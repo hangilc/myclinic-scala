@@ -28,4 +28,8 @@ object DbMysql {
     pass
   )
 
+  def execute[A](sql: ConnectionIO[A]): IO[A] = {
+    sql.transact(xa)
+  }
+
 }
