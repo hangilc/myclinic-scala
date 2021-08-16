@@ -1,4 +1,4 @@
-package dev.myclinic.scala.doobie
+package dev.myclinic.scala.db
 
 import doobie.util.Get
 
