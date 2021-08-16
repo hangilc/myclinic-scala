@@ -11,7 +11,6 @@ val doobieVersion = "0.10.0"
 lazy val root = (project in file("."))
   .settings(
     name := "myclinic-scala",
-// scalacOptions ++= Seq("-Ypartial-unification")
     libraryDependencies += scalaTest % Test,
     libraryDependencies += "mysql" % "mysql-connector-java" % "8.0.19",
     libraryDependencies ++= Seq(
