@@ -10,6 +10,10 @@ import org.http4s.server._
 import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.server.staticcontent._
 import scala.concurrent.ExecutionContext.Implicits.global
+import java.io.File
+import java.util.concurrent.Executors
+import scala.concurrent.ExecutionContextExecutorService
+import scala.concurrent.ExecutionContext
 
 object Main extends IOApp {
 
@@ -20,6 +24,9 @@ object Main extends IOApp {
   val apiService = HttpRoutes.of[IO] { case GET -> Root / "api" / "hello" =>
     Ok("api-hello")
   }
+
+  def staticService(blocker: Blocker) = 
+    fileService[IO](FileService.Config("./web", blocker, "/static"))
 
   val app: Resource[IO, Server[IO]] = {
     for {
@@ -34,15 +41,19 @@ object Main extends IOApp {
   }
 
   override def run(args: List[String]): IO[ExitCode] = {
+    val customBlockingEC: ExecutionContextExecutorService = 
+      ExecutionContext.fromExecutorService(
+        Executors.newCachedThreadPool()
+      )
+    val blocker = Blocker.liftExecutionContext(customBlockingEC)
     BlazeServerBuilder[IO](global)
       .withSocketReuseAddress(true)
       .bindHttp(8080, "localhost")
       .withHttpApp(
-          (indexService <+> apiService).orNotFound
+          (indexService <+> apiService <+> staticService(blocker)).orNotFound
       )
-      .serve
-      .compile
-      .drain
+      .resource
+      .use(_ => IO.never)
       .as(ExitCode.Success)
   }
 }
