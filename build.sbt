@@ -8,20 +8,27 @@ ThisBuild / organizationName := "myclinic"
 val http4sVersion = "0.23.1"
 val doobieVersion = "1.0.0-M5"
 
-cancelable in Global := true
-
-lazy val root = (project in file("."))
+lazy val root = project.in(file("."))
+  .aggregate(app.js, app.jvm)
   .settings(
-    name := "myclinic-scala",
-    libraryDependencies += scalaTest % Test,
-    libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.1.3" % "runtime",
-    libraryDependencies += "mysql" % "mysql-connector-java" % "8.0.19",
+    publish := {},
+    publishLocal := {}
+  )
+
+lazy val app = crossProject(JSPlatform, JVMPlatform).in(file("."))
+  .settings(
+    name := "app"
+  )
+  .jvmSettings(
     libraryDependencies ++= Seq(
+      "ch.qos.logback" % "logback-classic" % "1.1.3" % "runtime",
+      "mysql" % "mysql-connector-java" % "8.0.19",
       "org.tpolecat" %% "doobie-core" % doobieVersion,
-      "org.tpolecat" %% "doobie-hikari" % doobieVersion
-    ),
-    libraryDependencies ++= Seq(
+      "org.tpolecat" %% "doobie-hikari" % doobieVersion,
       "org.http4s" %% "http4s-dsl" % http4sVersion,
       "org.http4s" %% "http4s-blaze-server" % http4sVersion
     )
+  )
+  .jsSettings(
+    scalaJSUseMainModuleInitializer := true
   )
