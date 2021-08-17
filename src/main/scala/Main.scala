@@ -14,11 +14,12 @@ import java.io.File
 import java.util.concurrent.Executors
 import scala.concurrent.ExecutionContextExecutorService
 import scala.concurrent.ExecutionContext
+import org.http4s.headers.Location
 
 object Main extends IOApp {
 
   val indexService = HttpRoutes.of[IO] { case GET -> Root =>
-    Ok("hello world")
+    MovedPermanently(Location(uri"/static/index.html"))
   }
 
   val apiService = HttpRoutes.of[IO] { case GET -> Root / "api" / "hello" =>
