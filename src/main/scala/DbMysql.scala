@@ -6,7 +6,7 @@ import cats.effect.IO
 import scala.concurrent.ExecutionContext
 
 object DbMysql {
-  implicit val cs = IO.contextShift(ExecutionContext.global)
+  //implicit val cs = IO.contextShift(ExecutionContext.global)
 
   private val user = sys.env.get("MYCLINIC_DB_USER").get
   private val pass = sys.env.get("MYCLINIC_DB_PASS").get
