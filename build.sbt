@@ -8,10 +8,13 @@ ThisBuild / organizationName := "myclinic"
 val http4sVersion = "0.21.15"
 val doobieVersion = "0.10.0"
 
+cancelable in Global := true
+
 lazy val root = (project in file("."))
   .settings(
     name := "myclinic-scala",
     libraryDependencies += scalaTest % Test,
+    libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.1.3" % "runtime",
     libraryDependencies += "mysql" % "mysql-connector-java" % "8.0.19",
     libraryDependencies ++= Seq(
       "org.tpolecat" %% "doobie-core" % doobieVersion,
