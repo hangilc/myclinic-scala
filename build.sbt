@@ -70,4 +70,3 @@ lazy val model = crossProject(JSPlatform, JVMPlatform)
 
 val modelJS = model.js
 val modelJVM = model.jvm
-
