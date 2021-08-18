@@ -30,10 +30,16 @@ lazy val server = project.in(file("server"))
   )
 
 lazy val appointApp = project.in(file("appoint-app"))
+  .enablePlugins(TzdbPlugin)
   .settings(
     name := "myclinic-appoint",
       scalaJSUseMainModuleInitializer := true,
+      zonesFilter := {(z: String) => z == "Asia/Tokyo"},
       Compile / fastLinkJS / scalaJSLinkerOutputDirectory := 
-        (rootDir.value / "server" / "web" / "appoint" / "scalajs")
+        (rootDir.value / "server" / "web" / "appoint" / "scalajs"),
+      libraryDependencies ++= Seq(
+        "org.scala-js" %%% "scalajs-dom" % "1.1.0",
+        "io.github.cquiroz" %%% "scala-java-time" % "2.2.2",
+      ),
   )
 
