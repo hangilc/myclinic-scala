@@ -162,6 +162,13 @@ function $objectClassName(arg0) {
     }
   }
 }
+function $dp_compareTo__T__I(instance, x0) {
+  if (((typeof instance) === "string")) {
+    return $f_T__compareTo__T__I(instance, x0)
+  } else {
+    return instance.compareTo__T__I(x0)
+  }
+}
 function $dp_equals__O__Z(instance, x0) {
   switch ((typeof instance)) {
     case "string": {
@@ -949,7 +956,11 @@ $h_Ldev_myclinic_web_JsMain$.prototype = $c_Ldev_myclinic_web_JsMain$.prototype;
 $c_Ldev_myclinic_web_JsMain$.prototype.main__AT__V = (function(args) {
   var body = $m_Lorg_scalajs_dom_package$().document__Lorg_scalajs_dom_raw_HTMLDocument().body;
   body.classList.add("pb-5");
-  body.appendChild(this.Ldev_myclinic_web_JsMain$__f_banner)
+  body.appendChild(this.Ldev_myclinic_web_JsMain$__f_banner);
+  var app = new $c_Ldev_myclinic_scala_model_Appoint($m_Ljava_time_LocalDate$().of__I__I__I__Ljava_time_LocalDate(2021, 9, 22), $m_Ljava_time_LocalTime$().of__I__I__I__Ljava_time_LocalTime(9, 40, 0), "\u7530\u4e2d\u592a\u90ce", $m_s_None$(), "");
+  var this$2 = $m_s_Console$();
+  var this$3 = this$2.out__Ljava_io_PrintStream();
+  this$3.java$lang$JSConsoleBasedPrintStream$$printString__T__V((app + "\n"))
 });
 var $d_Ldev_myclinic_web_JsMain$ = new $TypeData().initClass({
   Ldev_myclinic_web_JsMain$: 0
@@ -1068,6 +1079,127 @@ function $m_jl_FloatingPointBits$() {
     $n_jl_FloatingPointBits$ = new $c_jl_FloatingPointBits$()
   };
   return $n_jl_FloatingPointBits$
+}
+/** @constructor */
+function $c_jl_Math$() {
+  /*<skip>*/
+}
+$c_jl_Math$.prototype = new $h_O();
+$c_jl_Math$.prototype.constructor = $c_jl_Math$;
+/** @constructor */
+function $h_jl_Math$() {
+  /*<skip>*/
+}
+$h_jl_Math$.prototype = $c_jl_Math$.prototype;
+$c_jl_Math$.prototype.addExact__J__J__J = (function(a, b) {
+  var alo = a.RTLong__f_lo;
+  var ahi = a.RTLong__f_hi;
+  var bhi = b.RTLong__f_hi;
+  var lo = ((alo + b.RTLong__f_lo) | 0);
+  var hi = ((((-2147483648) ^ lo) < ((-2147483648) ^ alo)) ? ((1 + ((ahi + bhi) | 0)) | 0) : ((ahi + bhi) | 0));
+  var resSgnBit = (hi < 0);
+  var ahi$1 = a.RTLong__f_hi;
+  if ((resSgnBit === (ahi$1 < 0))) {
+    var $$x1 = true
+  } else {
+    var ahi$2 = b.RTLong__f_hi;
+    var $$x1 = (resSgnBit === (ahi$2 < 0))
+  };
+  if ($$x1) {
+    return new $c_RTLong(lo, hi)
+  } else {
+    throw new $c_jl_ArithmeticException("Long overflow")
+  }
+});
+$c_jl_Math$.prototype.floorDiv__J__J__J = (function(a, b) {
+  var this$1 = $m_RTLong$();
+  var lo = this$1.divideImpl__I__I__I__I__I(a.RTLong__f_lo, a.RTLong__f_hi, b.RTLong__f_lo, b.RTLong__f_hi);
+  var hi = this$1.RTLong$__f_org$scalajs$linker$runtime$RuntimeLong$$hiReturn;
+  var ahi = a.RTLong__f_hi;
+  var ahi$1 = b.RTLong__f_hi;
+  if (((ahi < 0) === (ahi$1 < 0))) {
+    var $$x1 = true
+  } else {
+    var blo = b.RTLong__f_lo;
+    var a0 = (65535 & lo);
+    var a1 = ((lo >>> 16) | 0);
+    var b0 = (65535 & blo);
+    var b1 = ((blo >>> 16) | 0);
+    var a0b0 = $imul(a0, b0);
+    var a1b0 = $imul(a1, b0);
+    var a0b1 = $imul(a0, b1);
+    var lo$1 = ((a0b0 + (((a1b0 + a0b1) | 0) << 16)) | 0);
+    var c1part = ((((a0b0 >>> 16) | 0) + a0b1) | 0);
+    var hi$1 = (((((((($imul(lo, b.RTLong__f_hi) + $imul(hi, blo)) | 0) + $imul(a1, b1)) | 0) + ((c1part >>> 16) | 0)) | 0) + (((((65535 & c1part) + a1b0) | 0) >>> 16) | 0)) | 0);
+    var $$x1 = ((lo$1 === a.RTLong__f_lo) && (hi$1 === a.RTLong__f_hi))
+  };
+  if ($$x1) {
+    return new $c_RTLong(lo, hi)
+  } else {
+    var lo$2 = (((-1) + lo) | 0);
+    var hi$2 = ((lo$2 !== (-1)) ? hi : (((-1) + hi) | 0));
+    return new $c_RTLong(lo$2, hi$2)
+  }
+});
+$c_jl_Math$.prototype.floorMod__J__J__J = (function(a, b) {
+  var this$1 = $m_RTLong$();
+  var lo = this$1.remainderImpl__I__I__I__I__I(a.RTLong__f_lo, a.RTLong__f_hi, b.RTLong__f_lo, b.RTLong__f_hi);
+  var hi = this$1.RTLong$__f_org$scalajs$linker$runtime$RuntimeLong$$hiReturn;
+  var ahi = a.RTLong__f_hi;
+  var ahi$1 = b.RTLong__f_hi;
+  if ((((ahi < 0) === (ahi$1 < 0)) || ((lo === 0) && (hi === 0)))) {
+    return new $c_RTLong(lo, hi)
+  } else {
+    var bhi = b.RTLong__f_hi;
+    var lo$1 = ((lo + b.RTLong__f_lo) | 0);
+    var hi$1 = ((((-2147483648) ^ lo$1) < ((-2147483648) ^ lo)) ? ((1 + ((hi + bhi) | 0)) | 0) : ((hi + bhi) | 0));
+    return new $c_RTLong(lo$1, hi$1)
+  }
+});
+var $d_jl_Math$ = new $TypeData().initClass({
+  jl_Math$: 0
+}, false, "java.lang.Math$", {
+  jl_Math$: 1,
+  O: 1
+});
+$c_jl_Math$.prototype.$classData = $d_jl_Math$;
+var $n_jl_Math$;
+function $m_jl_Math$() {
+  if ((!$n_jl_Math$)) {
+    $n_jl_Math$ = new $c_jl_Math$()
+  };
+  return $n_jl_Math$
+}
+/** @constructor */
+function $c_jl_System$Streams$() {
+  this.jl_System$Streams$__f_out = null;
+  this.jl_System$Streams$__f_err = null;
+  this.jl_System$Streams$__f_in = null;
+  $n_jl_System$Streams$ = this;
+  this.jl_System$Streams$__f_out = new $c_jl_JSConsoleBasedPrintStream(false);
+  this.jl_System$Streams$__f_err = new $c_jl_JSConsoleBasedPrintStream(true);
+  this.jl_System$Streams$__f_in = null
+}
+$c_jl_System$Streams$.prototype = new $h_O();
+$c_jl_System$Streams$.prototype.constructor = $c_jl_System$Streams$;
+/** @constructor */
+function $h_jl_System$Streams$() {
+  /*<skip>*/
+}
+$h_jl_System$Streams$.prototype = $c_jl_System$Streams$.prototype;
+var $d_jl_System$Streams$ = new $TypeData().initClass({
+  jl_System$Streams$: 0
+}, false, "java.lang.System$Streams$", {
+  jl_System$Streams$: 1,
+  O: 1
+});
+$c_jl_System$Streams$.prototype.$classData = $d_jl_System$Streams$;
+var $n_jl_System$Streams$;
+function $m_jl_System$Streams$() {
+  if ((!$n_jl_System$Streams$)) {
+    $n_jl_System$Streams$ = new $c_jl_System$Streams$()
+  };
+  return $n_jl_System$Streams$
 }
 function $p_jl_System$SystemProperties$__loadSystemProperties__O($thiz) {
   var result = {};
@@ -3152,6 +3284,28 @@ function $m_sjsr_package$() {
   return $n_sjsr_package$
 }
 /** @constructor */
+function $c_s_util_DynamicVariable(init) {
+  this.s_util_DynamicVariable__f_v = null;
+  this.s_util_DynamicVariable__f_v = init
+}
+$c_s_util_DynamicVariable.prototype = new $h_O();
+$c_s_util_DynamicVariable.prototype.constructor = $c_s_util_DynamicVariable;
+/** @constructor */
+function $h_s_util_DynamicVariable() {
+  /*<skip>*/
+}
+$h_s_util_DynamicVariable.prototype = $c_s_util_DynamicVariable.prototype;
+$c_s_util_DynamicVariable.prototype.toString__T = (function() {
+  return (("DynamicVariable(" + this.s_util_DynamicVariable__f_v) + ")")
+});
+var $d_s_util_DynamicVariable = new $TypeData().initClass({
+  s_util_DynamicVariable: 0
+}, false, "scala.util.DynamicVariable", {
+  s_util_DynamicVariable: 1,
+  O: 1
+});
+$c_s_util_DynamicVariable.prototype.$classData = $d_s_util_DynamicVariable;
+/** @constructor */
 function $c_s_util_hashing_MurmurHash3() {
   /*<skip>*/
 }
@@ -3707,6 +3861,1077 @@ function $isArrayOf_jl_Throwable(obj, depth) {
 function $asArrayOf_jl_Throwable(obj, depth) {
   return (($isArrayOf_jl_Throwable(obj, depth) || (obj === null)) ? obj : $throwArrayCastException(obj, "Ljava.lang.Throwable;", depth))
 }
+function $p_Ljava_time_Duration$__ZERO$lzycompute__Ljava_time_Duration($thiz) {
+  if ((!$thiz.Ljava_time_Duration$__f_bitmap$0)) {
+    $thiz.Ljava_time_Duration$__f_ZERO = new $c_Ljava_time_Duration($L0, 0);
+    $thiz.Ljava_time_Duration$__f_bitmap$0 = true
+  };
+  return $thiz.Ljava_time_Duration$__f_ZERO
+}
+/** @constructor */
+function $c_Ljava_time_Duration$() {
+  this.Ljava_time_Duration$__f_ZERO = null;
+  this.Ljava_time_Duration$__f_bitmap$0 = false
+}
+$c_Ljava_time_Duration$.prototype = new $h_O();
+$c_Ljava_time_Duration$.prototype.constructor = $c_Ljava_time_Duration$;
+/** @constructor */
+function $h_Ljava_time_Duration$() {
+  /*<skip>*/
+}
+$h_Ljava_time_Duration$.prototype = $c_Ljava_time_Duration$.prototype;
+$c_Ljava_time_Duration$.prototype.ZERO__Ljava_time_Duration = (function() {
+  return ((!this.Ljava_time_Duration$__f_bitmap$0) ? $p_Ljava_time_Duration$__ZERO$lzycompute__Ljava_time_Duration(this) : this.Ljava_time_Duration$__f_ZERO)
+});
+$c_Ljava_time_Duration$.prototype.ofSeconds__J__J__Ljava_time_Duration = (function(seconds, nanoAdjustment) {
+  var t = $m_jl_Math$().floorDiv__J__J__J(nanoAdjustment, new $c_RTLong(1000000000, 0));
+  var lo = t.RTLong__f_lo;
+  var hi = t.RTLong__f_hi;
+  var t$1 = $m_jl_Math$().addExact__J__J__J(seconds, new $c_RTLong(lo, hi));
+  var lo$1 = t$1.RTLong__f_lo;
+  var hi$1 = t$1.RTLong__f_hi;
+  var this$1 = $m_jl_Math$().floorMod__J__J__J(nanoAdjustment, new $c_RTLong(1000000000, 0));
+  var nos = this$1.RTLong__f_lo;
+  return this.java$time$Duration$$create__J__I__Ljava_time_Duration(new $c_RTLong(lo$1, hi$1), nos)
+});
+$c_Ljava_time_Duration$.prototype.java$time$Duration$$create__J__I__Ljava_time_Duration = (function(seconds, nanoAdjustment) {
+  var hi = (nanoAdjustment >> 31);
+  var lo = (seconds.RTLong__f_lo | nanoAdjustment);
+  var hi$1 = (seconds.RTLong__f_hi | hi);
+  if (((lo === 0) && (hi$1 === 0))) {
+    return this.ZERO__Ljava_time_Duration()
+  } else {
+    return new $c_Ljava_time_Duration(seconds, nanoAdjustment)
+  }
+});
+var $d_Ljava_time_Duration$ = new $TypeData().initClass({
+  Ljava_time_Duration$: 0
+}, false, "java.time.Duration$", {
+  Ljava_time_Duration$: 1,
+  O: 1,
+  Ljava_io_Serializable: 1
+});
+$c_Ljava_time_Duration$.prototype.$classData = $d_Ljava_time_Duration$;
+var $n_Ljava_time_Duration$;
+function $m_Ljava_time_Duration$() {
+  if ((!$n_Ljava_time_Duration$)) {
+    $n_Ljava_time_Duration$ = new $c_Ljava_time_Duration$()
+  };
+  return $n_Ljava_time_Duration$
+}
+function $p_Ljava_time_LocalDate$__DAYS_PER_CYCLE__I($thiz) {
+  if (((((1 & $thiz.Ljava_time_LocalDate$__f_bitmap$init$0) << 24) >> 24) === 0)) {
+    throw new $c_s_UninitializedFieldError("Uninitialized field: /home/runner/work/scala-java-time/scala-java-time/core/js/target/scala-2.13/src_managed/main/org/threeten/bp/LocalDate.scala: 84")
+  };
+  return $thiz.Ljava_time_LocalDate$__f_DAYS_PER_CYCLE
+}
+function $p_Ljava_time_LocalDate$__create__I__Ljava_time_Month__I__Ljava_time_LocalDate($thiz, year, month, dayOfMonth) {
+  if ((dayOfMonth > 28)) {
+    var $$x2 = $m_Ljava_time_chrono_IsoChronology$().INSTANCE__Ljava_time_chrono_IsoChronology();
+    var hi = (year >> 31);
+    var $$x1 = (dayOfMonth > month.length__Z__I($$x2.isLeapYear__J__Z(new $c_RTLong(year, hi))))
+  } else {
+    var $$x1 = false
+  };
+  if ($$x1) {
+    if ((dayOfMonth === 29)) {
+      throw new $c_Ljava_time_DateTimeException((("Invalid date 'February 29' as '" + year) + "' is not a leap year"))
+    } else {
+      throw new $c_Ljava_time_DateTimeException((((("Invalid date '" + month.jl_Enum__f__name) + " ") + dayOfMonth) + "'"))
+    }
+  } else {
+    return new $c_Ljava_time_LocalDate(year, month.getValue__I(), dayOfMonth)
+  }
+}
+/** @constructor */
+function $c_Ljava_time_LocalDate$() {
+  this.Ljava_time_LocalDate$__f_MIN = null;
+  this.Ljava_time_LocalDate$__f_MAX = null;
+  this.Ljava_time_LocalDate$__f_DAYS_PER_CYCLE = 0;
+  this.Ljava_time_LocalDate$__f_DAYS_0000_TO_1970 = $L0;
+  this.Ljava_time_LocalDate$__f_bitmap$init$0 = 0;
+  this.Ljava_time_LocalDate$__f_bitmap$0 = 0;
+  $n_Ljava_time_LocalDate$ = this;
+  this.Ljava_time_LocalDate$__f_DAYS_PER_CYCLE = 146097;
+  this.Ljava_time_LocalDate$__f_bitmap$init$0 = (((1 | this.Ljava_time_LocalDate$__f_bitmap$init$0) << 24) >> 24);
+  var value = $p_Ljava_time_LocalDate$__DAYS_PER_CYCLE__I(this);
+  var hi = (value >> 31);
+  var b0 = (65535 & value);
+  var b1 = ((value >>> 16) | 0);
+  var a0b0 = $imul(5, b0);
+  var a0b1 = $imul(5, b1);
+  var lo = ((a0b0 + (a0b1 << 16)) | 0);
+  var c1part = ((((a0b0 >>> 16) | 0) + a0b1) | 0);
+  var hi$1 = (($imul(5, hi) + ((c1part >>> 16) | 0)) | 0);
+  var lo$1 = (((-10957) + lo) | 0);
+  var hi$2 = ((((-2147483648) ^ lo$1) < 2147472691) ? hi$1 : (((-1) + hi$1) | 0));
+  this.Ljava_time_LocalDate$__f_DAYS_0000_TO_1970 = new $c_RTLong(lo$1, hi$2);
+  this.Ljava_time_LocalDate$__f_bitmap$init$0 = (((2 | this.Ljava_time_LocalDate$__f_bitmap$init$0) << 24) >> 24)
+}
+$c_Ljava_time_LocalDate$.prototype = new $h_O();
+$c_Ljava_time_LocalDate$.prototype.constructor = $c_Ljava_time_LocalDate$;
+/** @constructor */
+function $h_Ljava_time_LocalDate$() {
+  /*<skip>*/
+}
+$h_Ljava_time_LocalDate$.prototype = $c_Ljava_time_LocalDate$.prototype;
+$c_Ljava_time_LocalDate$.prototype.of__I__I__I__Ljava_time_LocalDate = (function(year, month, dayOfMonth) {
+  var this$2 = $m_Ljava_time_temporal_ChronoField$().YEAR__Ljava_time_temporal_ChronoField();
+  var hi = (year >> 31);
+  this$2.Ljava_time_temporal_ChronoField__f__range.checkValidValue__J__Ljava_time_temporal_TemporalField__J(new $c_RTLong(year, hi), this$2);
+  var this$4 = $m_Ljava_time_temporal_ChronoField$().MONTH_OF_YEAR__Ljava_time_temporal_ChronoField();
+  var hi$1 = (month >> 31);
+  this$4.Ljava_time_temporal_ChronoField__f__range.checkValidValue__J__Ljava_time_temporal_TemporalField__J(new $c_RTLong(month, hi$1), this$4);
+  var this$6 = $m_Ljava_time_temporal_ChronoField$().DAY_OF_MONTH__Ljava_time_temporal_ChronoField();
+  var hi$2 = (dayOfMonth >> 31);
+  this$6.Ljava_time_temporal_ChronoField__f__range.checkValidValue__J__Ljava_time_temporal_TemporalField__J(new $c_RTLong(dayOfMonth, hi$2), this$6);
+  return $p_Ljava_time_LocalDate$__create__I__Ljava_time_Month__I__Ljava_time_LocalDate(this, year, $m_Ljava_time_Month$().of__I__Ljava_time_Month(month), dayOfMonth)
+});
+var $d_Ljava_time_LocalDate$ = new $TypeData().initClass({
+  Ljava_time_LocalDate$: 0
+}, false, "java.time.LocalDate$", {
+  Ljava_time_LocalDate$: 1,
+  O: 1,
+  Ljava_io_Serializable: 1
+});
+$c_Ljava_time_LocalDate$.prototype.$classData = $d_Ljava_time_LocalDate$;
+var $n_Ljava_time_LocalDate$;
+function $m_Ljava_time_LocalDate$() {
+  if ((!$n_Ljava_time_LocalDate$)) {
+    $n_Ljava_time_LocalDate$ = new $c_Ljava_time_LocalDate$()
+  };
+  return $n_Ljava_time_LocalDate$
+}
+function $p_Ljava_time_LocalTime$__HOURS$lzycompute__ALjava_time_LocalTime($thiz) {
+  if (((((1 & $thiz.Ljava_time_LocalTime$__f_bitmap$0) << 24) >> 24) === 0)) {
+    var hours = new ($d_Ljava_time_LocalTime.getArrayOf().constr)(24);
+    var i = 0;
+    while ((i < hours.u.length)) {
+      hours.set(i, new $c_Ljava_time_LocalTime(i, 0, 0, 0));
+      i = ((1 + i) | 0)
+    };
+    $thiz.Ljava_time_LocalTime$__f_HOURS = hours;
+    $thiz.Ljava_time_LocalTime$__f_bitmap$0 = (((1 | $thiz.Ljava_time_LocalTime$__f_bitmap$0) << 24) >> 24)
+  };
+  return $thiz.Ljava_time_LocalTime$__f_HOURS
+}
+function $p_Ljava_time_LocalTime$__HOURS__ALjava_time_LocalTime($thiz) {
+  return (((((1 & $thiz.Ljava_time_LocalTime$__f_bitmap$0) << 24) >> 24) === 0) ? $p_Ljava_time_LocalTime$__HOURS$lzycompute__ALjava_time_LocalTime($thiz) : $thiz.Ljava_time_LocalTime$__f_HOURS)
+}
+/** @constructor */
+function $c_Ljava_time_LocalTime$() {
+  this.Ljava_time_LocalTime$__f_HOURS = null;
+  this.Ljava_time_LocalTime$__f_MIN = null;
+  this.Ljava_time_LocalTime$__f_MAX = null;
+  this.Ljava_time_LocalTime$__f_MIDNIGHT = null;
+  this.Ljava_time_LocalTime$__f_NOON = null;
+  this.Ljava_time_LocalTime$__f_HOURS_PER_DAY = 0;
+  this.Ljava_time_LocalTime$__f_MINUTES_PER_HOUR = 0;
+  this.Ljava_time_LocalTime$__f_MINUTES_PER_DAY = 0;
+  this.Ljava_time_LocalTime$__f_SECONDS_PER_MINUTE = 0;
+  this.Ljava_time_LocalTime$__f_SECONDS_PER_HOUR = 0;
+  this.Ljava_time_LocalTime$__f_SECONDS_PER_DAY = 0;
+  this.Ljava_time_LocalTime$__f_MILLIS_PER_DAY = $L0;
+  this.Ljava_time_LocalTime$__f_MICROS_PER_DAY = $L0;
+  this.Ljava_time_LocalTime$__f_NANOS_PER_SECOND = $L0;
+  this.Ljava_time_LocalTime$__f_NANOS_PER_MINUTE = $L0;
+  this.Ljava_time_LocalTime$__f_NANOS_PER_HOUR = $L0;
+  this.Ljava_time_LocalTime$__f_NANOS_PER_DAY = $L0;
+  this.Ljava_time_LocalTime$__f_bitmap$init$0 = 0;
+  this.Ljava_time_LocalTime$__f_bitmap$0 = 0;
+  $n_Ljava_time_LocalTime$ = this;
+  this.Ljava_time_LocalTime$__f_HOURS_PER_DAY = 24;
+  this.Ljava_time_LocalTime$__f_bitmap$init$0 = (1 | this.Ljava_time_LocalTime$__f_bitmap$init$0);
+  this.Ljava_time_LocalTime$__f_MINUTES_PER_HOUR = 60;
+  this.Ljava_time_LocalTime$__f_bitmap$init$0 = (2 | this.Ljava_time_LocalTime$__f_bitmap$init$0);
+  this.Ljava_time_LocalTime$__f_MINUTES_PER_DAY = $imul(this.MINUTES_PER_HOUR__I(), this.HOURS_PER_DAY__I());
+  this.Ljava_time_LocalTime$__f_bitmap$init$0 = (4 | this.Ljava_time_LocalTime$__f_bitmap$init$0);
+  this.Ljava_time_LocalTime$__f_SECONDS_PER_MINUTE = 60;
+  this.Ljava_time_LocalTime$__f_bitmap$init$0 = (8 | this.Ljava_time_LocalTime$__f_bitmap$init$0);
+  this.Ljava_time_LocalTime$__f_SECONDS_PER_HOUR = $imul(this.SECONDS_PER_MINUTE__I(), this.MINUTES_PER_HOUR__I());
+  this.Ljava_time_LocalTime$__f_bitmap$init$0 = (16 | this.Ljava_time_LocalTime$__f_bitmap$init$0);
+  this.Ljava_time_LocalTime$__f_SECONDS_PER_DAY = $imul(this.SECONDS_PER_HOUR__I(), this.HOURS_PER_DAY__I());
+  this.Ljava_time_LocalTime$__f_bitmap$init$0 = (32 | this.Ljava_time_LocalTime$__f_bitmap$init$0);
+  var value = this.SECONDS_PER_DAY__I();
+  var hi = (value >> 31);
+  var b0 = (65535 & value);
+  var b1 = ((value >>> 16) | 0);
+  var a0b0 = $imul(1000, b0);
+  var a0b1 = $imul(1000, b1);
+  var lo = ((a0b0 + (a0b1 << 16)) | 0);
+  var c1part = ((((a0b0 >>> 16) | 0) + a0b1) | 0);
+  var hi$1 = (($imul(1000, hi) + ((c1part >>> 16) | 0)) | 0);
+  this.Ljava_time_LocalTime$__f_MILLIS_PER_DAY = new $c_RTLong(lo, hi$1);
+  this.Ljava_time_LocalTime$__f_bitmap$init$0 = (64 | this.Ljava_time_LocalTime$__f_bitmap$init$0);
+  var value$1 = this.SECONDS_PER_DAY__I();
+  var hi$2 = (value$1 >> 31);
+  var b0$1 = (65535 & value$1);
+  var b1$1 = ((value$1 >>> 16) | 0);
+  var a0b0$1 = $imul(16960, b0$1);
+  var a1b0 = $imul(15, b0$1);
+  var a0b1$1 = $imul(16960, b1$1);
+  var lo$1 = ((a0b0$1 + (((a1b0 + a0b1$1) | 0) << 16)) | 0);
+  var c1part$1 = ((((a0b0$1 >>> 16) | 0) + a0b1$1) | 0);
+  var hi$3 = (((((($imul(1000000, hi$2) + $imul(15, b1$1)) | 0) + ((c1part$1 >>> 16) | 0)) | 0) + (((((65535 & c1part$1) + a1b0) | 0) >>> 16) | 0)) | 0);
+  this.Ljava_time_LocalTime$__f_MICROS_PER_DAY = new $c_RTLong(lo$1, hi$3);
+  this.Ljava_time_LocalTime$__f_bitmap$init$0 = (128 | this.Ljava_time_LocalTime$__f_bitmap$init$0);
+  this.Ljava_time_LocalTime$__f_NANOS_PER_SECOND = new $c_RTLong(1000000000, 0);
+  this.Ljava_time_LocalTime$__f_bitmap$init$0 = (256 | this.Ljava_time_LocalTime$__f_bitmap$init$0);
+  var this$4 = this.NANOS_PER_SECOND__J();
+  var value$2 = this.SECONDS_PER_MINUTE__I();
+  var hi$4 = (value$2 >> 31);
+  var alo = this$4.RTLong__f_lo;
+  var a0 = (65535 & alo);
+  var a1 = ((alo >>> 16) | 0);
+  var b0$2 = (65535 & value$2);
+  var b1$2 = ((value$2 >>> 16) | 0);
+  var a0b0$2 = $imul(a0, b0$2);
+  var a1b0$1 = $imul(a1, b0$2);
+  var a0b1$2 = $imul(a0, b1$2);
+  var lo$2 = ((a0b0$2 + (((a1b0$1 + a0b1$2) | 0) << 16)) | 0);
+  var c1part$2 = ((((a0b0$2 >>> 16) | 0) + a0b1$2) | 0);
+  var hi$5 = (((((((($imul(alo, hi$4) + $imul(this$4.RTLong__f_hi, value$2)) | 0) + $imul(a1, b1$2)) | 0) + ((c1part$2 >>> 16) | 0)) | 0) + (((((65535 & c1part$2) + a1b0$1) | 0) >>> 16) | 0)) | 0);
+  this.Ljava_time_LocalTime$__f_NANOS_PER_MINUTE = new $c_RTLong(lo$2, hi$5);
+  this.Ljava_time_LocalTime$__f_bitmap$init$0 = (512 | this.Ljava_time_LocalTime$__f_bitmap$init$0);
+  var this$6 = this.NANOS_PER_MINUTE__J();
+  var value$3 = this.MINUTES_PER_HOUR__I();
+  var hi$6 = (value$3 >> 31);
+  var alo$1 = this$6.RTLong__f_lo;
+  var a0$1 = (65535 & alo$1);
+  var a1$1 = ((alo$1 >>> 16) | 0);
+  var b0$3 = (65535 & value$3);
+  var b1$3 = ((value$3 >>> 16) | 0);
+  var a0b0$3 = $imul(a0$1, b0$3);
+  var a1b0$2 = $imul(a1$1, b0$3);
+  var a0b1$3 = $imul(a0$1, b1$3);
+  var lo$3 = ((a0b0$3 + (((a1b0$2 + a0b1$3) | 0) << 16)) | 0);
+  var c1part$3 = ((((a0b0$3 >>> 16) | 0) + a0b1$3) | 0);
+  var hi$7 = (((((((($imul(alo$1, hi$6) + $imul(this$6.RTLong__f_hi, value$3)) | 0) + $imul(a1$1, b1$3)) | 0) + ((c1part$3 >>> 16) | 0)) | 0) + (((((65535 & c1part$3) + a1b0$2) | 0) >>> 16) | 0)) | 0);
+  this.Ljava_time_LocalTime$__f_NANOS_PER_HOUR = new $c_RTLong(lo$3, hi$7);
+  this.Ljava_time_LocalTime$__f_bitmap$init$0 = (1024 | this.Ljava_time_LocalTime$__f_bitmap$init$0);
+  var this$8 = this.NANOS_PER_HOUR__J();
+  var value$4 = this.HOURS_PER_DAY__I();
+  var hi$8 = (value$4 >> 31);
+  var alo$2 = this$8.RTLong__f_lo;
+  var a0$2 = (65535 & alo$2);
+  var a1$2 = ((alo$2 >>> 16) | 0);
+  var b0$4 = (65535 & value$4);
+  var b1$4 = ((value$4 >>> 16) | 0);
+  var a0b0$4 = $imul(a0$2, b0$4);
+  var a1b0$3 = $imul(a1$2, b0$4);
+  var a0b1$4 = $imul(a0$2, b1$4);
+  var lo$4 = ((a0b0$4 + (((a1b0$3 + a0b1$4) | 0) << 16)) | 0);
+  var c1part$4 = ((((a0b0$4 >>> 16) | 0) + a0b1$4) | 0);
+  var hi$9 = (((((((($imul(alo$2, hi$8) + $imul(this$8.RTLong__f_hi, value$4)) | 0) + $imul(a1$2, b1$4)) | 0) + ((c1part$4 >>> 16) | 0)) | 0) + (((((65535 & c1part$4) + a1b0$3) | 0) >>> 16) | 0)) | 0);
+  this.Ljava_time_LocalTime$__f_NANOS_PER_DAY = new $c_RTLong(lo$4, hi$9);
+  this.Ljava_time_LocalTime$__f_bitmap$init$0 = (2048 | this.Ljava_time_LocalTime$__f_bitmap$init$0)
+}
+$c_Ljava_time_LocalTime$.prototype = new $h_O();
+$c_Ljava_time_LocalTime$.prototype.constructor = $c_Ljava_time_LocalTime$;
+/** @constructor */
+function $h_Ljava_time_LocalTime$() {
+  /*<skip>*/
+}
+$h_Ljava_time_LocalTime$.prototype = $c_Ljava_time_LocalTime$.prototype;
+$c_Ljava_time_LocalTime$.prototype.HOURS_PER_DAY__I = (function() {
+  if (((1 & this.Ljava_time_LocalTime$__f_bitmap$init$0) === 0)) {
+    throw new $c_s_UninitializedFieldError("Uninitialized field: /home/runner/work/scala-java-time/scala-java-time/core/js/target/scala-2.13/src_managed/main/org/threeten/bp/LocalTime.scala: 90")
+  };
+  return this.Ljava_time_LocalTime$__f_HOURS_PER_DAY
+});
+$c_Ljava_time_LocalTime$.prototype.MINUTES_PER_HOUR__I = (function() {
+  if (((2 & this.Ljava_time_LocalTime$__f_bitmap$init$0) === 0)) {
+    throw new $c_s_UninitializedFieldError("Uninitialized field: /home/runner/work/scala-java-time/scala-java-time/core/js/target/scala-2.13/src_managed/main/org/threeten/bp/LocalTime.scala: 93")
+  };
+  return this.Ljava_time_LocalTime$__f_MINUTES_PER_HOUR
+});
+$c_Ljava_time_LocalTime$.prototype.SECONDS_PER_MINUTE__I = (function() {
+  if (((8 & this.Ljava_time_LocalTime$__f_bitmap$init$0) === 0)) {
+    throw new $c_s_UninitializedFieldError("Uninitialized field: /home/runner/work/scala-java-time/scala-java-time/core/js/target/scala-2.13/src_managed/main/org/threeten/bp/LocalTime.scala: 99")
+  };
+  return this.Ljava_time_LocalTime$__f_SECONDS_PER_MINUTE
+});
+$c_Ljava_time_LocalTime$.prototype.SECONDS_PER_HOUR__I = (function() {
+  if (((16 & this.Ljava_time_LocalTime$__f_bitmap$init$0) === 0)) {
+    throw new $c_s_UninitializedFieldError("Uninitialized field: /home/runner/work/scala-java-time/scala-java-time/core/js/target/scala-2.13/src_managed/main/org/threeten/bp/LocalTime.scala: 102")
+  };
+  return this.Ljava_time_LocalTime$__f_SECONDS_PER_HOUR
+});
+$c_Ljava_time_LocalTime$.prototype.SECONDS_PER_DAY__I = (function() {
+  if (((32 & this.Ljava_time_LocalTime$__f_bitmap$init$0) === 0)) {
+    throw new $c_s_UninitializedFieldError("Uninitialized field: /home/runner/work/scala-java-time/scala-java-time/core/js/target/scala-2.13/src_managed/main/org/threeten/bp/LocalTime.scala: 105")
+  };
+  return this.Ljava_time_LocalTime$__f_SECONDS_PER_DAY
+});
+$c_Ljava_time_LocalTime$.prototype.NANOS_PER_SECOND__J = (function() {
+  if (((256 & this.Ljava_time_LocalTime$__f_bitmap$init$0) === 0)) {
+    throw new $c_s_UninitializedFieldError("Uninitialized field: /home/runner/work/scala-java-time/scala-java-time/core/js/target/scala-2.13/src_managed/main/org/threeten/bp/LocalTime.scala: 114")
+  };
+  return this.Ljava_time_LocalTime$__f_NANOS_PER_SECOND
+});
+$c_Ljava_time_LocalTime$.prototype.NANOS_PER_MINUTE__J = (function() {
+  if (((512 & this.Ljava_time_LocalTime$__f_bitmap$init$0) === 0)) {
+    throw new $c_s_UninitializedFieldError("Uninitialized field: /home/runner/work/scala-java-time/scala-java-time/core/js/target/scala-2.13/src_managed/main/org/threeten/bp/LocalTime.scala: 117")
+  };
+  return this.Ljava_time_LocalTime$__f_NANOS_PER_MINUTE
+});
+$c_Ljava_time_LocalTime$.prototype.NANOS_PER_HOUR__J = (function() {
+  if (((1024 & this.Ljava_time_LocalTime$__f_bitmap$init$0) === 0)) {
+    throw new $c_s_UninitializedFieldError("Uninitialized field: /home/runner/work/scala-java-time/scala-java-time/core/js/target/scala-2.13/src_managed/main/org/threeten/bp/LocalTime.scala: 120")
+  };
+  return this.Ljava_time_LocalTime$__f_NANOS_PER_HOUR
+});
+$c_Ljava_time_LocalTime$.prototype.of__I__I__I__Ljava_time_LocalTime = (function(hour, minute, second) {
+  var this$2 = $m_Ljava_time_temporal_ChronoField$().HOUR_OF_DAY__Ljava_time_temporal_ChronoField();
+  var hi = (hour >> 31);
+  this$2.Ljava_time_temporal_ChronoField__f__range.checkValidValue__J__Ljava_time_temporal_TemporalField__J(new $c_RTLong(hour, hi), this$2);
+  if (((minute | second) === 0)) {
+    return $p_Ljava_time_LocalTime$__HOURS__ALjava_time_LocalTime(this).get(hour)
+  };
+  var this$4 = $m_Ljava_time_temporal_ChronoField$().MINUTE_OF_HOUR__Ljava_time_temporal_ChronoField();
+  var hi$1 = (minute >> 31);
+  this$4.Ljava_time_temporal_ChronoField__f__range.checkValidValue__J__Ljava_time_temporal_TemporalField__J(new $c_RTLong(minute, hi$1), this$4);
+  var this$6 = $m_Ljava_time_temporal_ChronoField$().SECOND_OF_MINUTE__Ljava_time_temporal_ChronoField();
+  var hi$2 = (second >> 31);
+  this$6.Ljava_time_temporal_ChronoField__f__range.checkValidValue__J__Ljava_time_temporal_TemporalField__J(new $c_RTLong(second, hi$2), this$6);
+  return new $c_Ljava_time_LocalTime(hour, minute, second, 0)
+});
+var $d_Ljava_time_LocalTime$ = new $TypeData().initClass({
+  Ljava_time_LocalTime$: 0
+}, false, "java.time.LocalTime$", {
+  Ljava_time_LocalTime$: 1,
+  O: 1,
+  Ljava_io_Serializable: 1
+});
+$c_Ljava_time_LocalTime$.prototype.$classData = $d_Ljava_time_LocalTime$;
+var $n_Ljava_time_LocalTime$;
+function $m_Ljava_time_LocalTime$() {
+  if ((!$n_Ljava_time_LocalTime$)) {
+    $n_Ljava_time_LocalTime$ = new $c_Ljava_time_LocalTime$()
+  };
+  return $n_Ljava_time_LocalTime$
+}
+function $p_Ljava_time_Month$__JANUARY$lzycompute__Ljava_time_Month($thiz) {
+  if (((1 & $thiz.Ljava_time_Month$__f_bitmap$0) === 0)) {
+    $thiz.Ljava_time_Month$__f_JANUARY = new $c_Ljava_time_Month("JANUARY", 0);
+    $thiz.Ljava_time_Month$__f_bitmap$0 = (1 | $thiz.Ljava_time_Month$__f_bitmap$0)
+  };
+  return $thiz.Ljava_time_Month$__f_JANUARY
+}
+function $p_Ljava_time_Month$__FEBRUARY$lzycompute__Ljava_time_Month($thiz) {
+  if (((2 & $thiz.Ljava_time_Month$__f_bitmap$0) === 0)) {
+    $thiz.Ljava_time_Month$__f_FEBRUARY = new $c_Ljava_time_Month("FEBRUARY", 1);
+    $thiz.Ljava_time_Month$__f_bitmap$0 = (2 | $thiz.Ljava_time_Month$__f_bitmap$0)
+  };
+  return $thiz.Ljava_time_Month$__f_FEBRUARY
+}
+function $p_Ljava_time_Month$__MARCH$lzycompute__Ljava_time_Month($thiz) {
+  if (((4 & $thiz.Ljava_time_Month$__f_bitmap$0) === 0)) {
+    $thiz.Ljava_time_Month$__f_MARCH = new $c_Ljava_time_Month("MARCH", 2);
+    $thiz.Ljava_time_Month$__f_bitmap$0 = (4 | $thiz.Ljava_time_Month$__f_bitmap$0)
+  };
+  return $thiz.Ljava_time_Month$__f_MARCH
+}
+function $p_Ljava_time_Month$__APRIL$lzycompute__Ljava_time_Month($thiz) {
+  if (((8 & $thiz.Ljava_time_Month$__f_bitmap$0) === 0)) {
+    $thiz.Ljava_time_Month$__f_APRIL = new $c_Ljava_time_Month("APRIL", 3);
+    $thiz.Ljava_time_Month$__f_bitmap$0 = (8 | $thiz.Ljava_time_Month$__f_bitmap$0)
+  };
+  return $thiz.Ljava_time_Month$__f_APRIL
+}
+function $p_Ljava_time_Month$__MAY$lzycompute__Ljava_time_Month($thiz) {
+  if (((16 & $thiz.Ljava_time_Month$__f_bitmap$0) === 0)) {
+    $thiz.Ljava_time_Month$__f_MAY = new $c_Ljava_time_Month("MAY", 4);
+    $thiz.Ljava_time_Month$__f_bitmap$0 = (16 | $thiz.Ljava_time_Month$__f_bitmap$0)
+  };
+  return $thiz.Ljava_time_Month$__f_MAY
+}
+function $p_Ljava_time_Month$__JUNE$lzycompute__Ljava_time_Month($thiz) {
+  if (((32 & $thiz.Ljava_time_Month$__f_bitmap$0) === 0)) {
+    $thiz.Ljava_time_Month$__f_JUNE = new $c_Ljava_time_Month("JUNE", 5);
+    $thiz.Ljava_time_Month$__f_bitmap$0 = (32 | $thiz.Ljava_time_Month$__f_bitmap$0)
+  };
+  return $thiz.Ljava_time_Month$__f_JUNE
+}
+function $p_Ljava_time_Month$__JULY$lzycompute__Ljava_time_Month($thiz) {
+  if (((64 & $thiz.Ljava_time_Month$__f_bitmap$0) === 0)) {
+    $thiz.Ljava_time_Month$__f_JULY = new $c_Ljava_time_Month("JULY", 6);
+    $thiz.Ljava_time_Month$__f_bitmap$0 = (64 | $thiz.Ljava_time_Month$__f_bitmap$0)
+  };
+  return $thiz.Ljava_time_Month$__f_JULY
+}
+function $p_Ljava_time_Month$__AUGUST$lzycompute__Ljava_time_Month($thiz) {
+  if (((128 & $thiz.Ljava_time_Month$__f_bitmap$0) === 0)) {
+    $thiz.Ljava_time_Month$__f_AUGUST = new $c_Ljava_time_Month("AUGUST", 7);
+    $thiz.Ljava_time_Month$__f_bitmap$0 = (128 | $thiz.Ljava_time_Month$__f_bitmap$0)
+  };
+  return $thiz.Ljava_time_Month$__f_AUGUST
+}
+function $p_Ljava_time_Month$__SEPTEMBER$lzycompute__Ljava_time_Month($thiz) {
+  if (((256 & $thiz.Ljava_time_Month$__f_bitmap$0) === 0)) {
+    $thiz.Ljava_time_Month$__f_SEPTEMBER = new $c_Ljava_time_Month("SEPTEMBER", 8);
+    $thiz.Ljava_time_Month$__f_bitmap$0 = (256 | $thiz.Ljava_time_Month$__f_bitmap$0)
+  };
+  return $thiz.Ljava_time_Month$__f_SEPTEMBER
+}
+function $p_Ljava_time_Month$__OCTOBER$lzycompute__Ljava_time_Month($thiz) {
+  if (((512 & $thiz.Ljava_time_Month$__f_bitmap$0) === 0)) {
+    $thiz.Ljava_time_Month$__f_OCTOBER = new $c_Ljava_time_Month("OCTOBER", 9);
+    $thiz.Ljava_time_Month$__f_bitmap$0 = (512 | $thiz.Ljava_time_Month$__f_bitmap$0)
+  };
+  return $thiz.Ljava_time_Month$__f_OCTOBER
+}
+function $p_Ljava_time_Month$__DECEMBER$lzycompute__Ljava_time_Month($thiz) {
+  if (((1024 & $thiz.Ljava_time_Month$__f_bitmap$0) === 0)) {
+    $thiz.Ljava_time_Month$__f_DECEMBER = new $c_Ljava_time_Month("DECEMBER", 11);
+    $thiz.Ljava_time_Month$__f_bitmap$0 = (1024 | $thiz.Ljava_time_Month$__f_bitmap$0)
+  };
+  return $thiz.Ljava_time_Month$__f_DECEMBER
+}
+function $p_Ljava_time_Month$__values$lzycompute__ALjava_time_Month($thiz) {
+  if (((2048 & $thiz.Ljava_time_Month$__f_bitmap$0) === 0)) {
+    $thiz.Ljava_time_Month$__f_values = new ($d_Ljava_time_Month.getArrayOf().constr)([$thiz.JANUARY__Ljava_time_Month(), $thiz.FEBRUARY__Ljava_time_Month(), $thiz.MARCH__Ljava_time_Month(), $thiz.APRIL__Ljava_time_Month(), $thiz.MAY__Ljava_time_Month(), $thiz.JUNE__Ljava_time_Month(), $thiz.JULY__Ljava_time_Month(), $thiz.AUGUST__Ljava_time_Month(), $thiz.SEPTEMBER__Ljava_time_Month(), $thiz.OCTOBER__Ljava_time_Month(), $thiz.NOVEMBER__Ljava_time_Month(), $thiz.DECEMBER__Ljava_time_Month()]);
+    $thiz.Ljava_time_Month$__f_bitmap$0 = (2048 | $thiz.Ljava_time_Month$__f_bitmap$0)
+  };
+  return $thiz.Ljava_time_Month$__f_values
+}
+function $p_Ljava_time_Month$__ENUMS$lzycompute__ALjava_time_Month($thiz) {
+  if (((4096 & $thiz.Ljava_time_Month$__f_bitmap$0) === 0)) {
+    $thiz.Ljava_time_Month$__f_java$time$Month$$ENUMS = $m_Ljava_time_Month$().values__ALjava_time_Month();
+    $thiz.Ljava_time_Month$__f_bitmap$0 = (4096 | $thiz.Ljava_time_Month$__f_bitmap$0)
+  };
+  return $thiz.Ljava_time_Month$__f_java$time$Month$$ENUMS
+}
+/** @constructor */
+function $c_Ljava_time_Month$() {
+  this.Ljava_time_Month$__f_JANUARY = null;
+  this.Ljava_time_Month$__f_FEBRUARY = null;
+  this.Ljava_time_Month$__f_MARCH = null;
+  this.Ljava_time_Month$__f_APRIL = null;
+  this.Ljava_time_Month$__f_MAY = null;
+  this.Ljava_time_Month$__f_JUNE = null;
+  this.Ljava_time_Month$__f_JULY = null;
+  this.Ljava_time_Month$__f_AUGUST = null;
+  this.Ljava_time_Month$__f_SEPTEMBER = null;
+  this.Ljava_time_Month$__f_OCTOBER = null;
+  this.Ljava_time_Month$__f_DECEMBER = null;
+  this.Ljava_time_Month$__f_values = null;
+  this.Ljava_time_Month$__f_java$time$Month$$ENUMS = null;
+  this.Ljava_time_Month$__f_NOVEMBER = null;
+  this.Ljava_time_Month$__f_bitmap$init$0 = false;
+  this.Ljava_time_Month$__f_bitmap$0 = 0;
+  $n_Ljava_time_Month$ = this;
+  this.Ljava_time_Month$__f_NOVEMBER = new $c_Ljava_time_Month("NOVEMBER", 10);
+  this.Ljava_time_Month$__f_bitmap$init$0 = true
+}
+$c_Ljava_time_Month$.prototype = new $h_O();
+$c_Ljava_time_Month$.prototype.constructor = $c_Ljava_time_Month$;
+/** @constructor */
+function $h_Ljava_time_Month$() {
+  /*<skip>*/
+}
+$h_Ljava_time_Month$.prototype = $c_Ljava_time_Month$.prototype;
+$c_Ljava_time_Month$.prototype.JANUARY__Ljava_time_Month = (function() {
+  return (((1 & this.Ljava_time_Month$__f_bitmap$0) === 0) ? $p_Ljava_time_Month$__JANUARY$lzycompute__Ljava_time_Month(this) : this.Ljava_time_Month$__f_JANUARY)
+});
+$c_Ljava_time_Month$.prototype.FEBRUARY__Ljava_time_Month = (function() {
+  return (((2 & this.Ljava_time_Month$__f_bitmap$0) === 0) ? $p_Ljava_time_Month$__FEBRUARY$lzycompute__Ljava_time_Month(this) : this.Ljava_time_Month$__f_FEBRUARY)
+});
+$c_Ljava_time_Month$.prototype.MARCH__Ljava_time_Month = (function() {
+  return (((4 & this.Ljava_time_Month$__f_bitmap$0) === 0) ? $p_Ljava_time_Month$__MARCH$lzycompute__Ljava_time_Month(this) : this.Ljava_time_Month$__f_MARCH)
+});
+$c_Ljava_time_Month$.prototype.APRIL__Ljava_time_Month = (function() {
+  return (((8 & this.Ljava_time_Month$__f_bitmap$0) === 0) ? $p_Ljava_time_Month$__APRIL$lzycompute__Ljava_time_Month(this) : this.Ljava_time_Month$__f_APRIL)
+});
+$c_Ljava_time_Month$.prototype.MAY__Ljava_time_Month = (function() {
+  return (((16 & this.Ljava_time_Month$__f_bitmap$0) === 0) ? $p_Ljava_time_Month$__MAY$lzycompute__Ljava_time_Month(this) : this.Ljava_time_Month$__f_MAY)
+});
+$c_Ljava_time_Month$.prototype.JUNE__Ljava_time_Month = (function() {
+  return (((32 & this.Ljava_time_Month$__f_bitmap$0) === 0) ? $p_Ljava_time_Month$__JUNE$lzycompute__Ljava_time_Month(this) : this.Ljava_time_Month$__f_JUNE)
+});
+$c_Ljava_time_Month$.prototype.JULY__Ljava_time_Month = (function() {
+  return (((64 & this.Ljava_time_Month$__f_bitmap$0) === 0) ? $p_Ljava_time_Month$__JULY$lzycompute__Ljava_time_Month(this) : this.Ljava_time_Month$__f_JULY)
+});
+$c_Ljava_time_Month$.prototype.AUGUST__Ljava_time_Month = (function() {
+  return (((128 & this.Ljava_time_Month$__f_bitmap$0) === 0) ? $p_Ljava_time_Month$__AUGUST$lzycompute__Ljava_time_Month(this) : this.Ljava_time_Month$__f_AUGUST)
+});
+$c_Ljava_time_Month$.prototype.SEPTEMBER__Ljava_time_Month = (function() {
+  return (((256 & this.Ljava_time_Month$__f_bitmap$0) === 0) ? $p_Ljava_time_Month$__SEPTEMBER$lzycompute__Ljava_time_Month(this) : this.Ljava_time_Month$__f_SEPTEMBER)
+});
+$c_Ljava_time_Month$.prototype.OCTOBER__Ljava_time_Month = (function() {
+  return (((512 & this.Ljava_time_Month$__f_bitmap$0) === 0) ? $p_Ljava_time_Month$__OCTOBER$lzycompute__Ljava_time_Month(this) : this.Ljava_time_Month$__f_OCTOBER)
+});
+$c_Ljava_time_Month$.prototype.NOVEMBER__Ljava_time_Month = (function() {
+  if ((!this.Ljava_time_Month$__f_bitmap$init$0)) {
+    throw new $c_s_UninitializedFieldError("Uninitialized field: /home/runner/work/scala-java-time/scala-java-time/core/js/target/scala-2.13/src_managed/main/org/threeten/bp/Month.scala: 140")
+  };
+  return this.Ljava_time_Month$__f_NOVEMBER
+});
+$c_Ljava_time_Month$.prototype.DECEMBER__Ljava_time_Month = (function() {
+  return (((1024 & this.Ljava_time_Month$__f_bitmap$0) === 0) ? $p_Ljava_time_Month$__DECEMBER$lzycompute__Ljava_time_Month(this) : this.Ljava_time_Month$__f_DECEMBER)
+});
+$c_Ljava_time_Month$.prototype.values__ALjava_time_Month = (function() {
+  return (((2048 & this.Ljava_time_Month$__f_bitmap$0) === 0) ? $p_Ljava_time_Month$__values$lzycompute__ALjava_time_Month(this) : this.Ljava_time_Month$__f_values)
+});
+$c_Ljava_time_Month$.prototype.java$time$Month$$ENUMS__ALjava_time_Month = (function() {
+  return (((4096 & this.Ljava_time_Month$__f_bitmap$0) === 0) ? $p_Ljava_time_Month$__ENUMS$lzycompute__ALjava_time_Month(this) : this.Ljava_time_Month$__f_java$time$Month$$ENUMS)
+});
+$c_Ljava_time_Month$.prototype.of__I__Ljava_time_Month = (function(month) {
+  if (((month < 1) || (month > 12))) {
+    throw new $c_Ljava_time_DateTimeException(("Invalid value for MonthOfYear: " + month))
+  } else {
+    return this.java$time$Month$$ENUMS__ALjava_time_Month().get((((-1) + month) | 0))
+  }
+});
+var $d_Ljava_time_Month$ = new $TypeData().initClass({
+  Ljava_time_Month$: 0
+}, false, "java.time.Month$", {
+  Ljava_time_Month$: 1,
+  O: 1,
+  Ljava_io_Serializable: 1
+});
+$c_Ljava_time_Month$.prototype.$classData = $d_Ljava_time_Month$;
+var $n_Ljava_time_Month$;
+function $m_Ljava_time_Month$() {
+  if ((!$n_Ljava_time_Month$)) {
+    $n_Ljava_time_Month$ = new $c_Ljava_time_Month$()
+  };
+  return $n_Ljava_time_Month$
+}
+function $p_Ljava_time_Year$__MIN_VALUE$lzycompute__I($thiz) {
+  if (((((1 & $thiz.Ljava_time_Year$__f_bitmap$0) << 24) >> 24) === 0)) {
+    $thiz.Ljava_time_Year$__f_MIN_VALUE = (-999999999);
+    $thiz.Ljava_time_Year$__f_bitmap$0 = (((1 | $thiz.Ljava_time_Year$__f_bitmap$0) << 24) >> 24)
+  };
+  return $thiz.Ljava_time_Year$__f_MIN_VALUE
+}
+function $p_Ljava_time_Year$__MAX_VALUE$lzycompute__I($thiz) {
+  if (((((2 & $thiz.Ljava_time_Year$__f_bitmap$0) << 24) >> 24) === 0)) {
+    $thiz.Ljava_time_Year$__f_MAX_VALUE = 999999999;
+    $thiz.Ljava_time_Year$__f_bitmap$0 = (((2 | $thiz.Ljava_time_Year$__f_bitmap$0) << 24) >> 24)
+  };
+  return $thiz.Ljava_time_Year$__f_MAX_VALUE
+}
+/** @constructor */
+function $c_Ljava_time_Year$() {
+  this.Ljava_time_Year$__f_MIN_VALUE = 0;
+  this.Ljava_time_Year$__f_MAX_VALUE = 0;
+  this.Ljava_time_Year$__f_PARSER = null;
+  this.Ljava_time_Year$__f_bitmap$0 = 0
+}
+$c_Ljava_time_Year$.prototype = new $h_O();
+$c_Ljava_time_Year$.prototype.constructor = $c_Ljava_time_Year$;
+/** @constructor */
+function $h_Ljava_time_Year$() {
+  /*<skip>*/
+}
+$h_Ljava_time_Year$.prototype = $c_Ljava_time_Year$.prototype;
+$c_Ljava_time_Year$.prototype.MIN_VALUE__I = (function() {
+  return (((((1 & this.Ljava_time_Year$__f_bitmap$0) << 24) >> 24) === 0) ? $p_Ljava_time_Year$__MIN_VALUE$lzycompute__I(this) : this.Ljava_time_Year$__f_MIN_VALUE)
+});
+$c_Ljava_time_Year$.prototype.MAX_VALUE__I = (function() {
+  return (((((2 & this.Ljava_time_Year$__f_bitmap$0) << 24) >> 24) === 0) ? $p_Ljava_time_Year$__MAX_VALUE$lzycompute__I(this) : this.Ljava_time_Year$__f_MAX_VALUE)
+});
+var $d_Ljava_time_Year$ = new $TypeData().initClass({
+  Ljava_time_Year$: 0
+}, false, "java.time.Year$", {
+  Ljava_time_Year$: 1,
+  O: 1,
+  Ljava_io_Serializable: 1
+});
+$c_Ljava_time_Year$.prototype.$classData = $d_Ljava_time_Year$;
+var $n_Ljava_time_Year$;
+function $m_Ljava_time_Year$() {
+  if ((!$n_Ljava_time_Year$)) {
+    $n_Ljava_time_Year$ = new $c_Ljava_time_Year$()
+  };
+  return $n_Ljava_time_Year$
+}
+function $p_Ljava_time_chrono_IsoChronology$__INSTANCE$lzycompute__Ljava_time_chrono_IsoChronology($thiz) {
+  if ((!$thiz.Ljava_time_chrono_IsoChronology$__f_bitmap$0)) {
+    $thiz.Ljava_time_chrono_IsoChronology$__f_INSTANCE = new $c_Ljava_time_chrono_IsoChronology();
+    $thiz.Ljava_time_chrono_IsoChronology$__f_bitmap$0 = true
+  };
+  return $thiz.Ljava_time_chrono_IsoChronology$__f_INSTANCE
+}
+/** @constructor */
+function $c_Ljava_time_chrono_IsoChronology$() {
+  this.Ljava_time_chrono_IsoChronology$__f_INSTANCE = null;
+  this.Ljava_time_chrono_IsoChronology$__f_bitmap$0 = false
+}
+$c_Ljava_time_chrono_IsoChronology$.prototype = new $h_O();
+$c_Ljava_time_chrono_IsoChronology$.prototype.constructor = $c_Ljava_time_chrono_IsoChronology$;
+/** @constructor */
+function $h_Ljava_time_chrono_IsoChronology$() {
+  /*<skip>*/
+}
+$h_Ljava_time_chrono_IsoChronology$.prototype = $c_Ljava_time_chrono_IsoChronology$.prototype;
+$c_Ljava_time_chrono_IsoChronology$.prototype.INSTANCE__Ljava_time_chrono_IsoChronology = (function() {
+  return ((!this.Ljava_time_chrono_IsoChronology$__f_bitmap$0) ? $p_Ljava_time_chrono_IsoChronology$__INSTANCE$lzycompute__Ljava_time_chrono_IsoChronology(this) : this.Ljava_time_chrono_IsoChronology$__f_INSTANCE)
+});
+var $d_Ljava_time_chrono_IsoChronology$ = new $TypeData().initClass({
+  Ljava_time_chrono_IsoChronology$: 0
+}, false, "java.time.chrono.IsoChronology$", {
+  Ljava_time_chrono_IsoChronology$: 1,
+  O: 1,
+  Ljava_io_Serializable: 1
+});
+$c_Ljava_time_chrono_IsoChronology$.prototype.$classData = $d_Ljava_time_chrono_IsoChronology$;
+var $n_Ljava_time_chrono_IsoChronology$;
+function $m_Ljava_time_chrono_IsoChronology$() {
+  if ((!$n_Ljava_time_chrono_IsoChronology$)) {
+    $n_Ljava_time_chrono_IsoChronology$ = new $c_Ljava_time_chrono_IsoChronology$()
+  };
+  return $n_Ljava_time_chrono_IsoChronology$
+}
+function $p_Ljava_time_temporal_ChronoField$__SECOND_OF_MINUTE$lzycompute__Ljava_time_temporal_ChronoField($thiz) {
+  if (((64 & $thiz.Ljava_time_temporal_ChronoField$__f_bitmap$0) === 0)) {
+    $thiz.Ljava_time_temporal_ChronoField$__f_SECOND_OF_MINUTE = new $c_Ljava_time_temporal_ChronoField("SecondOfMinute", 6, $m_Ljava_time_temporal_ChronoUnit$().SECONDS__Ljava_time_temporal_ChronoUnit(), $m_Ljava_time_temporal_ChronoUnit$().MINUTES__Ljava_time_temporal_ChronoUnit(), $m_Ljava_time_temporal_ValueRange$().of__J__J__Ljava_time_temporal_ValueRange($L0, new $c_RTLong(59, 0)));
+    $thiz.Ljava_time_temporal_ChronoField$__f_bitmap$0 = (64 | $thiz.Ljava_time_temporal_ChronoField$__f_bitmap$0)
+  };
+  return $thiz.Ljava_time_temporal_ChronoField$__f_SECOND_OF_MINUTE
+}
+function $p_Ljava_time_temporal_ChronoField$__MINUTE_OF_HOUR$lzycompute__Ljava_time_temporal_ChronoField($thiz) {
+  if (((256 & $thiz.Ljava_time_temporal_ChronoField$__f_bitmap$0) === 0)) {
+    $thiz.Ljava_time_temporal_ChronoField$__f_MINUTE_OF_HOUR = new $c_Ljava_time_temporal_ChronoField("MinuteOfHour", 8, $m_Ljava_time_temporal_ChronoUnit$().MINUTES__Ljava_time_temporal_ChronoUnit(), $m_Ljava_time_temporal_ChronoUnit$().HOURS__Ljava_time_temporal_ChronoUnit(), $m_Ljava_time_temporal_ValueRange$().of__J__J__Ljava_time_temporal_ValueRange($L0, new $c_RTLong(59, 0)));
+    $thiz.Ljava_time_temporal_ChronoField$__f_bitmap$0 = (256 | $thiz.Ljava_time_temporal_ChronoField$__f_bitmap$0)
+  };
+  return $thiz.Ljava_time_temporal_ChronoField$__f_MINUTE_OF_HOUR
+}
+function $p_Ljava_time_temporal_ChronoField$__HOUR_OF_DAY$lzycompute__Ljava_time_temporal_ChronoField($thiz) {
+  if (((4096 & $thiz.Ljava_time_temporal_ChronoField$__f_bitmap$0) === 0)) {
+    $thiz.Ljava_time_temporal_ChronoField$__f_HOUR_OF_DAY = new $c_Ljava_time_temporal_ChronoField("HourOfDay", 12, $m_Ljava_time_temporal_ChronoUnit$().HOURS__Ljava_time_temporal_ChronoUnit(), $m_Ljava_time_temporal_ChronoUnit$().DAYS__Ljava_time_temporal_ChronoUnit(), $m_Ljava_time_temporal_ValueRange$().of__J__J__Ljava_time_temporal_ValueRange($L0, new $c_RTLong(23, 0)));
+    $thiz.Ljava_time_temporal_ChronoField$__f_bitmap$0 = (4096 | $thiz.Ljava_time_temporal_ChronoField$__f_bitmap$0)
+  };
+  return $thiz.Ljava_time_temporal_ChronoField$__f_HOUR_OF_DAY
+}
+function $p_Ljava_time_temporal_ChronoField$__DAY_OF_MONTH$lzycompute__Ljava_time_temporal_ChronoField($thiz) {
+  if (((262144 & $thiz.Ljava_time_temporal_ChronoField$__f_bitmap$0) === 0)) {
+    var $$x2 = $m_Ljava_time_temporal_ChronoUnit$().DAYS__Ljava_time_temporal_ChronoUnit();
+    var $$x1 = $m_Ljava_time_temporal_ChronoUnit$().MONTHS__Ljava_time_temporal_ChronoUnit();
+    var this$1 = $m_Ljava_time_temporal_ValueRange$();
+    $thiz.Ljava_time_temporal_ChronoField$__f_DAY_OF_MONTH = new $c_Ljava_time_temporal_ChronoField("DayOfMonth", 18, $$x2, $$x1, this$1.of__J__J__J__J__Ljava_time_temporal_ValueRange(new $c_RTLong(1, 0), new $c_RTLong(1, 0), new $c_RTLong(28, 0), new $c_RTLong(31, 0)));
+    $thiz.Ljava_time_temporal_ChronoField$__f_bitmap$0 = (262144 | $thiz.Ljava_time_temporal_ChronoField$__f_bitmap$0)
+  };
+  return $thiz.Ljava_time_temporal_ChronoField$__f_DAY_OF_MONTH
+}
+function $p_Ljava_time_temporal_ChronoField$__MONTH_OF_YEAR$lzycompute__Ljava_time_temporal_ChronoField($thiz) {
+  if (((8388608 & $thiz.Ljava_time_temporal_ChronoField$__f_bitmap$0) === 0)) {
+    $thiz.Ljava_time_temporal_ChronoField$__f_MONTH_OF_YEAR = new $c_Ljava_time_temporal_ChronoField("MonthOfYear", 23, $m_Ljava_time_temporal_ChronoUnit$().MONTHS__Ljava_time_temporal_ChronoUnit(), $m_Ljava_time_temporal_ChronoUnit$().YEARS__Ljava_time_temporal_ChronoUnit(), $m_Ljava_time_temporal_ValueRange$().of__J__J__Ljava_time_temporal_ValueRange(new $c_RTLong(1, 0), new $c_RTLong(12, 0)));
+    $thiz.Ljava_time_temporal_ChronoField$__f_bitmap$0 = (8388608 | $thiz.Ljava_time_temporal_ChronoField$__f_bitmap$0)
+  };
+  return $thiz.Ljava_time_temporal_ChronoField$__f_MONTH_OF_YEAR
+}
+function $p_Ljava_time_temporal_ChronoField$__YEAR$lzycompute__Ljava_time_temporal_ChronoField($thiz) {
+  if (((67108864 & $thiz.Ljava_time_temporal_ChronoField$__f_bitmap$0) === 0)) {
+    var $$x4 = $m_Ljava_time_temporal_ChronoUnit$().YEARS__Ljava_time_temporal_ChronoUnit();
+    var $$x3 = $m_Ljava_time_temporal_ChronoUnit$().FOREVER__Ljava_time_temporal_ChronoUnit();
+    var $$x2 = $m_Ljava_time_temporal_ValueRange$();
+    var value = $m_Ljava_time_Year$().MIN_VALUE__I();
+    var hi = (value >> 31);
+    var $$x1 = new $c_RTLong(value, hi);
+    var value$1 = $m_Ljava_time_Year$().MAX_VALUE__I();
+    var hi$1 = (value$1 >> 31);
+    $thiz.Ljava_time_temporal_ChronoField$__f_YEAR = new $c_Ljava_time_temporal_ChronoField("Year", 26, $$x4, $$x3, $$x2.of__J__J__Ljava_time_temporal_ValueRange($$x1, new $c_RTLong(value$1, hi$1)));
+    $thiz.Ljava_time_temporal_ChronoField$__f_bitmap$0 = (67108864 | $thiz.Ljava_time_temporal_ChronoField$__f_bitmap$0)
+  };
+  return $thiz.Ljava_time_temporal_ChronoField$__f_YEAR
+}
+/** @constructor */
+function $c_Ljava_time_temporal_ChronoField$() {
+  this.Ljava_time_temporal_ChronoField$__f_NANO_OF_SECOND = null;
+  this.Ljava_time_temporal_ChronoField$__f_NANO_OF_DAY = null;
+  this.Ljava_time_temporal_ChronoField$__f_MICRO_OF_SECOND = null;
+  this.Ljava_time_temporal_ChronoField$__f_MICRO_OF_DAY = null;
+  this.Ljava_time_temporal_ChronoField$__f_MILLI_OF_SECOND = null;
+  this.Ljava_time_temporal_ChronoField$__f_MILLI_OF_DAY = null;
+  this.Ljava_time_temporal_ChronoField$__f_SECOND_OF_MINUTE = null;
+  this.Ljava_time_temporal_ChronoField$__f_SECOND_OF_DAY = null;
+  this.Ljava_time_temporal_ChronoField$__f_MINUTE_OF_HOUR = null;
+  this.Ljava_time_temporal_ChronoField$__f_MINUTE_OF_DAY = null;
+  this.Ljava_time_temporal_ChronoField$__f_HOUR_OF_AMPM = null;
+  this.Ljava_time_temporal_ChronoField$__f_CLOCK_HOUR_OF_AMPM = null;
+  this.Ljava_time_temporal_ChronoField$__f_HOUR_OF_DAY = null;
+  this.Ljava_time_temporal_ChronoField$__f_CLOCK_HOUR_OF_DAY = null;
+  this.Ljava_time_temporal_ChronoField$__f_AMPM_OF_DAY = null;
+  this.Ljava_time_temporal_ChronoField$__f_DAY_OF_WEEK = null;
+  this.Ljava_time_temporal_ChronoField$__f_ALIGNED_DAY_OF_WEEK_IN_MONTH = null;
+  this.Ljava_time_temporal_ChronoField$__f_ALIGNED_DAY_OF_WEEK_IN_YEAR = null;
+  this.Ljava_time_temporal_ChronoField$__f_DAY_OF_MONTH = null;
+  this.Ljava_time_temporal_ChronoField$__f_DAY_OF_YEAR = null;
+  this.Ljava_time_temporal_ChronoField$__f_EPOCH_DAY = null;
+  this.Ljava_time_temporal_ChronoField$__f_ALIGNED_WEEK_OF_MONTH = null;
+  this.Ljava_time_temporal_ChronoField$__f_ALIGNED_WEEK_OF_YEAR = null;
+  this.Ljava_time_temporal_ChronoField$__f_MONTH_OF_YEAR = null;
+  this.Ljava_time_temporal_ChronoField$__f_PROLEPTIC_MONTH = null;
+  this.Ljava_time_temporal_ChronoField$__f_YEAR_OF_ERA = null;
+  this.Ljava_time_temporal_ChronoField$__f_YEAR = null;
+  this.Ljava_time_temporal_ChronoField$__f_ERA = null;
+  this.Ljava_time_temporal_ChronoField$__f_INSTANT_SECONDS = null;
+  this.Ljava_time_temporal_ChronoField$__f_OFFSET_SECONDS = null;
+  this.Ljava_time_temporal_ChronoField$__f_values = null;
+  this.Ljava_time_temporal_ChronoField$__f_bitmap$0 = 0
+}
+$c_Ljava_time_temporal_ChronoField$.prototype = new $h_O();
+$c_Ljava_time_temporal_ChronoField$.prototype.constructor = $c_Ljava_time_temporal_ChronoField$;
+/** @constructor */
+function $h_Ljava_time_temporal_ChronoField$() {
+  /*<skip>*/
+}
+$h_Ljava_time_temporal_ChronoField$.prototype = $c_Ljava_time_temporal_ChronoField$.prototype;
+$c_Ljava_time_temporal_ChronoField$.prototype.SECOND_OF_MINUTE__Ljava_time_temporal_ChronoField = (function() {
+  return (((64 & this.Ljava_time_temporal_ChronoField$__f_bitmap$0) === 0) ? $p_Ljava_time_temporal_ChronoField$__SECOND_OF_MINUTE$lzycompute__Ljava_time_temporal_ChronoField(this) : this.Ljava_time_temporal_ChronoField$__f_SECOND_OF_MINUTE)
+});
+$c_Ljava_time_temporal_ChronoField$.prototype.MINUTE_OF_HOUR__Ljava_time_temporal_ChronoField = (function() {
+  return (((256 & this.Ljava_time_temporal_ChronoField$__f_bitmap$0) === 0) ? $p_Ljava_time_temporal_ChronoField$__MINUTE_OF_HOUR$lzycompute__Ljava_time_temporal_ChronoField(this) : this.Ljava_time_temporal_ChronoField$__f_MINUTE_OF_HOUR)
+});
+$c_Ljava_time_temporal_ChronoField$.prototype.HOUR_OF_DAY__Ljava_time_temporal_ChronoField = (function() {
+  return (((4096 & this.Ljava_time_temporal_ChronoField$__f_bitmap$0) === 0) ? $p_Ljava_time_temporal_ChronoField$__HOUR_OF_DAY$lzycompute__Ljava_time_temporal_ChronoField(this) : this.Ljava_time_temporal_ChronoField$__f_HOUR_OF_DAY)
+});
+$c_Ljava_time_temporal_ChronoField$.prototype.DAY_OF_MONTH__Ljava_time_temporal_ChronoField = (function() {
+  return (((262144 & this.Ljava_time_temporal_ChronoField$__f_bitmap$0) === 0) ? $p_Ljava_time_temporal_ChronoField$__DAY_OF_MONTH$lzycompute__Ljava_time_temporal_ChronoField(this) : this.Ljava_time_temporal_ChronoField$__f_DAY_OF_MONTH)
+});
+$c_Ljava_time_temporal_ChronoField$.prototype.MONTH_OF_YEAR__Ljava_time_temporal_ChronoField = (function() {
+  return (((8388608 & this.Ljava_time_temporal_ChronoField$__f_bitmap$0) === 0) ? $p_Ljava_time_temporal_ChronoField$__MONTH_OF_YEAR$lzycompute__Ljava_time_temporal_ChronoField(this) : this.Ljava_time_temporal_ChronoField$__f_MONTH_OF_YEAR)
+});
+$c_Ljava_time_temporal_ChronoField$.prototype.YEAR__Ljava_time_temporal_ChronoField = (function() {
+  return (((67108864 & this.Ljava_time_temporal_ChronoField$__f_bitmap$0) === 0) ? $p_Ljava_time_temporal_ChronoField$__YEAR$lzycompute__Ljava_time_temporal_ChronoField(this) : this.Ljava_time_temporal_ChronoField$__f_YEAR)
+});
+var $d_Ljava_time_temporal_ChronoField$ = new $TypeData().initClass({
+  Ljava_time_temporal_ChronoField$: 0
+}, false, "java.time.temporal.ChronoField$", {
+  Ljava_time_temporal_ChronoField$: 1,
+  O: 1,
+  Ljava_io_Serializable: 1
+});
+$c_Ljava_time_temporal_ChronoField$.prototype.$classData = $d_Ljava_time_temporal_ChronoField$;
+var $n_Ljava_time_temporal_ChronoField$;
+function $m_Ljava_time_temporal_ChronoField$() {
+  if ((!$n_Ljava_time_temporal_ChronoField$)) {
+    $n_Ljava_time_temporal_ChronoField$ = new $c_Ljava_time_temporal_ChronoField$()
+  };
+  return $n_Ljava_time_temporal_ChronoField$
+}
+function $p_Ljava_time_temporal_ChronoUnit$__SECONDS$lzycompute__Ljava_time_temporal_ChronoUnit($thiz) {
+  if (((8 & $thiz.Ljava_time_temporal_ChronoUnit$__f_bitmap$0) === 0)) {
+    var this$1 = $m_Ljava_time_Duration$();
+    $thiz.Ljava_time_temporal_ChronoUnit$__f_SECONDS = new $c_Ljava_time_temporal_ChronoUnit("Seconds", 3, this$1.java$time$Duration$$create__J__I__Ljava_time_Duration(new $c_RTLong(1, 0), 0));
+    $thiz.Ljava_time_temporal_ChronoUnit$__f_bitmap$0 = (8 | $thiz.Ljava_time_temporal_ChronoUnit$__f_bitmap$0)
+  };
+  return $thiz.Ljava_time_temporal_ChronoUnit$__f_SECONDS
+}
+function $p_Ljava_time_temporal_ChronoUnit$__MINUTES$lzycompute__Ljava_time_temporal_ChronoUnit($thiz) {
+  if (((16 & $thiz.Ljava_time_temporal_ChronoUnit$__f_bitmap$0) === 0)) {
+    var this$1 = $m_Ljava_time_Duration$();
+    $thiz.Ljava_time_temporal_ChronoUnit$__f_MINUTES = new $c_Ljava_time_temporal_ChronoUnit("Minutes", 4, this$1.java$time$Duration$$create__J__I__Ljava_time_Duration(new $c_RTLong(60, 0), 0));
+    $thiz.Ljava_time_temporal_ChronoUnit$__f_bitmap$0 = (16 | $thiz.Ljava_time_temporal_ChronoUnit$__f_bitmap$0)
+  };
+  return $thiz.Ljava_time_temporal_ChronoUnit$__f_MINUTES
+}
+function $p_Ljava_time_temporal_ChronoUnit$__HOURS$lzycompute__Ljava_time_temporal_ChronoUnit($thiz) {
+  if (((32 & $thiz.Ljava_time_temporal_ChronoUnit$__f_bitmap$0) === 0)) {
+    var this$1 = $m_Ljava_time_Duration$();
+    $thiz.Ljava_time_temporal_ChronoUnit$__f_HOURS = new $c_Ljava_time_temporal_ChronoUnit("Hours", 5, this$1.java$time$Duration$$create__J__I__Ljava_time_Duration(new $c_RTLong(3600, 0), 0));
+    $thiz.Ljava_time_temporal_ChronoUnit$__f_bitmap$0 = (32 | $thiz.Ljava_time_temporal_ChronoUnit$__f_bitmap$0)
+  };
+  return $thiz.Ljava_time_temporal_ChronoUnit$__f_HOURS
+}
+function $p_Ljava_time_temporal_ChronoUnit$__DAYS$lzycompute__Ljava_time_temporal_ChronoUnit($thiz) {
+  if (((128 & $thiz.Ljava_time_temporal_ChronoUnit$__f_bitmap$0) === 0)) {
+    var this$1 = $m_Ljava_time_Duration$();
+    $thiz.Ljava_time_temporal_ChronoUnit$__f_DAYS = new $c_Ljava_time_temporal_ChronoUnit("Days", 7, this$1.java$time$Duration$$create__J__I__Ljava_time_Duration(new $c_RTLong(86400, 0), 0));
+    $thiz.Ljava_time_temporal_ChronoUnit$__f_bitmap$0 = (128 | $thiz.Ljava_time_temporal_ChronoUnit$__f_bitmap$0)
+  };
+  return $thiz.Ljava_time_temporal_ChronoUnit$__f_DAYS
+}
+function $p_Ljava_time_temporal_ChronoUnit$__MONTHS$lzycompute__Ljava_time_temporal_ChronoUnit($thiz) {
+  if (((512 & $thiz.Ljava_time_temporal_ChronoUnit$__f_bitmap$0) === 0)) {
+    var this$1 = $m_Ljava_time_Duration$();
+    $thiz.Ljava_time_temporal_ChronoUnit$__f_MONTHS = new $c_Ljava_time_temporal_ChronoUnit("Months", 9, this$1.java$time$Duration$$create__J__I__Ljava_time_Duration(new $c_RTLong(2629746, 0), 0));
+    $thiz.Ljava_time_temporal_ChronoUnit$__f_bitmap$0 = (512 | $thiz.Ljava_time_temporal_ChronoUnit$__f_bitmap$0)
+  };
+  return $thiz.Ljava_time_temporal_ChronoUnit$__f_MONTHS
+}
+function $p_Ljava_time_temporal_ChronoUnit$__YEARS$lzycompute__Ljava_time_temporal_ChronoUnit($thiz) {
+  if (((1024 & $thiz.Ljava_time_temporal_ChronoUnit$__f_bitmap$0) === 0)) {
+    var this$1 = $m_Ljava_time_Duration$();
+    $thiz.Ljava_time_temporal_ChronoUnit$__f_YEARS = new $c_Ljava_time_temporal_ChronoUnit("Years", 10, this$1.java$time$Duration$$create__J__I__Ljava_time_Duration(new $c_RTLong(31556952, 0), 0));
+    $thiz.Ljava_time_temporal_ChronoUnit$__f_bitmap$0 = (1024 | $thiz.Ljava_time_temporal_ChronoUnit$__f_bitmap$0)
+  };
+  return $thiz.Ljava_time_temporal_ChronoUnit$__f_YEARS
+}
+function $p_Ljava_time_temporal_ChronoUnit$__FOREVER$lzycompute__Ljava_time_temporal_ChronoUnit($thiz) {
+  if (((32768 & $thiz.Ljava_time_temporal_ChronoUnit$__f_bitmap$0) === 0)) {
+    $thiz.Ljava_time_temporal_ChronoUnit$__f_FOREVER = new $c_Ljava_time_temporal_ChronoUnit("Forever", 15, $m_Ljava_time_Duration$().ofSeconds__J__J__Ljava_time_Duration(new $c_RTLong((-1), 2147483647), new $c_RTLong(999999999, 0)));
+    $thiz.Ljava_time_temporal_ChronoUnit$__f_bitmap$0 = (32768 | $thiz.Ljava_time_temporal_ChronoUnit$__f_bitmap$0)
+  };
+  return $thiz.Ljava_time_temporal_ChronoUnit$__f_FOREVER
+}
+/** @constructor */
+function $c_Ljava_time_temporal_ChronoUnit$() {
+  this.Ljava_time_temporal_ChronoUnit$__f_NANOS = null;
+  this.Ljava_time_temporal_ChronoUnit$__f_MICROS = null;
+  this.Ljava_time_temporal_ChronoUnit$__f_MILLIS = null;
+  this.Ljava_time_temporal_ChronoUnit$__f_SECONDS = null;
+  this.Ljava_time_temporal_ChronoUnit$__f_MINUTES = null;
+  this.Ljava_time_temporal_ChronoUnit$__f_HOURS = null;
+  this.Ljava_time_temporal_ChronoUnit$__f_HALF_DAYS = null;
+  this.Ljava_time_temporal_ChronoUnit$__f_DAYS = null;
+  this.Ljava_time_temporal_ChronoUnit$__f_WEEKS = null;
+  this.Ljava_time_temporal_ChronoUnit$__f_MONTHS = null;
+  this.Ljava_time_temporal_ChronoUnit$__f_YEARS = null;
+  this.Ljava_time_temporal_ChronoUnit$__f_DECADES = null;
+  this.Ljava_time_temporal_ChronoUnit$__f_CENTURIES = null;
+  this.Ljava_time_temporal_ChronoUnit$__f_MILLENNIA = null;
+  this.Ljava_time_temporal_ChronoUnit$__f_ERAS = null;
+  this.Ljava_time_temporal_ChronoUnit$__f_FOREVER = null;
+  this.Ljava_time_temporal_ChronoUnit$__f_values = null;
+  this.Ljava_time_temporal_ChronoUnit$__f_bitmap$0 = 0
+}
+$c_Ljava_time_temporal_ChronoUnit$.prototype = new $h_O();
+$c_Ljava_time_temporal_ChronoUnit$.prototype.constructor = $c_Ljava_time_temporal_ChronoUnit$;
+/** @constructor */
+function $h_Ljava_time_temporal_ChronoUnit$() {
+  /*<skip>*/
+}
+$h_Ljava_time_temporal_ChronoUnit$.prototype = $c_Ljava_time_temporal_ChronoUnit$.prototype;
+$c_Ljava_time_temporal_ChronoUnit$.prototype.SECONDS__Ljava_time_temporal_ChronoUnit = (function() {
+  return (((8 & this.Ljava_time_temporal_ChronoUnit$__f_bitmap$0) === 0) ? $p_Ljava_time_temporal_ChronoUnit$__SECONDS$lzycompute__Ljava_time_temporal_ChronoUnit(this) : this.Ljava_time_temporal_ChronoUnit$__f_SECONDS)
+});
+$c_Ljava_time_temporal_ChronoUnit$.prototype.MINUTES__Ljava_time_temporal_ChronoUnit = (function() {
+  return (((16 & this.Ljava_time_temporal_ChronoUnit$__f_bitmap$0) === 0) ? $p_Ljava_time_temporal_ChronoUnit$__MINUTES$lzycompute__Ljava_time_temporal_ChronoUnit(this) : this.Ljava_time_temporal_ChronoUnit$__f_MINUTES)
+});
+$c_Ljava_time_temporal_ChronoUnit$.prototype.HOURS__Ljava_time_temporal_ChronoUnit = (function() {
+  return (((32 & this.Ljava_time_temporal_ChronoUnit$__f_bitmap$0) === 0) ? $p_Ljava_time_temporal_ChronoUnit$__HOURS$lzycompute__Ljava_time_temporal_ChronoUnit(this) : this.Ljava_time_temporal_ChronoUnit$__f_HOURS)
+});
+$c_Ljava_time_temporal_ChronoUnit$.prototype.DAYS__Ljava_time_temporal_ChronoUnit = (function() {
+  return (((128 & this.Ljava_time_temporal_ChronoUnit$__f_bitmap$0) === 0) ? $p_Ljava_time_temporal_ChronoUnit$__DAYS$lzycompute__Ljava_time_temporal_ChronoUnit(this) : this.Ljava_time_temporal_ChronoUnit$__f_DAYS)
+});
+$c_Ljava_time_temporal_ChronoUnit$.prototype.MONTHS__Ljava_time_temporal_ChronoUnit = (function() {
+  return (((512 & this.Ljava_time_temporal_ChronoUnit$__f_bitmap$0) === 0) ? $p_Ljava_time_temporal_ChronoUnit$__MONTHS$lzycompute__Ljava_time_temporal_ChronoUnit(this) : this.Ljava_time_temporal_ChronoUnit$__f_MONTHS)
+});
+$c_Ljava_time_temporal_ChronoUnit$.prototype.YEARS__Ljava_time_temporal_ChronoUnit = (function() {
+  return (((1024 & this.Ljava_time_temporal_ChronoUnit$__f_bitmap$0) === 0) ? $p_Ljava_time_temporal_ChronoUnit$__YEARS$lzycompute__Ljava_time_temporal_ChronoUnit(this) : this.Ljava_time_temporal_ChronoUnit$__f_YEARS)
+});
+$c_Ljava_time_temporal_ChronoUnit$.prototype.FOREVER__Ljava_time_temporal_ChronoUnit = (function() {
+  return (((32768 & this.Ljava_time_temporal_ChronoUnit$__f_bitmap$0) === 0) ? $p_Ljava_time_temporal_ChronoUnit$__FOREVER$lzycompute__Ljava_time_temporal_ChronoUnit(this) : this.Ljava_time_temporal_ChronoUnit$__f_FOREVER)
+});
+var $d_Ljava_time_temporal_ChronoUnit$ = new $TypeData().initClass({
+  Ljava_time_temporal_ChronoUnit$: 0
+}, false, "java.time.temporal.ChronoUnit$", {
+  Ljava_time_temporal_ChronoUnit$: 1,
+  O: 1,
+  Ljava_io_Serializable: 1
+});
+$c_Ljava_time_temporal_ChronoUnit$.prototype.$classData = $d_Ljava_time_temporal_ChronoUnit$;
+var $n_Ljava_time_temporal_ChronoUnit$;
+function $m_Ljava_time_temporal_ChronoUnit$() {
+  if ((!$n_Ljava_time_temporal_ChronoUnit$)) {
+    $n_Ljava_time_temporal_ChronoUnit$ = new $c_Ljava_time_temporal_ChronoUnit$()
+  };
+  return $n_Ljava_time_temporal_ChronoUnit$
+}
+/** @constructor */
+function $c_Ljava_time_temporal_ValueRange(minSmallest, minLargest, maxSmallest, maxLargest) {
+  this.Ljava_time_temporal_ValueRange__f_minSmallest = $L0;
+  this.Ljava_time_temporal_ValueRange__f_minLargest = $L0;
+  this.Ljava_time_temporal_ValueRange__f_maxSmallest = $L0;
+  this.Ljava_time_temporal_ValueRange__f_maxLargest = $L0;
+  this.Ljava_time_temporal_ValueRange__f_minSmallest = minSmallest;
+  this.Ljava_time_temporal_ValueRange__f_minLargest = minLargest;
+  this.Ljava_time_temporal_ValueRange__f_maxSmallest = maxSmallest;
+  this.Ljava_time_temporal_ValueRange__f_maxLargest = maxLargest
+}
+$c_Ljava_time_temporal_ValueRange.prototype = new $h_O();
+$c_Ljava_time_temporal_ValueRange.prototype.constructor = $c_Ljava_time_temporal_ValueRange;
+/** @constructor */
+function $h_Ljava_time_temporal_ValueRange() {
+  /*<skip>*/
+}
+$h_Ljava_time_temporal_ValueRange.prototype = $c_Ljava_time_temporal_ValueRange.prototype;
+$c_Ljava_time_temporal_ValueRange.prototype.isValidValue__J__Z = (function(value) {
+  var b = this.Ljava_time_temporal_ValueRange__f_minSmallest;
+  var ahi = value.RTLong__f_hi;
+  var bhi = b.RTLong__f_hi;
+  if (((ahi === bhi) ? (((-2147483648) ^ value.RTLong__f_lo) >= ((-2147483648) ^ b.RTLong__f_lo)) : (ahi > bhi))) {
+    var b$1 = this.Ljava_time_temporal_ValueRange__f_maxLargest;
+    var ahi$1 = value.RTLong__f_hi;
+    var bhi$1 = b$1.RTLong__f_hi;
+    return ((ahi$1 === bhi$1) ? (((-2147483648) ^ value.RTLong__f_lo) <= ((-2147483648) ^ b$1.RTLong__f_lo)) : (ahi$1 < bhi$1))
+  } else {
+    return false
+  }
+});
+$c_Ljava_time_temporal_ValueRange.prototype.checkValidValue__J__Ljava_time_temporal_TemporalField__J = (function(value, field) {
+  if ((!this.isValidValue__J__Z(value))) {
+    if ((field !== null)) {
+      throw new $c_Ljava_time_DateTimeException(((((("Invalid value for " + field) + " (valid values ") + this) + "): ") + value))
+    } else {
+      throw new $c_Ljava_time_DateTimeException(((("Invalid value (valid values " + this) + "): ") + value))
+    }
+  } else {
+    return value
+  }
+});
+$c_Ljava_time_temporal_ValueRange.prototype.equals__O__Z = (function(obj) {
+  if ((obj instanceof $c_Ljava_time_temporal_ValueRange)) {
+    var x2 = $as_Ljava_time_temporal_ValueRange(obj);
+    if ((this === x2)) {
+      return true
+    } else {
+      var this$1 = this.Ljava_time_temporal_ValueRange__f_minSmallest;
+      var b = x2.Ljava_time_temporal_ValueRange__f_minSmallest;
+      if (((this$1.RTLong__f_lo === b.RTLong__f_lo) && (this$1.RTLong__f_hi === b.RTLong__f_hi))) {
+        var this$2 = this.Ljava_time_temporal_ValueRange__f_minLargest;
+        var b$1 = x2.Ljava_time_temporal_ValueRange__f_minLargest;
+        var $$x2 = ((this$2.RTLong__f_lo === b$1.RTLong__f_lo) && (this$2.RTLong__f_hi === b$1.RTLong__f_hi))
+      } else {
+        var $$x2 = false
+      };
+      if ($$x2) {
+        var this$3 = this.Ljava_time_temporal_ValueRange__f_maxSmallest;
+        var b$2 = x2.Ljava_time_temporal_ValueRange__f_maxSmallest;
+        var $$x1 = ((this$3.RTLong__f_lo === b$2.RTLong__f_lo) && (this$3.RTLong__f_hi === b$2.RTLong__f_hi))
+      } else {
+        var $$x1 = false
+      };
+      if ($$x1) {
+        var this$4 = this.Ljava_time_temporal_ValueRange__f_maxLargest;
+        var b$3 = x2.Ljava_time_temporal_ValueRange__f_maxLargest;
+        return ((this$4.RTLong__f_lo === b$3.RTLong__f_lo) && (this$4.RTLong__f_hi === b$3.RTLong__f_hi))
+      } else {
+        return false
+      }
+    }
+  } else {
+    return false
+  }
+});
+$c_Ljava_time_temporal_ValueRange.prototype.hashCode__I = (function() {
+  var this$1 = this.Ljava_time_temporal_ValueRange__f_minSmallest;
+  var b = this.Ljava_time_temporal_ValueRange__f_minLargest;
+  var alo = this$1.RTLong__f_lo;
+  var ahi = this$1.RTLong__f_hi;
+  var bhi = b.RTLong__f_hi;
+  var lo = ((alo + b.RTLong__f_lo) | 0);
+  var hi = ((((-2147483648) ^ lo) < ((-2147483648) ^ alo)) ? ((1 + ((ahi + bhi) | 0)) | 0) : ((ahi + bhi) | 0));
+  var b$1 = this.Ljava_time_temporal_ValueRange__f_minLargest;
+  var bhi$1 = b$1.RTLong__f_hi;
+  var lo$1 = ((16 + b$1.RTLong__f_lo) | 0);
+  var lo$2 = (((32 & lo$1) === 0) ? (lo << lo$1) : 0);
+  var hi$2 = (((32 & lo$1) === 0) ? (((((lo >>> 1) | 0) >>> ((31 - lo$1) | 0)) | 0) | (hi << lo$1)) : (lo << lo$1));
+  var b$2 = this.Ljava_time_temporal_ValueRange__f_maxSmallest;
+  var bhi$2 = b$2.RTLong__f_hi;
+  var lo$3 = ((48 + b$2.RTLong__f_lo) | 0);
+  var lo$4 = (((32 & lo$3) === 0) ? (((lo$2 >>> lo$3) | 0) | ((hi$2 << 1) << ((31 - lo$3) | 0))) : (hi$2 >> lo$3));
+  var hi$4 = (((32 & lo$3) === 0) ? (hi$2 >> lo$3) : (hi$2 >> 31));
+  var b$3 = this.Ljava_time_temporal_ValueRange__f_maxSmallest;
+  var bhi$3 = b$3.RTLong__f_hi;
+  var lo$5 = ((32 + b$3.RTLong__f_lo) | 0);
+  var lo$6 = (((32 & lo$5) === 0) ? (lo$4 << lo$5) : 0);
+  var hi$6 = (((32 & lo$5) === 0) ? (((((lo$4 >>> 1) | 0) >>> ((31 - lo$5) | 0)) | 0) | (hi$4 << lo$5)) : (lo$4 << lo$5));
+  var b$4 = this.Ljava_time_temporal_ValueRange__f_maxLargest;
+  var bhi$4 = b$4.RTLong__f_hi;
+  var lo$7 = ((32 + b$4.RTLong__f_lo) | 0);
+  var lo$8 = (((32 & lo$7) === 0) ? (((lo$6 >>> lo$7) | 0) | ((hi$6 << 1) << ((31 - lo$7) | 0))) : (hi$6 >> lo$7));
+  var hi$8 = (((32 & lo$7) === 0) ? (hi$6 >> lo$7) : (hi$6 >> 31));
+  var b$5 = this.Ljava_time_temporal_ValueRange__f_maxLargest;
+  var bhi$5 = b$5.RTLong__f_hi;
+  var lo$9 = ((48 + b$5.RTLong__f_lo) | 0);
+  var lo$10 = (((32 & lo$9) === 0) ? (lo$8 << lo$9) : 0);
+  var hi$10 = (((32 & lo$9) === 0) ? (((((lo$8 >>> 1) | 0) >>> ((31 - lo$9) | 0)) | 0) | (hi$8 << lo$9)) : (lo$8 << lo$9));
+  var lo$11 = (((lo$10 >>> 16) | 0) | (hi$10 << 16));
+  var hi$11 = (hi$10 >> 16);
+  var lo$12 = (lo$11 ^ hi$11);
+  return lo$12
+});
+$c_Ljava_time_temporal_ValueRange.prototype.toString__T = (function() {
+  var this$1 = this.Ljava_time_temporal_ValueRange__f_minSmallest;
+  var b = this.Ljava_time_temporal_ValueRange__f_minLargest;
+  if ((!((this$1.RTLong__f_lo === b.RTLong__f_lo) && (this$1.RTLong__f_hi === b.RTLong__f_hi)))) {
+    var ss = ("/" + this.Ljava_time_temporal_ValueRange__f_minLargest)
+  } else {
+    var ss = ""
+  };
+  var this$2 = this.Ljava_time_temporal_ValueRange__f_maxSmallest;
+  var b$1 = this.Ljava_time_temporal_ValueRange__f_maxLargest;
+  if ((!((this$2.RTLong__f_lo === b$1.RTLong__f_lo) && (this$2.RTLong__f_hi === b$1.RTLong__f_hi)))) {
+    var sl = ("/" + this.Ljava_time_temporal_ValueRange__f_maxLargest)
+  } else {
+    var sl = ""
+  };
+  return ((((this.Ljava_time_temporal_ValueRange__f_minSmallest + ss) + " - ") + this.Ljava_time_temporal_ValueRange__f_maxSmallest) + sl)
+});
+function $as_Ljava_time_temporal_ValueRange(obj) {
+  return (((obj instanceof $c_Ljava_time_temporal_ValueRange) || (obj === null)) ? obj : $throwClassCastException(obj, "java.time.temporal.ValueRange"))
+}
+function $isArrayOf_Ljava_time_temporal_ValueRange(obj, depth) {
+  return (!(!(((obj && obj.$classData) && (obj.$classData.arrayDepth === depth)) && obj.$classData.arrayBase.ancestors.Ljava_time_temporal_ValueRange)))
+}
+function $asArrayOf_Ljava_time_temporal_ValueRange(obj, depth) {
+  return (($isArrayOf_Ljava_time_temporal_ValueRange(obj, depth) || (obj === null)) ? obj : $throwArrayCastException(obj, "Ljava.time.temporal.ValueRange;", depth))
+}
+var $d_Ljava_time_temporal_ValueRange = new $TypeData().initClass({
+  Ljava_time_temporal_ValueRange: 0
+}, false, "java.time.temporal.ValueRange", {
+  Ljava_time_temporal_ValueRange: 1,
+  O: 1,
+  Ljava_io_Serializable: 1
+});
+$c_Ljava_time_temporal_ValueRange.prototype.$classData = $d_Ljava_time_temporal_ValueRange;
+/** @constructor */
+function $c_Ljava_time_temporal_ValueRange$() {
+  /*<skip>*/
+}
+$c_Ljava_time_temporal_ValueRange$.prototype = new $h_O();
+$c_Ljava_time_temporal_ValueRange$.prototype.constructor = $c_Ljava_time_temporal_ValueRange$;
+/** @constructor */
+function $h_Ljava_time_temporal_ValueRange$() {
+  /*<skip>*/
+}
+$h_Ljava_time_temporal_ValueRange$.prototype = $c_Ljava_time_temporal_ValueRange$.prototype;
+$c_Ljava_time_temporal_ValueRange$.prototype.of__J__J__Ljava_time_temporal_ValueRange = (function(min, max) {
+  var ahi = min.RTLong__f_hi;
+  var bhi = max.RTLong__f_hi;
+  if (((ahi === bhi) ? (((-2147483648) ^ min.RTLong__f_lo) > ((-2147483648) ^ max.RTLong__f_lo)) : (ahi > bhi))) {
+    throw $ct_jl_IllegalArgumentException__T__(new $c_jl_IllegalArgumentException(), "Minimum value must be less than maximum value")
+  } else {
+    return new $c_Ljava_time_temporal_ValueRange(min, min, max, max)
+  }
+});
+$c_Ljava_time_temporal_ValueRange$.prototype.of__J__J__J__J__Ljava_time_temporal_ValueRange = (function(minSmallest, minLargest, maxSmallest, maxLargest) {
+  var ahi = minSmallest.RTLong__f_hi;
+  var bhi = minLargest.RTLong__f_hi;
+  if (((ahi === bhi) ? (((-2147483648) ^ minSmallest.RTLong__f_lo) > ((-2147483648) ^ minLargest.RTLong__f_lo)) : (ahi > bhi))) {
+    throw $ct_jl_IllegalArgumentException__T__(new $c_jl_IllegalArgumentException(), "Smallest minimum value must be less than largest minimum value")
+  };
+  var ahi$1 = maxSmallest.RTLong__f_hi;
+  var bhi$1 = maxLargest.RTLong__f_hi;
+  if (((ahi$1 === bhi$1) ? (((-2147483648) ^ maxSmallest.RTLong__f_lo) > ((-2147483648) ^ maxLargest.RTLong__f_lo)) : (ahi$1 > bhi$1))) {
+    throw $ct_jl_IllegalArgumentException__T__(new $c_jl_IllegalArgumentException(), "Smallest maximum value must be less than largest maximum value")
+  };
+  var ahi$2 = minLargest.RTLong__f_hi;
+  var bhi$2 = maxLargest.RTLong__f_hi;
+  if (((ahi$2 === bhi$2) ? (((-2147483648) ^ minLargest.RTLong__f_lo) > ((-2147483648) ^ maxLargest.RTLong__f_lo)) : (ahi$2 > bhi$2))) {
+    throw $ct_jl_IllegalArgumentException__T__(new $c_jl_IllegalArgumentException(), "Minimum value must be less than maximum value")
+  };
+  return new $c_Ljava_time_temporal_ValueRange(minSmallest, minLargest, maxSmallest, maxLargest)
+});
+var $d_Ljava_time_temporal_ValueRange$ = new $TypeData().initClass({
+  Ljava_time_temporal_ValueRange$: 0
+}, false, "java.time.temporal.ValueRange$", {
+  Ljava_time_temporal_ValueRange$: 1,
+  O: 1,
+  Ljava_io_Serializable: 1
+});
+$c_Ljava_time_temporal_ValueRange$.prototype.$classData = $d_Ljava_time_temporal_ValueRange$;
+var $n_Ljava_time_temporal_ValueRange$;
+function $m_Ljava_time_temporal_ValueRange$() {
+  if ((!$n_Ljava_time_temporal_ValueRange$)) {
+    $n_Ljava_time_temporal_ValueRange$ = new $c_Ljava_time_temporal_ValueRange$()
+  };
+  return $n_Ljava_time_temporal_ValueRange$
+}
 function $sct_Ljava_time_zone_TzdbZoneRulesProvider__stinit__() {
   $m_sjs_reflect_Reflect$().registerInstantiatableClass__T__jl_Class__sjs_js_Array__V("java.time.zone.TzdbZoneRulesProvider", $d_Ljava_time_zone_TzdbZoneRulesProvider.getClassOf(), [[[], (() => new $c_Ljava_time_zone_TzdbZoneRulesProvider())]])
 }
@@ -4130,6 +5355,41 @@ function $m_s_Array$() {
     $n_s_Array$ = new $c_s_Array$()
   };
   return $n_s_Array$
+}
+/** @constructor */
+function $c_s_Console$() {
+  this.s_Console$__f_outVar = null;
+  this.s_Console$__f_errVar = null;
+  this.s_Console$__f_inVar = null;
+  $n_s_Console$ = this;
+  this.s_Console$__f_outVar = new $c_s_util_DynamicVariable($m_jl_System$Streams$().jl_System$Streams$__f_out);
+  this.s_Console$__f_errVar = new $c_s_util_DynamicVariable($m_jl_System$Streams$().jl_System$Streams$__f_err);
+  this.s_Console$__f_inVar = new $c_s_util_DynamicVariable(null)
+}
+$c_s_Console$.prototype = new $h_O();
+$c_s_Console$.prototype.constructor = $c_s_Console$;
+/** @constructor */
+function $h_s_Console$() {
+  /*<skip>*/
+}
+$h_s_Console$.prototype = $c_s_Console$.prototype;
+$c_s_Console$.prototype.out__Ljava_io_PrintStream = (function() {
+  return $as_Ljava_io_PrintStream(this.s_Console$__f_outVar.s_util_DynamicVariable__f_v)
+});
+var $d_s_Console$ = new $TypeData().initClass({
+  s_Console$: 0
+}, false, "scala.Console$", {
+  s_Console$: 1,
+  O: 1,
+  s_io_AnsiColor: 1
+});
+$c_s_Console$.prototype.$classData = $d_s_Console$;
+var $n_s_Console$;
+function $m_s_Console$() {
+  if ((!$n_s_Console$)) {
+    $n_s_Console$ = new $c_s_Console$()
+  };
+  return $n_s_Console$
 }
 /** @constructor */
 function $c_s_LowPriorityImplicits() {
@@ -4895,6 +6155,32 @@ var $d_jl_Character = new $TypeData().initClass({
   Ljava_io_Serializable: 1,
   jl_Comparable: 1
 }, (void 0), (void 0), ((x) => (x instanceof $Char)));
+function $ct_jl_Enum__T__I__($thiz, _name, _ordinal) {
+  $thiz.jl_Enum__f__name = _name;
+  $thiz.jl_Enum__f__ordinal = _ordinal;
+  return $thiz
+}
+/** @constructor */
+function $c_jl_Enum() {
+  this.jl_Enum__f__name = null;
+  this.jl_Enum__f__ordinal = 0
+}
+$c_jl_Enum.prototype = new $h_O();
+$c_jl_Enum.prototype.constructor = $c_jl_Enum;
+/** @constructor */
+function $h_jl_Enum() {
+  /*<skip>*/
+}
+$h_jl_Enum.prototype = $c_jl_Enum.prototype;
+$c_jl_Enum.prototype.toString__T = (function() {
+  return this.jl_Enum__f__name
+});
+$c_jl_Enum.prototype.equals__O__Z = (function(that) {
+  return (this === that)
+});
+$c_jl_Enum.prototype.hashCode__I = (function() {
+  return $systemIdentityHashCode(this)
+});
 class $c_jl_Error extends $c_jl_Throwable {
 }
 function $ct_jl_Exception__T__($thiz, s) {
@@ -4912,6 +6198,30 @@ var $d_jl_Exception = new $TypeData().initClass({
   Ljava_io_Serializable: 1
 });
 $c_jl_Exception.prototype.$classData = $d_jl_Exception;
+function $f_Ljava_time_chrono_Chronology__equals__O__Z($thiz, obj) {
+  if ($is_Ljava_time_chrono_Chronology(obj)) {
+    var x2 = $as_Ljava_time_chrono_Chronology(obj);
+    return (($thiz === x2) || ($f_T__compareTo__T__I("ISO", "ISO") === 0))
+  } else {
+    return false
+  }
+}
+function $f_Ljava_time_chrono_Chronology__hashCode__I($thiz) {
+  var this$1 = $objectGetClass($thiz);
+  return ($systemIdentityHashCode(this$1) ^ $f_T__hashCode__I("ISO"))
+}
+function $is_Ljava_time_chrono_Chronology(obj) {
+  return (!(!((obj && obj.$classData) && obj.$classData.ancestors.Ljava_time_chrono_Chronology)))
+}
+function $as_Ljava_time_chrono_Chronology(obj) {
+  return (($is_Ljava_time_chrono_Chronology(obj) || (obj === null)) ? obj : $throwClassCastException(obj, "java.time.chrono.Chronology"))
+}
+function $isArrayOf_Ljava_time_chrono_Chronology(obj, depth) {
+  return (!(!(((obj && obj.$classData) && (obj.$classData.arrayDepth === depth)) && obj.$classData.arrayBase.ancestors.Ljava_time_chrono_Chronology)))
+}
+function $asArrayOf_Ljava_time_chrono_Chronology(obj, depth) {
+  return (($isArrayOf_Ljava_time_chrono_Chronology(obj, depth) || (obj === null)) ? obj : $throwArrayCastException(obj, "Ljava.time.chrono.Chronology;", depth))
+}
 /** @constructor */
 function $c_s_$less$colon$less() {
   /*<skip>*/
@@ -6744,6 +8054,129 @@ var $d_sjsr_AnonFunction3 = new $TypeData().initClass({
   F3: 1
 });
 $c_sjsr_AnonFunction3.prototype.$classData = $d_sjsr_AnonFunction3;
+/** @constructor */
+function $c_Ldev_myclinic_scala_model_Appoint(date, time, patientName, patientId, memo) {
+  this.Ldev_myclinic_scala_model_Appoint__f_date = null;
+  this.Ldev_myclinic_scala_model_Appoint__f_time = null;
+  this.Ldev_myclinic_scala_model_Appoint__f_patientName = null;
+  this.Ldev_myclinic_scala_model_Appoint__f_patientId = null;
+  this.Ldev_myclinic_scala_model_Appoint__f_memo = null;
+  this.Ldev_myclinic_scala_model_Appoint__f_date = date;
+  this.Ldev_myclinic_scala_model_Appoint__f_time = time;
+  this.Ldev_myclinic_scala_model_Appoint__f_patientName = patientName;
+  this.Ldev_myclinic_scala_model_Appoint__f_patientId = patientId;
+  this.Ldev_myclinic_scala_model_Appoint__f_memo = memo
+}
+$c_Ldev_myclinic_scala_model_Appoint.prototype = new $h_O();
+$c_Ldev_myclinic_scala_model_Appoint.prototype.constructor = $c_Ldev_myclinic_scala_model_Appoint;
+/** @constructor */
+function $h_Ldev_myclinic_scala_model_Appoint() {
+  /*<skip>*/
+}
+$h_Ldev_myclinic_scala_model_Appoint.prototype = $c_Ldev_myclinic_scala_model_Appoint.prototype;
+$c_Ldev_myclinic_scala_model_Appoint.prototype.productPrefix__T = (function() {
+  return "Appoint"
+});
+$c_Ldev_myclinic_scala_model_Appoint.prototype.productArity__I = (function() {
+  return 5
+});
+$c_Ldev_myclinic_scala_model_Appoint.prototype.productElement__I__O = (function(x$1) {
+  switch (x$1) {
+    case 0: {
+      return this.Ldev_myclinic_scala_model_Appoint__f_date;
+      break
+    }
+    case 1: {
+      return this.Ldev_myclinic_scala_model_Appoint__f_time;
+      break
+    }
+    case 2: {
+      return this.Ldev_myclinic_scala_model_Appoint__f_patientName;
+      break
+    }
+    case 3: {
+      return this.Ldev_myclinic_scala_model_Appoint__f_patientId;
+      break
+    }
+    case 4: {
+      return this.Ldev_myclinic_scala_model_Appoint__f_memo;
+      break
+    }
+    default: {
+      return $m_sr_Statics$().ioobe__I__O(x$1)
+    }
+  }
+});
+$c_Ldev_myclinic_scala_model_Appoint.prototype.productIterator__sc_Iterator = (function() {
+  return new $c_sr_ScalaRunTime$$anon$1(this)
+});
+$c_Ldev_myclinic_scala_model_Appoint.prototype.hashCode__I = (function() {
+  var this$2 = $m_s_util_hashing_MurmurHash3$();
+  return this$2.productHash__s_Product__I__Z__I(this, (-889275714), false)
+});
+$c_Ldev_myclinic_scala_model_Appoint.prototype.toString__T = (function() {
+  return $m_sr_ScalaRunTime$()._toString__s_Product__T(this)
+});
+$c_Ldev_myclinic_scala_model_Appoint.prototype.equals__O__Z = (function(x$1) {
+  if ((this === x$1)) {
+    return true
+  } else if ((x$1 instanceof $c_Ldev_myclinic_scala_model_Appoint)) {
+    var Appoint$1 = $as_Ldev_myclinic_scala_model_Appoint(x$1);
+    var x = this.Ldev_myclinic_scala_model_Appoint__f_date;
+    var x$2 = Appoint$1.Ldev_myclinic_scala_model_Appoint__f_date;
+    if (((x === null) ? (x$2 === null) : x.equals__O__Z(x$2))) {
+      var x$3 = this.Ldev_myclinic_scala_model_Appoint__f_time;
+      var x$4 = Appoint$1.Ldev_myclinic_scala_model_Appoint__f_time;
+      var $$x2 = ((x$3 === null) ? (x$4 === null) : x$3.equals__O__Z(x$4))
+    } else {
+      var $$x2 = false
+    };
+    if (($$x2 && (this.Ldev_myclinic_scala_model_Appoint__f_patientName === Appoint$1.Ldev_myclinic_scala_model_Appoint__f_patientName))) {
+      var x$5 = this.Ldev_myclinic_scala_model_Appoint__f_patientId;
+      var x$6 = Appoint$1.Ldev_myclinic_scala_model_Appoint__f_patientId;
+      var $$x1 = ((x$5 === null) ? (x$6 === null) : x$5.equals__O__Z(x$6))
+    } else {
+      var $$x1 = false
+    };
+    if ($$x1) {
+      return (this.Ldev_myclinic_scala_model_Appoint__f_memo === Appoint$1.Ldev_myclinic_scala_model_Appoint__f_memo)
+    } else {
+      return false
+    }
+  } else {
+    return false
+  }
+});
+function $as_Ldev_myclinic_scala_model_Appoint(obj) {
+  return (((obj instanceof $c_Ldev_myclinic_scala_model_Appoint) || (obj === null)) ? obj : $throwClassCastException(obj, "dev.myclinic.scala.model.Appoint"))
+}
+function $isArrayOf_Ldev_myclinic_scala_model_Appoint(obj, depth) {
+  return (!(!(((obj && obj.$classData) && (obj.$classData.arrayDepth === depth)) && obj.$classData.arrayBase.ancestors.Ldev_myclinic_scala_model_Appoint)))
+}
+function $asArrayOf_Ldev_myclinic_scala_model_Appoint(obj, depth) {
+  return (($isArrayOf_Ldev_myclinic_scala_model_Appoint(obj, depth) || (obj === null)) ? obj : $throwArrayCastException(obj, "Ldev.myclinic.scala.model.Appoint;", depth))
+}
+var $d_Ldev_myclinic_scala_model_Appoint = new $TypeData().initClass({
+  Ldev_myclinic_scala_model_Appoint: 0
+}, false, "dev.myclinic.scala.model.Appoint", {
+  Ldev_myclinic_scala_model_Appoint: 1,
+  O: 1,
+  s_Product: 1,
+  s_Equals: 1,
+  Ljava_io_Serializable: 1
+});
+$c_Ldev_myclinic_scala_model_Appoint.prototype.$classData = $d_Ldev_myclinic_scala_model_Appoint;
+/** @constructor */
+function $c_Ljava_io_OutputStream() {
+  /*<skip>*/
+}
+$c_Ljava_io_OutputStream.prototype = new $h_O();
+$c_Ljava_io_OutputStream.prototype.constructor = $c_Ljava_io_OutputStream;
+/** @constructor */
+function $h_Ljava_io_OutputStream() {
+  /*<skip>*/
+}
+$h_Ljava_io_OutputStream.prototype = $c_Ljava_io_OutputStream.prototype;
 function $f_jl_Byte__equals__O__Z($thiz, that) {
   return Object.is($thiz, that)
 }
@@ -6920,6 +8353,23 @@ function $f_T__hashCode__I($thiz) {
 function $f_T__equals__O__Z($thiz, that) {
   return ($thiz === that)
 }
+function $f_T__compareTo__T__I($thiz, anotherString) {
+  var thisLength = $uI($thiz.length);
+  var strLength = $uI(anotherString.length);
+  var minLength = ((thisLength < strLength) ? thisLength : strLength);
+  var i = 0;
+  while ((i !== minLength)) {
+    var index = i;
+    var $$x1 = $uI($thiz.charCodeAt(index));
+    var index$1 = i;
+    var cmp = (((65535 & $$x1) - (65535 & $uI(anotherString.charCodeAt(index$1)))) | 0);
+    if ((cmp !== 0)) {
+      return cmp
+    };
+    i = ((1 + i) | 0)
+  };
+  return ((thisLength - strLength) | 0)
+}
 function $f_T__getChars__I__I__AC__I__V($thiz, srcBegin, srcEnd, dst, dstBegin) {
   if (((((srcEnd > $uI($thiz.length)) || (srcBegin < 0)) || (srcEnd < 0)) || (srcBegin > srcEnd))) {
     throw $ct_jl_StringIndexOutOfBoundsException__T__(new $c_jl_StringIndexOutOfBoundsException(), "Index out of Bound")
@@ -6966,6 +8416,13 @@ function $ct_jl_StringBuilder__T__($thiz, str) {
   $thiz.jl_StringBuilder__f_java$lang$StringBuilder$$content = str;
   return $thiz
 }
+function $ct_jl_StringBuilder__I__($thiz, initialCapacity) {
+  $ct_jl_StringBuilder__($thiz);
+  if ((initialCapacity < 0)) {
+    throw new $c_jl_NegativeArraySizeException()
+  };
+  return $thiz
+}
 /** @constructor */
 function $c_jl_StringBuilder() {
   this.jl_StringBuilder__f_java$lang$StringBuilder$$content = null
@@ -6984,6 +8441,16 @@ $c_jl_StringBuilder.prototype.append__AC__jl_StringBuilder = (function(str) {
   this.jl_StringBuilder__f_java$lang$StringBuilder$$content = (("" + this.jl_StringBuilder__f_java$lang$StringBuilder$$content) + str$1);
   return this
 });
+$c_jl_StringBuilder.prototype.deleteCharAt__I__jl_StringBuilder = (function(index) {
+  var oldContent = this.jl_StringBuilder__f_java$lang$StringBuilder$$content;
+  if (((index < 0) || (index >= $uI(oldContent.length)))) {
+    throw $ct_jl_StringIndexOutOfBoundsException__I__(new $c_jl_StringIndexOutOfBoundsException(), index)
+  };
+  var $$x1 = $as_T(oldContent.substring(0, index));
+  var beginIndex = ((1 + index) | 0);
+  this.jl_StringBuilder__f_java$lang$StringBuilder$$content = (("" + $$x1) + $as_T(oldContent.substring(beginIndex)));
+  return this
+});
 $c_jl_StringBuilder.prototype.toString__T = (function() {
   return this.jl_StringBuilder__f_java$lang$StringBuilder$$content
 });
@@ -6991,9 +8458,37 @@ $c_jl_StringBuilder.prototype.length__I = (function() {
   var this$1 = this.jl_StringBuilder__f_java$lang$StringBuilder$$content;
   return $uI(this$1.length)
 });
+$c_jl_StringBuilder.prototype.setLength__I__V = (function(newLength) {
+  if ((newLength < 0)) {
+    throw $ct_jl_StringIndexOutOfBoundsException__I__(new $c_jl_StringIndexOutOfBoundsException(), newLength)
+  };
+  var newContent = this.jl_StringBuilder__f_java$lang$StringBuilder$$content;
+  var this$1 = newContent;
+  var additional = ((newLength - $uI(this$1.length)) | 0);
+  if ((additional < 0)) {
+    var this$2 = newContent;
+    newContent = $as_T(this$2.substring(0, newLength))
+  } else {
+    var i = 0;
+    while ((i !== additional)) {
+      newContent = (newContent + "\u0000");
+      i = ((1 + i) | 0)
+    }
+  };
+  this.jl_StringBuilder__f_java$lang$StringBuilder$$content = newContent
+});
 $c_jl_StringBuilder.prototype.charAt__I__C = (function(index) {
   var this$1 = this.jl_StringBuilder__f_java$lang$StringBuilder$$content;
   return (65535 & $uI(this$1.charCodeAt(index)))
+});
+$c_jl_StringBuilder.prototype.setCharAt__I__C__V = (function(index, ch) {
+  var oldContent = this.jl_StringBuilder__f_java$lang$StringBuilder$$content;
+  if (((index < 0) || (index >= $uI(oldContent.length)))) {
+    throw $ct_jl_StringIndexOutOfBoundsException__I__(new $c_jl_StringIndexOutOfBoundsException(), index)
+  };
+  var $$x1 = $as_T(oldContent.substring(0, index));
+  var beginIndex = ((1 + index) | 0);
+  this.jl_StringBuilder__f_java$lang$StringBuilder$$content = ((("" + $$x1) + $bC(ch)) + $as_T(oldContent.substring(beginIndex)))
 });
 var $d_jl_StringBuilder = new $TypeData().initClass({
   jl_StringBuilder: 0
@@ -7721,6 +9216,21 @@ var $d_sjs_js_WrappedDictionary$DictionaryIterator = new $TypeData().initClass({
   sc_IterableOnceOps: 1
 });
 $c_sjs_js_WrappedDictionary$DictionaryIterator.prototype.$classData = $d_sjs_js_WrappedDictionary$DictionaryIterator;
+function $ct_Ljava_io_FilterOutputStream__Ljava_io_OutputStream__($thiz, out) {
+  $thiz.Ljava_io_FilterOutputStream__f_out = out;
+  return $thiz
+}
+/** @constructor */
+function $c_Ljava_io_FilterOutputStream() {
+  this.Ljava_io_FilterOutputStream__f_out = null
+}
+$c_Ljava_io_FilterOutputStream.prototype = new $h_Ljava_io_OutputStream();
+$c_Ljava_io_FilterOutputStream.prototype.constructor = $c_Ljava_io_FilterOutputStream;
+/** @constructor */
+function $h_Ljava_io_FilterOutputStream() {
+  /*<skip>*/
+}
+$h_Ljava_io_FilterOutputStream.prototype = $c_Ljava_io_FilterOutputStream.prototype;
 class $c_jl_ArithmeticException extends $c_jl_RuntimeException {
   constructor(s) {
     super();
@@ -7802,6 +9312,28 @@ var $d_jl_IndexOutOfBoundsException = new $TypeData().initClass({
   Ljava_io_Serializable: 1
 });
 $c_jl_IndexOutOfBoundsException.prototype.$classData = $d_jl_IndexOutOfBoundsException;
+/** @constructor */
+function $c_jl_JSConsoleBasedPrintStream$DummyOutputStream() {
+  /*<skip>*/
+}
+$c_jl_JSConsoleBasedPrintStream$DummyOutputStream.prototype = new $h_Ljava_io_OutputStream();
+$c_jl_JSConsoleBasedPrintStream$DummyOutputStream.prototype.constructor = $c_jl_JSConsoleBasedPrintStream$DummyOutputStream;
+/** @constructor */
+function $h_jl_JSConsoleBasedPrintStream$DummyOutputStream() {
+  /*<skip>*/
+}
+$h_jl_JSConsoleBasedPrintStream$DummyOutputStream.prototype = $c_jl_JSConsoleBasedPrintStream$DummyOutputStream.prototype;
+var $d_jl_JSConsoleBasedPrintStream$DummyOutputStream = new $TypeData().initClass({
+  jl_JSConsoleBasedPrintStream$DummyOutputStream: 0
+}, false, "java.lang.JSConsoleBasedPrintStream$DummyOutputStream", {
+  jl_JSConsoleBasedPrintStream$DummyOutputStream: 1,
+  Ljava_io_OutputStream: 1,
+  O: 1,
+  Ljava_io_Closeable: 1,
+  jl_AutoCloseable: 1,
+  Ljava_io_Flushable: 1
+});
+$c_jl_JSConsoleBasedPrintStream$DummyOutputStream.prototype.$classData = $d_jl_JSConsoleBasedPrintStream$DummyOutputStream;
 class $c_jl_NegativeArraySizeException extends $c_jl_RuntimeException {
   constructor() {
     super();
@@ -7866,6 +9398,265 @@ var $d_jl_UnsupportedOperationException = new $TypeData().initClass({
   Ljava_io_Serializable: 1
 });
 $c_jl_UnsupportedOperationException.prototype.$classData = $d_jl_UnsupportedOperationException;
+class $c_Ljava_time_DateTimeException extends $c_jl_RuntimeException {
+  constructor(message) {
+    super();
+    $ct_jl_Throwable__T__jl_Throwable__Z__Z__(this, message, null, true, true)
+  };
+}
+var $d_Ljava_time_DateTimeException = new $TypeData().initClass({
+  Ljava_time_DateTimeException: 0
+}, false, "java.time.DateTimeException", {
+  Ljava_time_DateTimeException: 1,
+  jl_RuntimeException: 1,
+  jl_Exception: 1,
+  jl_Throwable: 1,
+  O: 1,
+  Ljava_io_Serializable: 1
+});
+$c_Ljava_time_DateTimeException.prototype.$classData = $d_Ljava_time_DateTimeException;
+/** @constructor */
+function $c_Ljava_time_Duration(seconds, nanos) {
+  this.Ljava_time_Duration__f_seconds = $L0;
+  this.Ljava_time_Duration__f_nanos = 0;
+  this.Ljava_time_Duration__f_seconds = seconds;
+  this.Ljava_time_Duration__f_nanos = nanos
+}
+$c_Ljava_time_Duration.prototype = new $h_O();
+$c_Ljava_time_Duration.prototype.constructor = $c_Ljava_time_Duration;
+/** @constructor */
+function $h_Ljava_time_Duration() {
+  /*<skip>*/
+}
+$h_Ljava_time_Duration.prototype = $c_Ljava_time_Duration.prototype;
+$c_Ljava_time_Duration.prototype.equals__O__Z = (function(other) {
+  if ((other instanceof $c_Ljava_time_Duration)) {
+    var x2 = $as_Ljava_time_Duration(other);
+    if ((this === x2)) {
+      return true
+    } else {
+      var this$1 = this.Ljava_time_Duration__f_seconds;
+      var b = x2.Ljava_time_Duration__f_seconds;
+      if (((this$1.RTLong__f_lo === b.RTLong__f_lo) && (this$1.RTLong__f_hi === b.RTLong__f_hi))) {
+        return (this.Ljava_time_Duration__f_nanos === x2.Ljava_time_Duration__f_nanos)
+      } else {
+        return false
+      }
+    }
+  } else {
+    return false
+  }
+});
+$c_Ljava_time_Duration.prototype.hashCode__I = (function() {
+  var this$2 = this.Ljava_time_Duration__f_seconds;
+  var this$1 = this.Ljava_time_Duration__f_seconds;
+  var hi = this$1.RTLong__f_hi;
+  var lo = (this$2.RTLong__f_lo ^ hi);
+  return ((lo + $imul(51, this.Ljava_time_Duration__f_nanos)) | 0)
+});
+$c_Ljava_time_Duration.prototype.toString__T = (function() {
+  if ((this === $m_Ljava_time_Duration$().ZERO__Ljava_time_Duration())) {
+    return "PT0S"
+  };
+  var this$2 = this.Ljava_time_Duration__f_seconds;
+  var value = $m_Ljava_time_LocalTime$().SECONDS_PER_HOUR__I();
+  var hi = (value >> 31);
+  var this$3 = $m_RTLong$();
+  var lo = this$3.divideImpl__I__I__I__I__I(this$2.RTLong__f_lo, this$2.RTLong__f_hi, value, hi);
+  var hi$1 = this$3.RTLong$__f_org$scalajs$linker$runtime$RuntimeLong$$hiReturn;
+  var this$5 = this.Ljava_time_Duration__f_seconds;
+  var value$1 = $m_Ljava_time_LocalTime$().SECONDS_PER_HOUR__I();
+  var hi$2 = (value$1 >> 31);
+  var this$6 = $m_RTLong$();
+  var lo$1 = this$6.remainderImpl__I__I__I__I__I(this$5.RTLong__f_lo, this$5.RTLong__f_hi, value$1, hi$2);
+  var hi$3 = this$6.RTLong$__f_org$scalajs$linker$runtime$RuntimeLong$$hiReturn;
+  var value$2 = $m_Ljava_time_LocalTime$().SECONDS_PER_MINUTE__I();
+  var hi$4 = (value$2 >> 31);
+  var this$8 = $m_RTLong$();
+  var lo$2 = this$8.divideImpl__I__I__I__I__I(lo$1, hi$3, value$2, hi$4);
+  var this$10 = this.Ljava_time_Duration__f_seconds;
+  var value$3 = $m_Ljava_time_LocalTime$().SECONDS_PER_MINUTE__I();
+  var hi$6 = (value$3 >> 31);
+  var this$11 = $m_RTLong$();
+  var lo$3 = this$11.remainderImpl__I__I__I__I__I(this$10.RTLong__f_lo, this$10.RTLong__f_hi, value$3, hi$6);
+  var buf = $ct_scm_StringBuilder__I__(new $c_scm_StringBuilder(), 24);
+  buf.append__T__scm_StringBuilder("PT");
+  if ((!((lo === 0) && (hi$1 === 0)))) {
+    buf.append__J__scm_StringBuilder(new $c_RTLong(lo, hi$1)).append__C__scm_StringBuilder(72)
+  };
+  if ((lo$2 !== 0)) {
+    buf.append__I__scm_StringBuilder(lo$2).append__C__scm_StringBuilder(77)
+  };
+  if ((((lo$3 === 0) && (this.Ljava_time_Duration__f_nanos === 0)) && (buf.scm_StringBuilder__f_underlying.length__I() > 2))) {
+    return buf.scm_StringBuilder__f_underlying.jl_StringBuilder__f_java$lang$StringBuilder$$content
+  };
+  if (((lo$3 < 0) && (this.Ljava_time_Duration__f_nanos > 0))) {
+    if ((lo$3 === (-1))) {
+      buf.append__T__scm_StringBuilder("-0")
+    } else {
+      buf.append__I__scm_StringBuilder(((1 + lo$3) | 0))
+    }
+  } else {
+    buf.append__I__scm_StringBuilder(lo$3)
+  };
+  if ((this.Ljava_time_Duration__f_nanos > 0)) {
+    var pos = buf.scm_StringBuilder__f_underlying.length__I();
+    if ((lo$3 < 0)) {
+      buf.append__I__scm_StringBuilder(((2000000000 - this.Ljava_time_Duration__f_nanos) | 0))
+    } else {
+      buf.append__I__scm_StringBuilder(((1000000000 + this.Ljava_time_Duration__f_nanos) | 0))
+    };
+    while (true) {
+      var index = (((-1) + buf.scm_StringBuilder__f_underlying.length__I()) | 0);
+      if ((buf.scm_StringBuilder__f_underlying.charAt__I__C(index) === 48)) {
+        var len = (((-1) + buf.scm_StringBuilder__f_underlying.length__I()) | 0);
+        buf.scm_StringBuilder__f_underlying.setLength__I__V(len)
+      } else {
+        break
+      }
+    };
+    buf.setCharAt__I__C__scm_StringBuilder(pos, 46)
+  };
+  buf.append__C__scm_StringBuilder(83);
+  return buf.scm_StringBuilder__f_underlying.jl_StringBuilder__f_java$lang$StringBuilder$$content
+});
+function $as_Ljava_time_Duration(obj) {
+  return (((obj instanceof $c_Ljava_time_Duration) || (obj === null)) ? obj : $throwClassCastException(obj, "java.time.Duration"))
+}
+function $isArrayOf_Ljava_time_Duration(obj, depth) {
+  return (!(!(((obj && obj.$classData) && (obj.$classData.arrayDepth === depth)) && obj.$classData.arrayBase.ancestors.Ljava_time_Duration)))
+}
+function $asArrayOf_Ljava_time_Duration(obj, depth) {
+  return (($isArrayOf_Ljava_time_Duration(obj, depth) || (obj === null)) ? obj : $throwArrayCastException(obj, "Ljava.time.Duration;", depth))
+}
+var $d_Ljava_time_Duration = new $TypeData().initClass({
+  Ljava_time_Duration: 0
+}, false, "java.time.Duration", {
+  Ljava_time_Duration: 1,
+  O: 1,
+  Ljava_time_temporal_TemporalAmount: 1,
+  s_math_Ordered: 1,
+  jl_Comparable: 1,
+  Ljava_io_Serializable: 1
+});
+$c_Ljava_time_Duration.prototype.$classData = $d_Ljava_time_Duration;
+/** @constructor */
+function $c_Ljava_time_chrono_IsoChronology() {
+  /*<skip>*/
+}
+$c_Ljava_time_chrono_IsoChronology.prototype = new $h_O();
+$c_Ljava_time_chrono_IsoChronology.prototype.constructor = $c_Ljava_time_chrono_IsoChronology;
+/** @constructor */
+function $h_Ljava_time_chrono_IsoChronology() {
+  /*<skip>*/
+}
+$h_Ljava_time_chrono_IsoChronology.prototype = $c_Ljava_time_chrono_IsoChronology.prototype;
+$c_Ljava_time_chrono_IsoChronology.prototype.equals__O__Z = (function(obj) {
+  return $f_Ljava_time_chrono_Chronology__equals__O__Z(this, obj)
+});
+$c_Ljava_time_chrono_IsoChronology.prototype.hashCode__I = (function() {
+  return $f_Ljava_time_chrono_Chronology__hashCode__I(this)
+});
+$c_Ljava_time_chrono_IsoChronology.prototype.toString__T = (function() {
+  return "ISO"
+});
+$c_Ljava_time_chrono_IsoChronology.prototype.isLeapYear__J__Z = (function(prolepticYear) {
+  var lo = (3 & prolepticYear.RTLong__f_lo);
+  if ((lo === 0)) {
+    var this$1 = $m_RTLong$();
+    var lo$1 = this$1.remainderImpl__I__I__I__I__I(prolepticYear.RTLong__f_lo, prolepticYear.RTLong__f_hi, 100, 0);
+    var hi = this$1.RTLong$__f_org$scalajs$linker$runtime$RuntimeLong$$hiReturn;
+    if ((!((lo$1 === 0) && (hi === 0)))) {
+      return true
+    } else {
+      var this$2 = $m_RTLong$();
+      var lo$2 = this$2.remainderImpl__I__I__I__I__I(prolepticYear.RTLong__f_lo, prolepticYear.RTLong__f_hi, 400, 0);
+      var hi$1 = this$2.RTLong$__f_org$scalajs$linker$runtime$RuntimeLong$$hiReturn;
+      return ((lo$2 === 0) && (hi$1 === 0))
+    }
+  } else {
+    return false
+  }
+});
+var $d_Ljava_time_chrono_IsoChronology = new $TypeData().initClass({
+  Ljava_time_chrono_IsoChronology: 0
+}, false, "java.time.chrono.IsoChronology", {
+  Ljava_time_chrono_IsoChronology: 1,
+  O: 1,
+  Ljava_time_chrono_Chronology: 1,
+  s_math_Ordered: 1,
+  jl_Comparable: 1,
+  Ljava_io_Serializable: 1
+});
+$c_Ljava_time_chrono_IsoChronology.prototype.$classData = $d_Ljava_time_chrono_IsoChronology;
+/** @constructor */
+function $c_Ljava_time_temporal_ChronoField(name, ordinal, baseUnit, rangeUnit, _range) {
+  this.jl_Enum__f__name = null;
+  this.jl_Enum__f__ordinal = 0;
+  this.Ljava_time_temporal_ChronoField__f_name = null;
+  this.Ljava_time_temporal_ChronoField__f_ordinal = 0;
+  this.Ljava_time_temporal_ChronoField__f_baseUnit = null;
+  this.Ljava_time_temporal_ChronoField__f_rangeUnit = null;
+  this.Ljava_time_temporal_ChronoField__f__range = null;
+  this.Ljava_time_temporal_ChronoField__f_name = name;
+  this.Ljava_time_temporal_ChronoField__f_ordinal = ordinal;
+  this.Ljava_time_temporal_ChronoField__f_baseUnit = baseUnit;
+  this.Ljava_time_temporal_ChronoField__f_rangeUnit = rangeUnit;
+  this.Ljava_time_temporal_ChronoField__f__range = _range;
+  $ct_jl_Enum__T__I__(this, name, ordinal)
+}
+$c_Ljava_time_temporal_ChronoField.prototype = new $h_jl_Enum();
+$c_Ljava_time_temporal_ChronoField.prototype.constructor = $c_Ljava_time_temporal_ChronoField;
+/** @constructor */
+function $h_Ljava_time_temporal_ChronoField() {
+  /*<skip>*/
+}
+$h_Ljava_time_temporal_ChronoField.prototype = $c_Ljava_time_temporal_ChronoField.prototype;
+$c_Ljava_time_temporal_ChronoField.prototype.toString__T = (function() {
+  return this.Ljava_time_temporal_ChronoField__f_name
+});
+var $d_Ljava_time_temporal_ChronoField = new $TypeData().initClass({
+  Ljava_time_temporal_ChronoField: 0
+}, false, "java.time.temporal.ChronoField", {
+  Ljava_time_temporal_ChronoField: 1,
+  jl_Enum: 1,
+  O: 1,
+  jl_Comparable: 1,
+  Ljava_io_Serializable: 1,
+  Ljava_time_temporal_TemporalField: 1
+});
+$c_Ljava_time_temporal_ChronoField.prototype.$classData = $d_Ljava_time_temporal_ChronoField;
+/** @constructor */
+function $c_Ljava_time_temporal_ChronoUnit(name, ordinal, duration) {
+  this.jl_Enum__f__name = null;
+  this.jl_Enum__f__ordinal = 0;
+  this.Ljava_time_temporal_ChronoUnit__f_name = null;
+  this.Ljava_time_temporal_ChronoUnit__f_duration = null;
+  this.Ljava_time_temporal_ChronoUnit__f_name = name;
+  this.Ljava_time_temporal_ChronoUnit__f_duration = duration;
+  $ct_jl_Enum__T__I__(this, name, ordinal)
+}
+$c_Ljava_time_temporal_ChronoUnit.prototype = new $h_jl_Enum();
+$c_Ljava_time_temporal_ChronoUnit.prototype.constructor = $c_Ljava_time_temporal_ChronoUnit;
+/** @constructor */
+function $h_Ljava_time_temporal_ChronoUnit() {
+  /*<skip>*/
+}
+$h_Ljava_time_temporal_ChronoUnit.prototype = $c_Ljava_time_temporal_ChronoUnit.prototype;
+$c_Ljava_time_temporal_ChronoUnit.prototype.toString__T = (function() {
+  return this.Ljava_time_temporal_ChronoUnit__f_name
+});
+var $d_Ljava_time_temporal_ChronoUnit = new $TypeData().initClass({
+  Ljava_time_temporal_ChronoUnit: 0
+}, false, "java.time.temporal.ChronoUnit", {
+  Ljava_time_temporal_ChronoUnit: 1,
+  jl_Enum: 1,
+  O: 1,
+  jl_Comparable: 1,
+  Ljava_io_Serializable: 1,
+  Ljava_time_temporal_TemporalUnit: 1
+});
+$c_Ljava_time_temporal_ChronoUnit.prototype.$classData = $d_Ljava_time_temporal_ChronoUnit;
 function $ct_ju_NoSuchElementException__T__($thiz, s) {
   $ct_jl_Throwable__T__jl_Throwable__Z__Z__($thiz, s, null, true, true);
   return $thiz
@@ -10650,6 +12441,11 @@ function $ct_jl_StringIndexOutOfBoundsException__T__($thiz, s) {
   $ct_jl_Throwable__T__jl_Throwable__Z__Z__($thiz, s, null, true, true);
   return $thiz
 }
+function $ct_jl_StringIndexOutOfBoundsException__I__($thiz, index) {
+  var s = ("String index out of range: " + index);
+  $ct_jl_Throwable__T__jl_Throwable__Z__Z__($thiz, s, null, true, true);
+  return $thiz
+}
 function $ct_jl_StringIndexOutOfBoundsException__($thiz) {
   $ct_jl_Throwable__T__jl_Throwable__Z__Z__($thiz, null, null, true, true);
   return $thiz
@@ -10668,6 +12464,65 @@ var $d_jl_StringIndexOutOfBoundsException = new $TypeData().initClass({
   Ljava_io_Serializable: 1
 });
 $c_jl_StringIndexOutOfBoundsException.prototype.$classData = $d_jl_StringIndexOutOfBoundsException;
+/** @constructor */
+function $c_Ljava_time_Month(name, ordinal) {
+  this.jl_Enum__f__name = null;
+  this.jl_Enum__f__ordinal = 0;
+  this.Ljava_time_Month__f_ordinal = 0;
+  this.Ljava_time_Month__f_ordinal = ordinal;
+  $ct_jl_Enum__T__I__(this, name, ordinal)
+}
+$c_Ljava_time_Month.prototype = new $h_jl_Enum();
+$c_Ljava_time_Month.prototype.constructor = $c_Ljava_time_Month;
+/** @constructor */
+function $h_Ljava_time_Month() {
+  /*<skip>*/
+}
+$h_Ljava_time_Month.prototype = $c_Ljava_time_Month.prototype;
+$c_Ljava_time_Month.prototype.getValue__I = (function() {
+  return ((1 + this.Ljava_time_Month__f_ordinal) | 0)
+});
+$c_Ljava_time_Month.prototype.length__Z__I = (function(leapYear) {
+  var x = $m_Ljava_time_Month$().FEBRUARY__Ljava_time_Month();
+  if (((x !== null) && (x === this))) {
+    return (leapYear ? 29 : 28)
+  } else {
+    var x$3 = $m_Ljava_time_Month$().APRIL__Ljava_time_Month();
+    if (((x$3 !== null) && (x$3 === this))) {
+      var $$x1 = true
+    } else {
+      var x$5 = $m_Ljava_time_Month$().JUNE__Ljava_time_Month();
+      if (((x$5 !== null) && (x$5 === this))) {
+        var $$x1 = true
+      } else {
+        var x$7 = $m_Ljava_time_Month$().SEPTEMBER__Ljava_time_Month();
+        if (((x$7 !== null) && (x$7 === this))) {
+          var $$x1 = true
+        } else {
+          var x$9 = $m_Ljava_time_Month$().NOVEMBER__Ljava_time_Month();
+          var $$x1 = ((x$9 !== null) && (x$9 === this))
+        }
+      }
+    };
+    if ($$x1) {
+      return 30
+    } else {
+      return 31
+    }
+  }
+});
+var $d_Ljava_time_Month = new $TypeData().initClass({
+  Ljava_time_Month: 0
+}, false, "java.time.Month", {
+  Ljava_time_Month: 1,
+  jl_Enum: 1,
+  O: 1,
+  jl_Comparable: 1,
+  Ljava_io_Serializable: 1,
+  Ljava_time_temporal_TemporalAccessor: 1,
+  Ljava_time_temporal_TemporalAdjuster: 1
+});
+$c_Ljava_time_Month.prototype.$classData = $d_Ljava_time_Month;
 /** @constructor */
 function $c_s_None$() {
   /*<skip>*/
@@ -11206,6 +13061,282 @@ var $d_s_reflect_ClassTag$GenericClassTag = new $TypeData().initClass({
   s_Equals: 1
 });
 $c_s_reflect_ClassTag$GenericClassTag.prototype.$classData = $d_s_reflect_ClassTag$GenericClassTag;
+function $ct_Ljava_io_PrintStream__Ljava_io_OutputStream__Z__Ljava_nio_charset_Charset__($thiz, _out, autoFlush, charset) {
+  $thiz.Ljava_io_PrintStream__f_autoFlush = autoFlush;
+  $thiz.Ljava_io_PrintStream__f_charset = charset;
+  $ct_Ljava_io_FilterOutputStream__Ljava_io_OutputStream__($thiz, _out);
+  $thiz.Ljava_io_PrintStream__f_closing = false;
+  $thiz.Ljava_io_PrintStream__f_java$io$PrintStream$$closed = false;
+  $thiz.Ljava_io_PrintStream__f_errorFlag = false;
+  return $thiz
+}
+/** @constructor */
+function $c_Ljava_io_PrintStream() {
+  this.Ljava_io_FilterOutputStream__f_out = null;
+  this.Ljava_io_PrintStream__f_encoder = null;
+  this.Ljava_io_PrintStream__f_autoFlush = false;
+  this.Ljava_io_PrintStream__f_charset = null;
+  this.Ljava_io_PrintStream__f_closing = false;
+  this.Ljava_io_PrintStream__f_java$io$PrintStream$$closed = false;
+  this.Ljava_io_PrintStream__f_errorFlag = false;
+  this.Ljava_io_PrintStream__f_bitmap$0 = false
+}
+$c_Ljava_io_PrintStream.prototype = new $h_Ljava_io_FilterOutputStream();
+$c_Ljava_io_PrintStream.prototype.constructor = $c_Ljava_io_PrintStream;
+/** @constructor */
+function $h_Ljava_io_PrintStream() {
+  /*<skip>*/
+}
+$h_Ljava_io_PrintStream.prototype = $c_Ljava_io_PrintStream.prototype;
+function $as_Ljava_io_PrintStream(obj) {
+  return (((obj instanceof $c_Ljava_io_PrintStream) || (obj === null)) ? obj : $throwClassCastException(obj, "java.io.PrintStream"))
+}
+function $isArrayOf_Ljava_io_PrintStream(obj, depth) {
+  return (!(!(((obj && obj.$classData) && (obj.$classData.arrayDepth === depth)) && obj.$classData.arrayBase.ancestors.Ljava_io_PrintStream)))
+}
+function $asArrayOf_Ljava_io_PrintStream(obj, depth) {
+  return (($isArrayOf_Ljava_io_PrintStream(obj, depth) || (obj === null)) ? obj : $throwArrayCastException(obj, "Ljava.io.PrintStream;", depth))
+}
+function $p_Ljava_time_LocalTime__hour__B($thiz) {
+  if (((((1 & $thiz.Ljava_time_LocalTime__f_bitmap$init$0) << 24) >> 24) === 0)) {
+    throw new $c_s_UninitializedFieldError("Uninitialized field: /home/runner/work/scala-java-time/scala-java-time/core/js/target/scala-2.13/src_managed/main/org/threeten/bp/LocalTime.scala: 410")
+  };
+  return $thiz.Ljava_time_LocalTime__f_hour
+}
+function $p_Ljava_time_LocalTime__minute__B($thiz) {
+  if (((((2 & $thiz.Ljava_time_LocalTime__f_bitmap$init$0) << 24) >> 24) === 0)) {
+    throw new $c_s_UninitializedFieldError("Uninitialized field: /home/runner/work/scala-java-time/scala-java-time/core/js/target/scala-2.13/src_managed/main/org/threeten/bp/LocalTime.scala: 413")
+  };
+  return $thiz.Ljava_time_LocalTime__f_minute
+}
+function $p_Ljava_time_LocalTime__second__B($thiz) {
+  if (((((4 & $thiz.Ljava_time_LocalTime__f_bitmap$init$0) << 24) >> 24) === 0)) {
+    throw new $c_s_UninitializedFieldError("Uninitialized field: /home/runner/work/scala-java-time/scala-java-time/core/js/target/scala-2.13/src_managed/main/org/threeten/bp/LocalTime.scala: 416")
+  };
+  return $thiz.Ljava_time_LocalTime__f_second
+}
+/** @constructor */
+function $c_Ljava_time_LocalTime(_hour, _minute, _second, nano) {
+  this.Ljava_time_LocalTime__f_nano = 0;
+  this.Ljava_time_LocalTime__f_hour = 0;
+  this.Ljava_time_LocalTime__f_minute = 0;
+  this.Ljava_time_LocalTime__f_second = 0;
+  this.Ljava_time_LocalTime__f_bitmap$init$0 = 0;
+  this.Ljava_time_LocalTime__f_nano = nano;
+  this.Ljava_time_LocalTime__f_hour = ((_hour << 24) >> 24);
+  this.Ljava_time_LocalTime__f_bitmap$init$0 = (((1 | this.Ljava_time_LocalTime__f_bitmap$init$0) << 24) >> 24);
+  this.Ljava_time_LocalTime__f_minute = ((_minute << 24) >> 24);
+  this.Ljava_time_LocalTime__f_bitmap$init$0 = (((2 | this.Ljava_time_LocalTime__f_bitmap$init$0) << 24) >> 24);
+  this.Ljava_time_LocalTime__f_second = ((_second << 24) >> 24);
+  this.Ljava_time_LocalTime__f_bitmap$init$0 = (((4 | this.Ljava_time_LocalTime__f_bitmap$init$0) << 24) >> 24)
+}
+$c_Ljava_time_LocalTime.prototype = new $h_O();
+$c_Ljava_time_LocalTime.prototype.constructor = $c_Ljava_time_LocalTime;
+/** @constructor */
+function $h_Ljava_time_LocalTime() {
+  /*<skip>*/
+}
+$h_Ljava_time_LocalTime.prototype = $c_Ljava_time_LocalTime.prototype;
+$c_Ljava_time_LocalTime.prototype.toNanoOfDay__J = (function() {
+  var value = $p_Ljava_time_LocalTime__hour__B(this);
+  var hi = (value >> 31);
+  var b = $m_Ljava_time_LocalTime$().NANOS_PER_HOUR__J();
+  var blo = b.RTLong__f_lo;
+  var a0 = (65535 & value);
+  var a1 = ((value >>> 16) | 0);
+  var b0 = (65535 & blo);
+  var b1 = ((blo >>> 16) | 0);
+  var a0b0 = $imul(a0, b0);
+  var a1b0 = $imul(a1, b0);
+  var a0b1 = $imul(a0, b1);
+  var lo = ((a0b0 + (((a1b0 + a0b1) | 0) << 16)) | 0);
+  var c1part = ((((a0b0 >>> 16) | 0) + a0b1) | 0);
+  var hi$1 = (((((((($imul(value, b.RTLong__f_hi) + $imul(hi, blo)) | 0) + $imul(a1, b1)) | 0) + ((c1part >>> 16) | 0)) | 0) + (((((65535 & c1part) + a1b0) | 0) >>> 16) | 0)) | 0);
+  var total__lo = lo;
+  var total__hi = hi$1;
+  var this$3__lo = total__lo;
+  var this$3__hi = total__hi;
+  var value$1 = $p_Ljava_time_LocalTime__minute__B(this);
+  var hi$2 = (value$1 >> 31);
+  var b$1 = $m_Ljava_time_LocalTime$().NANOS_PER_MINUTE__J();
+  var blo$1 = b$1.RTLong__f_lo;
+  var a0$1 = (65535 & value$1);
+  var a1$1 = ((value$1 >>> 16) | 0);
+  var b0$1 = (65535 & blo$1);
+  var b1$1 = ((blo$1 >>> 16) | 0);
+  var a0b0$1 = $imul(a0$1, b0$1);
+  var a1b0$1 = $imul(a1$1, b0$1);
+  var a0b1$1 = $imul(a0$1, b1$1);
+  var lo$1 = ((a0b0$1 + (((a1b0$1 + a0b1$1) | 0) << 16)) | 0);
+  var c1part$1 = ((((a0b0$1 >>> 16) | 0) + a0b1$1) | 0);
+  var hi$3 = (((((((($imul(value$1, b$1.RTLong__f_hi) + $imul(hi$2, blo$1)) | 0) + $imul(a1$1, b1$1)) | 0) + ((c1part$1 >>> 16) | 0)) | 0) + (((((65535 & c1part$1) + a1b0$1) | 0) >>> 16) | 0)) | 0);
+  var alo = this$3__lo;
+  var ahi = this$3__hi;
+  var lo$2 = ((alo + lo$1) | 0);
+  var hi$4 = ((((-2147483648) ^ lo$2) < ((-2147483648) ^ alo)) ? ((1 + ((ahi + hi$3) | 0)) | 0) : ((ahi + hi$3) | 0));
+  var $$x1__lo = lo$2;
+  var $$x1__hi = hi$4;
+  total__lo = $$x1__lo;
+  total__hi = $$x1__hi;
+  var this$6__lo = total__lo;
+  var this$6__hi = total__hi;
+  var value$2 = $p_Ljava_time_LocalTime__second__B(this);
+  var hi$5 = (value$2 >> 31);
+  var b$2 = $m_Ljava_time_LocalTime$().NANOS_PER_SECOND__J();
+  var blo$2 = b$2.RTLong__f_lo;
+  var a0$2 = (65535 & value$2);
+  var a1$2 = ((value$2 >>> 16) | 0);
+  var b0$2 = (65535 & blo$2);
+  var b1$2 = ((blo$2 >>> 16) | 0);
+  var a0b0$2 = $imul(a0$2, b0$2);
+  var a1b0$2 = $imul(a1$2, b0$2);
+  var a0b1$2 = $imul(a0$2, b1$2);
+  var lo$3 = ((a0b0$2 + (((a1b0$2 + a0b1$2) | 0) << 16)) | 0);
+  var c1part$2 = ((((a0b0$2 >>> 16) | 0) + a0b1$2) | 0);
+  var hi$6 = (((((((($imul(value$2, b$2.RTLong__f_hi) + $imul(hi$5, blo$2)) | 0) + $imul(a1$2, b1$2)) | 0) + ((c1part$2 >>> 16) | 0)) | 0) + (((((65535 & c1part$2) + a1b0$2) | 0) >>> 16) | 0)) | 0);
+  var alo$1 = this$6__lo;
+  var ahi$1 = this$6__hi;
+  var lo$4 = ((alo$1 + lo$3) | 0);
+  var hi$7 = ((((-2147483648) ^ lo$4) < ((-2147483648) ^ alo$1)) ? ((1 + ((ahi$1 + hi$6) | 0)) | 0) : ((ahi$1 + hi$6) | 0));
+  var $$x2__lo = lo$4;
+  var $$x2__hi = hi$7;
+  total__lo = $$x2__lo;
+  total__hi = $$x2__hi;
+  var this$9__lo = total__lo;
+  var this$9__hi = total__hi;
+  var value$3 = this.Ljava_time_LocalTime__f_nano;
+  var hi$8 = (value$3 >> 31);
+  var alo$2 = this$9__lo;
+  var ahi$2 = this$9__hi;
+  var lo$5 = ((alo$2 + value$3) | 0);
+  var hi$9 = ((((-2147483648) ^ lo$5) < ((-2147483648) ^ alo$2)) ? ((1 + ((ahi$2 + hi$8) | 0)) | 0) : ((ahi$2 + hi$8) | 0));
+  var $$x3__lo = lo$5;
+  var $$x3__hi = hi$9;
+  total__lo = $$x3__lo;
+  total__hi = $$x3__hi;
+  return new $c_RTLong(total__lo, total__hi)
+});
+$c_Ljava_time_LocalTime.prototype.equals__O__Z = (function(obj) {
+  if ((obj instanceof $c_Ljava_time_LocalTime)) {
+    var x2 = $as_Ljava_time_LocalTime(obj);
+    return ((this === x2) || (((($p_Ljava_time_LocalTime__hour__B(this) === $p_Ljava_time_LocalTime__hour__B(x2)) && ($p_Ljava_time_LocalTime__minute__B(this) === $p_Ljava_time_LocalTime__minute__B(x2))) && ($p_Ljava_time_LocalTime__second__B(this) === $p_Ljava_time_LocalTime__second__B(x2))) && (this.Ljava_time_LocalTime__f_nano === x2.Ljava_time_LocalTime__f_nano)))
+  } else {
+    return false
+  }
+});
+$c_Ljava_time_LocalTime.prototype.hashCode__I = (function() {
+  var t = this.toNanoOfDay__J();
+  var lo = t.RTLong__f_lo;
+  var hi = t.RTLong__f_hi;
+  var lo$1 = (lo ^ hi);
+  return lo$1
+});
+$c_Ljava_time_LocalTime.prototype.toString__T = (function() {
+  var buf = $ct_scm_StringBuilder__I__(new $c_scm_StringBuilder(), 18);
+  var hourValue = $p_Ljava_time_LocalTime__hour__B(this);
+  var minuteValue = $p_Ljava_time_LocalTime__minute__B(this);
+  var secondValue = $p_Ljava_time_LocalTime__second__B(this);
+  var nanoValue = this.Ljava_time_LocalTime__f_nano;
+  buf.append__T__scm_StringBuilder(((hourValue < 10) ? "0" : "")).append__I__scm_StringBuilder(hourValue).append__T__scm_StringBuilder(((minuteValue < 10) ? ":0" : ":")).append__I__scm_StringBuilder(minuteValue);
+  if (((secondValue > 0) || (nanoValue > 0))) {
+    buf.append__T__scm_StringBuilder(((secondValue < 10) ? ":0" : ":")).append__I__scm_StringBuilder(secondValue);
+    if ((nanoValue > 0)) {
+      buf.append__C__scm_StringBuilder(46);
+      if ((((nanoValue % 1000000) | 0) === 0)) {
+        var i = ((1000 + ((nanoValue / 1000000) | 0)) | 0);
+        var this$2 = ("" + i);
+        buf.append__T__scm_StringBuilder($as_T(this$2.substring(1)))
+      } else if ((((nanoValue % 1000) | 0) === 0)) {
+        var i$1 = ((1000000 + ((nanoValue / 1000) | 0)) | 0);
+        var this$5 = ("" + i$1);
+        buf.append__T__scm_StringBuilder($as_T(this$5.substring(1)))
+      } else {
+        var i$2 = ((1000000000 + nanoValue) | 0);
+        var this$8 = ("" + i$2);
+        buf.append__T__scm_StringBuilder($as_T(this$8.substring(1)))
+      }
+    }
+  };
+  return buf.scm_StringBuilder__f_underlying.jl_StringBuilder__f_java$lang$StringBuilder$$content
+});
+function $as_Ljava_time_LocalTime(obj) {
+  return (((obj instanceof $c_Ljava_time_LocalTime) || (obj === null)) ? obj : $throwClassCastException(obj, "java.time.LocalTime"))
+}
+function $isArrayOf_Ljava_time_LocalTime(obj, depth) {
+  return (!(!(((obj && obj.$classData) && (obj.$classData.arrayDepth === depth)) && obj.$classData.arrayBase.ancestors.Ljava_time_LocalTime)))
+}
+function $asArrayOf_Ljava_time_LocalTime(obj, depth) {
+  return (($isArrayOf_Ljava_time_LocalTime(obj, depth) || (obj === null)) ? obj : $throwArrayCastException(obj, "Ljava.time.LocalTime;", depth))
+}
+var $d_Ljava_time_LocalTime = new $TypeData().initClass({
+  Ljava_time_LocalTime: 0
+}, false, "java.time.LocalTime", {
+  Ljava_time_LocalTime: 1,
+  O: 1,
+  Ljava_time_temporal_TemporalAccessor: 1,
+  Ljava_time_temporal_Temporal: 1,
+  Ljava_time_temporal_TemporalAdjuster: 1,
+  s_math_Ordered: 1,
+  jl_Comparable: 1,
+  Ljava_io_Serializable: 1
+});
+$c_Ljava_time_LocalTime.prototype.$classData = $d_Ljava_time_LocalTime;
+class $c_s_UninitializedFieldError extends $c_jl_RuntimeException {
+  constructor(msg) {
+    super();
+    this.s_UninitializedFieldError__f_msg = null;
+    this.s_UninitializedFieldError__f_msg = msg;
+    $ct_jl_Throwable__T__jl_Throwable__Z__Z__(this, msg, null, true, true)
+  };
+  productPrefix__T() {
+    return "UninitializedFieldError"
+  };
+  productArity__I() {
+    return 1
+  };
+  productElement__I__O(x$1) {
+    return ((x$1 === 0) ? this.s_UninitializedFieldError__f_msg : $m_sr_Statics$().ioobe__I__O(x$1))
+  };
+  productIterator__sc_Iterator() {
+    return new $c_sr_ScalaRunTime$$anon$1(this)
+  };
+  hashCode__I() {
+    var this$2 = $m_s_util_hashing_MurmurHash3$();
+    return this$2.productHash__s_Product__I__Z__I(this, (-889275714), false)
+  };
+  equals__O__Z(x$1) {
+    if ((this === x$1)) {
+      return true
+    } else if ((x$1 instanceof $c_s_UninitializedFieldError)) {
+      var UninitializedFieldError$1 = $as_s_UninitializedFieldError(x$1);
+      return (this.s_UninitializedFieldError__f_msg === UninitializedFieldError$1.s_UninitializedFieldError__f_msg)
+    } else {
+      return false
+    }
+  };
+}
+function $as_s_UninitializedFieldError(obj) {
+  return (((obj instanceof $c_s_UninitializedFieldError) || (obj === null)) ? obj : $throwClassCastException(obj, "scala.UninitializedFieldError"))
+}
+function $isArrayOf_s_UninitializedFieldError(obj, depth) {
+  return (!(!(((obj && obj.$classData) && (obj.$classData.arrayDepth === depth)) && obj.$classData.arrayBase.ancestors.s_UninitializedFieldError)))
+}
+function $asArrayOf_s_UninitializedFieldError(obj, depth) {
+  return (($isArrayOf_s_UninitializedFieldError(obj, depth) || (obj === null)) ? obj : $throwArrayCastException(obj, "Lscala.UninitializedFieldError;", depth))
+}
+var $d_s_UninitializedFieldError = new $TypeData().initClass({
+  s_UninitializedFieldError: 0
+}, false, "scala.UninitializedFieldError", {
+  s_UninitializedFieldError: 1,
+  jl_RuntimeException: 1,
+  jl_Exception: 1,
+  jl_Throwable: 1,
+  O: 1,
+  Ljava_io_Serializable: 1,
+  s_Product: 1,
+  s_Equals: 1
+});
+$c_s_UninitializedFieldError.prototype.$classData = $d_s_UninitializedFieldError;
 function $f_sc_View__toString__T($thiz) {
   return ($thiz.className__T() + "(<not computed>)")
 }
@@ -11428,6 +13559,181 @@ var $d_sjs_js_JavaScriptException = new $TypeData().initClass({
   s_Equals: 1
 });
 $c_sjs_js_JavaScriptException.prototype.$classData = $d_sjs_js_JavaScriptException;
+function $p_jl_JSConsoleBasedPrintStream__doWriteLine__T__V($thiz, line) {
+  if (($as_T((typeof console)) !== "undefined")) {
+    if ($thiz.jl_JSConsoleBasedPrintStream__f_isErr) {
+      var x = console.error;
+      var $$x1 = $uZ((!(!x)))
+    } else {
+      var $$x1 = false
+    };
+    if ($$x1) {
+      console.error(line)
+    } else {
+      console.log(line)
+    }
+  }
+}
+/** @constructor */
+function $c_jl_JSConsoleBasedPrintStream(isErr) {
+  this.Ljava_io_FilterOutputStream__f_out = null;
+  this.Ljava_io_PrintStream__f_encoder = null;
+  this.Ljava_io_PrintStream__f_autoFlush = false;
+  this.Ljava_io_PrintStream__f_charset = null;
+  this.Ljava_io_PrintStream__f_closing = false;
+  this.Ljava_io_PrintStream__f_java$io$PrintStream$$closed = false;
+  this.Ljava_io_PrintStream__f_errorFlag = false;
+  this.Ljava_io_PrintStream__f_bitmap$0 = false;
+  this.jl_JSConsoleBasedPrintStream__f_isErr = false;
+  this.jl_JSConsoleBasedPrintStream__f_flushed = false;
+  this.jl_JSConsoleBasedPrintStream__f_buffer = null;
+  this.jl_JSConsoleBasedPrintStream__f_isErr = isErr;
+  var out = new $c_jl_JSConsoleBasedPrintStream$DummyOutputStream();
+  $ct_Ljava_io_PrintStream__Ljava_io_OutputStream__Z__Ljava_nio_charset_Charset__(this, out, false, null);
+  this.jl_JSConsoleBasedPrintStream__f_flushed = true;
+  this.jl_JSConsoleBasedPrintStream__f_buffer = ""
+}
+$c_jl_JSConsoleBasedPrintStream.prototype = new $h_Ljava_io_PrintStream();
+$c_jl_JSConsoleBasedPrintStream.prototype.constructor = $c_jl_JSConsoleBasedPrintStream;
+/** @constructor */
+function $h_jl_JSConsoleBasedPrintStream() {
+  /*<skip>*/
+}
+$h_jl_JSConsoleBasedPrintStream.prototype = $c_jl_JSConsoleBasedPrintStream.prototype;
+$c_jl_JSConsoleBasedPrintStream.prototype.java$lang$JSConsoleBasedPrintStream$$printString__T__V = (function(s) {
+  var rest = s;
+  while ((rest !== "")) {
+    var this$1 = rest;
+    var nlPos = $uI(this$1.indexOf("\n"));
+    if ((nlPos < 0)) {
+      this.jl_JSConsoleBasedPrintStream__f_buffer = (("" + this.jl_JSConsoleBasedPrintStream__f_buffer) + rest);
+      this.jl_JSConsoleBasedPrintStream__f_flushed = false;
+      rest = ""
+    } else {
+      var $$x1 = this.jl_JSConsoleBasedPrintStream__f_buffer;
+      var this$3 = rest;
+      $p_jl_JSConsoleBasedPrintStream__doWriteLine__T__V(this, (("" + $$x1) + $as_T(this$3.substring(0, nlPos))));
+      this.jl_JSConsoleBasedPrintStream__f_buffer = "";
+      this.jl_JSConsoleBasedPrintStream__f_flushed = true;
+      var this$4 = rest;
+      var beginIndex = ((1 + nlPos) | 0);
+      rest = $as_T(this$4.substring(beginIndex))
+    }
+  }
+});
+var $d_jl_JSConsoleBasedPrintStream = new $TypeData().initClass({
+  jl_JSConsoleBasedPrintStream: 0
+}, false, "java.lang.JSConsoleBasedPrintStream", {
+  jl_JSConsoleBasedPrintStream: 1,
+  Ljava_io_PrintStream: 1,
+  Ljava_io_FilterOutputStream: 1,
+  Ljava_io_OutputStream: 1,
+  O: 1,
+  Ljava_io_Closeable: 1,
+  jl_AutoCloseable: 1,
+  Ljava_io_Flushable: 1,
+  jl_Appendable: 1
+});
+$c_jl_JSConsoleBasedPrintStream.prototype.$classData = $d_jl_JSConsoleBasedPrintStream;
+function $p_Ljava_time_LocalDate__month__S($thiz) {
+  if (((((1 & $thiz.Ljava_time_LocalDate__f_bitmap$init$0) << 24) >> 24) === 0)) {
+    throw new $c_s_UninitializedFieldError("Uninitialized field: /home/runner/work/scala-java-time/scala-java-time/core/js/target/scala-2.13/src_managed/main/org/threeten/bp/LocalDate.scala: 372")
+  };
+  return $thiz.Ljava_time_LocalDate__f_month
+}
+function $p_Ljava_time_LocalDate__day__S($thiz) {
+  if (((((2 & $thiz.Ljava_time_LocalDate__f_bitmap$init$0) << 24) >> 24) === 0)) {
+    throw new $c_s_UninitializedFieldError("Uninitialized field: /home/runner/work/scala-java-time/scala-java-time/core/js/target/scala-2.13/src_managed/main/org/threeten/bp/LocalDate.scala: 375")
+  };
+  return $thiz.Ljava_time_LocalDate__f_day
+}
+/** @constructor */
+function $c_Ljava_time_LocalDate(year, monthOfYear, dayOfMonth) {
+  this.Ljava_time_LocalDate__f_year = 0;
+  this.Ljava_time_LocalDate__f_month = 0;
+  this.Ljava_time_LocalDate__f_day = 0;
+  this.Ljava_time_LocalDate__f_bitmap$init$0 = 0;
+  this.Ljava_time_LocalDate__f_year = year;
+  this.Ljava_time_LocalDate__f_month = ((monthOfYear << 16) >> 16);
+  this.Ljava_time_LocalDate__f_bitmap$init$0 = (((1 | this.Ljava_time_LocalDate__f_bitmap$init$0) << 24) >> 24);
+  this.Ljava_time_LocalDate__f_day = ((dayOfMonth << 16) >> 16);
+  this.Ljava_time_LocalDate__f_bitmap$init$0 = (((2 | this.Ljava_time_LocalDate__f_bitmap$init$0) << 24) >> 24)
+}
+$c_Ljava_time_LocalDate.prototype = new $h_O();
+$c_Ljava_time_LocalDate.prototype.constructor = $c_Ljava_time_LocalDate;
+/** @constructor */
+function $h_Ljava_time_LocalDate() {
+  /*<skip>*/
+}
+$h_Ljava_time_LocalDate.prototype = $c_Ljava_time_LocalDate.prototype;
+$c_Ljava_time_LocalDate.prototype.compareTo0__Ljava_time_LocalDate__I = (function(otherDate) {
+  var cmp = ((this.Ljava_time_LocalDate__f_year - otherDate.Ljava_time_LocalDate__f_year) | 0);
+  if ((cmp === 0)) {
+    cmp = (($p_Ljava_time_LocalDate__month__S(this) - $p_Ljava_time_LocalDate__month__S(otherDate)) | 0);
+    if ((cmp === 0)) {
+      cmp = (($p_Ljava_time_LocalDate__day__S(this) - $p_Ljava_time_LocalDate__day__S(otherDate)) | 0)
+    }
+  };
+  return cmp
+});
+$c_Ljava_time_LocalDate.prototype.equals__O__Z = (function(obj) {
+  if ((obj instanceof $c_Ljava_time_LocalDate)) {
+    var x2 = $as_Ljava_time_LocalDate(obj);
+    return ((this === x2) || (this.compareTo0__Ljava_time_LocalDate__I(x2) === 0))
+  } else {
+    return false
+  }
+});
+$c_Ljava_time_LocalDate.prototype.hashCode__I = (function() {
+  var yearValue = this.Ljava_time_LocalDate__f_year;
+  var monthValue = $p_Ljava_time_LocalDate__month__S(this);
+  var dayValue = $p_Ljava_time_LocalDate__day__S(this);
+  return (((-2048) & yearValue) ^ (((((yearValue << 11) + (monthValue << 6)) | 0) + dayValue) | 0))
+});
+$c_Ljava_time_LocalDate.prototype.toString__T = (function() {
+  var yearValue = this.Ljava_time_LocalDate__f_year;
+  var monthValue = $p_Ljava_time_LocalDate__month__S(this);
+  var dayValue = $p_Ljava_time_LocalDate__day__S(this);
+  var absYear = ((yearValue < 0) ? ((-yearValue) | 0) : yearValue);
+  var buf = $ct_scm_StringBuilder__I__(new $c_scm_StringBuilder(), 10);
+  if ((absYear < 1000)) {
+    if ((yearValue < 0)) {
+      buf.append__I__scm_StringBuilder((((-10000) + yearValue) | 0)).deleteCharAt__I__scm_StringBuilder(1)
+    } else {
+      buf.append__I__scm_StringBuilder(((10000 + yearValue) | 0)).deleteCharAt__I__scm_StringBuilder(0)
+    }
+  } else {
+    if ((yearValue > 9999)) {
+      buf.append__C__scm_StringBuilder(43)
+    };
+    buf.append__I__scm_StringBuilder(yearValue)
+  };
+  var this$2 = buf.append__T__scm_StringBuilder(((monthValue < 10) ? "-0" : "-")).append__I__scm_StringBuilder(monthValue).append__T__scm_StringBuilder(((dayValue < 10) ? "-0" : "-")).append__I__scm_StringBuilder(dayValue);
+  return this$2.scm_StringBuilder__f_underlying.jl_StringBuilder__f_java$lang$StringBuilder$$content
+});
+function $as_Ljava_time_LocalDate(obj) {
+  return (((obj instanceof $c_Ljava_time_LocalDate) || (obj === null)) ? obj : $throwClassCastException(obj, "java.time.LocalDate"))
+}
+function $isArrayOf_Ljava_time_LocalDate(obj, depth) {
+  return (!(!(((obj && obj.$classData) && (obj.$classData.arrayDepth === depth)) && obj.$classData.arrayBase.ancestors.Ljava_time_LocalDate)))
+}
+function $asArrayOf_Ljava_time_LocalDate(obj, depth) {
+  return (($isArrayOf_Ljava_time_LocalDate(obj, depth) || (obj === null)) ? obj : $throwArrayCastException(obj, "Ljava.time.LocalDate;", depth))
+}
+var $d_Ljava_time_LocalDate = new $TypeData().initClass({
+  Ljava_time_LocalDate: 0
+}, false, "java.time.LocalDate", {
+  Ljava_time_LocalDate: 1,
+  O: 1,
+  Ljava_time_chrono_ChronoLocalDate: 1,
+  Ljava_time_temporal_Temporal: 1,
+  Ljava_time_temporal_TemporalAccessor: 1,
+  Ljava_time_temporal_TemporalAdjuster: 1,
+  s_math_Ordered: 1,
+  jl_Comparable: 1,
+  Ljava_io_Serializable: 1
+});
+$c_Ljava_time_LocalDate.prototype.$classData = $d_Ljava_time_LocalDate;
 function $p_sc_StrictOptimizedLinearSeqOps__loop$2__I__sc_LinearSeq__sc_LinearSeq($thiz, n, s) {
   while (true) {
     if (((n <= 0) || s.isEmpty__Z())) {
@@ -18486,6 +20792,10 @@ function $ct_scm_StringBuilder__($thiz) {
   $ct_scm_StringBuilder__jl_StringBuilder__($thiz, $ct_jl_StringBuilder__(new $c_jl_StringBuilder()));
   return $thiz
 }
+function $ct_scm_StringBuilder__I__($thiz, capacity) {
+  $ct_scm_StringBuilder__jl_StringBuilder__($thiz, $ct_jl_StringBuilder__I__(new $c_jl_StringBuilder(), capacity));
+  return $thiz
+}
 /** @constructor */
 function $c_scm_StringBuilder() {
   this.scm_StringBuilder__f_underlying = null
@@ -18535,6 +20845,11 @@ $c_scm_StringBuilder.prototype.addOne__C__scm_StringBuilder = (function(x) {
 $c_scm_StringBuilder.prototype.toString__T = (function() {
   return this.scm_StringBuilder__f_underlying.jl_StringBuilder__f_java$lang$StringBuilder$$content
 });
+$c_scm_StringBuilder.prototype.append__T__scm_StringBuilder = (function(s) {
+  var this$1 = this.scm_StringBuilder__f_underlying;
+  this$1.jl_StringBuilder__f_java$lang$StringBuilder$$content = (("" + this$1.jl_StringBuilder__f_java$lang$StringBuilder$$content) + s);
+  return this
+});
 $c_scm_StringBuilder.prototype.appendAll__sc_IterableOnce__scm_StringBuilder = (function(xs) {
   if ((xs instanceof $c_sci_WrappedString)) {
     var x2 = $as_sci_WrappedString(xs);
@@ -18565,6 +20880,32 @@ $c_scm_StringBuilder.prototype.appendAll__sc_IterableOnce__scm_StringBuilder = (
       }
     }
   };
+  return this
+});
+$c_scm_StringBuilder.prototype.append__I__scm_StringBuilder = (function(x) {
+  var this$1 = this.scm_StringBuilder__f_underlying;
+  var str = ("" + x);
+  this$1.jl_StringBuilder__f_java$lang$StringBuilder$$content = (this$1.jl_StringBuilder__f_java$lang$StringBuilder$$content + str);
+  return this
+});
+$c_scm_StringBuilder.prototype.append__J__scm_StringBuilder = (function(x) {
+  var this$1 = this.scm_StringBuilder__f_underlying;
+  var str = $m_RTLong$().org$scalajs$linker$runtime$RuntimeLong$$toString__I__I__T(x.RTLong__f_lo, x.RTLong__f_hi);
+  this$1.jl_StringBuilder__f_java$lang$StringBuilder$$content = (("" + this$1.jl_StringBuilder__f_java$lang$StringBuilder$$content) + str);
+  return this
+});
+$c_scm_StringBuilder.prototype.append__C__scm_StringBuilder = (function(x) {
+  var this$1 = this.scm_StringBuilder__f_underlying;
+  var str = $as_T(String.fromCharCode(x));
+  this$1.jl_StringBuilder__f_java$lang$StringBuilder$$content = (("" + this$1.jl_StringBuilder__f_java$lang$StringBuilder$$content) + str);
+  return this
+});
+$c_scm_StringBuilder.prototype.deleteCharAt__I__scm_StringBuilder = (function(index) {
+  this.scm_StringBuilder__f_underlying.deleteCharAt__I__jl_StringBuilder(index);
+  return this
+});
+$c_scm_StringBuilder.prototype.setCharAt__I__C__scm_StringBuilder = (function(index, ch) {
+  this.scm_StringBuilder__f_underlying.setCharAt__I__C__V(index, ch);
   return this
 });
 $c_scm_StringBuilder.prototype.isEmpty__Z = (function() {

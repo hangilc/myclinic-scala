@@ -2,13 +2,17 @@ package dev.myclinic.web
 
 import org.scalajs.dom
 import org.scalajs.dom.document
-import java.time.LocalDateTime
+import java.time.{LocalDate, LocalTime}
+import dev.myclinic.scala.model._
 
 object JsMain {
   def main(args: Array[String]): Unit = {
     val body = document.body
     body.classList.add("pb-5")
     body.appendChild(banner)
+    val app = Appoint(LocalDate.of(2021, 9, 22), LocalTime.of(9, 40, 0),
+      "田中太郎", None, "")
+    println(app)
   }
 
   val banner = {

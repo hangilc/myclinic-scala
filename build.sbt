@@ -12,7 +12,7 @@ val doobieVersion = "1.0.0-M5"
 val rootDir = ThisBuild / baseDirectory
 
 lazy val root = project.in(file("."))
-  .aggregate(server, appointApp)
+  .aggregate(server, appointApp, modelJS, modelJVM)
   .settings(
   )
 
@@ -30,16 +30,32 @@ lazy val server = project.in(file("server"))
   )
 
 lazy val appointApp = project.in(file("appoint-app"))
-  .enablePlugins(TzdbPlugin)
+  .dependsOn(modelJS)
   .settings(
     name := "myclinic-appoint",
       scalaJSUseMainModuleInitializer := true,
-      zonesFilter := {(z: String) => z == "Asia/Tokyo"},
       Compile / fastLinkJS / scalaJSLinkerOutputDirectory := 
         (rootDir.value / "server" / "web" / "appoint" / "scalajs"),
       libraryDependencies ++= Seq(
         "org.scala-js" %%% "scalajs-dom" % "1.1.0",
+      ),
+  )
+
+lazy val model = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Pure)
+  .settings(
+    name := "model",
+  )
+  .jsSettings(
+      scalaJSUseMainModuleInitializer := false,
+      zonesFilter := {(z: String) => z == "Asia/Tokyo"},
+      Compile / fastLinkJS / scalaJSLinkerOutputDirectory := 
+        (rootDir.value / "server" / "web" / "appoint" / "scalajs"),
+      libraryDependencies ++= Seq(
         "io.github.cquiroz" %%% "scala-java-time" % "2.2.2",
       ),
   )
+
+val modelJS = model.js
+val modelJVM = model.jvm
 
