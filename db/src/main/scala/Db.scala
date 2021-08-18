@@ -32,11 +32,17 @@ object Db {
 
   def createAppointTimes(times: List[(LocalDate, LocalTime)]): IO[Unit] = {
     def create(date: LocalDate, time: LocalTime): Appoint = 
-      Appoint(date, time, "", None, "")
+      Appoint(date, time, "", 0, "")
     
     val ins = times.map(_ match {
       case (d, t) => DbPrim.enterAppoint(create(d, t))
     })
-    ins.traverse(query).map(_ => ())
+    //query(ins.sequence[ConnectionIO, Unit])
+    query(ins.sequence).map(_ => ())
   }
+
+  def d(year: Int, month: Int, day: Int) = LocalDate.of(year, month, day)
+
+  def t(hour: Int, minute: Int) = LocalTime.of(hour, minute, 0)
+
 }

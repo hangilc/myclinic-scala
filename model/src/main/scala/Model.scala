@@ -7,6 +7,6 @@ case class Appoint(
   date: LocalDate,
   time: LocalTime,
   patientName: String,
-  patientId: Option[Int],
+  patientId: Int,
   memo: String
 )

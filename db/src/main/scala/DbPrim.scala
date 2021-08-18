@@ -22,9 +22,9 @@ object DbPrim {
       .query[Appoint].option
   }
 
-  def enterAppoint(appoint: Appoint): ConnectionIO[Int] = {
-    val patientId: Int = appoint.patientId.getOrElse(0)
+  def enterAppoint(appoint: Appoint): ConnectionIO[Unit] = {
     sql"""insert into appoint (date, time, patient_name, patient_id, memo) values 
-      (${appoint.date}, ${appoint.time}, ${appoint.patientName}, $patientId, ${appoint.memo})""".update.run
+      (${appoint.date}, ${appoint.time}, ${appoint.patientName}, 
+      ${appoint.patientId}, ${appoint.memo})""".update.run.map(_ => ())
   }
 }
