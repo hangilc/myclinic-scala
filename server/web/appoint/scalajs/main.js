@@ -826,7 +826,7 @@ var $d_D = new $TypeData().initPrim(0.0, "D", "double", $ac_D, Float64Array);
 function $s_Ldev_myclinic_web_JsMain__main__AT__V(args) {
   var this$3 = $m_s_Console$();
   var this$4 = this$3.out__Ljava_io_PrintStream();
-  this$4.java$lang$JSConsoleBasedPrintStream$$printString__T__V("hello, world!\n")
+  this$4.java$lang$JSConsoleBasedPrintStream$$printString__T__V("hello, world\n")
 }
 /** @constructor */
 function $c_jl_FloatingPointBits$() {

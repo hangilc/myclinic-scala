@@ -9,6 +9,8 @@ val mysqlVersion = "8.0.19"
 val http4sVersion = "0.23.1"
 val doobieVersion = "1.0.0-M5"
 
+val rootDir = ThisBuild / baseDirectory
+
 lazy val root = project.in(file("."))
   .aggregate(server, appointApp)
   .settings(
@@ -31,5 +33,7 @@ lazy val appointApp = project.in(file("appoint-app"))
   .settings(
     name := "myclinic-appoint",
       scalaJSUseMainModuleInitializer := true,
+      Compile / fastLinkJS / scalaJSLinkerOutputDirectory := 
+        (rootDir.value / "server" / "web" / "appoint" / "scalajs")
   )
 
