@@ -10,3 +10,8 @@ case class Appoint(
   patientId: Int,
   memo: String
 )
+
+object Appoint {
+  def create(date: LocalDate, time: LocalTime): Appoint =
+    Appoint(date, time, "", 0, "")
+}

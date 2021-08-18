@@ -31,13 +31,9 @@ object Db {
   }
 
   def createAppointTimes(times: List[(LocalDate, LocalTime)]): IO[Unit] = {
-    def create(date: LocalDate, time: LocalTime): Appoint = 
-      Appoint(date, time, "", 0, "")
-    
     val ins = times.map(_ match {
-      case (d, t) => DbPrim.enterAppoint(create(d, t))
+      case (d, t) => DbPrim.enterAppoint(Appoint.create(d, t))
     })
-    //query(ins.sequence[ConnectionIO, Unit])
     query(ins.sequence).map(_ => ())
   }
 
