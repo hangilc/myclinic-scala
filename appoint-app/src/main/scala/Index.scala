@@ -6,7 +6,20 @@ import java.time.LocalDateTime
 
 object JsMain {
   def main(args: Array[String]): Unit = {
-    val s = LocalDateTime.now().toString()
-    document.body.innerHTML = s"ScalaJS ${s}"
+    val body = document.body
+    body.classList.add("pb-5")
+    body.appendChild(banner)
+  }
+
+  val banner = {
+    val html = """
+    <div class="row pt-3 pb-2 ml-5 mr-5">
+        <h1 class="bg-dark text-white p-3 col-md-12">診察予約</h1>
+    </div>
+    """
+    val e = document.createElement("div")
+    e.classList.add("container-fluid")
+    e.innerHTML = html
+    e
   }
 }
