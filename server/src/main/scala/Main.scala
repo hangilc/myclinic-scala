@@ -1,4 +1,4 @@
-package dev.myclinic.scala
+package dev.myclinic.scala.server
 
 import cats.effect._
 import cats.implicits._
@@ -24,12 +24,14 @@ import io.circe.syntax._
 
 object Main extends IOApp {
 
-  val apiService = HttpRoutes.of[IO] { 
-    case GET -> Root / "api" / "hello" => Ok("api-hello")
-    case GET -> Root / "api" / "get-appoint" =>
-      Ok(Db.listAppoint(LocalDate.of(2021, 8, 1), LocalDate.of(2021, 8, 30))
-        .map(_.asJson))
-  }
+  // val apiService = HttpRoutes.of[IO] { 
+  //   case GET -> Root / "api" / "hello" => Ok("api-hello")
+  //   case GET -> Root / "api" / "get-appoint" =>
+  //     Ok(Db.listAppoint(LocalDate.of(2021, 8, 1), LocalDate.of(2021, 8, 30))
+  //       .map(_.asJson))
+  // }
+
+  val apiService = AppointService.service
 
   val staticService = fileService[IO](FileService.Config("./web", "/"))
 
