@@ -57,9 +57,7 @@ object Params {
   }
 }
 
-object HttpClient {
-
-  val pre = "/api/"
+class HttpClient(pre: String) {
 
   def url(service: String): String = pre + service
 
@@ -78,9 +76,12 @@ object HttpClient {
       "upto" -> LocalDate.of(2021, 8, 30))))
   }
 
-  def get[A](service: String, params: Params)(implicit dec: Decoder[A]) = {
+  def get[A](service: String, params: Params)(implicit dec: Decoder[A]) : Future[A] = {
     Ajax.get(url(service, params)).flatMap(
-      xhr => decode[A](xhr.responseText)
+      xhr => decode[A](xhr.responseText) match {
+        case Right(a) => Future.successful(a)
+        case Left(e) => Future.failed(e)
+      }
     )
   }
 }
