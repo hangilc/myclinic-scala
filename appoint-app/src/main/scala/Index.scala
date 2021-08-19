@@ -2,14 +2,25 @@ package dev.myclinic.web
 
 import org.scalajs.dom
 import org.scalajs.dom.document
+import dom.ext.Ajax
 import java.time.{LocalDate, LocalTime}
 import dev.myclinic.scala.model._
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+import scala.concurrent._
+import scala.util.{Success, Failure}
 
 object JsMain {
   def main(args: Array[String]): Unit = {
     val body = document.body
     body.classList.add("pb-5")
     body.appendChild(banner)
+    Ajax.get("/api/hello").onComplete{
+      case Success(xhr) => {
+        val txt = xhr.responseText
+        println(txt)
+      }
+      case Failure(e) => println(e.toString())
+    }
   }
 
   val banner = {

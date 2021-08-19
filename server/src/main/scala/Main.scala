@@ -30,8 +30,11 @@ object Main extends IOApp {
   //     Ok(Db.listAppoint(LocalDate.of(2021, 8, 1), LocalDate.of(2021, 8, 30))
   //       .map(_.asJson))
   // }
+  val helloService = HttpRoutes.of[IO] {
+    case GET -> Root / "hello" => Ok("api-hello")
+  }
 
-  val apiService = AppointService.service
+  val apiService = helloService <+> AppointService.service
 
   val staticService = fileService[IO](FileService.Config("./web", "/"))
 
