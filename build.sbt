@@ -7,8 +7,11 @@ ThisBuild / organizationName := "myclinic"
 
 val sqliteVersion = "3.36.0.1"
 val mysqlVersion = "8.0.19"
-val http4sVersion = "0.23.1"
+val http4sVersion = "1.0.0-M21"
 val doobieVersion = "1.0.0-M5"
+val circeVersion = "0.14.1"
+val scalaJavaTimeVersion = "2.2.2"
+val scalaJSDomVersion = "1.1.0"
 
 val rootDir = ThisBuild / baseDirectory
 
@@ -29,15 +32,15 @@ lazy val db = project.in(file("db"))
   )
 
 lazy val server = project.in(file("server"))
+  .dependsOn(db, modelJVM)
   .settings(
-    name := "myclinic-server",
+    name := "server",
     libraryDependencies ++= Seq(
       "ch.qos.logback" % "logback-classic" % "1.1.3" % "runtime",
-      "mysql" % "mysql-connector-java" % mysqlVersion,
-      "org.tpolecat" %% "doobie-core" % doobieVersion,
-      "org.tpolecat" %% "doobie-hikari" % doobieVersion,
-      "org.http4s" %% "http4s-dsl" % http4sVersion,
       "org.http4s" %% "http4s-blaze-server" % http4sVersion,
+      "org.http4s" %% "http4s-dsl" % http4sVersion,
+      "org.http4s" %% "http4s-circe" % http4sVersion,
+      "io.circe" %% "circe-generic" % circeVersion,
     )
   )
 
@@ -49,7 +52,7 @@ lazy val appointApp = project.in(file("appoint-app"))
       Compile / fastLinkJS / scalaJSLinkerOutputDirectory := 
         (rootDir.value / "server" / "web" / "appoint" / "scalajs"),
       libraryDependencies ++= Seq(
-        "org.scala-js" %%% "scalajs-dom" % "1.1.0",
+        "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion,
       ),
   )
 
@@ -57,6 +60,11 @@ lazy val model = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Pure)
   .settings(
     name := "model",
+    libraryDependencies ++= Seq(
+      "io.circe" %%% "circe-core" % circeVersion,
+      "io.circe" %%% "circe-generic" % circeVersion,
+      "io.circe" %%% "circe-parser" % circeVersion,
+    ),
   )
   .jsSettings(
       scalaJSUseMainModuleInitializer := false,
@@ -64,7 +72,7 @@ lazy val model = crossProject(JSPlatform, JVMPlatform)
       Compile / fastLinkJS / scalaJSLinkerOutputDirectory := 
         (rootDir.value / "server" / "web" / "appoint" / "scalajs"),
       libraryDependencies ++= Seq(
-        "io.github.cquiroz" %%% "scala-java-time" % "2.2.2",
+        "io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion,
       ),
   )
 
