@@ -40,7 +40,7 @@ object Main extends IOApp {
       .withSocketReuseAddress(true)
       .bindHttp(8080, "localhost")
       .withHttpApp(
-          (apiService <+> staticService).orNotFound
+        Router("/api" -> apiService, "/" -> staticService).orNotFound
       )
       .resource
       .use(_ => IO.never)
