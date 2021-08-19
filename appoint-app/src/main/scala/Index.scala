@@ -2,24 +2,34 @@ package dev.myclinic.web
 
 import org.scalajs.dom
 import org.scalajs.dom.document
-import dom.ext.Ajax
+import org.scalajs.dom.ext.Ajax
 import java.time.{LocalDate, LocalTime}
 import dev.myclinic.scala.model._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+import scala.scalajs.js.{Dictionary}
 import scala.concurrent._
+import org.scalajs.dom.experimental.{URL, URLSearchParams}
 import scala.util.{Success, Failure}
+import io.circe.parser.decode
+import dev.myclinic.scala.web.Api
 
 object JsMain {
   def main(args: Array[String]): Unit = {
     val body = document.body
     body.classList.add("pb-5")
     body.appendChild(banner)
-    Ajax.get("/api/hello").onComplete{
+    Api.hello()
+    val d = Dictionary("from" -> "2021-08-01", "upto" -> "2021-08-30")
+    val p = new URLSearchParams(d)
+    val url = "/api/list-appoint?" + p
+    println(url)
+    Ajax.get(url).onComplete{
       case Success(xhr) => {
         val txt = xhr.responseText
-        println(txt)
+        val apps: List[Appoint] = decode[List[Appoint]](txt).getOrElse(List())
+        println(apps)
       }
-      case Failure(e) => println(e.toString())
+      case Failure(e) => throw e
     }
   }
 
