@@ -14,4 +14,8 @@ object DbSqlite {
     "",
     ""
   )
+
+  def exec[A](q: ConnectionIO[A]): IO[A] = {
+    q.transact(xa)
+  }
 }

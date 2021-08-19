@@ -1,44 +1,83 @@
 package dev.myclinic.scala.db
 
 import java.time.{LocalDate, LocalTime}
-import dev.myclinic.scala.db.DbSqlite
-import dev.myclinic.scala.db.DbPrim
 import dev.myclinic.scala.model._
 import cats.effect.IO
 import cats._
 import cats.implicits._
 import doobie._
 import doobie.implicits._
-import dev.myclinic.scala.model._
 
-object Db {
+trait DbExecutor {
+  def exec[A](s: ConnectionIO[A]): IO[A]
+  def execVoid(s: ConnectionIO[_]): IO[Unit] = exec(s).map(_ => ())
+}
+
+object Db extends DbExecutor with DbAppoint {
   val xa = DbSqlite.xa
 
-  def query[A](sql: ConnectionIO[A]): IO[A] = {
-    sql.transact(xa)
-  }
+  override def exec[A](s: ConnectionIO[A]): IO[A] = s.transact(xa)
 
-  def listAppoint(from: LocalDate, upto: LocalDate): IO[List[Appoint]] = {
-    query(DbPrim.listAppoint(from, upto))
-  }
+}
+
+trait DbAppoint extends DbExecutor {
 
   def getAppoint(date: LocalDate, time: LocalTime): IO[Appoint] = {
-    query(DbPrim.getAppoint(date, time))
+    exec(DbPrim.getAppoint(date, time).unique)
   }
 
-  def findAppoint(date: LocalDate, time: LocalTime): IO[Option[Appoint]] = {
-    query(DbPrim.findAppoint(date, time))
+  def getAppointOption(
+      date: LocalDate,
+      time: LocalTime
+  ): IO[Option[Appoint]] = {
+    exec(DbPrim.getAppoint(date, time).option)
   }
 
   def createAppointTimes(times: List[(LocalDate, LocalTime)]): IO[Unit] = {
     val ins = times.map(_ match {
-      case (d, t) => DbPrim.enterAppoint(Appoint.create(d, t))
+      case (d, t) => DbPrim.enterAppoint(Appoint.create(d, t)).run
     })
-    query(ins.sequence).map(_ => ())
+    exec(ins.sequence).map(_ => ())
   }
 
-  def d(year: Int, month: Int, day: Int) = LocalDate.of(year, month, day)
+  def listAppoint(from: LocalDate, upto: LocalDate): IO[List[Appoint]] = {
+    exec(DbPrim.listAppoint(from, upto).to[List])
+  }
 
-  def t(hour: Int, minute: Int) = LocalTime.of(hour, minute, 0)
+  def registerAppoint(
+      date: LocalDate,
+      time: LocalTime,
+      patientName: String
+  ): IO[Unit] = {
+    require(!patientName.isEmpty)
+    execVoid(for(
+      at <- DbPrim.getAppoint(date, time).unique;
+      _ <- {
+        if( !at.patientName.isEmpty ){
+          throw new RuntimeException(s"Appointment already exists: ${at}")
+        } else {
+          val a = Appoint(at.date, at.time, patientName, 0, "")
+          DbPrim.updateAppoint(a).run
+        }
+      }
+    ) yield())
+  }
+
+  def cancelAppoint(date: LocalDate, time: LocalTime, patientName: String): IO[Unit] = {
+    require(!patientName.isEmpty)
+    execVoid(
+      for(
+        at <- DbPrim.getAppoint(date, time).unique;
+        _ <- {
+          if( at.patientName != patientName ){
+            throw new RuntimeException(s"Inconsistent appoiont: ${at}")
+          } else {
+            val a = Appoint.create(date, time)
+            DbPrim.updateAppoint(a).run
+          }
+        }
+      ) yield ()
+    )
+  }
 
 }
