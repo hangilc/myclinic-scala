@@ -8,10 +8,7 @@ import scala.concurrent.Future
 
 object Api {
 
-  val client = new HttpClient("/pre")
-
-  def hello(){
-  }
+  val client = new HttpClient("/api/")
 
   def listAppoint(from: LocalDate, upto: LocalDate): Future[List[Appoint]]  = {
     client.get[List[Appoint]]("list-appoint", Params("from" -> from, "upto" -> upto))

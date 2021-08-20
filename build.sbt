@@ -45,7 +45,7 @@ lazy val server = project.in(file("server"))
   )
 
 lazy val appointApp = project.in(file("appoint-app"))
-  .dependsOn(modelJS)
+  .dependsOn(modelJS, utilJS)
   .settings(
     name := "myclinic-appoint",
       scalaJSUseMainModuleInitializer := true,
@@ -78,3 +78,19 @@ lazy val model = crossProject(JSPlatform, JVMPlatform)
 
 val modelJS = model.js
 val modelJVM = model.jvm
+
+lazy val util = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Pure)
+  .settings(
+      scalaJSUseMainModuleInitializer := false,
+      zonesFilter := {(z: String) => z == "Asia/Tokyo"},
+      // Compile / fastLinkJS / scalaJSLinkerOutputDirectory := 
+      //   (rootDir.value / "server" / "web" / "appoint" / "scalajs"),
+      libraryDependencies ++= Seq(
+        "io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion,
+      ),
+  )
+
+val utilJS = util.js
+val utilJVM = util.jvm
+

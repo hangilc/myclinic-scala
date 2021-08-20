@@ -68,13 +68,6 @@ class HttpClient(pre: String) {
       url(service) + "?" + params.encode()
     }
   }
-  
-  def hello(){
-    println(url("get-patient"))
-    println( url("get-patient", Params("patient-id" -> 123)))
-    println(url("list-appoing", Params("from" -> LocalDate.of(2021, 8, 1), 
-      "upto" -> LocalDate.of(2021, 8, 30))))
-  }
 
   def get[A](service: String, params: Params)(implicit dec: Decoder[A]) : Future[A] = {
     Ajax.get(url(service, params)).flatMap(

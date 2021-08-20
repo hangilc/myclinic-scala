@@ -12,25 +12,33 @@ import org.scalajs.dom.experimental.{URL, URLSearchParams}
 import scala.util.{Success, Failure}
 import io.circe.parser.decode
 import dev.myclinic.scala.web.Api
+import dev.myclinic.scala.util.DateUtil
 
 object JsMain {
   def main(args: Array[String]): Unit = {
     val body = document.body
     body.classList.add("pb-5")
     body.appendChild(banner)
-    Api.hello()
-    val d = Dictionary("from" -> "2021-08-01", "upto" -> "2021-08-30")
-    val p = new URLSearchParams(d)
-    val url = "/api/list-appoint?" + p
-    println(url)
-    Ajax.get(url).onComplete{
-      case Success(xhr) => {
-        val txt = xhr.responseText
-        val apps: List[Appoint] = decode[List[Appoint]](txt).getOrElse(List())
-        println(apps)
-      }
-      case Failure(e) => throw e
+    val api = Api
+    for(
+      apps <- api.listAppoint(LocalDate.of(2021,8,1), LocalDate.of(2021,8,30))
+    ) yield {
+      println(apps)
     }
+    println(DateUtil.hello)
+    // Api.hello()
+    // val d = Dictionary("from" -> "2021-08-01", "upto" -> "2021-08-30")
+    // val p = new URLSearchParams(d)
+    // val url = "/api/list-appoint?" + p
+    // println(url)
+    // Ajax.get(url).onComplete{
+    //   case Success(xhr) => {
+    //     val txt = xhr.responseText
+    //     val apps: List[Appoint] = decode[List[Appoint]](txt).getOrElse(List())
+    //     println(apps)
+    //   }
+    //   case Failure(e) => throw e
+    // }
   }
 
   val banner = {
