@@ -18,6 +18,8 @@ val rootDir = ThisBuild / baseDirectory
 lazy val root = project.in(file("."))
   .aggregate(db, server, appointApp, modelJS, modelJVM, utilJS, utilJVM)
   .settings(
+    publish := {},
+    publishLocal := {},
   )
 
 lazy val db = project.in(file("db"))
@@ -32,7 +34,7 @@ lazy val db = project.in(file("db"))
   )
 
 lazy val server = project.in(file("server"))
-  .dependsOn(db, modelJVM)
+  .dependsOn(db, modelJVM, utilJVM)
   .settings(
     name := "server",
     libraryDependencies ++= Seq(
@@ -45,7 +47,7 @@ lazy val server = project.in(file("server"))
   )
 
 lazy val appointApp = project.in(file("appoint-app"))
-  .dependsOn(modelJS, utilJS)
+  .dependsOn(modelJS, utilJS, utilJS)
   .settings(
     name := "myclinic-appoint",
       scalaJSUseMainModuleInitializer := true,
@@ -55,6 +57,19 @@ lazy val appointApp = project.in(file("appoint-app"))
         "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion,
       ),
   )
+
+lazy val util = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Pure)
+  .jsSettings(
+      scalaJSUseMainModuleInitializer := false,
+      zonesFilter := {(z: String) => z == "Asia/Tokyo"},
+      libraryDependencies ++= Seq(
+        "io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion,
+      ),
+  )
+
+val utilJS = util.js
+val utilJVM = util.jvm
 
 lazy val model = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Pure)
@@ -79,15 +94,3 @@ lazy val model = crossProject(JSPlatform, JVMPlatform)
 val modelJS = model.js
 val modelJVM = model.jvm
 
-lazy val util = crossProject(JSPlatform, JVMPlatform)
-  .crossType(CrossType.Pure)
-  .jsSettings(
-      scalaJSUseMainModuleInitializer := false,
-      zonesFilter := {(z: String) => z == "Asia/Tokyo"},
-      libraryDependencies ++= Seq(
-        "io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion,
-      ),
-  )
-
-val utilJS = util.js
-val utilJVM = util.jvm

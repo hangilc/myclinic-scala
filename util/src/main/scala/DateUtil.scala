@@ -9,4 +9,6 @@ object DateUtil {
     at.minusDays(n)
   }
 
+  val hello = "hello"
+
 }
