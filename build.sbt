@@ -58,21 +58,9 @@ lazy val appointApp = project.in(file("appoint-app"))
       ),
   )
 
-lazy val util = crossProject(JSPlatform, JVMPlatform)
-  .crossType(CrossType.Pure)
-  .jsSettings(
-      scalaJSUseMainModuleInitializer := false,
-      zonesFilter := {(z: String) => z == "Asia/Tokyo"},
-      libraryDependencies ++= Seq(
-        "io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion,
-      ),
-  )
-
-val utilJS = util.js
-val utilJVM = util.jvm
-
 lazy val model = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Pure)
+  .in(file("model"))
   .settings(
     name := "model",
     libraryDependencies ++= Seq(
@@ -84,8 +72,6 @@ lazy val model = crossProject(JSPlatform, JVMPlatform)
   .jsSettings(
       scalaJSUseMainModuleInitializer := false,
       zonesFilter := {(z: String) => z == "Asia/Tokyo"},
-      // Compile / fastLinkJS / scalaJSLinkerOutputDirectory := 
-      //   (rootDir.value / "server" / "web" / "appoint" / "scalajs"),
       libraryDependencies ++= Seq(
         "io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion,
       ),
@@ -94,3 +80,16 @@ lazy val model = crossProject(JSPlatform, JVMPlatform)
 val modelJS = model.js
 val modelJVM = model.jvm
 
+lazy val util = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Pure)
+  .in(file("util"))
+  .jsSettings(
+      scalaJSUseMainModuleInitializer := false,
+      zonesFilter := {(z: String) => z == "Asia/Tokyo"},
+      libraryDependencies ++= Seq(
+        "io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion,
+      ),
+  )
+
+val utilJS = util.js
+val utilJVM = util.jvm
