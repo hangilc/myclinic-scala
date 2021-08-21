@@ -16,7 +16,7 @@ val scalaJSDomVersion = "1.1.0"
 val rootDir = ThisBuild / baseDirectory
 
 lazy val root = project.in(file("."))
-  .aggregate(db, server, appointApp, modelJS, modelJVM)
+  .aggregate(db, server, appointApp, modelJS, modelJVM, utilJS, utilJVM)
   .settings(
   )
 
@@ -69,8 +69,8 @@ lazy val model = crossProject(JSPlatform, JVMPlatform)
   .jsSettings(
       scalaJSUseMainModuleInitializer := false,
       zonesFilter := {(z: String) => z == "Asia/Tokyo"},
-      Compile / fastLinkJS / scalaJSLinkerOutputDirectory := 
-        (rootDir.value / "server" / "web" / "appoint" / "scalajs"),
+      // Compile / fastLinkJS / scalaJSLinkerOutputDirectory := 
+      //   (rootDir.value / "server" / "web" / "appoint" / "scalajs"),
       libraryDependencies ++= Seq(
         "io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion,
       ),
@@ -81,11 +81,9 @@ val modelJVM = model.jvm
 
 lazy val util = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Pure)
-  .settings(
+  .jsSettings(
       scalaJSUseMainModuleInitializer := false,
       zonesFilter := {(z: String) => z == "Asia/Tokyo"},
-      // Compile / fastLinkJS / scalaJSLinkerOutputDirectory := 
-      //   (rootDir.value / "server" / "web" / "appoint" / "scalajs"),
       libraryDependencies ++= Seq(
         "io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion,
       ),
@@ -93,4 +91,3 @@ lazy val util = crossProject(JSPlatform, JVMPlatform)
 
 val utilJS = util.js
 val utilJVM = util.jvm
-
