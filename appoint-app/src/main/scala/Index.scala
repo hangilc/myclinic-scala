@@ -2,7 +2,7 @@ package dev.myclinic.web
 
 import dev.myclinic.scala.model._
 import dev.myclinic.scala.util.DateUtil
-import dev.myclinic.scala.web.Api
+import dev.myclinic.scala.web.{Api, Dialog}
 import io.circe.parser.decode
 import org.scalajs.dom
 import org.scalajs.dom.document
@@ -82,7 +82,7 @@ case class AppointTimeRow(appoint: Appoint) {
     detail
   )
   val dom = div(
-    onclick := { () => org.scalajs.dom.window.alert("hello") },
+    onclick := { () => openDialog },
     style := "cursor: pointer"
   ) (datePart, detailPart).render
 
@@ -93,4 +93,9 @@ case class AppointTimeRow(appoint: Appoint) {
       appoint.patientName
     }
   }
+
+  def openDialog = {
+    Dialog.open("TEST")
+  }
+
 }
