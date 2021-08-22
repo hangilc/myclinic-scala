@@ -40,6 +40,11 @@ trait DbAppoint extends DbExecutor {
     exec(ins.sequence).map(_ => ())
   }
 
+  def createAppointTimes(date: LocalDate, times: (Int, Int)*): IO[Unit] = {
+    val items = times.map(x => (date, LocalTime.of(x._1, x._2, 0)))
+    createAppointTimes(items.toList)
+  }
+
   def listAppoint(from: LocalDate, upto: LocalDate): IO[List[Appoint]] = {
     exec(DbPrim.listAppoint(from, upto).to[List])
   }
