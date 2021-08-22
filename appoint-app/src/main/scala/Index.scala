@@ -95,7 +95,8 @@ case class AppointTimeRow(appoint: Appoint) {
   }
 
   def openDialog = {
-    Dialog.open("TEST")
+    val dlog = Dialog.create("TEST")
+    dlog.open()
   }
 
 }
