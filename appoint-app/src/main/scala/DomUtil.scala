@@ -85,3 +85,87 @@ object DomUtil {
   }
 
 }
+
+trait ElementModifier {
+  def applyTo(target: Element): Unit
+}
+
+object Modifiers {
+
+  private def create[A](f: Element => Unit): ElementModifier = {
+    new ElementModifier {
+      override def applyTo(e: Element): Unit = {
+        f(e)
+      }
+    }
+  }
+
+  object cls {
+    def :=(cls: String): ElementModifier = create[String] { e =>
+      e.classList.add(cls)
+    }
+  }
+
+  object textModifier {
+    def :=(content: String): ElementModifier = create[String](e => {
+      val t = document.createTextNode(content)
+      e.appendChild(t)
+    })
+  }
+}
+
+object Implicits {
+
+  implicit class ElementEx(val ele: Element) {
+
+    def apply(modifiers: ElementModifier*): ElementEx = {
+      modifiers.foreach(_.applyTo(ele))
+      this
+    }
+
+    def onclick(handler: MouseEvent => Unit): Element = {
+      ele.addEventListener("click", handler)
+      ele
+    }
+
+    def onclick(handler: () => Unit): Element = {
+      onclick((_: MouseEvent) => handler())
+    }
+
+  }
+
+  implicit def toElement(ex: ElementEx): Element = ex.ele
+
+  implicit def toTextModifier(data: String): ElementModifier = {
+    new ElementModifier {
+      override def applyTo(e: Element): Unit = {
+        val t = document.createTextNode(data)
+        e.appendChild(t)
+      }
+    }
+  }
+
+  implicit def toChildModifier(e: Element): ElementModifier = {
+    new ElementModifier {
+      override def applyTo(target: Element): Unit = {
+        target.appendChild(e)
+      }
+    }
+  }
+
+  implicit def toChildModifier(e: ElementEx): ElementModifier = {
+    new ElementModifier {
+      override def applyTo(target: Element): Unit = {
+        target.appendChild(e.ele)
+      }
+    }
+  }
+
+  def div(modifiers: ElementModifier*): ElementEx = {
+    val e = document.createElement("div")
+    val ex = ElementEx(e)
+    ex.apply(modifiers: _*)
+  }
+
+
+}

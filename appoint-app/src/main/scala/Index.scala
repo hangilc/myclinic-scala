@@ -3,6 +3,8 @@ package dev.myclinic.web
 import dev.myclinic.scala.model._
 import dev.myclinic.scala.util.DateUtil
 import dev.myclinic.scala.web.{Api, Dialog, Tmpl, DomUtil}
+import dev.myclinic.scala.web.Modifiers._
+import dev.myclinic.scala.web.Implicits._
 import io.circe.parser.decode
 import org.scalajs.dom
 import org.scalajs.dom.document
@@ -40,7 +42,6 @@ object JsMain {
             <h1 class="bg-dark text-white p-3 col-md-12">診察予約</h1>
         </div>
     </div>
-    <div class="x-hello">hello</div>
     """
 
   val banner = Tmpl.createElement(bannerTmpl)
@@ -131,7 +132,7 @@ case class SlotRow(appoint: Appoint) {
   })
   eTime.innerText = appoint.time.toString()
   eDetail.innerText = detail
-  DomUtil.onClick(ele, openDialog)
+  ele.onclick(openDialog _)
   
   def detail: String = {
     if (appoint.patientName.isEmpty) {
