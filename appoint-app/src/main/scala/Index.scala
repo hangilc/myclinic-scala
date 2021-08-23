@@ -131,9 +131,7 @@ case class SlotRow(appoint: Appoint) {
   })
   eTime.innerText = appoint.time.toString()
   eDetail.innerText = detail
-  ele.addEventListener("click", {(e: dom.MouseEvent) => {
-    openDialog()
-  }})
+  DomUtil.onClick(ele, openDialog)
   
   def detail: String = {
     if (appoint.patientName.isEmpty) {
@@ -143,8 +141,9 @@ case class SlotRow(appoint: Appoint) {
     }
   }
 
-  def openDialog() = {
-    println("Open Dialog")
+  def openDialog(): Unit = {
+    val dlog = Dialog.create("診察予約")
+    dlog.open()
   }
 
 }

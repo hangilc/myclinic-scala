@@ -3,7 +3,7 @@ package dev.myclinic.scala.web
 import org.scalajs.dom.{document, window, html}
 import scala.concurrent.Future
 import dev.myclinic.scala.web.{DomUtil, Tmpl}
-import org.scalajs.dom.raw.Element
+import org.scalajs.dom.raw.{Element, MouseEvent}
 
 trait Dialog[R] {
   var title: String
@@ -18,30 +18,33 @@ trait Dialog[R] {
 
 private object DialogTmpl {
   val tmpl = """
-   <div class="modal" tabindex="-1" role="dialog" data-backdrop="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title x-title"></h5>
-                    <button type="button" class="close x-close" data-dismiss="modal" 
-                      aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body x-content"> </div>
-                <div class="modal-footer x-commaand-box"> </div>
-            </div>
+    <div class="modal-dialog-content">
+        <div class="d-flex title-wrapper justify-content-between">
+            <h3 class="d-inline-block x-title">タイトル</h3>
+            <a href="javascript:void(0)" style="font-size: 1.2rem" 
+              class="align-item-center x-close-link">&times;</a>
         </div>
+        <div class="x-content" style="min-width:160px"></div>
+        <div class="command-box x-footer"></div>
     </div>
   """
+
   val backDrop = Tmpl.createElement("""
     <div class="modal-dialog-backdrop"></div>
   """)
 
 }
 
+object Dialog {
+  def create[R](title: String): Dialog[R] = {
+    val dlog = new DialogImpl[R]()
+    dlog.title = title
+    dlog
+  }
+}
+
 private class DialogImpl[R]() extends Dialog[R] {
-  val ele = Tmpl.createElement(DialogTmpl.tmpl)
+  val ele: Element = Tmpl.createElement(DialogTmpl.tmpl)
   var eTitle: Element = _
   var eCloseLink: Element = _
   var eContent: Element = _
@@ -49,12 +52,13 @@ private class DialogImpl[R]() extends Dialog[R] {
   DomUtil.traversex(ele, (name, e) => {
     name match {
       case "title" => eTitle = e
-      case "close" => eCloseLink = e
+      case "close-link" => eCloseLink = e
       case "content" => eContent = e
       case "command-box" => eCommandBox = e
       case _ =>
     }
   })
+  DomUtil.onClick(eCloseLink, cancel)
 
   def title: String = eTitle.innerText
 

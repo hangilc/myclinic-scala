@@ -12,7 +12,9 @@ case class Appoint(
   patientName: String,
   patientId: Int,
   memo: String
-)
+) {
+  def isVacent: Boolean = patientName.isEmpty
+}
 
 object Appoint {
   implicit val appointEncoder: Encoder[Appoint] = deriveEncoder
