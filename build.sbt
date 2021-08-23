@@ -55,7 +55,6 @@ lazy val appointApp = project.in(file("appoint-app"))
         (rootDir.value / "server" / "web" / "appoint" / "scalajs"),
       libraryDependencies ++= Seq(
         "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion,
-        "com.lihaoyi" %%% "scalatags" % "0.9.4",
      ),
   )
 
