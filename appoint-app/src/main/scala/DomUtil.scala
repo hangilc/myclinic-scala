@@ -86,23 +86,17 @@ object DomUtil {
 
 }
 
-trait ElementModifier {
-  def applyTo(target: Element): Unit
-}
+case class ElementModifier(modifier: Element => Unit)
 
 object Modifiers {
 
   case class Creator[A](f: (Element, A) => Unit) {
-    def :=(arg: A): ElementModifier = {
-      new ElementModifier {
-        override def applyTo(e: Element): Unit = f(e, arg)
-      }
-    }
+    def :=(arg: A): ElementModifier = ElementModifier(e => f(e, arg))
   }
 
   val cls = Creator[String]((e, a) => {
-     for(c <- a.split("\\s+") )
-        e.classList.add(c)
+    for (c <- a.split("\\s+"))
+      e.classList.add(c)
   })
 
   val cb = Creator[Element => Unit]((e, handler) => handler(e))
@@ -114,7 +108,7 @@ object Modifiers {
   val style = attr("style")
 
   val href = Creator[String]((e, a) => {
-    val value = if( a.isEmpty ) "javascript:void(0)" else a
+    val value = if (a.isEmpty) "javascript:void(0)" else a
     e.setAttribute("href", value)
   })
 
@@ -123,7 +117,7 @@ object Modifiers {
 class ElementEx(val ele: Element) {
 
   def apply(modifiers: ElementModifier*): ElementEx = {
-    modifiers.foreach(_.applyTo(ele))
+    modifiers.foreach(_.modifier(ele))
     this
   }
 
@@ -142,45 +136,40 @@ object ElementEx {
   def apply(e: Element): ElementEx = new ElementEx(e)
 }
 
-
 object Implicits {
 
   implicit def toElement(ex: ElementEx): Element = ex.ele
 
   implicit def toElementEx(e: Element): ElementEx = new ElementEx(e)
 
-  implicit def toTextModifier(data: String): ElementModifier = {
-    new ElementModifier {
-      override def applyTo(e: Element): Unit = {
-        val t = document.createTextNode(data)
-        e.appendChild(t)
-      }
-    }
-  }
+  implicit def toTextModifier(data: String): ElementModifier =
+    ElementModifier(e => {
+      val t = document.createTextNode(data)
+      e.appendChild(t)
+    })
 
-  implicit def toChildModifier(e: Element): ElementModifier = {
-    new ElementModifier {
-      override def applyTo(target: Element): Unit = {
-        target.appendChild(e)
-      }
-    }
-  }
+  implicit def toChildModifier(e: Element): ElementModifier =
+    ElementModifier(ele => {
+      ele.appendChild(e)
+    })
 
-  implicit def toChildModifier(e: ElementEx): ElementModifier = {
-    new ElementModifier {
-      override def applyTo(target: Element): Unit = {
-        target.appendChild(e.ele)
-      }
-    }
-  }
+  implicit def toChildModifier(e: ElementEx): ElementModifier =
+    ElementModifier(ele => {
+      ele.appendChild(e.ele)
+    })
 
-  implicit def toListModifier(ms: List[ElementModifier]): ElementModifier = {
-    new ElementModifier {
-      override def applyTo(target: Element): Unit = {
-        ms.foreach(_.applyTo(target))
-      }
-    }
-  }
+  implicit def toListModifier(ms: List[ElementModifier]): ElementModifier =
+    ElementModifier(target => {
+      ms.foreach(_.modifier(target))
+    })
+
+  private val ta = document.createElement("textarea")
+
+  def raw(text: String): ElementModifier = ElementModifier(target => {
+    ta.innerHTML = text
+    val decoded = ta.innerText
+    target.appendChild(document.createTextNode(decoded))
+  })
 
 }
 
@@ -224,5 +213,4 @@ object html {
     tag("a")(modifiers: _*)
   }
 
-  
 }

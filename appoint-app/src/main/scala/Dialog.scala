@@ -63,7 +63,7 @@ private class DialogImpl[R]() extends Dialog[R] {
         style := "font-size: 1.2rem",
         cls := "align-item-center",
         cb := (eCloseLink = _)
-      )("&times;")
+      )(raw("&times;"))
     ),
     div(style := "min-width:160px", cb := (eContent = _)),
     div(cls := "command-box", cb := (eCommandBox = _))
