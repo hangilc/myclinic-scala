@@ -46,6 +46,7 @@ object Dialog {
     dlog.title = title
     dlog
   }
+
 }
 
 private class DialogImpl[R]() extends Dialog[R] {

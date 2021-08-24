@@ -112,6 +112,12 @@ case class SlotRow(appoint: Appoint) {
 
   def openDialog(): Unit = {
     val dlog = Dialog.create("診察予約")
+    var eOk, eCancel: Element = null
+    dlog.commandBox(
+      button(cb := (eOk = _), attr("type") := "button", cls := "btn btn-outline-primary")("ＯＫ"),
+      button(cb := (eCancel = _), attr("type") := "button", cls := "btn btn-outline-secondary ms-2")("キャンセル"),
+    )
+    eCancel.onclick(() => dlog.cancel())
     dlog.open()
   }
 

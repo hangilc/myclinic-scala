@@ -213,4 +213,8 @@ object html {
     tag("a")(modifiers: _*)
   }
 
+  def button(modifiers: ElementModifier*): ElementEx = {
+    tag("button")(modifiers: _*)
+  }
+
 }
