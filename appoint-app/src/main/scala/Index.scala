@@ -5,6 +5,7 @@ import dev.myclinic.scala.util.DateUtil
 import dev.myclinic.scala.web.{Api, Dialog, Tmpl, DomUtil}
 import dev.myclinic.scala.web.Modifiers._
 import dev.myclinic.scala.web.Implicits._
+import dev.myclinic.scala.web.html._
 import io.circe.parser.decode
 import org.scalajs.dom
 import org.scalajs.dom.document
@@ -24,7 +25,7 @@ import scala.util.Success
 object JsMain {
   def main(args: Array[String]): Unit = {
     val body = document.body
-    List("px-5", "pt-1", "pb-5").foreach(body.classList.add)
+    body(cls := "px-5 pt-1 pb-5")
     body.appendChild(banner)
     body.appendChild(AppointRow.ele)
     val startDate = DateUtil.startDayOfWeek(LocalDate.now())
@@ -36,15 +37,11 @@ object JsMain {
     }
   }
 
-  val bannerTmpl = """
-    <div class="container-fluid">
-        <div class="row pt-3 pb-2 ml-5 mr-5">
-            <h1 class="bg-dark text-white p-3 col-md-12">診察予約</h1>
-        </div>
-    </div>
-    """
-
-  val banner = Tmpl.createElement(bannerTmpl)
+  val banner = div(cls := "container-fluid")(
+    div(cls := "row pt-3 pb-2 ml-5 mr-5")(
+      h1(cls := "bg-dark text-white p-3 col-md-12")("診察予約")
+    )
+  )
 
 }
 
@@ -59,21 +56,12 @@ object AppointDate {
 }
 
 object AppointRow {
-  val tmpl = """"
-    <div class="container px-0 mx-0">
-      <div class="row mx-0 x-row"></div>
-    </div>
-  """
 
-  val ele = Tmpl.createElement(tmpl)
   var eRow: Element = _
 
-  DomUtil.traversex(ele, (name, e) => {
-    name match {
-      case "row" => eRow = e
-      case _ =>
-    }
-  })
+  val ele = div(cls := "container px-0 mx-0")(
+    div(cls := "row mx-0", cb := { e => { eRow = e }})
+  )
 
   def add(c: AppointColumn) {
     eRow.appendChild(c.ele)
@@ -81,23 +69,13 @@ object AppointRow {
 }
 
 case class AppointColumn(appointDate: AppointDate) {
-  val tmpl = """
-    <div class="col-2">
-      <div class="x-date-rep"></div>
-      <div class="x-slots"></div>
-    </div>
-  """
   
-  val ele = Tmpl.createElement(tmpl)
   var eDateRep, eSlots: Element = _
+  val ele = div(cls := "col-2")(
+    div(cb := (eDateRep = _)),
+    div(cb := (eSlots = _)),
+  )
 
-  DomUtil.traversex(ele, (name, e) => {
-    name match {
-      case "date-rep" => eDateRep = e
-      case "slots" => eSlots = e
-      case _ =>
-    }
-  })
   eDateRep.innerText = dateRep
   appointDate.appoints.foreach(a => {
     val s = new SlotRow(a)
@@ -113,23 +91,13 @@ case class AppointColumn(appointDate: AppointDate) {
 }
 
 case class SlotRow(appoint: Appoint) {
-  val tmpl = """
-    <div style="cursor: pointer">
-      <div class="x-time"></div>
-      <div class="x-detail"></div>
-    </div>
-  """
 
-  val ele = Tmpl.createElement(tmpl)
   var eTime, eDetail: Element = _
+  val ele = div(style := "cursor: pointer")(
+    div(cb := (eTime = _)),
+    div(cb := (eDetail = _)),
+  )
 
-  DomUtil.traversex(ele, (name, e) => {
-    name match {
-      case "time" => eTime = e
-      case "detail" => eDetail = e
-      case _ =>
-    }
-  })
   eTime.innerText = appoint.time.toString()
   eDetail.innerText = detail
   ele.onclick(openDialog _)

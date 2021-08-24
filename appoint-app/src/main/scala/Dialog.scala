@@ -4,6 +4,8 @@ import org.scalajs.dom.{document, window, html}
 import scala.concurrent.Future
 import dev.myclinic.scala.web.{DomUtil, Tmpl}
 import dev.myclinic.scala.web.Implicits._
+import dev.myclinic.scala.web.html._
+import dev.myclinic.scala.web.Modifiers._
 import org.scalajs.dom.raw.{Element, MouseEvent}
 
 trait Dialog[R] {
@@ -30,9 +32,11 @@ private object DialogTmpl {
     </div>
   """
 
-  val backDrop = Tmpl.createElement("""
-    <div class="modal-dialog-backdrop"></div>
-  """)
+  val backDrop = div(cls := "modal-dialog-backdrop")
+
+  //   Tmpl.createElement("""
+  //   <div class="modal-dialog-backdrop"></div>
+  // """)
 
 }
 
@@ -45,20 +49,37 @@ object Dialog {
 }
 
 private class DialogImpl[R]() extends Dialog[R] {
-  val ele: Element = Tmpl.createElement(DialogTmpl.tmpl)
   var eTitle: Element = _
   var eCloseLink: Element = _
   var eContent: Element = _
   var eCommandBox: Element = _
-  DomUtil.traversex(ele, (name, e) => {
-    name match {
-      case "title" => eTitle = e
-      case "close-link" => eCloseLink = e
-      case "content" => eContent = e
-      case "command-box" => eCommandBox = e
-      case _ =>
+
+  //val ele: Element = Tmpl.createElement(DialogTmpl.tmpl)
+  val ele: Element = div(cls := "modal-dialog-content")(
+    div(cls := "d-flex title-wrapper justify-content-between")(
+      h3(cls := "d-inline-block", cb := (eTitle = _)),
+      a(
+        href := "",
+        style := "font-size: 1.2rem",
+        cls := "align-item-center",
+        cb := (eCloseLink = _)
+      )("&times;")
+    ),
+    div(style := "min-width:160px", cb := (eContent = _)),
+    div(cls := "command-box", cb := (eCommandBox = _))
+  )
+  DomUtil.traversex(
+    ele,
+    (name, e) => {
+      name match {
+        case "title"       => eTitle = e
+        case "close-link"  => eCloseLink = e
+        case "content"     => eContent = e
+        case "command-box" => eCommandBox = e
+        case _             =>
+      }
     }
-  })
+  )
   eCloseLink.onclick(cancel _)
 
   def title: String = eTitle.innerText
@@ -90,4 +111,3 @@ private class DialogImpl[R]() extends Dialog[R] {
 
   var onCancel: () => Unit = () => ()
 }
-

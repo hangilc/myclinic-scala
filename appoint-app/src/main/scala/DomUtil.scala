@@ -92,49 +92,62 @@ trait ElementModifier {
 
 object Modifiers {
 
-  private def create[A](f: Element => Unit): ElementModifier = {
-    new ElementModifier {
-      override def applyTo(e: Element): Unit = {
-        f(e)
+  case class Creator[A](f: (Element, A) => Unit) {
+    def :=(arg: A): ElementModifier = {
+      new ElementModifier {
+        override def applyTo(e: Element): Unit = f(e, arg)
       }
     }
   }
 
-  object cls {
-    def :=(cls: String): ElementModifier = create[String] { e =>
-      e.classList.add(cls)
-    }
+  val cls = Creator[String]((e, a) => {
+     for(c <- a.split("\\s+") )
+        e.classList.add(c)
+  })
+
+  val cb = Creator[Element => Unit]((e, handler) => handler(e))
+
+  def attr(name: String) = Creator[String]((e, a) => {
+    e.setAttribute(name, a)
+  })
+
+  val style = attr("style")
+
+  val href = Creator[String]((e, a) => {
+    val value = if( a.isEmpty ) "javascript:void(0)" else a
+    e.setAttribute("href", value)
+  })
+
+}
+
+class ElementEx(val ele: Element) {
+
+  def apply(modifiers: ElementModifier*): ElementEx = {
+    modifiers.foreach(_.applyTo(ele))
+    this
   }
 
-  object textModifier {
-    def :=(content: String): ElementModifier = create[String](e => {
-      val t = document.createTextNode(content)
-      e.appendChild(t)
-    })
+  def onclick(handler: MouseEvent => Unit): Element = {
+    ele.addEventListener("click", handler)
+    ele
   }
+
+  def onclick(handler: () => Unit): Element = {
+    onclick((_: MouseEvent) => handler())
+  }
+
 }
+
+object ElementEx {
+  def apply(e: Element): ElementEx = new ElementEx(e)
+}
+
 
 object Implicits {
 
-  implicit class ElementEx(val ele: Element) {
-
-    def apply(modifiers: ElementModifier*): ElementEx = {
-      modifiers.foreach(_.applyTo(ele))
-      this
-    }
-
-    def onclick(handler: MouseEvent => Unit): Element = {
-      ele.addEventListener("click", handler)
-      ele
-    }
-
-    def onclick(handler: () => Unit): Element = {
-      onclick((_: MouseEvent) => handler())
-    }
-
-  }
-
   implicit def toElement(ex: ElementEx): Element = ex.ele
+
+  implicit def toElementEx(e: Element): ElementEx = new ElementEx(e)
 
   implicit def toTextModifier(data: String): ElementModifier = {
     new ElementModifier {
@@ -161,11 +174,55 @@ object Implicits {
     }
   }
 
-  def div(modifiers: ElementModifier*): ElementEx = {
-    val e = document.createElement("div")
+  implicit def toListModifier(ms: List[ElementModifier]): ElementModifier = {
+    new ElementModifier {
+      override def applyTo(target: Element): Unit = {
+        ms.foreach(_.applyTo(target))
+      }
+    }
+  }
+
+}
+
+object html {
+
+  def tag(tag: String)(modifiers: ElementModifier*): ElementEx = {
+    val e = document.createElement(tag)
     val ex = ElementEx(e)
     ex.apply(modifiers: _*)
   }
 
+  def div(modifiers: ElementModifier*): ElementEx = {
+    tag("div")(modifiers: _*)
+  }
 
+  def h1(modifiers: ElementModifier*): ElementEx = {
+    tag("h1")(modifiers: _*)
+  }
+
+  def h2(modifiers: ElementModifier*): ElementEx = {
+    tag("h2")(modifiers: _*)
+  }
+
+  def h3(modifiers: ElementModifier*): ElementEx = {
+    tag("h3")(modifiers: _*)
+  }
+
+  def h4(modifiers: ElementModifier*): ElementEx = {
+    tag("h4")(modifiers: _*)
+  }
+
+  def h5(modifiers: ElementModifier*): ElementEx = {
+    tag("h5")(modifiers: _*)
+  }
+
+  def h6(modifiers: ElementModifier*): ElementEx = {
+    tag("h6")(modifiers: _*)
+  }
+
+  def a(modifiers: ElementModifier*): ElementEx = {
+    tag("a")(modifiers: _*)
+  }
+
+  
 }
