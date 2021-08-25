@@ -54,7 +54,6 @@ private class DialogImpl[R](title: String) extends Dialog[R] {
   val modal = new Bootstrap.Modal(ele)
 
   ele.addEventListener("hidden.bs.modal", (_: Event) => {
-    println("closed")
     modal.dispose()
     document.body.removeChild(ele)
     onClosedHandler(result)
