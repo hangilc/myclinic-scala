@@ -10,9 +10,18 @@ import dev.fujiwara.domq.Modifiers._
 import dev.fujiwara.domq.Html._
 import org.scalajs.dom.document
 import org.scalajs.dom.raw.Element
+import io.circe.Encoder
+import io.circe.syntax._
+import dev.myclinic.scala.model.JsonCodecs._
 
 import java.time.LocalDate
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+
+case class UpdateAppointArg(from: Appoint, to: Appoint)
+object UpdateAppointArg {
+  import io.circe.generic.semiauto._
+  implicit val argEncoder: Encoder[UpdateAppointArg] = deriveEncoder
+}
 
 object JsMain {
   def main(args: Array[String]): Unit = {
@@ -22,10 +31,13 @@ object JsMain {
     body.appendChild(AppointRow.ele)
     val startDate = DateUtil.startDayOfWeek(LocalDate.now())
     val endDate = startDate.plusDays(6)
-    val api = Api
-    for (apps <- api.listAppoint(startDate, endDate)) {
+    for (apps <- Api.listAppoint(startDate, endDate)) {
       val cols = AppointDate.classify(apps).map(AppointColumn)
       cols.foreach(AppointRow.add)
+      for(app <- apps){
+        val arg = UpdateAppointArg(app, app)
+        println(arg.asJson)
+      }
     }
   }
 
