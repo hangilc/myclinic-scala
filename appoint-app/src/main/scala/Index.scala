@@ -2,7 +2,7 @@ package dev.myclinic.web
 
 import dev.myclinic.scala.model._
 import dev.myclinic.scala.util.DateUtil
-import dev.myclinic.scala.web.{Api, Dialog, Tmpl, DomUtil}
+import dev.myclinic.scala.web.{Api, Dialog, Tmpl, DomUtil, Bs}
 import dev.myclinic.scala.web.Modifiers._
 import dev.myclinic.scala.web.Implicits._
 import dev.myclinic.scala.web.html._
@@ -110,15 +110,37 @@ case class SlotRow(appoint: Appoint) {
     }
   }
 
+  def dateTimeRep: String = {
+    val d = appoint.date
+    val t = appoint.time
+    s"${d.getMonthValue()}月${d.getDayOfMonth()}日${t.getHour()}時${t.getMinute()}分"
+  }
+
   def openDialog(): Unit = {
-    val dlog = Dialog.create("診察予約")
-    var eOk, eCancel: Element = null
-    dlog.commandBox(
-      button(cb := (eOk = _), attr("type") := "button", cls := "btn btn-outline-primary")("ＯＫ"),
-      button(cb := (eCancel = _), attr("type") := "button", cls := "btn btn-outline-secondary ms-2")("キャンセル"),
-    )
-    eCancel.onclick(() => dlog.cancel())
+    val dlog = Dialog[Int]("診察予約")
     dlog.open()
+    dlog.content(
+      div(dateTimeRep),
+      form(
+        div(cls := "row")(
+          div(cls := "col-auto")(
+            label(cls := "form-label")("患者名")
+          ),
+          div(cls := "col-auto")(
+            input(attr("type") := "text", cls := "form-control")
+          )
+        )
+      )
+    )
+    dlog.commands(
+      button(Bs.btn("btn-secondary"), Dialog.closeButton)("キャンセル"),
+      button(Bs.btn("btn-primary"), cb := (e => e.onclick(() => {
+        dlog.result = Some(12)
+        dlog.close()
+      })))("予約する")
+    )
+    dlog.onClosed(println(_))
+    println("opened")
   }
 
 }

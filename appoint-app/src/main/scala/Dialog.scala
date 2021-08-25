@@ -1,114 +1,86 @@
 package dev.myclinic.scala.web
 
-import org.scalajs.dom.{document, window, html}
-import scala.concurrent.Future
-import dev.myclinic.scala.web.{DomUtil, Tmpl}
+import dev.myclinic.scala.web.Bs
+import dev.myclinic.scala.web.DomUtil
 import dev.myclinic.scala.web.Implicits._
-import dev.myclinic.scala.web.html._
 import dev.myclinic.scala.web.Modifiers._
-import org.scalajs.dom.raw.{Element, MouseEvent}
+import dev.myclinic.scala.web.Tmpl
+import dev.myclinic.scala.web.html._
+import org.scalajs.dom.document
+import org.scalajs.dom.html
+import org.scalajs.dom.raw.Element
+import org.scalajs.dom.raw.Event
+import org.scalajs.dom.raw.MouseEvent
+
+import scala.concurrent.Future
 
 trait Dialog[R] {
-  var title: String
   def open(): Unit
-  def cancel(): Unit
-  def close(result: R): Unit
-  val content: Element
-  val commandBox: Element
-  var onComplete: R => Unit
-  var onCancel: () => Unit
-}
-
-private object DialogTmpl {
-  val tmpl = """
-    <div class="modal-dialog-content">
-        <div class="d-flex title-wrapper justify-content-between">
-            <h3 class="d-inline-block x-title">タイトル</h3>
-            <a href="javascript:void(0)" style="font-size: 1.2rem" 
-              class="align-item-center x-close-link">&times;</a>
-        </div>
-        <div class="x-content" style="min-width:160px"></div>
-        <div class="command-box x-footer"></div>
-    </div>
-  """
-
-  val backDrop = div(cls := "modal-dialog-backdrop")
-
-  //   Tmpl.createElement("""
-  //   <div class="modal-dialog-backdrop"></div>
-  // """)
-
+  def content: Element
+  def commands: Element
+  var result: Option[R]
+  def close(): Unit
+  def onClosed(handler: Option[R] => Unit): Unit
 }
 
 object Dialog {
-  def create[R](title: String): Dialog[R] = {
-    val dlog = new DialogImpl[R]()
-    dlog.title = title
+  def apply[R](title: String): Dialog[R] = {
+    val dlog = new DialogImpl[R](title)
     dlog
   }
 
+  def closeButton: ElementModifier = attr("data-bs-dismiss") := "modal"
 }
 
-private class DialogImpl[R]() extends Dialog[R] {
-  var eTitle: Element = _
-  var eCloseLink: Element = _
-  var eContent: Element = _
-  var eCommandBox: Element = _
-
-  //val ele: Element = Tmpl.createElement(DialogTmpl.tmpl)
-  val ele: Element = div(cls := "modal-dialog-content")(
-    div(cls := "d-flex title-wrapper justify-content-between")(
-      h3(cls := "d-inline-block", cb := (eTitle = _)),
-      a(
-        href := "",
-        style := "font-size: 1.2rem",
-        cls := "align-item-center",
-        cb := (eCloseLink = _)
-      )(raw("&times;"))
-    ),
-    div(style := "min-width:160px", cb := (eContent = _)),
-    div(cls := "command-box", cb := (eCommandBox = _))
+private class DialogImpl[R](title: String) extends Dialog[R] {
+  var result: Option[R] = None
+  var eContent, eCommands: Element = null
+  val ele = div(cls := "modal", attr("tabindex") := "-1")(
+    div(cls := "modal-dialog")(
+      div(cls := "modal-content")(
+        div(cls := "modal-header")(
+          h5(cls := "modal-title")(title),
+          button(attr("type") := "button", cls := "btn-close", Dialog.closeButton)
+        ),
+        div(cls := "modal-body", cb := (eContent = _)),
+        div(cls := "modal-footer", cb := (eCommands = _))(
+          // button(attr("type") := "button", cls := "btn btn-secondary",
+          //   Dialog.closeButton)("Close"),
+          // button(attr("type") := "button", cls := "btn btn-primary")("Save changes")
+        )
+      )
+    )
   )
-  DomUtil.traversex(
-    ele,
-    (name, e) => {
-      name match {
-        case "title"       => eTitle = e
-        case "close-link"  => eCloseLink = e
-        case "content"     => eContent = e
-        case "command-box" => eCommandBox = e
-        case _             =>
-      }
-    }
-  )
-  eCloseLink.onclick(cancel _)
 
-  def title: String = eTitle.innerText
-
-  def title_=(v: String): Unit = eTitle.innerText = v;
-
-  def open(): Unit = {
-    document.body.appendChild(DialogTmpl.backDrop)
-    document.body.appendChild(ele)
+  def content: Element = {
+    require(eContent != null)
+    eContent
   }
 
-  def cancel(): Unit = {
+  def commands: Element = {
+    require(eCommands != null)
+    eCommands
+  }
+
+  val modal = new Bs.Modal(ele)
+
+  ele.addEventListener("hidden.bs.modal", (e: Event) => {
+    println("closed")
+    modal.dispose()
     document.body.removeChild(ele)
-    document.body.removeChild(DialogTmpl.backDrop)
-    onCancel()
+    onCloseHandler(result)
+  })
+
+  override def open(): Unit = {
+    modal.show()
+    document.body(style := "hidden: auto")
   }
 
-  def close(result: R): Unit = {
-    document.body.removeChild(ele)
-    document.body.removeChild(DialogTmpl.backDrop)
-    onComplete(result)
+  override def close(): Unit = {
+    modal.hide()
   }
 
-  val content: Element = eContent
+  private var onCloseHandler: Option[R] => Unit = _ => ()
 
-  val commandBox: Element = eCommandBox
-
-  var onComplete: R => Unit = _ => ()
-
-  var onCancel: () => Unit = () => ()
+  def onClosed(handler: Option[R] => Unit): Unit = onCloseHandler = handler
 }

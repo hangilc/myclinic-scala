@@ -80,8 +80,11 @@ object DomUtil {
     )
   }
 
-  def onClick(ele: Element, handler: () => Unit): Unit = {
-    ele.addEventListener("click", { (_: MouseEvent) => handler() })
+  private var genIdCounter = 0
+
+  def genId(): String = {
+    genIdCounter += 1
+    s"genId-$genIdCounter"
   }
 
 }
@@ -110,6 +113,22 @@ object Modifiers {
   val href = Creator[String]((e, a) => {
     val value = if (a.isEmpty) "javascript:void(0)" else a
     e.setAttribute("href", value)
+  })
+
+  val ml = Creator[Int]((e, a) => {
+    e.classList.add(s"ms-$a")
+  })
+
+  val mr = Creator[Int]((e, a) => {
+    e.classList.add(s"me-$a")
+  })
+
+  val mt = Creator[Int]((e, a) => {
+    e.classList.add(s"mt-$a")
+  })
+
+  val mb = Creator[Int]((e, a) => {
+    e.classList.add(s"mb-$a")
   })
 
 }
@@ -175,46 +194,70 @@ object Implicits {
 
 object html {
 
+  case class Tag(tag: String) {
+    def apply(modifiers: ElementModifier*): ElementEx = {
+      val e = document.createElement(tag)
+      val ex = ElementEx(e)
+      ex.apply(modifiers: _*)
+    }
+  }
+
   def tag(tag: String)(modifiers: ElementModifier*): ElementEx = {
     val e = document.createElement(tag)
     val ex = ElementEx(e)
     ex.apply(modifiers: _*)
   }
 
-  def div(modifiers: ElementModifier*): ElementEx = {
-    tag("div")(modifiers: _*)
+  val div = Tag("div")
+  val h1 = Tag("h1")
+  val h2 = Tag("h2")
+  val h3 = Tag("h3")
+  val h4 = Tag("h4")
+  val h5 = Tag("h5")
+  val h6 = Tag("h6")
+  val a = Tag("a")
+  val button = Tag("button")
+  val p = Tag("p")
+  val form = Tag("form")
+  val input = Tag("input")
+  val label = Tag("label")
+
+}
+
+object Bs {
+  import Modifiers._
+
+  def btn(kind: String) = List(
+    attr("type") := "button",
+    cls := s"btn $kind"
+  )
+
+  @js.native
+  @JSGlobal("bootstrap.Modal")
+  class Modal(ele: Element) extends js.Object {
+    def toggle(): Unit = js.native
+    def show(): Unit = js.native
+    def hide(): Unit = js.native
+    def dispose(): Unit = js.native
   }
 
-  def h1(modifiers: ElementModifier*): ElementEx = {
-    tag("h1")(modifiers: _*)
-  }
+}
 
-  def h2(modifiers: ElementModifier*): ElementEx = {
-    tag("h2")(modifiers: _*)
-  }
+object Widgets {
 
-  def h3(modifiers: ElementModifier*): ElementEx = {
-    tag("h3")(modifiers: _*)
-  }
+  import html._
+  import Modifiers._
+  import Implicits._
 
-  def h4(modifiers: ElementModifier*): ElementEx = {
-    tag("h4")(modifiers: _*)
-  }
-
-  def h5(modifiers: ElementModifier*): ElementEx = {
-    tag("h5")(modifiers: _*)
-  }
-
-  def h6(modifiers: ElementModifier*): ElementEx = {
-    tag("h6")(modifiers: _*)
-  }
-
-  def a(modifiers: ElementModifier*): ElementEx = {
-    tag("a")(modifiers: _*)
-  }
-
-  def button(modifiers: ElementModifier*): ElementEx = {
-    tag("button")(modifiers: _*)
+  def okCancel(): (Element, Element, List[Element]) = {
+    var eOk, eCancel: Element = null
+    val eles = List(
+      button(cb := (eOk = _), Bs.btn("btn-outline-primary"))("ＯＫ"),
+      button(cb := (eCancel = _), Bs.btn("btn-outline-secondary"), ml := 2)(
+        "キャンセル"
+      )
+    )
+    (eOk, eCancel, eles.map(_.ele))
   }
 
 }
