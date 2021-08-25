@@ -1,7 +1,6 @@
 package dev.myclinic.scala.web
 
 import org.scalajs.dom.document
-import org.scalajs.dom.raw.DocumentFragment
 import org.scalajs.dom.raw.Element
 import org.scalajs.dom.raw.HTMLElement
 import org.scalajs.dom.raw.HTMLInputElement
@@ -9,10 +8,12 @@ import org.scalajs.dom.raw.MouseEvent
 
 import scalajs.js
 import scalajs.js.annotation.JSGlobal
+import org.scalajs.dom.raw.Node
+import org.scalajs.dom.raw.NodeSelector
 
 @js.native
 @JSGlobal
-abstract class DocumentFragmentEx extends DocumentFragment {
+abstract class DocumentFragment extends Node with NodeSelector {
 
   val childElementCount: Int = js.native
   val firstElementChild: Element = js.native
@@ -23,7 +24,7 @@ abstract class DocumentFragmentEx extends DocumentFragment {
 @JSGlobal
 abstract class HTMLTemplateElement extends HTMLElement {
 
-  val content: DocumentFragmentEx = js.native
+  val content: DocumentFragment = js.native
 
 }
 

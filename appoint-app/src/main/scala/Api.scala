@@ -1,9 +1,10 @@
 package dev.myclinic.scala.web
 
-import java.time.{LocalDate, LocalTime}
 import dev.myclinic.scala.model._
 import dev.myclinic.scala.web.HttpClient
 import dev.myclinic.scala.web.Params
+
+import java.time.LocalDate
 import scala.concurrent.Future
 
 object Api {

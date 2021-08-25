@@ -11,6 +11,7 @@ import dev.myclinic.scala.web.Modifiers._
 import dev.myclinic.scala.web.html._
 import org.scalajs.dom.document
 import org.scalajs.dom.raw.Element
+import dev.fujiwara.domq.{Template, Traverse, GenId}
 
 import java.time.LocalDate
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
@@ -18,16 +19,19 @@ import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 object JsMain {
   def main(args: Array[String]): Unit = {
     val body = document.body
-    body(cls := "px-5 pt-1 pb-5")
-    body.appendChild(banner)
-    body.appendChild(AppointRow.ele)
-    val startDate = DateUtil.startDayOfWeek(LocalDate.now())
-    val endDate = startDate.plusDays(6)
-    val api = Api
-    for (apps <- api.listAppoint(startDate, endDate)) {
-      val cols = AppointDate.classify(apps).map(AppointColumn)
-      cols.foreach(AppointRow.add)
+    for(i <- 1 to 10){
+      println(GenId.genId())
     }
+    // body(cls := "px-5 pt-1 pb-5")
+    // body.appendChild(banner)
+    // body.appendChild(AppointRow.ele)
+    // val startDate = DateUtil.startDayOfWeek(LocalDate.now())
+    // val endDate = startDate.plusDays(6)
+    // val api = Api
+    // for (apps <- api.listAppoint(startDate, endDate)) {
+    //   val cols = AppointDate.classify(apps).map(AppointColumn)
+    //   cols.foreach(AppointRow.add)
+    // }
   }
 
   val banner = div(cls := "container-fluid")(

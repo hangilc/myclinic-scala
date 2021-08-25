@@ -49,7 +49,8 @@ lazy val server = project.in(file("server"))
   )
 
 lazy val appointApp = project.in(file("appoint-app"))
-  .dependsOn(modelJS, utilJS, utilJS)
+  .enablePlugins(ScalaJSPlugin)
+  .dependsOn(domq, modelJS, utilJS, utilJS)
   .settings(
     name := "myclinic-appoint",
       scalaJSUseMainModuleInitializer := true,
@@ -59,6 +60,16 @@ lazy val appointApp = project.in(file("appoint-app"))
         "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion,
      ),
   )
+
+lazy val domq = project.in(file("domq"))
+  .enablePlugins(ScalaJSPlugin)
+  .settings(
+    name := "domq",
+    libraryDependencies ++= Seq(
+      "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion,
+    ),
+  )
+
 
 lazy val model = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Pure)
