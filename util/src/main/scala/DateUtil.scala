@@ -1,6 +1,6 @@
 package dev.myclinic.scala.util
 
-import java.time.{LocalDate, LocalTime}
+import java.time.LocalDate
 
 object DateUtil {
 

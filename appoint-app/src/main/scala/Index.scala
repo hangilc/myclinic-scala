@@ -2,25 +2,18 @@ package dev.myclinic.web
 
 import dev.myclinic.scala.model._
 import dev.myclinic.scala.util.DateUtil
-import dev.myclinic.scala.web.{Api, Dialog, Tmpl, DomUtil, Bs}
-import dev.myclinic.scala.web.Modifiers._
+import dev.myclinic.scala.web.Api
+import dev.myclinic.scala.web.Binding._
+import dev.myclinic.scala.web.Bs
+import dev.myclinic.scala.web.Dialog
 import dev.myclinic.scala.web.Implicits._
+import dev.myclinic.scala.web.Modifiers._
 import dev.myclinic.scala.web.html._
-import io.circe.parser.decode
-import org.scalajs.dom
 import org.scalajs.dom.document
-import org.scalajs.dom.experimental.URL
-import org.scalajs.dom.experimental.URLSearchParams
-import org.scalajs.dom.ext.Ajax
 import org.scalajs.dom.raw.Element
 
 import java.time.LocalDate
-import java.time.LocalTime
-import scala.concurrent._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
-import scala.scalajs.js.Dictionary
-import scala.util.Failure
-import scala.util.Success
 
 object JsMain {
   def main(args: Array[String]): Unit = {
@@ -117,6 +110,8 @@ case class SlotRow(appoint: Appoint) {
   }
 
   def openDialog(): Unit = {
+    val patientNameInput = InputBinding()
+    val patientNameError = TextBinding()
     val dlog = Dialog[Int]("診察予約")
     dlog.open()
     dlog.content(
@@ -127,20 +122,36 @@ case class SlotRow(appoint: Appoint) {
             label(cls := "form-label")("患者名")
           ),
           div(cls := "col-auto")(
-            input(attr("type") := "text", cls := "form-control")
-          )
+            input(attr("type") := "text", cls := "form-control",
+              bindTo(patientNameInput)),
+            div(cls := "invalid-feedback", bindTo(patientNameError))         )
         )
       )
     )
     dlog.commands(
       button(Bs.btn("btn-secondary"), Dialog.closeButton)("キャンセル"),
-      button(Bs.btn("btn-primary"), cb := (e => e.onclick(() => {
-        dlog.result = Some(12)
-        dlog.close()
-      })))("予約する")
+      button(Bs.btn("btn-primary"), onclick := onEnterClick)("予約する")
     )
+    patientNameInput.value = "清水"
     dlog.onClosed(println(_))
     println("opened")
+
+    def onEnterClick(): Unit = {
+      val ok = validatePatientNameInput()
+      if( ok ){
+        dlog.close()
+      }
+    }
+
+    def validatePatientNameInput(): Boolean = {
+      val s = patientNameInput.value
+      if( s.isEmpty ){
+        patientNameError.text = "患者名が入力されていません。"
+        patientNameInput.setValid(false)
+      } else {
+        patientNameInput.setValid(true)
+      }
+    }
   }
 
 }

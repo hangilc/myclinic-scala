@@ -13,7 +13,7 @@ val circeVersion = "0.14.1"
 val scalaJavaTimeVersion = "2.2.2"
 val scalaJSDomVersion = "1.1.0"
 
-// ThisBuild / scalacOptions ++= Seq("-feature", "-deprecation")
+ThisBuild / scalacOptions ++= Seq("-Wunused")
 
 val rootDir = ThisBuild / baseDirectory
 

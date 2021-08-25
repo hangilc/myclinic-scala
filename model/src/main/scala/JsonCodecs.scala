@@ -1,8 +1,9 @@
 package dev.myclinic.scala.model
 
-import java.time.{LocalDate, LocalTime}
-import java.time.format.DateTimeFormatter
 import io.circe._
+
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 
 object JsonCodecs {
   private val timeFormatter: DateTimeFormatter =

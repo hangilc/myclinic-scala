@@ -1,13 +1,12 @@
 package dev.myclinic.scala.web
 
-import org.scalajs.dom.raw.{
-  Element,
-  HTMLElement,
-  DocumentFragment,
-  HTMLCollection,
-  MouseEvent
-}
-import org.scalajs.dom.{document}
+import org.scalajs.dom.document
+import org.scalajs.dom.raw.DocumentFragment
+import org.scalajs.dom.raw.Element
+import org.scalajs.dom.raw.HTMLElement
+import org.scalajs.dom.raw.HTMLInputElement
+import org.scalajs.dom.raw.MouseEvent
+
 import scalajs.js
 import scalajs.js.annotation.JSGlobal
 
@@ -92,15 +91,25 @@ object DomUtil {
 case class ElementModifier(modifier: Element => Unit)
 
 object Modifiers {
+  import Implicits._
 
   case class Creator[A](f: (Element, A) => Unit) {
     def :=(arg: A): ElementModifier = ElementModifier(e => f(e, arg))
   }
 
-  val cls = Creator[String]((e, a) => {
-    for (c <- a.split("\\s+"))
-      e.classList.add(c)
-  })
+  case class ClsCreator() {
+    def :=(arg: String) = ElementModifier(e => {
+      for (c <- arg.split("\\s+"))
+        e.classList.add(c)
+    })
+
+    def :-(arg: String) = ElementModifier(e => {
+      for (c <- arg.split("\\s+"))
+        e.classList.remove(c)
+    })
+  }
+
+  val cls = ClsCreator()
 
   val cb = Creator[Element => Unit]((e, handler) => handler(e))
 
@@ -129,6 +138,18 @@ object Modifiers {
 
   val mb = Creator[Int]((e, a) => {
     e.classList.add(s"mb-$a")
+  })
+
+  def bindTo(target: Binding.TextBinding) = ElementModifier(e => {
+    target.bind(e)
+  })
+
+  def bindTo(target: Binding.InputBinding) = ElementModifier(e => {
+    target.bind(e.asInstanceOf[HTMLInputElement])
+  })
+
+  val onclick = Creator[() => Unit]((e, a) => {
+    e.onclick(a)
   })
 
 }
@@ -234,7 +255,7 @@ object Bs {
 
   @js.native
   @JSGlobal("bootstrap.Modal")
-  class Modal(ele: Element) extends js.Object {
+  class Modal(val ele: Element) extends js.Object {
     def toggle(): Unit = js.native
     def show(): Unit = js.native
     def hide(): Unit = js.native
@@ -243,21 +264,54 @@ object Bs {
 
 }
 
-object Widgets {
-
-  import html._
+object Binding {
   import Modifiers._
   import Implicits._
 
-  def okCancel(): (Element, Element, List[Element]) = {
-    var eOk, eCancel: Element = null
-    val eles = List(
-      button(cb := (eOk = _), Bs.btn("btn-outline-primary"))("ＯＫ"),
-      button(cb := (eCancel = _), Bs.btn("btn-outline-secondary"), ml := 2)(
-        "キャンセル"
-      )
-    )
-    (eOk, eCancel, eles.map(_.ele))
+  case class TextBinding() {
+    var ele: Element = null
+
+    def bind(e: Element): Unit = {
+      ele = e
+    }
+
+    def text: String = {
+      require(ele != null)
+      ele.innerText
+    }
+
+    def text_=(value: String): Unit = {
+      require(ele != null)
+      ele.innerText = value
+    }
+  }
+
+  case class InputBinding() {
+    var ele: HTMLInputElement = null
+
+    def bind(e: HTMLInputElement): Unit = {
+      ele = e
+    }
+
+    def value: String = {
+      require(ele != null)
+      ele.value
+    }
+
+    def value_=(v: String): Unit = {
+      require(ele != null)
+      ele.value = v
+    }
+
+    def setValid(valid: Boolean): Boolean = {
+      if( valid ){
+        ele(cls :- "is-invalid", cls := "is-valid")
+      } else {
+        ele(cls :- "is-valid", cls := "is-invalid")
+      }
+      valid
+    }
   }
 
 }
+

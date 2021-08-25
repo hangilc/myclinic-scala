@@ -1,12 +1,13 @@
 package dev.myclinic.scala.db
 
-import java.time.{LocalDate, LocalTime}
-import dev.myclinic.scala.model._
 import cats.effect.IO
-import cats._
 import cats.implicits._
+import dev.myclinic.scala.model._
 import doobie._
 import doobie.implicits._
+
+import java.time.LocalDate
+import java.time.LocalTime
 
 trait DbExecutor {
   def exec[A](s: ConnectionIO[A]): IO[A]

@@ -1,18 +1,12 @@
 package dev.myclinic.scala.web
 
 import dev.myclinic.scala.web.Bs
-import dev.myclinic.scala.web.DomUtil
 import dev.myclinic.scala.web.Implicits._
 import dev.myclinic.scala.web.Modifiers._
-import dev.myclinic.scala.web.Tmpl
 import dev.myclinic.scala.web.html._
 import org.scalajs.dom.document
-import org.scalajs.dom.html
 import org.scalajs.dom.raw.Element
 import org.scalajs.dom.raw.Event
-import org.scalajs.dom.raw.MouseEvent
-
-import scala.concurrent.Future
 
 trait Dialog[R] {
   def open(): Unit
@@ -64,7 +58,7 @@ private class DialogImpl[R](title: String) extends Dialog[R] {
 
   val modal = new Bs.Modal(ele)
 
-  ele.addEventListener("hidden.bs.modal", (e: Event) => {
+  ele.addEventListener("hidden.bs.modal", (_: Event) => {
     println("closed")
     modal.dispose()
     document.body.removeChild(ele)
