@@ -7,6 +7,7 @@ import dev.fujiwara.domq.Modifiers._
 import dev.fujiwara.domq.Html._
 import dev.fujiwara.domq.ElementQ._
 import dev.fujiwara.domq.Binding._
+import scala.annotation.unused
 
 // trait Dialog[R] {
 //   def open(): Unit
@@ -26,29 +27,37 @@ class Dialog[R](handler: R => Unit) {
       div(cls := "modal-content")(
         div(cls := "modal-header")(
           h5(cls := "modal-title", bindTo(titleBinding)),
-          button(attr("type") := "button", cls := "btn-close", Dialog.closeButton)
+          button(
+            attr("type") := "button",
+            cls := "btn-close",
+            Dialog.closeButton
+          )
         ),
-        div(cls := "modal-body", cb := (setupContent _))),
-        div(cls := "modal-footer", cb := (setupCommandBox _))
-      )
+        div(cls := "modal-body", cb := (setupContent _))
+      ),
+      div(cls := "modal-footer", cb := (setupCommandBox _))
     )
-  
+  )
+
   val modal = new Bootstrap.Modal(ele)
 
   titleBinding.text = "Untitled"
 
-  def setupContent(content: Element): Unit = ()
-  def setupCommandBox(commandBOx: Element): Unit = ()
+  def setupContent(@unused content: Element): Unit = ()
+  def setupCommandBox(@unused commandBOx: Element): Unit = ()
 
-  ele.addEventListener("hidden.bs.modal", (_: Event) => {
-    modal.dispose()
-    document.body.removeChild(ele)
-    if( result.isDefined ){
-      handler(result.get)
+  ele.addEventListener(
+    "hidden.bs.modal",
+    (_: Event) => {
+      modal.dispose()
+      document.body.removeChild(ele)
+      if (result.isDefined) {
+        handler(result.get)
+      }
     }
-  })
+  )
 
-def open(): Unit = {
+  def open(): Unit = {
     modal.show()
     document.body(style := "hidden: auto")
   }
@@ -56,14 +65,17 @@ def open(): Unit = {
   def close(): Unit = {
     modal.hide()
   }
+
+  def title: String = titleBinding.text
+
+  def title_=(v: String): Unit = titleBinding.text = v
 }
 
 object Dialog {
 
   def closeButton: Modifier = attr("data-bs-dismiss") := "modal"
-  
-}
 
+}
 
 // object Dialog {
 //   def apply[R](title: String): Dialog[R] = {
