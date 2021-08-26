@@ -33,7 +33,7 @@ object ParamValue {
 class Params(){
   private val items = ListBuffer.empty[(String, String)]
 
-  def add(k: String, p: ParamValue){
+  def add(k: String, p: ParamValue): Unit = {
     val pair = (k, p.encode())
     items += pair
   }

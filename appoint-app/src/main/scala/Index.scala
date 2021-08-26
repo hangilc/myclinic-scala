@@ -3,6 +3,7 @@ package dev.myclinic.web
 import dev.myclinic.scala.model._
 import dev.myclinic.scala.util.DateUtil
 import dev.myclinic.scala.web.Api
+import dev.myclinic.scala.web.appoint.MakeAppointDialog
 import dev.fujiwara.domq.Binding._
 import dev.fujiwara.domq.Dialog
 import dev.fujiwara.domq.ElementQ._
@@ -12,7 +13,6 @@ import org.scalajs.dom.document
 import org.scalajs.dom.raw.Element
 import io.circe.Encoder
 import io.circe.syntax._
-import dev.myclinic.scala.model.JsonCodecs._
 
 import java.time.LocalDate
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
@@ -67,7 +67,7 @@ object AppointRow {
     div(cls := "row mx-0", cb := { e => { eRow = e } })
   )
 
-  def add(c: AppointColumn) {
+  def add(c: AppointColumn): Unit = {
     eRow.appendChild(c.ele)
   }
 }
@@ -121,61 +121,65 @@ case class SlotRow(appoint: Appoint) {
   }
 
   def openDialog(): Unit = {
-    val patientNameInput = InputBinding()
-    val patientNameError = TextBinding()
-    val dlog = Dialog[Int]("診察予約")
-    dlog.open()
-    dlog.content(
-      div(dateTimeRep),
-      form(
-        div(cls := "row")(
-          div(cls := "col-auto")(
-            label(cls := "form-label")("患者名")
-          ),
-          div(cls := "col-auto")(
-            input(
-              attr("type") := "text",
-              cls := "form-control",
-              bindTo(patientNameInput)
-            ),
-            div(cls := "invalid-feedback", bindTo(patientNameError))
-          )
-        )
-      )
-    )
-    dlog.commands(
-      button(
-        attr("type") := "button",
-        cls := "btn btn-secondary",
-        Dialog.closeButton
-      )(
-        "キャンセル"
-      ),
-      button(
-        attr("type") := "button",
-        cls := "btn btn-primary",
-        onclick := (_ => onEnterClick())
-      )("予約する")
-    )
-    patientNameInput.value = "清水"
-    dlog.onClosed(println(_))
-
-    def onEnterClick(): Unit = {
-      val ok = validatePatientNameInput()
-      if (ok) {
-        dlog.close()
-      }
-    }
-
-    def validatePatientNameInput(): Boolean = {
-      val s = patientNameInput.value
-      if (s.isEmpty) {
-        patientNameError.text = "患者名が入力されていません。"
-        patientNameInput.setValid(false)
-      } else {
-        patientNameInput.setValid(true)
-      }
-    }
+    MakeAppointDialog.open(name => {
+      println("name", name)
+    })
   }
+
+  // def onDialogOrig(): Unit = {
+  //   val patientNameInput = InputBinding()
+  //   val patientNameError = TextBinding()
+  //   val dlog = Dialog[Int]("診察予約")
+  //   dlog.open()
+  //   dlog.content(
+  //     div(dateTimeRep),
+  //     form(
+  //       div(cls := "row")(
+  //         div(cls := "col-auto")(
+  //           label(cls := "form-label")("患者名")
+  //         ),
+  //         div(cls := "col-auto")(
+  //           input(
+  //             attr("type") := "text",
+  //             cls := "form-control",
+  //             bindTo(patientNameInput)
+  //           ),
+  //           div(cls := "invalid-feedback", bindTo(patientNameError))
+  //         )
+  //       )
+  //     )
+  //   )
+  //   dlog.commands(
+  //     button(
+  //       attr("type") := "button",
+  //       cls := "btn btn-secondary",
+  //       Dialog.closeButton
+  //     )(
+  //       "キャンセル"
+  //     ),
+  //     button(
+  //       attr("type") := "button",
+  //       cls := "btn btn-primary",
+  //       onclick := (_ => onEnterClick())
+  //     )("予約する")
+  //   )
+
+  //   def onEnterClick(): Unit = {
+  //     val ok = validatePatientNameInput()
+  //     if (ok) {
+  //       dlog.close()
+  //     }
+  //   }
+
+  //   def validatePatientNameInput(): Boolean = {
+  //     val s = patientNameInput.value
+  //     if (s.isEmpty) {
+  //       patientNameError.text = "患者名が入力されていません。"
+  //       patientNameInput.setValid(false)
+  //     } else {
+  //       patientNameInput.setValid(true)
+  //     }
+  //   }
+  // }
 
 }
