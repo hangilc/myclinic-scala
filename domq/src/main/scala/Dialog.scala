@@ -33,9 +33,9 @@ class Dialog[R](handler: R => Unit) {
             Dialog.closeButton
           )
         ),
-        div(cls := "modal-body", cb := (setupContent _))
-      ),
-      div(cls := "modal-footer", cb := (setupCommandBox _))
+        div(cls := "modal-body", cb := (setupContent _)),
+        div(cls := "modal-footer", cb := (setupCommandBox _))
+      )
     )
   )
 

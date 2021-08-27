@@ -121,7 +121,7 @@ case class SlotRow(appoint: Appoint) {
   }
 
   def openDialog(): Unit = {
-    MakeAppointDialog.open(name => {
+    MakeAppointDialog.open(appoint, name => {
       println("name", name)
     })
   }
