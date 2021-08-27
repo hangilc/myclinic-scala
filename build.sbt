@@ -51,7 +51,7 @@ lazy val server = project.in(file("server"))
 
 lazy val appointApp = project.in(file("appoint-app"))
   .enablePlugins(ScalaJSPlugin)
-  .dependsOn(domq, modelJS, utilJS, utilJS)
+  .dependsOn(domq, modelJS, utilJS, utilJS, clientJS)
   .settings(
     name := "myclinic-appoint",
       scalaJSUseMainModuleInitializer := true,

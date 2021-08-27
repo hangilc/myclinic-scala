@@ -24,25 +24,30 @@ object ParamValue {
   }
 }
 
-class Params(){
+trait URIComponentEncoder {
+  def encode(src: String): String
+}
+
+class Params()(implicit compEncoder: URIComponentEncoder){
   private val items = ListBuffer.empty[(String, String)]
 
   def add(k: String, p: ParamValue): Unit = {
-    val pair = (k, p.encode())
+    val pair = (k, compEncoder.encode(p.encode()))
     items += pair
   }
 
   def isEmpty: Boolean = items.isEmpty
 
   def encode(): String = {
-    val d = Dictionary(items.toList: _*)
-    val p = new URLSearchParams(d)
-    p.toString()
+    items.map(_ match {
+      case (k, "") => k
+      case (k, v) => s"$k=$v"
+    }).mkString("&")
   }
 }
 
 object Params {
-  def apply(items: (String, ParamValue)*) : Params = {
+  def apply(items: (String, ParamValue)*)(implicit compEncoder: URIComponentEncoder) : Params = {
     val params = new Params()
     for((k, p) <- items){
       params.add(k, p)
