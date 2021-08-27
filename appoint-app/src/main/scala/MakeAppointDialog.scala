@@ -9,8 +9,6 @@ import dev.myclinic.scala.util.KanjiDate
 import dev.fujiwara.domq.Binding.InputBinding
 import dev.fujiwara.domq.Binding.TextBinding
 import dev.fujiwara.domq.Binding.bindTo
-import org.scalajs.dom.raw.MouseEvent
-import scala.annotation.unused
 
 class MakeAppointDialog(appoint: Appoint, handler: String => Unit)
     extends Dialog[String]() {

@@ -7,7 +7,6 @@ import dev.fujiwara.domq.Modifiers._
 import dev.fujiwara.domq.Html._
 import dev.fujiwara.domq.ElementQ._
 import dev.fujiwara.domq.Binding._
-import scala.annotation.unused
 
 class Dialog[R]() {
   val titleBinding = Binding.TextBinding()
@@ -65,49 +64,3 @@ object Dialog {
   def closeButton: Modifier = attr("data-bs-dismiss") := "modal"
 
 }
-
-// object Dialog {
-//   def apply[R](title: String): Dialog[R] = {
-//     val dlog = new DialogImpl[R](title)
-//     dlog
-//   }
-
-//   def closeButton: Modifier = attr("data-bs-dismiss") := "modal"
-// }
-
-// private class DialogImpl[R](title: String) extends Dialog[R] {
-//   var result: Option[R] = None
-//   var eContent, eCommands: Element = null
-//   )
-
-//   def content: Element = {
-//     require(eContent != null)
-//     eContent
-//   }
-
-//   def commands: Element = {
-//     require(eCommands != null)
-//     eCommands
-//   }
-
-//   val modal = new Bootstrap.Modal(ele)
-
-//   ele.addEventListener("hidden.bs.modal", (_: Event) => {
-//     modal.dispose()
-//     document.body.removeChild(ele)
-//     onClosedHandler(result)
-//   })
-
-//   override def open(): Unit = {
-//     modal.show()
-//     document.body(style := "hidden: auto")
-//   }
-
-//   override def close(): Unit = {
-//     modal.hide()
-//   }
-
-//   private var onClosedHandler: Option[R] => Unit = _ => ()
-
-//   def onClosed(handler: Option[R] => Unit): Unit = onClosedHandler = handler
-// }
