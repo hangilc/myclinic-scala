@@ -6,6 +6,7 @@ import dev.fujiwara.domq.Modifiers._
 import dev.fujiwara.domq.Html._
 import dev.myclinic.scala.model.Appoint
 import org.scalajs.dom.raw.Element
+import dev.myclinic.scala.util.KanjiDate
 
 class MakeAppointDialog(appoint: Appoint, handler: String => Unit)
     extends Dialog[String](handler) {
@@ -32,7 +33,8 @@ class MakeAppointDialog(appoint: Appoint, handler: String => Unit)
   def dateTimeRep: String = {
     val d = appoint.date
     val t = appoint.time
-    s"${d.getMonthValue()}月${d.getDayOfMonth()}日${t.getHour()}時${t.getMinute()}分"
+    val youbi = KanjiDate.youbi(d)
+    s"${d.getMonthValue()}月${d.getDayOfMonth()}日（$youbi）${t.getHour()}時${t.getMinute()}分"
   }
 
 }
