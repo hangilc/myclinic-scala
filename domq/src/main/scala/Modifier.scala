@@ -69,9 +69,17 @@ object Modifiers {
     e.setAttribute("href", value)
   })
 
-  val onclick = Creator[MouseEvent => Unit]((e, a) => {
-    e.addEventListener("click", a)
-  })
+  // val onclick = Creator[MouseEvent => Unit]((e, a) => {
+  //   e.addEventListener("click", a)
+  // })
 
+  object onclick {
+    def :=(f: MouseEvent => Unit) = Modifier(e => {
+      e.addEventListener("click", f)
+    })
 
+    def :=(f: () => Unit) = Modifier(e => {
+      e.addEventListener("click", (_: MouseEvent) => f())
+    })
+  }
 }

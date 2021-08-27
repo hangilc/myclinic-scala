@@ -9,18 +9,10 @@ import dev.fujiwara.domq.ElementQ._
 import dev.fujiwara.domq.Binding._
 import scala.annotation.unused
 
-// trait Dialog[R] {
-//   def open(): Unit
-//   def content: Element
-//   def commands: Element
-//   var result: Option[R]
-//   def close(): Unit
-//   def onClosed(handler: Option[R] => Unit): Unit
-// }
-
-class Dialog[R](handler: R => Unit) {
-  var result: Option[R] = None
+class Dialog[R]() {
   val titleBinding = Binding.TextBinding()
+  var contentBinding = Binding.ElementBinding()
+  var commandBoxBinding = Binding.ElementBinding()
 
   val ele = div(cls := "modal", attr("tabindex") := "-1")(
     div(cls := "modal-dialog")(
@@ -33,8 +25,8 @@ class Dialog[R](handler: R => Unit) {
             Dialog.closeButton
           )
         ),
-        div(cls := "modal-body", cb := (setupContent _)),
-        div(cls := "modal-footer", cb := (setupCommandBox _))
+        div(cls := "modal-body", bindTo(contentBinding)),
+        div(cls := "modal-footer", bindTo(commandBoxBinding))
       )
     )
   )
@@ -43,17 +35,14 @@ class Dialog[R](handler: R => Unit) {
 
   titleBinding.text = "Untitled"
 
-  def setupContent(@unused content: Element): Unit = ()
-  def setupCommandBox(@unused commandBOx: Element): Unit = ()
+  def content: Element = contentBinding.element
+  def commandBox: Element = commandBoxBinding.element
 
   ele.addEventListener(
     "hidden.bs.modal",
     (_: Event) => {
       modal.dispose()
       document.body.removeChild(ele)
-      if (result.isDefined) {
-        handler(result.get)
-      }
     }
   )
 

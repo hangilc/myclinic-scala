@@ -6,7 +6,7 @@ import dev.fujiwara.domq.Modifiers._
 
 object Binding {
   case class TextBinding() {
-    var ele: Element = null
+    private var ele: Element = null
 
     def bind(e: Element): Unit = {
       ele = e
@@ -24,7 +24,7 @@ object Binding {
   }
 
   case class InputBinding() {
-    var ele: HTMLInputElement = null
+    private var ele: HTMLInputElement = null
 
     def bind(e: HTMLInputElement): Unit = {
       ele = e
@@ -50,12 +50,29 @@ object Binding {
     }
   }
 
+  case class ElementBinding() {
+    private var ele: Element = null
+
+    def bind(e: Element): Unit = {
+      ele = e
+    }
+
+    def element: Element = {
+      require(ele != null)
+      ele
+    }
+  }
+
   def bindTo(target: Binding.TextBinding) = Modifier(e => {
     target.bind(e)
   })
 
   def bindTo(target: Binding.InputBinding) = Modifier(e => {
     target.bind(e.asInstanceOf[HTMLInputElement])
+  })
+
+  def bindTo(target: Binding.ElementBinding) = Modifier(e => {
+    target.bind(e)
   })
 
 }

@@ -16,6 +16,7 @@ import io.circe.syntax._
 
 import java.time.LocalDate
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+import dev.myclinic.scala.util.KanjiDate
 
 case class UpdateAppointArg(from: Appoint, to: Appoint)
 object UpdateAppointArg {
@@ -117,7 +118,8 @@ case class SlotRow(appoint: Appoint) {
   def dateTimeRep: String = {
     val d = appoint.date
     val t = appoint.time
-    s"${d.getMonthValue()}月${d.getDayOfMonth()}日${t.getHour()}時${t.getMinute()}分"
+    val youbi = KanjiDate.youbi(d)
+    s"${d.getMonthValue()}月${d.getDayOfMonth()}日（$youbi）${t.getHour()}時${t.getMinute()}分"
   }
 
   def openDialog(): Unit = {
