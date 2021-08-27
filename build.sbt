@@ -18,7 +18,8 @@ ThisBuild / scalacOptions ++= Seq("-Wunused", "-deprecation")
 val rootDir = ThisBuild / baseDirectory
 
 lazy val root = project.in(file("."))
-  .aggregate(db, server, appointApp, modelJS, modelJVM, utilJS, utilJVM)
+  .aggregate(db, server, appointApp, modelJS, modelJVM, utilJS, utilJVM,
+    clientJS, clientJVM)
   .settings(
     publish := {},
     publishLocal := {},
@@ -107,3 +108,22 @@ lazy val util = crossProject(JSPlatform, JVMPlatform)
 val utilJS = util.js
 val utilJVM = util.jvm
 
+lazy val client = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Full)
+  .in(file("client"))
+  .settings(
+
+  )
+  .jvmSettings(
+
+  )
+  .jsSettings(
+      scalaJSUseMainModuleInitializer := false,
+      zonesFilter := {(z: String) => z == "Asia/Tokyo"},
+      libraryDependencies ++= Seq(
+        "io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion,
+      ),
+  )
+
+val clientJS = client.js
+val clientJVM = client.jvm

@@ -122,7 +122,7 @@ case class SlotRow(appoint: Appoint) {
 
   def openDialog(): Unit = {
     MakeAppointDialog.open(appoint, name => {
-      println("name", name)
+      val newApp = Appoint(appoint.date, appoint.time, name, 0, "")
     })
   }
 
