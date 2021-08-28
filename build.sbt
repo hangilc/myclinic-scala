@@ -7,7 +7,8 @@ ThisBuild / organizationName := "myclinic"
 
 val sqliteVersion = "3.36.0.1"
 val mysqlVersion = "8.0.19"
-val http4sVersion = "1.0.0-M21"
+//val http4sVersion = "1.0.0-M21"
+val http4sVersion = "0.23.1"
 val doobieVersion = "1.0.0-M5"
 val circeVersion = "0.14.1"
 val scalaJavaTimeVersion = "2.2.2"
@@ -19,7 +20,7 @@ val rootDir = ThisBuild / baseDirectory
 
 lazy val root = project.in(file("."))
   .aggregate(db, server, appointApp, modelJS, modelJVM, utilJS, utilJVM,
-    clientJS, clientJVM)
+    clientJS, clientJVM, apiJS, apiJVM)
   .settings(
     publish := {},
     publishLocal := {},
@@ -37,7 +38,7 @@ lazy val db = project.in(file("db"))
   )
 
 lazy val server = project.in(file("server"))
-  .dependsOn(db, modelJVM, utilJVM)
+  .dependsOn(db, modelJVM, utilJVM, apiJVM)
   .settings(
     name := "server",
     libraryDependencies ++= Seq(
@@ -46,6 +47,8 @@ lazy val server = project.in(file("server"))
       "org.http4s" %% "http4s-dsl" % http4sVersion,
       "org.http4s" %% "http4s-circe" % http4sVersion,
       "io.circe" %% "circe-generic" % circeVersion,
+      "org.endpoints4s" %% "http4s-server" % "7.0.0",
+      "org.endpoints4s" %% "openapi" % "3.1.0",
     )
   )
 
@@ -127,3 +130,18 @@ lazy val client = crossProject(JSPlatform, JVMPlatform)
 
 val clientJS = client.js
 val clientJVM = client.jvm
+
+lazy val api = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Pure)
+  .in(file("api"))
+  .dependsOn(model)
+  .settings(
+    libraryDependencies ++= Seq(
+      "org.endpoints4s" %%% "algebra" % "1.5.0",
+      "org.endpoints4s" %%% "json-schema-generic" % "1.5.0",
+    )
+  )
+
+val apiJS = api.js
+val apiJVM = api.jvm
+

@@ -3,21 +3,36 @@ package dev.myclinic.scala.server
 import cats.effect._
 import cats.implicits._
 import org.http4s._
-import org.http4s.dsl.io._
-import org.http4s.implicits._
-import org.http4s.server._
-import org.http4s.server.blaze.BlazeServerBuilder
-import org.http4s.server.staticcontent._
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import org.http4s.blaze.server.BlazeServerBuilder
+import org.http4s.server.Router
+import org.http4s.dsl.io._
+import org.http4s.implicits._
+import org.http4s.server.staticcontent.FileService
+import org.http4s.server.staticcontent.fileService
+
+import endpoints4s.http4s.server
+import dev.myclinic.scala.api.AppointEndpoints
+import dev.myclinic.scala.api.Result
 
 object Main extends IOApp {
 
-  val helloService = HttpRoutes.of[IO] {
-    case GET -> Root / "hello" => Ok("api-hello")
+  val helloService = HttpRoutes.of[IO] { case GET -> Root / "hello" =>
+    Ok("api-hello")
   }
 
   val apiService = helloService <+> AppointService.service
+
+  object apiServer extends server.Endpoints[IO]
+      with AppointEndpoints
+      with server.JsonEntitiesFromSchemas {
+    val routes: HttpRoutes[IO] = HttpRoutes.of(
+      routesFromEndpoints(
+        currentValue.implementedBy(_ => Result(1))
+      )
+    )
+  }
 
   val staticService = fileService[IO](FileService.Config("./web", "/"))
 
@@ -25,9 +40,14 @@ object Main extends IOApp {
     BlazeServerBuilder[IO](global)
       .withSocketReuseAddress(true)
       .bindHttp(8080, "localhost")
-      .withHttpApp(
-        Router("/api" -> apiService, "/" -> staticService).orNotFound
-      )
+      // .withHttpApp(
+      //   Router("/api" -> apiService, 
+      //   "/test/" -> apiServer.routes,
+      //   "/" -> staticService).orNotFound
+      // )
+      .withHttpApp(Router(
+        "/api" -> apiServer.routes
+      ).orNotFound)
       .resource
       .use(_ => IO.never)
       .as(ExitCode.Success)
