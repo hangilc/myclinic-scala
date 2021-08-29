@@ -61,7 +61,7 @@ lazy val server = project
       "org.http4s" %% "http4s-dsl" % http4sVersion,
       //"org.http4s" %% "http4s-circe" % http4sVersion,
       //"io.circe" %% "circe-generic" % circeVersion,
-      "org.endpoints4s" %% "http4s-server" % "7.0.0",
+      //"org.endpoints4s" %% "http4s-server" % "7.0.0",
       "org.endpoints4s" %% "openapi" % "3.1.0"
     )
   )
