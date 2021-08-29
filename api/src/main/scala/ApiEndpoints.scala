@@ -13,7 +13,7 @@ import endpoints4s.Invalid
 import java.time.format.DateTimeFormatter
 import endpoints4s.Validated
 
-trait AppointEndpoints
+trait ApiEndpoints
     extends algebra.Endpoints
     with algebra.JsonEntitiesFromSchemas
     with generic.JsonSchemas {

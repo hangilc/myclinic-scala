@@ -2,7 +2,7 @@ package dev.myclinic.web
 
 import dev.myclinic.scala.model._
 import dev.myclinic.scala.util.DateUtil
-import dev.myclinic.scala.web.Api
+//import dev.myclinic.scala.web.Api
 import dev.myclinic.scala.web.appoint.MakeAppointDialog
 import dev.fujiwara.domq.ElementQ._
 import dev.fujiwara.domq.Modifiers._
@@ -15,6 +15,7 @@ import io.circe.syntax._
 import java.time.LocalDate
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import dev.myclinic.scala.util.KanjiDate
+import dev.myclinic.scala.webclient.Api
 
 case class UpdateAppointArg(from: Appoint, to: Appoint)
 object UpdateAppointArg {
