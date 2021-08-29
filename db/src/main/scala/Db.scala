@@ -11,13 +11,12 @@ import java.time.LocalTime
 
 trait DbExecutor {
   def exec[A](s: ConnectionIO[A]): IO[A]
-  def execVoid(s: ConnectionIO[_]): IO[Unit] = exec(s).map(_ => ())
 }
 
 object Db extends DbExecutor with DbAppoint {
   val xa = DbSqlite.xa
 
-  override def exec[A](s: ConnectionIO[A]): IO[A] = s.transact(xa)
+  override def exec[A](s: ConnectionIO[A]): IO[A] = DbSqlite.exec(s)
 
 }
 
@@ -38,7 +37,7 @@ trait DbAppoint extends DbExecutor {
     val ins = times.map(_ match {
       case (d, t) => DbPrim.enterAppoint(Appoint.create(d, t)).run
     })
-    exec(ins.sequence).map(_ => ())
+    exec(ins.sequence).void
   }
 
   def createAppointTimes(date: LocalDate, times: (Int, Int)*): IO[Unit] = {
@@ -55,35 +54,46 @@ trait DbAppoint extends DbExecutor {
       time: LocalTime,
       patientName: String
   ): IO[Unit] = {
-    require(!patientName.isEmpty)
-    execVoid(for(
-      at <- DbPrim.getAppoint(date, time).unique;
-      _ <- {
-        if( !at.patientName.isEmpty ){
-          throw new RuntimeException(s"Appointment already exists: ${at}")
-        } else {
-          val a = Appoint(at.date, at.time, patientName, 0, "")
-          DbPrim.updateAppoint(a).run
-        }
+    def confirmVacant(app: Appoint): ConnectionIO[Unit] = {
+      if (!app.isVacant) {
+        throw new RuntimeException(s"Appoint slot is not empty: $date $time")
       }
-    ) yield())
+      ().pure[ConnectionIO]
+    }
+
+    def register(): ConnectionIO[Int] = {
+      val app = Appoint(date, time, patientName, 0, "")
+      DbPrim.updateAppoint(app).run
+    }
+
+    require(!patientName.isEmpty)
+    val ops = for {
+      at <- DbPrim.getAppoint(date, time).unique
+      _ <- confirmVacant(at)
+      _ <- register()
+    } yield ()
+    exec(ops)
   }
 
-  def cancelAppoint(date: LocalDate, time: LocalTime, patientName: String): IO[Unit] = {
-    require(!patientName.isEmpty)
-    execVoid(
-      for(
-        at <- DbPrim.getAppoint(date, time).unique;
-        _ <- {
-          if( at.patientName != patientName ){
-            throw new RuntimeException(s"Inconsistent appoiont: ${at}")
-          } else {
-            val a = Appoint.create(date, time)
-            DbPrim.updateAppoint(a).run
-          }
-        }
-      ) yield ()
-    )
-  }
+  // def cancelAppoint(
+  //     date: LocalDate,
+  //     time: LocalTime,
+  //     patientName: String
+  // ): IO[Unit] = {
+  //   require(!patientName.isEmpty)
+  //   execVoid(
+  //     for (
+  //       at <- DbPrim.getAppoint(date, time).unique;
+  //       _ <- {
+  //         if (at.patientName != patientName) {
+  //           throw new RuntimeException(s"Inconsistent appoiont: ${at}")
+  //         } else {
+  //           val a = Appoint.create(date, time)
+  //           DbPrim.updateAppoint(a).run
+  //         }
+  //       }
+  //     ) yield ()
+  //   )
+  // }
 
 }

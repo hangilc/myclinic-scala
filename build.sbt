@@ -10,7 +10,7 @@ val mysqlVersion = "8.0.19"
 //val http4sVersion = "1.0.0-M21"
 val http4sVersion = "0.23.1"
 val doobieVersion = "1.0.0-M5"
-val circeVersion = "0.14.1"
+//val circeVersion = "0.14.1"
 val scalaJavaTimeVersion = "2.2.2"
 val scalaJSDomVersion = "1.1.0"
 
@@ -95,11 +95,11 @@ lazy val model = crossProject(JSPlatform, JVMPlatform)
   .in(file("model"))
   .settings(
     name := "model",
-    libraryDependencies ++= Seq(
-      "io.circe" %%% "circe-core" % circeVersion,
-      "io.circe" %%% "circe-generic" % circeVersion,
-      "io.circe" %%% "circe-parser" % circeVersion
-    )
+    // libraryDependencies ++= Seq(
+    //   "io.circe" %%% "circe-core" % circeVersion,
+    //   "io.circe" %%% "circe-generic" % circeVersion,
+    //   "io.circe" %%% "circe-parser" % circeVersion
+    // )
   )
   .jsSettings(
     scalaJSUseMainModuleInitializer := false,
@@ -151,8 +151,10 @@ lazy val api = crossProject(JSPlatform, JVMPlatform)
   .settings(
     libraryDependencies ++= Seq(
       "org.endpoints4s" %%% "algebra" % "1.5.0",
-      "org.endpoints4s" %%% "json-schema-generic" % "1.5.0"
-    )
+      "org.endpoints4s" %%% "json-schema-generic" % "1.5.0",
+      //"org.endpoints4s" %% "json-schema-circe" % "1.5.0",
+      //"org.endpoints4s" %%% "algebra-circe" % "1.5.0",
+   )
   )
 
 val apiJS = api.js

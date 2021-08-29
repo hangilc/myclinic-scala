@@ -1,27 +1,20 @@
-package dev.myclinic.web
+package dev.myclinic.scala.web.appoint
 
+import dev.fujiwara.domq.ElementQ._
+import dev.fujiwara.domq.Html._
+import dev.fujiwara.domq.Modifiers._
 import dev.myclinic.scala.model._
 import dev.myclinic.scala.util.DateUtil
-//import dev.myclinic.scala.web.Api
+import dev.myclinic.scala.util.KanjiDate
 import dev.myclinic.scala.web.appoint.MakeAppointDialog
-import dev.fujiwara.domq.ElementQ._
-import dev.fujiwara.domq.Modifiers._
-import dev.fujiwara.domq.Html._
+import dev.myclinic.scala.webclient.Api
 import org.scalajs.dom.document
 import org.scalajs.dom.raw.Element
-import io.circe.Encoder
-import io.circe.syntax._
 
 import java.time.LocalDate
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
-import dev.myclinic.scala.util.KanjiDate
-import dev.myclinic.scala.webclient.Api
-
-case class UpdateAppointArg(from: Appoint, to: Appoint)
-object UpdateAppointArg {
-  import io.circe.generic.semiauto._
-  implicit val argEncoder: Encoder[UpdateAppointArg] = deriveEncoder
-}
+import scala.util.Failure
+import scala.util.Success
 
 object JsMain {
   def main(args: Array[String]): Unit = {
@@ -34,10 +27,6 @@ object JsMain {
     for (apps <- Api.listAppoint(startDate, endDate)) {
       val cols = AppointDate.classify(apps).map(AppointColumn)
       cols.foreach(AppointRow.add)
-      for(app <- apps){
-        val arg = UpdateAppointArg(app, app)
-        println(arg.asJson)
-      }
     }
   }
 
@@ -80,18 +69,12 @@ case class AppointColumn(appointDate: AppointDate) {
     div(cb := (eSlots = _))
   )
 
-  eDateRep.innerText = dateRep
+  eDateRep.innerText = Misc.formatAppointDate(appointDate.date)
   appointDate.appoints.foreach(a => {
     val s = new SlotRow(a)
     eSlots.appendChild(s.ele)
   })
 
-  def dateRep: String = {
-    val d: LocalDate = appointDate.date
-    val month = d.getMonthValue()
-    val day = d.getDayOfMonth()
-    s"${month}月${day}日"
-  }
 }
 
 case class SlotRow(appoint: Appoint) {
@@ -123,7 +106,10 @@ case class SlotRow(appoint: Appoint) {
 
   def openDialog(): Unit = {
     MakeAppointDialog.open(appoint, name => {
-      val newApp = Appoint(appoint.date, appoint.time, name, 0, "")
+      Api.registerAppoint(appoint.date, appoint.time, name).onComplete[Unit](_ match {
+        case Success(_) => println("Success")
+        case Failure(exception) => println(exception)
+      })
     })
   }
 

@@ -29,6 +29,16 @@ trait ApiEndpoints
     )
   }
 
+  val registerAppoint: Endpoint[(LocalDate, LocalTime, String), Unit] = {
+    endpoint(
+      post(
+        root / "register-appoint" /? (qs[LocalDate]("date") & qs[LocalTime]("time") & qs[String]("name")),
+        emptyRequest
+      ),
+      ok(emptyResponse)
+    )
+  }
+
   implicit def dateScheme(implicit
       string: JsonSchema[String]
   ): JsonSchema[LocalDate] =

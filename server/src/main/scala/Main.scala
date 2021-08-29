@@ -13,9 +13,10 @@ import org.http4s.server.staticcontent.fileService
 
 import endpoints4s.http4s.server
 import dev.myclinic.scala.api.ApiEndpoints
-import java.time.{LocalDate, LocalTime}
 import dev.myclinic.scala.db.Db
 import org.http4s.headers.Location
+import java.time.LocalDate
+import java.time.LocalTime
 
 object Main extends IOApp {
 
@@ -31,6 +32,11 @@ object Main extends IOApp {
         listAppoint.implementedByEffect({
           (from: LocalDate, upto: LocalDate) => {
             Db.listAppoint(from, upto)
+          }
+        }.tupled),
+        registerAppoint.implementedByEffect({
+          (date: LocalDate, time: LocalTime, name: String) => {
+            Db.registerAppoint(date, time, name)
           }
         }.tupled)
       )
