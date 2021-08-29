@@ -14,7 +14,9 @@ import org.http4s.server.staticcontent.fileService
 
 import endpoints4s.http4s.server
 import dev.myclinic.scala.api.AppointEndpoints
-import dev.myclinic.scala.api.Result
+import java.time.{LocalDate, LocalTime}
+import dev.myclinic.scala.model.Appoint
+import dev.myclinic.scala.db.Db
 
 object Main extends IOApp {
 
@@ -29,7 +31,11 @@ object Main extends IOApp {
       with server.JsonEntitiesFromSchemas {
     val routes: HttpRoutes[IO] = HttpRoutes.of(
       routesFromEndpoints(
-        currentValue.implementedBy(_ => Result(1))
+        listAppoint.implementedByEffect({
+          (from: LocalDate, upto: LocalDate) => {
+            Db.listAppoint(from, upto)
+          }
+        }.tupled)
       )
     )
   }
