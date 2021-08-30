@@ -43,7 +43,10 @@ object Main extends IOApp {
            (date: LocalDate, time: LocalTime, name: String) => {
             Db.cancelAppoint(date, time, name)
           }
-        }.tupled)
+        }.tupled),
+        getAppoint.implementedByEffect({
+          (date: LocalDate, time: LocalTime) => Db.getAppoint(date, time)
+        }.tupled),
       )
     )
   }

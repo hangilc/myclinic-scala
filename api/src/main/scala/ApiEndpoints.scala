@@ -32,7 +32,9 @@ trait ApiEndpoints
   val registerAppoint: Endpoint[(LocalDate, LocalTime, String), Unit] = {
     endpoint(
       post(
-        root / "register-appoint" /? (qs[LocalDate]("date") & qs[LocalTime]("time") & qs[String]("name")),
+        root / "register-appoint" /? (qs[LocalDate]("date") & qs[LocalTime](
+          "time"
+        ) & qs[String]("name")),
         emptyRequest
       ),
       ok(emptyResponse)
@@ -42,10 +44,21 @@ trait ApiEndpoints
   val cancelAppoint: Endpoint[(LocalDate, LocalTime, String), Unit] = {
     endpoint(
       post(
-        root / "cancel-appoint" /? (qs[LocalDate]("date") & qs[LocalTime]("time") & qs[String]("name")),
+        root / "cancel-appoint" /? (qs[LocalDate]("date") & qs[LocalTime](
+          "time"
+        ) & qs[String]("name")),
         emptyRequest
       ),
       ok(emptyResponse)
+    )
+  }
+
+  val getAppoint: Endpoint[(LocalDate, LocalTime), Appoint] = {
+    endpoint(
+      get(
+        root / "get-appoint" /? (qs[LocalDate]("date") & qs[LocalTime]("time"))
+      ),
+      ok(jsonResponse[Appoint])
     )
   }
 

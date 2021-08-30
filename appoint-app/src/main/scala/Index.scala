@@ -5,7 +5,6 @@ import dev.fujiwara.domq.Html._
 import dev.fujiwara.domq.Modifiers._
 import dev.myclinic.scala.model._
 import dev.myclinic.scala.util.DateUtil
-import dev.myclinic.scala.util.KanjiDate
 import dev.myclinic.scala.web.appoint.MakeAppointDialog
 import dev.myclinic.scala.webclient.Api
 import org.scalajs.dom.document
@@ -15,6 +14,7 @@ import java.time.LocalDate
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.util.Failure
 import scala.util.Success
+import org.scalajs.dom.raw.CustomEvent
 
 object JsMain {
   def main(args: Array[String]): Unit = {
@@ -83,6 +83,13 @@ case class SlotRow(appoint: Appoint) {
     div(Misc.formatAppointTime(appoint.time)),
     div(detail)
   )
+
+  document.body.addEventListener[CustomEvent]("mc-appoint-modified", e => {
+    val modified = e.detail.asInstanceOf[Appoint]
+    if( modified.date == appoint.date && modified.time == appoint.time ){
+      println("modified", modified)
+    }
+  })
 
   def detail: String = {
     if (appoint.patientName.isEmpty) {
