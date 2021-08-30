@@ -6,6 +6,7 @@ import dev.fujiwara.domq.Html._
 import dev.fujiwara.domq.ElementQ._
 import dev.fujiwara.domq.Modifiers._
 import dev.myclinic.scala.model.Appoint
+import org.scalajs.dom.raw._
 import scala.util.Success
 import scala.util.Failure
 import dev.myclinic.scala.webclient.Api
@@ -38,7 +39,7 @@ object CancelAppointDialog {
       Api.cancelAppoint(appoint.date, appoint.time, appoint.patientName).onComplete(_ match {
         case Success(_) => {
           ui.close()
-          dlog.onConducted()
+          val e = new CustomEvent("", new CustomEventInit(appoint))
         }
         case Failure(ex) => DomqUtil.alert(ex.toString)
       })

@@ -115,9 +115,7 @@ case class SlotRow(appoint: Appoint) {
   }
 
   def openCancelAppointDialog(): Unit = {
-    CancelAppointDialog.open(appoint).onConducted = () => {
-      
-    }
+    CancelAppointDialog.open(appoint)
   }
 
 }
