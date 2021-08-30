@@ -79,15 +79,10 @@ case class AppointColumn(appointDate: AppointDate) {
 
 case class SlotRow(appoint: Appoint) {
 
-  var eTime, eDetail: Element = _
-  val ele = div(style := "cursor: pointer")(
-    div(cb := (eTime = _)),
-    div(cb := (eDetail = _))
+  val ele = div(style := "cursor: pointer", onclick := (onEleClick _))(
+    div(Misc.formatAppointTime(appoint.time)),
+    div(detail)
   )
-
-  eTime.innerText = appoint.time.toString()
-  eDetail.innerText = detail
-  ele.onclick(openDialog _)
 
   def detail: String = {
     if (appoint.patientName.isEmpty) {
@@ -97,20 +92,32 @@ case class SlotRow(appoint: Appoint) {
     }
   }
 
-  def dateTimeRep: String = {
-    val d = appoint.date
-    val t = appoint.time
-    val youbi = KanjiDate.youbi(d)
-    s"${d.getMonthValue()}月${d.getDayOfMonth()}日（$youbi）${t.getHour()}時${t.getMinute()}分"
+  def onEleClick(): Unit = {
+    if (appoint.isVacant) {
+      openMakeAppointDialog()
+    } else {
+      openCancelAppointDialog()
+    }
   }
 
-  def openDialog(): Unit = {
-    MakeAppointDialog.open(appoint, name => {
-      Api.registerAppoint(appoint.date, appoint.time, name).onComplete[Unit](_ match {
-        case Success(_) => println("Success")
-        case Failure(exception) => println(exception)
-      })
-    })
+  def openMakeAppointDialog(): Unit = {
+    MakeAppointDialog.open(
+      appoint,
+      name => {
+        Api
+          .registerAppoint(appoint.date, appoint.time, name)
+          .onComplete[Unit](_ match {
+            case Success(_)         => println("Success")
+            case Failure(exception) => println("failure", exception)
+          })
+      }
+    )
+  }
+
+  def openCancelAppointDialog(): Unit = {
+    CancelAppointDialog.open(appoint).onConducted = () => {
+      
+    }
   }
 
 }

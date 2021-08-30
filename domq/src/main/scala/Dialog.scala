@@ -8,7 +8,7 @@ import dev.fujiwara.domq.Html._
 import dev.fujiwara.domq.ElementQ._
 import dev.fujiwara.domq.Binding._
 
-class Dialog[R]() {
+class Dialog() {
   val titleBinding = Binding.TextBinding()
   var contentBinding = Binding.ElementBinding()
   var commandBoxBinding = Binding.ElementBinding()
@@ -34,6 +34,8 @@ class Dialog[R]() {
 
   titleBinding.text = "Untitled"
 
+  def title: String = titleBinding.text
+  def title_=(v: String): Unit = titleBinding.text = v
   def content: Element = contentBinding.element
   def commandBox: Element = commandBoxBinding.element
 
@@ -54,9 +56,6 @@ class Dialog[R]() {
     modal.hide()
   }
 
-  def title: String = titleBinding.text
-
-  def title_=(v: String): Unit = titleBinding.text = v
 }
 
 object Dialog {

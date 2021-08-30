@@ -38,6 +38,11 @@ object Main extends IOApp {
           (date: LocalDate, time: LocalTime, name: String) => {
             Db.registerAppoint(date, time, name)
           }
+        }.tupled),
+        cancelAppoint.implementedByEffect({
+           (date: LocalDate, time: LocalTime, name: String) => {
+            Db.cancelAppoint(date, time, name)
+          }
         }.tupled)
       )
     )

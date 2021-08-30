@@ -39,6 +39,16 @@ trait ApiEndpoints
     )
   }
 
+  val cancelAppoint: Endpoint[(LocalDate, LocalTime, String), Unit] = {
+    endpoint(
+      post(
+        root / "cancel-appoint" /? (qs[LocalDate]("date") & qs[LocalTime]("time") & qs[String]("name")),
+        emptyRequest
+      ),
+      ok(emptyResponse)
+    )
+  }
+
   implicit def dateScheme(implicit
       string: JsonSchema[String]
   ): JsonSchema[LocalDate] =

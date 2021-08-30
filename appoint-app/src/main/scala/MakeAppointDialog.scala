@@ -11,7 +11,7 @@ import dev.fujiwara.domq.Binding.TextBinding
 import dev.fujiwara.domq.Binding.bindTo
 
 class MakeAppointDialog(appoint: Appoint, handler: String => Unit)
-    extends Dialog[String]() {
+    extends Dialog() {
 
   title = "診察予約入力"
 

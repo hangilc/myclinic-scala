@@ -75,25 +75,28 @@ trait DbAppoint extends DbExecutor {
     exec(ops)
   }
 
-  // def cancelAppoint(
-  //     date: LocalDate,
-  //     time: LocalTime,
-  //     patientName: String
-  // ): IO[Unit] = {
-  //   require(!patientName.isEmpty)
-  //   execVoid(
-  //     for (
-  //       at <- DbPrim.getAppoint(date, time).unique;
-  //       _ <- {
-  //         if (at.patientName != patientName) {
-  //           throw new RuntimeException(s"Inconsistent appoiont: ${at}")
-  //         } else {
-  //           val a = Appoint.create(date, time)
-  //           DbPrim.updateAppoint(a).run
-  //         }
-  //       }
-  //     ) yield ()
-  //   )
-  // }
+  def cancelAppoint(
+      date: LocalDate,
+      time: LocalTime,
+      patientName: String
+  ): IO[Unit] = {
+    def confirmName(app: Appoint): ConnectionIO[Unit] = {
+      if (patientName != app.patientName) {
+        throw new RuntimeException(s"Inconsistent patient name: $patientName")
+      }
+      ().pure[ConnectionIO]
+    }
+
+    require(!patientName.isEmpty)
+    val ops = (for {
+      app <- DbPrim.getAppoint(date, time).unique
+      _ <- confirmName(app)
+      _ <- {
+        val update = Appoint.create(date, time)
+        DbPrim.updateAppoint(update).run
+      }
+    } yield ())
+    exec(ops)
+  }
 
 }
