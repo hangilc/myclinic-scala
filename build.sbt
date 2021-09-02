@@ -16,6 +16,8 @@ val scalaJSDomVersion = "1.1.0"
 
 ThisBuild / scalacOptions ++= Seq("-Wunused", "-deprecation")
 
+Compile / console / scalacOptions ~= { _.filterNot(Set("-Wunused")) }
+
 val rootDir = ThisBuild / baseDirectory
 
 lazy val root = project
@@ -63,7 +65,8 @@ lazy val server = project
       //"io.circe" %% "circe-generic" % circeVersion,
       //"org.endpoints4s" %% "http4s-server" % "7.0.0",
       "org.endpoints4s" %% "openapi" % "3.1.0"
-    )
+    ),
+    Compile / console / scalacOptions ~= { _.filterNot(Set("-Wunused")) }
   )
 
 lazy val appointApp = project
@@ -94,7 +97,7 @@ lazy val model = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Pure)
   .in(file("model"))
   .settings(
-    name := "model",
+    name := "model"
     // libraryDependencies ++= Seq(
     //   "io.circe" %%% "circe-core" % circeVersion,
     //   "io.circe" %%% "circe-generic" % circeVersion,
@@ -151,10 +154,10 @@ lazy val api = crossProject(JSPlatform, JVMPlatform)
   .settings(
     libraryDependencies ++= Seq(
       "org.endpoints4s" %%% "algebra" % "1.5.0",
-      "org.endpoints4s" %%% "json-schema-generic" % "1.5.0",
+      "org.endpoints4s" %%% "json-schema-generic" % "1.5.0"
       //"org.endpoints4s" %% "json-schema-circe" % "1.5.0",
       //"org.endpoints4s" %%% "algebra-circe" % "1.5.0",
-   )
+    )
   )
 
 val apiJS = api.js
