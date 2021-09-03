@@ -54,6 +54,9 @@ object Main extends IOApp {
         }.tupled)
       )
     )
+    def toJson[T](value: T)(implicit schema: JsonSchema[T]): String = {
+      schema.encoder.encode(value).render()
+    }
   }
 
   def ws(topic: Topic[IO, WebSocketFrame]) = HttpRoutes.of[IO] { case GET -> Root / "echo" =>
@@ -70,6 +73,9 @@ object Main extends IOApp {
   def helloService(topic: Topic[IO, WebSocketFrame]) = HttpRoutes.of[IO] {
     case GET -> Root => {
       val frame = Text("HELLO")
+      import dev.myclinic.scala.model.Appoint
+      val app = Appoint(LocalDate.now(), LocalTime.now(), "たなかたかし", 0, "")
+      println(apiServer.toJson(app))
       topic.publish1(frame) >> Ok("api-hello")
     }
   }
