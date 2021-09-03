@@ -70,12 +70,7 @@ object Main extends IOApp {
   def helloService(topic: Topic[IO, WebSocketFrame]) = HttpRoutes.of[IO] {
     case GET -> Root => {
       val frame = Text("HELLO")
-      //val stream = Stream(frame).covary[IO]
-      import cats.effect.unsafe.implicits.global
-      topic.publish1(frame).unsafeRunSync()
-      //stream.through(topic.publish)
-      println("sent to topic")
-      Ok("api-hello")
+      topic.publish1(frame) >> Ok("api-hello")
     }
   }
 
