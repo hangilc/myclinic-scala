@@ -56,11 +56,10 @@ object Main extends IOApp {
     )
   }
 
-  import cats.effect.unsafe.implicits.{global => g}
-  val topic = Topic[IO, WebSocketFrame].unsafeRunSync()
-
-  val ws = HttpRoutes.of[IO] { case GET -> Root / "echo" =>
-    val toClient = topic.subscribe(10)
+  def ws(topic: Topic[IO, WebSocketFrame]) = HttpRoutes.of[IO] { case GET -> Root / "echo" =>
+    val toClient = topic
+      .subscribe(10)
+      .evalMap(f => IO { println("sub"); f })
     val fromClient: Pipe[IO, WebSocketFrame, Unit] = _.evalMap {
       case Text(t, _) => IO.delay(println(t))
       case f          => IO.delay(println(s"Unknown type: $f"))
@@ -68,11 +67,13 @@ object Main extends IOApp {
     WebSocketBuilder[IO].build(toClient, fromClient)
   }
 
-  val helloService = HttpRoutes.of[IO] {
+  def helloService(topic: Topic[IO, WebSocketFrame]) = HttpRoutes.of[IO] {
     case GET -> Root => {
       val frame = Text("HELLO")
-      val stream = Stream(frame).covary[IO]
-      topic.publish(stream)
+      //val stream = Stream(frame).covary[IO]
+      import cats.effect.unsafe.implicits.global
+      topic.publish1(frame).unsafeRunSync()
+      //stream.through(topic.publish)
       println("sent to topic")
       Ok("api-hello")
     }
@@ -80,7 +81,7 @@ object Main extends IOApp {
 
   val staticService = fileService[IO](FileService.Config("./web", "/"))
 
-  override def run(args: List[String]): IO[ExitCode] = {
+  def buildServer(topic: Topic[IO, WebSocketFrame]) = {
     BlazeServerBuilder[IO](global)
       .withSocketReuseAddress(true)
       .bindHttp(8080, "localhost")
@@ -90,8 +91,8 @@ object Main extends IOApp {
             PermanentRedirect(Location(uri"/appoint/"))
           },
           "/api" -> apiServer.routes,
-          "/ws" -> ws,
-          "/hello" -> helloService,
+          "/ws" -> ws(topic),
+          "/hello" -> helloService(topic),
           "/" -> staticService
         ).orNotFound
       )
@@ -99,4 +100,12 @@ object Main extends IOApp {
       .use(_ => IO.never)
       .as(ExitCode.Success)
   }
+
+  override def run(args: List[String]): IO[ExitCode] = {
+    for {
+      topic <- Topic[IO, WebSocketFrame]
+      exitCode <- buildServer(topic)
+    } yield exitCode
+  }
+
 }
