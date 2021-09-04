@@ -14,12 +14,12 @@ import org.http4s.server.staticcontent.fileService
 import endpoints4s.http4s.server
 import dev.myclinic.scala.api.ApiEndpoints
 import dev.myclinic.scala.db.Db
+import dev.myclinic.scala.model._
 import org.http4s.headers.Location
 import java.time.LocalDate
 import java.time.LocalTime
 import org.http4s.server.websocket.WebSocketBuilder
 import fs2.concurrent.Topic
-import fs2.Stream
 import fs2.Pipe
 import org.http4s.websocket.WebSocketFrame
 import org.http4s.websocket.WebSocketFrame.Text
@@ -51,11 +51,19 @@ object Main extends IOApp {
         }.tupled),
         getAppoint.implementedByEffect({ (date: LocalDate, time: LocalTime) =>
           Db.getAppoint(date, time)
-        }.tupled)
+        }.tupled),
+        getNextAppEventId.implementedByEffect(_ => Db.getNextAppEventId())
       )
     )
+
     def toJson[T](value: T)(implicit schema: JsonSchema[T]): String = {
       schema.encoder.encode(value).render()
+    }
+  }
+
+  implicit val jsonEncoder = new Events.JsonEncoder {
+    override def encode[T](value: T): String = {
+      apiServer.toJson[T](value)
     }
   }
 
@@ -72,10 +80,9 @@ object Main extends IOApp {
 
   def helloService(topic: Topic[IO, WebSocketFrame]) = HttpRoutes.of[IO] {
     case GET -> Root => {
-      val frame = Text("HELLO")
-      import dev.myclinic.scala.model.Appoint
-      val app = Appoint(LocalDate.now(), LocalTime.now(), "たなかたかし", 0, "")
-      println(apiServer.toJson(app))
+      val app = Appoint(LocalDate.of(2021, 9, 14), LocalTime.of(10, 0, 0), "たなかたろう", 0, "")
+      val createdEvent = Events.createAppointCreatedEvent(app)
+      val frame = Text(apiServer.toJson(createdEvent))
       topic.publish1(frame) >> Ok("api-hello")
     }
   }

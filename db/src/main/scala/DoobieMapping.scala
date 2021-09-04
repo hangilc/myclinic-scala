@@ -7,6 +7,7 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 import dev.myclinic.scala.model.Sex
+import java.time.LocalDateTime
 
 private object LocalDateMapping {
   private val sqlDateFormatter: DateTimeFormatter =
@@ -34,6 +35,14 @@ private object LocalTimeMapping {
   }
 }
 
+private object LocalDateTimeMapping {
+  val sqlDateTimeFormatter = DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss")
+
+  def fromString(s: String): LocalDateTime = LocalDateTime.parse(s, sqlDateTimeFormatter)
+  def toString(dt: LocalDateTime): String = dt.format(sqlDateTimeFormatter)
+
+}
+
 private object SexMapping {
   def fromString(s: String): Sex = s match {
     case "M" => Sex.Male
@@ -59,6 +68,12 @@ object DoobieMapping {
   
   implicit val localTimeSet: Put[LocalTime] = 
     Put[String].tcontramap(LocalTimeMapping.toString _)
+  
+  implicit val localDateTimeGet: Get[LocalDateTime] = 
+    Get[String].map(LocalDateTimeMapping.fromString)
+
+  implicit val localDateTimeSet: Put[LocalDateTime] = 
+    Put[String].tcontramap(LocalDateTimeMapping.toString _)
 
   implicit val sexGet: Get[Sex] = Get[String].map(SexMapping.fromString _)
   implicit val sexSet: Put[Sex] = Put[String].tcontramap(SexMapping.toString _)

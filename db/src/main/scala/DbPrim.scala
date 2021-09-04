@@ -6,7 +6,7 @@ import doobie.implicits._
 import dev.myclinic.scala.model._
 import dev.myclinic.scala.db.DoobieMapping._
 
-object DbPrim extends AppointPrim {
+object DbPrim extends AppointPrim with AppEventPrim {
 
 }
 
@@ -37,5 +37,23 @@ trait AppointPrim {
     sql"select * from appoint where date = $date and time = $time"
       .query[Appoint]
   }
+}
+
+trait AppEventPrim {
+  def enterAppEvent(appEvent: AppEvent): ConnectionIO[Int] = {
+    sql"""
+      insert into app_event ( created_at, model, kind, data) values (
+        ${appEvent.createdAt}, ${appEvent.model},
+        ${appEvent.kind}, ${appEvent.data}
+      )
+    """.update.withUniqueGeneratedKeys[Int]("id")
+  }
+
+  def getNextAppEventId(): Query0[Int] = {
+    sql"""
+      select id from app_event order by id desc limit 1
+    """.query[Int]
+  }
+
 }
 

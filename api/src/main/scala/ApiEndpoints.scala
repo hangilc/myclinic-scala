@@ -12,6 +12,7 @@ import scala.util.Failure
 import endpoints4s.Invalid
 import java.time.format.DateTimeFormatter
 import endpoints4s.Validated
+import java.time.LocalDateTime
 
 trait ApiEndpoints
     extends algebra.Endpoints
@@ -62,6 +63,33 @@ trait ApiEndpoints
     )
   }
 
+  val getNextAppEventId: Endpoint[Unit, Int] = {
+    endpoint(
+      get(
+        root / "get-next-app-event-id"
+      ),
+      ok(jsonResponse[Int])
+    )
+  }
+
+  val listAppEventSince: Endpoint[Int, List[AppEvent]] = {
+    endpoint(
+      get(
+        root / "list-app-event-since" /? qs[Int]("from")
+      ),
+      ok(jsonResponse[List[AppEvent]])
+    )
+  }
+
+  val listAppEventInRange: Endpoint[(Int, Int), List[AppEvent]] = {
+    endpoint(
+      get(
+        root / "list-app-event-in-range" /? (qs[Int]("from") & qs[Int]("upto"))
+      ),
+      ok(jsonResponse[List[AppEvent]])
+    )
+  }
+
   implicit def dateScheme(implicit
       string: JsonSchema[String]
   ): JsonSchema[LocalDate] =
@@ -72,7 +100,28 @@ trait ApiEndpoints
   ): JsonSchema[LocalTime] =
     string.xmapPartial(toTime)(fromTime)
 
+  implicit def dateTimeSchema(implicit
+      string: JsonSchema[String]
+  ): JsonSchema[LocalDateTime] =
+    string.xmapPartial(toDateTime)(fromDateTime)
+
+  implicit def dateParam(implicit
+      string: QueryStringParam[String]
+  ): QueryStringParam[LocalDate] =
+    string.xmapPartial(toDate)(fromDate)
+
+  implicit def timeParam(implicit
+      string: QueryStringParam[String]
+  ): QueryStringParam[LocalTime] =
+    string.xmapPartial(toTime)(fromTime)
+
+  implicit def dateTimeParam(implicit
+      string: QueryStringParam[String]
+  ): QueryStringParam[LocalDateTime] =
+    string.xmapPartial(toDateTime)(fromDateTime)
+
   implicit lazy val appointSchema: JsonSchema[Appoint] = genericJsonSchema
+  implicit lazy val appEventSchema: JsonSchema[AppEvent] = genericJsonSchema
 
   def toDate: String => Validated[LocalDate] = { s =>
     Try(LocalDate.parse(s)) match {
@@ -82,11 +131,6 @@ trait ApiEndpoints
   }
 
   def fromDate: LocalDate => String = _.toString
-
-  implicit def dateParam(implicit
-      string: QueryStringParam[String]
-  ): QueryStringParam[LocalDate] =
-    string.xmapPartial(toDate)(fromDate)
 
   private val timeFormatter: DateTimeFormatter =
     DateTimeFormatter.ofPattern("HH:mm:ss")
@@ -100,9 +144,16 @@ trait ApiEndpoints
 
   def fromTime: LocalTime => String = _.format(timeFormatter)
 
-  implicit def timeParam(implicit
-      string: QueryStringParam[String]
-  ): QueryStringParam[LocalTime] =
-    string.xmapPartial(toTime)(fromTime)
+  val dateTimeFormatter: DateTimeFormatter =
+    DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss")
+
+  def fromDateTime: LocalDateTime => String = _.format(dateTimeFormatter)
+
+  def toDateTime: String => Validated[LocalDateTime] = { s =>
+    Try(LocalDateTime.parse(s, dateTimeFormatter)) match {
+      case Success(dt) => Valid(dt)
+      case Failure(_)  => Invalid(s"Invalid date time value '${s}'")
+    }
+  }
 
 }

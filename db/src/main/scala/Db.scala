@@ -99,4 +99,18 @@ trait DbAppoint extends DbExecutor {
     exec(ops)
   }
 
+  def enterAppEvent(appEvent: AppEvent): IO[Int] = {
+    exec(DbPrim.enterAppEvent(appEvent))
+  }
+
+  def getNextAppEventId(): IO[Int] = {
+    val ops = for(
+      idOpt <- DbPrim.getNextAppEventId().option
+    ) yield (idOpt match {
+      case Some(id) => id
+      case None => 0
+    })
+    exec(ops)
+  }
+
 }
