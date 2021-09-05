@@ -43,7 +43,6 @@ trait AppEventPrim {
       kind: String,
       data: String
   ): ConnectionIO[AppEvent] = {
-    println("enterAppEvent", model, kind, data)
     val createdAt = LocalDateTime.now()
     for {
       id <- sql"""

@@ -82,7 +82,7 @@ trait DbAppoint extends DbExecutor {
       appEvent <- DbPrim.enterAppEvent(
         "appoint",
         "updated",
-        encode(Events.FromTo(at, to))
+        encode(Events.FromTo[Appoint](at, to))
       )
     } yield appEvent
     exec(ops)

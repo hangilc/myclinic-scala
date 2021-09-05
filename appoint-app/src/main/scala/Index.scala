@@ -15,12 +15,14 @@ import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.util.Failure
 import scala.util.Success
 import org.scalajs.dom.raw.CustomEvent
+import org.scalajs.dom
 
 object JsMain {
   def main(args: Array[String]): Unit = {
     val body = document.body
     body(cls := "px-5 pt-1 pb-5")
     body.appendChild(banner)
+    openWebSocket()
     body.appendChild(AppointRow.ele)
     val startDate = DateUtil.startDayOfWeek(LocalDate.now())
     val endDate = startDate.plusDays(6)
@@ -35,6 +37,26 @@ object JsMain {
       h1(cls := "bg-dark text-white p-3 col-md-12")("診察予約")
     )
   )
+
+  def openWebSocket(): Unit = {
+    val location = dom.window.location
+    val origProtocol = location.protocol
+    val host = location.host
+    val protocol = origProtocol match {
+      case "https:" => "wss:"
+      case _        => "ws:"
+    }
+    val url = s"${protocol}//${host}/ws/events"
+    val ws = new dom.WebSocket(url)
+    ws.onmessage = {
+      (e: dom.raw.MessageEvent) => {
+        val src = e.data.asInstanceOf[String]
+        println("src", src)
+        val appEvent: AppEvent = Api.fromJson[AppEvent](src)
+        println(appEvent)
+      }
+    }
+  }
 
 }
 
@@ -84,12 +106,15 @@ case class SlotRow(appoint: Appoint) {
     div(detail)
   )
 
-  document.body.addEventListener[CustomEvent]("mc-appoint-modified", e => {
-    val modified = e.detail.asInstanceOf[Appoint]
-    if( modified.date == appoint.date && modified.time == appoint.time ){
-      println("modified", modified)
+  document.body.addEventListener[CustomEvent](
+    "mc-appoint-modified",
+    e => {
+      val modified = e.detail.asInstanceOf[Appoint]
+      if (modified.date == appoint.date && modified.time == appoint.time) {
+        println("modified", modified)
+      }
     }
-  })
+  )
 
   def detail: String = {
     if (appoint.patientName.isEmpty) {

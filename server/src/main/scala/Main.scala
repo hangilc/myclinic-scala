@@ -23,16 +23,18 @@ import fs2.concurrent.Topic
 import fs2.Pipe
 import org.http4s.websocket.WebSocketFrame
 import org.http4s.websocket.WebSocketFrame.Text
+import endpoints4s.Valid
+import endpoints4s.Invalid
+import ujson.Str
 
 object Main extends IOApp {
 
   object AppEventBroadcaster {
     def broadcast(
         topic: Topic[IO, WebSocketFrame],
-        appEvent: AppEvent,
-        encode: AppEvent => String
+        text: String
     ): IO[Unit] = {
-      topic.publish1(Text(encode(appEvent))) >> IO.pure(())
+      topic.publish1(Text(text)) >> IO.pure(())
     }
   }
 
@@ -51,10 +53,9 @@ object Main extends IOApp {
           (date: LocalDate, time: LocalTime, name: String) =>
             {
               val encode: Events.FromTo[Appoint] => String = v => toJson(v)
-              val encode2: AppEvent => String = v => toJson(v)
               for {
                 appEvent <- Db.registerAppoint(date, time, name, encode)
-                _ <- AppEventBroadcaster.broadcast(topic, appEvent, encode2)
+                _ <- AppEventBroadcaster.broadcast(topic, toJson(appEvent))
               } yield ()
             }
         }.tupled),
@@ -72,7 +73,15 @@ object Main extends IOApp {
     )
 
     def toJson[T](value: T)(implicit schema: JsonSchema[T]): String = {
-      schema.encoder.encode(value).render()
+      schema.encoder.encode(value).toString()
+    }
+
+    def fromJson[T](src: String)(implicit schema: JsonSchema[T]): T = {
+      val codec = stringCodec[T]
+      codec.decode(src) match {
+        case Valid(value) => value
+        case Invalid(errors) => throw new RuntimeException(errors.toString())
+      }
     }
   }
 
@@ -87,16 +96,16 @@ object Main extends IOApp {
       WebSocketBuilder[IO].build(toClient, fromClient)
   }
 
-  def helloService(topic: Topic[IO, WebSocketFrame]) = HttpRoutes.of[IO] {
+  def helloService(api: ApiService) = HttpRoutes.of[IO] {
     case GET -> Root => {
-      val frame = Text("HELLO")
-      topic.publish1(frame) >> Ok("api-hello")
+      Ok("hello")
     }
   }
 
   val staticService = fileService[IO](FileService.Config("./web", "/"))
 
   def buildServer(topic: Topic[IO, WebSocketFrame]) = {
+    val apiService = new ApiService(topic)
     BlazeServerBuilder[IO](global)
       .withSocketReuseAddress(true)
       .bindHttp(8080, "localhost")
@@ -105,9 +114,9 @@ object Main extends IOApp {
           "/appoint" -> HttpRoutes.of[IO] { case GET -> Root =>
             PermanentRedirect(Location(uri"/appoint/"))
           },
-          "/api" -> { val api = new ApiService(topic); api.routes },
+          "/api" -> apiService.routes,
           "/ws" -> ws(topic),
-          "/hello" -> helloService(topic),
+          "/hello" -> helloService(apiService),
           "/" -> staticService
         ).orNotFound
       )
