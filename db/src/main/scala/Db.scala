@@ -59,7 +59,6 @@ trait DbAppoint extends DbExecutor {
       if (!app.isVacant) {
         throw new RuntimeException(s"Appoint slot is not empty: $date $time")
       }
-      println("confirmed")
       ().pure[ConnectionIO]
     }
 
@@ -71,7 +70,7 @@ trait DbAppoint extends DbExecutor {
       }
       for {
         affected <- DbPrim.updateAppoint(app).run
-        _ <- { println("affected", affected); confirm1(affected) }
+        _ <- confirm1(affected)
       } yield app
     }
 
@@ -85,7 +84,6 @@ trait DbAppoint extends DbExecutor {
         "updated",
         encode(Events.FromTo(at, to))
       )
-      _ <- { println("appEvent", appEvent); ().pure[ConnectionIO] }
     } yield appEvent
     exec(ops)
   }

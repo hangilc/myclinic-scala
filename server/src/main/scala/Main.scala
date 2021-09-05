@@ -26,7 +26,17 @@ import org.http4s.websocket.WebSocketFrame.Text
 
 object Main extends IOApp {
 
-  object apiServer
+  object AppEventBroadcaster {
+    def broadcast(
+        topic: Topic[IO, WebSocketFrame],
+        appEvent: AppEvent,
+        encode: AppEvent => String
+    ): IO[Unit] = {
+      topic.publish1(Text(encode(appEvent))) >> IO.pure(())
+    }
+  }
+
+  class ApiService(topic: Topic[IO, WebSocketFrame])
       extends server.Endpoints[IO]
       with ApiEndpoints
       with server.JsonEntitiesFromSchemas {
@@ -41,9 +51,10 @@ object Main extends IOApp {
           (date: LocalDate, time: LocalTime, name: String) =>
             {
               val encode: Events.FromTo[Appoint] => String = v => toJson(v)
+              val encode2: AppEvent => String = v => toJson(v)
               for {
                 appEvent <- Db.registerAppoint(date, time, name, encode)
-                _ <- { println(appEvent); IO.pure(()) }
+                _ <- AppEventBroadcaster.broadcast(topic, appEvent, encode2)
               } yield ()
             }
         }.tupled),
@@ -65,15 +76,15 @@ object Main extends IOApp {
     }
   }
 
-  def ws(topic: Topic[IO, WebSocketFrame]) = HttpRoutes.of[IO] { case GET -> Root / "echo" =>
-    val toClient = topic
-      .subscribe(10)
-      .evalMap(f => IO { println("sub"); f })
-    val fromClient: Pipe[IO, WebSocketFrame, Unit] = _.evalMap {
-      case Text(t, _) => IO.delay(println(t))
-      case f          => IO.delay(println(s"Unknown type: $f"))
-    }
-    WebSocketBuilder[IO].build(toClient, fromClient)
+  def ws(topic: Topic[IO, WebSocketFrame]) = HttpRoutes.of[IO] {
+    case GET -> Root / "events" =>
+      val toClient = topic
+        .subscribe(10)
+      val fromClient: Pipe[IO, WebSocketFrame, Unit] = _.evalMap {
+        case Text(t, _) => IO.delay(println(t))
+        case f          => IO.delay(println(s"Unknown type: $f"))
+      }
+      WebSocketBuilder[IO].build(toClient, fromClient)
   }
 
   def helloService(topic: Topic[IO, WebSocketFrame]) = HttpRoutes.of[IO] {
@@ -94,7 +105,7 @@ object Main extends IOApp {
           "/appoint" -> HttpRoutes.of[IO] { case GET -> Root =>
             PermanentRedirect(Location(uri"/appoint/"))
           },
-          "/api" -> apiServer.routes,
+          "/api" -> { val api = new ApiService(topic); api.routes },
           "/ws" -> ws(topic),
           "/hello" -> helloService(topic),
           "/" -> staticService
