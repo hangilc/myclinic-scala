@@ -40,7 +40,11 @@ object Main extends IOApp {
         registerAppoint.implementedByEffect({
           (date: LocalDate, time: LocalTime, name: String) =>
             {
-              Db.registerAppoint(date, time, name)
+              val encode: Events.FromTo[Appoint] => String = v => toJson(v)
+              for {
+                appEvent <- Db.registerAppoint(date, time, name, encode)
+                _ <- { println(appEvent); IO.pure(()) }
+              } yield ()
             }
         }.tupled),
         cancelAppoint.implementedByEffect({
@@ -61,12 +65,6 @@ object Main extends IOApp {
     }
   }
 
-  implicit val jsonEncoder = new Events.JsonEncoder {
-    override def encode[T](value: T): String = {
-      apiServer.toJson[T](value)
-    }
-  }
-
   def ws(topic: Topic[IO, WebSocketFrame]) = HttpRoutes.of[IO] { case GET -> Root / "echo" =>
     val toClient = topic
       .subscribe(10)
@@ -80,9 +78,7 @@ object Main extends IOApp {
 
   def helloService(topic: Topic[IO, WebSocketFrame]) = HttpRoutes.of[IO] {
     case GET -> Root => {
-      val app = Appoint(LocalDate.of(2021, 9, 14), LocalTime.of(10, 0, 0), "たなかたろう", 0, "")
-      val createdEvent = Events.createAppointCreatedEvent(app)
-      val frame = Text(apiServer.toJson(createdEvent))
+      val frame = Text("HELLO")
       topic.publish1(frame) >> Ok("api-hello")
     }
   }

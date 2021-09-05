@@ -52,26 +52,41 @@ trait DbAppoint extends DbExecutor {
   def registerAppoint(
       date: LocalDate,
       time: LocalTime,
-      patientName: String
-  ): IO[Unit] = {
+      patientName: String,
+      encode: Events.FromTo[Appoint] => String
+  ): IO[AppEvent] = {
     def confirmVacant(app: Appoint): ConnectionIO[Unit] = {
       if (!app.isVacant) {
         throw new RuntimeException(s"Appoint slot is not empty: $date $time")
       }
+      println("confirmed")
       ().pure[ConnectionIO]
     }
 
-    def register(): ConnectionIO[Int] = {
+    def update(): ConnectionIO[Appoint] = {
       val app = Appoint(date, time, patientName, 0, "")
-      DbPrim.updateAppoint(app).run
+      def confirm1(i: Int): ConnectionIO[Unit] = i match {
+        case 1 => ().pure[ConnectionIO]
+        case _ => throw new RuntimeException(s"Failed to update appoint ${app}")
+      }
+      for {
+        affected <- DbPrim.updateAppoint(app).run
+        _ <- { println("affected", affected); confirm1(affected) }
+      } yield app
     }
 
     require(!patientName.isEmpty)
     val ops = for {
       at <- DbPrim.getAppoint(date, time).unique
       _ <- confirmVacant(at)
-      _ <- register()
-    } yield ()
+      to <- update()
+      appEvent <- DbPrim.enterAppEvent(
+        "appoint",
+        "updated",
+        encode(Events.FromTo(at, to))
+      )
+      _ <- { println("appEvent", appEvent); ().pure[ConnectionIO] }
+    } yield appEvent
     exec(ops)
   }
 
@@ -99,17 +114,12 @@ trait DbAppoint extends DbExecutor {
     exec(ops)
   }
 
-  def enterAppEvent(appEvent: AppEvent): IO[Int] = {
-    exec(DbPrim.enterAppEvent(appEvent))
-  }
-
   def getNextAppEventId(): IO[Int] = {
-    val ops = for(
-      idOpt <- DbPrim.getNextAppEventId().option
-    ) yield (idOpt match {
-      case Some(id) => id
-      case None => 0
-    })
+    val ops =
+      for (idOpt <- DbPrim.getNextAppEventId().option) yield (idOpt match {
+        case Some(id) => id
+        case None     => 0
+      })
     exec(ops)
   }
 

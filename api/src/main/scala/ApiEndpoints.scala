@@ -122,6 +122,10 @@ trait ApiEndpoints
 
   implicit lazy val appointSchema: JsonSchema[Appoint] = genericJsonSchema
   implicit lazy val appEventSchema: JsonSchema[AppEvent] = genericJsonSchema
+  implicit def eventsFromToSchema[T](implicit
+      schema: JsonSchema[T]
+  ): JsonSchema[Events.FromTo[T]] =
+    genericJsonSchema[Events.FromTo[T]]
 
   def toDate: String => Validated[LocalDate] = { s =>
     Try(LocalDate.parse(s)) match {
