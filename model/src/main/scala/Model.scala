@@ -7,6 +7,7 @@ import java.time.LocalDateTime
 case class Appoint(
   date: LocalDate,
   time: LocalTime,
+  eventId: Int,
   patientName: String,
   patientId: Int,
   memo: String
@@ -14,14 +15,9 @@ case class Appoint(
   def isVacant: Boolean = patientName.isEmpty
 }
 
-object Appoint {
-
-  def create(date: LocalDate, time: LocalTime): Appoint =
-    Appoint(date, time, "", 0, "")
-}
-
 case class AppEvent(
   id: Int,
+  eventId: Int,
   createdAt: LocalDateTime,
   model: String,
   kind: String,

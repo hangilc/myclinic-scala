@@ -11,6 +11,16 @@ import java.time.LocalTime
 
 trait DbExecutor {
   def exec[A](s: ConnectionIO[A]): IO[A]
+
+  def update1[A](s: ConnectionIO[Int], err: => String): ConnectionIO[Unit] = {
+    for{
+      affected <- s
+      _ = affected match {
+        case 1 => 
+        case _ => throw new RuntimeException(err)
+      }
+    } yield ()
+  }
 }
 
 object Db extends DbExecutor with DbAppoint {
@@ -53,7 +63,7 @@ trait DbAppoint extends DbExecutor {
       date: LocalDate,
       time: LocalTime,
       patientName: String,
-      encode: Events.FromTo[Appoint] => String
+      encode: Appoint => String
   ): IO[AppEvent] = {
     def confirmVacant(app: Appoint): ConnectionIO[Unit] = {
       if (!app.isVacant) {
@@ -62,8 +72,8 @@ trait DbAppoint extends DbExecutor {
       ().pure[ConnectionIO]
     }
 
-    def update(): ConnectionIO[Appoint] = {
-      val app = Appoint(date, time, patientName, 0, "")
+    def update(eventId: Int): ConnectionIO[Appoint] = {
+      val app = Appoint(date, time, eventId, patientName, 0, "")
       def confirm1(i: Int): ConnectionIO[Unit] = i match {
         case 1 => ().pure[ConnectionIO]
         case _ => throw new RuntimeException(s"Failed to update appoint ${app}")
@@ -76,14 +86,16 @@ trait DbAppoint extends DbExecutor {
 
     require(!patientName.isEmpty)
     val ops = for {
+      eventId <- DbPrim.getNextEventId()
       at <- DbPrim.getAppoint(date, time).unique
       _ <- confirmVacant(at)
-      to <- update()
+      to <- update(eventId)
       appEvent <- DbPrim.enterAppEvent(
         "appoint",
         "updated",
-        encode(Events.FromTo[Appoint](at, to))
+        encode(to)
       )
+      _ <- DbPrim.setEventId(eventId)
     } yield appEvent
     exec(ops)
   }
@@ -102,6 +114,7 @@ trait DbAppoint extends DbExecutor {
 
     require(!patientName.isEmpty)
     val ops = (for {
+      eventId <- DbPrim.getNextEventId()
       app <- DbPrim.getAppoint(date, time).unique
       _ <- confirmName(app)
       _ <- {
@@ -112,13 +125,23 @@ trait DbAppoint extends DbExecutor {
     exec(ops)
   }
 
-  def getNextAppEventId(): IO[Int] = {
-    val ops =
-      for (idOpt <- DbPrim.getNextAppEventId().option) yield (idOpt match {
-        case Some(id) => id
-        case None     => 0
-      })
-    exec(ops)
+  def getNextEventId(): IO[Int] = {
+    exec(DbPrim.getNextEventId())
+  }
+
+  def setEventId(eventId: Int): IO[Unit] = {
+    def confirm1(affected: Int): IO[Unit] = {
+      if( affected != 1 ){
+        throw new RuntimeException("Failed to update event_id.")
+      } else {
+        ().pure[IO]
+      }
+    }
+
+    for{
+      affected <- DbPrim.setCurrentEventId(eventId).run
+      _ <- confirm1(affected)
+    } yield ()
   }
 
 }
