@@ -13,10 +13,10 @@ trait DbExecutor {
   def exec[A](s: ConnectionIO[A]): IO[A]
 
   def update1[A](s: ConnectionIO[Int], err: => String): ConnectionIO[Unit] = {
-    for{
+    for {
       affected <- s
       _ = affected match {
-        case 1 => 
+        case 1 =>
         case _ => throw new RuntimeException(err)
       }
     } yield ()
@@ -44,10 +44,17 @@ trait DbAppoint extends DbExecutor {
   }
 
   def createAppointTimes(times: List[(LocalDate, LocalTime)]): IO[Unit] = {
-    val ins = times.map(_ match {
-      case (d, t) => DbPrim.enterAppoint(Appoint.create(d, t)).run
-    })
-    exec(ins.sequence).void
+    def seq(eventId: Int): ConnectionIO[Unit] = times.map({ (d: LocalDate, t: LocalTime) =>
+      {
+        val app = Appoint(d, t, eventId, "", 0, "")
+        DbPrim.enterAppoint(app)
+      }
+    }.tupled).sequence.void
+
+    exec(for {
+      eventId <- DbPrim.getNextEventId()
+      _ <- seq(eventId)
+    } yield ())
   }
 
   def createAppointTimes(date: LocalDate, times: (Int, Int)*): IO[Unit] = {
@@ -77,12 +84,13 @@ trait DbAppoint extends DbExecutor {
     }
 
     require(!patientName.isEmpty)
-    val ops = for {
+    val ops: ConnectionIO[AppEvent] = for {
       eventId <- DbPrim.getNextEventId()
       at <- DbPrim.getAppoint(date, time).unique
       _ = confirmVacant(at)
       to <- update(eventId)
       appEvent <- DbPrim.enterAppEvent(
+        eventId,
         "appoint",
         "updated",
         encode(to)
@@ -97,6 +105,8 @@ trait DbAppoint extends DbExecutor {
       time: LocalTime,
       patientName: String
   ): IO[Unit] = {
+    require(!patientName.isEmpty)
+
     def confirmName(app: Appoint): ConnectionIO[Unit] = {
       if (patientName != app.patientName) {
         throw new RuntimeException(s"Inconsistent patient name: $patientName")
@@ -104,36 +114,21 @@ trait DbAppoint extends DbExecutor {
       ().pure[ConnectionIO]
     }
 
-    require(!patientName.isEmpty)
-    val ops = (for {
+    val ops: ConnectionIO[Unit] = (for {
       eventId <- DbPrim.getNextEventId()
       app <- DbPrim.getAppoint(date, time).unique
       _ <- confirmName(app)
       _ <- {
-        val update = Appoint.create(date, time)
-        DbPrim.updateAppoint(update).run
+        val update = Appoint(date, time, eventId, "", 0, "")
+        DbPrim.updateAppoint(update)
       }
+      _ <- DbPrim.setEventId(eventId)
     } yield ())
     exec(ops)
   }
 
   def getNextEventId(): IO[Int] = {
     exec(DbPrim.getNextEventId())
-  }
-
-  def setEventId(eventId: Int): IO[Unit] = {
-    def confirm1(affected: Int): IO[Unit] = {
-      if( affected != 1 ){
-        throw new RuntimeException("Failed to update event_id.")
-      } else {
-        ().pure[IO]
-      }
-    }
-
-    for{
-      affected <- DbPrim.setCurrentEventId(eventId).run
-      _ <- confirm1(affected)
-    } yield ()
   }
 
 }
