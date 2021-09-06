@@ -97,21 +97,16 @@ trait AppEventPrim {
     } yield ()
   }
 
-  def getCurrentEventId(): ConnectionIO[Option[Int]] = {
+  private def getCurrentEventId(): ConnectionIO[Int] = {
     sql"""
-      select id from event_id_store order by id desc limit 1
-    """.query[Int].option
+      select event_id from event_id_store where id = 0
+    """.query[Int].unique
   }
 
   def getNextEventId(): ConnectionIO[Int] = {
-    def next(curr: Option[Int]): Int = curr match {
-      case Some(v) => v + 1
-      case None    => 0
-    }
-
     for {
-      currOpt <- getCurrentEventId()
-    } yield next(currOpt)
+      currId <- getCurrentEventId()
+    } yield currId + 1
   }
 
 }

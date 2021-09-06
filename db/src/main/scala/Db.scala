@@ -69,9 +69,8 @@ trait DbAppoint extends DbExecutor {
   def registerAppoint(
       date: LocalDate,
       time: LocalTime,
-      patientName: String,
-      encode: Appoint => String
-  ): IO[AppEvent] = {
+      patientName: String
+  )(implicit codec: ModelJsonCodec): IO[AppEvent] = {
     def confirmVacant(app: Appoint): Unit = {
       if (!app.isVacant) {
         throw new RuntimeException(s"Appoint slot is not empty: $date $time")
@@ -93,7 +92,7 @@ trait DbAppoint extends DbExecutor {
         eventId,
         "appoint",
         "updated",
-        encode(to)
+        codec.encodeAppoint(to)
       )
       _ <- DbPrim.setEventId(eventId)
     } yield appEvent

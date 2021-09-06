@@ -63,7 +63,7 @@ trait ApiEndpoints
     )
   }
 
-  val getNextAppEventId: Endpoint[Unit, Int] = {
+  val getNextEventId: Endpoint[Unit, Int] = {
     endpoint(
       get(
         root / "get-next-app-event-id"
@@ -122,10 +122,6 @@ trait ApiEndpoints
 
   implicit lazy val appointSchema: JsonSchema[Appoint] = genericJsonSchema
   implicit lazy val appEventSchema: JsonSchema[AppEvent] = genericJsonSchema
-  implicit def eventsFromToSchema[T](implicit
-      schema: JsonSchema[T]
-  ): JsonSchema[Events.FromTo[T]] =
-    genericJsonSchema[Events.FromTo[T]]
 
   def toDate: String => Validated[LocalDate] = { s =>
     Try(LocalDate.parse(s)) match {

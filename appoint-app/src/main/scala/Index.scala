@@ -51,9 +51,8 @@ object JsMain {
     ws.onmessage = {
       (e: dom.raw.MessageEvent) => {
         val src = e.data.asInstanceOf[String]
-        println("src", src)
         val appEvent: AppEvent = Api.fromJson[AppEvent](src)
-        println(appEvent)
+        println("appEvent", appEvent)
       }
     }
   }

@@ -25,7 +25,6 @@ import org.http4s.websocket.WebSocketFrame
 import org.http4s.websocket.WebSocketFrame.Text
 import endpoints4s.Valid
 import endpoints4s.Invalid
-import ujson.Str
 
 object Main extends IOApp {
 
@@ -42,6 +41,7 @@ object Main extends IOApp {
       extends server.Endpoints[IO]
       with ApiEndpoints
       with server.JsonEntitiesFromSchemas {
+    implicit val codec: ModelJsonCodec = new JsonCodecFromApi(this)
     val routes: HttpRoutes[IO] = HttpRoutes.of(
       routesFromEndpoints(
         listAppoint.implementedByEffect({ (from: LocalDate, upto: LocalDate) =>
@@ -52,9 +52,8 @@ object Main extends IOApp {
         registerAppoint.implementedByEffect({
           (date: LocalDate, time: LocalTime, name: String) =>
             {
-              val encode: Events.FromTo[Appoint] => String = v => toJson(v)
               for {
-                appEvent <- Db.registerAppoint(date, time, name, encode)
+                appEvent <- Db.registerAppoint(date, time, name)
                 _ <- AppEventBroadcaster.broadcast(topic, toJson(appEvent))
               } yield ()
             }
@@ -68,7 +67,7 @@ object Main extends IOApp {
         getAppoint.implementedByEffect({ (date: LocalDate, time: LocalTime) =>
           Db.getAppoint(date, time)
         }.tupled),
-        getNextAppEventId.implementedByEffect(_ => Db.getNextAppEventId())
+        getNextEventId.implementedByEffect(_ => Db.getNextEventId())
       )
     )
 
@@ -77,12 +76,12 @@ object Main extends IOApp {
     }
 
     def fromJson[T](src: String)(implicit schema: JsonSchema[T]): T = {
-      val codec = stringCodec[T]
-      codec.decode(src) match {
-        case Valid(value) => value
-        case Invalid(errors) => throw new RuntimeException(errors.toString())
+      schema.stringCodec.decode(src) match {
+        case Valid(t) => t
+        case Invalid(e) => throw new RuntimeException(e.toString())
       }
     }
+
   }
 
   def ws(topic: Topic[IO, WebSocketFrame]) = HttpRoutes.of[IO] {

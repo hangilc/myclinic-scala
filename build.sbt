@@ -49,7 +49,8 @@ lazy val db = project
       "org.xerial" % "sqlite-jdbc" % sqliteVersion,
       "org.tpolecat" %% "doobie-core" % doobieVersion,
       "org.tpolecat" %% "doobie-hikari" % doobieVersion
-    )
+    ),
+    Compile / console / scalacOptions ~= { _.filterNot(Set("-Wunused")) }
   )
 
 lazy val server = project
@@ -61,9 +62,6 @@ lazy val server = project
       "ch.qos.logback" % "logback-classic" % "1.1.3" % "runtime",
       "org.http4s" %% "http4s-blaze-server" % http4sVersion,
       "org.http4s" %% "http4s-dsl" % http4sVersion,
-      //"org.http4s" %% "http4s-circe" % http4sVersion,
-      //"io.circe" %% "circe-generic" % circeVersion,
-      //"org.endpoints4s" %% "http4s-server" % "7.0.0",
       "org.endpoints4s" %% "openapi" % "3.1.0"
     ),
     Compile / console / scalacOptions ~= { _.filterNot(Set("-Wunused")) }
@@ -98,11 +96,6 @@ lazy val model = crossProject(JSPlatform, JVMPlatform)
   .in(file("model"))
   .settings(
     name := "model"
-    // libraryDependencies ++= Seq(
-    //   "io.circe" %%% "circe-core" % circeVersion,
-    //   "io.circe" %%% "circe-generic" % circeVersion,
-    //   "io.circe" %%% "circe-parser" % circeVersion
-    // )
   )
   .jsSettings(
     scalaJSUseMainModuleInitializer := false,
