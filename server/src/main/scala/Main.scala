@@ -95,7 +95,7 @@ object Main extends IOApp {
       WebSocketBuilder[IO].build(toClient, fromClient)
   }
 
-  def helloService(api: ApiService) = HttpRoutes.of[IO] {
+  def helloService() = HttpRoutes.of[IO] {
     case GET -> Root => {
       Ok("hello")
     }
@@ -115,7 +115,7 @@ object Main extends IOApp {
           },
           "/api" -> apiService.routes,
           "/ws" -> ws(topic),
-          "/hello" -> helloService(apiService),
+          "/hello" -> helloService(),
           "/" -> staticService
         ).orNotFound
       )
