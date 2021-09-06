@@ -65,30 +65,22 @@ trait DbAppoint extends DbExecutor {
       patientName: String,
       encode: Appoint => String
   ): IO[AppEvent] = {
-    def confirmVacant(app: Appoint): ConnectionIO[Unit] = {
+    def confirmVacant(app: Appoint): Unit = {
       if (!app.isVacant) {
         throw new RuntimeException(s"Appoint slot is not empty: $date $time")
       }
-      ().pure[ConnectionIO]
     }
 
     def update(eventId: Int): ConnectionIO[Appoint] = {
       val app = Appoint(date, time, eventId, patientName, 0, "")
-      def confirm1(i: Int): ConnectionIO[Unit] = i match {
-        case 1 => ().pure[ConnectionIO]
-        case _ => throw new RuntimeException(s"Failed to update appoint ${app}")
-      }
-      for {
-        affected <- DbPrim.updateAppoint(app).run
-        _ <- confirm1(affected)
-      } yield app
+      DbPrim.updateAppoint(app) >> app.pure[ConnectionIO]
     }
 
     require(!patientName.isEmpty)
     val ops = for {
       eventId <- DbPrim.getNextEventId()
       at <- DbPrim.getAppoint(date, time).unique
-      _ <- confirmVacant(at)
+      _ = confirmVacant(at)
       to <- update(eventId)
       appEvent <- DbPrim.enterAppEvent(
         "appoint",
