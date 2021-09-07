@@ -40,7 +40,7 @@ object Main extends IOApp {
   class ApiService(topic: Topic[IO, WebSocketFrame])
       extends server.Endpoints[IO]
       with ApiEndpoints
-      with server.JsonEntitiesFromSchemas {
+      with server.JsonEntitiesFromSchemas { self =>
     implicit val codec: ModelJsonCodec = new JsonCodecFromApi(this)
     val routes: HttpRoutes[IO] = HttpRoutes.of(
       routesFromEndpoints(
