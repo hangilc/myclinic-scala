@@ -29,3 +29,4 @@ object Api
     schema.encoder.encode(value).render()
   }
 }
+

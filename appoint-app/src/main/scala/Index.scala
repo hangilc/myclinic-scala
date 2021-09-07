@@ -52,6 +52,13 @@ object JsMain {
       (e: dom.raw.MessageEvent) => {
         val src = e.data.asInstanceOf[String]
         val appEvent: AppEvent = Api.fromJson[AppEvent](src)
+        appEvent.model match {
+          case "appoint" => {
+            val data = Api.fromJson[Appoint](appEvent.data)
+            println(appEvent.model, appEvent.kind, data)
+          }
+          case _ =>
+        }
         println("appEvent", appEvent)
       }
     }
