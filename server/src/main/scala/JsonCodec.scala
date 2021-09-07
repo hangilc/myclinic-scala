@@ -3,7 +3,7 @@ package dev.myclinic.scala.server
 import dev.myclinic.scala.model._
 import dev.myclinic.scala.server.Main.ApiService
 
-case class JsonCodecFromApi(api: ApiService) extends ModelJsonCodec {
+case class JsonCodecFromApi(implicit api: ApiService) extends ModelJsonCodec {
   import api._
   def encode(value: Appoint): String = api.toJson[Appoint](value)
   def decode(json: String): Appoint = api.fromJson[Appoint](json)
