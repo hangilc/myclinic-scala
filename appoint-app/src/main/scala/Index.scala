@@ -5,17 +5,11 @@ import dev.fujiwara.domq.Html._
 import dev.fujiwara.domq.Modifiers._
 import dev.myclinic.scala.model._
 import dev.myclinic.scala.util.DateUtil
-import dev.myclinic.scala.web.appoint.MakeAppointDialog
 import dev.myclinic.scala.webclient.Api
+import org.scalajs.dom
 import org.scalajs.dom.document
-import org.scalajs.dom.raw.Element
 
 import java.time.LocalDate
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
-import scala.util.Failure
-import scala.util.Success
-import org.scalajs.dom.raw.CustomEvent
-import org.scalajs.dom
 
 object JsMain {
   def main(args: Array[String]): Unit = {
@@ -51,14 +45,8 @@ object JsMain {
       (e: dom.raw.MessageEvent) => {
         val src = e.data.asInstanceOf[String]
         val appEvent: AppEvent = Api.fromJson[AppEvent](src)
-        appEvent.model match {
-          case "appoint" => {
-            val data = Api.fromJson[Appoint](appEvent.data)
-            println(appEvent.model, appEvent.kind, data)
-          }
-          case _ =>
-        }
-        println("appEvent", appEvent)
+        println("websocket received", appEvent)
+        Events.handle(appEvent)
       }
     }
   }

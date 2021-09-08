@@ -24,6 +24,7 @@ object AppointSheet {
     def setup(appoints: List[Appoint]): Unit = {
       val appointDates = AppointDate.classify(appoints)
       val columns = appointDates.map(AppointColumn(_))
+      println("columns", columns)
       AppointRow.set(columns)
       dateRange = Some((from, upto))
     }
@@ -37,7 +38,24 @@ object AppointSheet {
     wrapper(eles)
   }
 
-  def handleEvent(event: AppEvent): Unit = ()
+  def handleEvent(event: Events.ModelEvent): Unit = {
+    import Events._
+    println("AppointSheet handling", event)
+    event match {
+      case AppointUpdated(appoint) => onAppointUpdated(appoint)
+      case _                       =>
+    }
+  }
+
+  def onAppointUpdated(appoint: Appoint): Unit = {
+    println("onAppointUpdated handling", appoint)
+    AppointRow.columns.foreach(c => {
+      println("in onAppointUpdate", c.appointDate.date, appoint.date)
+      if (c.appointDate.date == appoint.date) {
+        c.updateRow(appoint)
+      }
+    })
+  }
 
   case class AppointDate(date: LocalDate, appoints: List[Appoint])
 
@@ -62,31 +80,38 @@ object AppointSheet {
       rowBinding.element.clear()
     }
 
-    def add(c: AppointColumn): Unit = {
-      rowBinding.element.appendChild(c.ele)
-    }
-
     def set(cols: List[AppointColumn]): Unit = {
+      println("setting AppointRow", cols)
+      columns = cols
       clear()
-      cols.foreach(add _)
+      columns.foreach(c => rowBinding.element(c.ele))
     }
   }
 
-  
   case class AppointColumn(appointDate: AppointDate) {
 
-    var eDateRep, eSlots: Element = _
+    val date = appointDate.date
+    var slotsBinding = ElementBinding()
     val ele = div(cls := "col-2")(
-      div(cb := (eDateRep = _)),
-      div(cb := (eSlots = _))
+      div(dateRep),
+      div(bindTo(slotsBinding))
     )
+    var slots: Array[SlotRow] = appointDate.appoints.map(SlotRow(_)).toArray
 
-    eDateRep.innerText = Misc.formatAppointDate(appointDate.date)
-    appointDate.appoints.foreach(a => {
-      val s = new SlotRow(a)
-      eSlots.appendChild(s.ele)
-    })
+    def dateRep: String = Misc.formatAppointDate(date)
+    slots.foreach(s => slotsBinding.element(s.ele))
 
+    def updateRow(app: Appoint): Unit = {
+      println("updating row", app)
+      for (i <- 0 until slots.length) {
+        val slot = slots(i)
+        if (slot.needUpdate(app)) {
+          val newSlot = SlotRow(app)
+          slot.ele.replaceBy(newSlot.ele)
+          slots(i) = newSlot
+        }
+      }
+    }
   }
 
   case class SlotRow(appoint: Appoint) {
@@ -105,6 +130,10 @@ object AppointSheet {
         }
       }
     )
+
+    def needUpdate(newAppoint: Appoint): Boolean = {
+      appoint.requireUpdate(newAppoint)
+    }
 
     def detail: String = {
       if (appoint.patientName.isEmpty) {

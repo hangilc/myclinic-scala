@@ -23,6 +23,10 @@ case class ElementQ(ele: Element) {
     ele.innerHTML = ""
   }
 
+  def replaceBy(newElement: Element): Unit = {
+    ele.parentNode.replaceChild(newElement, ele)
+  }
+
 }
 
 object ElementQ {
