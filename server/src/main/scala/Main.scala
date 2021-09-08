@@ -64,9 +64,13 @@ object Main extends IOApp {
         }.tupled),
         cancelAppoint.implementedByEffect({
           (date: LocalDate, time: LocalTime, name: String) =>
-            {
-              Db.cancelAppoint(date, time, name)
-            }
+            for {
+              appEvent <- Db.cancelAppoint(date, time, name)
+              _ <- AppEventBroadcaster.broadcast(
+                topic,
+                ServerJsonCodec.toJson(appEvent)
+              ) 
+            } yield ()
         }.tupled),
         getAppoint.implementedByEffect({ (date: LocalDate, time: LocalTime) =>
           Db.getAppoint(date, time)

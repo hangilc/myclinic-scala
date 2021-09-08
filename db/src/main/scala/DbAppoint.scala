@@ -20,8 +20,8 @@ trait DbAppoint extends Sqlite {
 
   def createAppointTimes(
       times: List[(LocalDate, LocalTime)]
-  )(implicit encoder: JsonEncoder): IO[Unit] = {
-    def seq(eventId: Int): ConnectionIO[Unit] =
+  )(implicit encoder: JsonEncoder): IO[List[AppEvent]] = {
+    def seq(eventId: Int): ConnectionIO[List[AppEvent]] =
       times
         .map({ (d: LocalDate, t: LocalTime) =>
           {
@@ -31,12 +31,22 @@ trait DbAppoint extends Sqlite {
           }
         }.tupled)
         .sequence
-        .void
 
     sqlite(DbEventPrim.withEventId(seq _))
   }
 
-  def registerAppoint(a: Appoint)(implicit encoder: JsonEncoder): IO[Unit] = {
+  def createAppointTimes(
+    year: Int, month: Int, day: Int,
+    slots: (Int, Int)*
+  )(implicit encoder: JsonEncoder): IO[List[AppEvent]] = {
+    val date = LocalDate.of(year, month, day)
+    val times = for{
+      ((h: Int, m: Int)) <- slots
+    } yield (date, LocalTime.of(h, m, 0))
+    createAppointTimes(times.toList)
+  }
+
+  def registerAppoint(a: Appoint)(implicit encoder: JsonEncoder): IO[AppEvent] = {
     require(!a.patientName.isEmpty)
 
     sqlite(
@@ -46,8 +56,8 @@ trait DbAppoint extends Sqlite {
           _ <- Helper.confirm(cur.isVacant, s"Appoint is not vacant: ${cur}")
           to = a.copy(eventId = eventId)
           _ <- DbAppointPrim.updateAppoint(to)
-          _ <- AppEventHelper.enterAppointEvent(eventId, "updated", to)
-        } yield ()
+          appEvent <- AppEventHelper.enterAppointEvent(eventId, "updated", to)
+        } yield appEvent
       )
     )
   }
@@ -56,7 +66,7 @@ trait DbAppoint extends Sqlite {
       date: LocalDate,
       time: LocalTime,
       patientName: String
-  )(implicit encoder: JsonEncoder): IO[Unit] = {
+  )(implicit encoder: JsonEncoder): IO[AppEvent] = {
     require(!patientName.isEmpty)
 
     sqlite(
@@ -70,8 +80,8 @@ trait DbAppoint extends Sqlite {
           )
           to = Appoint(date, time, eventId, "", 0, "")
           _ <- DbAppointPrim.updateAppoint(to)
-          _ <- AppEventHelper.enterAppointEvent(eventId, "updated", to)
-        } yield ()
+          appEvent <- AppEventHelper.enterAppointEvent(eventId, "updated", to)
+        } yield appEvent
       )
     )
   }

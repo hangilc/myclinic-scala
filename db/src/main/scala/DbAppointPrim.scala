@@ -35,7 +35,7 @@ object DbAppointPrim {
   }
 
   def listAppoint(from: LocalDate, upto: LocalDate): Query0[Appoint] = {
-    sql""""
+    sql"""
       select * from appoint where date >= $from and date <= $upto order by date, time
     """.query[Appoint]
   }
