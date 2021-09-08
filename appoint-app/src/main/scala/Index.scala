@@ -16,7 +16,6 @@ import scala.util.Failure
 import scala.util.Success
 import org.scalajs.dom.raw.CustomEvent
 import org.scalajs.dom
-import endpoints4s.xhr.JsonEntitiesFromSchemas
 
 object JsMain {
   def main(args: Array[String]): Unit = {

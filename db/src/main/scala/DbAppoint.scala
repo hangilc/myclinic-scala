@@ -33,14 +33,14 @@ trait DbAppoint extends Sqlite {
         .sequence
         .void
 
-    sqlite(DbEvent.withEventId(seq _))
+    sqlite(DbEventPrim.withEventId(seq _))
   }
 
   def registerAppoint(a: Appoint)(implicit encoder: JsonEncoder): IO[Unit] = {
     require(!a.patientName.isEmpty)
 
     sqlite(
-      DbEvent.withEventId(eventId =>
+      DbEventPrim.withEventId(eventId =>
         for {
           cur <- DbAppointPrim.getAppoint(a.date, a.time).unique
           _ <- Helper.confirm(cur.isVacant, s"Appoint is not vacant: ${cur}")
@@ -60,7 +60,7 @@ trait DbAppoint extends Sqlite {
     require(!patientName.isEmpty)
 
     sqlite(
-      DbEvent.withEventId(eventId =>
+      DbEventPrim.withEventId(eventId =>
         for {
           cur <- DbAppointPrim.getAppoint(date, time).unique
           _ <- Helper.confirm(!cur.isVacant, s"Appoint is vacant: ${cur}")

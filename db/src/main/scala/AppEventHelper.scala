@@ -9,7 +9,7 @@ object AppEventHelper {
       encoder: JsonEncoder
   ): ConnectionIO[AppEvent] = {
     val data = encoder.toJson(app)
-    DbEvent.enterAppEvent(eventId, "appoint", kind, data)
+    DbEventPrim.enterAppEvent(eventId, "appoint", kind, data)
   }
 
 }

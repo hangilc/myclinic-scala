@@ -41,7 +41,7 @@ object Main extends IOApp {
       extends server.Endpoints[IO]
       with ApiEndpoints
       with server.JsonEntitiesFromSchemas { self =>
-    implicit val codec: ModelJsonCodec = new JsonCodecFromApi(this)
+    implicit val dbJsonEncoder = DbJsonEncoder
     val routes: HttpRoutes[IO] = HttpRoutes.of(
       routesFromEndpoints(
         listAppoint.implementedByEffect({ (from: LocalDate, upto: LocalDate) =>
@@ -52,9 +52,13 @@ object Main extends IOApp {
         registerAppoint.implementedByEffect({
           (date: LocalDate, time: LocalTime, name: String) =>
             {
+              val app = Appoint(date, time, 0, name, 0, "")
               for {
-                appEvent <- Db.registerAppoint(date, time, name)
-                _ <- AppEventBroadcaster.broadcast(topic, toJson(appEvent))
+                appEvent <- Db.registerAppoint(app)
+                _ <- AppEventBroadcaster.broadcast(
+                  topic,
+                  ServerJsonCodec.toJson(appEvent)
+                )
               } yield ()
             }
         }.tupled),
@@ -67,7 +71,7 @@ object Main extends IOApp {
         getAppoint.implementedByEffect({ (date: LocalDate, time: LocalTime) =>
           Db.getAppoint(date, time)
         }.tupled),
-        getNextEventId.implementedByEffect(_ => Db.getNextEventId())
+        getNextEventId.implementedByEffect(_ => Db.nextGlobalEventId())
       )
     )
 
@@ -77,7 +81,7 @@ object Main extends IOApp {
 
     def fromJson[T](src: String)(implicit schema: JsonSchema[T]): T = {
       schema.stringCodec.decode(src) match {
-        case Valid(t) => t
+        case Valid(t)   => t
         case Invalid(e) => throw new RuntimeException(e.toString())
       }
     }
