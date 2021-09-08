@@ -3,4 +3,3 @@ target/
 .bsp/
 .metals/
 server/web/**/scalajs/
-project/**/metals.sbt
