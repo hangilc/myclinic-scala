@@ -19,6 +19,10 @@ case class ElementQ(ele: Element) {
     onclick((_: MouseEvent) => handler())
   }
 
+  def clear(): Unit = {
+    ele.innerHTML = ""
+  }
+
 }
 
 object ElementQ {

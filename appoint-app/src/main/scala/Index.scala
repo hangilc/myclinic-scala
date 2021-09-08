@@ -23,13 +23,12 @@ object JsMain {
     body(cls := "px-5 pt-1 pb-5")
     body.appendChild(banner)
     openWebSocket()
-    body.appendChild(AppointRow.ele)
+     val workarea = div()
+    body.appendChild(workarea)
     val startDate = DateUtil.startDayOfWeek(LocalDate.now())
     val endDate = startDate.plusDays(6)
-    for (apps <- Api.listAppoint(startDate, endDate)) {
-      val cols = AppointDate.classify(apps).map(AppointColumn)
-      cols.foreach(AppointRow.add)
-    }
+    AppointSheet.setupDateRange(startDate, endDate)
+    AppointSheet.setupTo(workarea)
   }
 
   val banner = div(cls := "container-fluid")(
@@ -62,98 +61,6 @@ object JsMain {
         println("appEvent", appEvent)
       }
     }
-  }
-
-}
-
-case class AppointDate(date: LocalDate, appoints: List[Appoint])
-
-object AppointDate {
-  def classify(appList: List[Appoint]): List[AppointDate] = {
-    val map = appList.groupBy(_.date)
-    val result = for (k <- map.keys) yield AppointDate(k, map(k))
-    result.toList.sortBy(_.date)
-  }
-}
-
-object AppointRow {
-
-  var eRow: Element = _
-
-  val ele = div(cls := "container px-0 mx-0")(
-    div(cls := "row mx-0", cb := { e => { eRow = e } })
-  )
-
-  def add(c: AppointColumn): Unit = {
-    eRow.appendChild(c.ele)
-  }
-}
-
-case class AppointColumn(appointDate: AppointDate) {
-
-  var eDateRep, eSlots: Element = _
-  val ele = div(cls := "col-2")(
-    div(cb := (eDateRep = _)),
-    div(cb := (eSlots = _))
-  )
-
-  eDateRep.innerText = Misc.formatAppointDate(appointDate.date)
-  appointDate.appoints.foreach(a => {
-    val s = new SlotRow(a)
-    eSlots.appendChild(s.ele)
-  })
-
-}
-
-case class SlotRow(appoint: Appoint) {
-
-  val ele = div(style := "cursor: pointer", onclick := (onEleClick _))(
-    div(Misc.formatAppointTime(appoint.time)),
-    div(detail)
-  )
-
-  document.body.addEventListener[CustomEvent](
-    "mc-appoint-modified",
-    e => {
-      val modified = e.detail.asInstanceOf[Appoint]
-      if (modified.date == appoint.date && modified.time == appoint.time) {
-        println("modified", modified)
-      }
-    }
-  )
-
-  def detail: String = {
-    if (appoint.patientName.isEmpty) {
-      "（空）"
-    } else {
-      appoint.patientName
-    }
-  }
-
-  def onEleClick(): Unit = {
-    if (appoint.isVacant) {
-      openMakeAppointDialog()
-    } else {
-      openCancelAppointDialog()
-    }
-  }
-
-  def openMakeAppointDialog(): Unit = {
-    MakeAppointDialog.open(
-      appoint,
-      name => {
-        Api
-          .registerAppoint(appoint.date, appoint.time, name)
-          .onComplete[Unit](_ match {
-            case Success(_)         => println("Success")
-            case Failure(exception) => println("failure", exception)
-          })
-      }
-    )
-  }
-
-  def openCancelAppointDialog(): Unit = {
-    CancelAppointDialog.open(appoint)
   }
 
 }
