@@ -1,16 +1,15 @@
 package dev.myclinic.scala.db
 
-import cats._
-import cats.data._
-import cats.effect._
-import cats.implicits._
-import doobie._
-import doobie.implicits._
-import org.sqlite.SQLiteDataSource
 import org.sqlite.SQLiteConfig
+import org.sqlite.SQLiteDataSource
+import doobie.ConnectionIO
+import doobie.ExecutionContexts
+import doobie.Transactor
+import doobie.implicits._
 import javax.sql.DataSource
+import cats.effect.IO
 
-object DbSqlite {
+object SqliteExecutor {
   val dbfile: String = sys.env.get("MYCLINIC_SQLITE_DB").get
   val url = s"jdbc:sqlite:${dbfile}"
 
@@ -26,16 +25,13 @@ object DbSqlite {
   }
 
   val xa = transactor(ds)
-    
-  // val xa2 = Transactor.fromDriverManager[IO](
-  //   "org.sqlite.JDBC",
-  //   url,
-  //   "",
-  //   ""
-  // )
 
-  def exec[A](q: ConnectionIO[A]): IO[A] = {
-    xa.use(tx => q.transact(tx))
+  def execute[A](op: ConnectionIO[A]): IO[A] = {
+    xa.use(tx => op.transact(tx))
   }
 
+}
+
+trait Sqlite {
+  def sqlite[A](op: ConnectionIO[A]): IO[A] = SqliteExecutor.execute(op)
 }
