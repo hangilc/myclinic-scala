@@ -8,14 +8,14 @@ import endpoints4s.Valid
 import endpoints4s.Invalid
 import cats.effect.IO
 
-case class JsonCodecFromApi(api: ApiService) extends ModelJsonCodec {
-  import api._
-  def encode(value: Appoint): String = api.toJson[Appoint](value)
-  def decode(json: String): Appoint = api.fromJson[Appoint](json)
-  def encodeAppoint(value: Appoint): String = api.toJson(value)
-  def decodeAppoint(src: String): Appoint = api.fromJson[Appoint](src)
+// case class JsonCodecFromApi(api: ApiService) extends ModelJsonCodec {
+//   import api._
+//   def encode(value: Appoint): String = api.toJson[Appoint](value)
+//   def decode(json: String): Appoint = api.fromJson[Appoint](json)
+//   def encodeAppoint(value: Appoint): String = api.toJson(value)
+//   def decodeAppoint(src: String): Appoint = api.fromJson[Appoint](src)
 
-}
+// }
 
 object ServerJsonCodec
     extends server.Endpoints[IO]
@@ -32,7 +32,6 @@ object ServerJsonCodec
       case Invalid(e) => throw new RuntimeException(e.toString())
     }
   }
-
 }
 
 object JsonableImplicits {
