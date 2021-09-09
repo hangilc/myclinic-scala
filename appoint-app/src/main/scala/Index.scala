@@ -8,13 +8,11 @@ import dev.myclinic.scala.util.DateUtil
 import dev.myclinic.scala.webclient.Api
 import org.scalajs.dom
 import org.scalajs.dom.document
-import org.scalajs.dom.window
 import java.time.LocalDate
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+import concurrent.ExecutionContext.Implicits.global
 
 object JsMain {
   def main(args: Array[String]): Unit = {
-    window.addEventListener("error", (e: dom.raw.Event) => println(e))
     val body = document.body
     body(cls := "px-5 pt-1 pb-5")
     body.appendChild(banner)
@@ -48,6 +46,7 @@ object JsMain {
       ws.onmessage = { (e: dom.raw.MessageEvent) =>
         {
           val src = e.data.asInstanceOf[String]
+          println("message", src)
           val appEvent: AppEvent = Api.fromJson[AppEvent](src)
           GlobalEventWorker.postEvent(appEvent)
         }

@@ -51,7 +51,11 @@ class MakeAppointDialog(appoint: Appoint, handler: String => Unit)
     val d = appoint.date
     val t = appoint.time
     val youbi = KanjiDate.youbi(d)
-    s"${d.getMonthValue()}月${d.getDayOfMonth()}日（$youbi）${t.getHour()}時${t.getMinute()}分"
+    val m = d.getMonthValue()
+    val day = d.getDayOfMonth()
+    val hour = t.getHour()
+    val minute = t.getMinute()
+    s"${m}月${day}日（$youbi）${hour}時${minute}分"
   }
 
   def onOkClick(): Unit = {

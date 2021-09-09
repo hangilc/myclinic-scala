@@ -24,11 +24,9 @@ object AppointSheet {
     def setup(appoints: List[Appoint]): Unit = {
       val appointDates = AppointDate.classify(appoints)
       val columns = appointDates.map(AppointColumn(_))
-      println("columns", columns)
       AppointRow.set(columns)
       dateRange = Some((from, upto))
     }
-    throw new RuntimeException("testing...")
     for {
       appoints <- Api.listAppoint(from, upto)
     } yield setup(appoints)
@@ -40,7 +38,6 @@ object AppointSheet {
 
   def handleEvent(event: Events.ModelEvent): Unit = {
     import Events._
-    println("AppointSheet handling", event)
     event match {
       case AppointUpdated(appoint) => onAppointUpdated(appoint)
       case _                       =>
@@ -48,7 +45,6 @@ object AppointSheet {
   }
 
   def onAppointUpdated(appoint: Appoint): Unit = {
-    println("onAppointUpdated handling", appoint)
     AppointRow.columns.foreach(c => {
       println("in onAppointUpdate", c.appointDate.date, appoint.date)
       if (c.appointDate.date == appoint.date) {
@@ -81,7 +77,6 @@ object AppointSheet {
     }
 
     def set(cols: List[AppointColumn]): Unit = {
-      println("setting AppointRow", cols)
       columns = cols
       clear()
       columns.foreach(c => rowBinding.element(c.ele))
@@ -102,7 +97,6 @@ object AppointSheet {
     slots.foreach(s => slotsBinding.element(s.ele))
 
     def updateRow(app: Appoint): Unit = {
-      println("updating row", app)
       for (i <- 0 until slots.length) {
         val slot = slots(i)
         if (slot.needUpdate(app)) {
@@ -119,16 +113,6 @@ object AppointSheet {
     val ele = div(style := "cursor: pointer", onclick := (onEleClick _))(
       div(Misc.formatAppointTime(appoint.time)),
       div(detail)
-    )
-
-    document.body.addEventListener[CustomEvent](
-      "mc-appoint-modified",
-      e => {
-        val modified = e.detail.asInstanceOf[Appoint]
-        if (modified.date == appoint.date && modified.time == appoint.time) {
-          println("modified", modified)
-        }
-      }
     )
 
     def needUpdate(newAppoint: Appoint): Boolean = {
