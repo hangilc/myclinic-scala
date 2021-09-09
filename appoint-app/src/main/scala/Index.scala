@@ -33,7 +33,7 @@ object JsMain {
 
   def openWebSocket(): Unit = {
     def f(nextEventId: Int): Unit = {
-      GlobalEventWorker.nextEventId = nextEventId
+      GlobalEventWorker.initNextEventId(nextEventId)
       val location = dom.window.location
       val origProtocol = location.protocol
       val host = location.host
