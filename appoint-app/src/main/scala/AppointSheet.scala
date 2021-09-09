@@ -28,7 +28,7 @@ object AppointSheet {
       AppointRow.set(columns)
       dateRange = Some((from, upto))
     }
-
+    throw new RuntimeException("testing...")
     for {
       appoints <- Api.listAppoint(from, upto)
     } yield setup(appoints)

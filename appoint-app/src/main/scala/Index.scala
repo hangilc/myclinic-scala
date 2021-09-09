@@ -8,16 +8,18 @@ import dev.myclinic.scala.util.DateUtil
 import dev.myclinic.scala.webclient.Api
 import org.scalajs.dom
 import org.scalajs.dom.document
-
+import org.scalajs.dom.window
 import java.time.LocalDate
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
 object JsMain {
   def main(args: Array[String]): Unit = {
+    window.addEventListener("error", (e: dom.raw.Event) => println(e))
     val body = document.body
     body(cls := "px-5 pt-1 pb-5")
     body.appendChild(banner)
     openWebSocket()
-     val workarea = div()
+    val workarea = div()
     body.appendChild(workarea)
     val startDate = DateUtil.startDayOfWeek(LocalDate.now())
     val endDate = startDate.plusDays(6)
@@ -32,23 +34,29 @@ object JsMain {
   )
 
   def openWebSocket(): Unit = {
-    val location = dom.window.location
-    val origProtocol = location.protocol
-    val host = location.host
-    val protocol = origProtocol match {
-      case "https:" => "wss:"
-      case _        => "ws:"
-    }
-    val url = s"${protocol}//${host}/ws/events"
-    val ws = new dom.WebSocket(url)
-    ws.onmessage = {
-      (e: dom.raw.MessageEvent) => {
-        val src = e.data.asInstanceOf[String]
-        val appEvent: AppEvent = Api.fromJson[AppEvent](src)
-        println("websocket received", appEvent)
-        Events.handle(appEvent)
+    def f(nextEventId: Int): Unit = {
+      GlobalEventWorker.nextEventId = nextEventId
+      val location = dom.window.location
+      val origProtocol = location.protocol
+      val host = location.host
+      val protocol = origProtocol match {
+        case "https:" => "wss:"
+        case _        => "ws:"
+      }
+      val url = s"${protocol}//${host}/ws/events"
+      val ws = new dom.WebSocket(url)
+      ws.onmessage = { (e: dom.raw.MessageEvent) =>
+        {
+          val src = e.data.asInstanceOf[String]
+          val appEvent: AppEvent = Api.fromJson[AppEvent](src)
+          GlobalEventWorker.postEvent(appEvent)
+        }
       }
     }
+
+    for {
+      nextEventId <- Api.getNextEventId(())
+    } yield f(nextEventId)
   }
 
 }
