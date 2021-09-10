@@ -5,21 +5,21 @@ import dev.myclinic.scala.webclient.Api
 
 object Events {
 
-  class ModelEvent(val eventId: Int)
-  case class AppointCreated(eventId: Int, appoint: Appoint) extends ModelEvent(eventId)
-  case class AppointUpdated(eventId: Int, appoint: Appoint) extends ModelEvent(eventId)
-  case class AppointDeleted(eventId: Int, appoint: Appoint) extends ModelEvent(eventId)
-  case class Unknown(eventId: Int, orig: AppEvent) extends ModelEvent(eventId)
+  sealed trait ModelEvent
+  case class AppointCreated(appoint: Appoint) extends ModelEvent
+  case class AppointUpdated(appoint: Appoint) extends ModelEvent
+  case class AppointDeleted(appoint: Appoint) extends ModelEvent
+  case class Unknown(orig: AppEvent) extends ModelEvent
 
   def convert(appEvent: AppEvent): ModelEvent = appEvent match {
-    case AppEvent(_, eventId, _, "appoint", kind, encodedData) => {
+    case AppEvent(_, _, _, "appoint", kind, encodedData) => {
       val data = Api.fromJson[Appoint](encodedData)
       kind match {
-        case "created" => AppointCreated(eventId, data)
-        case "updated" => AppointUpdated(eventId, data)
-        case "deleted" => AppointDeleted(eventId, data)
+        case "created" => AppointCreated(data)
+        case "updated" => AppointUpdated(data)
+        case "deleted" => AppointDeleted(data)
       }
     }
-    case _ => Unknown(appEvent.eventId, appEvent)
+    case _ => Unknown(appEvent)
   }
 }

@@ -36,14 +36,6 @@ object AppointSheet {
     wrapper(eles)
   }
 
-  def handleEvent(event: Events.ModelEvent): Unit = {
-    import Events._
-    event match {
-      case AppointUpdated(appoint) => onAppointUpdated(appoint)
-      case _                       =>
-    }
-  }
-
   def onAppointUpdated(appoint: Appoint): Unit = {
     AppointRow.columns.foreach(c => {
       println("in onAppointUpdate", c.appointDate.date, appoint.date)
@@ -109,6 +101,15 @@ object AppointSheet {
   }
 
   case class SlotRow(appoint: Appoint) {
+
+    val listener = GlobalEventDispatcher.createListener(e => {
+      e match {
+        case Events.AppointUpdated(app)
+            if app.sameDateTime(appoint) && app.eventId > appoint.eventId => {
+              println("Need update")
+            }
+      }
+    })
 
     val ele = div(style := "cursor: pointer", onclick := (onEleClick _))(
       div(Misc.formatAppointTime(appoint.time)),

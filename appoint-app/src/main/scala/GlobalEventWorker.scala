@@ -13,76 +13,20 @@ import scalajs.js.timers.SetTimeoutHandle
 import concurrent.ExecutionContext.Implicits.global
 import dev.myclinic.scala.web.appoint.Events
 import dev.myclinic.scala.web.appoint.Events.ModelEvent
+import dev.myclinic.scala.web.appoint.AppointHelper.catchall
 
-object GlobalEventWorker {
-  private var nextEventIdValue = 0
+class GlobalEventLinearizer(var nextEventId: Int, handler: AppEvent => Unit) {
   private val queue = js.Array[Work]()
   private var currentWorker: Option[SetTimeoutHandle] = None
-  private val listeners = js.Array[Listener]()
-  private val history = js.Array[ModelEvent]()
 
-  def nextEventId = nextEventIdValue
-
-  private def nextEventId_=(value: Int): Unit = {
-    nextEventIdValue = value
+  def post(appEvent: AppEvent): Unit = {
+    queue.push(EventWork(appEvent))
+    startWorker()
   }
 
-  def initNextEventId(value: Int): Unit = {
-    nextEventId = value
-  }
-
-  trait Listener {
-    def handle(event: ModelEvent): Unit
-  }
-
-  def addListener(listener: Listener): Unit = {
-    listeners.push(listener)
-  }
-
-  def trigger(appEvent: AppEvent): Unit = {
-    val e = Events.convert(appEvent)
-    history.push(e)
-    listeners.foreach(listener => listener.handle(e))
-  }
-
-  def applyHistory(listener: Listener, startEventId: Int): Unit = {
-    history.foreach(e => {
-      if( e.eventId >= startEventId ){
-        listener.handle(e)
-      }
-    })
-  }
-
-  sealed trait Work {
-    def process(): Future[Unit]
-  }
-
-  case class EventWork(appEvent: AppEvent) extends Work {
-    def process(): Future[Unit] = {
-      println("EventWork", nextEventId, appEvent)
-      if (nextEventId == appEvent.eventId) {
-        nextEventId += 1
-        trigger(appEvent)
-        Future.successful(())
-      } else {
-        def f(events: List[AppEvent]): Unit = {
-          queue.unshift(this)
-          queue.unshift(RangeWork(events, appEvent.eventId))
-        }
-
-        for {
-          events <- Api.listAppEventInRange(nextEventId, appEvent.eventId - 1)
-        } yield f(events)
-      }
-    }
-  }
-
-  case class RangeWork(events: List[AppEvent], nextId: Int) extends Work {
-    def process(): Future[Unit] = {
-      println("RangeWork", events, nextId, nextEventId)
-      events.foreach(trigger(_))
-      nextEventId = nextId
-      Future.successful(())
+  private def startWorker(): Unit = {
+    if (currentWorker.isEmpty && !queue.isEmpty) {
+      currentWorker = Some(createWorker(queue.shift()))
     }
   }
 
@@ -105,28 +49,91 @@ object GlobalEventWorker {
     )
   }
 
-  def startWorker(): Unit = {
-    if (currentWorker.isEmpty && !queue.isEmpty) {
-      currentWorker = Some(createWorker(queue.shift()))
+  private sealed trait Work {
+    def process(): Future[Unit]
+  }
+
+  private case class EventWork(appEvent: AppEvent) extends Work {
+    def process(): Future[Unit] = {
+      println("EventWork", nextEventId, appEvent)
+      if (nextEventId == appEvent.eventId) {
+        nextEventId += 1
+        handler(appEvent)
+        Future.successful(())
+      } else {
+        def f(events: List[AppEvent]): Unit = {
+          queue.unshift(this)
+          queue.unshift(RangeWork(events, appEvent.eventId))
+        }
+
+        for {
+          events <- Api.listAppEventInRange(nextEventId, appEvent.eventId - 1)
+        } yield f(events)
+      }
     }
   }
 
-  def postEvent(appEvent: AppEvent): Unit = {
-    queue.push(EventWork(appEvent))
-    startWorker()
+  private case class RangeWork(events: List[AppEvent], nextId: Int)
+      extends Work {
+    def process(): Future[Unit] = {
+      println("RangeWork", events, nextId, nextEventId)
+      events.foreach(handler(_))
+      nextEventId = nextId
+      Future.successful(())
+    }
   }
 
-  private def catchall[A](
-      f: () => Future[A],
-      cb: Either[Throwable, A] => Unit
-  ): Unit = {
-    try {
-      f().onComplete {
-        case Success(value) => cb(Right(value))
-        case Failure(e)     => cb(Left(e))
-      }
-    } catch {
-      case (e: Throwable) => cb(Left(e))
+}
+
+object GlobalEventDispatcher {
+  val listeners = js.Array[GlobalEventListener]()
+
+  def createListener(process: ModelEvent => Unit): GlobalEventListener = {
+    val listener = new GlobalEventListener(process)
+    addListener(listener)
+    listener
+  }
+
+  def dispatch(appEvent: AppEvent): Unit = {
+    val me = Events.convert(appEvent)
+    listeners.foreach(_.post(me))
+    listeners.foreach(_.drain())
+  }
+
+  def addListener(listener: GlobalEventListener): Unit = {
+    listeners.push(listener)
+  }
+
+  def removeListener(listener: GlobalEventListener): Unit = {
+    val len = listeners.length
+    listeners -= listener
+    assert(listeners.length == len - 1)
+  }
+
+}
+
+class GlobalEventListener(val process: ModelEvent => Unit) {
+  private val queue = js.Array[ModelEvent]()
+
+  private var enabled: Boolean = false
+
+  def enable(): Unit = {
+    enabled = true
+    drain()
+  }
+
+  def disable(): Unit = {
+    enabled = false
+  }
+
+  def post(event: ModelEvent): Unit = {
+    queue.push(event)
+  }
+
+  def drain(): Unit = {
+    while (!queue.isEmpty && enabled) {
+      val e = queue.shift()
+      process(e)
     }
   }
 

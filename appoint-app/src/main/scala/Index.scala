@@ -10,6 +10,7 @@ import org.scalajs.dom
 import org.scalajs.dom.document
 import java.time.LocalDate
 import concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 object JsMain {
   def main(args: Array[String]): Unit = {
@@ -31,9 +32,11 @@ object JsMain {
     )
   )
 
-  def openWebSocket(): Unit = {
+  def openWebSocket(): Future[Unit] = {
     def f(nextEventId: Int): Unit = {
-      GlobalEventWorker.initNextEventId(nextEventId)
+      val linear = new GlobalEventLinearizer(nextEventId, e => {
+        GlobalEventDispatcher.dispatch(e)
+      })
       val location = dom.window.location
       val origProtocol = location.protocol
       val host = location.host
@@ -48,7 +51,7 @@ object JsMain {
           val src = e.data.asInstanceOf[String]
           println("message", src)
           val appEvent: AppEvent = Api.fromJson[AppEvent](src)
-          GlobalEventWorker.postEvent(appEvent)
+          linear.post(appEvent)
         }
       }
     }
