@@ -12,11 +12,15 @@ import java.time.LocalDate
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.util.Failure
 import scala.util.Success
+import dev.myclinic.scala.web.appoint.Events._
 
 object AppointSheet {
   val eles = div(AppointRow.ele)
-
   var dateRange: Option[(LocalDate, LocalDate)] = None
+  val listener: GlobalEventListener = GlobalEventDispatcher.createListener({
+    case AppointUpdated(app) => AppointRow.respondToUpdatedEvent(app)
+    case _                   =>
+  })
 
   def setupDateRange(from: LocalDate, upto: LocalDate): Unit = {
     def setup(appoints: List[Appoint]): Unit = {
@@ -62,6 +66,10 @@ object AppointSheet {
       div(cls := "row mx-0", bindTo(rowBinding))
     )
 
+    def respondToUpdatedEvent(updated: Appoint): Unit = {
+      columns.foreach(_.respondToUpdatedEvent(updated))
+    }
+
     def clear(): Unit = {
       rowBinding.element.clear()
     }
@@ -81,48 +89,38 @@ object AppointSheet {
       div(dateRep),
       div(bindTo(slotsBinding))
     )
-    var slots: Array[SlotRow] = appointDate.appoints.map(SlotRow(_)).toArray
+    var slots: Array[SlotRow] =
+      appointDate.appoints.map(app => SlotRow(app, this)).toArray
+
+    def respondToUpdatedEvent(updated: Appoint): Unit = {
+      slots.foreach(_.respondToUpdatedEvent(updated))
+    }
 
     def dateRep: String = Misc.formatAppointDate(date)
     slots.foreach(s => slotsBinding.element(s.ele))
 
-    def updateRow(app: Appoint): Unit = {
-      for (i <- 0 until slots.length) {
-        val slot = slots(i)
-        if (slot.needUpdate(app)) {
-          val newSlot = SlotRow(app)
-          slot.ele.replaceBy(newSlot.ele)
-          slots(i) = newSlot
-        }
+    def replaceSlotBy(slot: SlotRow): Unit = {
+      val index = slots.indexOf(slot)
+      if( index >= 0 ){
+        val prev = slots(index)
+        slots(index) = slot
+        prev.ele.replaceBy(slot.ele)
       }
     }
   }
 
-  case class SlotRow(appoint: Appoint) {
-
-    val listener = GlobalEventDispatcher.createListener(e => {
-      e match {
-        case Events.AppointUpdated(app)
-            if app.sameDateTime(appoint) && app.eventId > appoint.eventId => {
-              println("Need update")
-            }
-        case _ => 
-      }
-    })
+  case class SlotRow(appoint: Appoint, col: AppointColumn) {
 
     val ele = div(style := "cursor: pointer", onclick := (onEleClick _))(
       div(Misc.formatAppointTime(appoint.time)),
       div(detail)
     )
 
-    listener.enable()
-
-    def dispose(): Unit = {
-      listener.dispose()
-    }
-
-    def needUpdate(newAppoint: Appoint): Boolean = {
-      appoint.requireUpdate(newAppoint)
+    def respondToUpdatedEvent(updated: Appoint): Unit = {
+      if (appoint.requireUpdate(updated)) {
+        val newSlot = SlotRow(updated, col)
+        col.replaceSlotBy(newSlot)
+      }
     }
 
     def detail: String = {
