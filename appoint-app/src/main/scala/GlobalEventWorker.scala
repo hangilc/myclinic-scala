@@ -1,19 +1,17 @@
 package dev.myclinic.scala.web.appoint
 
 import dev.myclinic.scala.model.AppEvent
+import dev.myclinic.scala.web.appoint.AppointHelper.catchall
+import dev.myclinic.scala.web.appoint.Events
+import dev.myclinic.scala.web.appoint.Events.ModelEvent
 import dev.myclinic.scala.webclient.Api
 
 import scala.concurrent.Future
 import scala.scalajs.js
-import scala.util.Failure
-import scala.util.Success
 
 import scalajs.js.timers.setTimeout
 import scalajs.js.timers.SetTimeoutHandle
 import concurrent.ExecutionContext.Implicits.global
-import dev.myclinic.scala.web.appoint.Events
-import dev.myclinic.scala.web.appoint.Events.ModelEvent
-import dev.myclinic.scala.web.appoint.AppointHelper.catchall
 
 class GlobalEventLinearizer(var nextEventId: Int, handler: AppEvent => Unit) {
   private val queue = js.Array[Work]()
@@ -135,6 +133,11 @@ class GlobalEventListener(val process: ModelEvent => Unit) {
       val e = queue.shift()
       process(e)
     }
+  }
+
+  def dispose(): Unit = {
+    disable()
+    GlobalEventDispatcher.removeListener(this)
   }
 
 }

@@ -1,13 +1,11 @@
 package dev.myclinic.scala.web.appoint
 
+import dev.fujiwara.domq.Binding._
 import dev.fujiwara.domq.ElementQ._
 import dev.fujiwara.domq.Html._
 import dev.fujiwara.domq.Modifiers._
-import dev.fujiwara.domq.Binding._
 import dev.myclinic.scala.model._
 import dev.myclinic.scala.webclient.Api
-import org.scalajs.dom.document
-import org.scalajs.dom.raw.CustomEvent
 import org.scalajs.dom.raw.Element
 
 import java.time.LocalDate
@@ -108,6 +106,7 @@ object AppointSheet {
             if app.sameDateTime(appoint) && app.eventId > appoint.eventId => {
               println("Need update")
             }
+        case _ => 
       }
     })
 
@@ -115,6 +114,12 @@ object AppointSheet {
       div(Misc.formatAppointTime(appoint.time)),
       div(detail)
     )
+
+    listener.enable()
+
+    def dispose(): Unit = {
+      listener.dispose()
+    }
 
     def needUpdate(newAppoint: Appoint): Boolean = {
       appoint.requireUpdate(newAppoint)
