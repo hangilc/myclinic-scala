@@ -12,6 +12,8 @@ import scala.scalajs.js
 import scalajs.js.timers.setTimeout
 import scalajs.js.timers.SetTimeoutHandle
 import concurrent.ExecutionContext.Implicits.global
+import scala.util.Success
+import scala.util.Failure
 
 class GlobalEventLinearizer(var nextEventId: Int, handler: AppEvent => Unit) {
   private val queue = js.Array[Work]()
@@ -29,22 +31,17 @@ class GlobalEventLinearizer(var nextEventId: Int, handler: AppEvent => Unit) {
   }
 
   def createWorker(work: Work): SetTimeoutHandle = setTimeout(0) {
-    catchall(
-      () => work.process(),
-      (result: Either[Throwable, Unit]) =>
-        result match {
-          case Left(e) => {
-            System.err.println(e)
-            queue.unshift(work)
-            currentWorker = None
-            startWorker()
-          }
-          case Right(_) => {
-            currentWorker = None
-            startWorker()
-          }
+    catchall(work.process()).onComplete(result => {
+      result match {
+        case Success(_) =>
+        case Failure(e) => {
+          System.err.println(e)
+          queue.unshift(work)
         }
-    )
+      }
+      currentWorker = None
+      startWorker()
+    })
   }
 
   private sealed trait Work {
@@ -138,6 +135,15 @@ class GlobalEventListener(val process: ModelEvent => Unit) {
   def dispose(): Unit = {
     disable()
     GlobalEventDispatcher.removeListener(this)
+  }
+
+  def suspending(proc: => Future[Unit]): Future[Unit] = {
+    val enabledSave = enabled
+
+    disable()
+    for {
+      _ <- catchall(proc)
+    } yield { enabled = enabledSave }
   }
 
 }

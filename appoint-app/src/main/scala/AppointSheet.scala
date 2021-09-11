@@ -16,21 +16,22 @@ import dev.myclinic.scala.web.appoint.Events._
 import scala.concurrent.Future
 
 object AppointSheet {
-  val eles = div(AppointRow.ele)
+  val eles = div(TopMenu.ele, AppointRow.ele)
   var dateRange: Option[(LocalDate, LocalDate)] = None
   val listener: GlobalEventListener = GlobalEventDispatcher.createListener({
     case AppointUpdated(app) => AppointRow.respondToUpdatedEvent(app)
     case _                   =>
   })
+  listener.enable()
 
   def setupDateRange(from: LocalDate, upto: LocalDate): Future[Unit] = {
-    listener.disable()
-    for {
-      appoints <- Api.listAppoint(from, upto)
-      _ = AppointRow.init(appoints)
-      dateRange = Some((from, upto))
-      _ = listener.enable()
-    } yield ()
+    listener.suspending {
+      for {
+        appoints <- Api.listAppoint(from, upto)
+        _ = AppointRow.init(appoints)
+        _ = { dateRange = Some((from, upto)) }
+      } yield ()
+    }
   }
 
   def setupTo(wrapper: Element): Unit = {
@@ -44,6 +45,53 @@ object AppointSheet {
       val map = appList.groupBy(_.date)
       val result = for (k <- map.keys) yield AppointDate(k, map(k))
       result.toList.sortBy(_.date)
+    }
+  }
+
+  object TopMenu {
+    val prevWeekBinding, nextWeekBinding = ElementBinding()
+    val ele = div(
+      button(
+        attr("type") := "button",
+        cls := "btn btn-outline-primary",
+        bindTo(prevWeekBinding),
+        "前の週"
+      ),
+      button(
+        attr("type") := "button",
+        cls := "btn btn-outline-primary",
+        bindTo(nextWeekBinding),
+        "次の週"
+      )
+    )
+
+    prevWeekBinding.element.onclick(() => onPrevWeek())
+    nextWeekBinding.element.onclick(() => onNextWeek())
+
+    def onPrevWeek(): Future[Unit] = {
+      println("onNextWeek", dateRange)
+      dateRange match {
+        case Some((from, upto)) => {
+          val fromNext = from.plusDays(-7)
+          val uptoNext = upto.plusDays(-7)
+          println("nextWeek", fromNext, uptoNext)
+          setupDateRange(fromNext, uptoNext)
+        }
+        case None => Future.successful(())
+      }
+    }
+
+    def onNextWeek(): Future[Unit] = {
+      println("onNextWeek", dateRange)
+      dateRange match {
+        case Some((from, upto)) => {
+          val fromNext = from.plusDays(7)
+          val uptoNext = upto.plusDays(7)
+          println("nextWeek", fromNext, uptoNext)
+          setupDateRange(fromNext, uptoNext)
+        }
+        case None => Future.successful(())
+      }
     }
   }
 
@@ -97,7 +145,7 @@ object AppointSheet {
 
     def replaceSlotBy(prev: SlotRow, slot: SlotRow): Unit = {
       val index = slots.indexOf(prev)
-      if( index >= 0 ){
+      if (index >= 0) {
         slots(index) = slot
         prev.ele.replaceBy(slot.ele)
       }
