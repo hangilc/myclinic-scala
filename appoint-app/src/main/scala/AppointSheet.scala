@@ -69,12 +69,10 @@ object AppointSheet {
     nextWeekBinding.element.onclick(() => onNextWeek())
 
     def onPrevWeek(): Future[Unit] = {
-      println("onNextWeek", dateRange)
       dateRange match {
         case Some((from, upto)) => {
           val fromNext = from.plusDays(-7)
           val uptoNext = upto.plusDays(-7)
-          println("nextWeek", fromNext, uptoNext)
           setupDateRange(fromNext, uptoNext)
         }
         case None => Future.successful(())
@@ -82,12 +80,10 @@ object AppointSheet {
     }
 
     def onNextWeek(): Future[Unit] = {
-      println("onNextWeek", dateRange)
       dateRange match {
         case Some((from, upto)) => {
           val fromNext = from.plusDays(7)
           val uptoNext = upto.plusDays(7)
-          println("nextWeek", fromNext, uptoNext)
           setupDateRange(fromNext, uptoNext)
         }
         case None => Future.successful(())
