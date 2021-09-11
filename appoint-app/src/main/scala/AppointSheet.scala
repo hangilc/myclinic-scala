@@ -13,6 +13,7 @@ import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.util.Failure
 import scala.util.Success
 import dev.myclinic.scala.web.appoint.Events._
+import scala.concurrent.Future
 
 object AppointSheet {
   val eles = div(AppointRow.ele)
@@ -22,29 +23,18 @@ object AppointSheet {
     case _                   =>
   })
 
-  def setupDateRange(from: LocalDate, upto: LocalDate): Unit = {
-    def setup(appoints: List[Appoint]): Unit = {
-      val appointDates = AppointDate.classify(appoints)
-      val columns = appointDates.map(AppointColumn(_))
-      AppointRow.set(columns)
-      dateRange = Some((from, upto))
-    }
+  def setupDateRange(from: LocalDate, upto: LocalDate): Future[Unit] = {
+    listener.disable()
     for {
       appoints <- Api.listAppoint(from, upto)
-    } yield setup(appoints)
+      _ = AppointRow.init(appoints)
+      dateRange = Some((from, upto))
+      _ = listener.enable()
+    } yield ()
   }
 
   def setupTo(wrapper: Element): Unit = {
     wrapper(eles)
-  }
-
-  def onAppointUpdated(appoint: Appoint): Unit = {
-    AppointRow.columns.foreach(c => {
-      println("in onAppointUpdate", c.appointDate.date, appoint.date)
-      if (c.appointDate.date == appoint.date) {
-        c.updateRow(appoint)
-      }
-    })
   }
 
   case class AppointDate(date: LocalDate, appoints: List[Appoint])
@@ -66,19 +56,25 @@ object AppointSheet {
       div(cls := "row mx-0", bindTo(rowBinding))
     )
 
-    def respondToUpdatedEvent(updated: Appoint): Unit = {
-      columns.foreach(_.respondToUpdatedEvent(updated))
+    def init(appoints: List[Appoint]): Unit = {
+      clear()
+      val appointDates = AppointDate.classify(appoints)
+      columns = appointDates.map(AppointColumn(_)).toList
+      columns.foreach(addElement _)
     }
 
     def clear(): Unit = {
       rowBinding.element.clear()
     }
 
-    def set(cols: List[AppointColumn]): Unit = {
-      columns = cols
-      clear()
-      columns.foreach(c => rowBinding.element(c.ele))
+    def addElement(col: AppointColumn): Unit = {
+      rowBinding.element(col.ele)
     }
+
+    def respondToUpdatedEvent(updated: Appoint): Unit = {
+      columns.foreach(_.respondToUpdatedEvent(updated))
+    }
+
   }
 
   case class AppointColumn(appointDate: AppointDate) {
@@ -99,10 +95,9 @@ object AppointSheet {
     def dateRep: String = Misc.formatAppointDate(date)
     slots.foreach(s => slotsBinding.element(s.ele))
 
-    def replaceSlotBy(slot: SlotRow): Unit = {
-      val index = slots.indexOf(slot)
+    def replaceSlotBy(prev: SlotRow, slot: SlotRow): Unit = {
+      val index = slots.indexOf(prev)
       if( index >= 0 ){
-        val prev = slots(index)
         slots(index) = slot
         prev.ele.replaceBy(slot.ele)
       }
@@ -119,7 +114,7 @@ object AppointSheet {
     def respondToUpdatedEvent(updated: Appoint): Unit = {
       if (appoint.requireUpdate(updated)) {
         val newSlot = SlotRow(updated, col)
-        col.replaceSlotBy(newSlot)
+        col.replaceSlotBy(this, newSlot)
       }
     }
 
