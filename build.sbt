@@ -1,6 +1,7 @@
 import Dependencies._
 
-ThisBuild / scalaVersion := "2.13.6"
+//ThisBuild / scalaVersion := "2.13.6"
+ThisBuild / scalaVersion := "3.0.2"
 ThisBuild / version := "0.1.0-SNAPSHOT"
 ThisBuild / organization := "dev.myclinic.scala"
 ThisBuild / organizationName := "myclinic"
@@ -11,12 +12,13 @@ val mysqlVersion = "8.0.19"
 val http4sVersion = "0.23.1"
 val doobieVersion = "1.0.0-M5"
 //val circeVersion = "0.14.1"
-val scalaJavaTimeVersion = "2.2.2"
+val scalaJavaTimeVersion = "2.3.0"
 val scalaJSDomVersion = "1.1.0"
 val tapirVersion = "0.19.0-M8"
 val tapirDocVersion = "0.19.0-M4"
 
-ThisBuild / scalacOptions ++= Seq("-Wunused", "-deprecation")
+//ThisBuild / scalacOptions ++= Seq("-Wunused", "-deprecation")
+ThisBuild / scalacOptions ++= Seq("-deprecation")
 
 Compile / console / scalacOptions ~= { _.filterNot(Set("-Wunused")) }
 
@@ -32,8 +34,6 @@ lazy val root = project
     modelJVM,
     utilJS,
     utilJVM,
-    clientJS,
-    clientJVM,
     apiJS,
     apiJVM
   )
@@ -64,12 +64,12 @@ lazy val server = project
       "ch.qos.logback" % "logback-classic" % "1.1.3" % "runtime",
       "org.http4s" %% "http4s-blaze-server" % http4sVersion,
       "org.http4s" %% "http4s-dsl" % http4sVersion,
-      "org.endpoints4s" %% "openapi" % "3.1.0",
+//      "org.endpoints4s" %% "openapi" % "3.1.0",
       "com.softwaremill.sttp.tapir" %% "tapir-http4s-server" % tapirVersion,
       "com.softwaremill.sttp.tapir" %% "tapir-openapi-docs" % tapirVersion,
       "com.softwaremill.sttp.tapir" %% "tapir-openapi-circe-yaml" % tapirVersion,
       "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-http4s" % tapirDocVersion,
-      "com.softwaremill.sttp.tapir" %% "tapir-redoc-http4s" % tapirDocVersion,
+      "com.softwaremill.sttp.tapir" %% "tapir-redoc-http4s" % tapirDocVersion
     ),
     Compile / console / scalacOptions ~= { _.filterNot(Set("-Wunused")) }
   )
@@ -77,14 +77,15 @@ lazy val server = project
 lazy val appointApp = project
   .in(file("appoint-app"))
   .enablePlugins(ScalaJSPlugin)
-  .dependsOn(domq, modelJS, utilJS, utilJS, clientJS, webclient)
+  .dependsOn(domq, modelJS, utilJS, utilJS, webclient)
   .settings(
     name := "myclinic-appoint",
     scalaJSUseMainModuleInitializer := true,
     Compile / fastLinkJS / scalaJSLinkerOutputDirectory :=
       (rootDir.value / "server" / "web" / "appoint" / "scalajs"),
     libraryDependencies ++= Seq(
-      "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion
+      ("org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion)
+        .cross(CrossVersion.for3Use2_13)
     )
   )
 
@@ -94,7 +95,8 @@ lazy val domq = project
   .settings(
     name := "domq",
     libraryDependencies ++= Seq(
-      "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion
+      ("org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion)
+        .cross(CrossVersion.for3Use2_13)
     )
   )
 
@@ -108,7 +110,7 @@ lazy val model = crossProject(JSPlatform, JVMPlatform)
     scalaJSUseMainModuleInitializer := false,
     zonesFilter := { (z: String) => z == "Asia/Tokyo" },
     libraryDependencies ++= Seq(
-      "io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion
+      ("io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion).cross(CrossVersion.for2_13Use3)
     )
   )
 
@@ -122,30 +124,30 @@ lazy val util = crossProject(JSPlatform, JVMPlatform)
     scalaJSUseMainModuleInitializer := false,
     zonesFilter := { (z: String) => z == "Asia/Tokyo" },
     libraryDependencies ++= Seq(
-      "io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion
+          ("io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion).cross(CrossVersion.for2_13Use3)
     )
   )
 
 val utilJS = util.js
 val utilJVM = util.jvm
 
-lazy val client = crossProject(JSPlatform, JVMPlatform)
-  .crossType(CrossType.Full)
-  .in(file("client"))
-  .settings(
-  )
-  .jvmSettings(
-  )
-  .jsSettings(
-    scalaJSUseMainModuleInitializer := false,
-    zonesFilter := { (z: String) => z == "Asia/Tokyo" },
-    libraryDependencies ++= Seq(
-      "io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion
-    )
-  )
+// lazy val client = crossProject(JSPlatform, JVMPlatform)
+//   .crossType(CrossType.Full)
+//   .in(file("client"))
+//   .settings(
+//   )
+//   .jvmSettings(
+//   )
+//   .jsSettings(
+//     scalaJSUseMainModuleInitializer := false,
+//     zonesFilter := { (z: String) => z == "Asia/Tokyo" },
+//     libraryDependencies ++= Seq(
+//       "io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion
+//     )
+//   )
 
-val clientJS = client.js
-val clientJVM = client.jvm
+// val clientJS = client.js
+// val clientJVM = client.jvm
 
 lazy val api = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Pure)
@@ -153,10 +155,10 @@ lazy val api = crossProject(JSPlatform, JVMPlatform)
   .dependsOn(model)
   .settings(
     libraryDependencies ++= Seq(
-      "org.endpoints4s" %%% "algebra" % "1.5.0",
-      "org.endpoints4s" %%% "json-schema-generic" % "1.5.0",
+      // "org.endpoints4s" %%% "algebra" % "1.5.0",
+      // "org.endpoints4s" %%% "json-schema-generic" % "1.5.0",
       "com.softwaremill.sttp.tapir" %% "tapir-core" % tapirVersion,
-      "com.softwaremill.sttp.tapir" %% "tapir-json-circe" % tapirVersion,
+      "com.softwaremill.sttp.tapir" %% "tapir-json-circe" % tapirVersion
     )
   )
 
@@ -171,8 +173,9 @@ lazy val webclient = project
     name := "webclient",
     scalaJSUseMainModuleInitializer := true,
     libraryDependencies ++= Seq(
-      "org.endpoints4s" %%% "xhr-client" % "3.1.0",
-      "com.softwaremill.sttp.tapir" %%% "tapir-sttp-client" % tapirVersion,
-      "io.github.cquiroz" %%% "scala-java-time" % "2.2.0"
+//      "org.endpoints4s" %%% "xhr-client" % "3.1.0",
+      //"com.softwaremill.sttp.tapir" %%% "tapir-sttp-client" % tapirVersion,
+      "com.softwaremill.sttp.client3" %%% "core" % "3.3.14",
+      ("io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion).cross(CrossVersion.for2_13Use3)
     )
   )
