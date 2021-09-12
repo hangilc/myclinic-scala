@@ -110,7 +110,7 @@ lazy val model = crossProject(JSPlatform, JVMPlatform)
     scalaJSUseMainModuleInitializer := false,
     zonesFilter := { (z: String) => z == "Asia/Tokyo" },
     libraryDependencies ++= Seq(
-      ("io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion).cross(CrossVersion.for2_13Use3)
+      "io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion
     )
   )
 
@@ -124,7 +124,8 @@ lazy val util = crossProject(JSPlatform, JVMPlatform)
     scalaJSUseMainModuleInitializer := false,
     zonesFilter := { (z: String) => z == "Asia/Tokyo" },
     libraryDependencies ++= Seq(
-          ("io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion).cross(CrossVersion.for2_13Use3)
+      // ("io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion)
+      //   .cross(CrossVersion.for2_13Use3)
     )
   )
 
@@ -153,6 +154,11 @@ lazy val api = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Pure)
   .in(file("api"))
   .dependsOn(model)
+  .jsSettings(
+    libraryDependencies ++= Seq(
+      "io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion
+    )
+  )
   .settings(
     libraryDependencies ++= Seq(
       // "org.endpoints4s" %%% "algebra" % "1.5.0",
@@ -176,6 +182,7 @@ lazy val webclient = project
 //      "org.endpoints4s" %%% "xhr-client" % "3.1.0",
       //"com.softwaremill.sttp.tapir" %%% "tapir-sttp-client" % tapirVersion,
       "com.softwaremill.sttp.client3" %%% "core" % "3.3.14",
-      ("io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion).cross(CrossVersion.for2_13Use3)
+      // ("io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion)
+      //   .cross(CrossVersion.for2_13Use3)
     )
   )
