@@ -1,12 +1,23 @@
 package dev.myclinic.scala.webclient
 
-import sttp.client3._
-import sttp.tapir.client.sttp.SttpClientInterpreter
-import dev.myclinic.scala.api.MyclinicEndpoints
+import org.scalajs.dom._
+import scala.concurrent.Future
+import scala.concurrent.Promise
 
 object MyclinicApi {
-  val hello = SttpClientInterpreter().toQuickClient(
-    MyclinicEndpoints.helloEndpoint,
-    Some(uri"http://localhost:8080/rest")
-  )
+  
+  def hello(): Future[String] = {
+    val promise = Promise[String]()
+    val httpRequest = new XMLHttpRequest()
+    httpRequest.onreadystatechange = (_:Event) => {
+      if( httpRequest.readyState == XMLHttpRequest.DONE){
+        //val status = httpRequest.status
+        promise.success(httpRequest.responseText)
+      }
+    }
+    httpRequest.open("GET", "http://localhost:8080/api/hello")
+    httpRequest.send()
+    promise.future
+  }
+
 }

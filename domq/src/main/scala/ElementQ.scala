@@ -2,6 +2,10 @@ package dev.fujiwara.domq
 
 import org.scalajs.dom.raw.Element
 import org.scalajs.dom.raw.MouseEvent
+import scala.language.implicitConversions
+import org.scalajs.dom.raw.HTMLDocument
+import org.scalajs.dom.raw.HTMLElement
+import org.scalajs.dom.raw.HTMLInputElement
 
 case class ElementQ(ele: Element) {
 
@@ -30,7 +34,10 @@ case class ElementQ(ele: Element) {
 }
 
 object ElementQ {
-  implicit def toElementQ(e: Element) = ElementQ(e)
+  
+  given Conversion[Element, ElementQ] = ElementQ(_)
+  given Conversion[HTMLElement, ElementQ] = ElementQ(_)
+  given htmlInputToElementQ: Conversion[HTMLInputElement, ElementQ] = ElementQ(_)
 
-  implicit def toElement(eq: ElementQ) = eq.ele
+  given Conversion[ElementQ, Element] = _.ele
 }

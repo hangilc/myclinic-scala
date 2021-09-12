@@ -3,11 +3,13 @@ package dev.fujiwara.domq
 import org.scalajs.dom.document
 import org.scalajs.dom.raw.Element
 import org.scalajs.dom.raw.MouseEvent
+import scala.language.implicitConversions
 
 case class Modifier(modifier: Element => Unit)
 
 object Modifier {
-  implicit def toTextModifier(data: String): Modifier =
+
+  given toTextModifier: scala.Conversion[String, Modifier] = data =>
     Modifier(e => {
       val t = document.createTextNode(data)
       e.appendChild(t)
@@ -44,7 +46,7 @@ object Modifiers {
     def :=(arg: A) = Modifier(e => f(e, arg))
   }
 
-  val cls = new AnyRef {
+  case class ClsModifier(){
     def :=(arg: String) = Modifier(e => {
       for (c <- arg.split("\\s+"))
         e.classList.add(c)
@@ -55,6 +57,8 @@ object Modifiers {
         e.classList.remove(c)
     })
   }
+
+  val cls = ClsModifier()
 
   val cb = Creator[Element => Unit]((e, handler) => handler(e))
 
@@ -68,10 +72,6 @@ object Modifiers {
     val value = if (a.isEmpty) "javascript:void(0)" else a
     e.setAttribute("href", value)
   })
-
-  // val onclick = Creator[MouseEvent => Unit]((e, a) => {
-  //   e.addEventListener("click", a)
-  // })
 
   object onclick {
     def :=(f: MouseEvent => Unit) = Modifier(e => {

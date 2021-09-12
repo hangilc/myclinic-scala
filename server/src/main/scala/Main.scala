@@ -1,33 +1,21 @@
 package dev.myclinic.scala.server
 
 import cats.effect._
+import fs2.Pipe
+import fs2.concurrent.Topic
 import org.http4s._
-
-import scala.concurrent.ExecutionContext.Implicits.global
 import org.http4s.blaze.server.BlazeServerBuilder
-import org.http4s.server.Router
 import org.http4s.dsl.io._
+import org.http4s.headers.Location
 import org.http4s.implicits._
+import org.http4s.server.Router
 import org.http4s.server.staticcontent.FileService
 import org.http4s.server.staticcontent.fileService
-
-import endpoints4s.http4s.server
-import dev.myclinic.scala.api.ApiEndpoints
-import dev.myclinic.scala.db.Db
-import dev.myclinic.scala.model._
-import org.http4s.headers.Location
-import java.time.LocalDate
-import java.time.LocalTime
 import org.http4s.server.websocket.WebSocketBuilder
-import fs2.concurrent.Topic
-import fs2.Pipe
 import org.http4s.websocket.WebSocketFrame
 import org.http4s.websocket.WebSocketFrame.Text
-import endpoints4s.Valid
-import endpoints4s.Invalid
-import sttp.tapir.swagger.http4s.SwaggerHttp4s
-import sttp.tapir.openapi.circe.yaml._
-import sttp.tapir.server.http4s.Http4sServerInterpreter
+
+import scala.concurrent.ExecutionContext.Implicits.global
 object Main extends IOApp {
 
   object AppEventBroadcaster {
@@ -37,61 +25,6 @@ object Main extends IOApp {
     ): IO[Unit] = {
       topic.publish1(Text(text)) >> IO.pure(())
     }
-  }
-
-  class ApiService(topic: Topic[IO, WebSocketFrame])
-      extends server.Endpoints[IO]
-      with ApiEndpoints
-      with server.JsonEntitiesFromSchemas { self =>
-    implicit val dbJsonEncoder = DbJsonEncoder
-    val routes: HttpRoutes[IO] = HttpRoutes.of(
-      routesFromEndpoints(
-        listAppoint.implementedByEffect({ (from: LocalDate, upto: LocalDate) =>
-          {
-            Db.listAppoint(from, upto)
-          }
-        }.tupled),
-        registerAppoint.implementedByEffect({
-          (date: LocalDate, time: LocalTime, name: String) =>
-            {
-              val app = Appoint(date, time, 0, name, 0, "")
-              for {
-                appEvent <- Db.registerAppoint(app)
-                _ <- AppEventBroadcaster.broadcast(
-                  topic,
-                  ServerJsonCodec.toJson(appEvent)
-                )
-              } yield ()
-            }
-        }.tupled),
-        cancelAppoint.implementedByEffect({
-          (date: LocalDate, time: LocalTime, name: String) =>
-            for {
-              appEvent <- Db.cancelAppoint(date, time, name)
-              _ <- AppEventBroadcaster.broadcast(
-                topic,
-                ServerJsonCodec.toJson(appEvent)
-              )
-            } yield ()
-        }.tupled),
-        getAppoint.implementedByEffect({ (date: LocalDate, time: LocalTime) =>
-          Db.getAppoint(date, time)
-        }.tupled),
-        getNextEventId.implementedByEffect(_ => Db.nextGlobalEventId())
-      )
-    )
-
-    def toJson[T](value: T)(implicit schema: JsonSchema[T]): String = {
-      schema.encoder.encode(value).toString()
-    }
-
-    def fromJson[T](src: String)(implicit schema: JsonSchema[T]): T = {
-      schema.stringCodec.decode(src) match {
-        case Valid(t)   => t
-        case Invalid(e) => throw new RuntimeException(e.toString())
-      }
-    }
-
   }
 
   def ws(topic: Topic[IO, WebSocketFrame]) = HttpRoutes.of[IO] {
@@ -105,25 +38,6 @@ object Main extends IOApp {
       WebSocketBuilder[IO].build(toClient, fromClient)
   }
 
-  val docAPI =
-    sttp.tapir.docs.openapi
-      .OpenAPIDocsInterpreter()
-      .toOpenAPI(
-        List(dev.myclinic.scala.api.MyclinicEndpoints.helloEndpoint),
-        "Myclinic",
-        "1.0.0"
-      )
-
-  val docRoutes = (new SwaggerHttp4s(docAPI.toYaml)).routes[IO]
-
-  def helloLogic: Unit => IO[Either[Unit, String]] = _ =>
-    IO.pure(Right[Unit, String]("hello"))
-
-  val helloRoutes: HttpRoutes[IO] = Http4sServerInterpreter[IO]()
-    .toRoutes(dev.myclinic.scala.api.MyclinicEndpoints.helloEndpoint)(
-      helloLogic
-    )
-
   def helloService() = HttpRoutes.of[IO] {
     case GET -> Root => {
       Ok("hello")
@@ -133,7 +47,6 @@ object Main extends IOApp {
   val staticService = fileService[IO](FileService.Config("./web", "/"))
 
   def buildServer(topic: Topic[IO, WebSocketFrame]) = {
-    val apiService = new ApiService(topic)
     BlazeServerBuilder[IO](global)
       .withSocketReuseAddress(true)
       .bindHttp(8080, "localhost")
@@ -142,11 +55,8 @@ object Main extends IOApp {
           "/appoint" -> HttpRoutes.of[IO] { case GET -> Root =>
             PermanentRedirect(Location(uri"/appoint/"))
           },
-          "/api" -> apiService.routes,
+          "/api" -> RestService.routes,
           "/ws" -> ws(topic),
-          //"/hello" -> helloService(),
-          "/rest" -> helloRoutes,
-          "/" -> docRoutes,
           "/" -> staticService
         ).orNotFound
       )

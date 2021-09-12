@@ -1,8 +1,9 @@
 package dev.fujiwara.domq
 
 import org.scalajs.dom.raw.{Element, HTMLInputElement}
-import dev.fujiwara.domq.ElementQ._
+import dev.fujiwara.domq.ElementQ.{given, *}
 import dev.fujiwara.domq.Modifiers._
+import scala.language.implicitConversions
 
 object Binding {
   case class TextBinding() {

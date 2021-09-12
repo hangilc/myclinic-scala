@@ -7,11 +7,14 @@ import dev.fujiwara.domq.Modifiers._
 import dev.fujiwara.domq.Html._
 import dev.fujiwara.domq.ElementQ._
 import dev.fujiwara.domq.Binding._
+import scala.language.implicitConversions
 
 class Dialog() {
   val titleBinding = Binding.TextBinding()
   var contentBinding = Binding.ElementBinding()
   var commandBoxBinding = Binding.ElementBinding()
+
+  val c = cls
 
   val ele = div(cls := "modal", attr("tabindex") := "-1")(
     div(cls := "modal-dialog")(
@@ -49,7 +52,7 @@ class Dialog() {
 
   def open(): Unit = {
     modal.show()
-    document.body(style := "hidden: auto")
+    ElementQ(document.body)(style := "hidden: auto")
   }
 
   def close(): Unit = {

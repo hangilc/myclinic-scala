@@ -1,7 +1,7 @@
 package dev.myclinic.scala.web.appoint
 
 import dev.fujiwara.domq.Dialog
-import dev.fujiwara.domq.ElementQ._
+import dev.fujiwara.domq.ElementQ.{given, *}
 import dev.fujiwara.domq.Modifiers._
 import dev.fujiwara.domq.Html._
 import dev.myclinic.scala.model.Appoint
@@ -9,6 +9,7 @@ import dev.myclinic.scala.util.KanjiDate
 import dev.fujiwara.domq.Binding.InputBinding
 import dev.fujiwara.domq.Binding.TextBinding
 import dev.fujiwara.domq.Binding.bindTo
+import scala.language.implicitConversions
 
 class MakeAppointDialog(appoint: Appoint, handler: String => Unit)
     extends Dialog() {
