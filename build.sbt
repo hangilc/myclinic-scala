@@ -13,6 +13,8 @@ val doobieVersion = "1.0.0-M5"
 //val circeVersion = "0.14.1"
 val scalaJavaTimeVersion = "2.2.2"
 val scalaJSDomVersion = "1.1.0"
+val tapirVersion = "0.19.0-M8"
+val tapirDocVersion = "0.19.0-M4"
 
 ThisBuild / scalacOptions ++= Seq("-Wunused", "-deprecation")
 
@@ -62,7 +64,12 @@ lazy val server = project
       "ch.qos.logback" % "logback-classic" % "1.1.3" % "runtime",
       "org.http4s" %% "http4s-blaze-server" % http4sVersion,
       "org.http4s" %% "http4s-dsl" % http4sVersion,
-      "org.endpoints4s" %% "openapi" % "3.1.0"
+      "org.endpoints4s" %% "openapi" % "3.1.0",
+      "com.softwaremill.sttp.tapir" %% "tapir-http4s-server" % tapirVersion,
+      "com.softwaremill.sttp.tapir" %% "tapir-openapi-docs" % tapirVersion,
+      "com.softwaremill.sttp.tapir" %% "tapir-openapi-circe-yaml" % tapirVersion,
+      "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-http4s" % tapirDocVersion,
+      "com.softwaremill.sttp.tapir" %% "tapir-redoc-http4s" % tapirDocVersion,
     ),
     Compile / console / scalacOptions ~= { _.filterNot(Set("-Wunused")) }
   )
@@ -147,9 +154,9 @@ lazy val api = crossProject(JSPlatform, JVMPlatform)
   .settings(
     libraryDependencies ++= Seq(
       "org.endpoints4s" %%% "algebra" % "1.5.0",
-      "org.endpoints4s" %%% "json-schema-generic" % "1.5.0"
-      //"org.endpoints4s" %% "json-schema-circe" % "1.5.0",
-      //"org.endpoints4s" %%% "algebra-circe" % "1.5.0",
+      "org.endpoints4s" %%% "json-schema-generic" % "1.5.0",
+      "com.softwaremill.sttp.tapir" %% "tapir-core" % tapirVersion,
+      "com.softwaremill.sttp.tapir" %% "tapir-json-circe" % tapirVersion,
     )
   )
 
@@ -164,6 +171,8 @@ lazy val webclient = project
     name := "webclient",
     scalaJSUseMainModuleInitializer := true,
     libraryDependencies ++= Seq(
-      "org.endpoints4s" %%% "xhr-client" % "3.1.0"
+      "org.endpoints4s" %%% "xhr-client" % "3.1.0",
+      "com.softwaremill.sttp.tapir" %%% "tapir-sttp-client" % tapirVersion,
+      "io.github.cquiroz" %%% "scala-java-time" % "2.2.0"
     )
   )

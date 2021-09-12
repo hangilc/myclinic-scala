@@ -25,7 +25,9 @@ import org.http4s.websocket.WebSocketFrame
 import org.http4s.websocket.WebSocketFrame.Text
 import endpoints4s.Valid
 import endpoints4s.Invalid
-
+import sttp.tapir.swagger.http4s.SwaggerHttp4s
+import sttp.tapir.openapi.circe.yaml._
+import sttp.tapir.server.http4s.Http4sServerInterpreter
 object Main extends IOApp {
 
   object AppEventBroadcaster {
@@ -69,7 +71,7 @@ object Main extends IOApp {
               _ <- AppEventBroadcaster.broadcast(
                 topic,
                 ServerJsonCodec.toJson(appEvent)
-              ) 
+              )
             } yield ()
         }.tupled),
         getAppoint.implementedByEffect({ (date: LocalDate, time: LocalTime) =>
@@ -103,6 +105,25 @@ object Main extends IOApp {
       WebSocketBuilder[IO].build(toClient, fromClient)
   }
 
+  val docAPI =
+    sttp.tapir.docs.openapi
+      .OpenAPIDocsInterpreter()
+      .toOpenAPI(
+        List(dev.myclinic.scala.api.MyclinicEndpoints.helloEndpoint),
+        "Myclinic",
+        "1.0.0"
+      )
+
+  val docRoutes = (new SwaggerHttp4s(docAPI.toYaml)).routes[IO]
+
+  def helloLogic: Unit => IO[Either[Unit, String]] = _ =>
+    IO.pure(Right[Unit, String]("hello"))
+
+  val helloRoutes: HttpRoutes[IO] = Http4sServerInterpreter[IO]()
+    .toRoutes(dev.myclinic.scala.api.MyclinicEndpoints.helloEndpoint)(
+      helloLogic
+    )
+
   def helloService() = HttpRoutes.of[IO] {
     case GET -> Root => {
       Ok("hello")
@@ -123,7 +144,9 @@ object Main extends IOApp {
           },
           "/api" -> apiService.routes,
           "/ws" -> ws(topic),
-          "/hello" -> helloService(),
+          //"/hello" -> helloService(),
+          "/rest" -> helloRoutes,
+          "/" -> docRoutes,
           "/" -> staticService
         ).orNotFound
       )

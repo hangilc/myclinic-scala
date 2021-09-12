@@ -6,14 +6,21 @@ import dev.fujiwara.domq.Modifiers._
 import dev.myclinic.scala.model._
 import dev.myclinic.scala.util.DateUtil
 import dev.myclinic.scala.webclient.Api
+import dev.myclinic.scala.webclient.MyclinicApi
 import org.scalajs.dom
 import org.scalajs.dom.document
 import java.time.LocalDate
 import concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.Success
+import scala.util.Failure
 
 object JsMain {
   def main(args: Array[String]): Unit = {
+    MyclinicApi.hello(()).onComplete({
+      case Success(s) => println("hello", s)
+      case Failure(_) => 
+    })
     val body = document.body
     body(cls := "px-5 pt-1 pb-5")
     body.appendChild(banner)
