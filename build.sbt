@@ -32,6 +32,8 @@ lazy val root = project
     server,
     webclient,
     domq,
+    modeljsonJVM,
+    modeljsonJS,
     appointApp
   )
   .settings(
@@ -45,6 +47,7 @@ lazy val model = crossProject(JSPlatform, JVMPlatform)
   .settings(
     name := "model"
   )
+  .jsConfigure(_ enablePlugins TzdbPlugin)
   .jsSettings(
     scalaJSUseMainModuleInitializer := false,
     zonesFilter := { (z: String) => z == "Asia/Tokyo" },
@@ -72,6 +75,7 @@ lazy val db = project
 lazy val util = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Pure)
   .in(file("util"))
+  .jsConfigure(_ enablePlugins TzdbPlugin)
   .jsSettings(
     scalaJSUseMainModuleInitializer := false,
     zonesFilter := { (z: String) => z == "Asia/Tokyo" },
@@ -85,7 +89,7 @@ val utilJVM = util.jvm
 
 lazy val server = project
   .in(file("server"))
-  .dependsOn(db, modelJVM, utilJVM)
+  .dependsOn(db, modelJVM, utilJVM, modeljsonJVM)
   .settings(
     name := "server",
     libraryDependencies ++= Seq(
@@ -99,7 +103,7 @@ lazy val server = project
 lazy val webclient = project
   .in(file("webclient"))
   .enablePlugins(ScalaJSPlugin)
-  .dependsOn(modelJS)
+  .dependsOn(modelJS, modeljsonJS)
   .settings(
     name := "webclient",
     scalaJSUseMainModuleInitializer := false,
@@ -135,20 +139,22 @@ lazy val appointApp = project
     )
   )
 
-// // lazy val client = crossProject(JSPlatform, JVMPlatform)
-// //   .crossType(CrossType.Full)
-// //   .in(file("client"))
-// //   .settings(
-// //   )
-// //   .jvmSettings(
-// //   )
-// //   .jsSettings(
-// //     scalaJSUseMainModuleInitializer := false,
-// //     zonesFilter := { (z: String) => z == "Asia/Tokyo" },
-// //     libraryDependencies ++= Seq(
-// //       "io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion
-// //     )
-// //   )
+lazy val modeljson = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Pure)
+  .in(file("modeljson"))
+  .jsConfigure(_ enablePlugins TzdbPlugin)
+  .jsSettings(
+    scalaJSUseMainModuleInitializer := false,
+    zonesFilter := { (z: String) => z == "Asia/Tokyo" },
+    libraryDependencies ++= Seq(
+      "io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion
+    )
+  )
+  .settings(
+    libraryDependencies ++= Seq(
+      "io.circe" %%% "circe-core" % circeVersion
+    )
+  )
 
-// // val clientJS = client.js
-// // val clientJVM = client.jvm
+val modeljsonJVM = modeljson.jvm
+val modeljsonJS = modeljson.js
