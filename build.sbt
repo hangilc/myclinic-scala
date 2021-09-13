@@ -105,7 +105,7 @@ lazy val server = project
 lazy val webclient = project
   .in(file("webclient"))
   .enablePlugins(ScalaJSPlugin)
-  .dependsOn(modelJS, modeljsonJS)
+  .dependsOn(modelJS, modeljsonJS, utilJS)
   .settings(
     name := "webclient",
     scalaJSUseMainModuleInitializer := false,
