@@ -32,6 +32,8 @@ object RestService {
   object dateUpto extends QueryParamDecoderMatcher[LocalDate]("upto")
   object timeTime extends QueryParamDecoderMatcher[LocalTime]("time")
   object nameString extends QueryParamDecoderMatcher[String]("name")
+  object intFrom extends QueryParamDecoderMatcher[Int]("from")
+  object intUpto extends QueryParamDecoderMatcher[Int]("upto")
 
   def routes(using topic: Topic[IO, WebSocketFrame]) = HttpRoutes.of[IO] {
 
@@ -59,6 +61,23 @@ object RestService {
       } yield "ok".asJson
       Ok(op)
     }
+
+    case GET -> Root / "get-appoint" :? dateDate(date) +& timeTime(time) => {
+      Ok(Db.getAppoint(date, time))
+    }
+
+    case GET -> Root / "get-next-app-event-id" => {
+      Ok(Db.nextGlobalEventId())
+    }
+
+    case GET -> Root / "list-app-event-since" :? intFrom(from) => {
+      Ok(Db.listGlobalEventSince(from))
+    }
+
+    case GET -> Root / "list-app-event-in-range" :? intFrom(from) +& intUpto(upto) => {
+      Ok(Db.listGlobalEventInRange(from, upto))
+    }
+
   }
 
 }

@@ -41,6 +41,20 @@ object DbEventPrim {
     """.query[Int].unique
   }
 
+  def listGlobalEventSince(eventId: Int): Query0[AppEvent] = {
+    val sql = sql""" 
+      select * from app_event where event_id >= ${eventId}
+    """"
+    sql.query[AppEvent]
+  }
+
+  def listGlobalEventInRange(fromEventId: Int, uptoEventId: Int): Query0[AppEvent] = {
+    val sql = sql""" 
+      select * from app_event where event_id >= ${fromEventId} and event_id <= ${uptoEventId}
+    """"
+    sql.query[AppEvent]
+  }
+
   def nextGlobalEventId(): ConnectionIO[Int] = {
     for {
       currId <- getGlobalEventId()
