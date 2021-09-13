@@ -24,9 +24,14 @@ object RestService {
 
   given QueryParamDecoder[LocalDate] =
     QueryParamDecoder[String].map(DateUtil.stringToDate(_))
+  given QueryParamDecoder[LocalTime] =
+    QueryParamDecoder[String].map(DateUtil.stringToTime(_))
 
   object dateFrom extends QueryParamDecoderMatcher[LocalDate]("from")
+  object dateDate extends QueryParamDecoderMatcher[LocalDate]("date")
   object dateUpto extends QueryParamDecoderMatcher[LocalDate]("upto")
+  object timeTime extends QueryParamDecoderMatcher[LocalTime]("time")
+  object nameString extends QueryParamDecoderMatcher[String]("name")
 
   def routes(using topic: Topic[IO, WebSocketFrame]) = HttpRoutes.of[IO] {
 
@@ -36,12 +41,23 @@ object RestService {
       Ok(Db.listAppoint(from, upto))
 
     case req @ POST -> Root / "register-appoint" => {
-        val op = for {
-          appoint <- req.as[Appoint]
-          appEvent <- Db.registerAppoint(appoint)
-          _ <- topic.publish1(Text(appEvent.asJson.toString()))
-        } yield "ok".asJson
-        Ok(op)
+      val op = for {
+        appoint <- req.as[Appoint]
+        appEvent <- Db.registerAppoint(appoint)
+        _ <- topic.publish1(Text(appEvent.asJson.toString()))
+      } yield "ok".asJson
+      Ok(op)
+    }
+
+    case req @ POST -> Root / "cancel-appoint" :? dateDate(date) +& timeTime(
+          time
+        ) +& nameString(name) => {
+      val op = for {
+        appoint <- req.as[Appoint]
+        appEvent <- Db.cancelAppoint(date, time, name)
+        _ <- topic.publish1(Text(appEvent.asJson.toString()))
+      } yield "ok".asJson
+      Ok(op)
     }
   }
 
