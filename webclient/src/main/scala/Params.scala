@@ -6,12 +6,13 @@ import java.time.LocalTime
 import scala.collection.mutable.ListBuffer
 import dev.myclinic.scala.util.DateUtil
 import java.time.LocalDateTime
+import scala.scalajs.js.URIUtils
 
 trait ParamValue {
   def encode(): String
 }
 
-object ParamValue {
+object ParamsImplicits {
   given strParam: Conversion[String, ParamValue] = s =>
     new ParamValue {
       def encode(): String = s
@@ -43,11 +44,11 @@ trait URIComponentEncoder {
   def encode(src: String): String
 }
 
-class Params()(implicit compEncoder: URIComponentEncoder) {
+class Params() {
   private val items = ListBuffer.empty[(String, String)]
 
   def add(k: String, p: ParamValue): Unit = {
-    val pair = (k, compEncoder.encode(p.encode()))
+    val pair = (k, URIEncoder.encode(p.encode()))
     items += pair
   }
 
@@ -66,11 +67,17 @@ class Params()(implicit compEncoder: URIComponentEncoder) {
 object Params {
   def apply(
       items: (String, ParamValue)*
-  )(implicit compEncoder: URIComponentEncoder): Params = {
+  ): Params = {
     val params = new Params()
     for ((k, p) <- items) {
       params.add(k, p)
     }
     params
+  }
+}
+
+object URIEncoder {
+  def encode(src: String): String = {
+    URIUtils.encodeURIComponent(src)
   }
 }

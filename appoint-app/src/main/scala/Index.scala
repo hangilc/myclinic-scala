@@ -17,24 +17,16 @@ import scala.language.implicitConversions
 
 object JsMain {
   def main(args: Array[String]): Unit = {
-    // MyclinicApi.hello(()).onComplete({
-    //   case Success(s) => println("hello", s)
-    //   case Failure(_) => 
-    // })
     val body = document.body
     body(cls := "px-5 pt-1 pb-5")
     body.appendChild(banner)
-    MyclinicApi.hello().onComplete({
-      case Success(s) => println(s)
-      case Failure(e) => println(e.toString())
-    })
-    // openWebSocket()
-    // val workarea = div()
-    // body.appendChild(workarea)
-    // val startDate = DateUtil.startDayOfWeek(LocalDate.now())
-    // val endDate = startDate.plusDays(6)
-    // AppointSheet.setupDateRange(startDate, endDate)
-    // AppointSheet.setupTo(workarea)
+    openWebSocket()
+    val workarea = div()
+    body.appendChild(workarea)
+    val startDate = DateUtil.startDayOfWeek(LocalDate.now())
+    val endDate = startDate.plusDays(6)
+    AppointSheet.setupDateRange(startDate, endDate)
+    AppointSheet.setupTo(workarea)
   }
 
   val banner = div(cls := "container-fluid")(

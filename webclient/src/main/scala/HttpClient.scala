@@ -7,21 +7,27 @@ import org.scalajs.dom.raw.Event
 import io.circe._
 import io.circe.syntax._
 import io.circe.parser.decode
-import dev.myclinic.scala.modeljson.Implicits.{given}
 
-class HttpClient(prefix: String) {
-  def get[R](url: String): Future[R] = ???
-  def post[R](url: String, jsonBody: String): Future[R] = ???
-}
+// object HttpClient {
+//   def get[R](url: String, params: Params)(using Decoder[R]): Future[R] =
+//     Ajax.request("GET", url, params, "")
+
+//   def post[R](
+//       url: String,
+//       params: Params,
+//       jsonBody: String
+//   )(using Decoder[R]): Future[R] =
+//     Ajax.request("POST", url, params, jsonBody)
+// }
 
 object Ajax {
 
   def request[T](
       method: String,
       url: String,
-      params: Seq[(String, ParamValue)],
+      params: Params,
       body: String
-  ): Future[T] = {
+  )(using Decoder[T]): Future[T] = {
     val promise = Promise[T]
     val xhr = new XMLHttpRequest()
     xhr.onreadystatechange = (_: Event) => {
