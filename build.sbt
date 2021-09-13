@@ -61,13 +61,14 @@ val modelJVM = model.jvm
 
 lazy val db = project
   .in(file("db"))
-  .dependsOn(modelJVM)
+  .dependsOn(modelJVM, modeljsonJVM)
   .settings(
     name := "db",
     libraryDependencies ++= Seq(
       "org.xerial" % "sqlite-jdbc" % sqliteVersion,
       "org.tpolecat" %% "doobie-core" % doobieVersion,
-      "org.tpolecat" %% "doobie-hikari" % doobieVersion
+      "org.tpolecat" %% "doobie-hikari" % doobieVersion,
+      "org.http4s" %% "http4s-circe" % http4sVersion
     ),
     Compile / console / scalacOptions ~= { _.filterNot(Set("-Wunused")) }
   )
@@ -95,7 +96,8 @@ lazy val server = project
     libraryDependencies ++= Seq(
       "ch.qos.logback" % "logback-classic" % "1.1.3" % "runtime",
       "org.http4s" %% "http4s-blaze-server" % http4sVersion,
-      "org.http4s" %% "http4s-dsl" % http4sVersion
+      "org.http4s" %% "http4s-dsl" % http4sVersion,
+      "org.http4s" %% "http4s-circe" % http4sVersion
     ),
     Compile / console / scalacOptions ~= { _.filterNot(Set("-Wunused")) }
   )
@@ -142,6 +144,7 @@ lazy val appointApp = project
 lazy val modeljson = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Pure)
   .in(file("modeljson"))
+  .dependsOn(model)
   .jsConfigure(_ enablePlugins TzdbPlugin)
   .jsSettings(
     scalaJSUseMainModuleInitializer := false,
@@ -152,7 +155,9 @@ lazy val modeljson = crossProject(JSPlatform, JVMPlatform)
   )
   .settings(
     libraryDependencies ++= Seq(
-      "io.circe" %%% "circe-core" % circeVersion
+      "io.circe" %%% "circe-core" % circeVersion,
+      "io.circe" %%% "circe-generic" % circeVersion,
+      "io.circe" %%% "circe-parser" % circeVersion
     )
   )
 

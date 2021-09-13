@@ -20,7 +20,7 @@ trait DbAppoint extends Sqlite {
 
   def createAppointTimes(
       times: List[(LocalDate, LocalTime)]
-  )(implicit encoder: JsonEncoder): IO[List[AppEvent]] = {
+  ): IO[List[AppEvent]] = {
     def seq(eventId: Int): ConnectionIO[List[AppEvent]] =
       times
         .map({ (d: LocalDate, t: LocalTime) =>
@@ -38,7 +38,7 @@ trait DbAppoint extends Sqlite {
   def createAppointTimes(
     year: Int, month: Int, day: Int,
     slots: (Int, Int)*
-  )(implicit encoder: JsonEncoder): IO[List[AppEvent]] = {
+  ): IO[List[AppEvent]] = {
     val date = LocalDate.of(year, month, day)
     val times = for{
       ((h: Int, m: Int)) <- slots
@@ -46,7 +46,7 @@ trait DbAppoint extends Sqlite {
     createAppointTimes(times.toList)
   }
 
-  def registerAppoint(a: Appoint)(implicit encoder: JsonEncoder): IO[AppEvent] = {
+  def registerAppoint(a: Appoint): IO[AppEvent] = {
     require(!a.patientName.isEmpty)
 
     sqlite(
@@ -66,7 +66,7 @@ trait DbAppoint extends Sqlite {
       date: LocalDate,
       time: LocalTime,
       patientName: String
-  )(implicit encoder: JsonEncoder): IO[AppEvent] = {
+  ): IO[AppEvent] = {
     require(!patientName.isEmpty)
 
     sqlite(

@@ -47,6 +47,7 @@ object Main extends IOApp {
   val staticService = fileService[IO](FileService.Config("./web", "/"))
 
   def buildServer(topic: Topic[IO, WebSocketFrame]) = {
+    given Topic[IO, WebSocketFrame] = topic
     BlazeServerBuilder[IO](global)
       .withSocketReuseAddress(true)
       .bindHttp(8080, "localhost")
