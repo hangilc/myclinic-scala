@@ -10,7 +10,7 @@ import dev.myclinic.scala.webclient.ParamsImplicits.{given}
 import scala.language.implicitConversions
 
 object Api {
-  def url(service: String): String = "/api/${service}"
+  def url(service: String): String = s"/api/${service}"
 
   def get[T](service: String, params: Params)(using
       Decoder[T]

@@ -13,6 +13,7 @@ import scala.util.Failure
 import scala.util.Success
 import dev.myclinic.scala.web.appoint.Events._
 import scala.concurrent.Future
+import dev.myclinic.scala.webclient.Api
 import scala.language.implicitConversions
 
 object AppointSheet {
@@ -183,10 +184,10 @@ object AppointSheet {
         appoint,
         name => {
           Api
-            .registerAppoint(appoint.date, appoint.time, name)
+            .registerAppoint(Appoint(appoint.date, appoint.time, 0, name, 0, ""))
             .onComplete[Unit](_ match {
               case Success(_)         => println("Success")
-              case Failure(exception) => println("failure", exception)
+              case Failure(exception) => println(("failure", exception))
             })
         }
       )

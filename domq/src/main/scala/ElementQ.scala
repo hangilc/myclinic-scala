@@ -6,6 +6,7 @@ import scala.language.implicitConversions
 import org.scalajs.dom.raw.HTMLDocument
 import org.scalajs.dom.raw.HTMLElement
 import org.scalajs.dom.raw.HTMLInputElement
+import scala.concurrent.Future
 
 case class ElementQ(ele: Element) {
 
@@ -14,12 +15,12 @@ case class ElementQ(ele: Element) {
     this
   }
 
-  def onclick(handler: MouseEvent => Unit): Element = {
+  def onclick(handler: MouseEvent => _): Element = {
     ele.addEventListener("click", handler)
     ele
   }
 
-  def onclick(handler: () => Unit): Element = {
+  def onclick(handler: () => _): Element = {
     onclick((_: MouseEvent) => handler())
   }
 
