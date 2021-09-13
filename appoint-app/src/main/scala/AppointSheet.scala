@@ -8,13 +8,14 @@ import dev.myclinic.scala.model._
 import org.scalajs.dom.raw.Element
 
 import java.time.LocalDate
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Failure
 import scala.util.Success
 import dev.myclinic.scala.web.appoint.Events._
 import scala.concurrent.Future
 import dev.myclinic.scala.webclient.Api
 import scala.language.implicitConversions
+import org.scalajs.dom.raw.MouseEvent
 
 object AppointSheet {
   val eles = div(TopMenu.ele, AppointRow.ele)
@@ -26,7 +27,6 @@ object AppointSheet {
   listener.enable()
 
   def setupDateRange(from: LocalDate, upto: LocalDate): Future[Unit] = {
-    println(("setupDateRange", from, upto))
     listener.suspending {
       for {
         appoints <- Api.listAppoint(from, upto)
@@ -71,7 +71,6 @@ object AppointSheet {
     nextWeekBinding.element.onclick(() => onNextWeek())
 
     def onPrevWeek(): Future[Unit] = {
-      println(("dateRange", dateRange))
       dateRange match {
         case Some((from, upto)) => {
           val fromNext = from.plusDays(-7)

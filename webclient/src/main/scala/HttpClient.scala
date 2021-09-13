@@ -26,13 +26,14 @@ object Ajax {
     xhr.onreadystatechange = (_: Event) => {
       if (xhr.readyState == XMLHttpRequest.DONE) {
         val status = xhr.status
-        if (status == XMLHttpRequest.DONE) {
+        if (status == 200) {
           val src = xhr.responseText
           decode[T](src) match {
             case Right(value) => promise.success(value)
             case Left(ex)     => promise.failure(ex)
           }
         } else {
+          System.err.println(xhr.responseText)
           promise.failure(new RuntimeException(xhr.responseText))
         }
       }
