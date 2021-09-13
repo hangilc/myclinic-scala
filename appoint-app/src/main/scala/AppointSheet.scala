@@ -26,6 +26,7 @@ object AppointSheet {
   listener.enable()
 
   def setupDateRange(from: LocalDate, upto: LocalDate): Future[Unit] = {
+    println(("setupDateRange", from, upto))
     listener.suspending {
       for {
         appoints <- Api.listAppoint(from, upto)
@@ -70,6 +71,7 @@ object AppointSheet {
     nextWeekBinding.element.onclick(() => onNextWeek())
 
     def onPrevWeek(): Future[Unit] = {
+      println(("dateRange", dateRange))
       dateRange match {
         case Some((from, upto)) => {
           val fromNext = from.plusDays(-7)
