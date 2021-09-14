@@ -36,7 +36,6 @@ object JsMain {
       Api
         .hello()
         .onComplete(result => {
-          println("COMPLETED")
           result match {
             case Success(x) => println(s"success: $x")
             case Failure(e) => e match {
