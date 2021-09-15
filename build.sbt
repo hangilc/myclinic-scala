@@ -17,8 +17,6 @@ val tapirDocVersion = "0.19.0-M4"
 
 ThisBuild / scalacOptions ++= Seq("-deprecation")
 
-Compile / console / scalacOptions ~= { _.filterNot(Set("-Wunused")) }
-
 val rootDir = ThisBuild / baseDirectory
 
 lazy val root = project
@@ -70,7 +68,6 @@ lazy val db = project
       "org.tpolecat" %% "doobie-hikari" % doobieVersion,
       "org.http4s" %% "http4s-circe" % http4sVersion
     ),
-    Compile / console / scalacOptions ~= { _.filterNot(Set("-Wunused")) }
   )
 
 lazy val util = crossProject(JSPlatform, JVMPlatform)
@@ -99,7 +96,6 @@ lazy val server = project
       "org.http4s" %% "http4s-dsl" % http4sVersion,
       "org.http4s" %% "http4s-circe" % http4sVersion
     ),
-    Compile / console / scalacOptions ~= { _.filterNot(Set("-Wunused")) }
   )
 
 lazy val webclient = project
