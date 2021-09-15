@@ -24,6 +24,9 @@ object Api {
   ): Future[T] =
     Ajax.request("POST", url(service), params, body.asJson.toString())
 
+  def hello(): Future[String] = 
+    get("hello", Params())
+
   def listAppoint(from: LocalDate, upto: LocalDate): Future[List[Appoint]] = 
     get("list-appoint", Params("from" -> from, "upto" -> upto))
   

@@ -35,9 +35,23 @@ object RestService {
   object intFrom extends QueryParamDecoderMatcher[Int]("from")
   object intUpto extends QueryParamDecoderMatcher[Int]("upto")
 
+  case class UserError(message: String) extends Exception
+
+  def hello(): IO[String] = {
+    throw new UserError("さようなら")
+    "こんにちは".pure[IO]
+  }
+
   def routes(using topic: Topic[IO, WebSocketFrame]) = HttpRoutes.of[IO] {
 
-    case GET -> Root / "hello" => Ok("\"hello, world\"")
+    case GET -> Root / "hello" => {
+      try Ok(hello())
+      catch {
+        case e: UserError => BadRequest(e.message, "X-User-Error" -> "true") 
+        case e: Exception => throw e
+      }
+
+    }
 
     case GET -> Root / "list-appoint" :? dateFrom(from) +& dateUpto(upto) =>
       Ok(Db.listAppoint(from, upto))

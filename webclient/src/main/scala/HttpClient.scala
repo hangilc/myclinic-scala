@@ -32,6 +32,16 @@ object Ajax {
             case Right(value) => promise.success(value)
             case Left(ex)     => promise.failure(ex)
           }
+        } else if( status == 400 ){
+          if( xhr.getResponseHeader("X-User-Error") == "true" ){
+            val message: String = decode[String](xhr.responseText) match {
+              case Right(m) => m
+              case Left(e) => xhr.responseText
+            }
+            promise.failure(UserError(message))
+          } else {
+            promise.failure(new RuntimeException(xhr.response.toString()))
+          }
         } else {
           System.err.println(xhr.responseText)
           promise.failure(new RuntimeException(xhr.responseText))

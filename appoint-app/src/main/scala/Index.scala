@@ -12,7 +12,7 @@ import concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.Success
 import scala.util.Failure
-import dev.myclinic.scala.webclient.Api
+import dev.myclinic.scala.webclient.{Api, UserError}
 import scala.language.implicitConversions
 import io.circe._
 import io.circe.syntax._
@@ -31,6 +31,20 @@ object JsMain {
     val endDate = startDate.plusDays(6)
     AppointSheet.setupDateRange(startDate, endDate)
     AppointSheet.setupTo(workarea)
+
+    {
+      Api
+        .hello()
+        .onComplete(result => {
+          result match {
+            case Success(x) => println(s"success: $x")
+            case Failure(e) => e match {
+              case ex: UserError => println(ex.message)
+              case _: Throwable => println(e)
+            }
+          }
+        })
+    }
   }
 
   val banner = div(cls := "container-fluid")(
@@ -41,9 +55,12 @@ object JsMain {
 
   def openWebSocket(): Future[Unit] = {
     def f(nextEventId: Int): Unit = {
-      val linear = new GlobalEventLinearizer(nextEventId, e => {
-        GlobalEventDispatcher.dispatch(e)
-      })
+      val linear = new GlobalEventLinearizer(
+        nextEventId,
+        e => {
+          GlobalEventDispatcher.dispatch(e)
+        }
+      )
       val location = dom.window.location
       val origProtocol = location.protocol
       val host = location.host
@@ -59,7 +76,7 @@ object JsMain {
           println(("message", src))
           val appEvent: AppEvent = decode[AppEvent](src) match {
             case Right(value) => value
-            case Left(ex) => throw ex
+            case Left(ex)     => throw ex
           }
           linear.post(appEvent)
         }
