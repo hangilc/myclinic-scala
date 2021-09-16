@@ -15,7 +15,7 @@ val scalaJSDomVersion = "1.1.0"
 val tapirVersion = "0.19.0-M8"
 val tapirDocVersion = "0.19.0-M4"
 
-ThisBuild / scalacOptions ++= Seq("-deprecation", "-encoding", "UTF-8", "-new-syntax", "-indent")
+ThisBuild / scalacOptions ++= Seq("-deprecation", "-encoding", "UTF-8")
 
 val rootDir = ThisBuild / baseDirectory
 
