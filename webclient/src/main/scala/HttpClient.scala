@@ -43,6 +43,6 @@ object Ajax:
           promise.failure(new RuntimeException(xhr.responseText))
     }
     xhr.open(method, urlWithQuery)
-    xhr.send()
+    xhr.send(body)
     promise.future
 

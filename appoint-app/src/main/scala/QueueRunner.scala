@@ -19,6 +19,7 @@ class QueueRunner():
 
   def enqueue(action: Action): Unit =
     queue.push(action)
+    startWorker()
 
   def start(): Unit = startWorker()
 

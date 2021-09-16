@@ -34,8 +34,12 @@ object JsMain:
     body.appendChild(workarea)
     val startDate = DateUtil.startDayOfWeek(LocalDate.now())
     val endDate = startDate.plusDays(6)
-    AppointSheet.setupDateRange(startDate, endDate)
     AppointSheet.setupTo(workarea)
+    QueueRunner.enqueue(new QueueRunner.Action:
+      def start(): Future[Unit] =
+        AppointSheet.setupDateRange(startDate, endDate)
+      def onComplete(success: Boolean): Unit = ()
+    )
 
   val banner = div(cls := "container-fluid")(
     div(cls := "row pt-3 pb-2 ml-5 mr-5")(
@@ -66,7 +70,11 @@ object JsMain:
               HandleEventAction.enqueue(appEvent)
               nextEventId += 1
             else
-              val action = TarckMissingEventsAction(nextEventId, appEvent.eventId, appEvent)
+              val action = TarckMissingEventsAction(
+                nextEventId,
+                appEvent.eventId,
+                appEvent
+              )
               QueueRunner.enqueue(action)
               nextEventId = appEvent.eventId + 1
           case Left(ex) => System.err.println(ex.toString())

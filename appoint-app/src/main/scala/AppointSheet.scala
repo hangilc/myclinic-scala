@@ -20,20 +20,19 @@ import org.scalajs.dom.raw.MouseEvent
 object AppointSheet:
   val eles = div(TopMenu.ele, AppointRow.ele)
   var dateRange: Option[(LocalDate, LocalDate)] = None
-  val listener: GlobalEventListener = GlobalEventDispatcher.createListener({
-    case AppointUpdated(app) => AppointRow.respondToUpdatedEvent(app)
-    case _                   =>
-  })
-  listener.enable()
+  val listener: EventListener = new EventListener {
+    def handleEvent(event: ModelEvent): Unit =
+      event match
+        case AppointUpdated(app) => AppointRow.respondToUpdatedEvent(app)
+        case _                   =>
+  }
 
   def setupDateRange(from: LocalDate, upto: LocalDate): Future[Unit] =
-    listener.suspending {
-      for
-        appoints <- Api.listAppoint(from, upto)
-        _ = AppointRow.init(appoints)
-        _ = { dateRange = Some((from, upto)) }
-      yield ()
-    }
+    for
+      appoints <- Api.listAppoint(from, upto)
+      _ = AppointRow.init(appoints)
+      _ = { dateRange = Some((from, upto)) }
+    yield ()
 
   def setupTo(wrapper: Element): Unit =
     wrapper(eles)
@@ -66,21 +65,27 @@ object AppointSheet:
     prevWeekBinding.element.onclick(() => onPrevWeek())
     nextWeekBinding.element.onclick(() => onNextWeek())
 
-    def onPrevWeek(): Future[Unit] =
+    def onPrevWeek(): Unit =
       dateRange match
         case Some((from, upto)) => {
           val fromNext = from.plusDays(-7)
           val uptoNext = upto.plusDays(-7)
-          setupDateRange(fromNext, uptoNext)
+          QueueRunner.enqueue(new QueueRunner.Action:
+            def start(): Future[Unit] = setupDateRange(fromNext, uptoNext)
+            def onComplete(success: Boolean): Unit = ()
+          )
         }
         case None => Future.successful(())
 
-    def onNextWeek(): Future[Unit] =
+    def onNextWeek(): Unit =
       dateRange match
         case Some((from, upto)) => {
           val fromNext = from.plusDays(7)
           val uptoNext = upto.plusDays(7)
-          setupDateRange(fromNext, uptoNext)
+          QueueRunner.enqueue(new QueueRunner.Action:
+            def start(): Future[Unit] = setupDateRange(fromNext, uptoNext)
+            def onComplete(success: Boolean): Unit = ()
+          )
         }
         case None => Future.successful(())
 
@@ -107,7 +112,6 @@ object AppointSheet:
 
     def respondToUpdatedEvent(updated: Appoint): Unit =
       columns.foreach(_.respondToUpdatedEvent(updated))
-
 
   case class AppointColumn(appointDate: AppointDate):
 
@@ -145,23 +149,21 @@ object AppointSheet:
         col.replaceSlotBy(this, newSlot)
 
     def detail: String =
-      if appoint.patientName.isEmpty then
-        "（空）"
-      else
-        appoint.patientName
+      if appoint.patientName.isEmpty then "（空）"
+      else appoint.patientName
 
     def onEleClick(): Unit =
-      if appoint.isVacant then
-        openMakeAppointDialog()
-      else
-        openCancelAppointDialog()
+      if appoint.isVacant then openMakeAppointDialog()
+      else openCancelAppointDialog()
 
     def openMakeAppointDialog(): Unit =
       MakeAppointDialog.open(
         appoint,
         name => {
           Api
-            .registerAppoint(Appoint(appoint.date, appoint.time, 0, name, 0, ""))
+            .registerAppoint(
+              Appoint(appoint.date, appoint.time, 0, name, 0, "")
+            )
             .onComplete[Unit](_ match {
               case Success(_)         => println("Success")
               case Failure(exception) => println(("failure", exception))
