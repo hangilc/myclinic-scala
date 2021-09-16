@@ -19,7 +19,6 @@ import io.circe._
 import io.circe.syntax._
 import io.circe.parser.decode
 import dev.myclinic.scala.modeljson.Implicits.{given}
-import dev.myclinic.scala.web.appoint.Events.EventListener
 
 object JsMain:
   def main(args: Array[String]): Unit =
@@ -48,6 +47,9 @@ object JsMain:
   )
 
   val eventListeners = js.Array[EventListener]()
+
+  def addEventListener(listener: EventListener): Unit =
+    eventListeners.push(listener)
 
   def openWebSocket(): Future[Unit] =
     def f(startEventId: Int): Unit =
@@ -88,7 +90,7 @@ trait EventListener:
 
 case class HandleEventAction(listener: EventListener, event: Events.ModelEvent)
     extends QueueRunner.Action:
-  def start(): Future[Unit] = ???
+  def start(): Future[Unit] = Future.successful(listener.handleEvent(event))
   def onComplete(result: Boolean): Unit = ()
 
 object HandleEventAction:

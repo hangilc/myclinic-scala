@@ -19,22 +19,22 @@ trait DateTime:
   val sqlDateTimeFormatter: DateTimeFormatter =
     DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss")
 
-  given Encoder[LocalDate] = Encoder.encodeString.contramap(_.toString())
+  implicit val dateEncoder: Encoder[LocalDate] = Encoder.encodeString.contramap(_.toString())
 
-  given Decoder[LocalDate] = Decoder.decodeString.emapTry(str =>
+  implicit val dateDecoder: Decoder[LocalDate] = Decoder.decodeString.emapTry(str =>
     Try(LocalDate.parse(str, sqlDateFormatter))
   )
 
-  given Encoder[LocalTime] =
+  implicit val timeEncoder: Encoder[LocalTime] =
     Encoder.encodeString.contramap(_.format(sqlTimeFormatter))
 
-  given Decoder[LocalTime] = Decoder.decodeString.emapTry(str =>
+  implicit val timeDecoder: Decoder[LocalTime] = Decoder.decodeString.emapTry(str =>
     Try(LocalTime.parse(str, sqlTimeFormatter))
   )
 
-  given Encoder[LocalDateTime] =
+  implicit val dateTimeEncoder: Encoder[LocalDateTime] =
     Encoder.encodeString.contramap(_.format(sqlDateTimeFormatter))
 
-  given Decoder[LocalDateTime] = Decoder.decodeString.emapTry(str =>
-    Try(LocalDateTime.parse(str, sqlTimeFormatter))
+  implicit val dateTimeDecoder: Decoder[LocalDateTime] = Decoder.decodeString.emapTry(str =>
+    Try(LocalDateTime.parse(str, sqlDateTimeFormatter))
   )

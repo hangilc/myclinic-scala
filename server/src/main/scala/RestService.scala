@@ -67,7 +67,6 @@ object RestService:
           time
         ) +& nameString(name) => {
       val op = for
-        appoint <- req.as[Appoint]
         appEvent <- Db.cancelAppoint(date, time, name)
         _ <- topic.publish1(Text(appEvent.asJson.toString()))
       yield "ok".asJson

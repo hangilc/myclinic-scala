@@ -6,9 +6,9 @@ import dev.myclinic.scala.model._
 
 object Implicits extends DateTime {
 
-  given Encoder[Appoint] = deriveEncoder[Appoint]
-  given Decoder[Appoint] = deriveDecoder[Appoint]
-  given Encoder[AppEvent] = deriveEncoder[AppEvent]
-  given Decoder[AppEvent] = deriveDecoder[AppEvent]
+  implicit val appointEncoder: Encoder[Appoint] = deriveEncoder[Appoint]
+  implicit val appointDecoder: Decoder[Appoint] = deriveDecoder[Appoint]
+  implicit val appEventEncoder: Encoder[AppEvent] = deriveEncoder[AppEvent]
+  implicit val appEventDecoder: Decoder[AppEvent] = deriveDecoder[AppEvent]
 
 }

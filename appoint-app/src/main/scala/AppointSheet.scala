@@ -11,9 +11,10 @@ import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Failure
 import scala.util.Success
-import dev.myclinic.scala.web.appoint.Events._
 import scala.concurrent.Future
 import dev.myclinic.scala.webclient.Api
+import dev.myclinic.scala.web.appoint.Events.ModelEvent
+import dev.myclinic.scala.web.appoint.Events.AppointUpdated
 import scala.language.implicitConversions
 import org.scalajs.dom.raw.MouseEvent
 
@@ -26,6 +27,7 @@ object AppointSheet:
         case AppointUpdated(app) => AppointRow.respondToUpdatedEvent(app)
         case _                   =>
   }
+  JsMain.addEventListener(listener)
 
   def setupDateRange(from: LocalDate, upto: LocalDate): Future[Unit] =
     for
