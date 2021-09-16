@@ -7,7 +7,7 @@ import scala.language.implicitConversions
 
 case class Modifier(modifier: Element => Unit)
 
-object Modifier {
+object Modifier:
 
   given toTextModifier: scala.Conversion[String, Modifier] = data =>
     Modifier(e => {
@@ -38,25 +38,22 @@ object Modifier {
     target.appendChild(document.createTextNode(decoded))
   })
 
-}
 
-object Modifiers {
+object Modifiers:
 
-  case class Creator[A](f: (Element, A) => Unit) {
+  case class Creator[A](f: (Element, A) => Unit):
     def :=(arg: A) = Modifier(e => f(e, arg))
-  }
 
-  case class ClsModifier(){
+  case class ClsModifier():
     def :=(arg: String) = Modifier(e => {
-      for (c <- arg.split("\\s+"))
+      for c <- arg.split("\\s+") do
         e.classList.add(c)
     })
 
     def :-(arg: String) = Modifier(e => {
-      for (c <- arg.split("\\s+"))
+      for c <- arg.split("\\s+") do
         e.classList.remove(c)
     })
-  }
 
   val cls = ClsModifier()
 
@@ -69,11 +66,11 @@ object Modifiers {
   val style = attr("style")
 
   val href = Creator[String]((e, a) => {
-    val value = if (a.isEmpty) "javascript:void(0)" else a
+    val value = if a.isEmpty then "javascript:void(0)" else a
     e.setAttribute("href", value)
   })
 
-  object onclick {
+  object onclick:
     def :=(f: MouseEvent => Unit) = Modifier(e => {
       e.addEventListener("click", f)
     })
@@ -81,5 +78,3 @@ object Modifiers {
     def :=(f: () => Unit) = Modifier(e => {
       e.addEventListener("click", (_: MouseEvent) => f())
     })
-  }
-}

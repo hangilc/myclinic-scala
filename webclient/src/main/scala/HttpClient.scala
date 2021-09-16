@@ -8,49 +8,41 @@ import io.circe._
 import io.circe.syntax._
 import io.circe.parser.decode
 
-object Ajax {
+object Ajax:
 
   def request[T](
       method: String,
       url: String,
       params: Params,
       body: String
-  )(using Decoder[T]): Future[T] = {
-    val urlWithQuery = if( params.isEmpty ){
+  )(using Decoder[T]): Future[T] =
+    val urlWithQuery = if  params.isEmpty  then
       url
-    } else {
+    else
       url + "?" + params.encode()
-    }
     val promise = Promise[T]
     val xhr = new XMLHttpRequest()
     xhr.onreadystatechange = (_: Event) => {
-      if (xhr.readyState == XMLHttpRequest.DONE) {
+      if xhr.readyState == XMLHttpRequest.DONE then
         val status = xhr.status
-        if (status == 200) {
+        if status == 200 then
           val src = xhr.responseText
-          decode[T](src) match {
+          decode[T](src) match
             case Right(value) => promise.success(value)
             case Left(ex)     => promise.failure(ex)
-          }
-        } else if( status == 400 ){
-          if( xhr.getResponseHeader("X-User-Error") == "true" ){
-            val message: String = decode[String](xhr.responseText) match {
+        else if  status == 400  then
+          if  xhr.getResponseHeader("X-User-Error") == "true"  then
+            val message: String = decode[String](xhr.responseText) match
               case Right(m) => m
               case Left(e) => xhr.responseText
-            }
             promise.failure(UserError(message))
-          } else {
+          else
             promise.failure(new RuntimeException(xhr.response.toString()))
-          }
-        } else {
+        else
           System.err.println(xhr.responseText)
           promise.failure(new RuntimeException(xhr.responseText))
-        }
-      }
     }
     xhr.open(method, urlWithQuery)
     xhr.send()
     promise.future
-  }
 
-}

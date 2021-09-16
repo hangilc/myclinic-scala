@@ -3,17 +3,13 @@ package dev.myclinic.scala.db
 import cats.implicits._
 import doobie._
 
-object Helper {
+object Helper:
 
-  def confirm(b: Boolean, msg: => String): ConnectionIO[Unit] = {
-    if( !b ){
+  def confirm(b: Boolean, msg: => String): ConnectionIO[Unit] =
+    if  !b  then
       throw new RuntimeException(msg)
-    }
     ().pure[ConnectionIO]
-  }
 
-  def confirmUpdate(err: => String): Int => ConnectionIO[Unit] = {
+  def confirmUpdate(err: => String): Int => ConnectionIO[Unit] =
     affected => confirm(affected == 1, err)
-  }
 
-}

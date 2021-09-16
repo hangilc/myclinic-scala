@@ -9,7 +9,7 @@ import dev.myclinic.scala.modeljson.Implicits.{given}
 import dev.myclinic.scala.webclient.ParamsImplicits.{given}
 import scala.language.implicitConversions
 
-object Api {
+object Api:
   def url(service: String): String = s"/api/${service}"
 
   def get[T](service: String, params: Params)(using
@@ -48,4 +48,3 @@ object Api {
   def listAppEventInRange(fromEventId: Int, uptoEventId: Int): Future[List[AppEvent]] =
     get("list-app-event-in-range", Params("from" -> fromEventId, "upto" -> uptoEventId))
 
-}

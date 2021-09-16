@@ -12,39 +12,35 @@ import org.scalajs.dom.raw.HTMLCollection
 
 @js.native
 @JSGlobal
-abstract class DocumentFragment extends Node with NodeSelector {
+abstract class DocumentFragment extends Node with NodeSelector:
 
   val childElementCount: Int = js.native
   val firstElementChild: Element = js.native
   val children: HTMLCollection = js.native
-}
 
 @js.native
 @JSGlobal
-abstract class HTMLTemplateElement extends HTMLElement {
+abstract class HTMLTemplateElement extends HTMLElement:
 
   val content: DocumentFragment = js.native
 
-}
 
 object Template {
 
-  def createElement(html: String): Element = {
+  def createElement(html: String): Element =
     val tmpl =
       document.createElement("template").asInstanceOf[HTMLTemplateElement]
     tmpl.innerHTML = html.trim()
     tmpl.content.firstElementChild
-  }
 
-  def createElements(html: String): List[Element] = {
+  def createElements(html: String): List[Element] =
     val tmpl =
       document.createElement("template").asInstanceOf[HTMLTemplateElement]
     tmpl.innerHTML = html.trim()
     val children = tmpl.content.children
     val buf = ListBuffer[Element]()
-    for(i <- 0 until children.length)
+    for i <- 0 until children.length do
       buf += children.item(i)
     buf.toList
-  }
 
 }

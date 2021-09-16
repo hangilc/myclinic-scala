@@ -16,16 +16,14 @@ import org.http4s.websocket.WebSocketFrame
 import org.http4s.websocket.WebSocketFrame.Text
 
 import scala.concurrent.ExecutionContext.Implicits.global
-object Main extends IOApp {
+object Main extends IOApp:
 
-  object AppEventBroadcaster {
+  object AppEventBroadcaster:
     def broadcast(
         topic: Topic[IO, WebSocketFrame],
         text: String
-    ): IO[Unit] = {
+    ): IO[Unit] =
       topic.publish1(Text(text)) >> IO.pure(())
-    }
-  }
 
   def ws(topic: Topic[IO, WebSocketFrame]) = HttpRoutes.of[IO] {
     case GET -> Root / "events" =>
@@ -46,7 +44,7 @@ object Main extends IOApp {
 
   val staticService = fileService[IO](FileService.Config("./web", "/"))
 
-  def buildServer(topic: Topic[IO, WebSocketFrame]) = {
+  def buildServer(topic: Topic[IO, WebSocketFrame]) =
     given Topic[IO, WebSocketFrame] = topic
     BlazeServerBuilder[IO](global)
       .withSocketReuseAddress(true)
@@ -64,13 +62,10 @@ object Main extends IOApp {
       .resource
       .use(_ => IO.never)
       .as(ExitCode.Success)
-  }
 
-  override def run(args: List[String]): IO[ExitCode] = {
-    for {
+  override def run(args: List[String]): IO[ExitCode] =
+    for
       topic <- Topic[IO, WebSocketFrame]
       exitCode <- buildServer(topic)
-    } yield exitCode
-  }
+    yield exitCode
 
-}

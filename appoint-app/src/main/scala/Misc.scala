@@ -7,19 +7,16 @@ import dev.myclinic.scala.model.Appoint
 
 object Misc {
 
-  def formatAppointDate(d: LocalDate): String = {
+  def formatAppointDate(d: LocalDate): String =
     val youbi = KanjiDate.youbi(d)
     s"${d.getMonthValue()}月${d.getDayOfMonth()}日（$youbi）"
-  }
 
-  def formatAppointTime(t: LocalTime): String = {
+  def formatAppointTime(t: LocalTime): String =
     f"${t.getHour()}%02d:${t.getMinute()}%02d"
-  }
 
-  def formatAppointDateTime(a: Appoint): String = {
+  def formatAppointDateTime(a: Appoint): String =
     val d = formatAppointDate(a.date)
     val t = formatAppointTime(a.time)
     d + t
-  }
 
 }

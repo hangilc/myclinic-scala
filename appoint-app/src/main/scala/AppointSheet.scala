@@ -17,7 +17,7 @@ import dev.myclinic.scala.webclient.Api
 import scala.language.implicitConversions
 import org.scalajs.dom.raw.MouseEvent
 
-object AppointSheet {
+object AppointSheet:
   val eles = div(TopMenu.ele, AppointRow.ele)
   var dateRange: Option[(LocalDate, LocalDate)] = None
   val listener: GlobalEventListener = GlobalEventDispatcher.createListener({
@@ -26,31 +26,27 @@ object AppointSheet {
   })
   listener.enable()
 
-  def setupDateRange(from: LocalDate, upto: LocalDate): Future[Unit] = {
+  def setupDateRange(from: LocalDate, upto: LocalDate): Future[Unit] =
     listener.suspending {
-      for {
+      for
         appoints <- Api.listAppoint(from, upto)
         _ = AppointRow.init(appoints)
         _ = { dateRange = Some((from, upto)) }
-      } yield ()
+      yield ()
     }
-  }
 
-  def setupTo(wrapper: Element): Unit = {
+  def setupTo(wrapper: Element): Unit =
     wrapper(eles)
-  }
 
   case class AppointDate(date: LocalDate, appoints: List[Appoint])
 
-  object AppointDate {
-    def classify(appList: List[Appoint]): List[AppointDate] = {
+  object AppointDate:
+    def classify(appList: List[Appoint]): List[AppointDate] =
       val map = appList.groupBy(_.date)
-      val result = for (k <- map.keys) yield AppointDate(k, map(k))
+      val result = for k <- map.keys yield AppointDate(k, map(k))
       result.toList.sortBy(_.date)
-    }
-  }
 
-  object TopMenu {
+  object TopMenu:
     val prevWeekBinding, nextWeekBinding = ElementBinding()
     val ele = div(
       button(
@@ -70,30 +66,25 @@ object AppointSheet {
     prevWeekBinding.element.onclick(() => onPrevWeek())
     nextWeekBinding.element.onclick(() => onNextWeek())
 
-    def onPrevWeek(): Future[Unit] = {
-      dateRange match {
+    def onPrevWeek(): Future[Unit] =
+      dateRange match
         case Some((from, upto)) => {
           val fromNext = from.plusDays(-7)
           val uptoNext = upto.plusDays(-7)
           setupDateRange(fromNext, uptoNext)
         }
         case None => Future.successful(())
-      }
-    }
 
-    def onNextWeek(): Future[Unit] = {
-      dateRange match {
+    def onNextWeek(): Future[Unit] =
+      dateRange match
         case Some((from, upto)) => {
           val fromNext = from.plusDays(7)
           val uptoNext = upto.plusDays(7)
           setupDateRange(fromNext, uptoNext)
         }
         case None => Future.successful(())
-      }
-    }
-  }
 
-  object AppointRow {
+  object AppointRow:
 
     var rowBinding = ElementBinding()
     var columns: List[AppointColumn] = List()
@@ -102,28 +93,23 @@ object AppointSheet {
       div(cls := "row mx-0", bindTo(rowBinding))
     )
 
-    def init(appoints: List[Appoint]): Unit = {
+    def init(appoints: List[Appoint]): Unit =
       clear()
       val appointDates = AppointDate.classify(appoints)
       columns = appointDates.map(AppointColumn(_)).toList
       columns.foreach(addElement _)
-    }
 
-    def clear(): Unit = {
+    def clear(): Unit =
       rowBinding.element.clear()
-    }
 
-    def addElement(col: AppointColumn): Unit = {
+    def addElement(col: AppointColumn): Unit =
       rowBinding.element(col.ele)
-    }
 
-    def respondToUpdatedEvent(updated: Appoint): Unit = {
+    def respondToUpdatedEvent(updated: Appoint): Unit =
       columns.foreach(_.respondToUpdatedEvent(updated))
-    }
 
-  }
 
-  case class AppointColumn(appointDate: AppointDate) {
+  case class AppointColumn(appointDate: AppointDate):
 
     val date = appointDate.date
     var slotsBinding = ElementBinding()
@@ -134,53 +120,43 @@ object AppointSheet {
     var slots: Array[SlotRow] =
       appointDate.appoints.map(app => SlotRow(app, this)).toArray
 
-    def respondToUpdatedEvent(updated: Appoint): Unit = {
+    def respondToUpdatedEvent(updated: Appoint): Unit =
       slots.foreach(_.respondToUpdatedEvent(updated))
-    }
 
     def dateRep: String = Misc.formatAppointDate(date)
     slots.foreach(s => slotsBinding.element(s.ele))
 
-    def replaceSlotBy(prev: SlotRow, slot: SlotRow): Unit = {
+    def replaceSlotBy(prev: SlotRow, slot: SlotRow): Unit =
       val index = slots.indexOf(prev)
-      if (index >= 0) {
+      if index >= 0 then
         slots(index) = slot
         prev.ele.replaceBy(slot.ele)
-      }
-    }
-  }
 
-  case class SlotRow(appoint: Appoint, col: AppointColumn) {
+  case class SlotRow(appoint: Appoint, col: AppointColumn):
 
     val ele = div(style := "cursor: pointer", onclick := (onEleClick _))(
       div(Misc.formatAppointTime(appoint.time)),
       div(detail)
     )
 
-    def respondToUpdatedEvent(updated: Appoint): Unit = {
-      if (appoint.requireUpdate(updated)) {
+    def respondToUpdatedEvent(updated: Appoint): Unit =
+      if appoint.requireUpdate(updated) then
         val newSlot = SlotRow(updated, col)
         col.replaceSlotBy(this, newSlot)
-      }
-    }
 
-    def detail: String = {
-      if (appoint.patientName.isEmpty) {
+    def detail: String =
+      if appoint.patientName.isEmpty then
         "（空）"
-      } else {
+      else
         appoint.patientName
-      }
-    }
 
-    def onEleClick(): Unit = {
-      if (appoint.isVacant) {
+    def onEleClick(): Unit =
+      if appoint.isVacant then
         openMakeAppointDialog()
-      } else {
+      else
         openCancelAppointDialog()
-      }
-    }
 
-    def openMakeAppointDialog(): Unit = {
+    def openMakeAppointDialog(): Unit =
       MakeAppointDialog.open(
         appoint,
         name => {
@@ -192,10 +168,6 @@ object AppointSheet {
             })
         }
       )
-    }
 
-    def openCancelAppointDialog(): Unit = {
+    def openCancelAppointDialog(): Unit =
       CancelAppointDialog.open(appoint)
-    }
-  }
-}

@@ -4,19 +4,16 @@ import org.scalajs.dom.document
 
 object Html {
 
-  case class Tag(tag: String) {
-    def apply(modifiers: Modifier*): ElementQ = {
+  case class Tag(tag: String):
+    def apply(modifiers: Modifier*): ElementQ =
       val e = document.createElement(tag)
       val ex = ElementQ(e)
       ex.apply(modifiers: _*)
-    }
-  }
 
-  def tag(tag: String)(modifiers: Modifier*): ElementQ = {
+  def tag(tag: String)(modifiers: Modifier*): ElementQ =
     val e = document.createElement(tag)
     val ex = ElementQ(e)
     ex.apply(modifiers: _*)
-  }
 
   val div = Tag("div")
   val h1 = Tag("h1")

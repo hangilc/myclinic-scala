@@ -9,18 +9,16 @@ import doobie.implicits._
 import java.time.LocalDate
 import java.time.LocalTime
 
-trait DbAppoint extends Sqlite {
-  def getAppoint(date: LocalDate, time: LocalTime): IO[Appoint] = {
+trait DbAppoint extends Sqlite:
+  def getAppoint(date: LocalDate, time: LocalTime): IO[Appoint] =
     sqlite(DbAppointPrim.getAppoint(date, time).unique)
-  }
 
-  def listAppoint(from: LocalDate, upto: LocalDate): IO[List[Appoint]] = {
+  def listAppoint(from: LocalDate, upto: LocalDate): IO[List[Appoint]] =
     sqlite(DbAppointPrim.listAppoint(from, upto).to[List])
-  }
 
   def createAppointTimes(
       times: List[(LocalDate, LocalTime)]
-  ): IO[List[AppEvent]] = {
+  ): IO[List[AppEvent]] =
     def seq(eventId: Int): ConnectionIO[List[AppEvent]] =
       times
         .map({ (d: LocalDate, t: LocalTime) =>
@@ -33,45 +31,42 @@ trait DbAppoint extends Sqlite {
         .sequence
 
     sqlite(DbEventPrim.withEventId(seq _))
-  }
 
   def createAppointTimes(
     year: Int, month: Int, day: Int,
     slots: (Int, Int)*
-  ): IO[List[AppEvent]] = {
+  ): IO[List[AppEvent]] =
     val date = LocalDate.of(year, month, day)
-    val times = for{
+    val times = for
       ((h: Int, m: Int)) <- slots
-    } yield (date, LocalTime.of(h, m, 0))
+    yield (date, LocalTime.of(h, m, 0))
     createAppointTimes(times.toList)
-  }
 
-  def registerAppoint(a: Appoint): IO[AppEvent] = {
+  def registerAppoint(a: Appoint): IO[AppEvent] =
     require(!a.patientName.isEmpty)
 
     sqlite(
       DbEventPrim.withEventId(eventId =>
-        for {
+        for
           cur <- DbAppointPrim.getAppoint(a.date, a.time).unique
           _ <- Helper.confirm(cur.isVacant, s"Appoint is not vacant: ${cur}")
           to = a.copy(eventId = eventId)
           _ <- DbAppointPrim.updateAppoint(to)
           appEvent <- AppEventHelper.enterAppointEvent(eventId, "updated", to)
-        } yield appEvent
+        yield appEvent
       )
     )
-  }
 
   def cancelAppoint(
       date: LocalDate,
       time: LocalTime,
       patientName: String
-  ): IO[AppEvent] = {
+  ): IO[AppEvent] =
     require(!patientName.isEmpty)
 
     sqlite(
       DbEventPrim.withEventId(eventId =>
-        for {
+        for
           cur <- DbAppointPrim.getAppoint(date, time).unique
           _ <- Helper.confirm(!cur.isVacant, s"Appoint is vacant: ${cur}")
           _ <- Helper.confirm(
@@ -81,9 +76,7 @@ trait DbAppoint extends Sqlite {
           to = Appoint(date, time, eventId, "", 0, "")
           _ <- DbAppointPrim.updateAppoint(to)
           appEvent <- AppEventHelper.enterAppointEvent(eventId, "updated", to)
-        } yield appEvent
+        yield appEvent
       )
     )
-  }
 
-}

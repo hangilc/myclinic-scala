@@ -8,31 +8,25 @@ import org.scalajs.dom.raw.HTMLElement
 import org.scalajs.dom.raw.HTMLInputElement
 import scala.concurrent.Future
 
-case class ElementQ(ele: Element) {
+case class ElementQ(ele: Element):
 
-  def apply(modifiers: Modifier*): ElementQ = {
+  def apply(modifiers: Modifier*): ElementQ =
     modifiers.foreach(_.modifier(ele))
     this
-  }
 
-  def onclick(handler: MouseEvent => _): Element = {
+  def onclick(handler: MouseEvent => _): Element =
     ele.addEventListener("click", handler)
     ele
-  }
 
-  def onclick(handler: () => _): Element = {
+  def onclick(handler: () => _): Element =
     onclick((_: MouseEvent) => handler())
-  }
 
-  def clear(): Unit = {
+  def clear(): Unit =
     ele.innerHTML = ""
-  }
 
-  def replaceBy(newElement: Element): Unit = {
+  def replaceBy(newElement: Element): Unit =
     ele.parentNode.replaceChild(newElement, ele)
-  }
 
-}
 
 object ElementQ {
   

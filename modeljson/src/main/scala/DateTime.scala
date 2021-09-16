@@ -9,7 +9,7 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import scala.util.Try
 
-trait DateTime {
+trait DateTime:
   val sqlDateFormatter: DateTimeFormatter =
     DateTimeFormatter.ofPattern("uuuu-MM-dd")
 
@@ -38,4 +38,3 @@ trait DateTime {
   given Decoder[LocalDateTime] = Decoder.decodeString.emapTry(str =>
     Try(LocalDateTime.parse(str, sqlTimeFormatter))
   )
-}

@@ -3,12 +3,11 @@ package dev.myclinic.scala.util
 import java.time.{LocalDate, LocalTime, LocalDateTime}
 import java.time.format.DateTimeFormatter
 
-object DateUtil {
+object DateUtil:
 
-  def startDayOfWeek(at: LocalDate): LocalDate = {
+  def startDayOfWeek(at: LocalDate): LocalDate =
     val n = at.getDayOfWeek().getValue() % 7
     at.minusDays(n)
-  }
 
   val sqlDateFormatter: DateTimeFormatter =
     DateTimeFormatter.ofPattern("uuuu-MM-dd")
@@ -35,4 +34,3 @@ object DateUtil {
   def dateTimeToString(dt: LocalDateTime): String =
     dt.format(sqlDateTimeFormatter)
 
-}

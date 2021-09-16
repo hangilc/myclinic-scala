@@ -9,7 +9,7 @@ import dev.myclinic.scala.webclient.Api
 import concurrent.ExecutionContext.Implicits.global
 import scala.language.implicitConversions
 
-private class CancelAppointDialogUI(appoint: Appoint) extends Dialog {
+private class CancelAppointDialogUI(appoint: Appoint) extends Dialog:
   title = "予約の取消"
   def onEnter(): Unit = ()
 
@@ -30,19 +30,15 @@ private class CancelAppointDialogUI(appoint: Appoint) extends Dialog {
       onclick := (onEnter _)
     )("予約取消実行")
   )
-}
 
-object CancelAppointDialog {
-  def open(appoint: Appoint): Unit = {
+object CancelAppointDialog:
+  def open(appoint: Appoint): Unit =
     val ui = new CancelAppointDialogUI(appoint) {
       override def onEnter(): Unit = doCancel(appoint, this)
     }
     ui.open()
-  }
 
-  def doCancel(appoint: Appoint, ui: Dialog): Unit = {
+  def doCancel(appoint: Appoint, ui: Dialog): Unit =
     Api
       .cancelAppoint(appoint.date, appoint.time, appoint.patientName)
       .onComplete[Unit](_ => ui.close())
-  }
-}

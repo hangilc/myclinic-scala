@@ -12,7 +12,7 @@ import dev.fujiwara.domq.Binding.bindTo
 import scala.language.implicitConversions
 
 class MakeAppointDialog(appoint: Appoint, handler: String => Unit)
-    extends Dialog() {
+    extends Dialog():
 
   title = "診察予約入力"
 
@@ -48,7 +48,7 @@ class MakeAppointDialog(appoint: Appoint, handler: String => Unit)
       onclick := (onOkClick _))("入力")
   )
 
-  def dateTimeRep: String = {
+  def dateTimeRep: String =
     val d = appoint.date
     val t = appoint.time
     val youbi = KanjiDate.youbi(d)
@@ -57,35 +57,27 @@ class MakeAppointDialog(appoint: Appoint, handler: String => Unit)
     val hour = t.getHour()
     val minute = t.getMinute()
     s"${m}月${day}日（$youbi）${hour}時${minute}分"
-  }
 
-  def onOkClick(): Unit = {
+  def onOkClick(): Unit =
     val name = nameInputBinding.value
     val ok: Boolean = validateName(name, errs => {
       nameErrorBinding.text = errs
       nameInputBinding.setValid(false)
     })
-    if( ok ){
+    if  ok  then
       close()
       handler(name)
-    }
-  }
 
-  def validateName(name: String, error: String => Unit): Boolean = {
-    if( name.isEmpty ){
+  def validateName(name: String, error: String => Unit): Boolean =
+    if  name.isEmpty  then
       error("患者名が入力されていません。")
       false
-    } else {
+    else
       true
-    }
-  }
 
-}
 
-object MakeAppointDialog {
-  def open(appoint: Appoint, handler: String => Unit): Unit = {
+object MakeAppointDialog:
+  def open(appoint: Appoint, handler: String => Unit): Unit =
     val dlog = new MakeAppointDialog(appoint, handler)
     dlog.open()
-  }
 
-}

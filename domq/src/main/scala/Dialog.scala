@@ -9,7 +9,7 @@ import dev.fujiwara.domq.ElementQ._
 import dev.fujiwara.domq.Binding._
 import scala.language.implicitConversions
 
-class Dialog() {
+class Dialog():
   val titleBinding = Binding.TextBinding()
   var contentBinding = Binding.ElementBinding()
   var commandBoxBinding = Binding.ElementBinding()
@@ -50,19 +50,15 @@ class Dialog() {
     }
   )
 
-  def open(): Unit = {
+  def open(): Unit =
     modal.show()
     ElementQ(document.body)(style := "hidden: auto")
-  }
 
-  def close(): Unit = {
+  def close(): Unit =
     modal.hide()
-  }
 
-}
 
-object Dialog {
+object Dialog:
 
   def closeButton: Modifier = attr("data-bs-dismiss") := "modal"
 
-}

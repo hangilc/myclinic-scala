@@ -5,64 +5,51 @@ import dev.fujiwara.domq.ElementQ.{given, *}
 import dev.fujiwara.domq.Modifiers._
 import scala.language.implicitConversions
 
-object Binding {
-  case class TextBinding() {
+object Binding:
+  case class TextBinding():
     private var ele: Element = null
 
-    def bind(e: Element): Unit = {
+    def bind(e: Element): Unit =
       ele = e
-    }
 
-    def text: String = {
+    def text: String =
       require(ele != null)
       ele.innerText
-    }
 
-    def text_=(value: String): Unit = {
+    def text_=(value: String): Unit =
       require(ele != null)
       ele.innerText = value
-    }
-  }
 
-  case class InputBinding() {
+  case class InputBinding():
     private var ele: HTMLInputElement = null
 
-    def bind(e: HTMLInputElement): Unit = {
+    def bind(e: HTMLInputElement): Unit =
       ele = e
-    }
 
-    def value: String = {
+    def value: String =
       require(ele != null)
       ele.value
-    }
 
-    def value_=(v: String): Unit = {
+    def value_=(v: String): Unit =
       require(ele != null)
       ele.value = v
-    }
 
-    def setValid(valid: Boolean): Boolean = {
-      if (valid) {
+    def setValid(valid: Boolean): Boolean =
+      if valid then
         ele(cls :- "is-invalid", cls := "is-valid")
-      } else {
+      else
         ele(cls :- "is-valid", cls := "is-invalid")
-      }
       valid
-    }
-  }
 
-  case class ElementBinding() {
+  case class ElementBinding():
     private var ele: Element = null
 
-    def bind(e: Element): Unit = {
+    def bind(e: Element): Unit =
       ele = e
-    }
 
-    def element: Element = {
+    def element: Element =
       require(ele != null)
       ele
-    }
-  }
 
   def bindTo(target: Binding.TextBinding) = Modifier(e => {
     target.bind(e)
@@ -76,4 +63,3 @@ object Binding {
     target.bind(e)
   })
 
-}

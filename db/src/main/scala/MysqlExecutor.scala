@@ -4,7 +4,7 @@ import doobie._
 import doobie.implicits._
 import cats.effect.IO
 
-object MysqlExecutor {
+object MysqlExecutor:
 
   private val user = sys.env.get("MYCLINIC_DB_USER").get
   private val pass = sys.env.get("MYCLINIC_DB_PASS").get
@@ -26,12 +26,9 @@ object MysqlExecutor {
     pass
   )
 
-  def execute[A](sql: ConnectionIO[A]): IO[A] = {
+  def execute[A](sql: ConnectionIO[A]): IO[A] =
     sql.transact(xa)
-  }
 
-}
 
-trait Mysql {
+trait Mysql:
   def mysql[A](op: ConnectionIO[A]): IO[A] = MysqlExecutor.execute(op)
-}

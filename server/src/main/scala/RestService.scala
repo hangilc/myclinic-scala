@@ -20,7 +20,7 @@ import org.http4s.websocket.WebSocketFrame
 import dev.myclinic.scala.model._
 import org.http4s.websocket.WebSocketFrame.Text
 
-object RestService {
+object RestService:
 
   given QueryParamDecoder[LocalDate] =
     QueryParamDecoder[String].map(DateUtil.stringToDate(_))
@@ -37,19 +37,17 @@ object RestService {
 
   case class UserError(message: String) extends Exception
 
-  def hello(): IO[String] = {
+  def hello(): IO[String] =
     throw new UserError("さようなら")
     "こんにちは".pure[IO]
-  }
 
   def routes(using topic: Topic[IO, WebSocketFrame]) = HttpRoutes.of[IO] {
 
     case GET -> Root / "hello" => {
       try Ok(hello())
-      catch {
+      catch
         case e: UserError => BadRequest(e.message, "X-User-Error" -> "true") 
         case e: Exception => throw e
-      }
 
     }
 
@@ -57,22 +55,22 @@ object RestService {
       Ok(Db.listAppoint(from, upto))
 
     case req @ POST -> Root / "register-appoint" => {
-      val op = for {
+      val op = for
         appoint <- req.as[Appoint]
         appEvent <- Db.registerAppoint(appoint)
         _ <- topic.publish1(Text(appEvent.asJson.toString()))
-      } yield "ok".asJson
+      yield "ok".asJson
       Ok(op)
     }
 
     case req @ POST -> Root / "cancel-appoint" :? dateDate(date) +& timeTime(
           time
         ) +& nameString(name) => {
-      val op = for {
+      val op = for
         appoint <- req.as[Appoint]
         appEvent <- Db.cancelAppoint(date, time, name)
         _ <- topic.publish1(Text(appEvent.asJson.toString()))
-      } yield "ok".asJson
+      yield "ok".asJson
       Ok(op)
     }
 
@@ -94,4 +92,3 @@ object RestService {
 
   }
 
-}

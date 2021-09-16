@@ -16,18 +16,15 @@ object Events {
   case class AppointDeleted(appoint: Appoint) extends ModelEvent
   case class Unknown(orig: AppEvent) extends ModelEvent
 
-  def convert(appEvent: AppEvent): ModelEvent = appEvent match {
+  def convert(appEvent: AppEvent): ModelEvent = appEvent match
     case AppEvent(_, _, _, "appoint", kind, encodedData) => {
-      val data = decode[Appoint](encodedData) match {
+      val data = decode[Appoint](encodedData) match
         case Right(value) => value
         case Left(ex) => throw ex
-      }
-      kind match {
+      kind match
         case "created" => AppointCreated(data)
         case "updated" => AppointUpdated(data)
         case "deleted" => AppointDeleted(data)
-      }
     }
     case _ => Unknown(appEvent)
-  }
 }

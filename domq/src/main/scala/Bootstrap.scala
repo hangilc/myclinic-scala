@@ -5,7 +5,7 @@ import scalajs.js
 import scalajs.js.annotation.JSGlobal
 import org.scalajs.dom.raw.Element
 
-object Bootstrap {
+object Bootstrap:
   val ml = Creator[Int]((e, a) => {
     e.classList.add(s"ms-$a")
   })
@@ -24,11 +24,9 @@ object Bootstrap {
 
   @js.native
   @JSGlobal("bootstrap.Modal")
-  class Modal(val ele: Element) extends js.Object {
+  class Modal(val ele: Element) extends js.Object:
     def toggle(): Unit = js.native
     def show(): Unit = js.native
     def hide(): Unit = js.native
     def dispose(): Unit = js.native
-  }
 
-}

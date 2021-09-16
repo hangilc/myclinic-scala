@@ -19,8 +19,8 @@ import io.circe.syntax._
 import io.circe.parser.decode
 import dev.myclinic.scala.modeljson.Implicits.{given}
 
-object JsMain {
-  def main(args: Array[String]): Unit = {
+object JsMain:
+  def main(args: Array[String]): Unit =
     val body = document.body
     body(cls := "px-5 pt-1 pb-5")
     body.appendChild(banner)
@@ -45,7 +45,6 @@ object JsMain {
           }
         })
     }
-  }
 
   val banner = div(cls := "container-fluid")(
     div(cls := "row pt-3 pb-2 ml-5 mr-5")(
@@ -53,8 +52,8 @@ object JsMain {
     )
   )
 
-  def openWebSocket(): Future[Unit] = {
-    def f(nextEventId: Int): Unit = {
+  def openWebSocket(): Future[Unit] =
+    def f(nextEventId: Int): Unit =
       val linear = new GlobalEventLinearizer(
         nextEventId,
         e => {
@@ -64,28 +63,23 @@ object JsMain {
       val location = dom.window.location
       val origProtocol = location.protocol
       val host = location.host
-      val protocol = origProtocol match {
+      val protocol = origProtocol match
         case "https:" => "wss:"
         case _        => "ws:"
-      }
       val url = s"${protocol}//${host}/ws/events"
       val ws = new dom.WebSocket(url)
       ws.onmessage = { (e: dom.raw.MessageEvent) =>
         {
           val src = e.data.asInstanceOf[String]
           println(("message", src))
-          val appEvent: AppEvent = decode[AppEvent](src) match {
+          val appEvent: AppEvent = decode[AppEvent](src) match
             case Right(value) => value
             case Left(ex)     => throw ex
-          }
           linear.post(appEvent)
         }
       }
-    }
 
-    for {
+    for
       nextEventId <- Api.getNextAppEventId()
-    } yield f(nextEventId)
-  }
+    yield f(nextEventId)
 
-}

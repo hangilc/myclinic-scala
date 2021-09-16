@@ -9,7 +9,7 @@ import doobie.implicits._
 import javax.sql.DataSource
 import cats.effect.IO
 
-object SqliteExecutor {
+object SqliteExecutor:
   val dbfile: String = sys.env.get("MYCLINIC_SQLITE_DB").get
   val url = s"jdbc:sqlite:${dbfile}"
 
@@ -18,19 +18,16 @@ object SqliteExecutor {
   val ds = new SQLiteDataSource(config)
   ds.setUrl(url)
 
-  def transactor(ds: DataSource) = {
-    for{
+  def transactor(ds: DataSource) =
+    for
       ce <- ExecutionContexts.fixedThreadPool[IO](32)
-    } yield Transactor.fromDataSource[IO](ds, ce)
-  }
+    yield Transactor.fromDataSource[IO](ds, ce)
 
   val xa = transactor(ds)
 
-  def execute[A](op: ConnectionIO[A]): IO[A] = {
+  def execute[A](op: ConnectionIO[A]): IO[A] =
     xa.use(tx => op.transact(tx))
-  }
 
-}
 
 trait Sqlite {
   def sqlite[A](op: ConnectionIO[A]): IO[A] = SqliteExecutor.execute(op)

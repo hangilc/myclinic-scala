@@ -9,54 +9,44 @@ import java.time.format.DateTimeFormatter
 import dev.myclinic.scala.model.Sex
 import java.time.LocalDateTime
 
-private object LocalDateMapping {
+private object LocalDateMapping:
   private val sqlDateFormatter: DateTimeFormatter =
     DateTimeFormatter.ofPattern("uuuu-MM-dd")
 
-  def fromString(s: String): LocalDate = {
+  def fromString(s: String): LocalDate =
     LocalDate.parse(s, sqlDateFormatter)
-  }
 
-  def toString(d: LocalDate): String = {
+  def toString(d: LocalDate): String =
     d.format(sqlDateFormatter)
-  }
-}
 
-private object LocalTimeMapping {
+private object LocalTimeMapping:
   private val sqlTimeFormatter: DateTimeFormatter =
     DateTimeFormatter.ofPattern("HH:mm:ss")
 
-  def fromString(s: String): LocalTime = {
+  def fromString(s: String): LocalTime =
     LocalTime.parse(s, sqlTimeFormatter)
-  }
 
-  def toString(t: LocalTime): String = {
+  def toString(t: LocalTime): String =
     t.format(sqlTimeFormatter)
-  }
-}
 
-private object LocalDateTimeMapping {
+private object LocalDateTimeMapping:
   val sqlDateTimeFormatter = DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss")
 
   def fromString(s: String): LocalDateTime = LocalDateTime.parse(s, sqlDateTimeFormatter)
   def toString(dt: LocalDateTime): String = dt.format(sqlDateTimeFormatter)
 
-}
 
-private object SexMapping {
-  def fromString(s: String): Sex = s match {
+private object SexMapping:
+  def fromString(s: String): Sex = s match
     case "M" => Sex.Male
     case "F" => Sex.Female
     case _ => throw new RuntimeException("Unknown sex: " + s)
-  }
 
-  def toString(s: Sex): String = s match {
+  def toString(s: Sex): String = s match
     case Sex.Male => "M"
     case Sex.Female => "F"
-  }
-}
 
-object DoobieMapping {
+object DoobieMapping:
   implicit val localDateGet: Get[LocalDate] =
     Get[String].map(LocalDateMapping.fromString _)
 
@@ -77,4 +67,3 @@ object DoobieMapping {
 
   implicit val sexGet: Get[Sex] = Get[String].map(SexMapping.fromString _)
   implicit val sexSet: Put[Sex] = Put[String].tcontramap(SexMapping.toString _)
-}

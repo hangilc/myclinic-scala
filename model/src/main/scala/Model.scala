@@ -11,17 +11,14 @@ case class Appoint(
   patientName: String,
   patientId: Int,
   memo: String
-) {
+):
   def isVacant: Boolean = patientName.isEmpty
 
-  def sameDateTime(that: Appoint): Boolean = {
+  def sameDateTime(that: Appoint): Boolean =
     date == that.date && time == that.time
-  }
 
-  def requireUpdate(newAppoint: Appoint): Boolean = {
+  def requireUpdate(newAppoint: Appoint): Boolean =
     sameDateTime(newAppoint) && eventId < newAppoint.eventId
-  }
-}
 
 case class AppEvent(
   id: Int,
