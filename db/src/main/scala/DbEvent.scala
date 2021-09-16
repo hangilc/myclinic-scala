@@ -14,7 +14,7 @@ trait DbEvent extends Sqlite {
   def listGlobalEventSince(eventId: Int): IO[List[AppEvent]] =
     sqlite(DbEventPrim.listGlobalEventSince(eventId).to[List])
 
-  def listGlobalEventInRange(fromEventId: Int, uptoEventId: Int): IO[List[AppEvent]] =
-    sqlite(DbEventPrim.listGlobalEventInRange(fromEventId, uptoEventId).to[List])
+  def listGlobalEventInRange(fromEventId: Int, untilEventId: Int): IO[List[AppEvent]] =
+    sqlite(DbEventPrim.listGlobalEventInRange(fromEventId, untilEventId).to[List])
 
 }

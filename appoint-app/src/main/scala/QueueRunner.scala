@@ -50,3 +50,8 @@ class QueueRunner():
     catch
       case ex: Throwable => onError(ex)
   }
+
+object QueueRunner extends QueueRunner
+
+
+

@@ -45,6 +45,6 @@ object Api:
   def listAppEventSince(fromEventId: Int): Future[List[AppEvent]] =
     get("list-app-event-since", Params("from" -> fromEventId))
 
-  def listAppEventInRange(fromEventId: Int, uptoEventId: Int): Future[List[AppEvent]] =
-    get("list-app-event-in-range", Params("from" -> fromEventId, "upto" -> uptoEventId))
+  def listAppEventInRange(fromEventId: Int, untilEventId: Int): Future[List[AppEvent]] =
+    get("list-app-event-in-range", Params("from" -> fromEventId, "upto" -> untilEventId))
 

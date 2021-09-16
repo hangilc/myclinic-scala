@@ -16,6 +16,9 @@ object Events {
   case class AppointDeleted(appoint: Appoint) extends ModelEvent
   case class Unknown(orig: AppEvent) extends ModelEvent
 
+  trait EventListener:
+    def handleEvent(event: ModelEvent): Unit
+
   def convert(appEvent: AppEvent): ModelEvent = appEvent match
     case AppEvent(_, _, _, "appoint", kind, encodedData) => {
       val data = decode[Appoint](encodedData) match

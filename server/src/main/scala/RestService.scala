@@ -33,7 +33,7 @@ object RestService:
   object timeTime extends QueryParamDecoderMatcher[LocalTime]("time")
   object nameString extends QueryParamDecoderMatcher[String]("name")
   object intFrom extends QueryParamDecoderMatcher[Int]("from")
-  object intUpto extends QueryParamDecoderMatcher[Int]("upto")
+  object intUntil extends QueryParamDecoderMatcher[Int]("until")
 
   case class UserError(message: String) extends Exception
 
@@ -86,8 +86,8 @@ object RestService:
       Ok(Db.listGlobalEventSince(from))
     }
 
-    case GET -> Root / "list-app-event-in-range" :? intFrom(from) +& intUpto(upto) => {
-      Ok(Db.listGlobalEventInRange(from, upto))
+    case GET -> Root / "list-app-event-in-range" :? intFrom(from) +& intUntil(until) => {
+      Ok(Db.listGlobalEventInRange(from, until))
     }
 
   }

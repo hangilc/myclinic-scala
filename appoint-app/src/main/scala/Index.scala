@@ -10,6 +10,7 @@ import org.scalajs.dom.document
 import java.time.LocalDate
 import concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.scalajs.js
 import scala.util.Success
 import scala.util.Failure
 import dev.myclinic.scala.webclient.{Api, UserError}
@@ -18,13 +19,17 @@ import io.circe._
 import io.circe.syntax._
 import io.circe.parser.decode
 import dev.myclinic.scala.modeljson.Implicits.{given}
+import dev.myclinic.scala.web.appoint.Events.EventListener
 
 object JsMain:
   def main(args: Array[String]): Unit =
     val body = document.body
     body(cls := "px-5 pt-1 pb-5")
     body.appendChild(banner)
-    openWebSocket()
+    QueueRunner.enqueue(new QueueRunner.Action {
+      def start(): Future[Unit] = openWebSocket()
+      def onComplete(success: Boolean): Unit = ()
+    })
     val workarea = div()
     body.appendChild(workarea)
     val startDate = DateUtil.startDayOfWeek(LocalDate.now())
@@ -32,34 +37,17 @@ object JsMain:
     AppointSheet.setupDateRange(startDate, endDate)
     AppointSheet.setupTo(workarea)
 
-    {
-      Api
-        .hello()
-        .onComplete(result => {
-          result match {
-            case Success(x) => println(s"success: $x")
-            case Failure(e) => e match {
-              case ex: UserError => println(ex.message)
-              case _: Throwable => println(e)
-            }
-          }
-        })
-    }
-
   val banner = div(cls := "container-fluid")(
     div(cls := "row pt-3 pb-2 ml-5 mr-5")(
       h1(cls := "bg-dark text-white p-3 col-md-12")("診察予約")
     )
   )
 
+  val eventListeners = js.Array[EventListener]()
+
   def openWebSocket(): Future[Unit] =
-    def f(nextEventId: Int): Unit =
-      val linear = new GlobalEventLinearizer(
-        nextEventId,
-        e => {
-          GlobalEventDispatcher.dispatch(e)
-        }
-      )
+    def f(startEventId: Int): Unit =
+      var nextEventId = startEventId
       val location = dom.window.location
       val origProtocol = location.protocol
       val host = location.host
@@ -69,17 +57,47 @@ object JsMain:
       val url = s"${protocol}//${host}/ws/events"
       val ws = new dom.WebSocket(url)
       ws.onmessage = { (e: dom.raw.MessageEvent) =>
-        {
-          val src = e.data.asInstanceOf[String]
-          println(("message", src))
-          val appEvent: AppEvent = decode[AppEvent](src) match
-            case Right(value) => value
-            case Left(ex)     => throw ex
-          linear.post(appEvent)
-        }
+        val src = e.data.asInstanceOf[String]
+        println(("message", src))
+        decode[AppEvent](src) match
+          case Right(appEvent) =>
+            val modelEvent = Events.convert(appEvent)
+            if appEvent.eventId == nextEventId then
+              HandleEventAction.enqueue(appEvent)
+              nextEventId += 1
+            else
+              val action = TarckMissingEventsAction(nextEventId, appEvent.eventId, appEvent)
+              QueueRunner.enqueue(action)
+              nextEventId = appEvent.eventId + 1
+          case Left(ex) => System.err.println(ex.toString())
       }
 
-    for
-      nextEventId <- Api.getNextAppEventId()
+    for nextEventId <- Api.getNextAppEventId()
     yield f(nextEventId)
 
+trait EventListener:
+  def handleEvent(event: Events.ModelEvent): Unit
+
+case class HandleEventAction(listener: EventListener, event: Events.ModelEvent)
+    extends QueueRunner.Action:
+  def start(): Future[Unit] = ???
+  def onComplete(result: Boolean): Unit = ()
+
+object HandleEventAction:
+  def enqueue(appEvent: AppEvent): Unit =
+    val modelEvent = Events.convert(appEvent)
+    val actions = JsMain.eventListeners.map(HandleEventAction(_, modelEvent))
+    actions.foreach(QueueRunner.enqueue(_))
+
+case class TarckMissingEventsAction(
+    startEventId: Int,
+    untilEventId: Int,
+    following: AppEvent
+) extends QueueRunner.Action:
+  def start(): Future[Unit] =
+    for events <- Api.listAppEventInRange(startEventId, untilEventId)
+    yield
+      events.foreach(HandleEventAction.enqueue(_))
+      HandleEventAction.enqueue(following)
+
+  def onComplete(result: Boolean): Unit = ()

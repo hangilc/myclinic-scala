@@ -43,9 +43,9 @@ object DbEventPrim:
     """"
     sql.query[AppEvent]
 
-  def listGlobalEventInRange(fromEventId: Int, uptoEventId: Int): Query0[AppEvent] =
+  def listGlobalEventInRange(fromEventId: Int, untilEventId: Int): Query0[AppEvent] =
     val sql = sql""" 
-      select * from app_event where event_id >= ${fromEventId} and event_id <= ${uptoEventId}
+      select * from app_event where event_id >= ${fromEventId} and event_id < ${untilEventId}
     """"
     sql.query[AppEvent]
 
