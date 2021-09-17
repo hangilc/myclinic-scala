@@ -21,20 +21,15 @@ import org.scalajs.dom.raw.MouseEvent
 object AppointSheet:
   val eles = div(TopMenu.ele, AppointRow.ele)
   var dateRange: Option[(LocalDate, LocalDate)] = None
-  val listener: EventListener = new EventListener {
-    def handleEvent(event: ModelEvent): Unit =
-      event match
-        case AppointUpdated(app) => AppointRow.respondToUpdatedEvent(app)
-        case _                   =>
-  }
-  JsMain.addEventListener(listener)
 
   def setupDateRange(from: LocalDate, upto: LocalDate): Future[Unit] =
     for
       appoints <- Api.listAppoint(from, upto)
-      _ = AppointRow.init(appoints)
-      _ = { dateRange = Some((from, upto)) }
-    yield ()
+    yield 
+      Removing.broadcastRemoving(eles)
+      AppointRow.init(appoints)
+      dateRange = Some((from, upto))
+    
 
   def setupTo(wrapper: Element): Unit =
     wrapper(eles)
@@ -72,23 +67,16 @@ object AppointSheet:
         case Some((from, upto)) => {
           val fromNext = from.plusDays(-7)
           val uptoNext = upto.plusDays(-7)
-          QueueRunner.enqueue(new QueueRunner.Action:
-            def start(): Future[Unit] = setupDateRange(fromNext, uptoNext)
-            def onComplete(success: Boolean): Unit = ()
-          )
+          setupDateRange(fromNext, uptoNext)
         }
         case None => Future.successful(())
 
     def onNextWeek(): Unit =
       dateRange match
-        case Some((from, upto)) => {
+        case Some((from, upto)) =>
           val fromNext = from.plusDays(7)
           val uptoNext = upto.plusDays(7)
-          QueueRunner.enqueue(new QueueRunner.Action:
-            def start(): Future[Unit] = setupDateRange(fromNext, uptoNext)
-            def onComplete(success: Boolean): Unit = ()
-          )
-        }
+          setupDateRange(fromNext, uptoNext)
         case None => Future.successful(())
 
   object AppointRow:
@@ -112,9 +100,6 @@ object AppointSheet:
     def addElement(col: AppointColumn): Unit =
       rowBinding.element(col.ele)
 
-    def respondToUpdatedEvent(updated: Appoint): Unit =
-      columns.foreach(_.respondToUpdatedEvent(updated))
-
   case class AppointColumn(appointDate: AppointDate):
 
     val date = appointDate.date
@@ -125,9 +110,6 @@ object AppointSheet:
     )
     var slots: Array[SlotRow] =
       appointDate.appoints.map(app => SlotRow(app, this)).toArray
-
-    def respondToUpdatedEvent(updated: Appoint): Unit =
-      slots.foreach(_.respondToUpdatedEvent(updated))
 
     def dateRep: String = Misc.formatAppointDate(date)
     slots.foreach(s => slotsBinding.element(s.ele))

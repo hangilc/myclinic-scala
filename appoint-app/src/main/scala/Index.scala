@@ -39,30 +39,12 @@ object JsMain:
         AppointSheet.setupDateRange(startDate, endDate)
       def onComplete(success: Boolean): Unit = ()
     )
-    {
-      val client = div("Listener")
-      body(client)
-      EventSystem.addListener(modelEvent => println(modelEvent), client)
-      val client2 = div("Listener-2")
-      body(client2)
-      EventSystem.addListener(modelEvent => println(modelEvent), client2)
-      val app = Appoint(LocalDate.now(), java.time.LocalTime.now(), 1, "henry", 0, "")
-      val modelEvent = Events.AppointCreated(app)
-      EventSystem.dispatch(modelEvent, body)
-      body.removeChild(client)
-      EventSystem.dispatch(modelEvent, body)
-    }
 
   val banner = div(cls := "container-fluid")(
     div(cls := "row pt-3 pb-2 ml-5 mr-5")(
       h1(cls := "bg-dark text-white p-3 col-md-12")("診察予約")
     )
   )
-
-  val eventListeners = js.Array[EventListener]()
-
-  def addEventListener(listener: EventListener): Unit =
-    eventListeners.push(listener)
 
   def openWebSocket(): Future[Unit] =
     def f(startEventId: Int): Unit =
@@ -82,45 +64,20 @@ object JsMain:
           case Right(appEvent) =>
             val modelEvent = Events.convert(appEvent)
             if appEvent.eventId == nextEventId then
-              HandleEventAction.enqueue(appEvent)
+              ModelEventDispatcher.dispatch(modelEvent)
               nextEventId += 1
             else
-              val action = TarckMissingEventsAction(
-                nextEventId,
-                appEvent.eventId,
-                appEvent
-              )
-              QueueRunner.enqueue(action)
-              nextEventId = appEvent.eventId + 1
+              Api
+                .listAppEventInRange(nextEventId, appEvent.eventId)
+                .onComplete({
+                  case Success(events) =>
+                    val modelEvents = events.map(Events.convert(_))
+                    modelEvents.foreach(ModelEventDispatcher.dispatch(_))
+                    ModelEventDispatcher.dispatch(modelEvent)
+                  case Failure(ex) => System.err.println(ex)
+                })
           case Left(ex) => System.err.println(ex.toString())
       }
 
     for nextEventId <- Api.getNextAppEventId()
     yield f(nextEventId)
-
-trait EventListener:
-  def handleEvent(event: Events.ModelEvent): Unit
-
-case class HandleEventAction(listener: EventListener, event: Events.ModelEvent)
-    extends QueueRunner.Action:
-  def start(): Future[Unit] = Future.successful(listener.handleEvent(event))
-  def onComplete(result: Boolean): Unit = ()
-
-object HandleEventAction:
-  def enqueue(appEvent: AppEvent): Unit =
-    val modelEvent = Events.convert(appEvent)
-    val actions = JsMain.eventListeners.map(HandleEventAction(_, modelEvent))
-    actions.foreach(QueueRunner.enqueue(_))
-
-case class TarckMissingEventsAction(
-    startEventId: Int,
-    untilEventId: Int,
-    following: AppEvent
-) extends QueueRunner.Action:
-  def start(): Future[Unit] =
-    for events <- Api.listAppEventInRange(startEventId, untilEventId)
-    yield
-      events.foreach(HandleEventAction.enqueue(_))
-      HandleEventAction.enqueue(following)
-
-  def onComplete(result: Boolean): Unit = ()
