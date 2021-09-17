@@ -23,13 +23,11 @@ object AppointSheet:
   var dateRange: Option[(LocalDate, LocalDate)] = None
 
   def setupDateRange(from: LocalDate, upto: LocalDate): Future[Unit] =
-    for
-      appoints <- Api.listAppoint(from, upto)
-    yield 
+    for appoints <- Api.listAppoint(from, upto)
+    yield
       Removing.broadcastRemoving(eles)
       AppointRow.init(appoints)
       dateRange = Some((from, upto))
-    
 
   def setupTo(wrapper: Element): Unit =
     wrapper(eles)
@@ -118,6 +116,7 @@ object AppointSheet:
       val index = slots.indexOf(prev)
       if index >= 0 then
         slots(index) = slot
+        Removing.broadcastRemoving(prev.ele)
         prev.ele.replaceBy(slot.ele)
 
   case class SlotRow(appoint: Appoint, col: AppointColumn):
@@ -127,10 +126,17 @@ object AppointSheet:
       div(detail)
     )
 
-    def respondToUpdatedEvent(updated: Appoint): Unit =
-      if appoint.requireUpdate(updated) then
-        val newSlot = SlotRow(updated, col)
-        col.replaceSlotBy(this, newSlot)
+    val modelEventHandler: ModelEvent => Unit = (_: @unchecked) match {
+      case AppointUpdated(updated) =>
+        if appoint.requireUpdate(updated) then
+          val newSlot = SlotRow(updated, col)
+          col.replaceSlotBy(this, newSlot)
+    }
+    ModelEventDispatcher.addHandler(modelEventHandler)
+    Removing.addRemovingListener(
+      ele,
+      () => ModelEventDispatcher.removeHandler(modelEventHandler)
+    )
 
     def detail: String =
       if appoint.patientName.isEmpty then "（空）"
