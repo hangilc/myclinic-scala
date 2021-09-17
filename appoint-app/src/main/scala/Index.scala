@@ -39,6 +39,19 @@ object JsMain:
         AppointSheet.setupDateRange(startDate, endDate)
       def onComplete(success: Boolean): Unit = ()
     )
+    {
+      val client = div("Listener")
+      body(client)
+      EventSystem.addListener(modelEvent => println(modelEvent), client)
+      val client2 = div("Listener-2")
+      body(client2)
+      EventSystem.addListener(modelEvent => println(modelEvent), client2)
+      val app = Appoint(LocalDate.now(), java.time.LocalTime.now(), 1, "henry", 0, "")
+      val modelEvent = Events.AppointCreated(app)
+      EventSystem.dispatch(modelEvent, body)
+      body.removeChild(client)
+      EventSystem.dispatch(modelEvent, body)
+    }
 
   val banner = div(cls := "container-fluid")(
     div(cls := "row pt-3 pb-2 ml-5 mr-5")(
