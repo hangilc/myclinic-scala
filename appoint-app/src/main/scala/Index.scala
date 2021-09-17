@@ -25,20 +25,13 @@ object JsMain:
     val body = document.body
     body(cls := "px-5 pt-1 pb-5")
     body.appendChild(banner)
-    QueueRunner.enqueue(new QueueRunner.Action {
-      def start(): Future[Unit] = openWebSocket()
-      def onComplete(success: Boolean): Unit = ()
-    })
+    openWebSocket()
     val workarea = div()
     body.appendChild(workarea)
     val startDate = DateUtil.startDayOfWeek(LocalDate.now())
     val endDate = startDate.plusDays(6)
     AppointSheet.setupTo(workarea)
-    QueueRunner.enqueue(new QueueRunner.Action:
-      def start(): Future[Unit] =
-        AppointSheet.setupDateRange(startDate, endDate)
-      def onComplete(success: Boolean): Unit = ()
-    )
+    AppointSheet.setupDateRange(startDate, endDate)
 
   val banner = div(cls := "container-fluid")(
     div(cls := "row pt-3 pb-2 ml-5 mr-5")(
