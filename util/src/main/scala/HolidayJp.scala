@@ -44,12 +44,28 @@ private val kenkoku: Modifier = list => list.add(2, 11, "建国記念の日")
 
 private val tennou: Modifier = list => list.add(2, 23, "天皇誕生日")
 
+private val shunbun: Modifier = list => 
+  list.add(DateUtil.shunbun(list.year), "春分の日")
 
+private val shouwa: Modifier = list => list.add(4, 29, "昭和の日")
+
+private val kenpou: Modifier = list => list.add(5, 3, "憲法記念日")
+private val midori: Modifier = list => list.add(5, 4, "みどりの日")
+private val kodomo: Modifier = list => list.add(5, 5, "こどもの日")
+private val uminohi: Modifier = list => 
+  list.addNthMonday(7, 3, "海の日")
+private val yamanohi: Modifier = list => list.add(8, 11, "山の日")
 
 object HolidayJp:
   def listHolidays(year: Int): List[Holiday] =
     HolidayList(2021).populate(
       ganjitsu,
       seijin,
-      tennou
+      tennou,
+      shunbun,
+      shouwa,
+      kenpou,
+      midori,
+      kodomo,
+      uminohi
     ).get()
