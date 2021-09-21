@@ -3,6 +3,7 @@ package dev.myclinic.scala.util
 import java.time.{LocalDate, LocalTime, LocalDateTime, DayOfWeek}
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
+import java.time.temporal.ChronoUnit.DAYS
 
 object DateUtil:
 
@@ -35,18 +36,25 @@ object DateUtil:
   def dateTimeToString(dt: LocalDateTime): String =
     dt.format(sqlDateTimeFormatter)
 
-  def lastDayOfMonth(year: Int, month: Int): LocalDate = 
+  def lastDayOfMonth(year: Int, month: Int): LocalDate =
     val nextMonthFirst = LocalDate.of(year, month, 1).plus(1, ChronoUnit.MONTHS)
-    nextMonthFirst.minus(1, ChronoUnit.DAYS)
-  
-  def firstSunday(year: Int, month: Int): LocalDate =
+    nextMonthFirst.minus(1, DAYS)
+
+  def firstDayOfWeek(year: Int, month: Int, dayOfWeek: DayOfWeek): LocalDate =
     val firstDay = LocalDate.of(year, month, 1)
-    val firstDayDow = firstDay.getDayOfWeek.getValue()
-    if firstDayDow == 0 then firstDay
-    else
-      firstDay.plus(7 - firstDayDow, ChronoUnit.DAYS)
-  
-  def nthDayOfWeek(nthZeroBased: Int, dayOfWeek: DayOfWeek): LocalDate = ???
+    val offset = dayOfWeek.getValue() - firstDay.getDayOfWeek().getValue()
+    if offset == 0 then firstDay
+    else if offset > 0 then firstDay.plus(offset, DAYS)
+    else firstDay.plus(7 + offset, DAYS)
 
+  def nthDayOfWeek(
+      year: Int,
+      month: Int,
+      dayOfWeek: DayOfWeek,
+      nthOneBased: Int
+  ): LocalDate =
+    firstDayOfWeek(year, month, dayOfWeek).plus((nthOneBased - 1) * 7, DAYS)
 
-
+  def shunbun(year: Int): LocalDate = year match {
+    
+  }
