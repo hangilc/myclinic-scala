@@ -55,6 +55,29 @@ object DateUtil:
   ): LocalDate =
     firstDayOfWeek(year, month, dayOfWeek).plus((nthOneBased - 1) * 7, DAYS)
 
-  def shunbun(year: Int): LocalDate = year match {
-    
-  }
+  private def mod4Map(year: Int, r0: Int, r1: Int, r2: Int, r3: Int): Int =
+    year % 4 match {
+      case 0 => r0
+      case 1 => r1
+      case 2 => r2
+      case 3 => r3
+    }
+
+  def shunbun(year: Int): LocalDate =
+    val d = year match {
+      case x if x >= 1992 && x <= 2023 => mod4Map(year, 20, 20, 21, 21)
+      case x if x >= 2024 && x <= 2055 => mod4Map(year, 20, 20, 20, 21)
+      case x if x >= 2056 && x <= 2091 => mod4Map(year, 20, 20, 20, 20)
+      case x if x >= 2092 && x <= 2099 => mod4Map(year, 19, 20, 20, 20)
+      case _ => throw new RuntimeException(s"Cannot calculate shubun for $year")
+    }
+    LocalDate.of(year, 3, d)
+
+  def shuubun(year: Int): LocalDate =
+    val d: Int = year match {
+      case x if x >= 2012 && x <= 2043 => mod4Map(year, 22, 23, 23, 23)
+      case x if x >= 2044 && x <= 2075 => mod4Map(year, 22, 22, 23, 23)
+      case x if x >= 2076 && x <= 2099 => mod4Map(year, 22, 22, 22, 23)
+      case _ => throw new RuntimeException(s"Cannot calculate shuubun for $year")
+    }
+    LocalDate.of(year, 9, d)
