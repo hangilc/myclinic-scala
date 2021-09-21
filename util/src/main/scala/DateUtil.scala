@@ -1,7 +1,8 @@
 package dev.myclinic.scala.util
 
-import java.time.{LocalDate, LocalTime, LocalDateTime}
+import java.time.{LocalDate, LocalTime, LocalDateTime, DayOfWeek}
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 
 object DateUtil:
 
@@ -33,4 +34,19 @@ object DateUtil:
 
   def dateTimeToString(dt: LocalDateTime): String =
     dt.format(sqlDateTimeFormatter)
+
+  def lastDayOfMonth(year: Int, month: Int): LocalDate = 
+    val nextMonthFirst = LocalDate.of(year, month, 1).plus(1, ChronoUnit.MONTHS)
+    nextMonthFirst.minus(1, ChronoUnit.DAYS)
+  
+  def firstSunday(year: Int, month: Int): LocalDate =
+    val firstDay = LocalDate.of(year, month, 1)
+    val firstDayDow = firstDay.getDayOfWeek.getValue()
+    if firstDayDow == 0 then firstDay
+    else
+      firstDay.plus(7 - firstDayDow, ChronoUnit.DAYS)
+  
+  def nthDayOfWeek(nthZeroBased: Int, dayOfWeek: DayOfWeek): LocalDate = ???
+
+
 

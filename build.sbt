@@ -32,7 +32,8 @@ lazy val root = project
     domq,
     modeljsonJVM,
     modeljsonJS,
-    appointApp
+    appointApp,
+    appointAdmin,
   )
   .settings(
     publish := {},
@@ -136,6 +137,10 @@ lazy val appointApp = project
         .cross(CrossVersion.for3Use2_13)
     )
   )
+
+lazy val appointAdmin = project.in(file("appoint-admin"))
+  .dependsOn(modelJVM, db, utilJVM)
+  .settings()
 
 lazy val modeljson = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Pure)
