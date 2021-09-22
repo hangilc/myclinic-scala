@@ -6,197 +6,126 @@ import java.time.*
 import java.time.temporal.ChronoUnit.*
 import scala.collection.mutable.ListBuffer
 
-case class NationalHoliday(date: LocalDate, name: String):
+case class Holiday(date: LocalDate, name: String):
   override def toString(): String =
     s"${date}（${DateUtil.youbi(date)}） ${name}"
 
-object NationalHoliday:
-  def apply(year: Int, month: Int, day: Int, name: String): NationalHoliday =
-    NationalHoliday(LocalDate.of(year, month, day), name)
+case class NationalHolidays(year: Int):
+  val list: List[Holiday] = Adjust
+    .adjust(
+      NationalHolidayEnum.values
+        .flatMap(e => e.date(year).map(d => Holiday(d, e.name)))
+        .toList
+    )
+    .sortBy(h => h.date)
+  val map: Map[LocalDate, Holiday] = Map(list.map(h => (h.date, h))*)
 
-private case class HolidayList(year: Int, list: ListBuffer[NationalHoliday]):
-  def get(): List[NationalHoliday] = list.sortBy(_.date).toList
+  def findByDate(d: LocalDate): Option[Holiday] = map.get(d)
 
-  def contains(d: LocalDate): Boolean = list.find(_.date == d).isDefined
+  def print(): Unit = list.foreach(println)
 
-  def add(holiday: NationalHoliday): Unit = list.append(holiday)
+type Year = Int
 
-  def add(date: LocalDate, name: String): Unit =
-    list.append(NationalHoliday(date, name))
+enum NationalHolidayEnum(val name: String, val date: Year => Option[LocalDate]):
+  case Ganjitsu extends NationalHolidayEnum("元日", Spec.at(1, 1))
+  case Seijin extends NationalHolidayEnum("成人の日", Spec.secondMonday(1))
+  case Kenkoku extends NationalHolidayEnum("建国記念の日", Spec.at(2, 11))
+  case Tennou extends NationalHolidayEnum("天皇誕生日", Spec.at(2, 23))
+  case Shunbun
+      extends NationalHolidayEnum("春分の日", year => Some(Orbit.shunbun(year)))
+  case Shouwa extends NationalHolidayEnum("昭和の日", Spec.at(4, 29))
+  case Kenpou extends NationalHolidayEnum("憲法記念日", Spec.at(5, 3))
+  case Midori extends NationalHolidayEnum("みどりの日", Spec.at(5, 4))
+  case Kodomo extends NationalHolidayEnum("こどもの日", Spec.at(5, 5))
+  case Uminohi extends NationalHolidayEnum("海の日", Spec.uminohi)
+  case Yamanohi extends NationalHolidayEnum("山の日", Spec.yamanohi)
+  case Keirou extends NationalHolidayEnum("敬老の日", Spec.thirdMonday(9))
+  case Shuubun
+      extends NationalHolidayEnum("秋分の日", year => Some(Orbit.shuubun(year)))
+  case Sports extends NationalHolidayEnum("スポーツの日", Spec.sports)
+  case Bunka extends NationalHolidayEnum("文化の日", Spec.at(11, 3))
+  case Kinrou extends NationalHolidayEnum("勤労感謝の日", Spec.at(11, 23))
 
-  def add(month: Int, day: Int, name: String): Unit =
-    list.append(NationalHoliday(LocalDate.of(year, month, day), name))
+object Spec:
+  def at(month: Int, day: Int): Year => Option[LocalDate] = year =>
+    Some(LocalDate.of(year, month, day))
 
-  def nthMonday(month: Int, nthOneBased: Int, name: String): Unit =
-    val d = DateUtil.nthDayOfWeek(year, month, MONDAY, nthOneBased)
-    add(d, name)
+  def nthMonday(month: Int, nthOneBased: Int): Year => Option[LocalDate] =
+    year => Some(DateUtil.nthDayOfWeek(year, month, MONDAY, nthOneBased))
 
-  def populate(modifiers: Modifier*): HolidayList =
-    modifiers.foreach(_.addTo(this))
-    this
+  def secondMonday(month: Int): Year => Option[LocalDate] = nthMonday(month, 2)
+  def thirdMonday(month: Int): Year => Option[LocalDate] = nthMonday(month, 3)
 
-private object HolidayList:
-  def apply(year: Int): HolidayList =
-    HolidayList(year, ListBuffer[NationalHoliday]())
-
-private trait Modifier:
-  def addTo(list: HolidayList): Unit
-  def discard(): Modifier = ModifierNop()
-
-private class ModifierNop extends Modifier:
-  def addTo(list: HolidayList): Unit = ()
-
-private class ModifierOne(val holiday: HolidayList => Option[NationalHoliday])
-    extends Modifier:
-  def addTo(list: HolidayList): Unit =
-    holiday(list) match {
-      case Some(h) => list.add(h)
-      case None    => ()
+  val uminohi: Year => Option[LocalDate] = year =>
+    year match {
+      case 2021 => at(7, 22)(year)
+      case _    => thirdMonday(7)(year)
     }
 
-  def moveTo(month: Int, day: Int): ModifierOne =
-    ModifierOne(list =>
-      holiday(list) map (h => {
-        val d = LocalDate.of(h.date.getYear, month, day)
-        h.copy(date = d)
-      })
-    )
+  val yamanohi: Year => Option[LocalDate] = year =>
+    year match {
+      case 2021 => at(8, 8)(year)
+      case _    => at(8, 11)(year)
+    }
 
-def at(date: LocalDate, name: String): ModifierOne =
-  ModifierOne(list => Some(NationalHoliday(date, name)))
+  val sports: Year => Option[LocalDate] = year =>
+    year match {
+      case 2021 => at(7, 23)(year)
+      case _    => secondMonday(10)(year)
+    }
 
-def at(month: Int, day: Int, name: String): ModifierOne =
-  ModifierOne(list =>
-    Some(NationalHoliday(LocalDate.of(list.year, month, day), name))
-  )
+object Orbit:
+  def shunbun(year: Int): LocalDate =
+    val d = year match {
+      case x if x >= 1992 && x <= 2023 => mod4Map(year, 20, 20, 21, 21)
+      case x if x >= 2024 && x <= 2055 => mod4Map(year, 20, 20, 20, 21)
+      case x if x >= 2056 && x <= 2091 => mod4Map(year, 20, 20, 20, 20)
+      case x if x >= 2092 && x <= 2099 => mod4Map(year, 19, 20, 20, 20)
+      case _ => throw new RuntimeException(s"Cannot calculate shubun for $year")
+    }
+    LocalDate.of(year, 3, d)
 
-def nthMonday(month: Int, nthOneBased: Int, name: String): ModifierOne =
-  ModifierOne(list =>
-    Some(
-      NationalHoliday(
-        DateUtil.nthDayOfWeek(list.year, month, MONDAY, nthOneBased),
-        name
-      )
-    )
-  )
+  def shuubun(year: Int): LocalDate =
+    val d: Int = year match {
+      case x if x >= 2012 && x <= 2043 => mod4Map(year, 22, 23, 23, 23)
+      case x if x >= 2044 && x <= 2075 => mod4Map(year, 22, 22, 23, 23)
+      case x if x >= 2076 && x <= 2099 => mod4Map(year, 22, 22, 22, 23)
+      case _ =>
+        throw new RuntimeException(s"Cannot calculate shuubun for $year")
+    }
+    LocalDate.of(year, 9, d)
 
-def secondMonday(month: Int, name: String): ModifierOne =
-  nthMonday(month, 2, name)
+  private def mod4Map(year: Int, r0: Int, r1: Int, r2: Int, r3: Int): Int =
+    year % 4 match {
+      case 0 => r0
+      case 1 => r1
+      case 2 => r2
+      case 3 => r3
+    }
 
-def thirdMonday(month: Int, name: String): ModifierOne =
-  nthMonday(month, 3, name)
+object Adjust:
+  def adjust(holidays: List[Holiday]): List[Holiday] =
+    val f = furikae(holidays).map(d => Holiday(d, "振替休日"))
+    val s = sandwiched(holidays).map(d => Holiday(d, "休日"))
+    f ++ s ++ holidays
 
-def dependsOnYear(f: Int => ModifierOne): ModifierOne =
-  ModifierOne(list => f(list.year).holiday(list))
-
-val none = ModifierOne(_ => None)
-
-def range(
-    fromMonth: Int,
-    fromDay: Int,
-    uptoMonth: Int,
-    uptoDay: Int,
-    name: String
-): Modifier = new Modifier:
-  def addTo(hl: HolidayList): Unit =
-    val year = hl.year
-    val fromDate = LocalDate.of(year, fromMonth, fromDay)
-    val uptoDate = LocalDate.of(year, uptoMonth, uptoDay)
-    var d = fromDate
-    import math.Ordering.Implicits.infixOrderingOps
-    while d <= uptoDate do ()
-
-private val ganjitsu: Modifier = at(1, 1, "元日")
-
-private val seijin: Modifier = secondMonday(1, "成人の日")
-
-private val kenkoku: Modifier = dependsOnYear(year => {
-  if year >= 1967 then at(2, 11, "建国記念の日")
-  else none
-})
-
-private val tennou: Modifier = at(2, 23, "天皇誕生日")
-
-private val shunbun: Modifier = dependsOnYear(year => {
-  at(DateUtil.shunbun(year), "春分の日")
-})
-
-private val shouwa: Modifier = at(4, 29, "昭和の日")
-
-private val kenpou: Modifier = at(5, 3, "憲法記念日")
-private val midori: Modifier = at(5, 4, "みどりの日")
-private val kodomo: Modifier = at(5, 5, "こどもの日")
-private val uminohi: Modifier = dependsOnYear(year => {
-  val name = "海の日"
-  year match {
-    case 2021 => at(7, 22, name)
-    case _    => thirdMonday(7, name)
-  }
-})
-private val yamanohi: Modifier = dependsOnYear(year => {
-  val name = "山の日"
-  year match {
-    case 2021 => at(8, 8, name)
-    case _    => at(8, 11, name)
-  }
-})
-private val keirou: Modifier = thirdMonday(9, "敬老の日")
-private val shuubun: Modifier =
-  dependsOnYear(year => at(DateUtil.shuubun(year), "秋分の日"))
-private val sports: Modifier = dependsOnYear(year => {
-  val name = "スポーツの日"
-  year match {
-    case 2021 => at(7, 23, name)
-    case _    => secondMonday(10, name)
-  }
-})
-private val bunka: Modifier = at(11, 3, "文化の日")
-private val kinrou: Modifier = at(11, 23, "勤労感謝の日")
-
-private val furikae: Modifier = new Modifier:
-  def addTo(hl: HolidayList): Unit =
+  def furikae(holidays: Seq[Holiday]): List[LocalDate] =
     def isSunday(d: LocalDate): Boolean = d.getDayOfWeek == SUNDAY
     def pickFurikae(d: LocalDate): LocalDate =
-      if hl.contains(d) then pickFurikae(d.plus(1, DAYS)) else d
-    val furikae = ListBuffer[LocalDate]()
-    hl.list.foreach(h => {
-      if isSunday(h.date) then furikae.append(pickFurikae(h.date.plus(1, DAYS)))
+      if holidays.contains(d) then pickFurikae(d.plus(1, DAYS)) else d
+    val buf = ListBuffer[LocalDate]()
+    holidays.foreach(h => {
+      if isSunday(h.date) then buf.append(pickFurikae(h.date.plus(1, DAYS)))
     })
-    furikae.foreach(d => hl.add(d, "振替休日"))
+    buf.toList
 
-private val sandwiched: Modifier = new Modifier:
-  def addTo(hl: HolidayList): Unit =
-    val hs = ListBuffer[LocalDate]()
-    hl.list.foreach(h => {
+  def sandwiched(holidays: Seq[Holiday]): List[LocalDate] =
+    def isSunday(d: LocalDate): Boolean = d.getDayOfWeek == SUNDAY
+    val buf = ListBuffer[LocalDate]()
+    holidays.foreach(h => {
       val d1 = h.date.plus(1, DAYS)
       val d2 = h.date.plus(2, DAYS)
-      if hl.contains(d2) && !hl.contains(d1) then hs.append(d1)
+      if holidays.contains(d2) && !holidays.contains(d1) && !isSunday(d1) then
+        buf.append(d1)
     })
-    hs.foreach(hl.add(_, "休日"))
-
-def nationalHollidays(year: Int): HolidayList =
-  HolidayList(year)
-    .populate(
-      ganjitsu,
-      seijin,
-      kenkoku,
-      tennou,
-      shunbun,
-      shouwa,
-      kenpou,
-      midori,
-      kodomo,
-      uminohi,
-      yamanohi,
-      keirou,
-      shuubun,
-      sports,
-      bunka,
-      kinrou,
-      sandwiched,
-      furikae
-    )
-
-object HolidayJp:
-  def listHolidays(year: Int): List[NationalHoliday] =
-    nationalHollidays(year).get()
+    buf.toList
