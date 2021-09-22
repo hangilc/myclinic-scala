@@ -4,6 +4,7 @@ import java.time.{LocalDate, LocalTime, LocalDateTime, DayOfWeek}
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.time.temporal.ChronoUnit.DAYS
+import java.time.DayOfWeek.*
 
 object DateUtil:
 
@@ -54,6 +55,18 @@ object DateUtil:
       nthOneBased: Int
   ): LocalDate =
     firstDayOfWeek(year, month, dayOfWeek).plus((nthOneBased - 1) * 7, DAYS)
+
+  def youbi(date: LocalDate): String = youbi(date.getDayOfWeek)
+
+  def youbi(dayOfWeek: DayOfWeek): String = dayOfWeek match {
+    case SUNDAY => "日"
+    case MONDAY => "月"
+    case TUESDAY => "火"
+    case WEDNESDAY => "水"
+    case THURSDAY => "木"
+    case FRIDAY => "金"
+    case SATURDAY => "土"
+  }
 
   private def mod4Map(year: Int, r0: Int, r1: Int, r2: Int, r3: Int): Int =
     year % 4 match {

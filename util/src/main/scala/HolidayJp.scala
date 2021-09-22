@@ -6,26 +6,26 @@ import java.time.*
 import java.time.temporal.ChronoUnit.*
 import scala.collection.mutable.ListBuffer
 
-case class Holiday(date: LocalDate, name: String):
+case class NationalHoliday(date: LocalDate, name: String):
   override def toString(): String =
-    s"${date} ${name}"
+    s"${date}（${DateUtil.youbi(date)}） ${name}"
 
-object Holiday:
-  def apply(year: Int, month: Int, day: Int, name: String): Holiday =
-    Holiday(LocalDate.of(year, month, day), name)
+object NationalHoliday:
+  def apply(year: Int, month: Int, day: Int, name: String): NationalHoliday =
+    NationalHoliday(LocalDate.of(year, month, day), name)
 
-private case class HolidayList(year: Int, list: ListBuffer[Holiday]):
-  def get(): List[Holiday] = list.sortBy(_.date).toList
+private case class HolidayList(year: Int, list: ListBuffer[NationalHoliday]):
+  def get(): List[NationalHoliday] = list.sortBy(_.date).toList
 
   def contains(d: LocalDate): Boolean = list.find(_.date == d).isDefined
 
-  def add(holiday: Holiday): Unit = list.append(holiday)
+  def add(holiday: NationalHoliday): Unit = list.append(holiday)
 
   def add(date: LocalDate, name: String): Unit =
-    list.append(Holiday(date, name))
+    list.append(NationalHoliday(date, name))
 
   def add(month: Int, day: Int, name: String): Unit =
-    list.append(Holiday(LocalDate.of(year, month, day), name))
+    list.append(NationalHoliday(LocalDate.of(year, month, day), name))
 
   def nthMonday(month: Int, nthOneBased: Int, name: String): Unit =
     val d = DateUtil.nthDayOfWeek(year, month, MONDAY, nthOneBased)
@@ -36,7 +36,8 @@ private case class HolidayList(year: Int, list: ListBuffer[Holiday]):
     this
 
 private object HolidayList:
-  def apply(year: Int): HolidayList = HolidayList(year, ListBuffer[Holiday]())
+  def apply(year: Int): HolidayList =
+    HolidayList(year, ListBuffer[NationalHoliday]())
 
 private trait Modifier:
   def addTo(list: HolidayList): Unit
@@ -45,7 +46,7 @@ private trait Modifier:
 private class ModifierNop extends Modifier:
   def addTo(list: HolidayList): Unit = ()
 
-private class ModifierOne(val holiday: HolidayList => Option[Holiday])
+private class ModifierOne(val holiday: HolidayList => Option[NationalHoliday])
     extends Modifier:
   def addTo(list: HolidayList): Unit =
     holiday(list) match {
@@ -62,15 +63,17 @@ private class ModifierOne(val holiday: HolidayList => Option[Holiday])
     )
 
 def at(date: LocalDate, name: String): ModifierOne =
-  ModifierOne(list => Some(Holiday(date, name)))
+  ModifierOne(list => Some(NationalHoliday(date, name)))
 
 def at(month: Int, day: Int, name: String): ModifierOne =
-  ModifierOne(list => Some(Holiday(LocalDate.of(list.year, month, day), name)))
+  ModifierOne(list =>
+    Some(NationalHoliday(LocalDate.of(list.year, month, day), name))
+  )
 
 def nthMonday(month: Int, nthOneBased: Int, name: String): ModifierOne =
   ModifierOne(list =>
     Some(
-      Holiday(
+      NationalHoliday(
         DateUtil.nthDayOfWeek(list.year, month, MONDAY, nthOneBased),
         name
       )
@@ -88,8 +91,20 @@ def dependsOnYear(f: Int => ModifierOne): ModifierOne =
 
 val none = ModifierOne(_ => None)
 
-private trait ModifierOrig:
-  def modify(hl: HolidayList): Unit
+def range(
+    fromMonth: Int,
+    fromDay: Int,
+    uptoMonth: Int,
+    uptoDay: Int,
+    name: String
+): Modifier = new Modifier:
+  def addTo(hl: HolidayList): Unit =
+    val year = hl.year
+    val fromDate = LocalDate.of(year, fromMonth, fromDay)
+    val uptoDate = LocalDate.of(year, uptoMonth, uptoDay)
+    var d = fromDate
+    import math.Ordering.Implicits.infixOrderingOps
+    while d <= uptoDate do ()
 
 private val ganjitsu: Modifier = at(1, 1, "元日")
 
@@ -159,27 +174,29 @@ private val sandwiched: Modifier = new Modifier:
     })
     hs.foreach(hl.add(_, "休日"))
 
+def nationalHollidays(year: Int): HolidayList =
+  HolidayList(year)
+    .populate(
+      ganjitsu,
+      seijin,
+      kenkoku,
+      tennou,
+      shunbun,
+      shouwa,
+      kenpou,
+      midori,
+      kodomo,
+      uminohi,
+      yamanohi,
+      keirou,
+      shuubun,
+      sports,
+      bunka,
+      kinrou,
+      sandwiched,
+      furikae
+    )
+
 object HolidayJp:
-  def listHolidays(year: Int): List[Holiday] =
-    HolidayList(year)
-      .populate(
-        ganjitsu,
-        seijin,
-        kenkoku,
-        tennou,
-        shunbun,
-        shouwa,
-        kenpou,
-        midori,
-        kodomo,
-        uminohi,
-        yamanohi,
-        keirou,
-        shuubun,
-        sports,
-        bunka,
-        kinrou,
-        sandwiched,
-        furikae
-      )
-      .get()
+  def listHolidays(year: Int): List[NationalHoliday] =
+    nationalHollidays(year).get()
