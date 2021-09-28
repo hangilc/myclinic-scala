@@ -15,6 +15,7 @@ object SqliteExecutor:
 
   val config = new SQLiteConfig()
   config.setEncoding(SQLiteConfig.Encoding.UTF8)
+  config.enforceForeignKeys(true)
   val ds = new SQLiteDataSource(config)
   ds.setUrl(url)
 

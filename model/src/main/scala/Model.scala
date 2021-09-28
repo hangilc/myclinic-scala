@@ -4,21 +4,23 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.LocalDateTime
 
-case class Appoint(
+case class AppointTime(
+  appointTimeId: Int,
+  eventId: Int,
   date: LocalDate,
   time: LocalTime,
+  kind: String,
+  capacity: Int
+)
+
+case class Appoint(
+  appointId: Int,
   eventId: Int,
+  appointTimeId: Int,
   patientName: String,
   patientId: Int,
   memo: String
-):
-  def isVacant: Boolean = patientName.isEmpty
-
-  def sameDateTime(that: Appoint): Boolean =
-    date == that.date && time == that.time
-
-  def requireUpdate(newAppoint: Appoint): Boolean =
-    sameDateTime(newAppoint) && eventId < newAppoint.eventId
+)
 
 case class AppEvent(
   id: Int,

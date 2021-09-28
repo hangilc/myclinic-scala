@@ -26,6 +26,16 @@ case class NationalHolidays(year: Int):
 
 type Year = Int
 
+object NationalHolidays:
+  val yearMap: Map[Year, NationalHolidays] = Map(
+    2021 -> NationalHolidays(2021),
+    2022 -> NationalHolidays(2022)
+  )
+
+  def findByDate(date: LocalDate): Option[Holiday] =
+    yearMap.get(date.getYear).flatMap(_.findByDate(date))
+
+
 enum NationalHolidayEnum(val name: String, val date: Year => Option[LocalDate]):
   case Ganjitsu extends NationalHolidayEnum("元日", Spec.at(1, 1))
   case Seijin extends NationalHolidayEnum("成人の日", Spec.secondMonday(1))

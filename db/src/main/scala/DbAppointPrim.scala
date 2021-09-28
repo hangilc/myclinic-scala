@@ -1,42 +1,77 @@
 package dev.myclinic.scala.db
 
 import java.time._
-import cats.implicits._
+// import cats._
+// import cats.implicits._
 import doobie._
 import doobie.implicits._
-import dev.myclinic.scala.model._
+import dev.myclinic.scala.model.{AppointTime, Appoint, AppEvent}
 import dev.myclinic.scala.db.DoobieMapping._
 
 object DbAppointPrim:
 
-  def enterAppoint(a: Appoint): ConnectionIO[Unit] =
+  def getAppointTime(appointTimeId: Int): Query0[AppointTime] =
+    sql"""
+      select * from appoint_time where appoint_time_id = ${appointTimeId}
+    """.query[AppointTime]
+
+  def enterAppointTime(at: AppointTime): ConnectionIO[AppointTime] =
     val op = sql"""
-      insert into appoint (date, time, event_id, patient_name, patient_id, memo) 
-        values (${a.date}, ${a.time}, ${a.eventId}, 
-        ${a.patientName}, ${a.patientId}, ${a.memo})
-      """.update.run
-    op >>= Helper.confirmUpdate(s"Failed to enter appoint: ${a}.")
+      insert into appoint_time (event_id, date, time, kind, capacity)
+      values(${at.eventId}, ${at.date}, ${at.time}, ${at.kind}, ${at.capacity})
+    """
+    for
+      id <- op.update.withUniqueGeneratedKeys[Int]("appoint_time_id")
+      entered <- getAppointTime(id).unique
+    yield entered
+
+  def updateAppointTime(at: AppointTime): ConnectionIO[Unit] =
+    sql"""
+      update appoint_time set event_id = ${at.eventId}, date = ${at.date},
+        time = ${at.time}, kind = ${at.kind}, capacity = ${at.capacity}
+    """.update.run.map[Unit](affected =>
+      if affected != 1 then
+        throw new RuntimeException("Failed to update appoint time.")
+    )
+
+  def deleteAppointTime(appointTimeId: Int): ConnectionIO[Unit] =
+    sql"""
+      delete from appooint_time where appoint_time_id = ${appointTimeId}
+    """.update.run.map[Unit](affected =>
+      if affected != 1 then
+        throw new RuntimeException("Failed to delete appoint time.")
+    )
+
+  def getAppoint(appointId: Int): Query0[Appoint] =
+    sql"select * from appoint where appoint_id = ${appointId}".query[Appoint]
+
+  def enterAppoint(a: Appoint): ConnectionIO[Appoint] =
+    val op = sql"""
+      insert into appoint (event_id, appoint_time_id, patient_name, patient_id, memo) 
+        values (${a.eventId}, ${a.appointTimeId}, ${a.patientName}, ${a.patientId}, ${a.memo})
+      """
+    for
+      id <- op.update.withUniqueGeneratedKeys[Int]("appoint_id")
+      entered <- getAppoint(id).unique
+    yield entered
 
   def updateAppoint(a: Appoint): ConnectionIO[Unit] =
-    val op = sql"""
-      update appoint set event_id = ${a.eventId}, 
-        patient_name = ${a.patientName}, patient_id = ${a.patientId},
-        memo = ${a.memo} 
-        where date = ${a.date} and time = ${a.time}
-    """.update.run
-    op >>= Helper.confirmUpdate(s"Failed to update appoint: ${a}")
-
-  def deleteAppoint(date: LocalDate, time: LocalTime): ConnectionIO[Unit] =
-    val op =
-      sql"delete from appoint where date = ${date} and time = ${time}".update.run
-    op >>= Helper.confirmUpdate(s"Failed to delete appoint")
-
-  def listAppoint(from: LocalDate, upto: LocalDate): Query0[Appoint] =
     sql"""
-      select * from appoint where date >= $from and date <= $upto order by date, time
-    """.query[Appoint]
+      update appoint set event_id = ${a.eventId}, 
+        appoint_time_id = ${a.appointTimeId},
+        patient_name = ${a.patientName}, 
+        patient_id = ${a.patientId},
+        memo = ${a.memo} 
+        where appoint_id = ${a.appointId}
+    """.update.run.map(affected =>
+      if affected != 1 then
+        throw new RuntimeException("Failed to update appoint.")
+    )
 
-  def getAppoint(date: LocalDate, time: LocalTime): Query0[Appoint] =
-    sql"select * from appoint where date = $date and time = $time"
-      .query[Appoint]
+def deleteAppoint(appointId: Int): ConnectionIO[Unit] =
+  sql"delete from appoint where appoiont_id = ${appointId}".update.run.map(
+    affected =>
+      if affected != 1 then
+        throw new RuntimeException("Failed to delete appoint.")
+  )
 
