@@ -54,6 +54,12 @@ lazy val model = crossProject(JSPlatform, JVMPlatform)
       "io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion
     )
   )
+  .jvmSettings(
+    libraryDependencies ++= Seq(
+      scalaTest
+    )
+  )
+
 
 val modelJS = model.js
 val modelJVM = model.jvm
