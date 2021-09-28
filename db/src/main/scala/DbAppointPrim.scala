@@ -17,8 +17,8 @@ object DbAppointPrim:
 
   def enterAppointTime(at: AppointTime): ConnectionIO[AppointTime] =
     val op = sql"""
-      insert into appoint_time (event_id, date, time, kind, capacity)
-      values(${at.eventId}, ${at.date}, ${at.time}, ${at.kind}, ${at.capacity})
+      insert into appoint_time (event_id, date, from_time, until_time, kind, capacity)
+      values(${at.eventId}, ${at.date}, ${at.fromTime}, ${at.untilTime}, ${at.kind}, ${at.capacity})
     """
     for
       id <- op.update.withUniqueGeneratedKeys[Int]("appoint_time_id")
@@ -28,7 +28,8 @@ object DbAppointPrim:
   def updateAppointTime(at: AppointTime): ConnectionIO[Unit] =
     sql"""
       update appoint_time set event_id = ${at.eventId}, date = ${at.date},
-        time = ${at.time}, kind = ${at.kind}, capacity = ${at.capacity}
+        from_time = ${at.fromTime}, until_time = ${at.untilTime}, 
+        kind = ${at.kind}, capacity = ${at.capacity}
     """.update.run.map[Unit](affected =>
       if affected != 1 then
         throw new RuntimeException("Failed to update appoint time.")

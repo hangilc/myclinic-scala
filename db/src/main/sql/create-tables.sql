@@ -2,7 +2,8 @@ create table if not exists appoint_time (
     appoint_time_id integer primary key,
     event_id integer not null,
     date text not null,
-    time text not null,
+    from_time text not null,
+    until_time text not null,
     kind text not null,
     capacity int not null
 );
@@ -27,7 +28,8 @@ create table if not exists app_event (
 );
 
 create table if not exists event_id_store (
-    global_event_id int not null
+    id int primary key not null,
+    event_id int not null
 );
 
 

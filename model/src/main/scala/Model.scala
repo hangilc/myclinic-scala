@@ -8,7 +8,8 @@ case class AppointTime(
   appointTimeId: Int,
   eventId: Int,
   date: LocalDate,
-  time: LocalTime,
+  fromTime: LocalTime,
+  untilTime: LocalTime,
   kind: String,
   capacity: Int
 )

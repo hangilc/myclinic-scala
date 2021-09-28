@@ -3,13 +3,25 @@ package dev.myclinic.scala.db
 import cats.effect.IO
 import cats.implicits._
 import dev.myclinic.scala.model._
+import dev.myclinic.scala.db.{DbAppointPrim => Prim}
 import doobie._
 import doobie.implicits._
 
 import java.time.LocalDate
 import java.time.LocalTime
 
-// trait DbAppoint extends Sqlite:
+trait DbAppoint extends Sqlite:
+  private def withEventId[A](f: Int => ConnectionIO[A]): IO[A] =
+    sqlite(DbEventPrim.withEventId(eventId => f(eventId)))
+
+  def batchEnterAppointTimes(appointTimes: List[AppointTime]): IO[Unit] =
+    withEventId(eventId => {
+      appointTimes.map(_.copy(eventId = eventId))
+      .map(at => Prim.enterAppointTime(at))
+      .sequence_
+    })
+
+
 //   def getAppoint(date: LocalDate, time: LocalTime): IO[Appoint] =
 //     sqlite(DbAppointPrim.getAppoint(date, time).unique)
 
