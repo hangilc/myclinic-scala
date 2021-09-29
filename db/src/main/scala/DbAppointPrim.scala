@@ -69,10 +69,14 @@ object DbAppointPrim:
         throw new RuntimeException("Failed to update appoint.")
     )
 
-def deleteAppoint(appointId: Int): ConnectionIO[Unit] =
-  sql"delete from appoint where appoiont_id = ${appointId}".update.run.map(
-    affected =>
-      if affected != 1 then
-        throw new RuntimeException("Failed to delete appoint.")
-  )
+  def deleteAppoint(appointId: Int): ConnectionIO[Unit] =
+    sql"delete from appoint where appoiont_id = ${appointId}".update.run.map(
+      affected =>
+        if affected != 1 then
+          throw new RuntimeException("Failed to delete appoint.")
+    )
 
+  def listExistingAppointTimeDates(from: LocalDate, upto: LocalDate): Query0[LocalDate] =
+    sql"""
+      select distinct date from appoint_time where date >= ${from} and date <= ${upto}
+    """.query[LocalDate]

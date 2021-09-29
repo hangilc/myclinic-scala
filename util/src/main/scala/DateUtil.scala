@@ -68,3 +68,6 @@ object DateUtil:
     case SATURDAY => "土"
   }
 
+  def datesFrom(date: LocalDate): LazyList[LocalDate] =
+    LazyList.unfold(date)(date => Some(date, date.plus(1, DAYS)))
+
