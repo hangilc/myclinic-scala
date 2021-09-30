@@ -3,11 +3,12 @@ package dev.myclinic.scala.util
 import java.time.LocalDate
 import java.time.DayOfWeek.*
 
-sealed trait ClinicOperation
-case object InOperation extends ClinicOperation
-case object RegularHoliday extends ClinicOperation
-case class AdHocHoliday(name: String) extends ClinicOperation
-case class NationalHoliday(name: String) extends ClinicOperation
+enum ClinicOperation:
+  case InOperation extends ClinicOperation
+  case RegularHoliday extends ClinicOperation
+  case AdHocHoliday(name: String) extends ClinicOperation
+  case NationalHoliday(name: String) extends ClinicOperation
+end ClinicOperation
 
 object ClinicOperation:
   extension [A, B >: A](opt: Option[A])
