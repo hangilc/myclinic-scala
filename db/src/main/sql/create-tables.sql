@@ -11,7 +11,7 @@ create table if not exists appoint_time (
 create table if not exists appoint (
     appoint_id integer primary key,
     event_id integer not null,
-    appoint_time_id integer 
+    appoint_time_id integer,
     patient_name text not null,
     patient_id integer not null,
     memo text not null,

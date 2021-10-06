@@ -56,6 +56,16 @@ object RestService:
         ) =>
       Ok(Db.listAppointTimes(from, upto))
 
+    case req @ POST -> Root / "register-appoint" => {
+      val op = for
+        appoint <- req.as[Appoint]
+        result <- Db.addAppoint(appoint)
+        (entered, appEvent) = result
+        _ <- topic.publish1(Text(appEvent.asJson.toString()))
+      yield entered
+      Ok(op)
+    }
+
     // case req @ POST -> Root / "register-appoint" => {
     //   val op = for
     //     appoint <- req.as[Appoint]

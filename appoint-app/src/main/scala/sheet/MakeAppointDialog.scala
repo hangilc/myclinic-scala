@@ -1,4 +1,4 @@
-package dev.myclinic.scala.web.appoint.sheet
+package dev.myclinic.scala.web.appointTime.sheet
 
 import dev.fujiwara.domq.Dialog
 import dev.fujiwara.domq.ElementQ.{given, *}
@@ -11,7 +11,7 @@ import dev.fujiwara.domq.Binding.TextBinding
 import dev.fujiwara.domq.Binding.bindTo
 import scala.language.implicitConversions
 
-class MakeAppointDialog(appoint: AppointTime, handler: String => Unit)
+class MakeAppointDialog(appointTime: AppointTime, handler: String => Unit)
     extends Dialog():
 
   title = "診察予約入力"
@@ -49,8 +49,8 @@ class MakeAppointDialog(appoint: AppointTime, handler: String => Unit)
   )
 
   def dateTimeRep: String =
-    val d = appoint.date
-    val t = appoint.fromTime
+    val d = appointTime.date
+    val t = appointTime.fromTime
     val youbi = KanjiDate.youbi(d)
     val m = d.getMonthValue()
     val day = d.getDayOfMonth()
@@ -77,7 +77,7 @@ class MakeAppointDialog(appoint: AppointTime, handler: String => Unit)
 
 
 object MakeAppointDialog:
-  def open(appoint: AppointTime, handler: String => Unit): Unit =
-    val dlog = new MakeAppointDialog(appoint, handler)
+  def open(appointTime: AppointTime, handler: String => Unit): Unit =
+    val dlog = new MakeAppointDialog(appointTime, handler)
     dlog.open()
 

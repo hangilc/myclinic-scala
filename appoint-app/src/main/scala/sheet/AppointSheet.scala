@@ -20,6 +20,7 @@ import org.scalajs.dom.raw.MouseEvent
 import dev.myclinic.scala.web.appoint.Removing
 import dev.myclinic.scala.web.appoint.Misc
 import dev.myclinic.scala.web.appoint.ModelEventDispatcher
+import dev.myclinic.scala.web.appointTime.sheet.MakeAppointDialog
 
 object AppointSheet:
   val eles = div(TopMenu.ele, AppointRow.ele)
@@ -123,69 +124,74 @@ object AppointSheet:
       c.setAppointTimes(appointDate.appointTimes)
       c
 
-
   case class AppointTimeBox(appointTime: AppointTime):
-    val ele = div()(timeLabel)
+    val ele =
+      div(style := "cursor: pointer", onclick := (onEleClick _))(timeLabel)
 
-    def timeLabel: String = 
+    def timeLabel: String =
       val f = Misc.formatAppointTime(appointTime.fromTime)
       val u = Misc.formatAppointTime(appointTime.untilTime)
       s"$f - $u"
 
+    def onEleClick(): Unit =
+      MakeAppointDialog.open(appointTime, name => {
+        val app = Appoint(0, 0, appointTime.appointTimeId, name, 0, "")
+        Api.registerAppoint(app)
+      })
 
-    // var slots: Array[SlotRow] =
-    //   appointDate.appoints.map(app => SlotRow(app, this)).toArray
+// var slots: Array[SlotRow] =
+//   appointDate.appoints.map(app => SlotRow(app, this)).toArray
 
-    // slots.foreach(s => slotsBinding.element(s.ele))
+// slots.foreach(s => slotsBinding.element(s.ele))
 
-    // def replaceSlotBy(prev: SlotRow, slot: SlotRow): Unit =
-    //   val index = slots.indexOf(prev)
-    //   if index >= 0 then
-    //     slots(index) = slot
-    //     Removing.broadcastRemoving(prev.ele)
-    //     prev.ele.replaceBy(slot.ele)
+// def replaceSlotBy(prev: SlotRow, slot: SlotRow): Unit =
+//   val index = slots.indexOf(prev)
+//   if index >= 0 then
+//     slots(index) = slot
+//     Removing.broadcastRemoving(prev.ele)
+//     prev.ele.replaceBy(slot.ele)
 
-  // case class SlotRow(appointTime: AppointTime, col: AppointColumn):
+// case class SlotRow(appointTime: AppointTime, col: AppointColumn):
 
-  //   val ele = div(style := "cursor: pointer", onclick := (onEleClick _))(
-  //     div(Misc.formatAppointTime(appointTime.fromTime)),
-  //     div(detail)
-  //   )
+//   val ele = div(style := "cursor: pointer", onclick := (onEleClick _))(
+//     div(Misc.formatAppointTime(appointTime.fromTime)),
+//     div(detail)
+//   )
 
-    // val modelEventHandler: ModelEvent => Unit = (_: @unchecked) match {
-    //   case AppointUpdated(updated) =>
-    //     if appoint.requireUpdate(updated) then
-    //       val newSlot = SlotRow(updated, col)
-    //       col.replaceSlotBy(this, newSlot)
-    // }
-    // ModelEventDispatcher.addHandler(modelEventHandler)
-    // Removing.addRemovingListener(
-    //   ele,
-    //   () => ModelEventDispatcher.removeHandler(modelEventHandler)
-    // )
+// val modelEventHandler: ModelEvent => Unit = (_: @unchecked) match {
+//   case AppointUpdated(updated) =>
+//     if appoint.requireUpdate(updated) then
+//       val newSlot = SlotRow(updated, col)
+//       col.replaceSlotBy(this, newSlot)
+// }
+// ModelEventDispatcher.addHandler(modelEventHandler)
+// Removing.addRemovingListener(
+//   ele,
+//   () => ModelEventDispatcher.removeHandler(modelEventHandler)
+// )
 
-    // def detail: String =
-    //   if appoint.patientName.isEmpty then "（空）"
-    //   else appoint.patientName
+// def detail: String =
+//   if appoint.patientName.isEmpty then "（空）"
+//   else appoint.patientName
 
-    // def onEleClick(): Unit =
-    //   if appoint.isVacant then openMakeAppointDialog()
-    //   else openCancelAppointDialog()
+// def onEleClick(): Unit =
+//   if appoint.isVacant then openMakeAppointDialog()
+//   else openCancelAppointDialog()
 
-    // def openMakeAppointDialog(): Unit =
-    //   MakeAppointDialog.open(
-    //     appoint,
-    //     name => {
-    //       Api
-    //         .registerAppoint(
-    //           Appoint(appoint.date, appoint.time, 0, name, 0, "")
-    //         )
-    //         .onComplete[Unit](_ match {
-    //           case Success(_)         => println("Success")
-    //           case Failure(exception) => println(("failure", exception))
-    //         })
-    //     }
-    //   )
+// def openMakeAppointDialog(): Unit =
+//   MakeAppointDialog.open(
+//     appoint,
+//     name => {
+//       Api
+//         .registerAppoint(
+//           Appoint(appoint.date, appoint.time, 0, name, 0, "")
+//         )
+//         .onComplete[Unit](_ match {
+//           case Success(_)         => println("Success")
+//           case Failure(exception) => println(("failure", exception))
+//         })
+//     }
+//   )
 
-    // def openCancelAppointDialog(): Unit =
-    //   CancelAppointDialog.open(appoint)
+// def openCancelAppointDialog(): Unit =
+//   CancelAppointDialog.open(appoint)
