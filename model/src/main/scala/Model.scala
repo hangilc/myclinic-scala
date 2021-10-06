@@ -12,7 +12,9 @@ case class AppointTime(
     untilTime: LocalTime,
     kind: String,
     capacity: Int
-)
+):
+  def isAdjacentTo(other: AppointTime): Boolean =
+    date == other.date && untilTime == other.fromTime
 
 object AppointTime:
   def overlaps(ats: List[AppointTime]): Boolean =
@@ -35,6 +37,11 @@ object AppointTime:
           })
           .exists(identity)
     }
+
+  def isAdjacentRun(as: List[AppointTime]): Boolean =
+    if as.size < 2 then true
+    else
+      as.sliding(2).forall(e => e(0).isAdjacentTo(e(1)))
 
 case class Appoint(
     appointId: Int,

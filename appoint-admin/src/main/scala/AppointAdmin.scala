@@ -10,14 +10,23 @@ import dev.myclinic.scala.model.*
 import java.time.{LocalDate, LocalTime, DayOfWeek}
 import java.time.DayOfWeek.*
 import java.time.temporal.ChronoUnit
+import cats.effect.unsafe.implicits.global
 
 object AppointAdmin:
+  extension [T](io: IO[T]) def run(): T = io.unsafeRunSync()
 
   def fillAppointTimesUpto(from: LocalDate, upto: LocalDate): IO[Unit] =
-    def ensureNoExistingDate(dates: List[LocalDate]): Unit =
-      if !dates.forall(d => d.isBefore(from) || d.isAfter(upto)) then
-        throw new RuntimeException("Appoint time for the date already exists.")
-    def filterDate(date: LocalDate): Boolean =
+    def requestedDates: List[LocalDate] =
+      DateUtil
+        .datesFrom(from)
+        .takeWhile(d => d.isBefore(upto) || d.isEqual(upto))
+        .toList
+    def excludeExistingDates(
+        dates: List[LocalDate],
+        existing: List[LocalDate]
+    ): List[LocalDate] =
+      dates.filter(d => !existing.contains(d))
+    def filterOperationDate(date: LocalDate): Boolean =
       import ClinicOperation.*
       ClinicOperation.getClinicOperationAt(date) match {
         case InOperation        => true
@@ -28,7 +37,7 @@ object AppointAdmin:
     def pickTimes(date: LocalDate): List[(LocalTime, LocalTime)] =
       def t(hour: Int, minute: Int): (LocalTime, LocalTime) =
         val from = LocalTime.of(hour, minute)
-        val until = from.plus(20, ChronoUnit.SECONDS)
+        val until = from.plus(20, ChronoUnit.MINUTES)
         (from, until)
       date.getDayOfWeek match {
         case SATURDAY =>
@@ -63,12 +72,6 @@ object AppointAdmin:
             t(17, 0)
           )
       }
-    def insertDates: List[LocalDate] =
-      DateUtil
-        .datesFrom(from)
-        .takeWhile(d => d.isBefore(upto) || d.isEqual(upto))
-        .filter(filterDate(_))
-        .toList
     def appointTimesForDate(date: LocalDate): List[AppointTime] =
       val kind = "regular"
       val capacity = 1
@@ -77,19 +80,67 @@ object AppointAdmin:
         !AppointTime.timeIntervalOverlaps(tuples),
         "AppointTime overlaps."
       )
-      tuples.map { case (from, upto) => {
-        val kind = "regular"
-        val capacity = 1
-        AppointTime(0, 0, date, from, upto, kind, capacity)
-      }}
-    def appointTimes: List[AppointTime] =
-      insertDates.map(appointTimesForDate(_)).flatten
+      tuples.map {
+        case (from, upto) => {
+          val kind = "regular"
+          val capacity = 1
+          AppointTime(0, 0, date, from, upto, kind, capacity)
+        }
+      }
 
     for
       existingDates <- Db.listExistingAppointTimeDates(from, upto)
-      _ = ensureNoExistingDate(existingDates)
+      existingDatesExcluded = excludeExistingDates(
+        requestedDates,
+        existingDates
+      )
+      targetDates = existingDatesExcluded.filter(filterOperationDate(_))
+      appointTimes = targetDates.map(appointTimesForDate(_)).flatten
       _ <- Db.batchEnterAppointTimes(appointTimes).void
     yield ()
+
+  def listAppointTimes(
+      from: LocalDate,
+      upto: LocalDate
+  ): IO[List[AppointTime]] =
+    Db.listAppointTimes(from, upto)
+
+  def listAppointTimesForDate(date: LocalDate): IO[List[AppointTime]] =
+    listAppointTimes(date, date)
+
+  def printAppointTimes(date: LocalDate): IO[Unit] =
+    def format(a: AppointTime): String =
+      val detail =
+        if a.kind == "regular" then ""
+        else s" ${a.kind}(${a.capacity})"
+      s"${a.appointTimeId} ${a.date} ${a.fromTime}-${a.untilTime} ${detail}"
+
+    for
+      times <- listAppointTimesForDate(date)
+      _ <- times.map(a => IO.println(format(a))).sequence
+    yield ()
+
+  def convertAppointTime(
+      appointTimes: List[AppointTime],
+      kind: String,
+      capacity: Int
+  ): IO[AppointTime] =
+    assert(appointTimes.size > 0, "Empty appoint time list.")
+    assert(
+      AppointTime.isAdjacentRun(appointTimes),
+      "Adjacent appoint times expected."
+    )
+    def create(): AppointTime = 
+      val first: AppointTime = appointTimes.head
+      val last: AppointTime = appointTimes.last
+      AppointTime(0, 0, first.date, first.fromTime, last.untilTime, kind, capacity)
+    for 
+      _ <- Db.batchDeleteAppointTimes(appointTimes)
+      result <- Db.createAppointTime(create())
+    yield result
+
+  def getAppointTimeById(appointTimeId: Int): IO[AppointTime] =
+    Db.getAppointTimeById(appointTimeId)
 
 // def enterRegularAppointTimes(year: Int, month: Int): Unit =
 //   val lastDay = DateUtil.lastDayOfMonth(year, month)

@@ -1,8 +1,6 @@
 package dev.myclinic.scala.db
 
 import java.time._
-// import cats._
-// import cats.implicits._
 import doobie._
 import doobie.implicits._
 import dev.myclinic.scala.model.{AppointTime, Appoint, AppEvent}
@@ -17,8 +15,10 @@ object DbAppointPrim:
 
   def enterAppointTime(at: AppointTime): ConnectionIO[AppointTime] =
     val op = sql"""
-      insert into appoint_time (event_id, date, from_time, until_time, kind, capacity)
-      values(${at.eventId}, ${at.date}, ${at.fromTime}, ${at.untilTime}, ${at.kind}, ${at.capacity})
+      insert into appoint_time (event_id, date, from_time, until_time, 
+        kind, capacity)
+        values(${at.eventId}, ${at.date}, ${at.fromTime}, ${at.untilTime}, 
+        ${at.kind}, ${at.capacity})
     """
     for
       id <- op.update.withUniqueGeneratedKeys[Int]("appoint_time_id")
@@ -37,19 +37,50 @@ object DbAppointPrim:
 
   def deleteAppointTime(appointTimeId: Int): ConnectionIO[Unit] =
     sql"""
-      delete from appooint_time where appoint_time_id = ${appointTimeId}
+      delete from appoint_time where appoint_time_id = ${appointTimeId}
     """.update.run.map[Unit](affected =>
       if affected != 1 then
         throw new RuntimeException("Failed to delete appoint time.")
     )
+
+  def listExistingAppointTimeDates(
+      from: LocalDate,
+      upto: LocalDate
+  ): Query0[LocalDate] =
+    sql"""
+      select distinct date from appoint_time 
+        where date >= ${from} and date <= ${upto}
+    """.query[LocalDate]
+
+  def listAppointTimes(
+      from: LocalDate,
+      upto: LocalDate
+  ): Query0[AppointTime] =
+    sql"""
+      select * from appoint_time where date >= ${from} and
+        date <= ${upto} order by date, from_time
+    """.query[AppointTime]
+
+  def listAppointTimes(
+      date: LocalDate,
+      from: LocalTime,
+      upto: LocalTime
+  ): Query0[AppointTime] =
+    sql"""
+      select * from appoint_time where date = ${date} and
+        fromTime >= ${from} and fromTime <= ${upto}
+        order by date, from_time
+    """.query[AppointTime]
 
   def getAppoint(appointId: Int): Query0[Appoint] =
     sql"select * from appoint where appoint_id = ${appointId}".query[Appoint]
 
   def enterAppoint(a: Appoint): ConnectionIO[Appoint] =
     val op = sql"""
-      insert into appoint (event_id, appoint_time_id, patient_name, patient_id, memo) 
-        values (${a.eventId}, ${a.appointTimeId}, ${a.patientName}, ${a.patientId}, ${a.memo})
+      insert into appoint (event_id, appoint_time_id, patient_name, 
+        patient_id, memo) 
+        values (${a.eventId}, ${a.appointTimeId}, ${a.patientName}, 
+        ${a.patientId}, ${a.memo})
       """
     for
       id <- op.update.withUniqueGeneratedKeys[Int]("appoint_id")
@@ -76,7 +107,8 @@ object DbAppointPrim:
           throw new RuntimeException("Failed to delete appoint.")
     )
 
-  def listExistingAppointTimeDates(from: LocalDate, upto: LocalDate): Query0[LocalDate] =
+  def listAppointsForAppointTime(appointTimeId: Int): Query0[Appoint] =
     sql"""
-      select distinct date from appoint_time where date >= ${from} and date <= ${upto}
-    """.query[LocalDate]
+      select * from appoint where appoint_time_id = ${appointTimeId}
+        order by appoint_id
+    """.query[Appoint]

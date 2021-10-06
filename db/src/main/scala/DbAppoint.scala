@@ -23,11 +23,39 @@ trait DbAppoint extends Sqlite:
         .sequence_
     })
 
+  def createAppointTime(appointTime: AppointTime): IO[AppointTime] =
+    sqlite(Prim.enterAppointTime(appointTime))
+
+  private def safeDeleteAppointTime(appointTimeId: Int): ConnectionIO[Unit] =
+    for
+      appoints <- Prim.listAppointsForAppointTime(appointTimeId).to[List]
+      _ = if appoints.size > 0 then
+        throw new RuntimeException("Appoint exists.")
+      _ <- Prim.deleteAppointTime(appointTimeId)
+    yield ()
+
+  def batchDeleteAppointTimes(appointTimes: List[AppointTime]): IO[Unit] =
+    val op =
+      appointTimes.map(a => safeDeleteAppointTime(a.appointTimeId)).sequence
+    sqlite(op.void)
+
+  def deleteAppointTime(appointTimeId: Int): IO[Unit] =
+    sqlite(safeDeleteAppointTime(appointTimeId))
+
   def listExistingAppointTimeDates(
       from: LocalDate,
       upto: LocalDate
   ): IO[List[LocalDate]] =
     sqlite(Prim.listExistingAppointTimeDates(from, upto).to[List])
+
+  def listAppointTimes(
+      from: LocalDate,
+      upto: LocalDate
+  ): IO[List[AppointTime]] =
+    sqlite(Prim.listAppointTimes(from, upto).to[List])
+
+  def getAppointTimeById(appointTimeId: Int): IO[AppointTime] =
+    sqlite(Prim.getAppointTime(appointTimeId).unique)
 
 //   def getAppoint(date: LocalDate, time: LocalTime): IO[Appoint] =
 //     sqlite(DbAppointPrim.getAppoint(date, time).unique)
