@@ -15,7 +15,10 @@ import cats.effect.unsafe.implicits.global
 object AppointAdmin:
   extension [T](io: IO[T]) def run(): T = io.unsafeRunSync()
 
-  def fillAppointTimesUpto(from: LocalDate, upto: LocalDate): IO[Unit] =
+  def fillAppointTimesUpto(
+      from: LocalDate,
+      upto: LocalDate
+  ): IO[List[AppEvent]] =
     def requestedDates: List[LocalDate] =
       DateUtil
         .datesFrom(from)
@@ -96,8 +99,8 @@ object AppointAdmin:
       )
       targetDates = existingDatesExcluded.filter(filterOperationDate(_))
       appointTimes = targetDates.map(appointTimesForDate(_)).flatten
-      _ <- Db.batchEnterAppointTimes(appointTimes).void
-    yield ()
+      result <- Db.batchEnterAppointTimes(appointTimes)
+    yield result
 
   def listAppointTimes(
       from: LocalDate,
@@ -124,53 +127,35 @@ object AppointAdmin:
       appointTimes: List[AppointTime],
       kind: String,
       capacity: Int
-  ): IO[AppointTime] =
+  ): IO[(AppointTime, List[AppEvent])] =
     assert(appointTimes.size > 0, "Empty appoint time list.")
     assert(
       AppointTime.isAdjacentRun(appointTimes),
       "Adjacent appoint times expected."
     )
-    def create(): AppointTime = 
+    def create(): AppointTime =
       val first: AppointTime = appointTimes.head
       val last: AppointTime = appointTimes.last
-      AppointTime(0, 0, first.date, first.fromTime, last.untilTime, kind, capacity)
-    for 
-      _ <- Db.batchDeleteAppointTimes(appointTimes)
-      result <- Db.createAppointTime(create())
-    yield result
+      AppointTime(
+        0,
+        0,
+        first.date,
+        first.fromTime,
+        last.untilTime,
+        kind,
+        capacity
+      )
+    for
+      events <- Db.batchDeleteAppointTimes(appointTimes)
+      enteredWithEvent <- Db.createAppointTime(create())
+    yield enteredWithEvent match {
+      case (entered, event) => (entered, events ++ List(event))
+    }
 
   def getAppointTimeById(appointTimeId: Int): IO[AppointTime] =
     Db.getAppointTimeById(appointTimeId)
 
-// def enterRegularAppointTimes(year: Int, month: Int): Unit =
-//   val lastDay = DateUtil.lastDayOfMonth(year, month)
-//   for day <- 1 to lastDay do
-//     val date = LocalDate.of(year, month, day)
-//     val dow = date.getDayOfWeek
-//     val times = regularAppointTimes(dow)
-//     if !times.isEmpty then
-//       println(s"$year $month $day")
-//       println(times)
+  def addAppoint(a: Appoint): IO[(Appoint, AppEvent)] =
+    Db.addAppoint(a)
 
-// def regularAppointTimes(dayOfWeek: DayOfWeek): List[LocalTime] =
-//   dayOfWeek match {
-//       case SUNDAY | WEDNESDAY => List.empty
-//       case SATURDAY => saturdayAppointTimes
-//       case _ => regularDayAppointTimes
-//   }
 
-// def saturdayAppointTimes: List[LocalTime] =
-//   List(9, 10, 11).flatMap(regularAppointTimes(_))
-
-// def regularDayAppointTimes: List[LocalTime] =
-//   List(9, 10, 11, 14, 15, 16, 17).flatMap(regularAppointTimes(_))
-
-// private def regularAppointTimes(hour: Int): List[LocalTime] =
-//   hour match {
-//     case 9 => List(time(9, 40))
-//     case 17 => List(time(17, 0))
-//     case _ => List(time(hour, 0), time(hour, 20), time(hour, 40))
-//   }
-
-// private def time(hour: Int, minute: Int): LocalTime =
-//   LocalTime.of(hour, minute, 0)

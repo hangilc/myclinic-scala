@@ -15,31 +15,48 @@ trait DbAppoint extends Sqlite:
   private def withEventId[A](f: Int => ConnectionIO[A]): IO[A] =
     sqlite(DbEventPrim.withEventId(eventId => f(eventId)))
 
-  def batchEnterAppointTimes(appointTimes: List[AppointTime]): IO[Unit] =
+  private def enterWithEvent(
+      a: AppointTime
+  ): ConnectionIO[(AppointTime, AppEvent)] =
+    for
+      entered <- Prim.enterAppointTime(a)
+      event <- DbEventPrim.logAppointTimeCreated(entered)
+    yield (entered, event)
+
+  def batchEnterAppointTimes(
+      appointTimes: List[AppointTime]
+  ): IO[List[AppEvent]] =
     withEventId(eventId => {
-      appointTimes
-        .map(_.copy(eventId = eventId))
-        .map(at => Prim.enterAppointTime(at))
-        .sequence_
+      val ats = appointTimes.map(_.copy(eventId = eventId))
+      ats.map(at => enterWithEvent(at)).sequence.map(_.map(ae => ae._2))
     })
 
-  def createAppointTime(appointTime: AppointTime): IO[AppointTime] =
-    sqlite(Prim.enterAppointTime(appointTime))
+  def createAppointTime(appointTime: AppointTime): IO[(AppointTime, AppEvent)] =
+    withEventId(eventId => {
+      val a = appointTime.copy(eventId = eventId)
+      enterWithEvent(a)
+    })
 
-  private def safeDeleteAppointTime(appointTimeId: Int): ConnectionIO[Unit] =
+  private def safeDeleteAppointTime(
+      appointTimeId: Int
+  ): ConnectionIO[AppEvent] =
     for
+      at <- Prim.getAppointTime(appointTimeId).unique
       appoints <- Prim.listAppointsForAppointTime(appointTimeId).to[List]
       _ = if appoints.size > 0 then
         throw new RuntimeException("Appoint exists.")
       _ <- Prim.deleteAppointTime(appointTimeId)
-    yield ()
+      log <- DbEventPrim.logAppointTimeDeleted(at)
+    yield log
 
-  def batchDeleteAppointTimes(appointTimes: List[AppointTime]): IO[Unit] =
+  def batchDeleteAppointTimes(
+      appointTimes: List[AppointTime]
+  ): IO[List[AppEvent]] =
     val op =
       appointTimes.map(a => safeDeleteAppointTime(a.appointTimeId)).sequence
-    sqlite(op.void)
+    sqlite(op)
 
-  def deleteAppointTime(appointTimeId: Int): IO[Unit] =
+  def deleteAppointTime(appointTimeId: Int): IO[AppEvent] =
     sqlite(safeDeleteAppointTime(appointTimeId))
 
   def listExistingAppointTimeDates(
@@ -57,72 +74,21 @@ trait DbAppoint extends Sqlite:
   def getAppointTimeById(appointTimeId: Int): IO[AppointTime] =
     sqlite(Prim.getAppointTime(appointTimeId).unique)
 
-//   def getAppoint(date: LocalDate, time: LocalTime): IO[Appoint] =
-//     sqlite(DbAppointPrim.getAppoint(date, time).unique)
+  private def enterAppointWithEvent(
+      a: Appoint
+  ): ConnectionIO[(Appoint, AppEvent)] =
+    for
+      entered <- Prim.enterAppoint(a)
+      event <- DbEventPrim.logAppointCreated(entered)
+    yield (entered, event)
 
-//   def listAppoint(from: LocalDate, upto: LocalDate): IO[List[Appoint]] =
-//     sqlite(DbAppointPrim.listAppoint(from, upto).to[List])
-
-//   def createAppointTimes(
-//       times: List[(LocalDate, LocalTime)]
-//   ): IO[List[AppEvent]] =
-//     def seq(eventId: Int): ConnectionIO[List[AppEvent]] =
-//       times
-//         .map({ (d: LocalDate, t: LocalTime) =>
-//           {
-//             val app = Appoint(d, t, eventId, "", 0, "")
-//             DbAppointPrim.enterAppoint(app) *>
-//               AppEventHelper.enterAppointEvent(eventId, "created", app)
-//           }
-//         }.tupled)
-//         .sequence
-
-//     sqlite(DbEventPrim.withEventId(seq _))
-
-//   def createAppointTimes(
-//     year: Int, month: Int, day: Int,
-//     slots: (Int, Int)*
-//   ): IO[List[AppEvent]] =
-//     val date = LocalDate.of(year, month, day)
-//     val times = for
-//       ((h: Int, m: Int)) <- slots
-//     yield (date, LocalTime.of(h, m, 0))
-//     createAppointTimes(times.toList)
-
-//   def registerAppoint(a: Appoint): IO[AppEvent] =
-//     require(!a.patientName.isEmpty)
-
-//     sqlite(
-//       DbEventPrim.withEventId(eventId =>
-//         for
-//           cur <- DbAppointPrim.getAppoint(a.date, a.time).unique
-//           _ <- Helper.confirm(cur.isVacant, s"Appoint is not vacant: ${cur}")
-//           to = a.copy(eventId = eventId)
-//           _ <- DbAppointPrim.updateAppoint(to)
-//           appEvent <- AppEventHelper.enterAppointEvent(eventId, "updated", to)
-//         yield appEvent
-//       )
-//     )
-
-//   def cancelAppoint(
-//       date: LocalDate,
-//       time: LocalTime,
-//       patientName: String
-//   ): IO[AppEvent] =
-//     require(!patientName.isEmpty)
-
-//     sqlite(
-//       DbEventPrim.withEventId(eventId =>
-//         for
-//           cur <- DbAppointPrim.getAppoint(date, time).unique
-//           _ <- Helper.confirm(!cur.isVacant, s"Appoint is vacant: ${cur}")
-//           _ <- Helper.confirm(
-//             cur.patientName == patientName,
-//             s"Inconsistent patient names: ${patientName} != ${cur.patientName}"
-//           )
-//           to = Appoint(date, time, eventId, "", 0, "")
-//           _ <- DbAppointPrim.updateAppoint(to)
-//           appEvent <- AppEventHelper.enterAppointEvent(eventId, "updated", to)
-//         yield appEvent
-//       )
-//     )
+  def addAppoint(a: Appoint): IO[(Appoint, AppEvent)] =
+    withEventId(eventId => {
+      for
+        at <- Prim.getAppointTime(a.appointTimeId).unique
+        existing <- Prim.listAppointsForAppointTime(at.appointTimeId).to[List]
+        _ = if existing.size >= at.capacity then
+          throw new RuntimeException("Overbooking")
+        result <- enterAppointWithEvent(a.copy(eventId = eventId))
+      yield result
+    })

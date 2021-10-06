@@ -73,7 +73,8 @@ lazy val db = project
       "org.xerial" % "sqlite-jdbc" % sqliteVersion,
       "org.tpolecat" %% "doobie-core" % doobieVersion,
       "org.tpolecat" %% "doobie-hikari" % doobieVersion,
-      "org.http4s" %% "http4s-circe" % http4sVersion
+      "org.http4s" %% "http4s-circe" % http4sVersion,
+      "io.circe" %%% "circe-core" % circeVersion,
     ),
   )
 
