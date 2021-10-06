@@ -8,13 +8,17 @@ import dev.myclinic.scala.model.Appoint
 import dev.myclinic.scala.webclient.Api
 import concurrent.ExecutionContext.Implicits.global
 import scala.language.implicitConversions
+import dev.myclinic.scala.web.appoint.Misc
 
 private class CancelAppointDialogUI(appoint: Appoint) extends Dialog:
   title = "予約の取消"
   def onEnter(): Unit = ()
 
   content(
-    div(cls := "fw-bold text-center mb-2")(Misc.formatAppointDateTime(appoint)),
+    div(cls := "fw-bold text-center mb-2")(
+      "???"
+      //Misc.formatAppointDateTime(appoint)
+    ),
     div(cls := "fw-bold text-center")(appoint.patientName)
   )
 
@@ -39,6 +43,7 @@ object CancelAppointDialog:
     ui.open()
 
   def doCancel(appoint: Appoint, ui: Dialog): Unit =
-    Api
-      .cancelAppoint(appoint.date, appoint.time, appoint.patientName)
-      .onComplete[Unit](_ => ui.close())
+    ???
+    // Api
+    //   .cancelAppoint(appoint.date, appoint.time, appoint.patientName)
+    //   .onComplete[Unit](_ => ui.close())

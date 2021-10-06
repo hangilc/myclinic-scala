@@ -26,26 +26,25 @@ object AppointSheet:
   var dateRange: Option[(LocalDate, LocalDate)] = None
 
   def setupDateRange(from: LocalDate, upto: LocalDate): Future[Unit] =
-    for appoints <- Api.listAppoint(from, upto)
+    for appoints <- Api.listAppointTimes(from, upto)
     yield
-      Removing.broadcastRemoving(eles)
       AppointRow.init(appoints)
       dateRange = Some((from, upto))
 
   def setupTo(wrapper: Element): Unit =
     wrapper(eles)
 
-  case class AppointDate(date: LocalDate, appoints: List[Appoint])
+  case class AppointDate(date: LocalDate, appointTimes: List[AppointTime])
 
   object AppointDate:
-    def classify(appList: List[Appoint]): List[AppointDate] =
+    def classify(appList: List[AppointTime]): List[AppointDate] =
       val map = appList.groupBy(_.date)
       val result = for k <- map.keys yield AppointDate(k, map(k))
       result.toList.sortBy(_.date)
 
   object TopMenu:
     val prevWeekBinding, nextWeekBinding = ElementBinding()
-    val ele = div(
+    val ele = div(cls := "mb-2")(
       button(
         attr("type") := "button",
         cls := "btn btn-outline-primary",
@@ -54,7 +53,7 @@ object AppointSheet:
       ),
       button(
         attr("type") := "button",
-        cls := "btn btn-outline-primary",
+        cls := "btn btn-outline-primary ms-2",
         bindTo(nextWeekBinding),
         "次の週"
       )
@@ -89,10 +88,10 @@ object AppointSheet:
       div(cls := "row mx-0", bindTo(rowBinding))
     )
 
-    def init(appoints: List[Appoint]): Unit =
+    def init(appointTimes: List[AppointTime]): Unit =
       clear()
-      val appointDates = AppointDate.classify(appoints)
-      columns = appointDates.map(AppointColumn(_)).toList
+      val appointDates = AppointDate.classify(appointTimes)
+      columns = appointDates.map(AppointColumn.create(_)).toList
       columns.foreach(addElement _)
 
     def clear(): Unit =
@@ -101,68 +100,92 @@ object AppointSheet:
     def addElement(col: AppointColumn): Unit =
       rowBinding.element(col.ele)
 
-  case class AppointColumn(appointDate: AppointDate):
-
-    val date = appointDate.date
-    var slotsBinding = ElementBinding()
+  case class AppointColumn(date: LocalDate):
+    var boxBinding = ElementBinding()
+    val boxes: Array[AppointTimeBox] = Array()
     val ele = div(cls := "col-2")(
       div(dateRep),
-      div(bindTo(slotsBinding))
+      div(bindTo(boxBinding))
     )
-    var slots: Array[SlotRow] =
-      appointDate.appoints.map(app => SlotRow(app, this)).toArray
 
     def dateRep: String = Misc.formatAppointDate(date)
-    slots.foreach(s => slotsBinding.element(s.ele))
 
-    def replaceSlotBy(prev: SlotRow, slot: SlotRow): Unit =
-      val index = slots.indexOf(prev)
-      if index >= 0 then
-        slots(index) = slot
-        Removing.broadcastRemoving(prev.ele)
-        prev.ele.replaceBy(slot.ele)
+    def setAppointTimes(appointTimes: List[AppointTime]): Unit =
+      appointTimes.map(a => {
+        val box = AppointTimeBox(a)
+        boxes :+ box
+        boxBinding.element(box.ele)
+      })
 
-  case class SlotRow(appoint: Appoint, col: AppointColumn):
+  object AppointColumn:
+    def create(appointDate: AppointDate): AppointColumn =
+      val c = AppointColumn(appointDate.date)
+      c.setAppointTimes(appointDate.appointTimes)
+      c
 
-    val ele = div(style := "cursor: pointer", onclick := (onEleClick _))(
-      div(Misc.formatAppointTime(appoint.time)),
-      div(detail)
-    )
 
-    val modelEventHandler: ModelEvent => Unit = (_: @unchecked) match {
-      case AppointUpdated(updated) =>
-        if appoint.requireUpdate(updated) then
-          val newSlot = SlotRow(updated, col)
-          col.replaceSlotBy(this, newSlot)
-    }
-    ModelEventDispatcher.addHandler(modelEventHandler)
-    Removing.addRemovingListener(
-      ele,
-      () => ModelEventDispatcher.removeHandler(modelEventHandler)
-    )
+  case class AppointTimeBox(appointTime: AppointTime):
+    val ele = div()(timeLabel)
 
-    def detail: String =
-      if appoint.patientName.isEmpty then "（空）"
-      else appoint.patientName
+    def timeLabel: String = 
+      val f = Misc.formatAppointTime(appointTime.fromTime)
+      val u = Misc.formatAppointTime(appointTime.untilTime)
+      s"$f - $u"
 
-    def onEleClick(): Unit =
-      if appoint.isVacant then openMakeAppointDialog()
-      else openCancelAppointDialog()
 
-    def openMakeAppointDialog(): Unit =
-      MakeAppointDialog.open(
-        appoint,
-        name => {
-          Api
-            .registerAppoint(
-              Appoint(appoint.date, appoint.time, 0, name, 0, "")
-            )
-            .onComplete[Unit](_ match {
-              case Success(_)         => println("Success")
-              case Failure(exception) => println(("failure", exception))
-            })
-        }
-      )
+    // var slots: Array[SlotRow] =
+    //   appointDate.appoints.map(app => SlotRow(app, this)).toArray
 
-    def openCancelAppointDialog(): Unit =
-      CancelAppointDialog.open(appoint)
+    // slots.foreach(s => slotsBinding.element(s.ele))
+
+    // def replaceSlotBy(prev: SlotRow, slot: SlotRow): Unit =
+    //   val index = slots.indexOf(prev)
+    //   if index >= 0 then
+    //     slots(index) = slot
+    //     Removing.broadcastRemoving(prev.ele)
+    //     prev.ele.replaceBy(slot.ele)
+
+  // case class SlotRow(appointTime: AppointTime, col: AppointColumn):
+
+  //   val ele = div(style := "cursor: pointer", onclick := (onEleClick _))(
+  //     div(Misc.formatAppointTime(appointTime.fromTime)),
+  //     div(detail)
+  //   )
+
+    // val modelEventHandler: ModelEvent => Unit = (_: @unchecked) match {
+    //   case AppointUpdated(updated) =>
+    //     if appoint.requireUpdate(updated) then
+    //       val newSlot = SlotRow(updated, col)
+    //       col.replaceSlotBy(this, newSlot)
+    // }
+    // ModelEventDispatcher.addHandler(modelEventHandler)
+    // Removing.addRemovingListener(
+    //   ele,
+    //   () => ModelEventDispatcher.removeHandler(modelEventHandler)
+    // )
+
+    // def detail: String =
+    //   if appoint.patientName.isEmpty then "（空）"
+    //   else appoint.patientName
+
+    // def onEleClick(): Unit =
+    //   if appoint.isVacant then openMakeAppointDialog()
+    //   else openCancelAppointDialog()
+
+    // def openMakeAppointDialog(): Unit =
+    //   MakeAppointDialog.open(
+    //     appoint,
+    //     name => {
+    //       Api
+    //         .registerAppoint(
+    //           Appoint(appoint.date, appoint.time, 0, name, 0, "")
+    //         )
+    //         .onComplete[Unit](_ match {
+    //           case Success(_)         => println("Success")
+    //           case Failure(exception) => println(("failure", exception))
+    //         })
+    //     }
+    //   )
+
+    // def openCancelAppointDialog(): Unit =
+    //   CancelAppointDialog.open(appoint)

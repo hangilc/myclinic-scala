@@ -38,7 +38,7 @@ object RestService:
   case class UserError(message: String) extends Exception
 
   def hello(): IO[String] =
-    throw new UserError("さようなら")
+    //throw new UserError("さようなら")
     "こんにちは".pure[IO]
 
   def routes(using topic: Topic[IO, WebSocketFrame]) = HttpRoutes.of[IO] {
@@ -46,48 +46,49 @@ object RestService:
     case GET -> Root / "hello" => {
       try Ok(hello())
       catch
-        case e: UserError => BadRequest(e.message, "X-User-Error" -> "true") 
+        case e: UserError => BadRequest(e.message, "X-User-Error" -> "true")
         case e: Exception => throw e
 
     }
 
-    case GET -> Root / "list-appoint" :? dateFrom(from) +& dateUpto(upto) =>
-      Ok(Db.listAppoint(from, upto))
+    case GET -> Root / "list-appoint-times" :? dateFrom(from) +& dateUpto(
+          upto
+        ) =>
+      Ok(Db.listAppointTimes(from, upto))
 
-    case req @ POST -> Root / "register-appoint" => {
-      val op = for
-        appoint <- req.as[Appoint]
-        appEvent <- Db.registerAppoint(appoint)
-        _ <- topic.publish1(Text(appEvent.asJson.toString()))
-      yield "ok".asJson
-      Ok(op)
-    }
+    // case req @ POST -> Root / "register-appoint" => {
+    //   val op = for
+    //     appoint <- req.as[Appoint]
+    //     appEvent <- Db.registerAppoint(appoint)
+    //     _ <- topic.publish1(Text(appEvent.asJson.toString()))
+    //   yield "ok".asJson
+    //   Ok(op)
+    // }
 
-    case req @ POST -> Root / "cancel-appoint" :? dateDate(date) +& timeTime(
-          time
-        ) +& nameString(name) => {
-      val op = for
-        appEvent <- Db.cancelAppoint(date, time, name)
-        _ <- topic.publish1(Text(appEvent.asJson.toString()))
-      yield "ok".asJson
-      Ok(op)
-    }
+    // case req @ POST -> Root / "cancel-appoint" :? dateDate(date) +& timeTime(
+    //       time
+    //     ) +& nameString(name) => {
+    //   val op = for
+    //     appEvent <- Db.cancelAppoint(date, time, name)
+    //     _ <- topic.publish1(Text(appEvent.asJson.toString()))
+    //   yield "ok".asJson
+    //   Ok(op)
+    // }
 
-    case GET -> Root / "get-appoint" :? dateDate(date) +& timeTime(time) => {
-      Ok(Db.getAppoint(date, time))
-    }
+    // case GET -> Root / "get-appoint" :? dateDate(date) +& timeTime(time) => {
+    //   Ok(Db.getAppoint(date, time))
+    // }
 
-    case GET -> Root / "get-next-app-event-id" => {
-      Ok(Db.nextGlobalEventId())
-    }
+    // case GET -> Root / "get-next-app-event-id" => {
+    //   Ok(Db.nextGlobalEventId())
+    // }
 
-    case GET -> Root / "list-app-event-since" :? intFrom(from) => {
-      Ok(Db.listGlobalEventSince(from))
-    }
+    // case GET -> Root / "list-app-event-since" :? intFrom(from) => {
+    //   Ok(Db.listGlobalEventSince(from))
+    // }
 
-    case GET -> Root / "list-app-event-in-range" :? intFrom(from) +& intUntil(until) => {
-      Ok(Db.listGlobalEventInRange(from, until))
-    }
+    // case GET -> Root / "list-app-event-in-range" :? intFrom(from) +& intUntil(until) => {
+    //   Ok(Db.listGlobalEventInRange(from, until))
+    // }
 
   }
-

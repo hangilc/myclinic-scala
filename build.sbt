@@ -12,8 +12,6 @@ val doobieVersion = "1.0.0-M5"
 val circeVersion = "0.14.1"
 val scalaJavaTimeVersion = "2.3.0"
 val scalaJSDomVersion = "1.1.0"
-val tapirVersion = "0.19.0-M8"
-val tapirDocVersion = "0.19.0-M4"
 
 ThisBuild / scalacOptions ++= Seq("-deprecation", "-encoding", "UTF-8")
 

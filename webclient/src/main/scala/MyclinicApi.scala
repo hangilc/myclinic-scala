@@ -27,24 +27,27 @@ object Api:
   def hello(): Future[String] = 
     get("hello", Params())
 
-  def listAppoint(from: LocalDate, upto: LocalDate): Future[List[Appoint]] = 
-    get("list-appoint", Params("from" -> from, "upto" -> upto))
+  def listAppointTimes(from: LocalDate, upto: LocalDate): Future[List[AppointTime]] =
+    get("list-appoint-times", Params("from" -> from, "upto" -> upto))
+
+  // def listAppoint(from: LocalDate, upto: LocalDate): Future[List[Appoint]] = 
+  //   get("list-appoint", Params("from" -> from, "upto" -> upto))
   
-  def registerAppoint(appoint: Appoint): Future[String] =
-    post("register-appoint", Params(), appoint)
+  // def registerAppoint(appoint: Appoint): Future[String] =
+  //   post("register-appoint", Params(), appoint)
 
-  def cancelAppoint(date: LocalDate, time: LocalTime, patientName: String): Future[String] = 
-    post("cancel-appoint", Params("date" -> date, "time" -> time, "name" -> patientName), "")
+  // def cancelAppoint(date: LocalDate, time: LocalTime, patientName: String): Future[String] = 
+  //   post("cancel-appoint", Params("date" -> date, "time" -> time, "name" -> patientName), "")
 
-  def getAppoint(date: LocalDate, time: LocalTime): Future[Appoint] =
-    get("get-appoint", Params("date" -> date, "time" -> time))
+  // def getAppoint(date: LocalDate, time: LocalTime): Future[Appoint] =
+  //   get("get-appoint", Params("date" -> date, "time" -> time))
 
-  def getNextAppEventId(): Future[Int] = 
-    get("get-next-app-event-id", Params())
+  // def getNextAppEventId(): Future[Int] = 
+  //   get("get-next-app-event-id", Params())
 
-  def listAppEventSince(fromEventId: Int): Future[List[AppEvent]] =
-    get("list-app-event-since", Params("from" -> fromEventId))
+  // def listAppEventSince(fromEventId: Int): Future[List[AppEvent]] =
+  //   get("list-app-event-since", Params("from" -> fromEventId))
 
-  def listAppEventInRange(fromEventId: Int, untilEventId: Int): Future[List[AppEvent]] =
-    get("list-app-event-in-range", Params("from" -> fromEventId, "upto" -> untilEventId))
+  // def listAppEventInRange(fromEventId: Int, untilEventId: Int): Future[List[AppEvent]] =
+  //   get("list-app-event-in-range", Params("from" -> fromEventId, "upto" -> untilEventId))
 
