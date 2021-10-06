@@ -5,6 +5,7 @@ import dev.fujiwara.domq.ElementQ.{given, *}
 import dev.fujiwara.domq.Html.{given, *}
 import dev.fujiwara.domq.Modifiers.{given, *}
 import dev.myclinic.scala.model._
+import dev.myclinic.scala.util.DateUtil
 import org.scalajs.dom.raw.Element
 
 import java.time.LocalDate
@@ -12,6 +13,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Failure
 import scala.util.Success
 import scala.concurrent.Future
+import scala.collection.mutable
 import dev.myclinic.scala.webclient.Api
 import dev.myclinic.scala.web.appoint.Events.ModelEvent
 import dev.myclinic.scala.web.appoint.Events.AppointUpdated
@@ -21,15 +23,28 @@ import dev.myclinic.scala.web.appoint.Removing
 import dev.myclinic.scala.web.appoint.Misc
 import dev.myclinic.scala.web.appoint.ModelEventDispatcher
 import dev.myclinic.scala.web.appointTime.sheet.MakeAppointDialog
+import cats.syntax.all._
 
 object AppointSheet:
   val eles = div(TopMenu.ele, AppointRow.ele)
   var dateRange: Option[(LocalDate, LocalDate)] = None
 
   def setupDateRange(from: LocalDate, upto: LocalDate): Future[Unit] =
-    for appoints <- Api.listAppointTimes(from, upto)
+    val dates = DateUtil.enumDates(from, upto)
+    var appMap: mutable.Map[LocalDate, List[Appoint]] = mutable.Map()
+    for
+      appointTimes <- Api.listAppointTimes(from, upto)
+      _ <- dates
+        .map(d => {
+          for
+            appoints <- Api.listAppointsForDate(d)
+            _ = appMap(d) = appoints
+          yield ()
+        })
+        .sequence
+        .void
     yield
-      AppointRow.init(appoints)
+      AppointRow.init(appointTimes, appMap.toMap)
       dateRange = Some((from, upto))
 
   def setupTo(wrapper: Element): Unit =
@@ -89,7 +104,11 @@ object AppointSheet:
       div(cls := "row mx-0", bindTo(rowBinding))
     )
 
-    def init(appointTimes: List[AppointTime]): Unit =
+    def init(
+        appointTimes: List[AppointTime],
+        appointMap: Map[LocalDate, List[Appoint]]
+    ): Unit =
+      println(("appoint-map", appointMap))
       clear()
       val appointDates = AppointDate.classify(appointTimes)
       columns = appointDates.map(AppointColumn.create(_)).toList
@@ -134,13 +153,16 @@ object AppointSheet:
       s"$f - $u"
 
     def onEleClick(): Unit =
-      MakeAppointDialog.open(appointTime, name => {
-        val app = Appoint(0, 0, appointTime.appointTimeId, name, 0, "")
-        Api.registerAppoint(app)
-      })
+      MakeAppointDialog.open(
+        appointTime,
+        name => {
+          val app = Appoint(0, 0, appointTime.appointTimeId, name, 0, "")
+          Api.registerAppoint(app)
+        }
+      )
 
 // var slots: Array[SlotRow] =
-//   appointDate.appoints.map(app => SlotRow(app, this)).toArray
+//   appointDate.appointTimes.map(app => SlotRow(app, this)).toArray
 
 // slots.foreach(s => slotsBinding.element(s.ele))
 

@@ -112,3 +112,10 @@ object DbAppointPrim:
       select * from appoint where appoint_time_id = ${appointTimeId}
         order by appoint_id
     """.query[Appoint]
+
+  def listAppointsForDate(date: LocalDate): Query0[Appoint] =
+    sql"""
+      select a.* from appoint as a inner join appoint_time as at
+        on a.appoint_time_id = at.appoint_time_id 
+        where at.date = ${date}
+    """.query[Appoint]

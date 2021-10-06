@@ -92,3 +92,9 @@ trait DbAppoint extends Sqlite:
         result <- enterAppointWithEvent(a.copy(eventId = eventId))
       yield result
     })
+
+  def listAppointsForAppointTime(appointTimeId: Int): IO[List[Appoint]] =
+    sqlite(Prim.listAppointsForAppointTime(appointTimeId).to[List])
+
+  def listAppointsForDate(date: LocalDate): IO[List[Appoint]] =
+    sqlite(Prim.listAppointsForDate(date).to[List])

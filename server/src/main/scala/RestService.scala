@@ -34,6 +34,8 @@ object RestService:
   object nameString extends QueryParamDecoderMatcher[String]("name")
   object intFrom extends QueryParamDecoderMatcher[Int]("from")
   object intUntil extends QueryParamDecoderMatcher[Int]("until")
+  object intAppointTimeId
+      extends QueryParamDecoderMatcher[Int]("appoint-time-id")
 
   case class UserError(message: String) extends Exception
 
@@ -64,6 +66,16 @@ object RestService:
         _ <- topic.publish1(Text(appEvent.asJson.toString()))
       yield entered
       Ok(op)
+    }
+
+    case GET -> Root / "list-appoints-for-appoint-time" :? intAppointTimeId(
+          appointTimeId
+        ) => {
+          Ok(Db.listAppointsForAppointTime(appointTimeId))
+        }
+
+    case GET -> Root / "list-appoints-for-date" :? dateDate(date) => {
+      Ok(Db.listAppointsForDate(date))
     }
 
     // case req @ POST -> Root / "register-appoint" => {

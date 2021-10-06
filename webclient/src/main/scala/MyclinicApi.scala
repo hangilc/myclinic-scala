@@ -17,40 +17,50 @@ object Api:
   ): Future[T] =
     Ajax.request("GET", url(service), params, "")
 
-  def post[B, T](service: String, params: Params, body: B)(
-      using
+  def post[B, T](service: String, params: Params, body: B)(using
       Encoder[B],
       Decoder[T]
   ): Future[T] =
     Ajax.request("POST", url(service), params, body.asJson.toString())
 
-  def hello(): Future[String] = 
+  def hello(): Future[String] =
     get("hello", Params())
 
-  def listAppointTimes(from: LocalDate, upto: LocalDate): Future[List[AppointTime]] =
+  def listAppointTimes(
+      from: LocalDate,
+      upto: LocalDate
+  ): Future[List[AppointTime]] =
     get("list-appoint-times", Params("from" -> from, "upto" -> upto))
 
   def registerAppoint(appoint: Appoint): Future[Appoint] =
     post("register-appoint", Params(), appoint)
 
-  // def listAppoint(from: LocalDate, upto: LocalDate): Future[List[Appoint]] = 
-  //   get("list-appoint", Params("from" -> from, "upto" -> upto))
-  
-  // def registerAppoint(appoint: Appoint): Future[String] =
-  //   post("register-appoint", Params(), appoint)
+  def listAppointsForAppointTime(appointTimeId: Int): Future[List[Appoint]] =
+    get(
+      "list-appoints-for-appoint-time",
+      Params("appoint-time-id" -> appointTimeId)
+    )
 
-  // def cancelAppoint(date: LocalDate, time: LocalTime, patientName: String): Future[String] = 
-  //   post("cancel-appoint", Params("date" -> date, "time" -> time, "name" -> patientName), "")
+  def listAppointsForDate(date: LocalDate): Future[List[Appoint]] =
+    get("list-appoints-for-date", Params("date" -> date))
 
-  // def getAppoint(date: LocalDate, time: LocalTime): Future[Appoint] =
-  //   get("get-appoint", Params("date" -> date, "time" -> time))
+// def listAppoint(from: LocalDate, upto: LocalDate): Future[List[Appoint]] =
+//   get("list-appoint", Params("from" -> from, "upto" -> upto))
 
-  // def getNextAppEventId(): Future[Int] = 
-  //   get("get-next-app-event-id", Params())
+// def registerAppoint(appoint: Appoint): Future[String] =
+//   post("register-appoint", Params(), appoint)
 
-  // def listAppEventSince(fromEventId: Int): Future[List[AppEvent]] =
-  //   get("list-app-event-since", Params("from" -> fromEventId))
+// def cancelAppoint(date: LocalDate, time: LocalTime, patientName: String): Future[String] =
+//   post("cancel-appoint", Params("date" -> date, "time" -> time, "name" -> patientName), "")
 
-  // def listAppEventInRange(fromEventId: Int, untilEventId: Int): Future[List[AppEvent]] =
-  //   get("list-app-event-in-range", Params("from" -> fromEventId, "upto" -> untilEventId))
+// def getAppoint(date: LocalDate, time: LocalTime): Future[Appoint] =
+//   get("get-appoint", Params("date" -> date, "time" -> time))
 
+// def getNextAppEventId(): Future[Int] =
+//   get("get-next-app-event-id", Params())
+
+// def listAppEventSince(fromEventId: Int): Future[List[AppEvent]] =
+//   get("list-app-event-since", Params("from" -> fromEventId))
+
+// def listAppEventInRange(fromEventId: Int, untilEventId: Int): Future[List[AppEvent]] =
+//   get("list-app-event-in-range", Params("from" -> fromEventId, "upto" -> untilEventId))

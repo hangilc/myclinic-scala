@@ -31,6 +31,3 @@ create table if not exists event_id_store (
     id int primary key not null,
     event_id int not null
 );
-
-
-

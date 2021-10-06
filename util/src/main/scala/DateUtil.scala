@@ -59,15 +59,17 @@ object DateUtil:
   def youbi(date: LocalDate): String = youbi(date.getDayOfWeek)
 
   def youbi(dayOfWeek: DayOfWeek): String = dayOfWeek match {
-    case SUNDAY => "日"
-    case MONDAY => "月"
-    case TUESDAY => "火"
+    case SUNDAY    => "日"
+    case MONDAY    => "月"
+    case TUESDAY   => "火"
     case WEDNESDAY => "水"
-    case THURSDAY => "木"
-    case FRIDAY => "金"
-    case SATURDAY => "土"
+    case THURSDAY  => "木"
+    case FRIDAY    => "金"
+    case SATURDAY  => "土"
   }
 
   def datesFrom(date: LocalDate): LazyList[LocalDate] =
     LazyList.unfold(date)(date => Some(date, date.plus(1, DAYS)))
 
+  def enumDates(from: LocalDate, upto: LocalDate): List[LocalDate] =
+    datesFrom(from).takeWhile(d => d.isBefore(upto) || d.isEqual(upto)).toList
