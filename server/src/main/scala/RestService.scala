@@ -78,7 +78,17 @@ object RestService:
       Ok(Db.listAppointsForDate(date))
     }
 
-    // case req @ POST -> Root / "register-appoint" => {
+    case GET -> Root / "get-next-app-event-id" => Ok(Db.nextGlobalEventId())
+
+    case GET -> Root / "list-app-event-since" :? intFrom(from) => {
+      Ok(Db.listGlobalEventSince(from))
+    }
+
+    case GET -> Root / "list-app-event-in-range" :? intFrom(from) +& intUntil(until) => {
+      Ok(Db.listGlobalEventInRange(from, until))
+    }
+
+  // case req @ POST -> Root / "register-appoint" => {
     //   val op = for
     //     appoint <- req.as[Appoint]
     //     appEvent <- Db.registerAppoint(appoint)
@@ -105,12 +115,5 @@ object RestService:
     //   Ok(Db.nextGlobalEventId())
     // }
 
-    // case GET -> Root / "list-app-event-since" :? intFrom(from) => {
-    //   Ok(Db.listGlobalEventSince(from))
-    // }
-
-    // case GET -> Root / "list-app-event-in-range" :? intFrom(from) +& intUntil(until) => {
-    //   Ok(Db.listGlobalEventInRange(from, until))
-    // }
 
   }

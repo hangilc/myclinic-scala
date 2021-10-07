@@ -44,6 +44,15 @@ object Api:
   def listAppointsForDate(date: LocalDate): Future[List[Appoint]] =
     get("list-appoints-for-date", Params("date" -> date))
 
+  def getNextAppEventId(): Future[Int] =
+    get("get-next-app-event-id", Params())
+
+  def listAppEventSince(fromEventId: Int): Future[List[AppEvent]] =
+    get("list-app-event-since", Params("from" -> fromEventId))
+
+  def listAppEventInRange(fromEventId: Int, untilEventId: Int): Future[List[AppEvent]] =
+    get("list-app-event-in-range", Params("from" -> fromEventId, "upto" -> untilEventId))
+
 // def listAppoint(from: LocalDate, upto: LocalDate): Future[List[Appoint]] =
 //   get("list-appoint", Params("from" -> from, "upto" -> upto))
 
@@ -56,11 +65,3 @@ object Api:
 // def getAppoint(date: LocalDate, time: LocalTime): Future[Appoint] =
 //   get("get-appoint", Params("date" -> date, "time" -> time))
 
-// def getNextAppEventId(): Future[Int] =
-//   get("get-next-app-event-id", Params())
-
-// def listAppEventSince(fromEventId: Int): Future[List[AppEvent]] =
-//   get("list-app-event-since", Params("from" -> fromEventId))
-
-// def listAppEventInRange(fromEventId: Int, untilEventId: Int): Future[List[AppEvent]] =
-//   get("list-app-event-in-range", Params("from" -> fromEventId, "upto" -> untilEventId))
