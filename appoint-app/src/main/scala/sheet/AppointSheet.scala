@@ -154,7 +154,7 @@ object AppointSheet:
       appointMap: Map[AppointTimeId, List[Appoint]]
   ):
     var boxBinding = ElementBinding()
-    val boxes: Array[AppointTimeBox] = Array()
+    var boxes: Array[AppointTimeBox] = Array()
     val ele = div(cls := "col-2")(
       div(dateRep),
       div(bindTo(boxBinding))
@@ -166,7 +166,7 @@ object AppointSheet:
       appointTimes.map(a => {
         val box =
           AppointTimeBox(a, appointMap.getOrElse(a.appointTimeId, List.empty))
-        boxes :+ box
+        boxes = boxes :+ box
         boxBinding.element(box.ele)
       })
     
