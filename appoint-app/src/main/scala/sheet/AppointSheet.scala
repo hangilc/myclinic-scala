@@ -24,38 +24,55 @@ import dev.myclinic.scala.web.appoint.Misc
 import dev.myclinic.scala.web.appoint.ModelEventDispatcher
 import dev.myclinic.scala.web.appointTime.sheet.MakeAppointDialog
 import cats.syntax.all._
+import cats.implicits._
+import cats.Monoid
 
 object AppointSheet:
   val eles = div(TopMenu.ele, AppointRow.ele)
   var dateRange: Option[(LocalDate, LocalDate)] = None
+  type AppointTimeId = Int
 
   def setupDateRange(from: LocalDate, upto: LocalDate): Future[Unit] =
     val dates = DateUtil.enumDates(from, upto)
-    var appMap: mutable.Map[LocalDate, List[Appoint]] = mutable.Map()
+    var appointList: List[List[Appoint]] = List.empty
     for
       appointTimes <- Api.listAppointTimes(from, upto)
       _ <- dates
         .map(d => {
           for
             appoints <- Api.listAppointsForDate(d)
-            _ = appMap(d) = appoints
+            _ = appointList = appoints :: appointList
           yield ()
         })
         .sequence
         .void
     yield
-      AppointRow.init(appointTimes, appMap.toMap)
+      AppointRow.init(appointTimes, makeAppointMap(appointList.flatten))
       dateRange = Some((from, upto))
+
+  def makeAppointMap(
+      appoints: List[Appoint]
+  ): Map[AppointTimeId, List[Appoint]] =
+    Monoid[Map[AppointTimeId, List[Appoint]]].combineAll(
+      appoints.map(app => Map(app.appointTimeId -> List(app)))
+    )
 
   def setupTo(wrapper: Element): Unit =
     wrapper(eles)
 
-  case class AppointDate(date: LocalDate, appointTimes: List[AppointTime])
+  case class AppointDate(
+      date: LocalDate,
+      appointTimes: List[AppointTime],
+      appointMap: Map[AppointTimeId, List[Appoint]]
+  )
 
   object AppointDate:
-    def classify(appList: List[AppointTime]): List[AppointDate] =
+    def classify(
+        appList: List[AppointTime],
+        appointMap: Map[AppointTimeId, List[Appoint]]
+    ): List[AppointDate] =
       val map = appList.groupBy(_.date)
-      val result = for k <- map.keys yield AppointDate(k, map(k))
+      val result = for k <- map.keys yield AppointDate(k, map(k), appointMap)
       result.toList.sortBy(_.date)
 
   object TopMenu:
@@ -106,12 +123,11 @@ object AppointSheet:
 
     def init(
         appointTimes: List[AppointTime],
-        appointMap: Map[LocalDate, List[Appoint]]
+        appointMap: Map[AppointTimeId, List[Appoint]]
     ): Unit =
-      println(("appoint-map", appointMap))
       clear()
-      val appointDates = AppointDate.classify(appointTimes)
-      columns = appointDates.map(AppointColumn.create(_)).toList
+      val appointDates = AppointDate.classify(appointTimes, appointMap)
+      columns = appointDates.map(AppointColumn.create(_, appointMap)).toList
       columns.foreach(addElement _)
 
     def clear(): Unit =
@@ -120,7 +136,10 @@ object AppointSheet:
     def addElement(col: AppointColumn): Unit =
       rowBinding.element(col.ele)
 
-  case class AppointColumn(date: LocalDate):
+  case class AppointColumn(
+      date: LocalDate,
+      appointMap: Map[AppointTimeId, List[Appoint]]
+  ):
     var boxBinding = ElementBinding()
     val boxes: Array[AppointTimeBox] = Array()
     val ele = div(cls := "col-2")(
@@ -132,18 +151,24 @@ object AppointSheet:
 
     def setAppointTimes(appointTimes: List[AppointTime]): Unit =
       appointTimes.map(a => {
-        val box = AppointTimeBox(a)
+        val box = AppointTimeBox(a, appointMap.getOrElse(a.appointTimeId, List.empty))
         boxes :+ box
         boxBinding.element(box.ele)
       })
 
   object AppointColumn:
-    def create(appointDate: AppointDate): AppointColumn =
-      val c = AppointColumn(appointDate.date)
+    def create(
+        appointDate: AppointDate,
+        appointMap: Map[AppointTimeId, List[Appoint]]
+    ): AppointColumn =
+      val c = AppointColumn(appointDate.date, appointMap)
       c.setAppointTimes(appointDate.appointTimes)
       c
 
-  case class AppointTimeBox(appointTime: AppointTime):
+  case class AppointTimeBox(
+      appointTime: AppointTime,
+      appoints: List[Appoint]
+  ):
     val ele =
       div(style := "cursor: pointer", onclick := (onEleClick _))(timeLabel)
 
