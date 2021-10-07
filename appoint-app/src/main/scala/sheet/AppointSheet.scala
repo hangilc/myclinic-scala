@@ -15,13 +15,12 @@ import scala.util.Success
 import scala.concurrent.Future
 import scala.collection.mutable
 import dev.myclinic.scala.webclient.Api
-import dev.myclinic.scala.web.appoint.Events.ModelEvent
-import dev.myclinic.scala.web.appoint.Events.AppointUpdated
+import dev.myclinic.scala.event.ModelEvents.ModelEvent
+import dev.myclinic.scala.event.ModelEvents.{AppointUpdated, AppointCreated, AppointDeleted}
 import scala.language.implicitConversions
 import org.scalajs.dom.raw.MouseEvent
 import dev.myclinic.scala.web.appoint.Removing
 import dev.myclinic.scala.web.appoint.Misc
-import dev.myclinic.scala.web.appoint.ModelEventDispatcher
 import dev.myclinic.scala.web.appointTime.sheet.MakeAppointDialog
 import cats.syntax.all._
 import cats.implicits._
