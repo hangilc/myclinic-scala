@@ -28,6 +28,7 @@ import dev.myclinic.scala.web.appointTime.sheet.MakeAppointDialog
 import cats.syntax.all._
 import cats.implicits._
 import cats.Monoid
+import dev.myclinic.scala.event.getMaxEventId
 
 object AppointSheet:
   val eles = div(TopMenu.ele, AppointRow.ele)
@@ -49,9 +50,6 @@ object AppointSheet:
         .sequence
         .void
     yield
-      import dev.myclinic.scala.event.getMaxEventId
-      // println(getMaxEventId(appointTimes))
-      // println(getMaxEventId(appointList.flatten))
       AppointRow.init(appointTimes, makeAppointMap(appointList.flatten))
       dateRange = Some((from, upto))
 
@@ -127,12 +125,18 @@ object AppointSheet:
       div(cls := "row mx-0", bindTo(rowBinding))
     )
 
-    ModelEventPublishers.appointCreated.subscribe(onAppointCreated)
+    val appointCreatedSubscriber =
+      ModelEventPublishers.appointCreated.subscribe(onAppointCreated)
 
     def init(
         appointTimes: List[AppointTime],
         appointMap: Map[AppointTimeId, List[Appoint]]
     ): Unit =
+      appointCreatedSubscriber.stop()
+      val maxEventId = getMaxEventId(appointTimes)
+        .max(getMaxEventId(
+          
+        ))
       clear()
       AppointRow.appointTimes = appointTimes
       val appointDates = AppointDate.classify(appointTimes, appointMap)

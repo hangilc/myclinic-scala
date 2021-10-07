@@ -14,21 +14,22 @@ def getMaxEventId[F[_]: Foldable](as: F[Evented]): Int =
 
 object ModelEvents {
 
-  sealed trait ModelEvent
-  case class AppointCreated(created: Appoint) extends ModelEvent
-  case class AppointUpdated(updated: Appoint) extends ModelEvent
-  case class AppointDeleted(deleted: Appoint) extends ModelEvent
-  case class Unknown(orig: AppEvent) extends ModelEvent
+  sealed trait ModelEvent(val eventId: Int)
+  case class AppointCreated(eventIdArg: Int, created: Appoint) extends ModelEvent(eventIdArg)
+  case class AppointUpdated(eventIdArg: Int, updated: Appoint) extends ModelEvent(eventIdArg)
+  case class AppointDeleted(eventIdArg: Int, deleted: Appoint) extends ModelEvent(eventIdArg)
+  case class Unknown(eventIdArg: Int, orig: AppEvent) extends ModelEvent(eventIdArg)
 
-  def convert(appEvent: AppEvent): ModelEvent = appEvent match
-    case AppEvent(_, _, _, "appoint", kind, encodedData) => {
-      val data = decode[Appoint](encodedData) match
-        case Right(value) => value
-        case Left(ex) => throw ex
-      kind match
-        case "created" => AppointCreated(data)
-        case "updated" => AppointUpdated(data)
-        case "deleted" => AppointDeleted(data)
+  def convert(appEvent: AppEvent): ModelEvent = 
+    appEvent.model match {
+      case "appoint" => 
+        val data = decode[Appoint](appEvent.data) match
+          case Right(value) => value
+          case Left(ex) => throw ex
+        appEvent.kind match
+          case "created" => AppointCreated(appEvent.eventId, data)
+          case "updated" => AppointUpdated(appEvent.eventId, data)
+          case "deleted" => AppointDeleted(appEvent.eventId, data)
+      case _ => Unknown(appEvent.eventId, appEvent)
     }
-    case _ => Unknown(appEvent)
 }
