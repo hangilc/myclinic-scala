@@ -7,6 +7,10 @@ import io.circe.parser.decode
 import dev.myclinic.scala.modeljson.Implicits.{given}
 import scala.util.Success
 import scala.util.Failure
+import cats.Foldable
+
+def getMaxEventId[F[_]: Foldable](as: F[Evented]): Int =
+  summon[Foldable[F]].foldLeft(as, 0)((acc, ele) => acc.max(ele.eventId))
 
 object ModelEvents {
 

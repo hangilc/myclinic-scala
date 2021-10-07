@@ -49,6 +49,9 @@ object AppointSheet:
         .sequence
         .void
     yield
+      import dev.myclinic.scala.event.getMaxEventId
+      // println(getMaxEventId(appointTimes))
+      // println(getMaxEventId(appointList.flatten))
       AppointRow.init(appointTimes, makeAppointMap(appointList.flatten))
       dateRange = Some((from, upto))
 

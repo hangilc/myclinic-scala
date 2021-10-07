@@ -12,7 +12,7 @@ case class AppointTime(
     untilTime: LocalTime,
     kind: String,
     capacity: Int
-):
+) extends Evented:
   def isAdjacentTo(other: AppointTime): Boolean =
     date == other.date && untilTime == other.fromTime
 
@@ -50,7 +50,7 @@ case class Appoint(
     patientName: String,
     patientId: Int,
     memo: String
-)
+) extends Evented
 
 case class AppEvent(
     id: Int,
