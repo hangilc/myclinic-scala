@@ -169,8 +169,20 @@ object AppointSheet:
       appointTime: AppointTime,
       appoints: List[Appoint]
   ):
+    val slotsElement = ElementBinding()
     val ele =
-      div(style := "cursor: pointer", onclick := (onEleClick _))(timeLabel)
+      div(style := "cursor: pointer", onclick := (onEleClick _))
+        (
+          div(timeLabel),
+          div(bindTo(slotsElement))
+        )
+    
+    appoints.foreach(app => {
+      slotsElement.element(makeSlot(app))
+    })
+
+    def makeSlot(appoint: Appoint): Element = 
+      div(appoint.patientName)
 
     def timeLabel: String =
       val f = Misc.formatAppointTime(appointTime.fromTime)
