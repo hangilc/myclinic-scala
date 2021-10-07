@@ -7,7 +7,6 @@ import dev.fujiwara.domq.Modifiers.{given, *}
 import dev.myclinic.scala.model._
 import dev.myclinic.scala.util.DateUtil
 import org.scalajs.dom.raw.Element
-
 import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Failure
@@ -16,10 +15,14 @@ import scala.concurrent.Future
 import scala.collection.mutable
 import dev.myclinic.scala.webclient.Api
 import dev.myclinic.scala.event.ModelEvents.ModelEvent
-import dev.myclinic.scala.event.ModelEvents.{AppointUpdated, AppointCreated, AppointDeleted}
+import dev.myclinic.scala.event.ModelEvents.{
+  AppointUpdated,
+  AppointCreated,
+  AppointDeleted
+}
+import dev.myclinic.scala.event.ModelEventPublishers
 import scala.language.implicitConversions
 import org.scalajs.dom.raw.MouseEvent
-import dev.myclinic.scala.web.appoint.Removing
 import dev.myclinic.scala.web.appoint.Misc
 import dev.myclinic.scala.web.appointTime.sheet.MakeAppointDialog
 import cats.syntax.all._
@@ -115,25 +118,36 @@ object AppointSheet:
 
     var rowBinding = ElementBinding()
     var columns: List[AppointColumn] = List()
+    var appointTimes: List[AppointTime] = List.empty
 
     val ele = div(cls := "container px-0 mx-0")(
       div(cls := "row mx-0", bindTo(rowBinding))
     )
+
+    ModelEventPublishers.appointCreated.subscribe(onAppointCreated)
 
     def init(
         appointTimes: List[AppointTime],
         appointMap: Map[AppointTimeId, List[Appoint]]
     ): Unit =
       clear()
+      AppointRow.appointTimes = appointTimes
       val appointDates = AppointDate.classify(appointTimes, appointMap)
       columns = appointDates.map(AppointColumn.create(_, appointMap)).toList
-      columns.foreach(addElement _)
+      columns.foreach(addElement)
 
     def clear(): Unit =
       rowBinding.element.clear()
 
     def addElement(col: AppointColumn): Unit =
       rowBinding.element(col.ele)
+
+    def onAppointCreated(event: AppointCreated): Unit =
+      val created = event.created
+      appointTimes
+        .find(at => at.appointTimeId == created.appointTimeId)
+        .flatMap(at => columns.find(c => c.date == at.date))
+        .map(c => c.insert(created))
 
   case class AppointColumn(
       date: LocalDate,
@@ -150,10 +164,15 @@ object AppointSheet:
 
     def setAppointTimes(appointTimes: List[AppointTime]): Unit =
       appointTimes.map(a => {
-        val box = AppointTimeBox(a, appointMap.getOrElse(a.appointTimeId, List.empty))
+        val box =
+          AppointTimeBox(a, appointMap.getOrElse(a.appointTimeId, List.empty))
         boxes :+ box
         boxBinding.element(box.ele)
       })
+    
+    def insert(appoint: Appoint): Unit =
+      boxes.find(b => b.appointTime.appointTimeId == appoint.appointTimeId)
+        .map(b => b.addAppoint(appoint))
 
   object AppointColumn:
     def create(
@@ -166,21 +185,24 @@ object AppointSheet:
 
   case class AppointTimeBox(
       appointTime: AppointTime,
-      appoints: List[Appoint]
+      var appoints: List[Appoint]
   ):
     val slotsElement = ElementBinding()
     val ele =
-      div(style := "cursor: pointer", onclick := (onEleClick _))
-        (
-          div(timeLabel),
-          div(bindTo(slotsElement))
-        )
-    
+      div(style := "cursor: pointer", onclick := (onEleClick _))(
+        div(timeLabel),
+        div(bindTo(slotsElement))
+      )
+
     appoints.foreach(app => {
       slotsElement.element(makeSlot(app))
     })
 
-    def makeSlot(appoint: Appoint): Element = 
+    def addAppoint(appoint: Appoint): Unit =
+      appoints = appoints ++ List(appoint)
+      slotsElement.element(makeSlot(appoint))
+
+    def makeSlot(appoint: Appoint): Element =
       div(appoint.patientName)
 
     def timeLabel: String =
@@ -196,60 +218,4 @@ object AppointSheet:
           Api.registerAppoint(app)
         }
       )
-
-// var slots: Array[SlotRow] =
-//   appointDate.appointTimes.map(app => SlotRow(app, this)).toArray
-
-// slots.foreach(s => slotsBinding.element(s.ele))
-
-// def replaceSlotBy(prev: SlotRow, slot: SlotRow): Unit =
-//   val index = slots.indexOf(prev)
-//   if index >= 0 then
-//     slots(index) = slot
-//     Removing.broadcastRemoving(prev.ele)
-//     prev.ele.replaceBy(slot.ele)
-
-// case class SlotRow(appointTime: AppointTime, col: AppointColumn):
-
-//   val ele = div(style := "cursor: pointer", onclick := (onEleClick _))(
-//     div(Misc.formatAppointTime(appointTime.fromTime)),
-//     div(detail)
-//   )
-
-// val modelEventHandler: ModelEvent => Unit = (_: @unchecked) match {
-//   case AppointUpdated(updated) =>
-//     if appoint.requireUpdate(updated) then
-//       val newSlot = SlotRow(updated, col)
-//       col.replaceSlotBy(this, newSlot)
-// }
-// ModelEventDispatcher.addHandler(modelEventHandler)
-// Removing.addRemovingListener(
-//   ele,
-//   () => ModelEventDispatcher.removeHandler(modelEventHandler)
-// )
-
-// def detail: String =
-//   if appoint.patientName.isEmpty then "（空）"
-//   else appoint.patientName
-
-// def onEleClick(): Unit =
-//   if appoint.isVacant then openMakeAppointDialog()
-//   else openCancelAppointDialog()
-
-// def openMakeAppointDialog(): Unit =
-//   MakeAppointDialog.open(
-//     appoint,
-//     name => {
-//       Api
-//         .registerAppoint(
-//           Appoint(appoint.date, appoint.time, 0, name, 0, "")
-//         )
-//         .onComplete[Unit](_ match {
-//           case Success(_)         => println("Success")
-//           case Failure(exception) => println(("failure", exception))
-//         })
-//     }
-//   )
-
-// def openCancelAppointDialog(): Unit =
-//   CancelAppointDialog.open(appoint)
+    

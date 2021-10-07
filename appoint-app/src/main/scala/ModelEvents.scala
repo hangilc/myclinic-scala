@@ -11,9 +11,9 @@ import scala.util.Failure
 object ModelEvents {
 
   sealed trait ModelEvent
-  case class AppointCreated(appoint: Appoint) extends ModelEvent
-  case class AppointUpdated(appoint: Appoint) extends ModelEvent
-  case class AppointDeleted(appoint: Appoint) extends ModelEvent
+  case class AppointCreated(created: Appoint) extends ModelEvent
+  case class AppointUpdated(updated: Appoint) extends ModelEvent
+  case class AppointDeleted(deleted: Appoint) extends ModelEvent
   case class Unknown(orig: AppEvent) extends ModelEvent
 
   def convert(appEvent: AppEvent): ModelEvent = appEvent match
