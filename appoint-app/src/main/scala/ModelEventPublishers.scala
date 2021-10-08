@@ -17,6 +17,10 @@ case class ModelEventSubscriber[T <: ModelEvent](private val handler: T => Unit)
     isStopped = false
     handleQueue()
 
+  def start(dropUptoEventId: Int): Unit =
+    drainUpto(dropUptoEventId)
+    start()
+
   def stop(): Unit =
     isStopped = true
 

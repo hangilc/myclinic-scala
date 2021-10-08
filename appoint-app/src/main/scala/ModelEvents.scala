@@ -9,8 +9,11 @@ import scala.util.Success
 import scala.util.Failure
 import cats.Foldable
 
-def getMaxEventId[F[_]: Foldable](as: F[Evented]): Int =
+private def getMaxEventIdOne[F[_]: Foldable](as: F[Evented]): Int =
   summon[Foldable[F]].foldLeft(as, 0)((acc, ele) => acc.max(ele.eventId))
+
+def getMaxEventId[F[_]: Foldable](las: F[Evented]*): Int =
+  las.foldLeft(0)((acc, ele) => acc.max(getMaxEventIdOne(ele)))
 
 object ModelEvents {
 

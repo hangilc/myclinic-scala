@@ -133,15 +133,14 @@ object AppointSheet:
         appointMap: Map[AppointTimeId, List[Appoint]]
     ): Unit =
       appointCreatedSubscriber.stop()
-      val maxEventId = getMaxEventId(appointTimes)
-        .max(getMaxEventId(
-          
-        ))
+      val maxEventId = getMaxEventId(appointTimes :: appointMap.values.toList: _*)
       clear()
       AppointRow.appointTimes = appointTimes
       val appointDates = AppointDate.classify(appointTimes, appointMap)
       columns = appointDates.map(AppointColumn.create(_, appointMap)).toList
       columns.foreach(addElement)
+      appointCreatedSubscriber.start(maxEventId)
+      
 
     def clear(): Unit =
       rowBinding.element.clear()
