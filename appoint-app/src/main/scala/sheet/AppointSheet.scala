@@ -24,7 +24,6 @@ import dev.myclinic.scala.event.ModelEventPublishers
 import scala.language.implicitConversions
 import org.scalajs.dom.raw.MouseEvent
 import dev.myclinic.scala.web.appoint.Misc
-import dev.myclinic.scala.web.appointTime.sheet.MakeAppointDialog
 import cats.syntax.all._
 import cats.implicits._
 import cats.Monoid
@@ -189,39 +188,4 @@ object AppointSheet:
       c.setAppointTimes(appointDate.appointTimes)
       c
 
-  case class AppointTimeBox(
-      appointTime: AppointTime,
-      var appoints: List[Appoint]
-  ):
-    val slotsElement = ElementBinding()
-    val ele =
-      div(style := "cursor: pointer", onclick := (onEleClick _))(
-        div(timeLabel),
-        div(bindTo(slotsElement))
-      )
-
-    appoints.foreach(app => {
-      slotsElement.element(makeSlot(app))
-    })
-
-    def addAppoint(appoint: Appoint): Unit =
-      appoints = appoints ++ List(appoint)
-      slotsElement.element(makeSlot(appoint))
-
-    def makeSlot(appoint: Appoint): Element =
-      div(appoint.patientName)
-
-    def timeLabel: String =
-      val f = Misc.formatAppointTime(appointTime.fromTime)
-      val u = Misc.formatAppointTime(appointTime.untilTime)
-      s"$f - $u"
-
-    def onEleClick(): Unit =
-      MakeAppointDialog.open(
-        appointTime,
-        name => {
-          val app = Appoint(0, 0, appointTime.appointTimeId, name, 0, "")
-          Api.registerAppoint(app)
-        }
-      )
-    
+  

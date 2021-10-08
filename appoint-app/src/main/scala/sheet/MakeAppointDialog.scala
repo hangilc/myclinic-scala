@@ -1,4 +1,4 @@
-package dev.myclinic.scala.web.appointTime.sheet
+package dev.myclinic.scala.web.appoint.sheet
 
 import dev.fujiwara.domq.Dialog
 import dev.fujiwara.domq.ElementQ.{given, *}
