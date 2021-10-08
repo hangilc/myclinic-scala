@@ -30,3 +30,8 @@ object Bootstrap:
     def hide(): Unit = js.native
     def dispose(): Unit = js.native
 
+  @js.native
+  @JSGlobal("bootstrap.Dropdown")
+  class Dropdown(val ele: Element) extends js.Object:
+    def show(): Unit = js.native
+

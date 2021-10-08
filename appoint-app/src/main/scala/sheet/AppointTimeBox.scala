@@ -6,9 +6,12 @@ import dev.fujiwara.domq.Binding.{given, *}
 import dev.fujiwara.domq.ElementQ.{given, *}
 import dev.fujiwara.domq.Html.{given, *}
 import dev.fujiwara.domq.Modifiers.{given, *}
+import dev.fujiwara.domq.Bootstrap
 import scala.language.implicitConversions
 import org.scalajs.dom.raw.Element
 import dev.myclinic.scala.webclient.Api
+import org.scalajs.dom.raw.MouseEvent
+import org.scalajs.dom.raw.EventTarget
 
 case class AppointTimeBox(
       appointTime: AppointTime
@@ -17,7 +20,7 @@ case class AppointTimeBox(
     var slots: List[Slot] = List.empty
     val slotsElement = div()
     val ele =
-      div(style := "cursor: pointer", onclick := (onElementClick _))(
+      div(style := "cursor: pointer", onclick := (onElementClick))(
         div(timeLabel),
         slotsElement,
       )
@@ -45,14 +48,25 @@ case class AppointTimeBox(
       val u = Misc.formatAppointTime(appointTime.untilTime)
       s"$f - $u"
 
-    def onElementClick(): Unit =
-      if slots.isEmpty && appointTime.capacity > 0 then 
-        makeAppointDialog()
-      else if slots.size == 1 && appointTime.capacity == 1 then
-        cancelAppointDialog(slots.head.appoint)
+    def onElementClick(event: MouseEvent): Unit =
+      if event.ctrlKey then
+        contextMenu(event.target)
       else
-        ()
+        if slots.isEmpty && appointTime.capacity > 0 then 
+          makeAppointDialog()
+        else if slots.size == 1 && appointTime.capacity == 1 then
+          cancelAppointDialog(slots.head.appoint)
+        else
+          ()
     
+    val cmenu = ul( cls := "dropdown-menu")(
+      li(a(cls := "dropdown-item", href := "javascript:void", "Combine")),
+      li(a(cls := "dropdown-item", href := "javascript:void", "Convert")),
+    )
+
+    def contextMenu(trigger: EventTarget): Unit =
+      ???
+
     def makeAppointDialog(): Unit =
       MakeAppointDialog.open(
         appointTime,
