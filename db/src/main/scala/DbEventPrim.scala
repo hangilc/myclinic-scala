@@ -82,9 +82,8 @@ object DbEventPrim:
     assert(a.eventId > 0, "Non-positive event-id")
     enterAppEvent(a.eventId, "appoint-time", UPDATED, a.asJson.toString)
 
-  def logAppointTimeDeleted(a: AppointTime): ConnectionIO[AppEvent] =
-    assert(a.eventId > 0, "Non-positive event-id")
-    enterAppEvent(a.eventId, "appoint-time", DELETED, a.asJson.toString)
+  def logAppointTimeDeleted(eventId: Int, a: AppointTime): ConnectionIO[AppEvent] =
+    enterAppEvent(eventId, "appoint-time", DELETED, a.asJson.toString)
 
   def logAppointCreated(a: Appoint): ConnectionIO[AppEvent] =
     assert(a.eventId > 0)
@@ -94,7 +93,6 @@ object DbEventPrim:
     assert(a.eventId > 0)
     enterAppEvent(a.eventId, "appoint", UPDATED, a.asJson.toString)
 
-  def logAppointDeleted(a: Appoint): ConnectionIO[AppEvent] =
-    assert(a.eventId > 0)
-    enterAppEvent(a.eventId, "appoint", DELETED, a.asJson.toString)
+  def logAppointDeleted(eventId: Int, a: Appoint): ConnectionIO[AppEvent] =
+    enterAppEvent(eventId, "appoint", DELETED, a.asJson.toString)
 

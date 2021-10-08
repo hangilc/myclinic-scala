@@ -36,12 +36,16 @@ object RestService:
   object intUntil extends QueryParamDecoderMatcher[Int]("until")
   object intAppointTimeId
       extends QueryParamDecoderMatcher[Int]("appoint-time-id")
+  object intAppointId extends QueryParamDecoderMatcher[Int]("appoint-id")
 
   case class UserError(message: String) extends Exception
 
   def hello(): IO[String] =
     //throw new UserError("さようなら")
     "こんにちは".pure[IO]
+
+  private def publish(event: AppEvent): IO[Unit] =
+    topic.publish(Text(event.asJson.toString))
 
   def routes(using topic: Topic[IO, WebSocketFrame]) = HttpRoutes.of[IO] {
 
@@ -86,6 +90,14 @@ object RestService:
 
     case GET -> Root / "list-app-event-in-range" :? intFrom(from) +& intUntil(until) => {
       Ok(Db.listGlobalEventInRange(from, until))
+    }
+
+    case POST -> Root / "cancel-appoint" :? intAppontId(appointId) => {
+      val op = for
+        event <- Db.cancelAppoint(appointId)
+        _ <- publish(event)
+      yield ()
+      Ok(op)
     }
 
   // case req @ POST -> Root / "register-appoint" => {

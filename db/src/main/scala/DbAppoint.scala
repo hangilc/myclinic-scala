@@ -38,6 +38,7 @@ trait DbAppoint extends Sqlite:
     })
 
   private def safeDeleteAppointTime(
+      eventId: Int,
       appointTimeId: Int
   ): ConnectionIO[AppEvent] =
     for
@@ -46,7 +47,7 @@ trait DbAppoint extends Sqlite:
       _ = if appoints.size > 0 then
         throw new RuntimeException("Appoint exists.")
       _ <- Prim.deleteAppointTime(appointTimeId)
-      log <- DbEventPrim.logAppointTimeDeleted(at)
+      log <- DbEventPrim.logAppointTimeDeleted(eventId, at)
     yield log
 
   def batchDeleteAppointTimes(
@@ -91,6 +92,15 @@ trait DbAppoint extends Sqlite:
           throw new RuntimeException("Overbooking")
         result <- enterAppointWithEvent(a.copy(eventId = eventId))
       yield result
+    })
+
+  def cancelAppoint(appointId: Int): IO[AppEvent] =
+    withEventId(eventId => {
+      for
+        appoint <- Prim.getAppoint(appointId).unique
+        _ <- Prim.deleteAppoint(appointId)
+        event <- DbEventPrim.logAppointDeleted(eventId, appoint)
+      yield event
     })
 
   def listAppointsForAppointTime(appointTimeId: Int): IO[List[Appoint]] =
