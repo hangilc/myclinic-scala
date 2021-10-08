@@ -12,6 +12,7 @@ import org.scalajs.dom.raw.Element
 import dev.myclinic.scala.webclient.Api
 import org.scalajs.dom.raw.MouseEvent
 import org.scalajs.dom.raw.EventTarget
+import org.scalajs.dom.document
 
 case class AppointTimeBox(
       appointTime: AppointTime
@@ -50,7 +51,7 @@ case class AppointTimeBox(
 
     def onElementClick(event: MouseEvent): Unit =
       if event.ctrlKey then
-        contextMenu(event.target)
+        contextMenu(ele)
       else
         if slots.isEmpty && appointTime.capacity > 0 then 
           makeAppointDialog()
@@ -64,8 +65,10 @@ case class AppointTimeBox(
       li(a(cls := "dropdown-item", href := "javascript:void", "Convert")),
     )
 
-    def contextMenu(trigger: EventTarget): Unit =
-      ???
+    def contextMenu(trigger: Element): Unit =
+      import dev.fujiwara.domq.Tippy
+      val tippy = Tippy(trigger.asInstanceOf[Element], "hello")
+      tippy.show()
 
     def makeAppointDialog(): Unit =
       MakeAppointDialog.open(

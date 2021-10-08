@@ -28,7 +28,8 @@ case class ElementQ(ele: Element):
     ele.parentNode.replaceChild(newElement, ele)
 
   def remove(): Unit =
-    ele.parentNode.removeChild(ele)
+    val parent = ele.parentNode
+    if parent != null then ele.parentNode.removeChild(ele)
 
 
 object ElementQ {
