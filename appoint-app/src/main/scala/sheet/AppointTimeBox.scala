@@ -11,9 +11,10 @@ import org.scalajs.dom.raw.Element
 import dev.myclinic.scala.webclient.Api
 
 case class AppointTimeBox(
-      appointTime: AppointTime,
-      var appoints: List[Appoint]
+      appointTime: AppointTime
   ):
+    case class Slot(appoint: Appoint, ele: Element)
+    var slots: List[Slot] = List.empty
     val slotsElement = div()
     val ele =
       div(style := "cursor: pointer", onclick := (onElementClick _))(
@@ -21,16 +22,23 @@ case class AppointTimeBox(
         slotsElement,
       )
 
-    appoints.foreach(app => {
-      slotsElement(makeSlot(app))
-    })
+    def init(appoints: List[Appoint]): Unit =
+      slots = appoints.map(makeSlot(_))
+      slots.foreach(s => slotsElement(s.ele))
 
     def addAppoint(appoint: Appoint): Unit =
-      appoints = appoints ++ List(appoint)
-      slotsElement(makeSlot(appoint))
+      val slot = makeSlot(appoint)
+      slots = slots ++ List(slot)
+      slotsElement(slot.ele)
 
-    def makeSlot(appoint: Appoint): Element =
-      div(appoint.patientName)
+    def removeAppoint(appoint: Appoint): Unit =
+      slots.find(s => s.appoint == appoint).map(s => {
+        slots = slots.filter(_ != s)
+        s.ele.remove()
+      })
+
+    def makeSlot(appoint: Appoint): Slot =
+      Slot(appoint, div(appoint.patientName))
 
     def timeLabel: String =
       val f = Misc.formatAppointTime(appointTime.fromTime)
@@ -38,10 +46,10 @@ case class AppointTimeBox(
       s"$f - $u"
 
     def onElementClick(): Unit =
-      if appoints.isEmpty && appointTime.capacity > 0 then 
+      if slots.isEmpty && appointTime.capacity > 0 then 
         makeAppointDialog()
-      else if appoints.size == 1 && appointTime.capacity == 1 then
-        cancelAppointDialog(appoints.head)
+      else if slots.size == 1 && appointTime.capacity == 1 then
+        cancelAppointDialog(slots.head.appoint)
       else
         ()
     
@@ -64,3 +72,8 @@ case class AppointTimeBox(
         }
       )
 
+object AppointTimeBox:
+  def apply(appointTime: AppointTime, appoints: List[Appoint]): AppointTimeBox =
+    val box = AppointTimeBox(appointTime)
+    box.init(appoints)
+    box

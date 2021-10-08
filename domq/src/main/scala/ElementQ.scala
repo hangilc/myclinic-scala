@@ -27,6 +27,9 @@ case class ElementQ(ele: Element):
   def replaceBy(newElement: Element): Unit =
     ele.parentNode.replaceChild(newElement, ele)
 
+  def remove(): Unit =
+    ele.parentNode.removeChild(ele)
+
 
 object ElementQ {
   

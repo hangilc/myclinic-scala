@@ -126,19 +126,22 @@ object AppointSheet:
 
     val appointCreatedSubscriber =
       ModelEventPublishers.appointCreated.subscribe(onAppointCreated)
+    val appointDeletedSubscriber =
+      ModelEventPublishers.appointDeleted.subscribe(onAppointDeleted)
 
     def init(
         appointTimes: List[AppointTime],
         appointMap: Map[AppointTimeId, List[Appoint]]
     ): Unit =
-      appointCreatedSubscriber.stop()
+      val subscribers = List(appointCreatedSubscriber, appointDeletedSubscriber)
+      subscribers.foreach(_.stop())
       val maxEventId = getMaxEventId(appointTimes :: appointMap.values.toList: _*)
       clear()
       AppointRow.appointTimes = appointTimes
       val appointDates = AppointDate.classify(appointTimes, appointMap)
       columns = appointDates.map(AppointColumn.create(_, appointMap)).toList
       columns.foreach(addElement)
-      appointCreatedSubscriber.start(maxEventId)
+      subscribers.foreach(_.start(maxEventId))
       
 
     def clear(): Unit =
@@ -147,12 +150,17 @@ object AppointSheet:
     def addElement(col: AppointColumn): Unit =
       rowBinding.element(col.ele)
 
-    def onAppointCreated(event: AppointCreated): Unit =
-      val created = event.created
+    private def propagateToColumn(appoint: Appoint, f: (AppointColumn, Appoint) => Unit): Unit =
       appointTimes
-        .find(at => at.appointTimeId == created.appointTimeId)
+        .find(at => at.appointTimeId == appoint.appointTimeId)
         .flatMap(at => columns.find(c => c.date == at.date))
-        .map(c => c.insert(created))
+        .map(c => f(c, appoint))
+
+    def onAppointCreated(event: AppointCreated): Unit =
+      propagateToColumn(event.created, _.insert(_))
+
+    def onAppointDeleted(event: AppointDeleted): Unit =
+      propagateToColumn(event.deleted, _.delete(_))
 
   case class AppointColumn(
       date: LocalDate,
@@ -174,10 +182,15 @@ object AppointSheet:
         boxes = boxes :+ box
         boxBinding.element(box.ele)
       })
+
+    private def findBoxByAppoint(appoint: Appoint): Option[AppointTimeBox] =
+      boxes.find(b => b.appointTime.appointTimeId == appoint.appointTimeId)
     
     def insert(appoint: Appoint): Unit =
-      boxes.find(b => b.appointTime.appointTimeId == appoint.appointTimeId)
-        .map(b => b.addAppoint(appoint))
+      findBoxByAppoint(appoint).map(_.addAppoint(appoint))
+
+    def delete(appoint: Appoint): Unit =
+      findBoxByAppoint(appoint).map(_.removeAppoint(appoint))
 
   object AppointColumn:
     def create(
