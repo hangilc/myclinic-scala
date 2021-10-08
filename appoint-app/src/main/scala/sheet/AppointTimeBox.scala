@@ -16,7 +16,7 @@ case class AppointTimeBox(
   ):
     val slotsElement = div()
     val ele =
-      div(style := "cursor: pointer", onclick := (onEleClick _))(
+      div(style := "cursor: pointer", onclick := (onElementClick _))(
         div(timeLabel),
         slotsElement,
       )
@@ -37,7 +37,15 @@ case class AppointTimeBox(
       val u = Misc.formatAppointTime(appointTime.untilTime)
       s"$f - $u"
 
-    def onEleClick(): Unit =
+    def onElementClick(): Unit =
+      if appoints.isEmpty && appointTime.capacity > 0 then 
+        makeAppointDialog()
+      else if appoints.size == 1 && appointTime.capacity == 1 then
+        cancelAppointDialog(appoints.head)
+      else
+        ()
+    
+    def makeAppointDialog(): Unit =
       MakeAppointDialog.open(
         appointTime,
         name => {
@@ -46,3 +54,13 @@ case class AppointTimeBox(
         }
       )
     
+    def cancelAppointDialog(appoint: Appoint): Unit =
+      CancelAppointDialog.open(
+        appointTime,
+        appoint,
+        dialog => {
+          //
+          dialog.close()
+        }
+      )
+
