@@ -44,8 +44,8 @@ object RestService:
     //throw new UserError("さようなら")
     "こんにちは".pure[IO]
 
-  private def publish(event: AppEvent): IO[Unit] =
-    topic.publish(Text(event.asJson.toString))
+  private def publish(event: AppEvent)(using topic: Topic[IO, WebSocketFrame]): IO[Unit] =
+    topic.publish1(Text(event.asJson.toString)).void
 
   def routes(using topic: Topic[IO, WebSocketFrame]) = HttpRoutes.of[IO] {
 
@@ -92,7 +92,7 @@ object RestService:
       Ok(Db.listGlobalEventInRange(from, until))
     }
 
-    case POST -> Root / "cancel-appoint" :? intAppontId(appointId) => {
+    case POST -> Root / "cancel-appoint" :? intAppointId(appointId) => {
       val op = for
         event <- Db.cancelAppoint(appointId)
         _ <- publish(event)

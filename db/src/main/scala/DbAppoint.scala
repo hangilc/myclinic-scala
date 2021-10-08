@@ -53,12 +53,14 @@ trait DbAppoint extends Sqlite:
   def batchDeleteAppointTimes(
       appointTimes: List[AppointTime]
   ): IO[List[AppEvent]] =
-    val op =
-      appointTimes.map(a => safeDeleteAppointTime(a.appointTimeId)).sequence
-    sqlite(op)
+    withEventId(eventId =>
+      appointTimes
+        .map(a => safeDeleteAppointTime(eventId, a.appointTimeId))
+        .sequence
+    )
 
   def deleteAppointTime(appointTimeId: Int): IO[AppEvent] =
-    sqlite(safeDeleteAppointTime(appointTimeId))
+    withEventId(eventId => safeDeleteAppointTime(eventId, appointTimeId))
 
   def listExistingAppointTimeDates(
       from: LocalDate,

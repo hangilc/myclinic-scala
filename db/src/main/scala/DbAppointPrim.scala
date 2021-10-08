@@ -101,7 +101,7 @@ object DbAppointPrim:
     )
 
   def deleteAppoint(appointId: Int): ConnectionIO[Unit] =
-    sql"delete from appoint where appoiont_id = ${appointId}".update.run.map(
+    sql"delete from appoint where appoint_id = ${appointId}".update.run.map(
       affected =>
         if affected != 1 then
           throw new RuntimeException("Failed to delete appoint.")
