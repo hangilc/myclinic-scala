@@ -78,3 +78,7 @@ object Modifiers:
     def :=(f: () => Unit) = Modifier(e => {
       e.addEventListener("click", (_: MouseEvent) => f())
     })
+
+  val oncontextmenu = Creator[MouseEvent => Unit]((ele, handler) => {
+    ele.addEventListener("contextmenu", handler)
+  })

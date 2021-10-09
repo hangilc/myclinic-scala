@@ -21,7 +21,8 @@ case class AppointTimeBox(
     var slots: List[Slot] = List.empty
     val slotsElement = div()
     val ele =
-      div(style := "cursor: pointer", onclick := (onElementClick))(
+      div(style := "cursor: pointer", onclick := (onElementClick),
+        oncontextmenu := (onContextMenu))(
         div(timeLabel),
         slotsElement,
       )
@@ -50,24 +51,28 @@ case class AppointTimeBox(
       s"$f - $u"
 
     def onElementClick(event: MouseEvent): Unit =
-      if event.ctrlKey then
-        contextMenu(ele)
+      if slots.isEmpty && appointTime.capacity > 0 then 
+        makeAppointDialog()
+      else if slots.size == 1 && appointTime.capacity == 1 then
+        cancelAppointDialog(slots.head.appoint)
       else
-        if slots.isEmpty && appointTime.capacity > 0 then 
-          makeAppointDialog()
-        else if slots.size == 1 && appointTime.capacity == 1 then
-          cancelAppointDialog(slots.head.appoint)
-        else
-          ()
+        ()
     
-    val cmenu = ul( cls := "dropdown-menu")(
+    val cmenu = ul()(
       li(a(cls := "dropdown-item", href := "javascript:void", "Combine")),
       li(a(cls := "dropdown-item", href := "javascript:void", "Convert")),
     )
 
-    def contextMenu(trigger: Element): Unit =
-      import dev.fujiwara.domq.Tippy
-      val tippy = Tippy(trigger.asInstanceOf[Element], "hello")
+    def onContextMenu(event: MouseEvent): Unit =
+      event.preventDefault()
+      event.stopPropagation()
+      import dev.fujiwara.domq.TippyBuilder
+      val tippy = TippyBuilder(event.target.asInstanceOf[Element])
+        .content(cmenu)
+        .arrow(false)
+        .trigger("manual")
+        .theme("light")
+        .build()
       tippy.show()
 
     def makeAppointDialog(): Unit =
