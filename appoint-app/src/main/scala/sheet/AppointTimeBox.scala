@@ -8,7 +8,7 @@ import dev.fujiwara.domq.Html.{given, *}
 import dev.fujiwara.domq.Modifiers.{given, *}
 import dev.fujiwara.domq.Bootstrap
 import scala.language.implicitConversions
-import org.scalajs.dom.raw.Element
+import org.scalajs.dom.raw.HTMLElement
 import dev.myclinic.scala.webclient.Api
 import org.scalajs.dom.raw.MouseEvent
 import org.scalajs.dom.raw.EventTarget
@@ -17,7 +17,7 @@ import org.scalajs.dom.document
 case class AppointTimeBox(
       appointTime: AppointTime
   ):
-    case class Slot(appoint: Appoint, ele: Element)
+    case class Slot(appoint: Appoint, ele: HTMLElement)
     var slots: List[Slot] = List.empty
     val slotsElement = div()
     val ele =
@@ -67,7 +67,7 @@ case class AppointTimeBox(
       event.preventDefault()
       event.stopPropagation()
       import dev.fujiwara.domq.TippyBuilder
-      val tippy = TippyBuilder(event.target.asInstanceOf[Element])
+      val tippy = TippyBuilder(event.target.asInstanceOf[HTMLElement])
         .content(cmenu)
         .arrow(false)
         .trigger("manual")

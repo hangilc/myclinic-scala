@@ -28,7 +28,6 @@ class TippyBuilder(target: Element):
     add("content", value match {
       case s: String => s
       case e: Element => e
-      case _ => js.undefined
     })
   def theme(value: String): TippyBuilder = add("theme", value)
   def trigger(value: String): TippyBuilder = add("trigger", value)    

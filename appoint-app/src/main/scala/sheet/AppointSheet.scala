@@ -6,7 +6,7 @@ import dev.fujiwara.domq.Html.{given, *}
 import dev.fujiwara.domq.Modifiers.{given, *}
 import dev.myclinic.scala.model._
 import dev.myclinic.scala.util.DateUtil
-import org.scalajs.dom.raw.Element
+import org.scalajs.dom.raw.HTMLElement
 import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Failure
@@ -59,7 +59,7 @@ object AppointSheet:
       appoints.map(app => Map(app.appointTimeId -> List(app)))
     )
 
-  def setupTo(wrapper: Element): Unit =
+  def setupTo(wrapper: HTMLElement): Unit =
     wrapper(eles)
 
   case class AppointDate(
@@ -94,8 +94,8 @@ object AppointSheet:
       )
     )
 
-    prevWeekBinding.element.onclick(() => onPrevWeek())
-    nextWeekBinding.element.onclick(() => onNextWeek())
+    prevWeekBinding.element(onclick := (() => onPrevWeek()))
+    nextWeekBinding.element(onclick := (() => onNextWeek()))
 
     def onPrevWeek(): Unit =
       dateRange match

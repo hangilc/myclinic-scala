@@ -1,11 +1,12 @@
 package dev.fujiwara.domq
 
 import org.scalajs.dom.document
-import org.scalajs.dom.raw.Element
+import org.scalajs.dom.raw.HTMLElement
 import org.scalajs.dom.raw.MouseEvent
 import scala.language.implicitConversions
+import org.scalajs.dom.raw.CSSStyleDeclaration
 
-case class Modifier(modifier: Element => Unit)
+case class Modifier(modifier: HTMLElement => Unit)
 
 object Modifier:
 
@@ -15,7 +16,7 @@ object Modifier:
       e.appendChild(t)
     })
 
-  implicit def toChildModifier(e: Element): Modifier =
+  implicit def toChildModifier(e: HTMLElement): Modifier =
     Modifier(ele => {
       ele.appendChild(e)
     })
@@ -41,7 +42,7 @@ object Modifier:
 
 object Modifiers:
 
-  case class Creator[A](f: (Element, A) => Unit):
+  case class Creator[A](f: (HTMLElement, A) => Unit):
     def :=(arg: A) = Modifier(e => f(e, arg))
 
   case class ClsModifier():
@@ -57,11 +58,13 @@ object Modifiers:
 
   val cls = ClsModifier()
 
-  val cb = Creator[Element => Unit]((e, handler) => handler(e))
+  val cb = Creator[HTMLElement => Unit]((e, handler) => handler(e))
 
   def attr(name: String) = Creator[String]((e, a) => {
     e.setAttribute(name, a)
   })
+
+  def css(f: CSSStyleDeclaration => Unit): Modifier = Modifier(e => f(e.style))
 
   val style = attr("style")
 

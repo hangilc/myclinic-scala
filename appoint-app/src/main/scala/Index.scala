@@ -35,6 +35,8 @@ object JsMain:
     val endDate = startDate.plusDays(6)
     AppointSheet.setupTo(workarea)
     AppointSheet.setupDateRange(startDate, endDate)
+    import dev.fujiwara.domq.Modal.xCircle
+    body(xCircle())
 
   val banner = div(cls := "container-fluid")(
     div(cls := "row pt-3 pb-2 ml-5 mr-5")(

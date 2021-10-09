@@ -1,17 +1,18 @@
 package dev.fujiwara.domq
 
 import org.scalajs.dom.document
+import org.scalajs.dom.raw.HTMLElement
 
 object Html {
 
   case class Tag(tag: String):
     def apply(modifiers: Modifier*): ElementQ =
-      val e = document.createElement(tag)
+      val e = document.createElement(tag).asInstanceOf[HTMLElement]
       val ex = ElementQ(e)
       ex.apply(modifiers: _*)
 
   def tag(tag: String)(modifiers: Modifier*): ElementQ =
-    val e = document.createElement(tag)
+    val e = document.createElement(tag).asInstanceOf[HTMLElement]
     val ex = ElementQ(e)
     ex.apply(modifiers: _*)
 

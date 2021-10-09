@@ -1,7 +1,7 @@
 package dev.fujiwara.domq
 
 import org.scalajs.dom.document
-import org.scalajs.dom.raw.Element
+import org.scalajs.dom.raw.HTMLElement
 import org.scalajs.dom.raw.Event
 import dev.fujiwara.domq.Modifiers._
 import dev.fujiwara.domq.Html._
@@ -39,8 +39,8 @@ class Dialog():
 
   def title: String = titleBinding.text
   def title_=(v: String): Unit = titleBinding.text = v
-  def content: Element = contentBinding.element
-  def commandBox: Element = commandBoxBinding.element
+  def content: HTMLElement = contentBinding.element
+  def commandBox: HTMLElement = commandBoxBinding.element
 
   ele.addEventListener(
     "hidden.bs.modal",

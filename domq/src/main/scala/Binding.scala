@@ -1,15 +1,15 @@
 package dev.fujiwara.domq
 
-import org.scalajs.dom.raw.{Element, HTMLInputElement}
+import org.scalajs.dom.raw.{HTMLElement, HTMLInputElement}
 import dev.fujiwara.domq.ElementQ.{given, *}
 import dev.fujiwara.domq.Modifiers._
 import scala.language.implicitConversions
 
 object Binding:
   case class TextBinding():
-    private var ele: Element = null
+    private var ele: HTMLElement = null
 
-    def bind(e: Element): Unit =
+    def bind(e: HTMLElement): Unit =
       ele = e
 
     def text: String =
@@ -42,12 +42,12 @@ object Binding:
       valid
 
   case class ElementBinding():
-    private var ele: Element = null
+    private var ele: HTMLElement = null
 
-    def bind(e: Element): Unit =
+    def bind(e: HTMLElement): Unit =
       ele = e
 
-    def element: Element =
+    def element: HTMLElement =
       require(ele != null)
       ele
 
