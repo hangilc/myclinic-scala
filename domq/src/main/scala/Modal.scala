@@ -50,14 +50,16 @@ object Modal:
   })
 
   def xCircle(size: String = "1.5rem", color: String = "black"): HTMLElement = {
-    val svg = document.createElement("svg").asInstanceOf[HTMLElement]
-    val path = document.createElement("path").asInstanceOf[HTMLElement]
+    val svg = document.createElementNS("http://www.w3.org/2000/svg", "svg").asInstanceOf[HTMLElement]
+    val path = document.createElementNS("http://www.w3.org/2000/svg", "path").asInstanceOf[HTMLElement]
     svg(
-      attr("xmlns") := "http://www.w3.org/2000/svg",
+      //attr("xmlns") := "http://www.w3.org/2000/svg",
       css(style => {style.height = size; style.width = size}),
       attr("fill") := "none",
       attr("viewBox") := "0 0 24 24",
       attr("stroke") := color,
+      attr("width") := "34",
+      attr("height") := "34",
     )(
       path(
         attr("stroke-linecap") := "round",
@@ -66,6 +68,9 @@ object Modal:
         attr("d") := "M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
       )
     )
+    svg.setAttributeNS("http://www.w3.org/2000/svg", "viewBox", "0 0 24 24")
+    //svg.setAttributeNS("http://www.w3.org/2000/svg", "stroke", "green")
+    //svg.setAttributeNS("http://www.w3.org/2000/svg", "fill", "none")
     svg
   }
 
