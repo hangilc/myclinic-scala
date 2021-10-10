@@ -35,8 +35,21 @@ object JsMain:
     val endDate = startDate.plusDays(6)
     AppointSheet.setupTo(workarea)
     AppointSheet.setupDateRange(startDate, endDate)
-    import dev.fujiwara.domq.Modal.xCircle
-    body(div(xCircle(color = "green", size = "4rem")))
+    //import dev.fujiwara.domq.Modal.xCircle
+    // {
+    //   import dev.fujiwara.domq.Modal
+    //   val dialog = Modal("Test", close => div(
+    //     div(Modal.modalBody)(
+    //       css(style => style.minWidth = "200px"),
+    //       "Content"
+    //     ),
+    //     div(Modal.modalCommands)(
+    //       button("Close", onclick := (() => close())),
+    //       button("Ok", onclick := (() => close())),
+    //     )
+    //   ))
+    //   dialog.open()
+    // }
 
   val banner = div(cls := "container-fluid")(
     div(cls := "row pt-3 pb-2 ml-5 mr-5")(

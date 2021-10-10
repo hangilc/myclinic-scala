@@ -67,7 +67,22 @@ object Modifiers:
 
   def css(f: CSSStyleDeclaration => Unit): Modifier = Modifier(e => f(e.style))
 
-  val style = attr("style")
+  val mt = Creator[String]((e, value) => e.style.marginTop = value)
+  val mb = Creator[String]((e, value) => e.style.marginBottom = value)
+  val ml = Creator[String]((e, value) => e.style.marginLeft = value)
+  val mr = Creator[String]((e, value) => e.style.marginRight = value)
+
+  private def styleSetter(
+      f: (CSSStyleDeclaration, String) => Unit
+  ): Creator[String] =
+    Creator[String]((e, a) => f(e.style, a))
+
+  val padding = styleSetter((s, v) => s.padding = v)
+  val margin = styleSetter((s, v) => s.margin = v)
+
+  val display = styleSetter((style, value) => style.display = value)
+  val justifyContent =
+    styleSetter((style, value) => style.setProperty("justify-content", value))
 
   val href = Creator[String]((e, a) => {
     val value = if a.isEmpty then "javascript:void(0)" else a

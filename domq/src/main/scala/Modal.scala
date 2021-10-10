@@ -1,13 +1,41 @@
 package dev.fujiwara.domq
 
 import org.scalajs.dom.raw.{Element, HTMLElement}
-import org.scalajs.dom.raw.HTMLHtmlElement
 import org.scalajs.dom.document
 import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
+import dev.fujiwara.domq.Html.{*, given}
 import scala.language.implicitConversions
 
+class Modal(title: String, f: Modal.CloseFunction => HTMLElement):
+  val dialog = div(Modal.modalContent)
+
+  def open(): Unit =
+    dialog(
+      div(css(style => style.width = "*"),
+        span(Modal.modalTitle)(title),
+        Modal.xCircle(color = "gray")(
+          css(style => {
+            style.cssFloat = "right"
+            style.verticalAlign = "middle"
+          }),
+          onclick := (onCloseClick _)
+        )
+      ),
+      f(() => close())
+    )
+    document.body(Modal.modalBackdropInstance, dialog)
+
+  def close(): Unit =
+    dialog.remove()
+    Modal.modalBackdropInstance.remove()
+
+  def onCloseClick(): Unit =
+    close()
+
 object Modal:
+  type CloseFunction = (() => Unit)
+
   val modalBackdrop = Modifier(e => {
     val style = e.style
     style.display = "block"
@@ -22,6 +50,15 @@ object Modal:
     style.zIndex = "2001"
   })
 
+  val modalBackdropInstance: HTMLElement = div(modalBackdrop)
+
+  val modalTitle = Modifier(e => {
+    val style = e.style
+    style.verticalAlign = "middle"
+    style.fontSize = "1.2rem"
+    style.fontWeight = "bold"
+  })
+
   val modalContent = Modifier(e => {
     val style = e.style
     style.position = "fixed"
@@ -29,24 +66,22 @@ object Modal:
     style.left = "50vw"
     style.transform = "translateX(-50%)"
     style.backgroundColor = "white"
-    style.padding = "1.5rem"
+    style.padding = "0.5rem 1.5rem"
     style.opacity = "1.0"
     style.zIndex = "2002"
     style.overflow = "auto"
     style.borderRadius = "0.5rem"
   })
 
-  val modalTitle = Modifier(e => {
+  val modalBody = Modifier(e => {
     val style = e.style
-    style.lineHeight = "1.2rem"
+    style.padding = "0.5em 0"
   })
 
-  val modalHeader = Modifier(e => {
+  val modalCommands = Modifier(e => {
     val style = e.style
-    style.margin = "0 0 0.5em 0"
-    style.padding = "0"
-    style.fontSize = "1.2rem"
-  
+    e.style.textAlign = "end"
+    e(cls := "modal-commands")
   })
 
   // Based from Heroicons
@@ -59,21 +94,22 @@ object Modal:
     val svg = document.createElementNS(ns, "svg").asInstanceOf[HTMLElement]
     val path = document.createElementNS(ns, "path").asInstanceOf[HTMLElement]
     svg(
-      css(style => {style.height = size; style.width = size}),
+      css(style => { style.height = size; style.width = size }),
       attrNS(ns, "viewBox") := "0 0 24 24",
       attr("fill") := "none",
       attr("viewBox") := "0 0 24 24",
       attr("stroke") := color,
       attr("width") := "34",
-      attr("height") := "34",
+      attr("height") := "34"
     )(
       path(
         attr("stroke-linecap") := "round",
         attr("stroke-linejoin") := "round",
         attr("stroke-width") := "2",
-        attr("d") := "M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+        attr(
+          "d"
+        ) := "M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
       )
     )
     svg
   }
-

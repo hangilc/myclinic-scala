@@ -21,7 +21,7 @@ case class AppointTimeBox(
     var slots: List[Slot] = List.empty
     val slotsElement = div()
     val ele =
-      div(style := "cursor: pointer", onclick := (onElementClick),
+      div(css(style => style.cursor = "pointer"), onclick := (onElementClick),
         oncontextmenu := (onContextMenu))(
         div(timeLabel),
         slotsElement,

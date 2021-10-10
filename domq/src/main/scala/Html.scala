@@ -31,5 +31,6 @@ object Html {
   val label = Tag("label")
   val ul = Tag("ul")
   val li = Tag("li")
+  val span = Tag("span")
 
 }

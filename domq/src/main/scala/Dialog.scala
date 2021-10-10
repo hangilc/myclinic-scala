@@ -52,7 +52,7 @@ class Dialog():
 
   def open(): Unit =
     modal.show()
-    ElementQ(document.body)(style := "hidden: auto")
+    ElementQ(document.body)(attr("style") := "hidden: auto")
 
   def close(): Unit =
     modal.hide()

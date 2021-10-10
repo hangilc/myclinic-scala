@@ -79,7 +79,7 @@ object AppointSheet:
 
   object TopMenu:
     val prevWeekBinding, nextWeekBinding = ElementBinding()
-    val ele = div(cls := "mb-2")(
+    val ele = div(mb := "0.5rem")(
       button(
         attr("type") := "button",
         cls := "btn btn-outline-primary",
@@ -116,12 +116,17 @@ object AppointSheet:
 
   object AppointRow:
 
-    var rowBinding = ElementBinding()
+    var columnWrapper: HTMLElement = div()
     var columns: List[AppointColumn] = List()
     var appointTimes: List[AppointTime] = List.empty
 
-    val ele = div(cls := "container px-0 mx-0")(
-      div(cls := "row mx-0", bindTo(rowBinding))
+    // val ele = div(cls := "container px-0 mx-0")(
+    //   div(cls := "row mx-0", bindTo(rowBinding))
+    // )
+
+    val ele = columnWrapper(
+      display := "flex",
+      justifyContent := "center",
     )
 
     val appointCreatedSubscriber =
@@ -145,10 +150,10 @@ object AppointSheet:
       
 
     def clear(): Unit =
-      rowBinding.element.clear()
+      columnWrapper.clear()
 
     def addElement(col: AppointColumn): Unit =
-      rowBinding.element(col.ele)
+      columnWrapper(col.ele(margin := "0 0.5rem"))
 
     private def propagateToColumn(appoint: Appoint, f: (AppointColumn, Appoint) => Unit): Unit =
       appointTimes
