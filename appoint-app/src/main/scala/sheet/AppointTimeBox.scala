@@ -88,10 +88,7 @@ case class AppointTimeBox(
       CancelAppointDialog.open(
         appointTime,
         appoint,
-        dialog => {
-          Api.cancelAppoint(appoint.appointId)
-          dialog.close()
-        }
+        () => Api.cancelAppoint(appoint.appointId)
       )
 
 object AppointTimeBox:
