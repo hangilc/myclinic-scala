@@ -79,7 +79,8 @@ object Modifiers:
 
   val padding = styleSetter((s, v) => s.padding = v)
   val margin = styleSetter((s, v) => s.margin = v)
-
+  val border = styleSetter((s, v) => s.border = v)
+  val color = styleSetter((s, v) => s.color = v)
   val display = styleSetter((style, value) => style.display = value)
   val justifyContent =
     styleSetter((style, value) => style.setProperty("justify-content", value))

@@ -37,4 +37,5 @@ object ElementQ {
   given htmlInputToElementQ: Conversion[HTMLInputElement, ElementQ] = ElementQ(_)
 
   given Conversion[ElementQ, HTMLElement] = _.ele
+  given Conversion[ElementQ, HTMLInputElement] = _.ele.asInstanceOf[HTMLInputElement]
 }

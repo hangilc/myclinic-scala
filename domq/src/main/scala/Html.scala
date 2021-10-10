@@ -2,6 +2,7 @@ package dev.fujiwara.domq
 
 import org.scalajs.dom.document
 import org.scalajs.dom.raw.HTMLElement
+import org.scalajs.dom.raw.HTMLInputElement
 
 object Html {
 
@@ -11,10 +12,10 @@ object Html {
       val ex = ElementQ(e)
       ex.apply(modifiers: _*)
 
-  def tag(tag: String)(modifiers: Modifier*): ElementQ =
-    val e = document.createElement(tag).asInstanceOf[HTMLElement]
-    val ex = ElementQ(e)
-    ex.apply(modifiers: _*)
+  // def tag(tag: String)(modifiers: Modifier*): ElementQ =
+  //   val e = document.createElement(tag).asInstanceOf[HTMLElement]
+  //   val ex = ElementQ(e)
+  //   ex.apply(modifiers: _*)
 
   val div = Tag("div")
   val h1 = Tag("h1")

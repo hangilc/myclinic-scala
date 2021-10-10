@@ -18,6 +18,7 @@ class Modal(title: String, f: Modal.CloseFunction => HTMLElement):
           css(style => {
             style.cssFloat = "right"
             style.verticalAlign = "middle"
+            style.marginLeft = "2rem"
           }),
           onclick := (onCloseClick _)
         )
