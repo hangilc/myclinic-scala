@@ -134,7 +134,7 @@ lazy val appointApp = project
   .dependsOn(domq, modelJS, utilJS, utilJS, webclient)
   .settings(
     name := "myclinic-appoint",
-    scalaJSUseMainModuleInitializer := true,
+    //scalaJSUseMainModuleInitializer := true,
     Compile / fastLinkJS / scalaJSLinkerOutputDirectory :=
       (rootDir.value / "server" / "web" / "appoint" / "scalajs"),
     libraryDependencies ++= Seq(

@@ -79,7 +79,12 @@ object AppointSheet:
 
   object TopMenu:
     val prevWeekBinding, nextWeekBinding = ElementBinding()
-    val ele = div(mb := "0.5rem")(
+    val ele = div(
+      mb := "0.5rem",
+      css(style => {
+        style.textAlign = "center"
+      })
+    )(
       button(
         attr("type") := "button",
         cls := "btn btn-outline-primary",
@@ -120,13 +125,9 @@ object AppointSheet:
     var columns: List[AppointColumn] = List()
     var appointTimes: List[AppointTime] = List.empty
 
-    // val ele = div(cls := "container px-0 mx-0")(
-    //   div(cls := "row mx-0", bindTo(rowBinding))
-    // )
-
     val ele = columnWrapper(
       display := "flex",
-      justifyContent := "center",
+      justifyContent := "center"
     )
 
     val appointCreatedSubscriber =
@@ -140,14 +141,15 @@ object AppointSheet:
     ): Unit =
       val subscribers = List(appointCreatedSubscriber, appointDeletedSubscriber)
       subscribers.foreach(_.stop())
-      val maxEventId = getMaxEventId(appointTimes :: appointMap.values.toList: _*)
+      val maxEventId = getMaxEventId(
+        appointTimes :: appointMap.values.toList: _*
+      )
       clear()
       AppointRow.appointTimes = appointTimes
       val appointDates = AppointDate.classify(appointTimes, appointMap)
       columns = appointDates.map(AppointColumn.create(_, appointMap)).toList
       columns.foreach(addElement)
       subscribers.foreach(_.start(maxEventId))
-      
 
     def clear(): Unit =
       columnWrapper.clear()
@@ -155,7 +157,10 @@ object AppointSheet:
     def addElement(col: AppointColumn): Unit =
       columnWrapper(col.ele(margin := "0 0.5rem"))
 
-    private def propagateToColumn(appoint: Appoint, f: (AppointColumn, Appoint) => Unit): Unit =
+    private def propagateToColumn(
+        appoint: Appoint,
+        f: (AppointColumn, Appoint) => Unit
+    ): Unit =
       appointTimes
         .find(at => at.appointTimeId == appoint.appointTimeId)
         .flatMap(at => columns.find(c => c.date == at.date))
@@ -190,7 +195,7 @@ object AppointSheet:
 
     private def findBoxByAppoint(appoint: Appoint): Option[AppointTimeBox] =
       boxes.find(b => b.appointTime.appointTimeId == appoint.appointTimeId)
-    
+
     def insert(appoint: Appoint): Unit =
       findBoxByAppoint(appoint).map(_.addAppoint(appoint))
 
@@ -205,5 +210,3 @@ object AppointSheet:
       val c = AppointColumn(appointDate.date, appointMap)
       c.setAppointTimes(appointDate.appointTimes)
       c
-
-  

@@ -22,12 +22,17 @@ import dev.myclinic.scala.modeljson.Implicits.{given}
 import dev.myclinic.scala.web.appoint.sheet.AppointSheet
 import dev.myclinic.scala.event.ModelEventPublishers
 import dev.myclinic.scala.event.ModelEvents
+import scala.scalajs.js.annotation.JSExportTopLevel
+import scala.scalajs.js.annotation.JSExport
+import org.scalajs.dom.raw.HTMLElement
 
+@JSExportTopLevel("JsMain")
 object JsMain:
-  def main(args: Array[String]): Unit =
+  @JSExport
+  def main(isAdmin: Boolean): Unit =
     val body = document.body
     body(cls := "px-5 pt-1 pb-5")
-    body.appendChild(banner)
+    body.appendChild(banner(isAdmin))
     openWebSocket()
     val workarea = div()
     body.appendChild(workarea)
@@ -35,27 +40,19 @@ object JsMain:
     val endDate = startDate.plusDays(6)
     AppointSheet.setupTo(workarea)
     AppointSheet.setupDateRange(startDate, endDate)
-    //import dev.fujiwara.domq.Modal.xCircle
-    // {
-    //   import dev.fujiwara.domq.Modal
-    //   val dialog = Modal("Test", close => div(
-    //     div(Modal.modalBody)(
-    //       css(style => style.minWidth = "200px"),
-    //       "Content"
-    //     ),
-    //     div(Modal.modalCommands)(
-    //       button("Close", onclick := (() => close())),
-    //       button("Ok", onclick := (() => close())),
-    //     )
-    //   ))
-    //   dialog.open()
-    // }
 
-  val banner = div(cls := "container-fluid")(
-    div(cls := "row pt-3 pb-2 ml-5 mr-5")(
-      h1(cls := "bg-dark text-white p-3 col-md-12")("診察予約")
+  def banner(isAdmin: Boolean): HTMLElement = 
+    val text = "診察予約" + (if isAdmin then "（管理）" else "")
+    div(text)(
+      background := "#7fffd4",
+      padding := "1.5rem 0",
+      mb := "0.5rem",
+      css(style => {
+        style.textAlign = "center"
+        style.fontSize = "2rem"
+        style.fontWeight = "bold"
+      })
     )
-  )
 
   def openWebSocket(): Future[Unit] =
     def f(startEventId: Int): Unit =
