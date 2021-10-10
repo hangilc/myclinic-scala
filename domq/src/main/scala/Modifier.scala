@@ -39,7 +39,6 @@ object Modifier:
     target.appendChild(document.createTextNode(decoded))
   })
 
-
 object Modifiers:
 
   case class Creator[A](f: (HTMLElement, A) => Unit):
@@ -47,13 +46,11 @@ object Modifiers:
 
   case class ClsModifier():
     def :=(arg: String) = Modifier(e => {
-      for c <- arg.split("\\s+") do
-        e.classList.add(c)
+      for c <- arg.split("\\s+") do e.classList.add(c)
     })
 
     def :-(arg: String) = Modifier(e => {
-      for c <- arg.split("\\s+") do
-        e.classList.remove(c)
+      for c <- arg.split("\\s+") do e.classList.remove(c)
     })
 
   val cls = ClsModifier()
@@ -62,6 +59,10 @@ object Modifiers:
 
   def attr(name: String) = Creator[String]((e, a) => {
     e.setAttribute(name, a)
+  })
+
+  def attrNS(namespace: String, name: String) = Creator[String]((e, a) => {
+    e.setAttributeNS(namespace, name, a)
   })
 
   def css(f: CSSStyleDeclaration => Unit): Modifier = Modifier(e => f(e.style))

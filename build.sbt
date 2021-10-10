@@ -35,7 +35,7 @@ lazy val root = project
   )
   .settings(
     publish := {},
-    publishLocal := {}
+    publishLocal := {},
   )
 
 lazy val model = crossProject(JSPlatform, JVMPlatform)

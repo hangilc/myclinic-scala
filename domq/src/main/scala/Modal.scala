@@ -49,12 +49,18 @@ object Modal:
   
   })
 
+  // Based from Heroicons
+  // src: https://github.com/tailwindlabs/heroicons
+  // <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  // <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+  // </svg>
   def xCircle(size: String = "1.5rem", color: String = "black"): HTMLElement = {
-    val svg = document.createElementNS("http://www.w3.org/2000/svg", "svg").asInstanceOf[HTMLElement]
-    val path = document.createElementNS("http://www.w3.org/2000/svg", "path").asInstanceOf[HTMLElement]
+    val ns = "http://www.w3.org/2000/svg"
+    val svg = document.createElementNS(ns, "svg").asInstanceOf[HTMLElement]
+    val path = document.createElementNS(ns, "path").asInstanceOf[HTMLElement]
     svg(
-      //attr("xmlns") := "http://www.w3.org/2000/svg",
       css(style => {style.height = size; style.width = size}),
+      attrNS(ns, "viewBox") := "0 0 24 24",
       attr("fill") := "none",
       attr("viewBox") := "0 0 24 24",
       attr("stroke") := color,
@@ -68,12 +74,6 @@ object Modal:
         attr("d") := "M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
       )
     )
-    svg.setAttributeNS("http://www.w3.org/2000/svg", "viewBox", "0 0 24 24")
-    //svg.setAttributeNS("http://www.w3.org/2000/svg", "stroke", "green")
-    //svg.setAttributeNS("http://www.w3.org/2000/svg", "fill", "none")
     svg
   }
 
-//   <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-//   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-// </svg>
