@@ -8,9 +8,12 @@ import scala.language.implicitConversions
 import org.scalajs.dom.raw.MouseEvent
 import org.scalajs.dom.{document, window}
 
-object ContextMenu:
-  def prepareMenu(menu: HTMLElement): Unit =
-    menu(css(style => {
+class ContextMenu:
+  val menu: HTMLElement = makeEmptyMenu()
+  val screen: HTMLElement = makeScreen()
+
+  def makeEmptyMenu(): HTMLElement = 
+    div(css(style => {
         style.position = "absolute"
         style.background = "rgba(255, 255, 255, 1"
         style.border = "1px solid gray"
@@ -18,22 +21,7 @@ object ContextMenu:
         style.zIndex = "2002"
     }))
 
-  def show(clickEvent: MouseEvent, menu: HTMLElement): Unit =
-    val x = clickEvent.clientX + window.scrollX
-    val y = clickEvent.clientY + window.scrollY
-    menu(css(style => {
-      style.left = s"${x}px"
-      style.top = s"${y}.px"
-    }))
-    val screen = contextMenuScreen
-    document.body(screen(onclick := ((e: MouseEvent) => {
-      e.preventDefault
-      e.stopPropagation
-      menu.remove()
-      screen.remove()
-    })), menu)
-    
-  def contextMenuScreen: HTMLElement =
+  def makeScreen(): HTMLElement =
     div(css(style => {
       style.display = "block"
       style.position = "fixed"
@@ -46,3 +34,37 @@ object ContextMenu:
       style.overflowY = "auto"
       style.zIndex = "2001"
     }))
+
+  def show(event: MouseEvent): Unit = 
+    val x = event.clientX + window.scrollX
+    val y = event.clientY + window.scrollY
+    menu(css(style => {
+      style.left = s"${x}px"
+      style.top = s"${y}.px"
+    }))
+    document.body(screen(onclick := ((e: MouseEvent) => {
+      e.preventDefault
+      e.stopPropagation
+      remove()
+    })), menu)
+
+  def remove(): Unit = 
+    menu.remove()
+    screen.remove()
+
+
+object ContextMenu:
+  def apply(commands: (String, () => Unit)*): ContextMenu =
+    val m = new ContextMenu()
+    def makeItem(label: String, f: () => Unit): HTMLElement =
+      div(
+        a(label, href := "", onclick := (() => {
+          m.remove()
+          f()
+        }))
+      )
+    val items = commands.map((name, f) => {
+      Modifier(e => e.appendChild(makeItem(name, f)))
+    })
+    m.menu(items: _*)
+    m

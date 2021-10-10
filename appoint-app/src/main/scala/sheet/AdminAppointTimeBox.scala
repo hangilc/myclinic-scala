@@ -12,12 +12,13 @@ import org.scalajs.dom.{document, window}
 
 class AdminAppointTimeBox(appointTime: AppointTime)
     extends AppointTimeBox(appointTime):
-  ele.addEventListener("contextmenu", (event: MouseEvent) => {
-    event.preventDefault
-    val menu = div(
-        div(a("Convert", href := "")),
-        div(a("Combin", href := "")),
-    )
-    ContextMenu.prepareMenu(menu)
-    ContextMenu.show(event, menu)
-  })
+  ele.addEventListener(
+    "contextmenu",
+    (event: MouseEvent) => {
+      event.preventDefault
+      ContextMenu(
+        "Convert" -> (() => println("Convert")),
+        "Combine" -> (() => println("Combine")),
+      ).show(event)
+    }
+  )
