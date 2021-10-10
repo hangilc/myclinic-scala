@@ -29,7 +29,7 @@ import cats.implicits._
 import cats.Monoid
 import dev.myclinic.scala.event.getMaxEventId
 
-object AppointSheet:
+class AppointSheet:
   val eles = div(TopMenu.ele, AppointRow.ele)
   var dateRange: Option[(LocalDate, LocalDate)] = None
   type AppointTimeId = Int
@@ -172,6 +172,12 @@ object AppointSheet:
     def onAppointDeleted(event: AppointDeleted): Unit =
       propagateToColumn(event.deleted, _.delete(_))
 
+  def makeAppointTimeBox(
+      appointTime: AppointTime,
+      appoints: List[Appoint]
+  ): AppointTimeBox =
+    AppointTimeBox(appointTime, appoints)
+
   case class AppointColumn(
       date: LocalDate,
       appointMap: Map[AppointTimeId, List[Appoint]]
@@ -187,8 +193,10 @@ object AppointSheet:
 
     def setAppointTimes(appointTimes: List[AppointTime]): Unit =
       appointTimes.map(a => {
-        val box =
-          AppointTimeBox(a, appointMap.getOrElse(a.appointTimeId, List.empty))
+        val box = makeAppointTimeBox(
+          a,
+          appointMap.getOrElse(a.appointTimeId, List.empty)
+        )
         boxes = boxes :+ box
         boxBinding.element(box.ele)
       })

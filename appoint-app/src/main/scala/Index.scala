@@ -19,7 +19,7 @@ import io.circe._
 import io.circe.syntax._
 import io.circe.parser.decode
 import dev.myclinic.scala.modeljson.Implicits.{given}
-import dev.myclinic.scala.web.appoint.sheet.AppointSheet
+import dev.myclinic.scala.web.appoint.sheet.{AppointSheet, AdminAppointSheet}
 import dev.myclinic.scala.event.ModelEventPublishers
 import dev.myclinic.scala.event.ModelEvents
 import scala.scalajs.js.annotation.JSExportTopLevel
@@ -36,10 +36,11 @@ object JsMain:
     openWebSocket()
     val workarea = div()
     body.appendChild(workarea)
+    val sheet = if isAdmin then AdminAppointSheet() else AppointSheet()
     val startDate = DateUtil.startDayOfWeek(LocalDate.now())
     val endDate = startDate.plusDays(6)
-    AppointSheet.setupTo(workarea)
-    AppointSheet.setupDateRange(startDate, endDate)
+    sheet.setupTo(workarea)
+    sheet.setupDateRange(startDate, endDate)
 
   def banner(isAdmin: Boolean): HTMLElement = 
     val text = "診察予約" + (if isAdmin then "（管理）" else "")
