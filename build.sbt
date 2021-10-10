@@ -11,7 +11,7 @@ val http4sVersion = "0.23.3"
 val doobieVersion = "1.0.0-M5"
 val circeVersion = "0.14.1"
 val scalaJavaTimeVersion = "2.3.0"
-val scalaJSDomVersion = "1.1.0"
+val scalaJSDomVersion = "1.2.0"
 
 ThisBuild / scalacOptions ++= Seq("-deprecation", "-encoding", "UTF-8")
 
