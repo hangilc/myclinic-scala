@@ -11,6 +11,7 @@ import org.scalajs.dom.raw.HTMLElement
 import org.scalajs.dom.{document, window}
 import dev.myclinic.scala.webclient.Api
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class AdminAppointTimeBox(appointTime: AppointTime)
     extends AppointTimeBox(appointTime):
@@ -32,6 +33,22 @@ class AdminAppointTimeBox(appointTime: AppointTime)
     
 
   def doCombine(): Unit =
+    def listFollows(appointTimes: List[AppointTime]): List[AppointTime] =
+      appointTimes.dropWhile(_.appointTimeId != appointTime.appointTimeId)
+        .sliding(2)
+        .takeWhile({
+          case a :: b :: _ => a.isAdjacentTo(b)
+          case _ => false
+        })
+        .map(_(1))
+        .toList
     for
-      appoints <- Api.listAppointTimesForDate(appointTime.date)
+      appointTimes <- Api.listAppointTimesForDate(appointTime.date)
+      follows = listFollows(appointTimes)
+      _ <- {
+        if follows.isEmpty then Future.unit
+        else
+          val ids = (appointTime :: follows).map(_.appointTimeId)
+          Api.combineAppointTimes(ids)
+      }
     yield ()
