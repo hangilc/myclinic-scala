@@ -62,6 +62,41 @@ trait DbAppoint extends Sqlite:
   def deleteAppointTime(appointTimeId: Int): IO[AppEvent] =
     withEventId(eventId => safeDeleteAppointTime(eventId, appointTimeId))
 
+  private def saveUpdateAppointTime(eventId: Int, appointTime: AppointTime): ConnectionIO[AppEvent] =
+    val appointTimeId: Int = appointTime.appointTimeId
+    for
+      appoints <- Prim.listAppointsForAppointTime(appointTimeId).to[List]
+      _ = assert(appointTime.capacity >= appoints.size, "Too small capacity to update.")
+      ats <- Prim.listAppointTimesForDate(appointTime.date).to[List]
+      others = ats.filter(at => at.appointTimeId != appointTimeId)
+      event <- ???
+    yield event
+
+
+  private def batchGetAppointTimes(
+      appointTimeIds: List[Int]
+  ): ConnectionIO[List[AppointTime]] =
+    appointTimeIds.map(id => Prim.getAppointTime(id).unique).sequence
+
+  def combineAppointTimes(appointTimeIds: List[Int]): IO[List[AppEvent]] =
+    if appointTimeIds.size <= 1 then IO.pure(List.empty[AppEvent])
+    else
+      val targetId = appointTimeIds.head
+      val followIds = appointTimeIds.tail
+      def newUntilTime(follows: List[AppointTime]): LocalTime = 
+        follows.last.untilTime
+      withEventId(eventId => {
+        for
+          target <- Prim.getAppointTime(targetId).unique
+          follows <- batchGetAppointTimes(followIds)
+          _ = assert(
+            AppointTime.isAdjacentRun(target :: follows),
+            "Non-contiguous appoint times"
+          )
+          delEvents <- followIds.map(id => safeDeleteAppointTime(eventId, id)).sequence
+        yield events
+      })
+
   def listExistingAppointTimeDates(
       from: LocalDate,
       upto: LocalDate

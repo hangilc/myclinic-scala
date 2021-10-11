@@ -72,6 +72,12 @@ object DbAppointPrim:
         order by date, from_time
     """.query[AppointTime]
 
+  def listAppointTimesForDate(date: LocalDate): Query0[AppointTime] =
+    sql"""
+      select * from appoint_time where date = ${date}
+        order by date, from_time
+    """.query[AppointTime]
+
   def getAppoint(appointId: Int): Query0[Appoint] =
     sql"select * from appoint where appoint_id = ${appointId}".query[Appoint]
 

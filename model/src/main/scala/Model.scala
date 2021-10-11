@@ -3,6 +3,8 @@ package dev.myclinic.scala.model
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.LocalDateTime
+import dev.myclinic.scala.model.DateTimeOrder.{given}
+import localTimeOrder.mkOrderingOps
 
 case class AppointTime(
     appointTimeId: Int,
@@ -15,6 +17,12 @@ case class AppointTime(
 ) extends Evented:
   def isAdjacentTo(other: AppointTime): Boolean =
     date == other.date && untilTime == other.fromTime
+
+  def overlapsWith(other: AppointTime): Boolean =
+    date == other.date && (
+      untilTime <= other.fromTime ||
+      fromTime >= other.untilTime
+    )
 
 object AppointTime:
   def overlaps(ats: List[AppointTime]): Boolean =
