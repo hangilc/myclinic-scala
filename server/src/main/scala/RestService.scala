@@ -44,8 +44,15 @@ object RestService:
     //throw new UserError("さようなら")
     "こんにちは".pure[IO]
 
-  private def publish(event: AppEvent)(using topic: Topic[IO, WebSocketFrame]): IO[Unit] =
+  private def publish(event: AppEvent)(using
+      topic: Topic[IO, WebSocketFrame]
+  ): IO[Unit] =
     topic.publish1(Text(event.asJson.toString)).void
+
+  private def publishAll(events: List[AppEvent])(using
+      topic: Topic[IO, WebSocketFrame]
+  ): IO[Unit] =
+    events.map(publish(_)).sequence_
 
   def routes(using topic: Topic[IO, WebSocketFrame]) = HttpRoutes.of[IO] {
 
@@ -72,11 +79,20 @@ object RestService:
       Ok(op)
     }
 
+    case req @ POST -> Root / "combine-appoint-times" => {
+      val op = for
+        appointTimeIds <- req.as[List[Int]]
+        events <- Db.combineAppointTimes(appointTimeIds)
+        _ <- publishAll(events)
+      yield (true)
+      Ok(op)
+    }
+
     case GET -> Root / "list-appoints-for-appoint-time" :? intAppointTimeId(
           appointTimeId
         ) => {
-          Ok(Db.listAppointsForAppointTime(appointTimeId))
-        }
+      Ok(Db.listAppointsForAppointTime(appointTimeId))
+    }
 
     case GET -> Root / "list-appoints-for-date" :? dateDate(date) => {
       Ok(Db.listAppointsForDate(date))
@@ -88,7 +104,9 @@ object RestService:
       Ok(Db.listGlobalEventSince(from))
     }
 
-    case GET -> Root / "list-app-event-in-range" :? intFrom(from) +& intUntil(until) => {
+    case GET -> Root / "list-app-event-in-range" :? intFrom(from) +& intUntil(
+          until
+        ) => {
       Ok(Db.listGlobalEventInRange(from, until))
     }
 
@@ -99,33 +117,4 @@ object RestService:
       yield ()
       Ok(op)
     }
-
-  // case req @ POST -> Root / "register-appoint" => {
-    //   val op = for
-    //     appoint <- req.as[Appoint]
-    //     appEvent <- Db.registerAppoint(appoint)
-    //     _ <- topic.publish1(Text(appEvent.asJson.toString()))
-    //   yield "ok".asJson
-    //   Ok(op)
-    // }
-
-    // case req @ POST -> Root / "cancel-appoint" :? dateDate(date) +& timeTime(
-    //       time
-    //     ) +& nameString(name) => {
-    //   val op = for
-    //     appEvent <- Db.cancelAppoint(date, time, name)
-    //     _ <- topic.publish1(Text(appEvent.asJson.toString()))
-    //   yield "ok".asJson
-    //   Ok(op)
-    // }
-
-    // case GET -> Root / "get-appoint" :? dateDate(date) +& timeTime(time) => {
-    //   Ok(Db.getAppoint(date, time))
-    // }
-
-    // case GET -> Root / "get-next-app-event-id" => {
-    //   Ok(Db.nextGlobalEventId())
-    // }
-
-
   }

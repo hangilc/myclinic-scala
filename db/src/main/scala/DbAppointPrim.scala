@@ -1,6 +1,8 @@
 package dev.myclinic.scala.db
 
 import java.time._
+import cats._
+import cats.implicits._
 import doobie._
 import doobie.implicits._
 import dev.myclinic.scala.model.{AppointTime, Appoint, AppEvent}
@@ -25,15 +27,18 @@ object DbAppointPrim:
       entered <- getAppointTime(id).unique
     yield entered
 
-  def updateAppointTime(at: AppointTime): ConnectionIO[Unit] =
-    sql"""
+  def updateAppointTime(at: AppointTime): ConnectionIO[AppointTime] =
+    val op = sql"""
       update appoint_time set event_id = ${at.eventId}, date = ${at.date},
         from_time = ${at.fromTime}, until_time = ${at.untilTime}, 
         kind = ${at.kind}, capacity = ${at.capacity}
-    """.update.run.map[Unit](affected =>
-      if affected != 1 then
-        throw new RuntimeException("Failed to update appoint time.")
-    )
+    """
+    
+    for
+      affected <- op.update.run
+      _ = assert(affected == 1, "Failed to update appoint time.")
+      updated <- getAppointTime(at.appointTimeId).unique
+    yield updated
 
   def deleteAppointTime(appointTimeId: Int): ConnectionIO[Unit] =
     sql"""
@@ -93,18 +98,21 @@ object DbAppointPrim:
       entered <- getAppoint(id).unique
     yield entered
 
-  def updateAppoint(a: Appoint): ConnectionIO[Unit] =
-    sql"""
+  def updateAppoint(a: Appoint): ConnectionIO[Appoint] =
+    val op = sql"""
       update appoint set event_id = ${a.eventId}, 
         appoint_time_id = ${a.appointTimeId},
         patient_name = ${a.patientName}, 
         patient_id = ${a.patientId},
         memo = ${a.memo} 
         where appoint_id = ${a.appointId}
-    """.update.run.map(affected =>
-      if affected != 1 then
-        throw new RuntimeException("Failed to update appoint.")
-    )
+    """
+    
+    for 
+      affected <- op.update.run
+      _ = assert(affected == 1, "Failed to update appoint.")
+      updated <- getAppoint(a.appointId).unique
+    yield updated
 
   def deleteAppoint(appointId: Int): ConnectionIO[Unit] =
     sql"delete from appoint where appoint_id = ${appointId}".update.run.map(
