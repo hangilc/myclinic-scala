@@ -63,7 +63,7 @@ trait DbAppoint extends Sqlite:
   def deleteAppointTime(appointTimeId: Int): IO[AppEvent] =
     withEventId(eventId => safeDeleteAppointTime(eventId, appointTimeId))
 
-  private def saveUpdateAppointTime(
+  private def safeUpdateAppointTime(
       eventId: Int,
       appointTime: AppointTime
   ): ConnectionIO[AppEvent] =
@@ -118,14 +118,13 @@ trait DbAppoint extends Sqlite:
           delEvents <- followIds
             .map(id => safeDeleteAppointTime(eventId, id))
             .sequence
-          updated <- Prim.updateAppointTime(
+          updateEvent <- safeUpdateAppointTime(eventId, 
             target.copy(
               untilTime = newUntilTime(follows),
               capacity = target.capacity + capacityInc(follows),
               eventId = eventId
             )
           )
-          updateEvent <- DbEventPrim.logAppointTimeUpdated(updated)
         yield delEvents ++ List(updateEvent)
       })
 

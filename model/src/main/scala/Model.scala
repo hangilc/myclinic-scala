@@ -19,10 +19,9 @@ case class AppointTime(
     date == other.date && untilTime == other.fromTime
 
   def overlapsWith(other: AppointTime): Boolean =
-    date == other.date && (
-      untilTime <= other.fromTime ||
-      fromTime >= other.untilTime
-    )
+    date == other.date && 
+      untilTime > other.fromTime &&
+      fromTime < other.untilTime
 
 object AppointTime:
   def overlaps(ats: List[AppointTime]): Boolean =

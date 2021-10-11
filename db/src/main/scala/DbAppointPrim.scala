@@ -32,6 +32,7 @@ object DbAppointPrim:
       update appoint_time set event_id = ${at.eventId}, date = ${at.date},
         from_time = ${at.fromTime}, until_time = ${at.untilTime}, 
         kind = ${at.kind}, capacity = ${at.capacity}
+        where appoint_time_id = ${at.appointTimeId}
     """
     
     for
