@@ -8,13 +8,12 @@ import localTimeOrder.mkOrderingOps
 
 case class AppointTime(
     appointTimeId: Int,
-    eventId: Int,
     date: LocalDate,
     fromTime: LocalTime,
     untilTime: LocalTime,
     kind: String,
     capacity: Int
-) extends Evented:
+):
   def isAdjacentTo(other: AppointTime): Boolean =
     date == other.date && untilTime == other.fromTime
 
@@ -52,16 +51,14 @@ object AppointTime:
 
 case class Appoint(
     appointId: Int,
-    eventId: Int,
     appointTimeId: Int,
     patientName: String,
     patientId: Int,
     memo: String
-) extends Evented
+)
 
 case class AppEvent(
     appEventId: Int,
-    eventId: Int,
     createdAt: LocalDateTime,
     model: String,
     kind: String,

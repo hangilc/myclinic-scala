@@ -17,9 +17,9 @@ object DbAppointPrim:
 
   def enterAppointTime(at: AppointTime): ConnectionIO[AppointTime] =
     val op = sql"""
-      insert into appoint_time (event_id, date, from_time, until_time, 
+      insert into appoint_time (date, from_time, until_time, 
         kind, capacity)
-        values(${at.eventId}, ${at.date}, ${at.fromTime}, ${at.untilTime}, 
+        values(${at.date}, ${at.fromTime}, ${at.untilTime}, 
         ${at.kind}, ${at.capacity})
     """
     for
@@ -29,7 +29,7 @@ object DbAppointPrim:
 
   def updateAppointTime(at: AppointTime): ConnectionIO[AppointTime] =
     val op = sql"""
-      update appoint_time set event_id = ${at.eventId}, date = ${at.date},
+      update appoint_time set date = ${at.date},
         from_time = ${at.fromTime}, until_time = ${at.untilTime}, 
         kind = ${at.kind}, capacity = ${at.capacity}
         where appoint_time_id = ${at.appointTimeId}
@@ -89,9 +89,9 @@ object DbAppointPrim:
 
   def enterAppoint(a: Appoint): ConnectionIO[Appoint] =
     val op = sql"""
-      insert into appoint (event_id, appoint_time_id, patient_name, 
+      insert into appoint (appoint_time_id, patient_name, 
         patient_id, memo) 
-        values (${a.eventId}, ${a.appointTimeId}, ${a.patientName}, 
+        values (${a.appointTimeId}, ${a.patientName}, 
         ${a.patientId}, ${a.memo})
       """
     for
@@ -101,7 +101,7 @@ object DbAppointPrim:
 
   def updateAppoint(a: Appoint): ConnectionIO[Appoint] =
     val op = sql"""
-      update appoint set event_id = ${a.eventId}, 
+      update appoint set  
         appoint_time_id = ${a.appointTimeId},
         patient_name = ${a.patientName}, 
         patient_id = ${a.patientId},

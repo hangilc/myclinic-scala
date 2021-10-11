@@ -13,9 +13,6 @@ import java.time.LocalTime
 import java.security.InvalidParameterException
 
 trait DbAppoint extends Sqlite:
-  private def withEventId[A](f: Int => ConnectionIO[A]): IO[A] =
-    sqlite(DbEventPrim.withEventId(eventId => f(eventId)))
-
   private def enterWithEvent(
       a: AppointTime
   ): ConnectionIO[(AppointTime, AppEvent)] =
@@ -27,16 +24,13 @@ trait DbAppoint extends Sqlite:
   def batchEnterAppointTimes(
       appointTimes: List[AppointTime]
   ): IO[List[AppEvent]] =
-    withEventId(eventId => {
-      val ats = appointTimes.map(_.copy(eventId = eventId))
-      ats.map(at => enterWithEvent(at)).sequence.map(_.map(ae => ae._2))
-    })
+    val op = for
+      list <- appointTimes.map(enterWithEvent(_)).sequence
+    yield list.map(p => p._2)
+    sqlite(op)
 
   def createAppointTime(appointTime: AppointTime): IO[(AppointTime, AppEvent)] =
-    withEventId(eventId => {
-      val a = appointTime.copy(eventId = eventId)
-      enterWithEvent(a)
-    })
+    sqlite(enterWithEvent(appointTime))
 
   private def safeDeleteAppointTime(
       eventId: Int,
