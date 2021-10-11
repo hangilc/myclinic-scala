@@ -7,12 +7,18 @@ import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
 import scala.language.implicitConversions
 
-class Modal(title: String, f: Modal.CloseFunction => HTMLElement):
+class Modal[T](
+    title: String,
+    f: Modal.CloseFunction[T] => HTMLElement,
+    cb: T => Unit,
+    defaultValue: Option[T] = None
+):
   val dialog = div(Modal.modalContent)
 
   def open(): Unit =
     dialog(
-      div(css(style => style.width = "*"),
+      div(
+        css(style => style.width = "*"),
         span(Modal.modalTitle)(title),
         Modal.xCircle(color = "gray")(
           css(style => {
@@ -23,19 +29,27 @@ class Modal(title: String, f: Modal.CloseFunction => HTMLElement):
           onclick := (onCloseClick _)
         )
       ),
-      f(() => close())
+      f(close)
     )
     document.body(Modal.modalBackdropInstance, dialog)
 
-  def close(): Unit =
+  def close(optValue: Option[T]): Unit =
     dialog.remove()
     Modal.modalBackdropInstance.remove()
+    optValue match {
+      case Some(v) => cb(v)
+      case None    => ()
+    }
 
   def onCloseClick(): Unit =
-    close()
+    close(defaultValue)
 
 object Modal:
-  type CloseFunction = (() => Unit)
+  type CloseFunction[T] = (Option[T] => Unit)
+  type NoArgCloseFunction = () => Unit
+
+  def apply(title: String, f: NoArgCloseFunction => HTMLElement): Modal[Unit] =
+    new Modal(title, closeFun => f(() => closeFun(None)), _ => ())
 
   val modalBackdrop = Modifier(e => {
     val style = e.style

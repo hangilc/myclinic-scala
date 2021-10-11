@@ -69,6 +69,9 @@ object RestService:
         ) =>
       Ok(Db.listAppointTimes(from, upto))
 
+    case GET -> Root / "list-appoint-times-for-date" :? dateDate(date) =>
+      Ok(Db.listAppointTimesForDate(date))
+
     case req @ POST -> Root / "register-appoint" => {
       val op = for
         appoint <- req.as[Appoint]

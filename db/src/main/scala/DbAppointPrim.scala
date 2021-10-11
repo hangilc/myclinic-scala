@@ -133,3 +133,8 @@ object DbAppointPrim:
         on a.appoint_time_id = at.appoint_time_id 
         where at.date = ${date}
     """.query[Appoint]
+
+  def countAppointsByAppointTime(appointTimeId: Int): ConnectionIO[Int] =
+    sql"""
+      select count(*) from appoint where appoint_time_id = ${appointTimeId}
+    """.query[Int].unique

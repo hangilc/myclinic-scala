@@ -9,6 +9,8 @@ import org.scalajs.dom.raw.MouseEvent
 import scala.language.implicitConversions
 import org.scalajs.dom.raw.HTMLElement
 import org.scalajs.dom.{document, window}
+import dev.myclinic.scala.webclient.Api
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class AdminAppointTimeBox(appointTime: AppointTime)
     extends AppointTimeBox(appointTime):
@@ -17,8 +19,17 @@ class AdminAppointTimeBox(appointTime: AppointTime)
     (event: MouseEvent) => {
       event.preventDefault
       ContextMenu(
-        "Convert" -> (() => println("Convert")),
-        "Combine" -> (() => println("Combine")),
+        "Convert" -> doConvert,
+        "Combine" -> doCombine,
       ).show(event)
     }
   )
+
+  def doConvert(): Unit =
+    import dev.fujiwara.domq.ShowMessage
+    ShowMessage.showMessage("こんにちは、世界", "ご挨拶")
+
+  def doCombine(): Unit =
+    for
+      appoints <- Api.listAppointTimesForDate(appointTime.date)
+    yield ()

@@ -32,6 +32,9 @@ object Api:
   ): Future[List[AppointTime]] =
     get("list-appoint-times", Params("from" -> from, "upto" -> upto))
 
+  def listAppointTimesForDate(date: LocalDate): Future[List[AppointTime]] =
+    get("list-appoint-times-for-date", Params("date" -> date))
+
   def registerAppoint(appoint: Appoint): Future[Appoint] =
     post("register-appoint", Params(), appoint)
 
@@ -56,15 +59,5 @@ object Api:
   def cancelAppoint(appointId: Int): Future[Unit] =
     post("cancel-appoint", Params("appoint-id" -> appointId), Map[String, String]())
 
-// def listAppoint(from: LocalDate, upto: LocalDate): Future[List[Appoint]] =
-//   get("list-appoint", Params("from" -> from, "upto" -> upto))
-
-// def registerAppoint(appoint: Appoint): Future[String] =
-//   post("register-appoint", Params(), appoint)
-
-// def cancelAppoint(date: LocalDate, time: LocalTime, patientName: String): Future[String] =
-//   post("cancel-appoint", Params("date" -> date, "time" -> time, "name" -> patientName), "")
-
-// def getAppoint(date: LocalDate, time: LocalTime): Future[Appoint] =
-//   get("get-appoint", Params("date" -> date, "time" -> time))
-
+  def combineAppointTimes(appointTimeIds: List[Int]): Future[Unit] =
+    post("combine-appoint-times", Params(), appointTimeIds)

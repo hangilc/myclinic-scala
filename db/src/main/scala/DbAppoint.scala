@@ -108,6 +108,13 @@ trait DbAppoint extends Sqlite:
             AppointTime.isAdjacentRun(target :: follows),
             "Non-contiguous appoint times"
           )
+          appointCounts <- followIds
+            .map(Prim.countAppointsByAppointTime(_))
+            .sequence
+          _ = assert(
+            appointCounts.forall(_ == 0),
+            "Cannot combine appoint times (appoint exists)."
+          )
           delEvents <- followIds
             .map(id => safeDeleteAppointTime(eventId, id))
             .sequence
@@ -133,6 +140,9 @@ trait DbAppoint extends Sqlite:
       upto: LocalDate
   ): IO[List[AppointTime]] =
     sqlite(Prim.listAppointTimes(from, upto).to[List])
+
+  def listAppointTimesForDate(date: LocalDate): IO[List[AppointTime]] =
+    sqlite(Prim.listAppointTimesForDate(date).to[List])
 
   def getAppointTimeById(appointTimeId: Int): IO[AppointTime] =
     sqlite(Prim.getAppointTime(appointTimeId).unique)
