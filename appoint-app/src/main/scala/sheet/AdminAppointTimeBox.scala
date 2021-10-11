@@ -27,7 +27,9 @@ class AdminAppointTimeBox(appointTime: AppointTime)
 
   def doConvert(): Unit =
     import dev.fujiwara.domq.ShowMessage
-    ShowMessage.showMessage("こんにちは、世界", "ご挨拶")
+    import ShowMessage.AskCommand.*
+    ShowMessage.getString("テスト", "入力してください", println(_))
+    
 
   def doCombine(): Unit =
     for
