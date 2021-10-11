@@ -72,12 +72,12 @@ object JsMain:
         decode[AppEvent](src) match
           case Right(appEvent) =>
             val modelEvent = ModelEvents.convert(appEvent)
-            if appEvent.eventId == nextEventId then
+            if appEvent.appEventId == nextEventId then
               ModelEventPublishers.publish(modelEvent)
               nextEventId += 1
-            else
+            else if appEvent.appEventId > nextEventId then
               Api
-                .listAppEventInRange(nextEventId, appEvent.eventId)
+                .listAppEventInRange(nextEventId, appEvent.appEventId)
                 .onComplete({
                   case Success(events) =>
                     val modelEvents = events.map(ModelEvents.convert(_))

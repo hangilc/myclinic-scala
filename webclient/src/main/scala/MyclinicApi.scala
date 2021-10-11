@@ -54,7 +54,7 @@ object Api:
     get("list-app-event-since", Params("from" -> fromEventId))
 
   def listAppEventInRange(fromEventId: Int, untilEventId: Int): Future[List[AppEvent]] =
-    get("list-app-event-in-range", Params("from" -> fromEventId, "upto" -> untilEventId))
+    get("list-app-event-in-range", Params("from" -> fromEventId, "until" -> untilEventId))
 
   def cancelAppoint(appointId: Int): Future[Unit] =
     post("cancel-appoint", Params("appoint-id" -> appointId), Map[String, String]())

@@ -15,12 +15,9 @@ import scala.concurrent.Future
 import scala.collection.mutable
 import dev.myclinic.scala.webclient.Api
 import dev.myclinic.scala.event.ModelEvents.ModelEvent
-import dev.myclinic.scala.event.ModelEvents.{
-  AppointUpdated,
-  AppointCreated,
-  AppointDeleted
-}
+import dev.myclinic.scala.event.ModelEvents.*
 import dev.myclinic.scala.event.ModelEventPublishers
+import dev.myclinic.scala.event.ModelEventSubscriberController
 import scala.language.implicitConversions
 import org.scalajs.dom.raw.MouseEvent
 import dev.myclinic.scala.web.appoint.Misc
@@ -61,21 +58,6 @@ class AppointSheet:
 
   def setupTo(wrapper: HTMLElement): Unit =
     wrapper(eles)
-
-  case class AppointDate(
-      date: LocalDate,
-      appointTimes: List[AppointTime],
-      appointMap: Map[AppointTimeId, List[Appoint]]
-  )
-
-  object AppointDate:
-    def classify(
-        appList: List[AppointTime],
-        appointMap: Map[AppointTimeId, List[Appoint]]
-    ): List[AppointDate] =
-      val map = appList.groupBy(_.date)
-      val result = for k <- map.keys yield AppointDate(k, map(k), appointMap)
-      result.toList.sortBy(_.date)
 
   object TopMenu:
     val prevWeekBinding, nextWeekBinding = ElementBinding()
@@ -130,16 +112,17 @@ class AppointSheet:
       justifyContent := "center"
     )
 
-    val appointCreatedSubscriber =
-      ModelEventPublishers.appointCreated.subscribe(onAppointCreated)
-    val appointDeletedSubscriber =
-      ModelEventPublishers.appointDeleted.subscribe(onAppointDeleted)
+    val subscribers: List[ModelEventSubscriberController] = List(
+      ModelEventPublishers.appointCreated.subscribe(onAppointCreated),
+      ModelEventPublishers.appointDeleted.subscribe(onAppointDeleted),
+      ModelEventPublishers.appointTimeUpdated.subscribe(onAppointTimeUpdated),
+      ModelEventPublishers.appointTimeDeleted.subscribe(onAppointTimeDeleted),
+    )
 
     def init(
         appointTimes: List[AppointTime],
         appointMap: Map[AppointTimeId, List[Appoint]]
     ): Unit =
-      val subscribers = List(appointCreatedSubscriber, appointDeletedSubscriber)
       subscribers.foreach(_.stop())
       val maxEventId = getMaxEventId(
         appointTimes :: appointMap.values.toList: _*
@@ -147,7 +130,9 @@ class AppointSheet:
       clear()
       AppointRow.appointTimes = appointTimes
       val appointDates = AppointDate.classify(appointTimes, appointMap)
-      columns = appointDates.map(AppointColumn.create(_, appointMap)).toList
+      columns = appointDates
+        .map(AppointColumn.create(_, appointMap, makeAppointTimeBox))
+        .toList
       columns.foreach(addElement)
       subscribers.foreach(_.start(maxEventId))
 
@@ -166,11 +151,24 @@ class AppointSheet:
         .flatMap(at => columns.find(c => c.date == at.date))
         .map(c => f(c, appoint))
 
+    private def findColumnByDate(date: LocalDate): Option[AppointColumn] =
+      columns.find(c => c.date == date)
+
     def onAppointCreated(event: AppointCreated): Unit =
       propagateToColumn(event.created, _.insert(_))
 
     def onAppointDeleted(event: AppointDeleted): Unit =
       propagateToColumn(event.deleted, _.delete(_))
+
+    def onAppointTimeUpdated(event: AppointTimeUpdated): Unit =
+      findColumnByDate(event.updated.date).map(col =>
+        col.updateAppointTime(event.updated)
+      )
+
+    def onAppointTimeDeleted(event: AppointTimeDeleted): Unit =
+      findColumnByDate(event.deleted.date).map(col =>
+        col.deleteAppointTime(event.deleted.appointTimeId)
+      )
 
   def makeAppointTimeBox(
       appointTime: AppointTime,
@@ -178,43 +176,18 @@ class AppointSheet:
   ): AppointTimeBox =
     AppointTimeBox(appointTime, appoints)
 
-  case class AppointColumn(
-      date: LocalDate,
+case class AppointDate(
+    date: LocalDate,
+    appointTimes: List[AppointTime],
+    appointMap: Map[AppointDate.AppointTimeId, List[Appoint]]
+)
+
+object AppointDate:
+  type AppointTimeId = Int
+  def classify(
+      appList: List[AppointTime],
       appointMap: Map[AppointTimeId, List[Appoint]]
-  ):
-    var boxBinding = ElementBinding()
-    var boxes: Array[AppointTimeBox] = Array()
-    val ele = div(cls := "col-2")(
-      div(dateRep),
-      div(bindTo(boxBinding))
-    )
-
-    def dateRep: String = Misc.formatAppointDate(date)
-
-    def setAppointTimes(appointTimes: List[AppointTime]): Unit =
-      appointTimes.map(a => {
-        val box = makeAppointTimeBox(
-          a,
-          appointMap.getOrElse(a.appointTimeId, List.empty)
-        )
-        boxes = boxes :+ box
-        boxBinding.element(box.ele)
-      })
-
-    private def findBoxByAppoint(appoint: Appoint): Option[AppointTimeBox] =
-      boxes.find(b => b.appointTime.appointTimeId == appoint.appointTimeId)
-
-    def insert(appoint: Appoint): Unit =
-      findBoxByAppoint(appoint).map(_.addAppoint(appoint))
-
-    def delete(appoint: Appoint): Unit =
-      findBoxByAppoint(appoint).map(_.removeAppoint(appoint))
-
-  object AppointColumn:
-    def create(
-        appointDate: AppointDate,
-        appointMap: Map[AppointTimeId, List[Appoint]]
-    ): AppointColumn =
-      val c = AppointColumn(appointDate.date, appointMap)
-      c.setAppointTimes(appointDate.appointTimes)
-      c
+  ): List[AppointDate] =
+    val map = appList.groupBy(_.date)
+    val result = for k <- map.keys yield AppointDate(k, map(k), appointMap)
+    result.toList.sortBy(_.date)

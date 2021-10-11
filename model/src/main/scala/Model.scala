@@ -60,7 +60,7 @@ case class Appoint(
 ) extends Evented
 
 case class AppEvent(
-    id: Int,
+    appEventId: Int,
     eventId: Int,
     createdAt: LocalDateTime,
     model: String,

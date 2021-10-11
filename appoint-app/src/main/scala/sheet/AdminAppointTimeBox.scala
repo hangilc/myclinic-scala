@@ -33,6 +33,7 @@ class AdminAppointTimeBox(appointTime: AppointTime)
     
 
   def doCombine(): Unit =
+    val nFollows = 1
     def listFollows(appointTimes: List[AppointTime]): List[AppointTime] =
       appointTimes.dropWhile(_.appointTimeId != appointTime.appointTimeId)
         .sliding(2)
@@ -44,7 +45,7 @@ class AdminAppointTimeBox(appointTime: AppointTime)
         .toList
     for
       appointTimes <- Api.listAppointTimesForDate(appointTime.date)
-      follows = listFollows(appointTimes)
+      follows = listFollows(appointTimes).take(nFollows)
       _ <- {
         if follows.isEmpty then Future.unit
         else

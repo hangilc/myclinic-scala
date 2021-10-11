@@ -30,6 +30,9 @@ case class AppointTimeBox(
       slots = appoints.map(makeSlot(_))
       slots.foreach(s => slotsElement(s.ele))
 
+    def appoints: List[Appoint] =
+      slots.map(slot => slot.appoint)
+
     def addAppoint(appoint: Appoint): Unit =
       val slot = makeSlot(appoint)
       slots = slots ++ List(slot)
