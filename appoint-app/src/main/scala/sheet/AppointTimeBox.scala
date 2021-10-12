@@ -13,6 +13,17 @@ import dev.myclinic.scala.webclient.Api
 import org.scalajs.dom.raw.MouseEvent
 import org.scalajs.dom.raw.EventTarget
 import org.scalajs.dom.document
+import dev.myclinic.scala.util.DateTimeOrdering.given
+import scala.math.Ordered.orderingToOrdered
+import java.time.LocalDate
+import dev.myclinic.scala.web.appoint.sheet.Types.SortedElement
+
+given Ordering[AppointTimeBox] with
+  def compare(a: AppointTimeBox, b: AppointTimeBox): Int =
+    summon[Ordering[LocalDate]].compare(a.appointTime.date, b.appointTime.date)
+
+val sortedAppointTimeBox: SortedElement[AppointTimeBox] = new SortedElement[AppointTimeBox]:
+  def element(a: AppointTimeBox): HTMLElement = a.ele
 
 case class AppointTimeBox(
       appointTime: AppointTime

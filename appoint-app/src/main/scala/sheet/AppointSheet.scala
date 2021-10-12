@@ -187,7 +187,7 @@ class AppointSheet:
             Some(AppointColumn(date, Map.empty, makeAppointTimeBox))
           else None
         }
-        .foreach(c => ???)
+        .foreach(c => c.addAppointTime(event.created))
 
     def onAppointTimeDeleted(event: AppointTimeDeleted): Unit =
       findColumnByDate(event.deleted.date).map(col =>

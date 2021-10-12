@@ -33,6 +33,9 @@ case class AppointColumn(
       boxElement(box.ele)
     })
 
+  def addAppointTime(at: AppointTime): Unit =
+    
+
   def deleteAppointTime(appointTimeId: Int): Unit =
     boxes.find(box => box.appointTime.appointTimeId == appointTimeId)
       .foreach(box => {

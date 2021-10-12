@@ -74,9 +74,3 @@ object DateUtil:
   def enumDates(from: LocalDate, upto: LocalDate): List[LocalDate] =
     datesFrom(from).takeWhile(d => d.isBefore(upto) || d.isEqual(upto)).toList
 
-object DateTimeOrder:
-  given localTimeOrder: Ordering[LocalTime] with
-    def compare(self: LocalTime, other: LocalTime): Int =
-      if self.equals(other) then 0
-      else if self.isBefore(other) then -1
-      else 1
