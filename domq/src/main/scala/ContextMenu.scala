@@ -7,18 +7,20 @@ import dev.fujiwara.domq.Modifiers.{*, given}
 import scala.language.implicitConversions
 import org.scalajs.dom.raw.MouseEvent
 import org.scalajs.dom.{document, window}
+import org.scalajs.dom.raw.ClientRect
 
 class ContextMenu:
   val menu: HTMLElement = makeEmptyMenu()
   val screen: HTMLElement = makeScreen()
 
-  def makeEmptyMenu(): HTMLElement = 
+  def makeEmptyMenu(): HTMLElement =
     div(css(style => {
-        style.position = "absolute"
-        style.background = "rgba(255, 255, 255, 1"
-        style.border = "1px solid gray"
-        style.padding = "10px"
-        style.zIndex = "2002"
+      style.position = "absolute"
+      style.background = "rgba(255, 255, 255, 1"
+      style.border = "1px solid gray"
+      style.padding = "10px"
+      style.zIndex = "2002"
+      style.visibility = "hidden"
     }))
 
   def makeScreen(): HTMLElement =
@@ -35,36 +37,80 @@ class ContextMenu:
       style.zIndex = "2001"
     }))
 
-  def show(event: MouseEvent): Unit = 
-    val x = event.clientX + window.scrollX
-    val y = event.clientY + window.scrollY
+  def show(event: MouseEvent): Unit =
+    document.body(
+      screen(onclick := ((e: MouseEvent) => {
+        e.preventDefault
+        e.stopPropagation
+        remove()
+      })),
+      menu
+    )
+    val (x, y) = ContextMenu.calcPlacement(
+      event.clientX,
+      event.clientY,
+      menu.getClientRects()(0),
+      window.innerWidth,
+      window.innerHeight
+    )
+    val xx = x + window.scrollX
+    val yy = y + window.scrollY
     menu(css(style => {
-      style.left = s"${x}px"
-      style.top = s"${y}.px"
+      style.left = s"${xx}px"
+      style.top = s"${yy}.px"
     }))
-    document.body(screen(onclick := ((e: MouseEvent) => {
-      e.preventDefault
-      e.stopPropagation
-      remove()
-    })), menu)
+    menu(css(style => style.visibility = "visible"))
 
-  def remove(): Unit = 
+  def remove(): Unit =
     menu.remove()
     screen.remove()
-
 
 object ContextMenu:
   def apply(commands: (String, () => Unit)*): ContextMenu =
     val m = new ContextMenu()
     def makeItem(label: String, f: () => Unit): HTMLElement =
       div(
-        a(label, href := "", onclick := (() => {
-          m.remove()
-          f()
-        }))
+        a(
+          label,
+          href := "",
+          onclick := (() => {
+            m.remove()
+            f()
+          })
+        )
       )
     val items = commands.map((name, f) => {
       Modifier(e => e.appendChild(makeItem(name, f)))
     })
     m.menu(items: _*)
     m
+
+  def calcPlacement(
+      refX: Double,
+      refY: Double,
+      menuRect: ClientRect,
+      viewWidth: Double,
+      viewHeight: Double
+  ): (Double, Double) =
+    (
+      calcPlacementX(refX, menuRect, viewWidth),
+      calcPlacementY(refY, menuRect, viewHeight)
+    )
+
+  def calcPlacementX(
+      refX: Double,
+      menuRect: ClientRect,
+      viewWidth: Double
+  ): Double =
+    val right = refX + menuRect.width
+    if right <= viewWidth then refX
+    else viewWidth - menuRect.width
+
+  def calcPlacementY(
+      refY: Double,
+      menuRect: ClientRect,
+      viewHeight: Double
+  ): Double =
+    val bottom = refY + menuRect.height
+    if bottom <= viewHeight then refY
+    else viewHeight - menuRect.height
