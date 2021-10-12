@@ -6,6 +6,7 @@ import scala.language.implicitConversions
 import org.scalajs.dom.raw.HTMLDocument
 import org.scalajs.dom.raw.HTMLInputElement
 import scala.concurrent.Future
+import org.scalajs.dom.raw.Node
 
 case class ElementQ(ele: HTMLElement):
 
@@ -23,13 +24,18 @@ case class ElementQ(ele: HTMLElement):
   def clear(): Unit =
     ele.innerHTML = ""
 
+  def withParent(f: Node => Unit): Unit =
+    val parent = ele.parentNode
+    if parent != null then f(parent)
+
   def replaceBy(newElement: HTMLElement): Unit =
-    ele.parentNode.replaceChild(newElement, ele)
+    withParent(p => p.replaceChild(newElement, ele))
+
+  def preInsert(newElement: HTMLElement): Unit =
+    withParent(p => p.insertBefore(newElement, ele))
 
   def remove(): Unit =
-    val parent = ele.parentNode
-    if parent != null then ele.parentNode.removeChild(ele)
-
+    withParent(n => n.removeChild(ele))
 
 object ElementQ {
   

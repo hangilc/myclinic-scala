@@ -6,6 +6,8 @@ import dev.fujiwara.domq.Html.{given, *}
 import dev.fujiwara.domq.Modifiers.{given, *}
 import dev.myclinic.scala.model._
 import dev.myclinic.scala.util.DateUtil
+import dev.myclinic.scala.util.DateTimeOrder.localTimeOrder
+import math.Ordered.orderingToOrdered
 import org.scalajs.dom.raw.HTMLElement
 import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -16,7 +18,7 @@ import scala.collection.mutable
 import dev.myclinic.scala.webclient.Api
 import dev.myclinic.scala.event.ModelEvents.ModelEvent
 import dev.myclinic.scala.event.ModelEvents.*
-import dev.myclinic.scala.event.ModelEventPublishers
+import dev.myclinic.scala.event.{ModelEventPublishers => Pub}
 import dev.myclinic.scala.event.ModelEventSubscriberController
 import scala.language.implicitConversions
 import org.scalajs.dom.raw.MouseEvent
@@ -57,6 +59,12 @@ class AppointSheet:
 
   def setupTo(wrapper: HTMLElement): Unit =
     wrapper(eles)
+
+  def dateRangeIncludes(date: LocalDate): Boolean =
+    dateRange match {
+      case Some(from, upto) => from <= date && date <= upto
+      case None => false
+    }
 
   object TopMenu:
     val prevWeekBinding, nextWeekBinding = ElementBinding()
@@ -112,10 +120,11 @@ class AppointSheet:
     )
 
     val subscribers: List[ModelEventSubscriberController] = List(
-      ModelEventPublishers.appointCreated.subscribe(onAppointCreated),
-      ModelEventPublishers.appointDeleted.subscribe(onAppointDeleted),
-      ModelEventPublishers.appointTimeUpdated.subscribe(onAppointTimeUpdated),
-      ModelEventPublishers.appointTimeDeleted.subscribe(onAppointTimeDeleted),
+      Pub.appointCreated.subscribe(onAppointCreated),
+      Pub.appointDeleted.subscribe(onAppointDeleted),
+      Pub.appointTimeCreated.subscribe(onAppointTimeCreated),
+      Pub.appointTimeUpdated.subscribe(onAppointTimeUpdated),
+      Pub.appointTimeDeleted.subscribe(onAppointTimeDeleted),
     )
 
     def init(
@@ -137,6 +146,15 @@ class AppointSheet:
 
     def addElement(col: AppointColumn): Unit =
       columnWrapper(col.ele(margin := "0 0.5rem"))
+
+    def insertColumn(col: AppointColumn): Unit =
+      val (pre, post) = columns.span(c => c.date < col.date)
+      columns = pre ++ (col :: post)
+      post.headOption.fold(
+        columnWrapper(col.ele)
+      )(
+        c => c.ele.preInsert(col.ele)
+      )
 
     private def propagateToColumn(
         appoint: Appoint,
@@ -160,6 +178,16 @@ class AppointSheet:
       findColumnByDate(event.updated.date).map(col =>
         col.updateAppointTime(event.updated)
       )
+
+    def onAppointTimeCreated(event: AppointTimeCreated): Unit =
+      val date = event.created.date
+      findColumnByDate(date)
+        .orElse {
+          if dateRangeIncludes(date) then 
+            Some(AppointColumn(date, Map.empty, makeAppointTimeBox))
+          else None
+        }
+        .foreach(c => ???)
 
     def onAppointTimeDeleted(event: AppointTimeDeleted): Unit =
       findColumnByDate(event.deleted.date).map(col =>
