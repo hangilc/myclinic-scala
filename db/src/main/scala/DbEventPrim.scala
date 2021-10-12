@@ -64,7 +64,7 @@ object DbEventPrim:
   def logAppointTimeUpdated(a: AppointTime): ConnectionIO[AppEvent] =
     enterAppEvent("appoint-time", UPDATED, a.asJson.toString)
 
-  def logAppointTimeDeleted(eventId: Int, a: AppointTime): ConnectionIO[AppEvent] =
+  def logAppointTimeDeleted(a: AppointTime): ConnectionIO[AppEvent] =
     enterAppEvent("appoint-time", DELETED, a.asJson.toString)
 
   def logAppointCreated(a: Appoint): ConnectionIO[AppEvent] =
@@ -73,6 +73,6 @@ object DbEventPrim:
   def logAppointUpdated(a: Appoint): ConnectionIO[AppEvent] =
     enterAppEvent("appoint", UPDATED, a.asJson.toString)
 
-  def logAppointDeleted(eventId: Int, a: Appoint): ConnectionIO[AppEvent] =
+  def logAppointDeleted(a: Appoint): ConnectionIO[AppEvent] =
     enterAppEvent("appoint", DELETED, a.asJson.toString)
 

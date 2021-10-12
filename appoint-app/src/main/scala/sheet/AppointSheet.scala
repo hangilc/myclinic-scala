@@ -24,7 +24,6 @@ import dev.myclinic.scala.web.appoint.Misc
 import cats.syntax.all._
 import cats.implicits._
 import cats.Monoid
-import dev.myclinic.scala.event.getMaxEventId
 
 class AppointSheet:
   val eles = div(TopMenu.ele, AppointRow.ele)
@@ -124,9 +123,6 @@ class AppointSheet:
         appointMap: Map[AppointTimeId, List[Appoint]]
     ): Unit =
       subscribers.foreach(_.stop())
-      val maxEventId = getMaxEventId(
-        appointTimes :: appointMap.values.toList: _*
-      )
       clear()
       AppointRow.appointTimes = appointTimes
       val appointDates = AppointDate.classify(appointTimes, appointMap)
@@ -134,7 +130,7 @@ class AppointSheet:
         .map(AppointColumn.create(_, appointMap, makeAppointTimeBox))
         .toList
       columns.foreach(addElement)
-      subscribers.foreach(_.start(maxEventId))
+      subscribers.foreach(_.start())
 
     def clear(): Unit =
       columnWrapper.clear()

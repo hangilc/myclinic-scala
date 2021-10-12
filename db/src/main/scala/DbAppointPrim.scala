@@ -27,7 +27,7 @@ object DbAppointPrim:
       entered <- getAppointTime(id).unique
     yield entered
 
-  def updateAppointTime(at: AppointTime): ConnectionIO[AppointTime] =
+  def updateAppointTime(at: AppointTime): ConnectionIO[Unit] =
     val op = sql"""
       update appoint_time set date = ${at.date},
         from_time = ${at.fromTime}, until_time = ${at.untilTime}, 
@@ -38,8 +38,7 @@ object DbAppointPrim:
     for
       affected <- op.update.run
       _ = assert(affected == 1, "Failed to update appoint time.")
-      updated <- getAppointTime(at.appointTimeId).unique
-    yield updated
+    yield ()
 
   def deleteAppointTime(appointTimeId: Int): ConnectionIO[Unit] =
     sql"""

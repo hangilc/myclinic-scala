@@ -64,7 +64,7 @@ case class AppointTimeBox(
       MakeAppointDialog.open(
         appointTime,
         name => {
-          val app = Appoint(0, 0, appointTime.appointTimeId, name, 0, "")
+          val app = Appoint(0, appointTime.appointTimeId, name, 0, "")
           Api.registerAppoint(app)
         }
       )

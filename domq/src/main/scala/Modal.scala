@@ -110,12 +110,10 @@ object Modal:
     val path = document.createElementNS(ns, "path").asInstanceOf[HTMLElement]
     svg(
       css(style => { style.height = size; style.width = size }),
-      attrNS(ns, "viewBox") := "0 0 24 24",
+      attr("viewBox") := "0 0 24 24",
       attr("fill") := "none",
       attr("viewBox") := "0 0 24 24",
       attr("stroke") := color,
-      attr("width") := "34",
-      attr("height") := "34"
     )(
       path(
         attr("stroke-linecap") := "round",

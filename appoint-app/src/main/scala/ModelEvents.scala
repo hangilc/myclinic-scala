@@ -9,45 +9,32 @@ import scala.util.Success
 import scala.util.Failure
 import cats.Foldable
 
-private def getMaxEventIdOne[F[_]: Foldable](as: F[Evented]): Int =
-  summon[Foldable[F]].foldLeft(as, 0)((acc, ele) => acc.max(ele.eventId))
-
-def getMaxEventId[F[_]: Foldable](las: F[Evented]*): Int =
-  las.foldLeft(0)((acc, ele) => acc.max(getMaxEventIdOne(ele)))
-
 object ModelEvents:
 
-  sealed trait ModelEvent(val eventId: Int)
-  case class Unknown(eventIdArg: Int, orig: AppEvent)
-      extends ModelEvent(eventIdArg)
-  case class AppointCreated(eventIdArg: Int, created: Appoint)
-      extends ModelEvent(eventIdArg)
-  case class AppointUpdated(eventIdArg: Int, updated: Appoint)
-      extends ModelEvent(eventIdArg)
-  case class AppointDeleted(eventIdArg: Int, deleted: Appoint)
-      extends ModelEvent(eventIdArg)
-  case class AppointTimeCreated(eventIdArg: Int, created: AppointTime)
-      extends ModelEvent(eventIdArg)
-  case class AppointTimeUpdated(eventIdArg: Int, updated: AppointTime)
-      extends ModelEvent(eventIdArg)
-  case class AppointTimeDeleted(eventIdArg: Int, deleted: AppointTime)
-      extends ModelEvent(eventIdArg)
+  sealed trait ModelEvent
+  case class Unknown(orig: AppEvent) extends ModelEvent
+  case class AppointCreated(created: Appoint) extends ModelEvent
+  case class AppointUpdated(updated: Appoint) extends ModelEvent
+  case class AppointDeleted(deleted: Appoint) extends ModelEvent
+  case class AppointTimeCreated(created: AppointTime) extends ModelEvent
+  case class AppointTimeUpdated(updated: AppointTime) extends ModelEvent
+  case class AppointTimeDeleted(deleted: AppointTime) extends ModelEvent
 
   def convert(appEvent: AppEvent): ModelEvent =
     appEvent.model match {
       case "appoint" =>
         val data: Appoint = decodeData(appEvent)
         appEvent.kind match
-          case "created" => AppointCreated(appEvent.eventId, data)
-          case "updated" => AppointUpdated(appEvent.eventId, data)
-          case "deleted" => AppointDeleted(appEvent.eventId, data)
+          case "created" => AppointCreated(data)
+          case "updated" => AppointUpdated(data)
+          case "deleted" => AppointDeleted(data)
       case "appoint-time" =>
         val data: AppointTime = decodeData(appEvent)
         appEvent.kind match
-          case "created" => AppointTimeCreated(appEvent.eventId, data)
-          case "updated" => AppointTimeUpdated(appEvent.eventId, data)
-          case "deleted" => AppointTimeDeleted(appEvent.eventId, data)
-      case _ => Unknown(appEvent.eventId, appEvent)
+          case "created" => AppointTimeCreated(data)
+          case "updated" => AppointTimeUpdated(data)
+          case "deleted" => AppointTimeDeleted(data)
+      case _ => Unknown(appEvent)
     }
 
   def decodeData[T](appEvent: AppEvent)(using Decoder[T]): T =

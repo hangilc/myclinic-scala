@@ -33,7 +33,6 @@ trait DbAppoint extends Sqlite:
     sqlite(enterWithEvent(appointTime))
 
   private def safeDeleteAppointTime(
-      eventId: Int,
       appointTimeId: Int
   ): ConnectionIO[AppEvent] =
     for
@@ -42,23 +41,18 @@ trait DbAppoint extends Sqlite:
       _ = if appoints.size > 0 then
         throw new RuntimeException("Appoint exists.")
       _ <- Prim.deleteAppointTime(appointTimeId)
-      log <- DbEventPrim.logAppointTimeDeleted(eventId, at)
+      log <- DbEventPrim.logAppointTimeDeleted(at)
     yield log
 
-  def batchDeleteAppointTimes(
-      appointTimes: List[AppointTime]
-  ): IO[List[AppEvent]] =
-    withEventId(eventId =>
-      appointTimes
-        .map(a => safeDeleteAppointTime(eventId, a.appointTimeId))
-        .sequence
-    )
+  private def batchDeleteAppointTimes(
+      appointTimeIds: List[Int]
+  ): ConnectionIO[List[AppEvent]] =
+    appointTimeIds.map(id => safeDeleteAppointTime(id)).sequence
 
   def deleteAppointTime(appointTimeId: Int): IO[AppEvent] =
-    withEventId(eventId => safeDeleteAppointTime(eventId, appointTimeId))
+    sqlite(safeDeleteAppointTime(appointTimeId))
 
   private def safeUpdateAppointTime(
-      eventId: Int,
       appointTime: AppointTime
   ): ConnectionIO[AppEvent] =
     val appointTimeId: Int = appointTime.appointTimeId
@@ -74,8 +68,8 @@ trait DbAppoint extends Sqlite:
         others.forall(!appointTime.overlapsWith(_)),
         "Appoint time overlaps with other."
       )
-      updated <- Prim.updateAppointTime(appointTime.copy(eventId = eventId))
-      event <- DbEventPrim.logAppointTimeUpdated(updated)
+      _ <- Prim.updateAppointTime(appointTime)
+      event <- DbEventPrim.logAppointTimeUpdated(appointTime)
     yield event
 
   private def batchGetAppointTimes(
@@ -94,7 +88,7 @@ trait DbAppoint extends Sqlite:
         follows.last.untilTime
       def capacityInc(follows: List[AppointTime]): Int =
         follows.foldLeft(0)((acc, ele) => acc + ele.capacity)
-      withEventId(eventId => {
+      sqlite {
         for
           target <- Prim.getAppointTime(targetId).unique
           follows <- batchGetAppointTimes(followIds)
@@ -109,18 +103,14 @@ trait DbAppoint extends Sqlite:
             appointCounts.forall(_ == 0),
             "Cannot combine appoint times (appoint exists)."
           )
-          delEvents <- followIds
-            .map(id => safeDeleteAppointTime(eventId, id))
-            .sequence
-          updateEvent <- safeUpdateAppointTime(eventId, 
+          delEvents <- batchDeleteAppointTimes(followIds)
+          updateEvent <- safeUpdateAppointTime( 
             target.copy(
               untilTime = newUntilTime(follows),
-              capacity = target.capacity + capacityInc(follows),
-              eventId = eventId
-            )
-          )
+              capacity = target.capacity + capacityInc(follows)
+            ))
         yield delEvents ++ List(updateEvent)
-      })
+      }
 
   def listExistingAppointTimeDates(
       from: LocalDate,
@@ -149,22 +139,22 @@ trait DbAppoint extends Sqlite:
     yield (entered, event)
 
   def addAppoint(a: Appoint): IO[(Appoint, AppEvent)] =
-    withEventId(eventId => {
+    sqlite({
       for
         at <- Prim.getAppointTime(a.appointTimeId).unique
         existing <- Prim.listAppointsForAppointTime(at.appointTimeId).to[List]
         _ = if existing.size >= at.capacity then
           throw new RuntimeException("Overbooking")
-        result <- enterAppointWithEvent(a.copy(eventId = eventId))
+        result <- enterAppointWithEvent(a)
       yield result
     })
 
   def cancelAppoint(appointId: Int): IO[AppEvent] =
-    withEventId(eventId => {
+    sqlite({
       for
         appoint <- Prim.getAppoint(appointId).unique
         _ <- Prim.deleteAppoint(appointId)
-        event <- DbEventPrim.logAppointDeleted(eventId, appoint)
+        event <- DbEventPrim.logAppointDeleted(appoint)
       yield event
     })
 

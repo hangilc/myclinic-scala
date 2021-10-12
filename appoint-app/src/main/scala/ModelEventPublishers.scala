@@ -5,7 +5,6 @@ import scala.collection.mutable
 
 trait ModelEventSubscriberController:
   def start(): Unit
-  def start(dropUptoEventId: Int): Unit
   def stop(): Unit
 
 case class ModelEventSubscriber[T <: ModelEvent](private val handler: T => Unit)
@@ -23,15 +22,15 @@ case class ModelEventSubscriber[T <: ModelEvent](private val handler: T => Unit)
     isStopped = false
     handleQueue()
 
-  def start(dropUptoEventId: Int): Unit =
-    drainUpto(dropUptoEventId)
-    start()
+  // def start(dropUptoEventId: Int): Unit =
+  //   drainUpto(dropUptoEventId)
+  //   start()
 
   def stop(): Unit =
     isStopped = true
 
-  def drainUpto(eventIdIncluded: Int): Unit =
-    queue.dropWhileInPlace(e => e.eventId <= eventIdIncluded)
+  // def drainUpto(eventIdIncluded: Int): Unit =
+  //   queue.dropWhileInPlace(e => e.eventId <= eventIdIncluded)
 
   private def handleQueue(): Unit =
     while !queue.isEmpty do
