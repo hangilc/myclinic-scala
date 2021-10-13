@@ -31,6 +31,12 @@ object AppointTimeValidator:
       .andThen(s => isInt(s, CapacityNumberFormatError))
       .andThen(i => nonNegativeInt(i, CapacityNegativeError))
 
+  def validateTimes(
+      from: LocalTime,
+      until: LocalTime
+  ): ValidatedNec[AppointTimeError, Unit] =
+    timeIsBeforeOrEqual(from, until, (), TimesOrderError)
+
   def validate(
       date: LocalDate,
       fromTime: LocalTime,
@@ -38,6 +44,7 @@ object AppointTimeValidator:
       kindInput: String,
       capacityInput: String
   ): Result =
-    val checkTimes = timeIsBeforeOrEqual(fromTime, untilTime, TimesOrderError)
-    (checkTimes, validateKind(kindInput), validateCapacity(capacityInput))
-      .mapN(_, AppointTime(0, date, fromTime, untilTime, _, _))
+    val t = validateTimes(fromTime, untilTime)
+    val r = (validateKind(kindInput), validateCapacity(capacityInput))
+      .mapN(AppointTime(0, date, fromTime, untilTime, _, _))
+    (t, r).mapN((_, value) => value)

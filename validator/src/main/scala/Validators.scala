@@ -19,9 +19,10 @@ object Validators:
   def nonNegativeInt[E](input: Int, err: => E): ValidatedNec[E, Int] =
     condNec(input >= 0, input, err)
 
-  def timeIsBeforeOrEqual[E](
+  def timeIsBeforeOrEqual[E, A](
       a: LocalTime,
       b: LocalTime,
+      v: A,
       err: => E
-  ): ValidatedNec[E, Unit] =
-    condNec(a <= b, (), err)
+  ): ValidatedNec[E, A] =
+    condNec(a <= b, v, err)
