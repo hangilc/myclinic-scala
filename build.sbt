@@ -182,3 +182,6 @@ lazy val validator = crossProject(JSPlatform, JVMPlatform)
       "org.typelevel" %%% "cats-core" % catsVersion
     )
   )
+
+val validatorJVM = validator.jvm
+val validatorJS = validator.js
