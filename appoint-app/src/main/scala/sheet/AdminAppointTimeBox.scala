@@ -37,13 +37,23 @@ class AdminAppointTimeBox(appointTime: AppointTime)
     }))
     val kindInput = input(attr("value") := s"${appointTime.kind}")
     val capacityInput = input(attr("value") := s"${appointTime.capacity}")
-    val body = div(
+    def setupBody(body: HTMLElement) = body(
       errElement,
       Form.rows(
         span("kind") -> kindInput(attr("type") := "text"),
         span("capacity") -> capacityInput(attr("type") := "text")
       )
     )
+    def setupCommands(close: Modal.CloseFunction, wrapper: HTMLElement) =
+      wrapper(
+        Modal.enter(() => doEnter()),
+        Modal.cancel(() => close())
+      )
+    def doEnter(): Unit =
+      validate() match {
+        case Some(v) => println(v)
+        case None => ()
+      }
     def validate(): Option[AppointTime] =
       AppointTimeValidator
         .validate(
@@ -64,12 +74,10 @@ class AdminAppointTimeBox(appointTime: AppointTime)
         .toOption
     Modal[Unit](
       "予約枠の編集",
-      body,
-      List(
-        ModalCommand.Enter -> (() => None),
-        ModalCommand.Cancel -> (() => None)
-      ),
-      value => println(value)
+      (close, body, commands) => {
+        setupBody(body)
+        setupCommands(close, commands)
+      }
     ).open()
 
   def doCombine(): Unit =

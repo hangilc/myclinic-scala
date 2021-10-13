@@ -54,11 +54,9 @@ object ShowMessage:
           ),
           commandBox(Modal.modalCommands)
         )
-      },
-      cb,
-      Some(defaultValue)
+      }
     )
-    populateCommandBox(commandBox, commands, cmd => m.close(Some(cmd)))
+    populateCommandBox(commandBox, commands, cmd => m.close())
     m.open()
 
   def getString(
@@ -79,12 +77,10 @@ object ShowMessage:
           ),
           commandBox(Modal.modalCommands)
         )
-      },
-      {
-        case Enter => cb(Some(inputElement.value))
-        case _ => cb(None)
-      },
-      Some(Cancel)
+      }
     )
-    populateCommandBox(commandBox, List(Enter, Cancel), cmd => m.close(Some(cmd)))
+    populateCommandBox(commandBox, List(Enter, Cancel), {
+      case Enter => cb(Some(inputElement.value))
+      case _ => cb(None)
+    })
     m.open()

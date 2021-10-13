@@ -9,9 +9,7 @@ import scala.language.implicitConversions
 
 class Modal[T](
     title: String,
-    f: Modal.CloseFunction[T] => HTMLElement,
-    cb: T => Unit,
-    defaultValue: Option[T] = None
+    f: Modal.CloseFunction => HTMLElement
 ):
   val dialog = div(Modal.modalContent)
 
@@ -26,23 +24,16 @@ class Modal[T](
             style.verticalAlign = "middle"
             style.marginLeft = "2rem"
           }),
-          onclick := (onCloseClick _)
+          onclick := (close _)
         )
       ),
       f(close)
     )
     document.body(Modal.modalBackdropInstance, dialog)
 
-  def close(optValue: Option[T]): Unit =
+  def close(): Unit =
     dialog.remove()
     Modal.modalBackdropInstance.remove()
-    optValue match {
-      case Some(v) => cb(v)
-      case None    => ()
-    }
-
-  def onCloseClick(): Unit =
-    close(defaultValue)
 
 class ModalModifiers:
   val modalBackdrop = Modifier(e => {
@@ -126,31 +117,33 @@ enum ModalCommand(val label: String):
   case Cancel extends ModalCommand("キャンセル")
 
 object Modal extends ModalModifiers:
-  type CloseFunction[T] = (Option[T] => Unit)
-  type NoArgCloseFunction = () => Unit
+  type CloseFunction = () => Unit
 
-  def apply(title: String, f: NoArgCloseFunction => HTMLElement): Modal[Unit] =
-    new Modal(title, closeFun => f(() => closeFun(None)), _ => ())
+  def enter(handler: () => Unit): HTMLElement = button("入力", onclick := handler)
+  def cancel(handler: () => Unit): HTMLElement =
+    button("キャンセル", onclick := handler)
+
+  def apply(title: String, f: CloseFunction => HTMLElement): Modal[Unit] =
+    new Modal(title, close => f(close))
 
   def apply[T](
       title: String,
-      body: HTMLElement,
-      commands: List[(ModalCommand, () => Option[T])],
-      cb: T => Unit
+      f: (
+          CloseFunction,
+          HTMLElement,
+          HTMLElement
+      ) => Unit
   ): Modal[T] =
-    new Modal(title, close => {
-      val content = div(
-        body(modalBody),
-        div(modalCommands)(
-          commands.map({
-            case (cmd, handler) => button(
-              cmd.label,
-              onclick := (() => close(handler()))
-          )
-          }): _*
+    new Modal(
+      title,
+      close => {
+        val body = div()
+        val commands = div()
+        val content = div(
+          body(modalBody),
+          commands(modalCommands)
         )
-      )
-      content
-    }, cb)
-
-
+        f(close, body, commands)
+        content
+      }
+    )
