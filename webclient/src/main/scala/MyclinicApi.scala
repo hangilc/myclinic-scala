@@ -23,6 +23,11 @@ object Api:
   ): Future[T] =
     Ajax.request("POST", url(service), params, body.asJson.toString())
 
+  def post[T](service: String, params: Params)(using Decoder[T]): Future[T] =
+    post[Map[String, String], T](service, params, nobody)
+
+  val nobody: Map[String, String] = Map.empty
+
   def hello(): Future[String] =
     get("hello", Params())
 
@@ -34,6 +39,9 @@ object Api:
 
   def listAppointTimesForDate(date: LocalDate): Future[List[AppointTime]] =
     get("list-appoint-times-for-date", Params("date" -> date))
+
+  def fillAppointTimes(from: LocalDate, upto: LocalDate): Future[Unit] =
+    post("fill-appoint-times", Params("from" -> from, "upto" -> upto))
 
   def registerAppoint(appoint: Appoint): Future[Appoint] =
     post("register-appoint", Params(), appoint)
@@ -57,7 +65,7 @@ object Api:
     get("list-app-event-in-range", Params("from" -> fromEventId, "until" -> untilEventId))
 
   def cancelAppoint(appointId: Int): Future[Unit] =
-    post("cancel-appoint", Params("appoint-id" -> appointId), Map[String, String]())
+    post("cancel-appoint", Params("appoint-id" -> appointId))
 
   def combineAppointTimes(appointTimeIds: List[Int]): Future[Unit] =
     post("combine-appoint-times", Params(), appointTimeIds)

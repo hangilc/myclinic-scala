@@ -8,6 +8,7 @@ import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.ContextMenu
 import scala.language.implicitConversions
 import org.scalajs.dom.raw.MouseEvent
+import dev.myclinic.scala.webclient.Api
 
 class AdminAppointSheet extends AppointSheet:
   val cog = Icons.cog(color = "gray")
@@ -25,5 +26,7 @@ class AdminAppointSheet extends AppointSheet:
     ContextMenu("予約枠わりあて" -> doFillAppointTimes).show(event)
 
   def doFillAppointTimes(): Unit =
-    println("Fill")
+    dateRange.map {
+      case (from, upto) => Api.fillAppointTimes(from, upto)
+    }
     

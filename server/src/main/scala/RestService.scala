@@ -19,6 +19,7 @@ import fs2.concurrent.Topic
 import org.http4s.websocket.WebSocketFrame
 import dev.myclinic.scala.model._
 import org.http4s.websocket.WebSocketFrame.Text
+import dev.myclinic.scala.appoint.admin.AppointAdmin
 
 object RestService:
 
@@ -90,6 +91,13 @@ object RestService:
       yield (true)
       Ok(op)
     }
+
+    case POST -> Root / "fill-appoint-times" :? dateFrom(from) +& dateUpto(upto) =>
+      val op = for
+        events <- AppointAdmin.fillAppointTimesUpto(from, upto)
+        _ <- publishAll(events)
+      yield (true)
+      Ok(op)
 
     case GET -> Root / "list-appoints-for-appoint-time" :? intAppointTimeId(
           appointTimeId
