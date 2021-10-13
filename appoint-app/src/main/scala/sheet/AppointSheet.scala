@@ -67,29 +67,16 @@ class AppointSheet:
     }
 
   object TopMenu:
-    val prevWeekBinding, nextWeekBinding = ElementBinding()
     val ele = div(
       mb := "0.5rem",
       css(style => {
         style.textAlign = "center"
       })
     )(
-      button(
-        attr("type") := "button",
-        cls := "btn btn-outline-primary",
-        bindTo(prevWeekBinding),
-        "前の週"
-      ),
-      button(
-        attr("type") := "button",
-        cls := "btn btn-outline-primary ms-2",
-        bindTo(nextWeekBinding),
-        "次の週"
-      )
+      button("前の週", onclick := (onPrevWeek _)),
+      a("今週", href := "", leftGap, onclick := (onThisWeekClick _)),
+      button("次の週", leftGap, onclick := (onNextWeek _)),
     )
-
-    prevWeekBinding.element(onclick := (() => onPrevWeek()))
-    nextWeekBinding.element(onclick := (() => onNextWeek()))
 
     def onPrevWeek(): Unit =
       dateRange match
@@ -107,6 +94,11 @@ class AppointSheet:
           val uptoNext = upto.plusDays(7)
           setupDateRange(fromNext, uptoNext)
         case None => Future.successful(())
+
+    def onThisWeekClick(): Unit =
+      val start = DateUtil.startDayOfWeek(LocalDate.now())
+      val end = start.plusDays(6)
+      setupDateRange(start, end)
 
   object AppointRow:
 

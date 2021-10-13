@@ -72,6 +72,9 @@ object Modifiers:
   val ml = Creator[String]((e, value) => e.style.marginLeft = value)
   val mr = Creator[String]((e, value) => e.style.marginRight = value)
 
+  val leftGap: Modifier = ml := "0.5rem"
+  val topGap: Modifier = mt := "0.5em"
+
   private def styleSetter(
       f: (CSSStyleDeclaration, String) => Unit
   ): Creator[String] =

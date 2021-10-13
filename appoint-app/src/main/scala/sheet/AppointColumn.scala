@@ -24,7 +24,7 @@ case class AppointColumn(
 ):
   var boxes: Seq[AppointTimeBox] = Vector.empty
   var boxWrapper = div()
-  val ele = div(
+  val ele = div(css(style => style.width = "120px"))(
     div(dateRep),
     boxWrapper
   )
