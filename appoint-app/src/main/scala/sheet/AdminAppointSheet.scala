@@ -18,11 +18,8 @@ class AdminAppointSheet extends AppointSheet:
 
   override def makeAppointTimeBox(
       appointTime: AppointTime,
-      appoints: List[Appoint]
   ): AppointTimeBox =
-    val box = AdminAppointTimeBox(appointTime)
-    box.init(appoints)
-    box
+    AdminAppointTimeBox(appointTime)
 
   def onCogClick(event: MouseEvent): Unit =
     ContextMenu("予約枠わりあて" -> doFillAppointTimes).show(event)

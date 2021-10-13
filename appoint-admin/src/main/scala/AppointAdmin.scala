@@ -87,7 +87,7 @@ object AppointAdmin:
         case (from, upto) => {
           val kind = "regular"
           val capacity = 1
-          AppointTime(0, 0, date, from, upto, kind, capacity)
+          AppointTime(0, date, from, upto, kind, capacity)
         }
       }
 
@@ -101,6 +101,9 @@ object AppointAdmin:
       appointTimes = targetDates.map(appointTimesForDate(_)).flatten
       result <- Db.batchEnterAppointTimes(appointTimes)
     yield result
+
+  def fillAppointTimes(date: LocalDate): IO[List[AppEvent]] =
+    fillAppointTimesUpto(date, date)
 
   def listAppointTimes(
       from: LocalDate,
@@ -122,35 +125,6 @@ object AppointAdmin:
       times <- listAppointTimesForDate(date)
       _ <- times.map(a => IO.println(format(a))).sequence
     yield ()
-
-  def convertAppointTime(
-      appointTimes: List[AppointTime],
-      kind: String,
-      capacity: Int
-  ): IO[(AppointTime, List[AppEvent])] =
-    assert(appointTimes.size > 0, "Empty appoint time list.")
-    assert(
-      AppointTime.isAdjacentRun(appointTimes),
-      "Adjacent appoint times expected."
-    )
-    def create(): AppointTime =
-      val first: AppointTime = appointTimes.head
-      val last: AppointTime = appointTimes.last
-      AppointTime(
-        0,
-        0,
-        first.date,
-        first.fromTime,
-        last.untilTime,
-        kind,
-        capacity
-      )
-    for
-      events <- Db.batchDeleteAppointTimes(appointTimes)
-      enteredWithEvent <- Db.createAppointTime(create())
-    yield enteredWithEvent match {
-      case (entered, event) => (entered, events ++ List(event))
-    }
 
   def getAppointTimeById(appointTimeId: Int): IO[AppointTime] =
     Db.getAppointTimeById(appointTimeId)

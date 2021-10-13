@@ -11,45 +11,46 @@ import scala.language.implicitConversions
 
 case class AppointColumn(
     date: LocalDate,
-    appointMap: Map[AppointColumn.AppointTimeId, List[Appoint]],
-    appointTimeBoxMaker: (AppointTime, List[Appoint]) => AppointTimeBox
+    appointTimeBoxMaker: AppointTime => AppointTimeBox
 ):
-  var boxElement = div()
-  var boxes: List[AppointTimeBox] = List.empty
-  val ele = div(cls := "col-2")(
+  var boxes: Seq[AppointTimeBox] = Vector.empty
+  var boxWrapper = div()
+  val ele = div(
     div(dateRep),
-    boxElement
+    boxWrapper
   )
 
   def dateRep: String = Misc.formatAppointDate(date)
 
-  def setAppointTimes(appointTimes: List[AppointTime]): Unit =
-    appointTimes.map(a => {
-      val box = appointTimeBoxMaker(
-        a,
-        appointMap.getOrElse(a.appointTimeId, List.empty)
-      )
-      boxes = boxes :+ box
-      boxElement(box.ele)
-    })
+  def hasAppointTimeId(appointTimeId: Int): Boolean =
+    boxes.find(b => b.appointTime.appointTimeId == appointTimeId).isDefined
 
-  def addAppointTime(at: AppointTime): Unit =
-    
+  def addAppointTime(appointTime: AppointTime): Unit =
+    val box = appointTimeBoxMaker(appointTime)
+    boxes = sortedAppointTimeBox.insert(box, boxes, boxWrapper)
 
   def deleteAppointTime(appointTimeId: Int): Unit =
-    boxes.find(box => box.appointTime.appointTimeId == appointTimeId)
-      .foreach(box => {
-        boxes = boxes.filterNot(_ == box)
-        box.ele.remove()
-      })
+    boxes =
+      sortedAppointTimeBox.remove(b => b.appointTimeId == appointTimeId, boxes)
 
   def updateAppointTime(updated: AppointTime): Unit =
-    boxes.find(box => box.appointTime.appointTimeId == updated.appointTimeId)
-      .foreach(box => {
-        val newBox = appointTimeBoxMaker(updated, box.appoints)
-        boxes = boxes.map(b => if b == box then newBox else b)
-        box.ele.replaceBy(newBox.ele)
-      })
+    val box = appointTimeBoxMaker(updated)
+    boxes = sortedAppointTimeBox.update(
+      b => {
+        if b.appointTimeId == updated.appointTimeId then
+          box.addAppoints(b.appoints)
+          true
+        else false
+      },
+      box,
+      boxes
+    )
+
+  def addAppoint(appoint: Appoint): Unit =
+    findBoxByAppoint(appoint).foreach(b => b.addAppoint(appoint))
+
+  def addAppoints(appoints: Seq[Appoint]): Unit =
+    appoints.foreach(addAppoint(_))
 
   private def findBoxByAppoint(appoint: Appoint): Option[AppointTimeBox] =
     boxes.find(b => b.appointTime.appointTimeId == appoint.appointTimeId)
@@ -64,10 +65,15 @@ object AppointColumn:
   type AppointTimeId = Int
 
   def create(
-      appointDate: AppointDate,
-      appointMap: Map[AppointTimeId, List[Appoint]],
-      appointTimeBoxMaker: (AppointTime, List[Appoint]) => AppointTimeBox
+      date: LocalDate,
+      list: List[(AppointTime, List[Appoint])],
+      appointTimeBoxMaker: AppointTime => AppointTimeBox
   ): AppointColumn =
-    val c = AppointColumn(appointDate.date, appointMap, appointTimeBoxMaker)
-    c.setAppointTimes(appointDate.appointTimes)
+    val c = AppointColumn(date, appointTimeBoxMaker)
+    list.foreach {
+      case (appointTime, appoints) => {
+        c.addAppointTime(appointTime)
+        c.addAppoints(appoints)
+      }
+    }
     c

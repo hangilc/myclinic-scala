@@ -41,6 +41,7 @@ lazy val root = project
 lazy val model = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Pure)
   .in(file("model"))
+  .dependsOn(util)
   .settings(
     name := "model"
   )

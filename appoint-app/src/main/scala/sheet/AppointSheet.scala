@@ -6,7 +6,6 @@ import dev.fujiwara.domq.Html.{given, *}
 import dev.fujiwara.domq.Modifiers.{given, *}
 import dev.myclinic.scala.model._
 import dev.myclinic.scala.util.DateUtil
-import dev.myclinic.scala.util.DateTimeOrder.localTimeOrder
 import math.Ordered.orderingToOrdered
 import org.scalajs.dom.raw.HTMLElement
 import java.time.LocalDate
@@ -63,7 +62,7 @@ class AppointSheet:
   def dateRangeIncludes(date: LocalDate): Boolean =
     dateRange match {
       case Some(from, upto) => from <= date && date <= upto
-      case None => false
+      case None             => false
     }
 
   object TopMenu:
@@ -112,7 +111,6 @@ class AppointSheet:
 
     var columnWrapper: HTMLElement = div()
     var columns: List[AppointColumn] = List()
-    var appointTimes: List[AppointTime] = List.empty
 
     val ele = columnWrapper(
       display := "flex",
@@ -124,7 +122,7 @@ class AppointSheet:
       Pub.appointDeleted.subscribe(onAppointDeleted),
       Pub.appointTimeCreated.subscribe(onAppointTimeCreated),
       Pub.appointTimeUpdated.subscribe(onAppointTimeUpdated),
-      Pub.appointTimeDeleted.subscribe(onAppointTimeDeleted),
+      Pub.appointTimeDeleted.subscribe(onAppointTimeDeleted)
     )
 
     def init(
@@ -133,10 +131,19 @@ class AppointSheet:
     ): Unit =
       subscribers.foreach(_.stop())
       clear()
-      AppointRow.appointTimes = appointTimes
-      val appointDates = AppointDate.classify(appointTimes, appointMap)
-      columns = appointDates
-        .map(AppointColumn.create(_, appointMap, makeAppointTimeBox))
+      val dates: List[AppointDate] =
+        AppointDate.classify(appointTimes, appointMap)
+      columns = dates
+        .map((date: AppointDate) => {
+          val list: List[(AppointTime, List[Appoint])] =
+            appointTimes.map(appointTime =>
+              (
+                appointTime,
+                appointMap.get(appointTime.appointTimeId).getOrElse(List.empty)
+              )
+            )
+          AppointColumn.create(date.date, list, makeAppointTimeBox)
+        })
         .toList
       columns.foreach(addElement)
       subscribers.foreach(_.start())
@@ -152,18 +159,15 @@ class AppointSheet:
       columns = pre ++ (col :: post)
       post.headOption.fold(
         columnWrapper(col.ele)
-      )(
-        c => c.ele.preInsert(col.ele)
-      )
+      )(c => c.ele.preInsert(col.ele))
 
     private def propagateToColumn(
         appoint: Appoint,
         f: (AppointColumn, Appoint) => Unit
     ): Unit =
-      appointTimes
-        .find(at => at.appointTimeId == appoint.appointTimeId)
-        .flatMap(at => columns.find(c => c.date == at.date))
-        .map(c => f(c, appoint))
+      columns
+        .find(c => c.hasAppointTimeId(appoint.appointTimeId))
+        .foreach(c => f(c, appoint))
 
     private def findColumnByDate(date: LocalDate): Option[AppointColumn] =
       columns.find(c => c.date == date)
@@ -183,8 +187,8 @@ class AppointSheet:
       val date = event.created.date
       findColumnByDate(date)
         .orElse {
-          if dateRangeIncludes(date) then 
-            Some(AppointColumn(date, Map.empty, makeAppointTimeBox))
+          if dateRangeIncludes(date) then
+            Some(AppointColumn(date, makeAppointTimeBox))
           else None
         }
         .foreach(c => c.addAppointTime(event.created))
@@ -195,10 +199,9 @@ class AppointSheet:
       )
 
   def makeAppointTimeBox(
-      appointTime: AppointTime,
-      appoints: List[Appoint]
+      appointTime: AppointTime
   ): AppointTimeBox =
-    AppointTimeBox(appointTime, appoints)
+    AppointTimeBox(appointTime)
 
 case class AppointDate(
     date: LocalDate,

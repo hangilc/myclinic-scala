@@ -3,8 +3,8 @@ package dev.myclinic.scala.model
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.LocalDateTime
-import dev.myclinic.scala.model.DateTimeOrder.{given}
-import localTimeOrder.mkOrderingOps
+import dev.myclinic.scala.util.DateTimeOrdering.{*, given}
+import scala.math.Ordered.orderingToOrdered
 
 case class AppointTime(
     appointTimeId: Int,

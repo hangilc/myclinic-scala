@@ -37,6 +37,8 @@ case class AppointTimeBox(
         slotsElement,
       )
 
+    def appointTimeId: Int = appointTime.appointTimeId
+
     def init(appoints: List[Appoint]): Unit =
       slots = appoints.map(makeSlot(_))
       slots.foreach(s => slotsElement(s.ele))
@@ -48,6 +50,9 @@ case class AppointTimeBox(
       val slot = makeSlot(appoint)
       slots = slots ++ List(slot)
       slotsElement(slot.ele)
+
+    def addAppoints(appoints: Seq[Appoint]): Unit =
+      appoints.foreach(addAppoint(_))
 
     def removeAppoint(appoint: Appoint): Unit =
       slots.find(s => s.appoint == appoint).map(s => {
