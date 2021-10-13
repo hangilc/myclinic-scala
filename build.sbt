@@ -12,6 +12,7 @@ val doobieVersion = "1.0.0-M5"
 val circeVersion = "0.14.1"
 val scalaJavaTimeVersion = "2.3.0"
 val scalaJSDomVersion = "1.2.0"
+val catsVersion = "2.6.1"
 
 ThisBuild / scalacOptions ++= Seq("-deprecation", "-encoding", "UTF-8")
 
@@ -170,3 +171,14 @@ lazy val modeljson = crossProject(JSPlatform, JVMPlatform)
 
 val modeljsonJVM = modeljson.jvm
 val modeljsonJS = modeljson.js
+
+lazy val validator = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Pure)
+  .in(file("validator"))
+  .dependsOn(util, model)
+  .jsConfigure(_ enablePlugins TzdbPlugin)
+  .settings(
+    libraryDependencies ++= Seq(
+      "org.typelevel" %%% "cats-core" % catsVersion
+    )
+  )
