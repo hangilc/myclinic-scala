@@ -8,6 +8,15 @@ import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.myclinic.scala.web.appoint.Misc
 import dev.myclinic.scala.web.appoint
 import scala.language.implicitConversions
+import dev.myclinic.scala.web.appoint.sheet.Types.SortedElement
+import org.scalajs.dom.raw.HTMLElement
+
+given Ordering[AppointColumn] with
+  def compare(a: AppointColumn, b: AppointColumn): Int =
+    summon[Ordering[LocalDate]].compare(a.date, b.date)
+
+val sortedAppointColumn = new SortedElement[AppointColumn]:
+  def element(a: AppointColumn): HTMLElement = a.ele
 
 case class AppointColumn(
     date: LocalDate,

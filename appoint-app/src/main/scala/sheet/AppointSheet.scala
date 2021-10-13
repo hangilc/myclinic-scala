@@ -60,6 +60,7 @@ class AppointSheet:
     wrapper(eles)
 
   def dateRangeIncludes(date: LocalDate): Boolean =
+    println(("dateRangeIncludes", dateRange, date))
     dateRange match {
       case Some(from, upto) => from <= date && date <= upto
       case None             => false
@@ -110,7 +111,7 @@ class AppointSheet:
   object AppointRow:
 
     var columnWrapper: HTMLElement = div()
-    var columns: List[AppointColumn] = List()
+    var columns: Seq[AppointColumn] = List.empty
 
     val ele = columnWrapper(
       display := "flex",
@@ -133,8 +134,8 @@ class AppointSheet:
       clear()
       val dates: List[AppointDate] =
         AppointDate.classify(appointTimes, appointMap)
-      columns = dates
-        .map((date: AppointDate) => {
+      dates
+        .foreach((date: AppointDate) => {
           val list: List[(AppointTime, List[Appoint])] =
             date.appointTimes.map(appointTime =>
               (
@@ -142,24 +143,17 @@ class AppointSheet:
                 appointMap.get(appointTime.appointTimeId).getOrElse(List.empty)
               )
             )
-          AppointColumn.create(date.date, list, makeAppointTimeBox)
+          addColumn(AppointColumn.create(date.date, list, makeAppointTimeBox))
         })
-        .toList
-      columns.foreach(addElement)
       subscribers.foreach(_.start())
 
     def clear(): Unit =
       columnWrapper.clear()
+      columns = List.empty
 
-    def addElement(col: AppointColumn): Unit =
-      columnWrapper(col.ele(margin := "0 0.5rem"))
-
-    def insertColumn(col: AppointColumn): Unit =
-      val (pre, post) = columns.span(c => c.date < col.date)
-      columns = pre ++ (col :: post)
-      post.headOption.fold(
-        columnWrapper(col.ele)
-      )(c => c.ele.preInsert(col.ele))
+    def addColumn(col: AppointColumn): Unit =
+      col.ele(margin := "0 0.5rem")
+      columns = sortedAppointColumn.insert(col, columns, columnWrapper)
 
     private def propagateToColumn(
         appoint: Appoint,
@@ -188,7 +182,10 @@ class AppointSheet:
       findColumnByDate(date)
         .orElse {
           if dateRangeIncludes(date) then
-            Some(AppointColumn(date, makeAppointTimeBox))
+            val c = AppointColumn(date, makeAppointTimeBox)
+            addColumn(c)
+            println(("column-added", c))
+            Some(c)
           else None
         }
         .foreach(c => c.addAppointTime(event.created))
@@ -205,7 +202,7 @@ class AppointSheet:
 
 case class AppointDate(
     date: LocalDate,
-    appointTimes: List[AppointTime],
+    appointTimes: List[AppointTime]
 )
 
 object AppointDate:
@@ -215,5 +212,6 @@ object AppointDate:
       appointMap: Map[AppointTimeId, List[Appoint]]
   ): List[AppointDate] =
     val map = appList.groupBy(_.date)
-    val result = for k <- map.keys yield AppointDate(k, map(k).sortBy(_.fromTime))
+    val result =
+      for k <- map.keys yield AppointDate(k, map(k).sortBy(_.fromTime))
     result.toList.sortBy(_.date)
