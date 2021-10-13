@@ -15,6 +15,7 @@ import org.scalajs.dom.{document, window}
 import dev.myclinic.scala.webclient.Api
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import dev.myclinic.scala.validator.AppointTimeValidator
 
 class AdminAppointTimeBox(appointTime: AppointTime)
     extends AppointTimeBox(appointTime):
@@ -30,17 +31,45 @@ class AdminAppointTimeBox(appointTime: AppointTime)
   )
 
   def doConvert(): Unit =
+    val errElement = div(css(style => {
+      style.color = "red"
+      style.margin = "1rem"
+    }))
     val kindInput = input(attr("value") := s"${appointTime.kind}")
     val capacityInput = input(attr("value") := s"${appointTime.capacity}")
-    val body = Form.rows(
-      span("kind") -> kindInput(attr("type") := "text"),
-      span("capacity") -> capacityInput(attr("type") := "text")
+    val body = div(
+      errElement,
+      Form.rows(
+        span("kind") -> kindInput(attr("type") := "text"),
+        span("capacity") -> capacityInput(attr("type") := "text")
+      )
     )
+    def validate(): Option[AppointTime] =
+      AppointTimeValidator
+        .validate(
+          appointTime.date,
+          appointTime.fromTime,
+          appointTime.untilTime,
+          kindInput.value,
+          capacityInput.value
+        )
+        .bimap(
+          e => {
+            errElement.innerText =
+              e.toNonEmptyList.toList.map(_.message).mkString("\n")
+            e
+          },
+          a => a
+        )
+        .toOption
     Modal[Unit](
       "予約枠の編集",
       body,
-      List(ModalCommand.Enter -> (() => None), ModalCommand.Cancel -> (() => None)),
-      _ => ()
+      List(
+        ModalCommand.Enter -> (() => None),
+        ModalCommand.Cancel -> (() => None)
+      ),
+      value => println(value)
     ).open()
 
   def doCombine(): Unit =
