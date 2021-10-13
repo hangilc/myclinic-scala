@@ -5,6 +5,9 @@ import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.ContextMenu
+import dev.fujiwara.domq.Modal
+import dev.fujiwara.domq.ModalCommand
+import dev.fujiwara.domq.Form
 import org.scalajs.dom.raw.MouseEvent
 import scala.language.implicitConversions
 import org.scalajs.dom.raw.HTMLElement
@@ -21,25 +24,34 @@ class AdminAppointTimeBox(appointTime: AppointTime)
       event.preventDefault
       ContextMenu(
         "Convert" -> doConvert,
-        "Combine" -> doCombine,
+        "Combine" -> doCombine
       ).show(event)
     }
   )
 
   def doConvert(): Unit =
-    import dev.fujiwara.domq.ShowMessage
-    import ShowMessage.AskCommand.*
-    ShowMessage.getString("テスト", "入力してください", println(_))
-    
+    val kindInput = input(attr("value") := s"${appointTime.kind}")
+    val capacityInput = input(attr("value") := s"${appointTime.capacity}")
+    val body = Form.rows(
+      span("kind") -> kindInput(attr("type") := "text"),
+      span("capacity") -> capacityInput(attr("type") := "text")
+    )
+    Modal[Unit](
+      "予約枠の編集",
+      body,
+      List(ModalCommand.Enter -> (() => None), ModalCommand.Cancel -> (() => None)),
+      _ => ()
+    ).open()
 
   def doCombine(): Unit =
     val nFollows = 1
     def listFollows(appointTimes: List[AppointTime]): List[AppointTime] =
-      appointTimes.dropWhile(_.appointTimeId != appointTime.appointTimeId)
+      appointTimes
+        .dropWhile(_.appointTimeId != appointTime.appointTimeId)
         .sliding(2)
         .takeWhile({
           case a :: b :: _ => a.isAdjacentTo(b)
-          case _ => false
+          case _           => false
         })
         .map(_(1))
         .toList

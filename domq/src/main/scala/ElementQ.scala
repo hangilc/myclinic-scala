@@ -40,8 +40,11 @@ case class ElementQ(ele: HTMLElement):
 object ElementQ {
   
   given Conversion[HTMLElement, ElementQ] = ElementQ(_)
-  given htmlInputToElementQ: Conversion[HTMLInputElement, ElementQ] = ElementQ(_)
+  given Conversion[HTMLInputElement, ElementQ] = ElementQ(_)
 
   given Conversion[ElementQ, HTMLElement] = _.ele
   given Conversion[ElementQ, HTMLInputElement] = _.ele.asInstanceOf[HTMLInputElement]
+  given Conversion[(ElementQ, ElementQ), (HTMLElement, HTMLElement)] = {
+    case (a: ElementQ, b: ElementQ) => (a.ele, b.ele)
+  }
 }

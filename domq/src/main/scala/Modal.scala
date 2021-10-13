@@ -44,13 +44,7 @@ class Modal[T](
   def onCloseClick(): Unit =
     close(defaultValue)
 
-object Modal:
-  type CloseFunction[T] = (Option[T] => Unit)
-  type NoArgCloseFunction = () => Unit
-
-  def apply(title: String, f: NoArgCloseFunction => HTMLElement): Modal[Unit] =
-    new Modal(title, closeFun => f(() => closeFun(None)), _ => ())
-
+class ModalModifiers:
   val modalBackdrop = Modifier(e => {
     val style = e.style
     style.display = "block"
@@ -113,7 +107,7 @@ object Modal:
       attr("viewBox") := "0 0 24 24",
       attr("fill") := "none",
       attr("viewBox") := "0 0 24 24",
-      attr("stroke") := color,
+      attr("stroke") := color
     )(
       path(
         attr("stroke-linecap") := "round",
@@ -126,3 +120,37 @@ object Modal:
     )
     svg
   }
+
+enum ModalCommand(val label: String):
+  case Enter extends ModalCommand("入力")
+  case Cancel extends ModalCommand("キャンセル")
+
+object Modal extends ModalModifiers:
+  type CloseFunction[T] = (Option[T] => Unit)
+  type NoArgCloseFunction = () => Unit
+
+  def apply(title: String, f: NoArgCloseFunction => HTMLElement): Modal[Unit] =
+    new Modal(title, closeFun => f(() => closeFun(None)), _ => ())
+
+  def apply[T](
+      title: String,
+      body: HTMLElement,
+      commands: List[(ModalCommand, () => Option[T])],
+      cb: T => Unit
+  ): Modal[T] =
+    new Modal(title, close => {
+      val content = div(
+        body(modalBody),
+        div(modalCommands)(
+          commands.map({
+            case (cmd, handler) => button(
+              cmd.label,
+              onclick := (() => close(handler()))
+          )
+          }): _*
+        )
+      )
+      content
+    }, cb)
+
+
