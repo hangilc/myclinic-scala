@@ -6,6 +6,12 @@ import java.time.LocalDateTime
 import dev.myclinic.scala.util.DateTimeOrdering.{*, given}
 import scala.math.Ordered.orderingToOrdered
 
+given Ordering[AppointTime] with
+  def compare(a: AppointTime, b: AppointTime): Int =
+    val cmp: Int = summon[Ordering[LocalDate]].compare(a.date, b.date)
+    if cmp == 0 then summon[Ordering[LocalTime]].compare(a.fromTime, b.fromTime)
+    else cmp
+
 case class AppointTime(
     appointTimeId: Int,
     date: LocalDate,

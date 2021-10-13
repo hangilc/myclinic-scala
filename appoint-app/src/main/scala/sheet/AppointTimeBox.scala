@@ -1,7 +1,7 @@
 package dev.myclinic.scala.web.appoint.sheet
 
 import dev.myclinic.scala.web.appoint.Misc
-import dev.myclinic.scala.model.{AppointTime, Appoint}
+import dev.myclinic.scala.model.{AppointTime, Appoint, given}
 import dev.fujiwara.domq.Binding.{given, *}
 import dev.fujiwara.domq.ElementQ.{given, *}
 import dev.fujiwara.domq.Html.{given, *}
@@ -20,7 +20,7 @@ import dev.myclinic.scala.web.appoint.sheet.Types.SortedElement
 
 given Ordering[AppointTimeBox] with
   def compare(a: AppointTimeBox, b: AppointTimeBox): Int =
-    summon[Ordering[LocalDate]].compare(a.appointTime.date, b.appointTime.date)
+    summon[Ordering[AppointTime]].compare(a.appointTime, b.appointTime)
 
 val sortedAppointTimeBox: SortedElement[AppointTimeBox] = new SortedElement[AppointTimeBox]:
   def element(a: AppointTimeBox): HTMLElement = a.ele

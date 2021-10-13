@@ -136,7 +136,7 @@ class AppointSheet:
       columns = dates
         .map((date: AppointDate) => {
           val list: List[(AppointTime, List[Appoint])] =
-            appointTimes.map(appointTime =>
+            date.appointTimes.map(appointTime =>
               (
                 appointTime,
                 appointMap.get(appointTime.appointTimeId).getOrElse(List.empty)
@@ -206,7 +206,6 @@ class AppointSheet:
 case class AppointDate(
     date: LocalDate,
     appointTimes: List[AppointTime],
-    appointMap: Map[AppointDate.AppointTimeId, List[Appoint]]
 )
 
 object AppointDate:
@@ -216,5 +215,5 @@ object AppointDate:
       appointMap: Map[AppointTimeId, List[Appoint]]
   ): List[AppointDate] =
     val map = appList.groupBy(_.date)
-    val result = for k <- map.keys yield AppointDate(k, map(k), appointMap)
+    val result = for k <- map.keys yield AppointDate(k, map(k).sortBy(_.fromTime))
     result.toList.sortBy(_.date)
