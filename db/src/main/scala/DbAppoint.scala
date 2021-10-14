@@ -66,11 +66,14 @@ trait DbAppoint extends Sqlite:
       others = ats.filter(at => at.appointTimeId != appointTimeId)
       _ = assert(
         others.forall(!appointTime.overlapsWith(_)),
-        "Appoint time overlaps with other."
+        s"Appoint time overlaps with other.\n${appointTime} <=> ${others}"
       )
       _ <- Prim.updateAppointTime(appointTime)
       event <- DbEventPrim.logAppointTimeUpdated(appointTime)
     yield event
+
+  def updateAppointTime(appointTime: AppointTime): IO[AppEvent] =
+    sqlite(safeUpdateAppointTime(appointTime))
 
   private def batchGetAppointTimes(
       appointTimeIds: List[Int]

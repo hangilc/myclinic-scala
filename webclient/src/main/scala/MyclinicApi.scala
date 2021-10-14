@@ -37,6 +37,9 @@ object Api:
   ): Future[List[AppointTime]] =
     get("list-appoint-times", Params("from" -> from, "upto" -> upto))
 
+  def updateAppointTime(appointTime: AppointTime): Future[Unit] =
+    post("update-appoint-time", Params(), appointTime)
+
   def listAppointTimesForDate(date: LocalDate): Future[List[AppointTime]] =
     get("list-appoint-times-for-date", Params("date" -> date))
 

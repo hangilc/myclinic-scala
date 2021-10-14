@@ -38,6 +38,7 @@ object AppointTimeValidator:
     timeIsBeforeOrEqual(from, until, (), TimesOrderError)
 
   def validate(
+      appointTimeId: Int,
       date: LocalDate,
       fromTime: LocalTime,
       untilTime: LocalTime,
@@ -46,5 +47,5 @@ object AppointTimeValidator:
   ): Result =
     val t = validateTimes(fromTime, untilTime)
     val r = (validateKind(kindInput), validateCapacity(capacityInput))
-      .mapN(AppointTime(0, date, fromTime, untilTime, _, _))
+      .mapN(AppointTime(appointTimeId, date, fromTime, untilTime, _, _))
     (t, r).mapN((_, value) => value)

@@ -28,7 +28,7 @@ object Types:
         pre ++ post.tail
 
     def update(pred: T => Boolean, updated: T, sortedList: Seq[T]): Seq[T] = 
-      val (pre, post) = sortedList.span(pred)
+      val (pre, post) = sortedList.span(t => !pred(t))
       if post.isEmpty then sortedList
       else
         element(post.head).replaceBy(element(updated))

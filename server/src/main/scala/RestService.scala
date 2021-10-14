@@ -83,6 +83,15 @@ object RestService:
       Ok(op)
     }
 
+    case req @ POST -> Root / "update-appoint-time" => {
+      val op = for
+        appointTime <- req.as[AppointTime]
+        event <- Db.updateAppointTime(appointTime)
+        _ <- publish(event)
+      yield true
+      Ok(op)
+    }
+
     case req @ POST -> Root / "combine-appoint-times" => {
       val op = for
         appointTimeIds <- req.as[List[Int]]

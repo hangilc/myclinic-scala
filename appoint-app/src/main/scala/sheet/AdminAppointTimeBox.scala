@@ -46,17 +46,21 @@ class AdminAppointTimeBox(appointTime: AppointTime)
     )
     def setupCommands(close: Modal.CloseFunction, wrapper: HTMLElement) =
       wrapper(
-        Modal.enter(() => doEnter()),
+        Modal.enter(() => doEnter(close)),
         Modal.cancel(() => close())
       )
-    def doEnter(): Unit =
+    def doEnter(close: Modal.CloseFunction): Unit =
       validate() match {
-        case Some(v) => println(v)
+        case Some(v) => { 
+          Api.updateAppointTime(v)
+          close() 
+        }
         case None => ()
       }
     def validate(): Option[AppointTime] =
       AppointTimeValidator
         .validate(
+          appointTime.appointTimeId,
           appointTime.date,
           appointTime.fromTime,
           appointTime.untilTime,

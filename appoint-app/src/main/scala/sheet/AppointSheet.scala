@@ -60,7 +60,6 @@ class AppointSheet:
     wrapper(eles)
 
   def dateRangeIncludes(date: LocalDate): Boolean =
-    println(("dateRangeIncludes", dateRange, date))
     dateRange match {
       case Some(from, upto) => from <= date && date <= upto
       case None             => false
@@ -141,6 +140,7 @@ class AppointSheet:
 
     def clear(): Unit =
       columnWrapper.clear()
+      columns.foreach(_.ele.remove())
       columns = List.empty
 
     def addColumn(col: AppointColumn): Unit =
@@ -176,7 +176,6 @@ class AppointSheet:
           if dateRangeIncludes(date) then
             val c = AppointColumn(date, makeAppointTimeBox)
             addColumn(c)
-            println(("column-added", c))
             Some(c)
           else None
         }
