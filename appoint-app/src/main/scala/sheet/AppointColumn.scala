@@ -55,20 +55,17 @@ case class AppointColumn(
       boxes
     )
 
+  private def findBoxByAppoint(appoint: Appoint): Option[AppointTimeBox] =
+    boxes.find(b => b.appointTime.appointTimeId == appoint.appointTimeId)
+
   def addAppoint(appoint: Appoint): Unit =
     findBoxByAppoint(appoint).foreach(b => b.addAppoint(appoint))
 
   def addAppoints(appoints: Seq[Appoint]): Unit =
     appoints.foreach(addAppoint(_))
 
-  private def findBoxByAppoint(appoint: Appoint): Option[AppointTimeBox] =
-    boxes.find(b => b.appointTime.appointTimeId == appoint.appointTimeId)
-
-  def insert(appoint: Appoint): Unit =
-    findBoxByAppoint(appoint).map(_.addAppoint(appoint))
-
-  def delete(appoint: Appoint): Unit =
-    findBoxByAppoint(appoint).map(_.removeAppoint(appoint))
+  def deleteAppoint(appoint: Appoint): Unit =
+    findBoxByAppoint(appoint).foreach(b => b.removeAppoint(appoint))
 
 object AppointColumn:
   type AppointTimeId = Int

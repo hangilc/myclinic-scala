@@ -21,7 +21,7 @@ object Types:
       pre ++ (newInstance +: post)
 
     def remove(pred: T => Boolean, sortedList: Seq[T]): Seq[T] =
-      val (pre, post) = sortedList.span(pred)
+      val (pre, post) = sortedList.span(t => !pred(t))
       if post.isEmpty then sortedList
       else
         element(post.head).remove()

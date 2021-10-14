@@ -159,10 +159,10 @@ class AppointSheet:
       columns.find(c => c.date == date)
 
     def onAppointCreated(event: AppointCreated): Unit =
-      propagateToColumn(event.created, _.insert(_))
+      propagateToColumn(event.created, _.addAppoint(_))
 
     def onAppointDeleted(event: AppointDeleted): Unit =
-      propagateToColumn(event.deleted, _.delete(_))
+      propagateToColumn(event.deleted, _.deleteAppoint(_))
 
     def onAppointTimeUpdated(event: AppointTimeUpdated): Unit =
       findColumnByDate(event.updated.date).map(col =>
