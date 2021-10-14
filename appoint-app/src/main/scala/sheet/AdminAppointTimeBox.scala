@@ -8,6 +8,7 @@ import dev.fujiwara.domq.ContextMenu
 import dev.fujiwara.domq.Modal
 import dev.fujiwara.domq.ModalCommand
 import dev.fujiwara.domq.Form
+import dev.fujiwara.domq.ShowMessage
 import org.scalajs.dom.raw.MouseEvent
 import scala.language.implicitConversions
 import org.scalajs.dom.raw.HTMLElement
@@ -16,6 +17,7 @@ import dev.myclinic.scala.webclient.Api
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import dev.myclinic.scala.validator.AppointTimeValidator
+import dev.myclinic.scala.web.appoint.Misc
 
 class AdminAppointTimeBox(appointTime: AppointTime)
     extends AppointTimeBox(appointTime):
@@ -46,8 +48,8 @@ class AdminAppointTimeBox(appointTime: AppointTime)
     )
     def setupCommands(close: Modal.CloseFunction, wrapper: HTMLElement) =
       wrapper(
-        Modal.enter(() => doEnter(close)),
-        Modal.cancel(() => close())
+        Modal.enter(onclick := (() => doEnter(close))),
+        Modal.cancel(onclick := (() => close()))
       )
     def doEnter(close: Modal.CloseFunction): Unit =
       validate() match {
@@ -98,11 +100,27 @@ class AdminAppointTimeBox(appointTime: AppointTime)
         .toList
     for
       appointTimes <- Api.listAppointTimesForDate(appointTime.date)
-      follows = listFollows(appointTimes).take(nFollows)
-      _ <- {
-        if follows.isEmpty then Future.unit
-        else
-          val ids = (appointTime :: follows).map(_.appointTimeId)
-          Api.combineAppointTimes(ids)
-      }
-    yield ()
+    yield {
+      val follows = listFollows(appointTimes).take(nFollows)
+      if follows.isEmpty then
+        ShowMessage.showMessage("結合する予約枠がありません。")
+        Future.unit
+      else
+        val lines = List(
+          "以下のように予約枠を結合します。",
+          Misc.formatAppointDate(appointTime.date),
+          Misc.formatAppointTime(appointTime.fromTime) + " - ",
+          Misc.formatAppointTime(follows.last.untilTime)
+        ).mkString("\n")
+        Modal("予約枠の結合", (close, body, commands) => {
+          body.innerText = lines
+          commands(
+            Modal.ok()(onclick := { () => 
+              val ids = (appointTime :: follows).map(_.appointTimeId)
+              Api.combineAppointTimes(ids)
+              close()
+              }),
+            Modal.cancel()(onclick := (() => close()))
+          )
+        }).open()
+    }

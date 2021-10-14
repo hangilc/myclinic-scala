@@ -119,9 +119,9 @@ enum ModalCommand(val label: String):
 object Modal extends ModalModifiers:
   type CloseFunction = () => Unit
 
-  def enter(handler: () => Unit): HTMLElement = button("入力", onclick := handler)
-  def cancel(handler: () => Unit): HTMLElement =
-    button("キャンセル", onclick := handler)
+  def enter: HTMLElement = button("入力")
+  def ok: HTMLElement = button("Ok")
+  def cancel: HTMLElement = button("キャンセル")
 
   def apply(title: String, f: CloseFunction => HTMLElement): Modal[Unit] =
     new Modal(title, close => f(close))
