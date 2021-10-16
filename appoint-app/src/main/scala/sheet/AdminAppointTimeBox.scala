@@ -18,6 +18,12 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import dev.myclinic.scala.validator.AppointTimeValidator
 import dev.myclinic.scala.web.appoint.Misc
+import cats.data.ValidatedNec
+import cats.data.Validated.{validNec, invalidNec, condNec, Valid, Invalid}
+import dev.myclinic.scala.validator.Validators
+import java.time.LocalTime
+import dev.myclinic.scala.util.DateTimeOrdering.{*, given}
+import scala.math.Ordered.orderingToOrdered
 
 class AdminAppointTimeBox(appointTime: AppointTime)
     extends AppointTimeBox(appointTime):
@@ -27,7 +33,8 @@ class AdminAppointTimeBox(appointTime: AppointTime)
       event.preventDefault
       ContextMenu(
         "Convert" -> doConvert,
-        "Combine" -> doCombine
+        "Combine" -> doCombine,
+        "Split" -> doSplit
       ).show(event)
     }
   )
@@ -124,3 +131,70 @@ class AdminAppointTimeBox(appointTime: AppointTime)
           )
         }).open()
     }
+
+  def doSplit(): Unit = {
+    val errorBox = div()
+    val splitTimeInput = inputText()
+    def setupBody(body: HTMLElement): Unit = 
+      body(
+        errorBox(color := "red"),
+        div(Misc.formatAppointDate(appointTime.date)),
+        div("%s - %s".format(
+          Misc.formatAppointTime(appointTime.fromTime),
+          Misc.formatAppointTime(appointTime.untilTime)
+        )),
+        div(
+          "分割時刻：",
+          splitTimeInput(placeholder := "HH:MM")
+        )
+      )
+    def setupCommands(close: Modal.CloseFunction, wrapper: HTMLElement): Unit =
+      wrapper(
+        button("実行", onclick := (onExecute _)),
+        button("キャンセル", onclick := close)
+      )
+    def onExecute(): Unit =
+      SplitValidator.validate(splitTimeInput.value, appointTime) match {
+        case Valid(t) => {
+          println(t)
+        }
+        case Invalid(e) => { 
+          errorBox.innerText = Validators.errorMessage(e, _.label)
+        }
+      }
+    Modal("予約枠の分割", (close, body, commands) => {
+      setupBody(body)
+      setupCommands(close, commands)
+    }).open()
+  }
+
+private object SplitValidator:
+  sealed trait SplitError(val label: String)
+  object EmptyInputError extends SplitError("分割時刻が入力されていません。")
+  object InvalidFormatError extends SplitError("分割時刻の入力フォーマットが不適切です。")
+  object InvalidTimeError extends SplitError("分割時刻の値が不適切です。")
+  object InvalidSplitPointError extends SplitError("分割時刻が予約枠外です。")
+
+  type Result = ValidatedNec[SplitError, LocalTime]
+
+  def validateSplitTime(input: String, appointTime: AppointTime): Result =
+    Validators.nonEmpty(input, EmptyInputError)
+    .andThen(Validators.regexMatch(_, raw"\d{2}:\d{2}".r, InvalidFormatError))
+    .andThen(input => {
+      try
+        validNec(LocalTime.parse(input))
+      catch {
+        case _: Throwable => invalidNec(InvalidFormatError)
+      }
+    })
+    .andThen(t => condNec(
+      appointTime.fromTime <= t && t <= appointTime.untilTime,
+      t,
+      InvalidSplitPointError
+    ))
+
+  def validate(splitTimeInput: String, appointTime: AppointTime): Result =
+    validateSplitTime(splitTimeInput, appointTime)
+
+
+

@@ -3,6 +3,7 @@ package dev.fujiwara.domq
 import org.scalajs.dom.document
 import org.scalajs.dom.raw.HTMLElement
 import org.scalajs.dom.raw.HTMLInputElement
+import dev.fujiwara.domq.Modifiers.{attr}
 
 object Html {
 
@@ -33,5 +34,7 @@ object Html {
   val ul = Tag("ul")
   val li = Tag("li")
   val span = Tag("span")
+
+  def inputText = input(attr("type") := "text")
 
 }

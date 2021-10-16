@@ -65,6 +65,8 @@ object Modifiers:
     e.setAttributeNS(namespace, name, a)
   })
 
+  def placeholder: Creator[String] = attr("placeholder")
+
   def css(f: CSSStyleDeclaration => Unit): Modifier = Modifier(e => f(e.style))
 
   val mt = Creator[String]((e, value) => e.style.marginTop = value)
