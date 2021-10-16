@@ -32,6 +32,7 @@ object RestService:
   object dateDate extends QueryParamDecoderMatcher[LocalDate]("date")
   object dateUpto extends QueryParamDecoderMatcher[LocalDate]("upto")
   object timeTime extends QueryParamDecoderMatcher[LocalTime]("time")
+  object timeAt extends QueryParamDecoderMatcher[LocalTime]("at")
   object nameString extends QueryParamDecoderMatcher[String]("name")
   object intFrom extends QueryParamDecoderMatcher[Int]("from")
   object intUntil extends QueryParamDecoderMatcher[Int]("until")
@@ -100,6 +101,14 @@ object RestService:
       yield (true)
       Ok(op)
     }
+
+    case POST -> Root / "split-appoint-time" :? intAppointTimeId(appointTimeId) +& 
+      timeAt(at) =>
+        val op = for
+          events <- Db.splitAppointTime(appointTimeId, at)
+          _ <- publishAll(events)
+        yield (true)
+        Ok(op)
 
     case POST -> Root / "fill-appoint-times" :? dateFrom(from) +& dateUpto(upto) =>
       val op = for

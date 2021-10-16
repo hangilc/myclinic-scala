@@ -72,3 +72,6 @@ object Api:
 
   def combineAppointTimes(appointTimeIds: List[Int]): Future[Unit] =
     post("combine-appoint-times", Params(), appointTimeIds)
+
+  def splitAppointTime(appointTimeId: Int, at: LocalTime): Future[Unit] =
+    post("split-appoint-time", Params("appoint-time-id" -> appointTimeId, "at" -> at))

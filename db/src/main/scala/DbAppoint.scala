@@ -7,30 +7,45 @@ import dev.myclinic.scala.model.*
 import dev.myclinic.scala.db.{DbAppointPrim => Prim}
 import doobie.*
 import doobie.implicits.*
+import dev.myclinic.scala.util.DateTimeOrdering.{*, given}
+import scala.math.Ordered.orderingToOrdered
 
 import java.time.LocalDate
 import java.time.LocalTime
-import java.security.InvalidParameterException
+import java.time.temporal.ChronoUnit
 
 trait DbAppoint extends Sqlite:
-  private def enterWithEvent(
-      a: AppointTime
-  ): ConnectionIO[(AppointTime, AppEvent)] =
-    for
-      entered <- Prim.enterAppointTime(a)
-      event <- DbEventPrim.logAppointTimeCreated(entered)
-    yield (entered, event)
+  // private def enterWithEvent(
+  //     a: AppointTime
+  // ): ConnectionIO[(AppointTime, AppEvent)] =
+  //   for
+  //     created <- Prim.enterAppointTime(a)
+  //     event <- DbEventPrim.logAppointTimeCreated(created)
+  //   yield (created, event)
+
+  def safeCreateAppointTime(appointTime: AppointTime): ConnectionIO[AppEvent] =
+    assert(appointTime.appointTimeId == 0, "Non-zero appoint time to create.")
+    assert(
+      appointTime.fromTime <= appointTime.untilTime,
+      s"Invalid appoint time values. s{appointTime.fromTime} - s{appointTime.untilTime}"
+    )
+    def confirmNoOverlap(appointTimes: List[AppointTime]): Unit =
+      if AppointTime.overlaps(appointTimes.sortBy(_.fromTime)) then
+        throw new RuntimeException(s"AppointTime overlaps. ${appointTimes}")
+    for 
+      ats <- Prim.listAppointTimesForDate(appointTime.date).to[List]
+      _ = confirmNoOverlap(appointTime :: ats)
+      created <- Prim.enterAppointTime(appointTime)
+      event <- DbEventPrim.logAppointTimeCreated(created)
+    yield event
 
   def batchEnterAppointTimes(
       appointTimes: List[AppointTime]
   ): IO[List[AppEvent]] =
-    val op = for
-      list <- appointTimes.map(enterWithEvent(_)).sequence
-    yield list.map(p => p._2)
-    sqlite(op)
+    sqlite(appointTimes.map(safeCreateAppointTime(_)).sequence)
 
-  def createAppointTime(appointTime: AppointTime): IO[(AppointTime, AppEvent)] =
-    sqlite(enterWithEvent(appointTime))
+  def createAppointTime(appointTime: AppointTime): IO[AppEvent] =
+    sqlite(safeCreateAppointTime(appointTime))
 
   private def safeDeleteAppointTime(
       appointTimeId: Int
@@ -107,13 +122,49 @@ trait DbAppoint extends Sqlite:
             "Cannot combine appoint times (appoint exists)."
           )
           delEvents <- batchDeleteAppointTimes(followIds)
-          updateEvent <- safeUpdateAppointTime( 
+          updateEvent <- safeUpdateAppointTime(
             target.copy(
               untilTime = newUntilTime(follows),
               capacity = target.capacity + capacityInc(follows)
-            ))
+            )
+          )
         yield delEvents ++ List(updateEvent)
       }
+
+  def splitAppointTime(appointTimeId: Int, at: LocalTime): IO[List[AppEvent]] =
+    def confirmAt(appointTime: AppointTime): Unit =
+      if appointTime.fromTime <= at && at <= appointTime.untilTime then ()
+      else throw new RuntimeException(s"Invalid split time. (${at})")
+    def divideCapacity(
+        capacity: Int,
+        from: LocalTime,
+        at: LocalTime,
+        until: LocalTime
+    ): (Int, Int) =
+      val span = ChronoUnit.MINUTES.between(from, until).toInt
+      val left = ChronoUnit.MINUTES.between(from, at).toInt
+      val leftCap = capacity * left / span
+      (leftCap, capacity - leftCap)
+
+    val op = for
+      appointTime <- Prim.getAppointTime(appointTimeId).unique
+      _ = confirmAt(appointTime)
+      (capA, capB) = divideCapacity(
+        appointTime.capacity,
+        appointTime.fromTime,
+        at,
+        appointTime.untilTime
+      )
+      update = appointTime.copy(untilTime = at, capacity = capA)
+      follow = appointTime.copy(
+        appointTimeId = 0,
+        fromTime = at,
+        capacity = capB
+      )
+      updateEvent <- safeUpdateAppointTime(update)
+      createEvent <- safeCreateAppointTime(follow)
+    yield List(updateEvent, createEvent)
+    sqlite(op)
 
   def listExistingAppointTimeDates(
       from: LocalDate,
@@ -137,9 +188,9 @@ trait DbAppoint extends Sqlite:
       a: Appoint
   ): ConnectionIO[(Appoint, AppEvent)] =
     for
-      entered <- Prim.enterAppoint(a)
-      event <- DbEventPrim.logAppointCreated(entered)
-    yield (entered, event)
+      created <- Prim.enterAppoint(a)
+      event <- DbEventPrim.logAppointCreated(created)
+    yield (created, event)
 
   def addAppoint(a: Appoint): IO[(Appoint, AppEvent)] =
     sqlite({

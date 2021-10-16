@@ -150,13 +150,14 @@ class AdminAppointTimeBox(appointTime: AppointTime)
       )
     def setupCommands(close: Modal.CloseFunction, wrapper: HTMLElement): Unit =
       wrapper(
-        button("実行", onclick := (onExecute _)),
+        button("実行", onclick := (() => onExecute(close))),
         button("キャンセル", onclick := close)
       )
-    def onExecute(): Unit =
+    def onExecute(close: Modal.CloseFunction): Unit =
       SplitValidator.validate(splitTimeInput.value, appointTime) match {
-        case Valid(t) => {
-          println(t)
+        case Valid(at) => {
+          Api.splitAppointTime(appointTime.appointTimeId, at)
+          close()
         }
         case Invalid(e) => { 
           errorBox.innerText = Validators.errorMessage(e, _.label)
