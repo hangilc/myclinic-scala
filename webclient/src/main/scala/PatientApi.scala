@@ -9,5 +9,12 @@ import dev.myclinic.scala.modeljson.Implicits.{given}
 import dev.myclinic.scala.webclient.ParamsImplicits.{given}
 import scala.language.implicitConversions
 
-trait PatientApi:
-  def url(service: String): String = s"/api/${service}"
+object PatientApi extends ApiBase:
+  def baseUrl: String = "/api/"
+
+  object Api:
+    def getPatient(patientId: Int): Future[Patient] = 
+      ???
+
+    def searchPatient(text: String): Future[List[Patient]] = 
+      ???

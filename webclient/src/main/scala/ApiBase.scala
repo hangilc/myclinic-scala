@@ -7,8 +7,10 @@ import dev.myclinic.scala.webclient.ParamsImplicits.{given}
 import scala.language.implicitConversions
 import scala.concurrent.Future
 
-trait ApiBase(urlBase: String):
-  def url(service: String): String = s"${urlBase}/${service}"
+trait ApiBase:
+  def baseUrl: String
+
+  def url(service: String): String = s"${baseUrl}/${service}"
 
   def get[T](service: String, params: Params)(using
       Decoder[T]
