@@ -146,4 +146,5 @@ object RestService:
       yield ()
       Ok(op)
     }
-  }
+  } <+> PatientService.routes
+

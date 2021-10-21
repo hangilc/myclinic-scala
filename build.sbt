@@ -6,7 +6,7 @@ ThisBuild / organization := "dev.myclinic.scala"
 ThisBuild / organizationName := "myclinic"
 
 val sqliteVersion = "3.36.0.1"
-val mysqlVersion = "8.0.19"
+val mysqlVersion = "6.0.6"
 val http4sVersion = "0.23.3"
 val doobieVersion = "1.0.0-M5"
 val circeVersion = "0.14.1"
@@ -71,6 +71,7 @@ lazy val db = project
     name := "db",
     libraryDependencies ++= Seq(
       "org.xerial" % "sqlite-jdbc" % sqliteVersion,
+      "mysql" % "mysql-connector-java" % mysqlVersion,
       "org.tpolecat" %% "doobie-core" % doobieVersion,
       "org.tpolecat" %% "doobie-hikari" % doobieVersion,
       "org.http4s" %% "http4s-circe" % http4sVersion,

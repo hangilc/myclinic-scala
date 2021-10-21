@@ -1,8 +1,5 @@
 package dev.myclinic.scala.model
 
-sealed trait Sex
-
-object Sex {
-  object Male extends Sex
-  object Female extends Sex  
-}
+enum Sex(code: String, rep: String):
+  case Male extends Sex("M", "男")
+  case Female extends Sex("F", "女")
