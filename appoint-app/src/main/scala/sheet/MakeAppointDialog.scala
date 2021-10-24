@@ -4,7 +4,7 @@ import dev.fujiwara.domq.ElementQ.{given, *}
 import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.Html._
 import dev.fujiwara.domq.Modal
-import dev.fujiwara.domq.{Icons, Colors}
+import dev.fujiwara.domq.{Icons, Colors, LocalModal}
 import dev.myclinic.scala.model.{AppointTime, Appoint, Patient}
 import dev.myclinic.scala.util.KanjiDate
 import dev.fujiwara.domq.Form
@@ -99,14 +99,17 @@ object MakeAppointDialog:
       cancelButton(onclick := close)
       enterButton(onclick := (() => {
         validate() match {
-          case Right(app) => {
-            println(("appoint", app))
-            Api.registerAppoint(app)
-            close()
-          }
+          case Right(app) => doEnter(app, close)
           case Left(msg) => showError(msg)
         }
       }))
+
+    def doEnter(appoint: Appoint, close: () => Unit): Unit =
+      val content = div("Click Me")
+      val m = LocalModal.open(ele, content)
+      content(onclick := (() => m.close()))
+      //Api.registerAppoint(appoint)
+      //close()
     
     def makeNameSlot(patient: Patient): HTMLElement =
       div(hoverBackground("#eee"), padding := "2px 4px", cursor := "pointer")(
