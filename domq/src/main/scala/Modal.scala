@@ -18,7 +18,7 @@ class Modal[T](
       div(
         css(style => style.width = "*"),
         span(Modal.modalTitle)(title),
-        Modal.xCircle(color = "gray")(
+        Icons.x(color = "gray")(
           css(style => {
             style.cssFloat = "right"
             style.verticalAlign = "middle"

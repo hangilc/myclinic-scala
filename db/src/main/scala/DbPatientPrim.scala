@@ -28,7 +28,6 @@ object DbPatientPrim:
   def searchPatient(lastPart: String, firstPart: String): Query0[Patient] =
     val t1: String = s"%${lastPart}%"
     val t2: String = s"%${firstPart}%"
-    println((t1, t2))
     sql"""
       select * from patient where 
         (last_name like ${t1} or last_name_yomi like ${t1}) and 

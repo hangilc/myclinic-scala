@@ -87,9 +87,24 @@ object Modifiers:
   val border = styleSetter((s, v) => s.border = v)
   val color = styleSetter((s, v) => s.color = v)
   val background = styleSetter((s, v) => s.background = v)
+  val cursor = styleSetter((s, v) => s.cursor = v)
   val display = styleSetter((style, value) => style.display = value)
   val justifyContent =
     styleSetter((style, value) => style.setProperty("justify-content", value))
+
+  def hoverBackground(bg: String): Modifier =
+    var save: String = ""
+    Modifier(e => {
+      ElementQ(e)(
+        onmouseenter := (() => {
+          save = e.style.background
+          e.style.background = bg
+        }),
+        onmouseleave := (() => {
+          e.style.background = save
+        })
+      )
+    })
 
   val href = Creator[String]((e, a) => {
     val value = if a.isEmpty then "javascript:void(0)" else a
@@ -103,6 +118,24 @@ object Modifiers:
 
     def :=(f: () => Unit) = Modifier(e => {
       e.addEventListener("click", (_: MouseEvent) => f())
+    })
+
+  object onmouseenter:
+    def :=(f: MouseEvent => Unit) = Modifier(e => {
+      e.addEventListener("mouseenter", f)
+    })
+
+    def :=(f: () => Unit) = Modifier(e => {
+      e.addEventListener("mouseenter", (_: MouseEvent) => f())
+    })
+
+  object onmouseleave:
+    def :=(f: MouseEvent => Unit) = Modifier(e => {
+      e.addEventListener("mouseleave", f)
+    })
+
+    def :=(f: () => Unit) = Modifier(e => {
+      e.addEventListener("mouseleave", (_: MouseEvent) => f())
     })
 
   val oncontextmenu = Creator[MouseEvent => Unit]((ele, handler) => {

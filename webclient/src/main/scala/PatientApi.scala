@@ -14,7 +14,7 @@ object PatientApi extends ApiBase:
 
   trait Api:
     def getPatient(patientId: Int): Future[Patient] = 
-      ???
+      get("get-patient", Params("patient-id" -> patientId))
 
     def searchPatient(text: String): Future[List[Patient]] = 
-      ???
+      get("search-patient", Params("text" -> text))

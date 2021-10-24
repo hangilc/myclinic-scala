@@ -12,4 +12,6 @@ case class Patient(
     birthday: LocalDate,
     address: String,
     phone: String
-)
+):
+    def fullName(sep: String = " "): String = 
+        s"${lastName}${sep}${firstName}"
