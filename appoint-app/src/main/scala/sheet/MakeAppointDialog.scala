@@ -131,22 +131,27 @@ object MakeAppointDialog:
       nameWorkSpace(display := "block")
 
     def doSearchPatient(): Unit =
-      for
-        patients <- Api.searchPatient(nameInput.value)
-        _ = populateNameWorkspace(patients)
-      yield ()
+      if nameWorkSpace.style.display != "none" then closeNameWorkspace()
+      else
+        for
+          patients <- Api.searchPatient(nameInput.value)
+          _ = populateNameWorkspace(patients)
+        yield ()
 
     def syncPatientId(): Unit =
-      val name = nameInput.value
-      if name.contains(" ") || name.contains("　") then
-        for
-          patients <- Api.searchPatient(name)
-          _ =
-            if patients.size == 1 then
-              patientIdInput.value = patients(0).patientId.toString
-            else if patients.size == 0 then patientIdInput.value = ""
-            else populatePatientIdWorkspace(patients)
-        yield ()
+      if patientIdWorkspace.style.display != "none" then
+        closePatientIdWorkspace()
+      else
+        val name = nameInput.value
+        if name.contains(" ") || name.contains("　") then
+          for
+            patients <- Api.searchPatient(name)
+            _ =
+              if patients.size == 1 then
+                patientIdInput.value = patients(0).patientId.toString
+              else if patients.size == 0 then patientIdInput.value = ""
+              else populatePatientIdWorkspace(patients)
+          yield ()
 
     case class PatientIdSlot(patient: Patient):
       val ele: HTMLElement = div(
