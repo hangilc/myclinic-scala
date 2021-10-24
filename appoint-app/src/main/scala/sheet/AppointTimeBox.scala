@@ -77,12 +77,9 @@ case class AppointTimeBox(
     (s"$f - $u") + capa
 
   def onElementClick(event: MouseEvent): Unit =
-    if slots.isEmpty && appointTime.capacity > 0 then makeAppointDialog()
-    else if slots.size == 1 && appointTime.capacity == 1 then
-      cancelAppointDialog(slots.head.appoint)
-    else ()
+    if slots.size < appointTime.capacity then openAppointDialog()
 
-  def makeAppointDialog(): Unit =
+  def openAppointDialog(): Unit =
     MakeAppointDialog.open(appointTime)
 
   def cancelAppointDialog(appoint: Appoint): Unit =
