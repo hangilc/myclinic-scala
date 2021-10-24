@@ -1,6 +1,5 @@
 package dev.myclinic.scala.web.appoint.sheet
 
-import dev.fujiwara.domq.Binding.{given, *}
 import dev.fujiwara.domq.ElementQ.{given, *}
 import dev.fujiwara.domq.Html.{given, *}
 import dev.fujiwara.domq.Modifiers.{given, *}

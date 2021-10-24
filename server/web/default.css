@@ -1,3 +1,12 @@
+:root {
+  --primary-color:   #007bff;
+  --secondary-color: #6c757d;
+  --success-color:   #28a745;
+  --danger-color:    #dc3545;
+  --warning-color:   #ffc107;
+  --info-color:      #17a2b8;
+}
+
 a, a:link, a:visited, a:hover, a:active {
   text-decoration: none
 }
@@ -10,3 +19,14 @@ button + button {
   margin-left: 0.3em;
 }
 
+input[type=text]:focus {
+  outline: none;
+  border-radius: 4px;
+  background-color: transparent;
+  border: 2px solid var(--primary-color);
+}
+
+input[type=text] {
+  padding: 4px 8px;
+  border: 1px solid var(--secondary-color)
+}
