@@ -17,7 +17,10 @@ object Form:
     spec.foreach { case (key, input) =>
       tab(
         div(css(style => style.display = "table-row"))(
-          key(css(style => style.display = "table-cell")),
+          key(css(style => {
+            style.display = "table-cell"
+            style.textAlign = "right"
+          })),
           input(css(style => style.display = "table-cell"))
         )
       )

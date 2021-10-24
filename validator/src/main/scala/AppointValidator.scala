@@ -16,6 +16,10 @@ object AppointValidator:
     def message = "Appoint-time-id is zero."
   case object EmptyNameError extends AppointError:
     def message = "患者名が入力されていません。"
+  object IsNotIntPatientIdError extends AppointError:
+    def message = "患者番号が整数でありません。"
+  object NegativePatientIdError extends AppointError:
+    def message = "患者番号が負数です。"
 
   case class Result(value: ValidatedNec[AppointError, Appoint]):
     def toEither(): Either[String, Appoint] =
@@ -34,8 +38,11 @@ object AppointValidator:
   def validateName(name: String): ValidatedNec[AppointError, String] =
     nonEmpty(name, EmptyNameError)
 
-  def validatePatientId(patientId: Int): ValidatedNec[AppointError, Int] =
-    validNec(patientId)
+  def validatePatientId(patientId: String): ValidatedNec[AppointError, Int] =
+    if patientId.isEmpty then validNec(0)
+    else
+      isInt(patientId, IsNotIntPatientIdError)
+        .andThen(ival => nonNegativeInt(ival, NegativePatientIdError))
 
   def validateMemo(memo: String): ValidatedNec[AppointError, String] =
     validNec(memo)
@@ -44,7 +51,7 @@ object AppointValidator:
       appointId: Int,
       appointTimeId: Int,
       nameInput: String,
-      patientId: Int,
+      patientId: String,
       memoInput: String
   ): Result =
     val v = (

@@ -31,6 +31,7 @@ object MakeAppointDialog:
 
   class UI(appointTime: AppointTime):
     val nameInput: HTMLInputElement = inputText()
+    val patientIdInput: HTMLInputElement = inputText()
     val memoInput: HTMLInputElement = inputText()
     private val enterButton = button("入力")
     private val cancelButton = button("キャンセル")
@@ -44,6 +45,9 @@ object MakeAppointDialog:
         ),
         Form.rows(
           span("患者名：") -> nameInput,
+          span("患者番号：") -> patientIdInput(css(style => {
+            style.width = "4rem"
+          })),
           span("メモ：") -> memoInput,
         )
       ),
@@ -58,6 +62,7 @@ object MakeAppointDialog:
       enterButton(onclick := (() => {
         validate() match {
           case Right(app) => { 
+            println(("appoint", app))
             Api.registerAppoint(app)
             close() 
           }
@@ -74,7 +79,7 @@ object MakeAppointDialog:
         0,
         appointTime.appointTimeId,
         nameInput.value,
-        0,
+        patientIdInput.value,
         memoInput.value
       ).toEither()
 
