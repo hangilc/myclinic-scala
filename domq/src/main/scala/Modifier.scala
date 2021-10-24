@@ -89,8 +89,14 @@ object Modifiers:
   val background = styleSetter((s, v) => s.background = v)
   val cursor = styleSetter((s, v) => s.cursor = v)
   val display = styleSetter((style, value) => style.display = value)
+  val displayNone = display := "none"
+  val inlineBlock = display := "inline-block"
   val justifyContent =
     styleSetter((style, value) => style.setProperty("justify-content", value))
+  val maxHeight = styleSetter((s, v) => s.maxHeight = v)
+  val minHeight = styleSetter((s, v) => s.minHeight = v)
+  val overflowY = styleSetter((s, v) => s.overflowY = v)
+  val overflowYAuto = overflowY := "auto"
 
   def hoverBackground(bg: String): Modifier =
     var save: String = ""

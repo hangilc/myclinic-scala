@@ -34,8 +34,9 @@ object MakeAppointDialog:
 
   class UI(appointTime: AppointTime):
     val nameInput: HTMLInputElement = inputText()
+    val nameWorkSpace: HTMLElement = div()
     val patientIdInput: HTMLInputElement = inputText()
-    val patientIdWorkspace: HTMLElement = div(display := "none")
+    val patientIdWorkspace: HTMLElement = div(displayNone)
     val memoInput: HTMLInputElement = inputText()
     private val enterButton = button("入力")
     private val cancelButton = button("キャンセル")
@@ -48,9 +49,20 @@ object MakeAppointDialog:
           cls := "error-box"
         ),
         Form.rows(
-          span("患者名：") -> nameInput,
+          span("患者名：") -> div(inlineBlock)(
+            div(
+              nameInput(placeholder := "姓　名"),
+              Icons.search(color = "gray", size = "1.2rem")(
+                css(style => style.verticalAlign = "middle"),
+                ml := "0.5rem",
+                cursor := "pointer",
+                onclick := (doSearchPatient _)
+              )
+            ),
+            nameWorkSpace(displayNone, overflowYAuto, maxHeight := "10rem")
+          ),
           span("患者番号：") -> div(
-            div(css(style => style.display = "inline-block"))(
+            div(inlineBlock)(
               patientIdInput(css(style => {
                 style.width = "4rem"
               })),
@@ -58,7 +70,7 @@ object MakeAppointDialog:
                 css(style => style.verticalAlign = "middle"),
                 ml := "0.5rem",
                 cursor := "pointer",
-                onclick := (() => { 
+                onclick := (() => {
                   patientIdInput.value = ""
                   closePatientIdWorkspace()
                 })
@@ -95,6 +107,34 @@ object MakeAppointDialog:
           case Left(msg) => showError(msg)
         }
       }))
+    
+    def makeNameSlot(patient: Patient): HTMLElement =
+      div(hoverBackground("#eee"), padding := "2px 4px", cursor := "pointer")(
+        s"(${patient.patientId}) ${patient.fullName()}"
+      )
+
+    def closeNameWorkspace(): Unit =
+      nameWorkSpace.innerHTML = ""
+      nameWorkSpace(displayNone)
+
+    def populateNameWorkspace(patients: List[Patient]): Unit =
+      nameWorkSpace.innerHTML = ""
+      patients.foreach(patient => {
+        val e = makeNameSlot(patient)
+        e(onclick := (() => {
+          nameInput.value = patient.fullName()
+          patientIdInput.value = patient.patientId.toString
+          closeNameWorkspace()
+        }))
+        nameWorkSpace(e)
+      })
+      nameWorkSpace(display := "block")
+
+    def doSearchPatient(): Unit =
+      for
+        patients <- Api.searchPatient(nameInput.value)
+        _ = populateNameWorkspace(patients)
+      yield ()
 
     def syncPatientId(): Unit =
       val name = nameInput.value
@@ -113,7 +153,7 @@ object MakeAppointDialog:
         div(
           cursor := "pointer",
           padding := "2px 4px",
-          hoverBackground("#eee"),
+          hoverBackground("#eee")
         )(
           div(s"(${patient.patientId.toString}) ${patient.fullName()}"),
           div(KanjiDate.dateToKanji(patient.birthday) + "生")
