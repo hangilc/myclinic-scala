@@ -9,6 +9,4 @@ import dev.myclinic.scala.modeljson.Implicits.{given}
 import dev.myclinic.scala.webclient.ParamsImplicits.{given}
 import scala.language.implicitConversions
 
-object Api:
-  import AppointApi.Api.*
-  import PatientApi.Api.*
+object Api extends AppointApi.Api with PatientApi.Api

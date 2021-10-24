@@ -77,13 +77,7 @@ case class AppointTimeBox(
         ()
 
     def makeAppointDialog(): Unit =
-      MakeAppointDialog.open(
-        appointTime,
-        name => {
-          val app = Appoint(0, appointTime.appointTimeId, name, 0, "")
-          Api.registerAppoint(app)
-        }
-      )
+      MakeAppointDialog.open(appointTime)
     
     def cancelAppointDialog(appoint: Appoint): Unit =
       CancelAppointDialog.open(

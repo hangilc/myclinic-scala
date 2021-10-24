@@ -10,7 +10,7 @@ import scala.concurrent.Future
 trait ApiBase:
   def baseUrl: String
 
-  def url(service: String): String = s"${baseUrl}/${service}"
+  def url(service: String): String = s"${baseUrl}${service}"
 
   def get[T](service: String, params: Params)(using
       Decoder[T]

@@ -12,7 +12,7 @@ import scala.language.implicitConversions
 object PatientApi extends ApiBase:
   def baseUrl: String = "/api/"
 
-  object Api:
+  trait Api:
     def getPatient(patientId: Int): Future[Patient] = 
       ???
 

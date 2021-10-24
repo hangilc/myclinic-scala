@@ -12,13 +12,13 @@ import scala.language.implicitConversions
 object AppointApi extends ApiBase:
   def baseUrl: String = "/api/"
 
-  def listAppointTimes(
-      from: LocalDate,
-      upto: LocalDate
-  ): Future[List[AppointTime]] =
-    get("list-appoint-times", Params("from" -> from, "upto" -> upto))
+  trait Api:
+    def listAppointTimes(
+        from: LocalDate,
+        upto: LocalDate
+    ): Future[List[AppointTime]] =
+      get("list-appoint-times", Params("from" -> from, "upto" -> upto))
 
-  object Api:
     def updateAppointTime(appointTime: AppointTime): Future[Unit] =
       post("update-appoint-time", Params(), appointTime)
 
