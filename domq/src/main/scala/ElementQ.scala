@@ -47,4 +47,7 @@ object ElementQ {
   given Conversion[(ElementQ, ElementQ), (HTMLElement, HTMLElement)] = {
     case (a: ElementQ, b: ElementQ) => (a.ele, b.ele)
   }
+  given Conversion[(ElementQ, HTMLElement), (HTMLElement, HTMLElement)] = {
+    case (a: ElementQ, b: HTMLElement) => (a.ele, b)
+  }
 }

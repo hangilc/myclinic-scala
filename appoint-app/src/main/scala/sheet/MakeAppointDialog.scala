@@ -12,6 +12,9 @@ import org.scalajs.dom.raw.HTMLElement
 import org.scalajs.dom.raw.HTMLInputElement
 import dev.myclinic.scala.web.appoint.Misc
 import dev.myclinic.scala.webclient.Api
+import dev.myclinic.scala.validator.{AppointValidator, Validators}
+import cats.data.Validated.Valid
+import cats.data.Validated.Invalid
 
 object MakeAppointDialog:
   def open(appointTime: AppointTime): Unit =
@@ -28,6 +31,7 @@ object MakeAppointDialog:
 
   class UI(appointTime: AppointTime):
     val nameInput: HTMLInputElement = inputText()
+    val memoInput: HTMLInputElement = inputText()
     private val enterButton = button("入力")
     private val cancelButton = button("キャンセル")
     private val errorBox: HTMLElement = div()
@@ -36,12 +40,11 @@ object MakeAppointDialog:
         div(dateTimeRep(appointTime)),
         errorBox(
           display := "none",
-          color := "red",
-          border := "1px solid red"
+          cls := "error-box",
         ),
-        div(
-          span("患者名："),
-          nameInput(ml := "0.5rem")
+        Form.rows(
+          span("患者名：") -> nameInput,
+          span("メモ：") -> memoInput,
         )
       ),
       div(Modal.modalCommands)(
@@ -54,8 +57,7 @@ object MakeAppointDialog:
       cancelButton(onclick := close)
       enterButton(onclick := (() => {
         validate() match {
-          case Right(name) => { 
-            val app = Appoint(0, appointTime.appointTimeId, name, 0, "")
+          case Right(app) => { 
             Api.registerAppoint(app)
             close() 
           }
@@ -67,10 +69,14 @@ object MakeAppointDialog:
       errorBox.clear()
       errorBox(msg, display := "block")
 
-    def validate(): Either[String, String] =
-      val name = nameInput.value
-      if name.isEmpty then Left("患者名が入力されていません。") 
-      else Right(name)
+    def validate(): Either[String, Appoint] =
+      AppointValidator.validateForEnter(
+        0,
+        appointTime.appointTimeId,
+        nameInput.value,
+        0,
+        memoInput.value
+      ).toEither()
 
     def dateTimeRep(appointTime: AppointTime): String =
       Misc.formatAppointTimeSpan(appointTime)

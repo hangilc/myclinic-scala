@@ -11,8 +11,8 @@ object Form:
     val tab = div(css(style => {
       style.display = "table"
       style.borderCollapse = "separate"
-      style.borderSpacing = "0.5rem 0"
-      style.margin = "0 -0.5rem"
+      style.borderSpacing = "0.5rem 0.3rem"
+      style.margin = "-0.3rem -0.5rem"
     }))
     spec.foreach { case (key, input) =>
       tab(
