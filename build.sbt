@@ -116,7 +116,8 @@ lazy val webclient = project
     scalaJSUseMainModuleInitializer := false,
     libraryDependencies ++= Seq(
       ("org.scala-js" %%% "scalajs-dom" % "1.2.0")
-        .cross(CrossVersion.for3Use2_13)
+        .cross(CrossVersion.for3Use2_13),
+      "io.circe" %%% "circe-core" % circeVersion,
     )
   )
 

@@ -112,11 +112,16 @@ object MakeAppointDialog:
 
       if appoint.patientId != 0 then
         for 
-          patient <- Api.getPatient(appoint.patientId)
-          validated = AppointValidator.validatePatientIdConsistency(appoint, patient)
-          _ = AppointValidator.toEither(validated) match {
-            case Right(appoint) => action(appoint)
-            case Left(msg) => 
+          patientOpt <- Api.findPatient(appoint.patientId)
+          _ = patientOpt match {
+            case Some(patient) => {
+              val validated = AppointValidator.validatePatientIdConsistency(appoint, patient)
+              AppointValidator.toEither(validated) match {
+                case Right(appoint) => action(appoint)
+                case Left(msg) => showError(msg)
+              }
+            }
+            case None => showError("患者番号に該当する患者情報がみつかりません。")
           }
         yield ()
       else

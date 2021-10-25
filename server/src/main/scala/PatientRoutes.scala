@@ -30,6 +30,9 @@ object PatientService:
     case GET -> Root / "get-patient" :? intPatientId(patientId) =>
       Ok(Db.getPatient(patientId))
 
+    case GET -> Root / "find-patient" :? intPatientId(patientId) =>
+      Ok(Db.findPatient(patientId))
+
     case GET -> Root / "search-patient" :? strText(text) =>
       Ok(Db.searchPatient(text))
   }

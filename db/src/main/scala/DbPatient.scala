@@ -17,6 +17,9 @@ trait DbPatient extends Mysql:
   def getPatient(patientId: Int): IO[Patient] =
     mysql(Prim.getPatient(patientId).unique)
 
+  def findPatient(patientId: Int): IO[Option[Patient]] =
+    mysql(Prim.getPatient(patientId).option)
+
   def searchPatient(text: String): IO[List[Patient]] =
     val pat = Pattern.compile(raw"\s+", Pattern.UNICODE_CHARACTER_CLASS)
     val parts: Array[String] = pat.split(text, 2)

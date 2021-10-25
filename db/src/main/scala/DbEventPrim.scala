@@ -5,7 +5,7 @@ import cats.implicits._
 import doobie._
 import doobie.implicits._
 import dev.myclinic.scala.model._
-import dev.myclinic.scala.modeljson.Implicits._
+import dev.myclinic.scala.modeljson.Implicits.{given}
 import io.circe._
 import io.circe.syntax._
 import dev.myclinic.scala.db.DoobieMapping._
