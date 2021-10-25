@@ -1,6 +1,7 @@
 package dev.myclinic.scala.modeljson
 
 import io.circe._
+import io.circe.syntax._
 import io.circe.generic.semiauto._
 import dev.myclinic.scala.model._
 
@@ -19,5 +20,7 @@ object Implicits extends DateTime {
 
   given patientEncoder: Encoder[Patient] = deriveEncoder[Patient]
   given patientDecoder: Decoder[Patient] = deriveDecoder[Patient]
+  given Encoder[Option[Patient]] = Encoder.encodeOption[Patient]
+  given Decoder[Option[Patient]] = Decoder.decodeOption[Patient]
 
 }

@@ -9,7 +9,6 @@ import io.circe.syntax._
 import io.circe.parser.decode
 
 object Ajax:
-
   def request[T](
       method: String,
       url: String,
@@ -26,7 +25,6 @@ object Ajax:
         val status = xhr.status
         if status == 200 then
           val src = xhr.responseText
-          println(("src", src))
           decode[T](src) match
             case Right(value) => promise.success(value)
             case Left(ex) => {

@@ -10,6 +10,7 @@ val mysqlVersion = "6.0.6"
 val http4sVersion = "0.23.3"
 val doobieVersion = "1.0.0-M5"
 val circeVersion = "0.14.1"
+//val circeVersion = "0.15.0-M1"
 val scalaJavaTimeVersion = "2.3.0"
 val scalaJSDomVersion = "1.2.0"
 val catsVersion = "2.6.1"
@@ -118,6 +119,8 @@ lazy val webclient = project
       ("org.scala-js" %%% "scalajs-dom" % "1.2.0")
         .cross(CrossVersion.for3Use2_13),
       "io.circe" %%% "circe-core" % circeVersion,
+      "io.circe" %%% "circe-generic" % circeVersion,
+      "io.circe" %%% "circe-parser" % circeVersion
     )
   )
 
