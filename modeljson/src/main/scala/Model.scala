@@ -7,6 +7,18 @@ import dev.myclinic.scala.model._
 
 object Implicits extends DateTime {
 
+  given Encoder[Sex] = new Encoder[Sex]:
+    def apply(sex: Sex): Json =
+      sex match {
+        case Sex.Male => Json.fromString("M")
+        case Sex.Female => Json.fromString("F")
+      }
+  given Decoder[Sex] = Decoder.decodeString.emap(s => s match {
+    case "M" => Right(Sex.Male)
+    case "F" => Right(Sex.Female)
+    case _ => Left(s"Cannot decode sex (${s}).")
+  })
+
   given appEventEncoder: Encoder[AppEvent] = deriveEncoder[AppEvent]
   given appEventDecoder: Decoder[AppEvent] = deriveDecoder[AppEvent]
 
