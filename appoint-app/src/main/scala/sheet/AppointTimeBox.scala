@@ -28,7 +28,17 @@ val sortedAppointTimeBox: SortedElement[AppointTimeBox] =
 case class AppointTimeBox(
     appointTime: AppointTime
 ):
-  case class Slot(appoint: Appoint, ele: HTMLElement)
+  case class Slot(appoint: Appoint):
+    val ele = div(label)(onclick := (onClick _))
+
+    def label: String =
+      val name: String = s"${appoint.patientName}"
+      val memo: String =
+        if appoint.memo.isEmpty then "" else s" （${appoint.memo}）"
+      name + memo
+    def onClick(): Unit =
+      editAppointDialog(appoint)
+
   var slots: List[Slot] = List.empty
   val slotsElement = div()
   val ele =
@@ -40,14 +50,14 @@ case class AppointTimeBox(
   def appointTimeId: Int = appointTime.appointTimeId
 
   def init(appoints: List[Appoint]): Unit =
-    slots = appoints.map(makeSlot(_))
+    slots = appoints.map(Slot(_))
     slots.foreach(s => slotsElement(s.ele))
 
   def appoints: List[Appoint] =
     slots.map(slot => slot.appoint)
 
   def addAppoint(appoint: Appoint): Unit =
-    val slot = makeSlot(appoint)
+    val slot = Slot(appoint)
     slots = slots ++ List(slot)
     slotsElement(slot.ele)
 
@@ -62,13 +72,6 @@ case class AppointTimeBox(
         s.ele.remove()
       })
 
-  def makeSlot(appoint: Appoint): Slot =
-    val name: String = s"${appoint.patientName}"
-    val memo: String =
-      if appoint.memo.isEmpty then "" else s" （${appoint.memo}）"
-    val rep = name + memo
-    Slot(appoint, div(rep))
-
   def appointTimeLabel: String =
     val f = Misc.formatAppointTime(appointTime.fromTime)
     val u = Misc.formatAppointTime(appointTime.untilTime)
@@ -82,8 +85,8 @@ case class AppointTimeBox(
   def openAppointDialog(): Unit =
     MakeAppointDialog.open(appointTime)
 
-  def cancelAppointDialog(appoint: Appoint): Unit =
-    CancelAppointDialog.open(
+  def editAppointDialog(appoint: Appoint): Unit =
+    EditAppointDialog.open(
       appointTime,
       appoint,
       () => Api.cancelAppoint(appoint.appointId)

@@ -10,13 +10,13 @@ import dev.myclinic.scala.web.appoint.Misc
 import dev.myclinic.scala.util.KanjiDate
 import org.scalajs.dom.raw.HTMLElement
 
-object CancelAppointDialog:
+object EditAppointDialog:
   def open(
       appointTime: AppointTime,
       appoint: Appoint,
       handler: () => Unit
   ): Unit =
-    Modal("予約の取消", close => makeContent(appointTime, appoint, handler, close))
+    Modal("予約の編集", close => makeContent(appointTime, appoint, handler, close))
       .open()
 
   def makeContent(
