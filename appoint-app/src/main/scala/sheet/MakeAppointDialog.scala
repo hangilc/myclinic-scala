@@ -18,6 +18,7 @@ import cats.data.Validated.Valid
 import cats.data.Validated.Invalid
 import concurrent.ExecutionContext.Implicits.global
 import org.scalajs.dom.raw.MouseEvent
+import scala.concurrent.Future
 
 object MakeAppointDialog:
   def open(appointTime: AppointTime): Unit =
@@ -105,11 +106,21 @@ object MakeAppointDialog:
       }))
 
     def doEnter(appoint: Appoint, close: () => Unit): Unit =
-      val content = div("Click Me")
-      val m = LocalModal.open(ele, content)
-      content(onclick := (() => m.close()))
-      //Api.registerAppoint(appoint)
-      //close()
+      def action(appoint: Appoint): Unit =
+        Api.registerAppoint(appoint)
+        close()
+
+      if appoint.patientId != 0 then
+        for 
+          patient <- Api.getPatient(appoint.patientId)
+          validated = AppointValidator.validatePatientIdConsistency(appoint, patient)
+          _ = AppointValidator.toEither(validated) match {
+            case Right(appoint) => action(appoint)
+            case Left(msg) => 
+          }
+        yield ()
+      else
+        action(appoint)
     
     def makeNameSlot(patient: Patient): HTMLElement =
       div(hoverBackground("#eee"), padding := "2px 4px", cursor := "pointer")(
@@ -190,7 +201,7 @@ object MakeAppointDialog:
       errorBox(msg, display := "block")
 
     def validate(): Either[String, Appoint] =
-      AppointValidator
+      val v = AppointValidator
         .validateForEnter(
           0,
           appointTime.appointTimeId,
@@ -198,7 +209,7 @@ object MakeAppointDialog:
           patientIdInput.value,
           memoInput.value
         )
-        .toEither()
+      AppointValidator.toEither(v)
 
     def dateTimeRep(appointTime: AppointTime): String =
       Misc.formatAppointTimeSpan(appointTime)

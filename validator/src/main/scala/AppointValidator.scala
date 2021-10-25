@@ -2,7 +2,7 @@ package dev.myclinic.scala.validator
 
 import cats.data.ValidatedNec
 import cats.implicits.*
-import dev.myclinic.scala.model.Appoint
+import dev.myclinic.scala.model.{Appoint, Patient}
 import cats.data.Validated.{validNec, invalidNec, condNec}
 import dev.myclinic.scala.validator.Validators.*
 import java.time.{LocalDate, LocalTime}
@@ -20,10 +20,13 @@ object AppointValidator:
     def message = "患者番号が整数でありません。"
   object NegativePatientIdError extends AppointError:
     def message = "患者番号が負数です。"
+  object InconsistentPatientIdError extends AppointError:
+    def message = "患者情報が患者名と一致しません。"
 
-  case class Result(value: ValidatedNec[AppointError, Appoint]):
-    def toEither(): Either[String, Appoint] =
-      Validators.toEither(value, _.message)
+  type Result = ValidatedNec[AppointError, Appoint]
+
+  def toEither(validated: Result): Either[String, Appoint] =
+    Validators.toEither(validated, _.message)
 
   def validateAppointIdForEnter(
       appointId: Int
@@ -47,6 +50,20 @@ object AppointValidator:
   def validateMemo(memo: String): ValidatedNec[AppointError, String] =
     validNec(memo)
 
+  def validatePatientIdConsistency(
+      appoint: Appoint,
+      patient: Patient
+  ): ValidatedNec[AppointError, Appoint] =
+    val parts = appoint.patientName.split(raw"[ 　]+", 2)
+    val b = parts.size == 2 && {
+      val last = parts(0)
+      last == patient.lastName || last == patient.lastNameYomi
+    } && {
+      val first = parts(1)
+      first == patient.firstName || first == patient.firstNameYomi
+    }
+    condNec(b, appoint, InconsistentPatientIdError)
+
   def validateForEnter(
       appointId: Int,
       appointTimeId: Int,
@@ -54,11 +71,10 @@ object AppointValidator:
       patientId: String,
       memoInput: String
   ): Result =
-    val v = (
+    (
       validateAppointIdForEnter(appointId),
       validateAppointTimeId(appointTimeId),
       validateName(nameInput),
       validatePatientId(patientId),
       validateMemo(memoInput)
     ).mapN(Appoint.apply)
-    Result(v)
