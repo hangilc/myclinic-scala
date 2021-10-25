@@ -7,28 +7,22 @@ import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
 import scala.language.implicitConversions
 
-class Modal[T](
-    title: String,
-    f: Modal.CloseFunction => HTMLElement
-):
-  val dialog = div(Modal.modalContent)
-
+class Modal(title: String, content: HTMLElement):
+  val closeIcon = Icons.x(color = "gray")
+  val dialog = div(Modal.modalContent)(
+    div(
+      css(style => style.width = "*"),
+      span(Modal.modalTitle)(title),
+      closeIcon(
+        css(style => {
+          style.cssFloat = "right"
+          style.verticalAlign = "middle"
+          style.marginLeft = "2rem"
+        }))
+    ),
+    content
+  )
   def open(): Unit =
-    dialog(
-      div(
-        css(style => style.width = "*"),
-        span(Modal.modalTitle)(title),
-        Icons.x(color = "gray")(
-          css(style => {
-            style.cssFloat = "right"
-            style.verticalAlign = "middle"
-            style.marginLeft = "2rem"
-          }),
-          onclick := (close _)
-        )
-      ),
-      f(close)
-    )
     document.body(Modal.modalBackdropInstance, dialog)
 
   def close(): Unit =
@@ -84,34 +78,6 @@ class ModalModifiers:
     e(cls := "modal-commands")
   })
 
-  // Based from Heroicons
-  // src: https://github.com/tailwindlabs/heroicons
-  // <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-  // <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-  // </svg>
-  def xCircle(size: String = "1.5rem", color: String = "black"): HTMLElement = {
-    val ns = "http://www.w3.org/2000/svg"
-    val svg = document.createElementNS(ns, "svg").asInstanceOf[HTMLElement]
-    val path = document.createElementNS(ns, "path").asInstanceOf[HTMLElement]
-    svg(
-      css(style => { style.height = size; style.width = size }),
-      attr("viewBox") := "0 0 24 24",
-      attr("fill") := "none",
-      attr("viewBox") := "0 0 24 24",
-      attr("stroke") := color
-    )(
-      path(
-        attr("stroke-linecap") := "round",
-        attr("stroke-linejoin") := "round",
-        attr("stroke-width") := "2",
-        attr(
-          "d"
-        ) := "M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-      )
-    )
-    svg
-  }
-
 enum ModalCommand(val label: String):
   case Enter extends ModalCommand("入力")
   case Cancel extends ModalCommand("キャンセル")
@@ -123,8 +89,8 @@ object Modal extends ModalModifiers:
   def ok: HTMLElement = button("Ok")
   def cancel: HTMLElement = button("キャンセル")
 
-  def apply(title: String, f: CloseFunction => HTMLElement): Modal[Unit] =
-    new Modal(title, close => f(close))
+  def apply(title: String, content: HTMLElement): Modal =
+    new Modal(title, content)
 
   def apply[T](
       title: String,
