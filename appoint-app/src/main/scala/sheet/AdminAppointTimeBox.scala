@@ -41,57 +41,6 @@ class AdminAppointTimeBox(appointTime: AppointTime)
   def doConvert(): Unit =
     ConvertAppointTimeDialog(appointTime).open()
 
-  def doConvertOrig(): Unit =
-    val errElement = div(css(style => {
-      style.color = "red"
-      style.margin = "1rem"
-    }))
-    val kindInput = input(attr("value") := s"${appointTime.kind}")
-    val capacityInput = input(attr("value") := s"${appointTime.capacity}")
-    def setupBody(body: HTMLElement) = body(
-      errElement,
-      Form.rows(
-        span("kind") -> kindInput(attr("type") := "text"),
-        span("capacity") -> capacityInput(attr("type") := "text")
-      )
-    )
-    def setupCommands(close: () => Unit, wrapper: HTMLElement) =
-      wrapper(
-        Modal.enter(onclick := (() => doEnter(close))),
-        Modal.cancel(onclick := (() => close()))
-      )
-    def doEnter(close: () => Unit): Unit =
-      ConvertAppointTimeDialog(appointTime).open()
-    // def validate(): Option[AppointTime] =
-    //   AppointTimeValidator
-    //     .validate(
-    //       appointTime.appointTimeId,
-    //       appointTime.date,
-    //       appointTime.fromTime,
-    //       appointTime.untilTime,
-    //       kindInput.value,
-    //       capacityInput.value
-    //     )
-    //     .bimap(
-    //       e => {
-    //         errElement.innerText =
-    //           e.toNonEmptyList.toList.map(_.message).mkString("\n")
-    //         e
-    //       },
-    //       a => a
-    //     )
-    //     .toOption
-    // val modal = Modal(
-    //   "予約枠の編集",
-    //   setupBody(body),
-    //   setupCommands(close, commands)
-    //   (close, body, commands) => {
-    //     setupBody(body)
-    //     setupCommands(close, commands)
-    //   }
-    // )
-    // modal.open()
-
   def doCombine(): Unit =
     ()
     // val nFollows = 1
@@ -133,7 +82,7 @@ class AdminAppointTimeBox(appointTime: AppointTime)
     // }
 
   def doSplit(): Unit = 
-    ()
+    CombineAppointTimesDialog().open()
     // val errorBox = div()
     // val splitTimeInput = inputText()
     // def setupBody(body: HTMLElement): Unit = 
