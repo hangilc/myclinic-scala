@@ -83,6 +83,7 @@ object Modal extends ModalModifiers:
   def enter = button("入力")
   def cancel = button("キャンセル")
   def ok = button("ＯＫ")
+  def execute = button("実行")
 
   def apply(title: String, content: HTMLElement): Modal =
     new Modal(title, content(modalBody))

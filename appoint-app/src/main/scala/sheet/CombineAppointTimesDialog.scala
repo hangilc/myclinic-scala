@@ -7,30 +7,39 @@ import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
 import scala.language.implicitConversions
 import dev.myclinic.scala.webclient.Api
+import dev.myclinic.scala.web.appoint.Misc
 
-class CombineAppointTimesDialog(head: AppointTime, appointTimes: List[AppointTime]):
-  val dialog: Modal = Modal(
-    "予約枠の結合",
-    div(),
-    div()
-  )
+class CombineAppointTimesDialog(
+    head: AppointTime,
+    appointTimes: List[AppointTime]
+):
 
-  def open(): Unit = 
+  def open(): Unit =
     val nFollows = 1
     val followers = listFollowers(head, appointTimes).take(nFollows)
-    if followers.isEmpty then
-      ShowMessage.showMessage("結合する予約枠がありません。")
-    else
-      makeDialog().open()
+    if followers.isEmpty then ShowMessage.showMessage("結合する予約枠がありません。")
+    else makeDialog(followers).open()
 
-  def makeDialog(): Modal =
-    Modal(
+  def makeDialog(followers: List[AppointTime]): Modal =
+    val execButton = Modal.execute
+    val cancelButton = Modal.cancel
+    val dialog = Modal(
       "予約枠の結合",
-      div(),
-      div()
+      div(innerText := makeText(head, followers)),
+      div(execButton, cancelButton)
     )
+    execButton(onclick := (() => { onExec(followers); dialog.close() }))
+    cancelButton(onclick := (() => dialog.close()))
+    dialog
 
-  def listFollowers(head: AppointTime, appointTimes: List[AppointTime]): List[AppointTime] =
+  def onExec(followers: List[AppointTime]): Unit =
+    val ids = (head :: followers).map(_.appointTimeId)
+    Api.combineAppointTimes(ids)
+
+  def listFollowers(
+      head: AppointTime,
+      appointTimes: List[AppointTime]
+  ): List[AppointTime] =
     appointTimes
       .dropWhile(_.appointTimeId != head.appointTimeId)
       .sliding(2)
@@ -40,3 +49,11 @@ class CombineAppointTimesDialog(head: AppointTime, appointTimes: List[AppointTim
       })
       .map(_(1))
       .toList
+
+  def makeText(head: AppointTime, followers: List[AppointTime]): String =
+    List(
+      "以下のように予約枠を結合します。",
+      Misc.formatAppointDate(head.date),
+      Misc.formatAppointTime(head.fromTime) + " - ",
+      Misc.formatAppointTime(followers.last.untilTime)
+    ).mkString("\n")

@@ -113,6 +113,8 @@ object Modifiers:
       )
     })
 
+  val innerText = Creator[String]((e, t) => e.innerText = t)
+
   val href = Creator[String]((e, a) => {
     val value = if a.isEmpty then "javascript:void(0)" else a
     e.setAttribute("href", value)
