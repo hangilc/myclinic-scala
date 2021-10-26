@@ -31,10 +31,3 @@ input[type=text] {
   border: 1px solid var(--secondary-color)
 }
 
-.error-box {
-  border: 1px solid red;
-  color: red;
-  padding: 0.5rem;
-  margin: 0.5rem 0;
-  display: none;
-}

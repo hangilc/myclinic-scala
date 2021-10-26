@@ -90,7 +90,8 @@ object Modifiers:
   val cursor = styleSetter((s, v) => s.cursor = v)
   val display = styleSetter((style, value) => style.display = value)
   val displayNone = display := "none"
-  val inlineBlock = display := "inline-block"
+  val displayBlock = display := "block"
+  val displayInlineBlock = display := "inline-block"
   val justifyContent =
     styleSetter((style, value) => style.setProperty("justify-content", value))
   val maxHeight = styleSetter((s, v) => s.maxHeight = v)

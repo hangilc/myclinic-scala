@@ -39,7 +39,7 @@ class AdminAppointTimeBox(appointTime: AppointTime)
   )
 
   def doConvert(): Unit =
-    ConvertAppointTimeDialog.open(appointTime)
+    ConvertAppointTimeDialog(appointTime).open()
 
   def doConvertOrig(): Unit =
     val errElement = div(css(style => {
@@ -61,32 +61,26 @@ class AdminAppointTimeBox(appointTime: AppointTime)
         Modal.cancel(onclick := (() => close()))
       )
     def doEnter(close: () => Unit): Unit =
-      validate() match {
-        case Some(v) => { 
-          Api.updateAppointTime(v)
-          close() 
-        }
-        case None => ()
-      }
-    def validate(): Option[AppointTime] =
-      AppointTimeValidator
-        .validate(
-          appointTime.appointTimeId,
-          appointTime.date,
-          appointTime.fromTime,
-          appointTime.untilTime,
-          kindInput.value,
-          capacityInput.value
-        )
-        .bimap(
-          e => {
-            errElement.innerText =
-              e.toNonEmptyList.toList.map(_.message).mkString("\n")
-            e
-          },
-          a => a
-        )
-        .toOption
+      ConvertAppointTimeDialog(appointTime).open()
+    // def validate(): Option[AppointTime] =
+    //   AppointTimeValidator
+    //     .validate(
+    //       appointTime.appointTimeId,
+    //       appointTime.date,
+    //       appointTime.fromTime,
+    //       appointTime.untilTime,
+    //       kindInput.value,
+    //       capacityInput.value
+    //     )
+    //     .bimap(
+    //       e => {
+    //         errElement.innerText =
+    //           e.toNonEmptyList.toList.map(_.message).mkString("\n")
+    //         e
+    //       },
+    //       a => a
+    //     )
+    //     .toOption
     // val modal = Modal(
     //   "予約枠の編集",
     //   setupBody(body),

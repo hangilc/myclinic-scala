@@ -37,11 +37,20 @@ object AppointTimeValidator:
   def validateAppointTimeIdForUpdate(appointTimeId: Int): Result[Int] =
     positiveInt(appointTimeId, NonPositiveAppointTimeIdError)
 
+  def validateDateValue(date: LocalDate): Result[LocalDate] =
+    validNec(date)
+
   def validateFromTimeInput(input: String): Result[LocalTime] =
     isLocalTime(input, InvalidFromTimeInputError)
 
+  def validateFromTimeValue(time: LocalTime): Result[LocalTime] =
+    validNec(time)
+
   def validateUntilTimeInput(input: String): Result[LocalTime] =
     isLocalTime(input, InvalidUntilTimeInputError)
+
+  def validateUntilTimeValue(time: LocalTime): Result[LocalTime] =
+    validNec(time)
 
   def validateKindInput(input: String): ValidatedNec[AppointTimeError, String] =
     nonEmpty(input, KindEmptyError)
@@ -62,8 +71,11 @@ object AppointTimeValidator:
       TimesOrderError
     )
 
+  def toEither(validated: Result[AppointTime]): Either[String, AppointTime] =
+    Validators.toEither(validated, _.message)
+  
   def validateForUpdate(
-      appointTimeIdValidate: Result[Int],
+      appointTimeId: Int,
       dateValidate: Result[LocalDate],
       fromTimeValidate: Result[LocalTime],
       untilTimeValidate: Result[LocalTime],
@@ -71,7 +83,7 @@ object AppointTimeValidator:
       capacityValidate: Result[Int]
   ): Result[AppointTime] =
     var r = (
-      appointTimeIdValidate,
+      validateAppointTimeIdForUpdate(appointTimeId),
       dateValidate,
       fromTimeValidate,
       untilTimeValidate,
@@ -79,16 +91,3 @@ object AppointTimeValidator:
       capacityValidate
     ).mapN(AppointTime.apply)
     r.andThen(a => validateTimes(a))
-
-  // def validate(
-  //     appointTimeId: Int,
-  //     date: LocalDate,
-  //     fromTime: LocalTime,
-  //     untilTime: LocalTime,
-  //     kindInput: String,
-  //     capacityInput: String
-  // ): Result[AppointTime] =
-  //   val t = validateTimes(fromTime, untilTime)
-  //   val r = (validateKind(kindInput), validateCapacity(capacityInput))
-  //     .mapN(AppointTime(appointTimeId, date, fromTime, untilTime, _, _))
-  //   (t, r).mapN((_, value) => value)

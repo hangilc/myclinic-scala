@@ -51,7 +51,7 @@ object MakeAppointDialog:
           cls := "error-box"
         ),
         Form.rows(
-          span("患者名：") -> div(inlineBlock)(
+          span("患者名：") -> div(displayInlineBlock)(
             div(
               nameInput(placeholder := "姓　名"),
               Icons.search(color = "gray", size = "1.2rem")(
@@ -64,7 +64,7 @@ object MakeAppointDialog:
             nameWorkSpace(displayNone, overflowYAuto, maxHeight := "10rem")
           ),
           span("患者番号：") -> div(
-            div(inlineBlock)(
+            div(displayInlineBlock)(
               patientIdInput(css(style => {
                 style.width = "4rem"
               })),
