@@ -42,7 +42,12 @@ class AdminAppointTimeBox(appointTime: AppointTime)
     ConvertAppointTimeDialog(appointTime).open()
 
   def doCombine(): Unit =
-    ()
+    for
+      appointTimes <- Api.listAppointTimesForDate(appointTime.date)
+    yield {
+      CombineAppointTimesDialog(appointTime, appointTimes).open()
+    }
+
     // val nFollows = 1
     // def listFollows(appointTimes: List[AppointTime]): List[AppointTime] =
     //   appointTimes
@@ -68,21 +73,20 @@ class AdminAppointTimeBox(appointTime: AppointTime)
     //       Misc.formatAppointTime(appointTime.fromTime) + " - ",
     //       Misc.formatAppointTime(follows.last.untilTime)
     //     ).mkString("\n")
-    //     Modal("予約枠の結合", (close, body, commands) => {
-    //       body.innerText = lines
-    //       commands(
-    //         Modal.ok()(onclick := { () => 
-    //           val ids = (appointTime :: follows).map(_.appointTimeId)
-    //           Api.combineAppointTimes(ids)
-    //           close()
-    //           }),
-    //         Modal.cancel()(onclick := (() => close()))
-    //       )
-    //     }).open()
-    // }
+        // Modal("予約枠の結合", (close, body, commands) => {
+        //   body.innerText = lines
+        //   commands(
+        //     Modal.ok()(onclick := { () => 
+        //       val ids = (appointTime :: follows).map(_.appointTimeId)
+        //       Api.combineAppointTimes(ids)
+        //       close()
+        //       }),
+        //     Modal.cancel()(onclick := (() => close()))
+        //   )
+        // }).open()
 
   def doSplit(): Unit = 
-    CombineAppointTimesDialog().open()
+    ()
     // val errorBox = div()
     // val splitTimeInput = inputText()
     // def setupBody(body: HTMLElement): Unit = 
