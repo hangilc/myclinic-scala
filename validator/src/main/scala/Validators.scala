@@ -7,6 +7,7 @@ import scala.math.Ordered.orderingToOrdered
 import java.time.{LocalTime}
 import java.util.regex.Pattern
 import scala.util.matching.Regex
+import cats.instances.try_
 
 object Validators:
   def nonEmpty[E](input: String, err: => E): ValidatedNec[E, String] =
@@ -23,6 +24,13 @@ object Validators:
 
   def positiveInt[E](input: Int, err: => E): ValidatedNec[E, Int] =
     condNec(input > 0, input, err)
+
+  def isLocalTime[E](input: String, err: => E): ValidatedNec[E, LocalTime] =
+    try
+      validNec(LocalTime.parse(input))
+    catch {
+      case _: Exception => invalidNec(err)
+    }
 
   def timeIsBeforeOrEqual[E, A](
       a: LocalTime,

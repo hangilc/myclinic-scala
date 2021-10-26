@@ -22,16 +22,17 @@ import scala.concurrent.Future
 
 object MakeAppointDialog:
   def open(appointTime: AppointTime): Unit =
-    val ui = new UI(appointTime)
-    val dlog = Modal(
-      "診察予約入力",
-      close => {
-        ui.setup(close)
-        ui.ele
-      }
-    )
-    dlog.open()
-    ui.nameInput.focus()
+    ()
+    // val ui = new UI(appointTime)
+    // val dlog = Modal(
+    //   "診察予約入力",
+    //   close => {
+    //     ui.setup(close)
+    //     ui.ele
+    //   }
+    // )
+    // dlog.open()
+    // ui.nameInput.focus()
 
   class UI(appointTime: AppointTime):
     val nameInput: HTMLInputElement = inputText()

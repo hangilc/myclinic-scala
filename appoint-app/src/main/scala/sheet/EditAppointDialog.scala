@@ -16,25 +16,26 @@ object EditAppointDialog:
       appoint: Appoint,
       handler: () => Unit
   ): Unit =
-    Modal("予約の編集", close => makeContent(appointTime, appoint, handler, close))
-      .open()
+    ()
+  //   Modal("予約の編集", close => makeContent(appointTime, appoint, handler, close))
+  //     .open()
 
-  def makeContent(
-      appointTime: AppointTime,
-      appoint: Appoint,
-      handler: () => Unit,
-      close: () => Unit
-  ): HTMLElement =
-    div(
-      div(Modal.modalBody)(
-        div(dateTimeRep(appointTime)),
-        div(appoint.patientName)
-      ),
-      div(Modal.modalCommands)(
-        button("予約取消実行", onclick := (() => { handler(); close() })),
-        button("閉じる", onclick := (() => close()))
-      )
-    )
+  // def makeContent(
+  //     appointTime: AppointTime,
+  //     appoint: Appoint,
+  //     handler: () => Unit,
+  //     close: () => Unit
+  // ): HTMLElement =
+  //   div(
+  //     div(Modal.modalBody)(
+  //       div(dateTimeRep(appointTime)),
+  //       div(appoint.patientName)
+  //     ),
+  //     div(Modal.modalCommands)(
+  //       button("予約取消実行", onclick := (() => { handler(); close() })),
+  //       button("閉じる", onclick := (() => close()))
+  //     )
+  //   )
 
   def dateTimeRep(appointTime: AppointTime): String =
     val d = appointTime.date

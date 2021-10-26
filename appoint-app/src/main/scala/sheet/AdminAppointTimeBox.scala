@@ -6,7 +6,6 @@ import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.ContextMenu
 import dev.fujiwara.domq.Modal
-import dev.fujiwara.domq.ModalCommand
 import dev.fujiwara.domq.Form
 import dev.fujiwara.domq.ShowMessage
 import org.scalajs.dom.raw.MouseEvent
@@ -40,6 +39,9 @@ class AdminAppointTimeBox(appointTime: AppointTime)
   )
 
   def doConvert(): Unit =
+    ConvertAppointTimeDialog.open(appointTime)
+
+  def doConvertOrig(): Unit =
     val errElement = div(css(style => {
       style.color = "red"
       style.margin = "1rem"
@@ -85,92 +87,93 @@ class AdminAppointTimeBox(appointTime: AppointTime)
           a => a
         )
         .toOption
-    val modal = Modal(
-      "予約枠の編集",
-      setupBody(body),
-      setupCommands(close, commands)
-      (close, body, commands) => {
-        setupBody(body)
-        setupCommands(close, commands)
-      }
-    )
-    modal.open()
+    // val modal = Modal(
+    //   "予約枠の編集",
+    //   setupBody(body),
+    //   setupCommands(close, commands)
+    //   (close, body, commands) => {
+    //     setupBody(body)
+    //     setupCommands(close, commands)
+    //   }
+    // )
+    // modal.open()
 
   def doCombine(): Unit =
-    val nFollows = 1
-    def listFollows(appointTimes: List[AppointTime]): List[AppointTime] =
-      appointTimes
-        .dropWhile(_.appointTimeId != appointTime.appointTimeId)
-        .sliding(2)
-        .takeWhile({
-          case a :: b :: _ => a.isAdjacentTo(b)
-          case _           => false
-        })
-        .map(_(1))
-        .toList
-    for
-      appointTimes <- Api.listAppointTimesForDate(appointTime.date)
-    yield {
-      val follows = listFollows(appointTimes).take(nFollows)
-      if follows.isEmpty then
-        ShowMessage.showMessage("結合する予約枠がありません。")
-        Future.unit
-      else
-        val lines = List(
-          "以下のように予約枠を結合します。",
-          Misc.formatAppointDate(appointTime.date),
-          Misc.formatAppointTime(appointTime.fromTime) + " - ",
-          Misc.formatAppointTime(follows.last.untilTime)
-        ).mkString("\n")
-        Modal("予約枠の結合", (close, body, commands) => {
-          body.innerText = lines
-          commands(
-            Modal.ok()(onclick := { () => 
-              val ids = (appointTime :: follows).map(_.appointTimeId)
-              Api.combineAppointTimes(ids)
-              close()
-              }),
-            Modal.cancel()(onclick := (() => close()))
-          )
-        }).open()
-    }
+    ()
+    // val nFollows = 1
+    // def listFollows(appointTimes: List[AppointTime]): List[AppointTime] =
+    //   appointTimes
+    //     .dropWhile(_.appointTimeId != appointTime.appointTimeId)
+    //     .sliding(2)
+    //     .takeWhile({
+    //       case a :: b :: _ => a.isAdjacentTo(b)
+    //       case _           => false
+    //     })
+    //     .map(_(1))
+    //     .toList
+    // for
+    //   appointTimes <- Api.listAppointTimesForDate(appointTime.date)
+    // yield {
+    //   val follows = listFollows(appointTimes).take(nFollows)
+    //   if follows.isEmpty then
+    //     ShowMessage.showMessage("結合する予約枠がありません。")
+    //     Future.unit
+    //   else
+    //     val lines = List(
+    //       "以下のように予約枠を結合します。",
+    //       Misc.formatAppointDate(appointTime.date),
+    //       Misc.formatAppointTime(appointTime.fromTime) + " - ",
+    //       Misc.formatAppointTime(follows.last.untilTime)
+    //     ).mkString("\n")
+    //     Modal("予約枠の結合", (close, body, commands) => {
+    //       body.innerText = lines
+    //       commands(
+    //         Modal.ok()(onclick := { () => 
+    //           val ids = (appointTime :: follows).map(_.appointTimeId)
+    //           Api.combineAppointTimes(ids)
+    //           close()
+    //           }),
+    //         Modal.cancel()(onclick := (() => close()))
+    //       )
+    //     }).open()
+    // }
 
-  def doSplit(): Unit = {
-    val errorBox = div()
-    val splitTimeInput = inputText()
-    def setupBody(body: HTMLElement): Unit = 
-      body(
-        errorBox(color := "red"),
-        div(Misc.formatAppointDate(appointTime.date)),
-        div("%s - %s".format(
-          Misc.formatAppointTime(appointTime.fromTime),
-          Misc.formatAppointTime(appointTime.untilTime)
-        )),
-        div(
-          "分割時刻：",
-          splitTimeInput(placeholder := "HH:MM")
-        )
-      )
-    def setupCommands(close: Modal.CloseFunction, wrapper: HTMLElement): Unit =
-      wrapper(
-        button("実行", onclick := (() => onExecute(close))),
-        button("キャンセル", onclick := close)
-      )
-    def onExecute(close: Modal.CloseFunction): Unit =
-      SplitValidator.validate(splitTimeInput.value, appointTime) match {
-        case Valid(at) => {
-          Api.splitAppointTime(appointTime.appointTimeId, at)
-          close()
-        }
-        case Invalid(e) => { 
-          errorBox.innerText = Validators.errorMessage(e, _.label)
-        }
-      }
-    Modal("予約枠の分割", (close, body, commands) => {
-      setupBody(body)
-      setupCommands(close, commands)
-    }).open()
-  }
+  def doSplit(): Unit = 
+    ()
+    // val errorBox = div()
+    // val splitTimeInput = inputText()
+    // def setupBody(body: HTMLElement): Unit = 
+    //   body(
+    //     errorBox(color := "red"),
+    //     div(Misc.formatAppointDate(appointTime.date)),
+    //     div("%s - %s".format(
+    //       Misc.formatAppointTime(appointTime.fromTime),
+    //       Misc.formatAppointTime(appointTime.untilTime)
+    //     )),
+    //     div(
+    //       "分割時刻：",
+    //       splitTimeInput(placeholder := "HH:MM")
+    //     )
+    //   )
+    // def setupCommands(close: Modal.CloseFunction, wrapper: HTMLElement): Unit =
+    //   wrapper(
+    //     button("実行", onclick := (() => onExecute(close))),
+    //     button("キャンセル", onclick := close)
+    //   )
+    // def onExecute(close: Modal.CloseFunction): Unit =
+    //   SplitValidator.validate(splitTimeInput.value, appointTime) match {
+    //     case Valid(at) => {
+    //       Api.splitAppointTime(appointTime.appointTimeId, at)
+    //       close()
+    //     }
+    //     case Invalid(e) => { 
+    //       errorBox.innerText = Validators.errorMessage(e, _.label)
+    //     }
+    //   }
+    // Modal("予約枠の分割", (close, body, commands) => {
+    //   setupBody(body)
+    //   setupCommands(close, commands)
+    // }).open()
 
 private object SplitValidator:
   sealed trait SplitError(val label: String)

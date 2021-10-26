@@ -18,7 +18,8 @@ class Modal(title: String, content: HTMLElement):
           style.cssFloat = "right"
           style.verticalAlign = "middle"
           style.marginLeft = "2rem"
-        }))
+        })
+      )(onclick := (close _))
     ),
     content
   )
@@ -82,7 +83,7 @@ object Modal extends ModalModifiers:
   def enter = button("入力")
   def cancel = button("キャンセル")
   def ok = button("ＯＫ")
-  
+
   def apply(title: String, content: HTMLElement): Modal =
     new Modal(title, content(modalBody))
 
