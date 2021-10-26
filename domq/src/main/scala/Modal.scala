@@ -78,38 +78,21 @@ class ModalModifiers:
     e(cls := "modal-commands")
   })
 
-enum ModalCommand(val label: String):
-  case Enter extends ModalCommand("入力")
-  case Cancel extends ModalCommand("キャンセル")
-
 object Modal extends ModalModifiers:
   type CloseFunction = () => Unit
 
-  def enter: HTMLElement = button("入力")
-  def ok: HTMLElement = button("Ok")
-  def cancel: HTMLElement = button("キャンセル")
-
   def apply(title: String, content: HTMLElement): Modal =
-    new Modal(title, content)
+    new Modal(title, content(modalBody))
 
   def apply[T](
       title: String,
-      f: (
-          CloseFunction,
-          HTMLElement,
-          HTMLElement
-      ) => Unit
-  ): Modal[T] =
+      body: HTMLElement,
+      commands: HTMLElement
+  ): Modal =
     new Modal(
       title,
-      close => {
-        val body = div()
-        val commands = div()
-        val content = div(
-          body(modalBody),
-          commands(modalCommands)
-        )
-        f(close, body, commands)
-        content
-      }
+      div(
+        body(modalBody),
+        commands(modalCommands)
+      )
     )

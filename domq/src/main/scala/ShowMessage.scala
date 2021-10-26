@@ -8,22 +8,17 @@ import org.scalajs.dom.raw.HTMLElement
 
 object ShowMessage:
   def showMessage(msg: String, title: String = "メッセージ"): Unit =
-    Modal(
+    val b = button("OK")
+    val m: Modal = Modal(
       title,
-      close => {
-        div(
-          div(Modal.modalBody)(
-            msg
-          ),
-          div(Modal.modalCommands)(
-            button("OK", onclick := (() => close()))
-          )
-        )
-      }
-    ).open()
+      div(msg),
+      div(b)
+    )
+    b(onclick := (() => m.close()))
+    m.open()
 
   enum AskCommand(val label: String):
-    case Ok extends AskCommand("Ok")
+    case Ok extends AskCommand("OK")
     case Enter extends AskCommand("入力")
     case Cancel extends AskCommand("キャンセル")
 
@@ -32,9 +27,8 @@ object ShowMessage:
       commands: List[AskCommand],
       cb: AskCommand => Unit
   ): Unit =
-    val items: List[Modifier] = commands.map(cmd =>
-      button(cmd.label)(onclick := (() => cb(cmd)))
-    )
+    val items: List[Modifier] =
+      commands.map(cmd => button(cmd.label)(onclick := (() => cb(cmd))))
     box(items: _*)
 
   def choice(
@@ -45,16 +39,10 @@ object ShowMessage:
       cb: AskCommand => Unit
   ): Unit =
     val commandBox = div()
-    val m = new Modal[AskCommand](
+    val m = Modal(
       title,
-      close => {
-        div(
-          div(Modal.modalBody)(
-            message
-          ),
-          commandBox(Modal.modalCommands)
-        )
-      }
+      div(message),
+      commandBox
     )
     populateCommandBox(commandBox, commands, cmd => m.close())
     m.open()
@@ -67,20 +55,20 @@ object ShowMessage:
     import AskCommand.*
     val commandBox = div()
     val inputElement = input(attr("type") := "text")
-    val m = new Modal[AskCommand](
+    val m = Modal(
       title,
-      close => {
-        div(
-          div(Modal.modalBody)(
-            div(message),
-            div(inputElement)
-          ),
-          commandBox(Modal.modalCommands)
-        )
+      div(
+        div(message),
+        div(inputElement)
+      ),
+      commandBox
+    )
+    populateCommandBox(
+      commandBox,
+      List(Enter, Cancel),
+      {
+        case Enter => cb(Some(inputElement.value))
+        case _     => cb(None)
       }
     )
-    populateCommandBox(commandBox, List(Enter, Cancel), {
-      case Enter => cb(Some(inputElement.value))
-      case _ => cb(None)
-    })
     m.open()
