@@ -79,8 +79,10 @@ class ModalModifiers:
   })
 
 object Modal extends ModalModifiers:
-  type CloseFunction = () => Unit
-
+  def enter = button("入力")
+  def cancel = button("キャンセル")
+  def ok = button("ＯＫ")
+  
   def apply(title: String, content: HTMLElement): Modal =
     new Modal(title, content(modalBody))
 

@@ -53,12 +53,12 @@ class AdminAppointTimeBox(appointTime: AppointTime)
         span("capacity") -> capacityInput(attr("type") := "text")
       )
     )
-    def setupCommands(close: Modal.CloseFunction, wrapper: HTMLElement) =
+    def setupCommands(close: () => Unit, wrapper: HTMLElement) =
       wrapper(
         Modal.enter(onclick := (() => doEnter(close))),
         Modal.cancel(onclick := (() => close()))
       )
-    def doEnter(close: Modal.CloseFunction): Unit =
+    def doEnter(close: () => Unit): Unit =
       validate() match {
         case Some(v) => { 
           Api.updateAppointTime(v)
@@ -85,13 +85,16 @@ class AdminAppointTimeBox(appointTime: AppointTime)
           a => a
         )
         .toOption
-    Modal[Unit](
+    val modal = Modal(
       "予約枠の編集",
+      setupBody(body),
+      setupCommands(close, commands)
       (close, body, commands) => {
         setupBody(body)
         setupCommands(close, commands)
       }
-    ).open()
+    )
+    modal.open()
 
   def doCombine(): Unit =
     val nFollows = 1
