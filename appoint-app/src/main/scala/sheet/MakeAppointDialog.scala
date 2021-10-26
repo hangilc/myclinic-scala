@@ -22,19 +22,19 @@ import scala.concurrent.Future
 
 object MakeAppointDialog:
   def open(appointTime: AppointTime): Unit =
-    ()
-    // val ui = new UI(appointTime)
-    // val dlog = Modal(
-    //   "診察予約入力",
-    //   close => {
-    //     ui.setup(close)
-    //     ui.ele
-    //   }
-    // )
-    // dlog.open()
-    // ui.nameInput.focus()
+    val ui = new UI(appointTime)
+    val dlog = Modal(
+      "診察予約入力",
+      ui.body,
+      ui.commands
+    )
+    ui.setup(() => dlog.close())
+    dlog.open()
+    ui.nameInput.focus()
 
   class UI(appointTime: AppointTime):
+    val body = div()
+    val commands = div()
     val nameInput: HTMLInputElement = inputText()
     val nameWorkSpace: HTMLElement = div()
     val patientIdInput: HTMLInputElement = inputText()
@@ -44,7 +44,7 @@ object MakeAppointDialog:
     private val cancelButton = button("キャンセル")
     private val errorBox: HTMLElement = div()
     val ele = div(
-      div(Modal.modalBody)(
+      body(
         div(dateTimeRep(appointTime)),
         errorBox(
           display := "none",
@@ -91,7 +91,7 @@ object MakeAppointDialog:
           span("メモ：") -> memoInput
         )
       ),
-      div(Modal.modalCommands)(
+      commands(
         enterButton,
         cancelButton
       )
