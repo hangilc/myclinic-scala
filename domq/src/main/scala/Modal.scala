@@ -9,6 +9,7 @@ import scala.language.implicitConversions
 
 class Modal(title: String, content: HTMLElement):
   val closeIcon = Icons.x(color = "gray")
+  val workarea = content
   val dialog = div(Modal.modalContent)(
     div(
       css(style => style.width = "*"),
@@ -84,6 +85,7 @@ object Modal extends ModalModifiers:
   def cancel = button("キャンセル")
   def ok = button("ＯＫ")
   def execute = button("実行")
+  def yes = button("はい")
 
   def apply(title: String, content: HTMLElement): Modal =
     new Modal(title, content(modalBody))

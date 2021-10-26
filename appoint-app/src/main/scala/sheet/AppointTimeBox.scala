@@ -86,11 +86,7 @@ case class AppointTimeBox(
     MakeAppointDialog.open(appointTime)
 
   def editAppointDialog(appoint: Appoint): Unit =
-    EditAppointDialog.open(
-      appointTime,
-      appoint,
-      () => Api.cancelAppoint(appoint.appointId)
-    )
+    EditAppointDialog(appoint, appointTime).open()
 
 object AppointTimeBox:
   def apply(appointTime: AppointTime, appoints: List[Appoint]): AppointTimeBox =

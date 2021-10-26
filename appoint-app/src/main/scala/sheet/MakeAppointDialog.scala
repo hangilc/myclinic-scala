@@ -43,58 +43,56 @@ object MakeAppointDialog:
     private val enterButton = button("入力")
     private val cancelButton = button("キャンセル")
     private val errorBox: HTMLElement = div()
-    val ele = div(
-      body(
-        div(dateTimeRep(appointTime)),
-        errorBox(
-          display := "none",
-          cls := "error-box"
-        ),
-        Form.rows(
-          span("患者名：") -> div(displayInlineBlock)(
-            div(
-              nameInput(placeholder := "姓　名"),
-              Icons.search(color = "gray", size = "1.2rem")(
-                css(style => style.verticalAlign = "middle"),
-                ml := "0.5rem",
-                cursor := "pointer",
-                onclick := (doSearchPatient _)
-              )
-            ),
-            nameWorkSpace(displayNone, overflowYAuto, maxHeight := "10rem")
-          ),
-          span("患者番号：") -> div(
-            div(displayInlineBlock)(
-              patientIdInput(css(style => {
-                style.width = "4rem"
-              })),
-              Icons.trash(color = "gray", size = "1.2rem")(
-                css(style => style.verticalAlign = "middle"),
-                ml := "0.5rem",
-                cursor := "pointer",
-                onclick := (() => {
-                  patientIdInput.value = ""
-                  closePatientIdWorkspace()
-                })
-              ),
-              Icons.refresh(color = "gray", size = "1.2rem")(
-                css(style => style.verticalAlign = "middle"),
-                ml := "0.1rem",
-                cursor := "pointer",
-                onclick := (syncPatientId _)
-              )
-            ),
-            patientIdWorkspace(
-              mt := "0.3rem"
+    body(
+      div(dateTimeRep(appointTime)),
+      errorBox(
+        display := "none",
+        cls := "error-box"
+      ),
+      Form.rows(
+        span("患者名：") -> div(displayInlineBlock)(
+          div(
+            nameInput(placeholder := "姓　名"),
+            Icons.search(color = "gray", size = "1.2rem")(
+              css(style => style.verticalAlign = "middle"),
+              ml := "0.5rem",
+              cursor := "pointer",
+              onclick := (doSearchPatient _)
             )
           ),
-          span("メモ：") -> memoInput
-        )
-      ),
-      commands(
-        enterButton,
-        cancelButton
+          nameWorkSpace(displayNone, overflowYAuto, maxHeight := "10rem")
+        ),
+        span("患者番号：") -> div(
+          div(displayInlineBlock)(
+            patientIdInput(css(style => {
+              style.width = "4rem"
+            })),
+            Icons.trash(color = "gray", size = "1.2rem")(
+              css(style => style.verticalAlign = "middle"),
+              ml := "0.5rem",
+              cursor := "pointer",
+              onclick := (() => {
+                patientIdInput.value = ""
+                closePatientIdWorkspace()
+              })
+            ),
+            Icons.refresh(color = "gray", size = "1.2rem")(
+              css(style => style.verticalAlign = "middle"),
+              ml := "0.1rem",
+              cursor := "pointer",
+              onclick := (syncPatientId _)
+            )
+          ),
+          patientIdWorkspace(
+            mt := "0.3rem"
+          )
+        ),
+        span("メモ：") -> memoInput
       )
+    )
+    commands(
+      enterButton,
+      cancelButton
     )
 
     def setup(close: () => Unit): Unit =
@@ -102,7 +100,7 @@ object MakeAppointDialog:
       enterButton(onclick := (() => {
         validate() match {
           case Right(app) => doEnter(app, close)
-          case Left(msg) => showError(msg)
+          case Left(msg)  => showError(msg)
         }
       }))
 
@@ -112,22 +110,22 @@ object MakeAppointDialog:
         close()
 
       if appoint.patientId != 0 then
-        for 
+        for
           patientOpt <- Api.findPatient(appoint.patientId)
           _ = patientOpt match {
             case Some(patient) => {
-              val validated = AppointValidator.validatePatientIdConsistency(appoint, patient)
+              val validated =
+                AppointValidator.validatePatientIdConsistency(appoint, patient)
               AppointValidator.toEither(validated) match {
                 case Right(appoint) => action(appoint)
-                case Left(msg) => showError(msg)
+                case Left(msg)      => showError(msg)
               }
             }
             case None => showError("患者番号に該当する患者情報がみつかりません。")
           }
         yield ()
-      else
-        action(appoint)
-    
+      else action(appoint)
+
     def makeNameSlot(patient: Patient): HTMLElement =
       div(hoverBackground("#eee"), padding := "2px 4px", cursor := "pointer")(
         s"(${patient.patientId}) ${patient.fullName()}"

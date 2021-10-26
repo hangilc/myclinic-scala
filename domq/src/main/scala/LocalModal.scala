@@ -4,9 +4,12 @@ import org.scalajs.dom.raw.HTMLElement
 import scala.collection.mutable.ListBuffer
 import org.scalajs.dom.raw.Node
 
-case class LocalModal(wrapper: HTMLElement, content: HTMLElement):
-  val saved: List[Node] = removeChildren()
-  wrapper.appendChild(content)
+class LocalModal(wrapper: HTMLElement, content: HTMLElement):
+  var saved: List[Node] = List.empty
+
+  def open(): Unit = 
+    saved = removeChildren()
+    wrapper.appendChild(content)
 
   def close(): Unit =
     wrapper.innerHTML = ""
@@ -20,8 +23,5 @@ case class LocalModal(wrapper: HTMLElement, content: HTMLElement):
       buf += e
     buf.toList
 
-object LocalModal:
-  def open(wrapper: HTMLElement, content: HTMLElement): LocalModal =
-    LocalModal(wrapper, content)
 
 
