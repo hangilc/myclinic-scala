@@ -16,6 +16,7 @@ import dev.myclinic.scala.util.DateTimeOrdering.given
 import scala.math.Ordered.orderingToOrdered
 import java.time.LocalDate
 import dev.myclinic.scala.web.appoint.sheet.Types.SortedElement
+import dev.myclinic.scala.web.appoint.sheet.editappoint.EditAppointDialog
 
 given Ordering[AppointTimeBox] with
   def compare(a: AppointTimeBox, b: AppointTimeBox): Int =

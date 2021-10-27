@@ -19,6 +19,7 @@ class Modal(title: String, content: HTMLElement):
           style.cssFloat = "right"
           style.verticalAlign = "middle"
           style.marginLeft = "2rem"
+          style.cursor = "pointer"
         })
       )(onclick := (close _))
     ),

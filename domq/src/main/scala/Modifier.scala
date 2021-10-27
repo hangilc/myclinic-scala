@@ -61,6 +61,8 @@ object Modifiers:
     e.setAttribute(name, a)
   })
 
+  val value = attr("value")
+
   def attrNS(namespace: String, name: String) = Creator[String]((e, a) => {
     e.setAttributeNS(namespace, name, a)
   })
@@ -92,10 +94,13 @@ object Modifiers:
   val displayNone = display := "none"
   val displayBlock = display := "block"
   val displayInlineBlock = display := "inline-block"
+  val displayDefault = display := ""
   val justifyContent =
     styleSetter((style, value) => style.setProperty("justify-content", value))
   val maxHeight = styleSetter((s, v) => s.maxHeight = v)
   val minHeight = styleSetter((s, v) => s.minHeight = v)
+  val width = styleSetter((s, v) => s.width = v)
+  val height = styleSetter((s, v) => s.height = v)
   val overflowY = styleSetter((s, v) => s.overflowY = v)
   val overflowYAuto = overflowY := "auto"
 
