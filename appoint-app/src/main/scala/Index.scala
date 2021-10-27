@@ -45,7 +45,7 @@ object JsMain:
   def banner(isAdmin: Boolean): HTMLElement = 
     val text = "診察予約" + (if isAdmin then "（管理）" else "")
     div(text)(
-      background := "#7fffd4",
+      cls := "banner",
       padding := "1.5rem 0",
       mb := "0.5rem",
       css(style => {

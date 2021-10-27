@@ -23,13 +23,23 @@ case class AppointColumn(
     appointTimeBoxMaker: AppointTime => AppointTimeBox
 ):
   var boxes: Seq[AppointTimeBox] = Vector.empty
+  val dateElement = div()
   var boxWrapper = div()
-  val ele = div(css(style => style.width = "120px"))(
-    div(dateRep),
+  val ele = div(cls := "date-column")(
+    dateElement(cls := "date")(dateRep),
     boxWrapper
   )
+  adjustVacantClass()
 
   def dateRep: String = Misc.formatAppointDate(date)
+
+  def hasVacancy: Boolean = boxes.find(_.hasVacancy).isDefined
+
+  def adjustVacantClass(): Unit = 
+    if hasVacancy then
+      dateElement(cls := "vacant")
+    else
+      dateElement(cls :- "vacant")
 
   def hasAppointTimeId(appointTimeId: Int): Boolean =
     boxes.find(b => b.appointTime.appointTimeId == appointTimeId).isDefined
@@ -37,10 +47,12 @@ case class AppointColumn(
   def addAppointTime(appointTime: AppointTime): Unit =
     val box = appointTimeBoxMaker(appointTime)
     boxes = sortedAppointTimeBox.insert(box, boxes, boxWrapper)
+    adjustVacantClass()
 
   def deleteAppointTime(appointTimeId: Int): Unit =
     boxes =
       sortedAppointTimeBox.remove(b => b.appointTimeId == appointTimeId, boxes)
+    adjustVacantClass()
 
   def updateAppointTime(updated: AppointTime): Unit =
     val box = appointTimeBoxMaker(updated)
@@ -54,12 +66,14 @@ case class AppointColumn(
       box,
       boxes
     )
+    adjustVacantClass()
 
   private def findBoxByAppoint(appoint: Appoint): Option[AppointTimeBox] =
     boxes.find(b => b.appointTime.appointTimeId == appoint.appointTimeId)
 
   def addAppoint(appoint: Appoint): Unit =
     findBoxByAppoint(appoint).foreach(b => b.addAppoint(appoint))
+    adjustVacantClass()
 
   def addAppoints(appoints: Seq[Appoint]): Unit =
     appoints.foreach(addAppoint(_))
@@ -69,6 +83,7 @@ case class AppointColumn(
 
   def deleteAppoint(appoint: Appoint): Unit =
     findBoxByAppoint(appoint).foreach(b => b.removeAppoint(appoint))
+    adjustVacantClass()
 
 object AppointColumn:
   type AppointTimeId = Int

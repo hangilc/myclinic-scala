@@ -38,7 +38,7 @@ case class AppointTimeBox(
       ele.innerHTML = ""
       ele(label)(onclick := (onClick _))
     def label: String =
-      val patientId: String = 
+      val patientId: String =
         if appoint.patientId == 0 then ""
         else s"(${appoint.patientId}) "
       val name: String = s"${appoint.patientName}"
@@ -47,7 +47,7 @@ case class AppointTimeBox(
       patientId + name + memo
     def onClick(): Unit =
       val m = EditAppointDialog(appoint, appointTime)
-      m.onClose(() => { dialog = None})
+      m.onClose(() => { dialog = None })
       dialog = Some(m)
       m.open()
     def onAppointUpdated(updated: Appoint): Unit =
@@ -58,25 +58,35 @@ case class AppointTimeBox(
   var slots: List[Slot] = List.empty
   val slotsElement = div()
   val ele =
-    div(css(style => style.cursor = "pointer"), onclick := (onElementClick))(
+    div(
+      cls := "appoint-time-box",
+      css(style => style.cursor = "pointer"),
+      onclick := (onElementClick)
+    )(
       div(appointTimeLabel),
       slotsElement
     )
+  adjustVacantClass()
 
   def appointTimeId: Int = appointTime.appointTimeId
 
-  def init(appoints: List[Appoint]): Unit =
-    slots = appoints.map(Slot(_))
-    slots.foreach(s => slotsElement(s.ele))
-
   def appoints: List[Appoint] =
     slots.map(slot => slot.appoint)
+
+  def hasVacancy: Boolean = slots.size < appointTime.capacity
+
+  def adjustVacantClass(): Unit =
+    if hasVacancy then
+      ele(cls := "vacant")
+    else
+      ele(cls :- "vacant")
 
   def addAppoint(appoint: Appoint): Unit =
     if slots.find(s => s.appoint.appointId == appoint.appointId).isEmpty then
       val slot = Slot(appoint)
       slots = slots ++ List(slot)
       slotsElement(slot.ele)
+      adjustVacantClass()
 
   def updateAppoint(appoint: Appoint): Unit =
     slots
@@ -95,6 +105,7 @@ case class AppointTimeBox(
         slots = slots.filter(_ != s)
         s.ele.remove()
       })
+    adjustVacantClass()
 
   def appointTimeLabel: String =
     val f = Misc.formatAppointTime(appointTime.fromTime)
@@ -109,11 +120,8 @@ case class AppointTimeBox(
   def openAppointDialog(): Unit =
     MakeAppointDialog.open(appointTime)
 
-  // def editAppointDialog(appoint: Appoint): Unit =
-  //   EditAppointDialog(appoint, appointTime).open()
-
 object AppointTimeBox:
   def apply(appointTime: AppointTime, appoints: List[Appoint]): AppointTimeBox =
     val box = AppointTimeBox(appointTime)
-    box.init(appoints)
+    appoints.foreach(box.addAppoint(_))
     box

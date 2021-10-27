@@ -1,0 +1,31 @@
+.banner {
+  background-color: #eee
+}
+
+.date-column {
+  width: 160px;
+}
+
+.date {
+  background-color: #e8e8e8;
+  font-weight: bold;
+  border-radius: 6px;
+  padding: 4px;
+  margin-bottom: 10px;
+}
+
+.date.vacant {
+  border: 3px solid #3e3;
+}
+
+.appoint-time-box {
+  background-color: #e8e8e8;
+  margin-bottom: 6px;
+  padding: 4px;
+  border-radius: 6px;
+}
+
+.appoint-time-box.vacant {
+  background-color: #9e9;
+  font-weight: bold;
+}
