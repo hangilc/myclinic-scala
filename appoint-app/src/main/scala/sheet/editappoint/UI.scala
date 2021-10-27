@@ -11,16 +11,19 @@ class UI(
     appointTime: AppointTime,
     appointId: Int,
     patientName: => String,
-    patientId: => Int
+    patientId: => Int,
+    memo: => String
 ):
   val execCancelButton = button("予約取消実行")
   val closeButton = button("閉じる")
   private val patientIdPart = PatientIdPart(patientId, appointId, patientName)
+  private val memoPart = MemoPart(memo, appointId)
   val body = div(
     div(timesRep),
     div(patientName),
     Form.rows(
-      patientIdPart.keyPart -> patientIdPart.valuePart
+      patientIdPart.keyPart -> patientIdPart.valuePart,
+      memoPart.keyPart -> memoPart.valuePart,
     )
   )
   val commands = div(execCancelButton, closeButton)
@@ -30,3 +33,5 @@ class UI(
 
   def onPatientIdChanged(): Unit = 
     patientIdPart.onPatientIdChanged(patientId)
+  def onMemoChanged(): Unit =
+    memoPart.onMemoChanged(memo)

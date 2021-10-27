@@ -13,7 +13,13 @@ import dev.myclinic.scala.webclient.Api
 
 class EditAppointDialog(var appoint: Appoint, appointTime: AppointTime):
   val ui =
-    UI(appointTime, appoint.appointId, appoint.patientName, appoint.patientId)
+    UI(
+      appointTime,
+      appoint.appointId,
+      appoint.patientName,
+      appoint.patientId,
+      appoint.memo
+    )
   val dlog = Modal(
     "予約の編集",
     ui.body,
@@ -28,11 +34,11 @@ class EditAppointDialog(var appoint: Appoint, appointTime: AppointTime):
   def onClose(cb: () => Unit): Unit =
     dlog.onClose(cb)
 
-  def onAppointUpdated(updated: Appoint): Unit = 
+  def onAppointUpdated(updated: Appoint): Unit =
     val prev = appoint
     appoint = updated
-    if prev.patientId != appoint.patientId then
-      ui.onPatientIdChanged()
+    if prev.patientId != appoint.patientId then ui.onPatientIdChanged()
+    if prev.memo != appoint.memo then ui.onMemoChanged()
 
   def doExecCancel(): Unit =
     confirmCancel(() => {
