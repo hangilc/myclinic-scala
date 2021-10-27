@@ -11,7 +11,7 @@ import dev.myclinic.scala.util.KanjiDate
 import org.scalajs.dom.raw.HTMLElement
 import dev.myclinic.scala.webclient.Api
 
-class EditAppointDialog(appoint: Appoint, appointTime: AppointTime):
+class EditAppointDialog(var appoint: Appoint, appointTime: AppointTime):
   val ui =
     UI(appointTime, appoint.appointId, appoint.patientName, appoint.patientId)
   val dlog = Modal(
@@ -24,6 +24,15 @@ class EditAppointDialog(appoint: Appoint, appointTime: AppointTime):
 
   def open(): Unit =
     dlog.open()
+
+  def onClose(cb: () => Unit): Unit =
+    dlog.onClose(cb)
+
+  def onAppointUpdated(updated: Appoint): Unit = 
+    val prev = appoint
+    appoint = updated
+    if prev.patientId != appoint.patientId then
+      ui.onPatientIdChanged()
 
   def doExecCancel(): Unit =
     confirmCancel(() => {

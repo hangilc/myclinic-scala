@@ -13,9 +13,19 @@ import dev.myclinic.scala.model.{Patient}
 class PatientIdPart(var patientId: Int, appointId: Int, patientName: => String):
   val keyPart = span("患者番号：")
   val valuePart = div()
-  Disp(valuePart).populate()
+  var valuePartHandler: ValuePartHandler = Disp()
+  valuePartHandler.populate()
 
-  class Disp(wrapper: HTMLElement):
+  def onPatientIdChanged(newPatientId: Int): Unit =
+    patientId = newPatientId
+    valuePartHandler.onPatientIdChanged()
+
+  trait ValuePartHandler:
+    def populate(): Unit
+    def onPatientIdChanged(): Unit
+
+  class Disp() extends ValuePartHandler:
+    val wrapper: HTMLElement = valuePart
     def populate(): Unit =
       val editIcon = Icons.pencilAlt(color = "gray")
       val ele = div(
@@ -24,7 +34,10 @@ class PatientIdPart(var patientId: Int, appointId: Int, patientName: => String):
           Icons.defaultStyle,
           ml := "0.5rem",
           displayNone,
-          onclick := (() => Edit(wrapper).populate())
+          onclick := (() => {
+            valuePartHandler = Edit()
+            valuePartHandler.populate()
+          })
         )
       )
       wrapper.innerHTML = ""
@@ -40,8 +53,10 @@ class PatientIdPart(var patientId: Int, appointId: Int, patientName: => String):
     def label: String =
       if patientId == 0 then "（設定なし）"
       else patientId.toString
+    def onPatientIdChanged(): Unit = populate()
 
-  class Edit(wrapper: HTMLElement):
+  class Edit() extends ValuePartHandler:
+    val wrapper = valuePart
     val input = inputText()
     val enterIcon = Icons.checkCircle(color = Colors.primary)
     val discardIcon = Icons.xCircle(color = Colors.danger)
@@ -49,7 +64,10 @@ class PatientIdPart(var patientId: Int, appointId: Int, patientName: => String):
     val workarea = div()
     val errBox = ErrorBox()
     enterIcon(onclick := (() => onEnter()))
-    discardIcon(onclick := (() => Disp(wrapper).populate()))
+    discardIcon(onclick := (() =>  {
+      valuePartHandler = Disp()
+      valuePartHandler.populate()
+    }))
     refreshIcon(onclick := (() => doRefresh()))
 
     def populate(): Unit =
@@ -65,6 +83,9 @@ class PatientIdPart(var patientId: Int, appointId: Int, patientName: => String):
         workarea,
         errBox.ele
       )
+
+    def onPatientIdChanged(): Unit =
+      input.value = initialValue
 
     def initialValue: String = if patientId == 0 then "" else patientId.toString
 
@@ -113,7 +134,8 @@ class PatientIdPart(var patientId: Int, appointId: Int, patientName: => String):
     def doUpdate(newPatientId: Int): Unit =
       import dev.myclinic.scala.validator.AppointValidator
       if newPatientId == patientId then
-        Disp(wrapper).populate()
+        valuePartHandler = Disp()
+        valuePartHandler.populate()
       else
         for
           patientOption <- Api.findPatient(newPatientId)
@@ -131,7 +153,8 @@ class PatientIdPart(var patientId: Int, appointId: Int, patientName: => String):
               AppointValidator.toEither(v) match {
                 case Right(app) => { 
                   Api.updateAppoint(app)
-                  Disp(wrapper).populate()
+                  valuePartHandler = Disp()
+                  valuePartHandler.populate()
                 }
                 case Left(msg)  => errBox.show(msg)
               }

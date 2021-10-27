@@ -10,8 +10,8 @@ import appoint.Misc
 class UI(
     appointTime: AppointTime,
     appointId: Int,
-    var patientName: String,
-    var patientId: Int
+    patientName: => String,
+    patientId: => Int
 ):
   val execCancelButton = button("予約取消実行")
   val closeButton = button("閉じる")
@@ -27,3 +27,6 @@ class UI(
 
   def dateRep: String = Misc.formatAppointDate(appointTime.date)
   def timesRep: String = Misc.formatAppointTimeSpan(appointTime)
+
+  def onPatientIdChanged(): Unit = 
+    patientIdPart.onPatientIdChanged(patientId)

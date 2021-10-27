@@ -162,7 +162,6 @@ class AppointSheet:
       propagateToColumn(event.created, _.addAppoint(_))
 
     def onAppointUpdated(event: AppointUpdated): Unit =
-      println("appoint-updated")
       propagateToColumn(event.updated, _.updateAppoint(_))
 
     def onAppointDeleted(event: AppointDeleted): Unit =

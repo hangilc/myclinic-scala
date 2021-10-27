@@ -31,7 +31,7 @@ case class AppointTimeBox(
 ):
   case class Slot(var appoint: Appoint):
     val ele = div()
-    val dialog: Option[EditAppointDialog] = None
+    var dialog: Option[EditAppointDialog] = None
     updateUI()
 
     def updateUI(): Unit =
@@ -46,10 +46,14 @@ case class AppointTimeBox(
         if appoint.memo.isEmpty then "" else s" （${appoint.memo}）"
       patientId + name + memo
     def onClick(): Unit =
-      editAppointDialog(appoint)
+      val m = EditAppointDialog(appoint, appointTime)
+      m.onClose(() => { dialog = None})
+      dialog = Some(m)
+      m.open()
     def onAppointUpdated(updated: Appoint): Unit =
       appoint = updated
       updateUI()
+      dialog.foreach(d => d.onAppointUpdated(updated))
 
   var slots: List[Slot] = List.empty
   val slotsElement = div()
@@ -105,8 +109,8 @@ case class AppointTimeBox(
   def openAppointDialog(): Unit =
     MakeAppointDialog.open(appointTime)
 
-  def editAppointDialog(appoint: Appoint): Unit =
-    EditAppointDialog(appoint, appointTime).open()
+  // def editAppointDialog(appoint: Appoint): Unit =
+  //   EditAppointDialog(appoint, appointTime).open()
 
 object AppointTimeBox:
   def apply(appointTime: AppointTime, appoints: List[Appoint]): AppointTimeBox =
