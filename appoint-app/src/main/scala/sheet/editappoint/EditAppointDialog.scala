@@ -12,7 +12,8 @@ import org.scalajs.dom.raw.HTMLElement
 import dev.myclinic.scala.webclient.Api
 
 class EditAppointDialog(appoint: Appoint, appointTime: AppointTime):
-  val ui = UI(appointTime, appoint.patientName, appoint.patientId)
+  val ui =
+    UI(appointTime, appoint.appointId, appoint.patientName, appoint.patientId)
   val dlog = Modal(
     "予約の編集",
     ui.body,
@@ -54,17 +55,3 @@ class EditAppointDialog(appoint: Appoint, appointTime: AppointTime):
     }))
     cancelButton(onclick := (() => m.close()))
     m.open()
-
-  // class UI():
-  //   val execCancelButton = button("予約取消実行")
-  //   val closeButton = button("閉じる")
-  //   val body = div(
-  //     div(timesRep),
-  //     div(appoint.patientName)
-  //   )
-  //   val commands = div(execCancelButton, closeButton)
-
-  //   def dateRep: String = Misc.formatAppointDate(appointTime.date)
-  //   def timesRep: String = Misc.formatAppointTimeSpan(appointTime)
-
-

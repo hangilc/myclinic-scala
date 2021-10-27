@@ -117,6 +117,17 @@ object RestService:
       yield (true)
       Ok(op)
 
+    case GET -> Root / "get-appoint" :? intAppointId(appointId) =>
+      Ok(Db.getAppoint(appointId))
+
+    case req @ POST -> Root / "update-appoint" =>
+      val op = for
+        appoint <- req.as[Appoint]
+        event <- Db.updateAppoint(appoint)
+        _ = publish(event)
+      yield true
+      Ok(op)
+
     case GET -> Root / "list-appoints-for-appoint-time" :? intAppointTimeId(
           appointTimeId
         ) => {

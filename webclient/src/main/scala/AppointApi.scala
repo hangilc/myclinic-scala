@@ -49,6 +49,12 @@ object AppointApi extends ApiBase:
     def listAppEventInRange(fromEventId: Int, untilEventId: Int): Future[List[AppEvent]] =
       get("list-app-event-in-range", Params("from" -> fromEventId, "until" -> untilEventId))
 
+    def getAppoint(appointId: Int): Future[Appoint] =
+      get("get-appoint", Params("appoint-id" -> appointId))
+
+    def updateAppoint(appoint: Appoint): Future[Boolean] =
+      post("update-appoint", Params(), appoint)
+
     def cancelAppoint(appointId: Int): Future[Unit] =
       post("cancel-appoint", Params("appoint-id" -> appointId))
 

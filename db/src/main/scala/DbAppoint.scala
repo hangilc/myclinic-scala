@@ -15,13 +15,6 @@ import java.time.LocalTime
 import java.time.temporal.ChronoUnit
 
 trait DbAppoint extends Sqlite:
-  // private def enterWithEvent(
-  //     a: AppointTime
-  // ): ConnectionIO[(AppointTime, AppEvent)] =
-  //   for
-  //     created <- Prim.enterAppointTime(a)
-  //     event <- DbEventPrim.logAppointTimeCreated(created)
-  //   yield (created, event)
 
   def safeCreateAppointTime(appointTime: AppointTime): ConnectionIO[AppEvent] =
     assert(appointTime.appointTimeId == 0, "Non-zero appoint time to create.")
@@ -192,6 +185,12 @@ trait DbAppoint extends Sqlite:
       event <- DbEventPrim.logAppointCreated(created)
     yield (created, event)
 
+  private def safeUpdateAppoint(appoint: Appoint): ConnectionIO[(Appoint, AppEvent)] =
+    for
+      updated <- Prim.updateAppoint(appoint)
+      event <- DbEventPrim.logAppointUpdated(updated)
+    yield (updated, event)
+
   def addAppoint(a: Appoint): IO[(Appoint, AppEvent)] =
     sqlite({
       for
@@ -211,6 +210,17 @@ trait DbAppoint extends Sqlite:
         event <- DbEventPrim.logAppointDeleted(appoint)
       yield event
     })
+
+  def updateAppoint(appoint: Appoint): IO[AppEvent] =
+    sqlite({
+      for
+        result <- safeUpdateAppoint(appoint)
+        (updated, event) = result
+      yield event
+    })
+
+  def getAppoint(appointId: Int): IO[Appoint] =
+    sqlite(Prim.getAppoint(appointId).unique)
 
   def listAppointsForAppointTime(appointTimeId: Int): IO[List[Appoint]] =
     sqlite(Prim.listAppointsForAppointTime(appointTimeId).to[List])
