@@ -124,7 +124,7 @@ object RestService:
       val op = for
         appoint <- req.as[Appoint]
         event <- Db.updateAppoint(appoint)
-        _ = publish(event)
+        _ <- publish(event)
       yield true
       Ok(op)
 

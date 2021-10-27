@@ -110,6 +110,7 @@ class AppointSheet:
 
     val subscribers: List[ModelEventSubscriberController] = List(
       Pub.appointCreated.subscribe(onAppointCreated),
+      Pub.appointUpdated.subscribe(onAppointUpdated),
       Pub.appointDeleted.subscribe(onAppointDeleted),
       Pub.appointTimeCreated.subscribe(onAppointTimeCreated),
       Pub.appointTimeUpdated.subscribe(onAppointTimeUpdated),
@@ -159,6 +160,10 @@ class AppointSheet:
 
     def onAppointCreated(event: AppointCreated): Unit =
       propagateToColumn(event.created, _.addAppoint(_))
+
+    def onAppointUpdated(event: AppointUpdated): Unit =
+      println("appoint-updated")
+      propagateToColumn(event.updated, _.updateAppoint(_))
 
     def onAppointDeleted(event: AppointDeleted): Unit =
       propagateToColumn(event.deleted, _.deleteAppoint(_))

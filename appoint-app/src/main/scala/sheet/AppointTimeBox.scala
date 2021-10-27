@@ -29,16 +29,27 @@ val sortedAppointTimeBox: SortedElement[AppointTimeBox] =
 case class AppointTimeBox(
     appointTime: AppointTime
 ):
-  case class Slot(appoint: Appoint):
-    val ele = div(label)(onclick := (onClick _))
+  case class Slot(var appoint: Appoint):
+    val ele = div()
+    val dialog: Option[EditAppointDialog] = None
+    updateUI()
 
+    def updateUI(): Unit =
+      ele.innerHTML = ""
+      ele(label)(onclick := (onClick _))
     def label: String =
+      val patientId: String = 
+        if appoint.patientId == 0 then ""
+        else s"(${appoint.patientId}) "
       val name: String = s"${appoint.patientName}"
       val memo: String =
         if appoint.memo.isEmpty then "" else s" （${appoint.memo}）"
-      name + memo
+      patientId + name + memo
     def onClick(): Unit =
       editAppointDialog(appoint)
+    def onAppointUpdated(updated: Appoint): Unit =
+      appoint = updated
+      updateUI()
 
   var slots: List[Slot] = List.empty
   val slotsElement = div()
@@ -58,9 +69,17 @@ case class AppointTimeBox(
     slots.map(slot => slot.appoint)
 
   def addAppoint(appoint: Appoint): Unit =
-    val slot = Slot(appoint)
-    slots = slots ++ List(slot)
-    slotsElement(slot.ele)
+    if slots.find(s => s.appoint.appointId == appoint.appointId).isEmpty then
+      val slot = Slot(appoint)
+      slots = slots ++ List(slot)
+      slotsElement(slot.ele)
+
+  def updateAppoint(appoint: Appoint): Unit =
+    slots
+      .find(s => s.appoint.appointId == appoint.appointId)
+      .foreach(slot => {
+        slot.onAppointUpdated(appoint)
+      })
 
   def addAppoints(appoints: Seq[Appoint]): Unit =
     appoints.foreach(addAppoint(_))

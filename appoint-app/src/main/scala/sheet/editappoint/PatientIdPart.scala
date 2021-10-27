@@ -112,7 +112,9 @@ class PatientIdPart(var patientId: Int, appointId: Int, patientName: => String):
 
     def doUpdate(newPatientId: Int): Unit =
       import dev.myclinic.scala.validator.AppointValidator
-      if newPatientId != patientId then
+      if newPatientId == patientId then
+        Disp(wrapper).populate()
+      else
         for
           patientOption <- Api.findPatient(newPatientId)
           appoint <- Api.getAppoint(appointId)
@@ -127,7 +129,10 @@ class PatientIdPart(var patientId: Int, appointId: Int, patientName: => String):
                   patient
                 )
               AppointValidator.toEither(v) match {
-                case Right(app) => Api.updateAppoint(app)
+                case Right(app) => { 
+                  Api.updateAppoint(app)
+                  Disp(wrapper).populate()
+                }
                 case Left(msg)  => errBox.show(msg)
               }
             }

@@ -64,6 +64,9 @@ case class AppointColumn(
   def addAppoints(appoints: Seq[Appoint]): Unit =
     appoints.foreach(addAppoint(_))
 
+  def updateAppoint(appoint: Appoint): Unit =
+    findBoxByAppoint(appoint).foreach(b => b.updateAppoint(appoint))
+
   def deleteAppoint(appoint: Appoint): Unit =
     findBoxByAppoint(appoint).foreach(b => b.removeAppoint(appoint))
 
