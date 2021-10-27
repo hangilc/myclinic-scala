@@ -37,6 +37,7 @@ class EditAppointDialog(var appoint: Appoint, appointTime: AppointTime):
   def onAppointUpdated(updated: Appoint): Unit =
     val prev = appoint
     appoint = updated
+    if prev.patientName != appoint.patientName then ui.onPatientNameChanged()
     if prev.patientId != appoint.patientId then ui.onPatientIdChanged()
     if prev.memo != appoint.memo then ui.onMemoChanged()
 

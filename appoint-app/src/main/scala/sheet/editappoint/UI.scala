@@ -16,12 +16,13 @@ class UI(
 ):
   val execCancelButton = button("予約取消実行")
   val closeButton = button("閉じる")
+  private val patientNamePart = PatientNamePart(patientName, appointId)
   private val patientIdPart = PatientIdPart(patientId, appointId, patientName)
   private val memoPart = MemoPart(memo, appointId)
   val body = div(
     div(timesRep),
-    div(patientName),
     Form.rows(
+      patientNamePart.keyPart -> patientNamePart.valuePart,
       patientIdPart.keyPart -> patientIdPart.valuePart,
       memoPart.keyPart -> memoPart.valuePart,
     )
@@ -31,6 +32,8 @@ class UI(
   def dateRep: String = Misc.formatAppointDate(appointTime.date)
   def timesRep: String = Misc.formatAppointTimeSpan(appointTime)
 
+  def onPatientNameChanged(): Unit =
+    patientNamePart.onPatientNameChanged(patientName)
   def onPatientIdChanged(): Unit = 
     patientIdPart.onPatientIdChanged(patientId)
   def onMemoChanged(): Unit =
