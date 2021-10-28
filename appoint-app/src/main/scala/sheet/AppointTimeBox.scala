@@ -73,6 +73,9 @@ case class AppointTimeBox(
   def appoints: List[Appoint] =
     slots.map(slot => slot.appoint)
 
+  def probeVacantKind(): Option[String] =
+    if hasVacancy then Some(appointTime.kind) else None
+
   def hasVacancy: Boolean = slots.size < appointTime.capacity
 
   def adjustVacantClass(): Unit =

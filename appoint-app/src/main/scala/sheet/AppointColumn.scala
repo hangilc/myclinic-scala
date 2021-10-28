@@ -10,6 +10,7 @@ import dev.myclinic.scala.web.appoint
 import scala.language.implicitConversions
 import dev.myclinic.scala.web.appoint.sheet.Types.SortedElement
 import org.scalajs.dom.raw.HTMLElement
+import cats.syntax.all.*
 
 given Ordering[AppointColumn] with
   def compare(a: AppointColumn, b: AppointColumn): Int =
@@ -24,22 +25,30 @@ case class AppointColumn(
 ):
   var boxes: Seq[AppointTimeBox] = Vector.empty
   val dateElement = div()
+  val kindsArea = span()
   var boxWrapper = div()
   val ele = div(cls := "date-column")(
-    dateElement(cls := "date")(dateRep),
+    dateElement(cls := "date")(dateRep, kindsArea),
     boxWrapper
   )
   adjustVacantClass()
 
   def dateRep: String = Misc.formatAppointDate(date)
 
+  def probeVacantKinds(): Set[String] = 
+    boxes.map(b => b.probeVacantKind()).sequence.map(_.toSet).getOrElse(Set.empty)
+
   def hasVacancy: Boolean = boxes.find(_.hasVacancy).isDefined
 
   def adjustVacantClass(): Unit = 
-    if hasVacancy then
-      dateElement(cls := "vacant")
-    else
+    val kinds = probeVacantKinds()
+    if kinds.isEmpty then
       dateElement(cls :- "vacant")
+      kindsArea.innerHTML = ""
+    else
+      dateElement(cls := "vacant")
+      kindsArea.innerHTML = ""
+
 
   def hasAppointTimeId(appointTimeId: Int): Boolean =
     boxes.find(b => b.appointTime.appointTimeId == appointTimeId).isDefined
