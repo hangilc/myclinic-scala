@@ -60,22 +60,17 @@ case class AppointTimeBox(
   val ele =
     div(
       cls := "appoint-time-box",
+      cls := appointKindToCssClass(appointTime.kind),
       css(style => style.cursor = "pointer"),
       onclick := (onElementClick)
     )(
       div(appointTimeLabel),
+      div(AppointKind(appointTime.kind).label),
       slotsElement
     )
   adjustVacantClass()
 
-  def appointKindToCssClass(kind: String): String =
-    val base = kind match {
-      case "regular"   => "regular"
-      case "flu-vac"   => "flu-vac"
-      case "covid-vac" => "covid-vac"
-      case _           => "other"
-    }
-    "appoint-" + base
+  def appointKindToCssClass(kind: String): String = AppointKind(kind).cssClass
 
   def appointTimeId: Int = appointTime.appointTimeId
 
@@ -134,6 +129,7 @@ case class AppointTimeBox(
 
 object AppointTimeBox:
   def apply(appointTime: AppointTime, appoints: List[Appoint]): AppointTimeBox =
+    println("enter AppointTimeBox")
     val box = AppointTimeBox(appointTime)
     appoints.foreach(box.addAppoint(_))
     box

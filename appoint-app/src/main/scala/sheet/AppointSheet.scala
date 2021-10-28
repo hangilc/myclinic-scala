@@ -144,8 +144,10 @@ class AppointSheet:
       columns = List.empty
 
     def addColumn(col: AppointColumn): Unit =
+      println(("enter-add-column", columns))
       col.ele(margin := "0 0.5rem")
       columns = sortedAppointColumn.insert(col, columns, columnWrapper)
+      println(("leave-add-column", columns))
 
     private def propagateToColumn(
         appoint: Appoint,
@@ -192,6 +194,7 @@ class AppointSheet:
   def makeAppointTimeBox(
       appointTime: AppointTime
   ): AppointTimeBox =
+    println("enter makeAppointTimeBox")
     AppointTimeBox(appointTime)
 
 case class AppointDate(
