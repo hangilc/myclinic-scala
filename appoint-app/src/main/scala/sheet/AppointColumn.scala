@@ -5,6 +5,7 @@ import dev.myclinic.scala.model.{AppointTime, Appoint}
 import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
+import dev.fujiwara.domq.{Icons}
 import dev.myclinic.scala.web.appoint.Misc
 import dev.myclinic.scala.web.appoint
 import scala.language.implicitConversions
@@ -25,30 +26,61 @@ case class AppointColumn(
 ):
   var boxes: Seq[AppointTimeBox] = Vector.empty
   val dateElement = div()
-  val kindsArea = span()
+  val vacantKindsArea = span()
   var boxWrapper = div()
   val ele = div(cls := "date-column")(
-    dateElement(cls := "date")(dateRep, kindsArea),
+    dateElement(cls := "date")(
+      dateRep,
+      vacantKindsArea
+    ),
     boxWrapper
   )
   adjustVacantClass()
 
   def dateRep: String = Misc.formatAppointDate(date)
 
-  def probeVacantKinds(): Set[String] = 
-    boxes.map(b => b.probeVacantKind()).sequence.map(_.toSet).getOrElse(Set.empty)
+  def probeVacantKinds(): List[String] =
+    boxes
+      .map(b => b.probeVacantKind())
+      .filter(_ != None)
+      .sequence
+      .map(_.toSet)
+      .getOrElse(Set.empty)
+      .toList
+      .sortBy(a => kindToOrd(a))
 
   def hasVacancy: Boolean = boxes.find(_.hasVacancy).isDefined
 
-  def adjustVacantClass(): Unit = 
+  def kindToOrd(kind: String): Int =
+    kind match {
+      case "regular" => 0
+      case "covid-vac" => 1
+      case "flu-vac" => 2
+      case _ => 3
+    }
+
+  def kindToColor(kind: String): String =
+    kind match {
+      case "regular" => "green"
+      case "covid-vac" => "purple"
+      case "flu-vac" => "orange"
+      case _ => "gray"
+    }
+
+  def adjustVacantClass(): Unit =
     val kinds = probeVacantKinds()
+    val wrapper = vacantKindsArea
+    wrapper.clear()
     if kinds.isEmpty then
       dateElement(cls :- "vacant")
-      kindsArea.innerHTML = ""
     else
       dateElement(cls := "vacant")
-      kindsArea.innerHTML = ""
-
+      kinds.foreach(k => {
+        val c = kindToColor(k)
+        val icon = Icons.circleFilled(color = c)(Icons.defaultStaticStyle)
+        wrapper(icon)
+      })
+      
 
   def hasAppointTimeId(appointTimeId: Int): Boolean =
     boxes.find(b => b.appointTime.appointTimeId == appointTimeId).isDefined

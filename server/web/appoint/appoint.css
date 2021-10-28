@@ -7,16 +7,17 @@
 }
 
 .date {
-  background-color: #e8e8e8;
+  background-color: white;
   font-weight: bold;
   border-radius: 6px;
+  border: 1px solid gray;
   padding: 4px;
   margin-bottom: 10px;
 }
 
-.date.vacant {
+/* .date.vacant {
   border: 3px solid #3e3;
-}
+} */
 
 .appoint-time-box {
   background-color: #e8e8e8;

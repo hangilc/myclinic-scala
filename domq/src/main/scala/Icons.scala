@@ -53,13 +53,46 @@ object Icons:
   // <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
   //   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
   // </svg>
-  def checkCircle(size: String = "1.5rem", color: String = "black"): HTMLElement =
+  def checkCircle(
+      size: String = "1.5rem",
+      color: String = "black"
+  ): HTMLElement =
     makeIcon(
       size,
       color,
       List(
         "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
       )
+    )
+
+  def circle(
+      size: String = "1.5rem",
+      color: String = "black",
+      strokeWidth: String = "6"
+  ): HTMLElement =
+    makeIcon(
+      size,
+      color,
+      List(
+        "M 40 120 A 80 80 0 0 1 120 40 A 80 80 0 0 1 200 120 A 80 80 0 0 1 120 200 A 80 80 0 0 1 40 120"
+      ),
+      viewBox = "0 0 240 240",
+      strokeWidth = strokeWidth
+    )
+
+  def circleFilled(
+      size: String = "1.5rem",
+      color: String = "black",
+      strokeWidth: String = "6"
+  ): HTMLElement =
+    makeIcon(
+      size,
+      "none",
+      List(
+        "M 40 120 A 80 80 0 0 1 120 40 A 80 80 0 0 1 200 120 A 80 80 0 0 1 120 200 A 80 80 0 0 1 40 120"
+      ),
+      viewBox = "0 0 240 240",
+      fillColor = color
     )
 
   // Based from Heroicons
@@ -95,12 +128,15 @@ object Icons:
   // <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
   //   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
   // </svg>
-  def plusCircle(size: String = "1.5rem", color: String = "black"): HTMLElement =
+  def plusCircle(
+      size: String = "1.5rem",
+      color: String = "black"
+  ): HTMLElement =
     makeIcon(
       size,
       color,
       List(
-        "M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"      
+        "M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"
       )
     )
 
@@ -176,8 +212,11 @@ object Icons:
 
   private def makeIcon(
       size: String,
-      color: String,
-      ds: List[String]
+      strokeColor: String,
+      ds: List[String],
+      viewBox: String = "0 0 24 24",
+      strokeWidth: String = "2",
+      fillColor: String = "none"
   ): HTMLElement =
     val ns = "http://www.w3.org/2000/svg"
     val svg = document.createElementNS(ns, "svg").asInstanceOf[HTMLElement]
@@ -187,13 +226,13 @@ object Icons:
         path(
           attr("stroke-linecap") := "round",
           attr("stroke-linejoin") := "round",
-          attr("stroke-width") := "2",
+          attr("stroke-width") := strokeWidth,
           attr("d") := d
         )
       )
     svg(
-      attr("viewBox") := "0 0 24 24",
+      attr("viewBox") := viewBox,
       css(style => { style.height = size; style.width = size }),
-      attr("fill") := "none",
-      attr("stroke") := color
+      attr("fill") := fillColor,
+      attr("stroke") := strokeColor
     )(paths: _*)

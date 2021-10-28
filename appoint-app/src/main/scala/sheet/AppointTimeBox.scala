@@ -68,6 +68,15 @@ case class AppointTimeBox(
     )
   adjustVacantClass()
 
+  def appointKindToCssClass(kind: String): String =
+    val base = kind match {
+      case "regular"   => "regular"
+      case "flu-vac"   => "flu-vac"
+      case "covid-vac" => "covid-vac"
+      case _           => "other"
+    }
+    "appoint-" + base
+
   def appointTimeId: Int = appointTime.appointTimeId
 
   def appoints: List[Appoint] =
