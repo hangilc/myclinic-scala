@@ -64,13 +64,15 @@ case class AppointTimeBox(
       css(style => style.cursor = "pointer"),
       onclick := (onElementClick)
     )(
-      div(appointTimeLabel),
-      div(AppointKind(appointTime.kind).label),
+      div(appointTimeSpanRep),
+      div(appointTimeKindRep),
       slotsElement
     )
   adjustVacantClass()
 
-  def appointKindToCssClass(kind: String): String = AppointKind(kind).cssClass
+  def appointKindToCssClass(kind: String): String = {
+    AppointKind(kind).cssClass
+  }
 
   def appointTimeId: Int = appointTime.appointTimeId
 
@@ -83,10 +85,8 @@ case class AppointTimeBox(
   def hasVacancy: Boolean = slots.size < appointTime.capacity
 
   def adjustVacantClass(): Unit =
-    if hasVacancy then
-      ele(cls := "vacant")
-    else
-      ele(cls :- "vacant")
+    if hasVacancy then ele(cls := "vacant")
+    else ele(cls :- "vacant")
 
   def addAppoint(appoint: Appoint): Unit =
     if slots.find(s => s.appoint.appointId == appoint.appointId).isEmpty then
@@ -114,12 +114,16 @@ case class AppointTimeBox(
       })
     adjustVacantClass()
 
-  def appointTimeLabel: String =
+  def appointTimeSpanRep: String =
     val f = Misc.formatAppointTime(appointTime.fromTime)
     val u = Misc.formatAppointTime(appointTime.untilTime)
     val capa: String =
       if appointTime.capacity <= 1 then "" else s" (${appointTime.capacity})"
     (s"$f - $u") + capa
+
+  def appointTimeKindRep: String =
+    val label = AppointKind(appointTime.kind).label
+    if label.isEmpty then "" else s"[${label}]"
 
   def onElementClick(event: MouseEvent): Unit =
     if slots.size < appointTime.capacity then openAppointDialog()
@@ -129,7 +133,6 @@ case class AppointTimeBox(
 
 object AppointTimeBox:
   def apply(appointTime: AppointTime, appoints: List[Appoint]): AppointTimeBox =
-    println("enter AppointTimeBox")
     val box = AppointTimeBox(appointTime)
     appoints.foreach(box.addAppoint(_))
     box

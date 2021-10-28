@@ -58,7 +58,6 @@ object JsMain:
   def openWebSocket(): Future[Unit] =
     def f(startEventId: Int): Unit =
       var nextEventId = startEventId
-      println(("next-event-id", nextEventId))
       val location = dom.window.location
       val origProtocol = location.protocol
       val host = location.host

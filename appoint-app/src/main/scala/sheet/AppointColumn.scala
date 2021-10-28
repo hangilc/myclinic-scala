@@ -24,7 +24,6 @@ case class AppointColumn(
     date: LocalDate,
     appointTimeBoxMaker: AppointTime => AppointTimeBox
 ):
-  println(("column", date))
   var boxes: Seq[AppointTimeBox] = Vector.empty
   val dateElement = div()
   val vacantKindsArea = span()
@@ -36,48 +35,41 @@ case class AppointColumn(
     ),
     boxWrapper
   )
-  println(("ele", ele.innerHTML))
   adjustVacantClass()
-  println(("ele2", ele.innerHTML))
 
   def dateRep: String = Misc.formatAppointDate(date)
 
-  // def probeVacantKinds(): List[AppointKind] =
-  //   boxes
-  //     .map(b => b.probeVacantKind())
-  //     .filter(_ != None)
-  //     .sequence
-  //     .map(_.toSet)
-  //     .getOrElse(Set.empty)
-  //     .toList
-  //     .map(AppointKind(_))
-  //     .sortBy(_.ord)
-  def probeVacantKinds(): List[AppointKind] = List.empty
+  def probeVacantKinds(): List[AppointKind] =
+    boxes
+      .map(b => b.probeVacantKind())
+      .filter(_ != None)
+      .sequence
+      .map(_.toSet)
+      .getOrElse(Set.empty)
+      .toList
+      .map(AppointKind(_))
+      .sortBy(_.ord)
 
   def hasVacancy: Boolean = boxes.find(_.hasVacancy).isDefined
 
-  // def adjustVacantClass(): Unit =
-  //   val kinds = probeVacantKinds()
-  //   val wrapper = vacantKindsArea
-  //   wrapper.clear()
-  //   if kinds.isEmpty then
-  //     dateElement(cls :- "vacant")
-  //   else
-  //     dateElement(cls := "vacant")
-  //     kinds.foreach(k => {
-  //       val icon = Icons.circleFilled(color = k.iconColor)(Icons.defaultStaticStyle)
-  //       wrapper(icon)
-  //     })
+  def adjustVacantClass(): Unit =
+    val kinds = probeVacantKinds()
+    val wrapper = vacantKindsArea
+    wrapper.clear()
+    if kinds.isEmpty then
+      dateElement(cls :- "vacant")
+    else
+      dateElement(cls := "vacant")
+      kinds.foreach(k => {
+        val icon = Icons.circleFilled(color = k.iconColor)(Icons.defaultStaticStyle)
+        wrapper(icon)
+      })
       
-  def adjustVacantClass(): Unit = ()
-
   def hasAppointTimeId(appointTimeId: Int): Boolean =
     boxes.find(b => b.appointTime.appointTimeId == appointTimeId).isDefined
 
   def addAppointTime(appointTime: AppointTime): Unit =
-    println("enter addAppointTime")
     val box = appointTimeBoxMaker(appointTime)
-    println(("box", box))
     boxes = sortedAppointTimeBox.insert(box, boxes, boxWrapper)
     adjustVacantClass()
 
