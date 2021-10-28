@@ -71,27 +71,22 @@ class AppointSheet:
         style.textAlign = "center"
       })
     )(
-      button("前の週", onclick := (onPrevWeek _)),
+      button("前の月", onclick := (() => advanceDays(-28))),
+      button("前の週", onclick := (() => advanceDays(-7))),
       a("今週", href := "", leftGap, onclick := (onThisWeekClick _)),
-      button("次の週", leftGap, onclick := (onNextWeek _)),
+      button("次の週", leftGap, onclick := (() => advanceDays(7))),
+      button("次の月", leftGap, onclick := (() => advanceDays(28))),
     )
 
-    def onPrevWeek(): Unit =
+    def advanceDays(days: Int): Unit =
       dateRange match
         case Some((from, upto)) => {
-          val fromNext = from.plusDays(-7)
-          val uptoNext = upto.plusDays(-7)
+          val fromNext = from.plusDays(days)
+          val uptoNext = upto.plusDays(days)
           setupDateRange(fromNext, uptoNext)
         }
         case None => Future.successful(())
 
-    def onNextWeek(): Unit =
-      dateRange match
-        case Some((from, upto)) =>
-          val fromNext = from.plusDays(7)
-          val uptoNext = upto.plusDays(7)
-          setupDateRange(fromNext, uptoNext)
-        case None => Future.successful(())
 
     def onThisWeekClick(): Unit =
       val start = DateUtil.startDayOfWeek(LocalDate.now())
