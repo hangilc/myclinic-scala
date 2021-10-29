@@ -55,24 +55,18 @@ class AppointSheet:
       GlobalEvents.AppointColumnChanged.publish(AppointRow.columns)
 
   GlobalEvents.AppointColumnChanged.subscribe(cols => {
-    println(("column-changed-event", cols))
     if cols.size > 0 then hideDaySpanDisp()
     else showDaySpanDisp()
   })
 
   def showDaySpanDisp(): Unit =
-    println(("show-day-span", dateRange))
     dateRange match {
       case Some(a, b) => {
-        println(("matched Some", a, b))
         val at = Misc.formatAppointDate(a)
-        println(("at", at))
         val bt = Misc.formatAppointDate(b)
         val txt = s"${at} - ${bt}"
-        println(("day-span", txt))
         daySpanDisp.clear()
         daySpanDisp(span(txt), displayDefault)
-        println(("day-span", daySpanDisp))
       }
       case None => hideDaySpanDisp()
     }
@@ -200,7 +194,6 @@ class AppointSheet:
       )
 
     def onAppointTimeCreated(event: AppointTimeCreated): Unit =
-      println(("onAppointTimeCreated", event))
       val date = event.created.date
       findColumnByDate(date)
         .orElse {
