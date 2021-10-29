@@ -56,6 +56,7 @@ case class FloatWindow(
   def open(): Unit =
     val body: HTMLElement = document.body
     body(ele)
+    Position.placeAtWindowCenter(ele)
 
   def close(): Unit =
     ele.remove()
