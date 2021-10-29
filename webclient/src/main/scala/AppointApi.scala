@@ -25,7 +25,7 @@ object AppointApi extends ApiBase:
     def listAppointTimesForDate(date: LocalDate): Future[List[AppointTime]] =
       get("list-appoint-times-for-date", Params("date" -> date))
 
-    def fillAppointTimes(from: LocalDate, upto: LocalDate): Future[Unit] =
+    def fillAppointTimes(from: LocalDate, upto: LocalDate): Future[Boolean] =
       post("fill-appoint-times", Params("from" -> from, "upto" -> upto))
 
     def registerAppoint(appoint: Appoint): Future[Appoint] =

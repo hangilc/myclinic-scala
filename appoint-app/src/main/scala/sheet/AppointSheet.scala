@@ -168,6 +168,7 @@ class AppointSheet:
       )
 
     def onAppointTimeCreated(event: AppointTimeCreated): Unit =
+      println(("onAppointTimeCreated", event))
       val date = event.created.date
       findColumnByDate(date)
         .orElse {
@@ -177,7 +178,9 @@ class AppointSheet:
             Some(c)
           else None
         }
-        .foreach(c => c.addAppointTime(event.created))
+        .foreach(c => {
+          c.addAppointTime(event.created)
+        })
 
     def onAppointTimeDeleted(event: AppointTimeDeleted): Unit =
       findColumnByDate(event.deleted.date).map(col =>

@@ -55,7 +55,7 @@ object DbEventPrim:
       select app_event_id from app_event order by app_event_id desc limit 1
     """.query[Int].option.map(intOpt => intOpt match {
       case Some(id) => id + 1
-      case None => 0
+      case None => 1
     })
 
   def logAppointTimeCreated(a: AppointTime): ConnectionIO[AppEvent] =

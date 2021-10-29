@@ -83,6 +83,7 @@ object JsMain:
                     val modelEvents = events.map(ModelEvents.convert(_))
                     modelEvents.foreach(ModelEventPublishers.publish(_))
                     ModelEventPublishers.publish(modelEvent)
+                    nextEventId = appEvent.appEventId + 1
                   case Failure(ex) => System.err.println(ex)
                 })
           case Left(ex) => System.err.println(ex.toString())
