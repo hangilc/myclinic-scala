@@ -134,6 +134,16 @@ object Modifiers:
       e.addEventListener("click", (_: MouseEvent) => f())
     })
 
+  object onmousedown:
+    def :=(f: MouseEvent => Unit) = Modifier(e => {
+      e.addEventListener("mousedown", f)
+    })
+
+  object onmouseup:
+    def :=(f: MouseEvent => Unit) = Modifier(e => {
+      e.addEventListener("mouseup", f)
+    })
+
   object onmouseenter:
     def :=(f: MouseEvent => Unit) = Modifier(e => {
       e.addEventListener("mouseenter", f)

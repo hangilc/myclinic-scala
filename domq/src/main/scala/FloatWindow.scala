@@ -5,7 +5,7 @@ import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
 import scala.language.implicitConversions
 import org.scalajs.dom.document
-import org.scalajs.dom.raw.{HTMLElement}
+import org.scalajs.dom.raw.{HTMLElement, MouseEvent}
 
 case class FloatWindow(title: String, content: HTMLElement, width: String = "200px"):
   val eTitle = div()
@@ -22,11 +22,19 @@ case class FloatWindow(title: String, content: HTMLElement, width: String = "200
       style.backgroundColor = "#eee"
       style.padding = "2px"
       style.marginBottom = "4px"
-    }))(title),
+      style.cursor = "grab"
+      style.setProperty("user-select", "none")
+    }))(onmousedown := (onMouseDown _), onmouseup := (onMouseUp _))(title),
     content
   )
 
   def show(): Unit =
     val body: HTMLElement = document.body
     body(ele)
+
+  def onMouseDown(event: MouseEvent): Unit =
+    println(("down", event))
+
+  def onMouseUp(event: MouseEvent): Unit =
+    println(("up", event))
   

@@ -114,7 +114,7 @@ class AppointSheet:
       ContextMenu("変更履歴" -> (showHistory _)).show(event)
 
     def showHistory(): Unit = 
-      FloatWindow("変更履歴").show()
+      FloatWindow("変更履歴", div("content")).show()
 
     def advanceDays(days: Int): Unit =
       dateRange match
