@@ -74,10 +74,17 @@ case class FloatWindow(
     prevClickY = y
   }
 
+  val onMouseLeave: js.Function1[MouseEvent, Unit] = (event: MouseEvent) => {
+    eTitle(onmousemove :- onMouseMove)
+    eTitle(onmouseleave :- onMouseLeave)
+  }
+
   def onMouseDown(event: MouseEvent): Unit =
     prevClickX = event.clientX
     prevClickY = event.clientY
     eTitle(onmousemove := onMouseMove)
+    eTitle(onmouseleave := onMouseLeave)
 
   def onMouseUp(event: MouseEvent): Unit =
     eTitle(onmousemove :- onMouseMove)
+    eTitle(onmouseleave :- onMouseLeave)

@@ -164,8 +164,12 @@ object Modifiers:
     })
 
   object onmouseleave:
-    def :=(f: MouseEvent => Unit) = Modifier(e => {
+    def :=(f: js.Function1[MouseEvent, Unit]) = Modifier(e => {
       e.addEventListener("mouseleave", f)
+    })
+
+    def :-(f: js.Function1[MouseEvent, Unit]) = Modifier(e => {
+      e.removeEventListener("mouseleave", f)
     })
 
     def :=(f: () => Unit) = Modifier(e => {
