@@ -3,7 +3,7 @@ package dev.myclinic.scala.web.appoint.sheet
 import dev.fujiwara.domq.ElementQ.{given, *}
 import dev.fujiwara.domq.Html.{given, *}
 import dev.fujiwara.domq.Modifiers.{given, *}
-import dev.fujiwara.domq.{Icons, ContextMenu}
+import dev.fujiwara.domq.{Icons, ContextMenu, FloatWindow}
 import dev.myclinic.scala.model._
 import dev.myclinic.scala.util.DateUtil
 import math.Ordered.orderingToOrdered
@@ -114,7 +114,7 @@ class AppointSheet:
       ContextMenu("変更履歴" -> (showHistory _)).show(event)
 
     def showHistory(): Unit = 
-      
+      FloatWindow("変更履歴").show()
 
     def advanceDays(days: Int): Unit =
       dateRange match
