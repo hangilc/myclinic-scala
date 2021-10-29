@@ -20,13 +20,18 @@ import dev.myclinic.scala.event.{ModelEventPublishers => Pub}
 import dev.myclinic.scala.event.ModelEventSubscriberController
 import scala.language.implicitConversions
 import org.scalajs.dom.raw.MouseEvent
-import dev.myclinic.scala.web.appoint.Misc
+import dev.myclinic.scala.web.appoint.{Misc, GlobalEvents}
 import cats.syntax.all._
 import cats.implicits._
 import cats.Monoid
 
 class AppointSheet:
-  val eles = div(TopMenu.ele, AppointRow.ele)
+  val daySpanDisp: HTMLElement = div(css(style => {
+    style.display = "none"
+    style.textAlign = "center"
+    style.padding = "1rem 0"
+  }))
+  val eles = div(TopMenu.ele, daySpanDisp, AppointRow.ele)
   var dateRange: Option[(LocalDate, LocalDate)] = None
   type AppointTimeId = Int
 
@@ -46,7 +51,35 @@ class AppointSheet:
         .void
     yield
       AppointRow.init(appointTimes, makeAppointMap(appointList.flatten))
-      dateRange = Some((from, upto))
+      dateRange = Some(from, upto)
+      GlobalEvents.AppointColumnChanged.publish(AppointRow.columns)
+
+  GlobalEvents.AppointColumnChanged.subscribe(cols => {
+    println(("column-changed-event", cols))
+    if cols.size > 0 then hideDaySpanDisp()
+    else showDaySpanDisp()
+  })
+
+  def showDaySpanDisp(): Unit =
+    println(("show-day-span", dateRange))
+    dateRange match {
+      case Some(a, b) => {
+        println(("matched Some", a, b))
+        val at = Misc.formatAppointDate(a)
+        println(("at", at))
+        val bt = Misc.formatAppointDate(b)
+        val txt = s"${at} - ${bt}"
+        println(("day-span", txt))
+        daySpanDisp.clear()
+        daySpanDisp(span(txt), displayDefault)
+        println(("day-span", daySpanDisp))
+      }
+      case None => hideDaySpanDisp()
+    }
+
+  def hideDaySpanDisp(): Unit = 
+    daySpanDisp.innerHTML = ""
+    daySpanDisp(displayNone)
 
   def makeAppointMap(
       appoints: List[Appoint]
@@ -75,7 +108,7 @@ class AppointSheet:
       button("前の週", onclick := (() => advanceDays(-7))),
       a("今週", href := "", leftGap, onclick := (onThisWeekClick _)),
       button("次の週", leftGap, onclick := (() => advanceDays(7))),
-      button("次の月", leftGap, onclick := (() => advanceDays(28))),
+      button("次の月", leftGap, onclick := (() => advanceDays(28)))
     )
 
     def advanceDays(days: Int): Unit =
@@ -86,7 +119,6 @@ class AppointSheet:
           setupDateRange(fromNext, uptoNext)
         }
         case None => Future.successful(())
-
 
     def onThisWeekClick(): Unit =
       val start = DateUtil.startDayOfWeek(LocalDate.now())
@@ -175,6 +207,7 @@ class AppointSheet:
           if dateRangeIncludes(date) then
             val c = AppointColumn(date, makeAppointTimeBox)
             addColumn(c)
+            GlobalEvents.AppointColumnChanged.publish(columns)
             Some(c)
           else None
         }
@@ -185,6 +218,7 @@ class AppointSheet:
     def onAppointTimeDeleted(event: AppointTimeDeleted): Unit =
       findColumnByDate(event.deleted.date).map(col =>
         col.deleteAppointTime(event.deleted.appointTimeId)
+        GlobalEvents.AppointColumnChanged.publish(columns)
       )
 
   def makeAppointTimeBox(

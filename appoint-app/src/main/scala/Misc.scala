@@ -8,7 +8,9 @@ import dev.myclinic.scala.model.AppointTime
 object Misc {
 
   def formatAppointDate(d: LocalDate): String =
+    println(("enter formatAppointDate", d))
     val youbi = KanjiDate.youbi(d)
+    println(("youbi", youbi))
     s"${d.getMonthValue()}月${d.getDayOfMonth()}日（$youbi）"
 
   def formatAppointTime(t: LocalTime): String =
