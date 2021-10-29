@@ -3,12 +3,18 @@ package dev.fujiwara.domq
 import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
+import dev.fujiwara.domq.{Icons}
 import scala.language.implicitConversions
-import org.scalajs.dom.document
+import org.scalajs.dom.{document, window}
 import org.scalajs.dom.raw.{HTMLElement, MouseEvent}
+import scala.scalajs.js
 
-case class FloatWindow(title: String, content: HTMLElement, width: String = "200px"):
-  val eTitle = div()
+case class FloatWindow(
+    title: String,
+    content: HTMLElement,
+    width: String = "200px"
+):
+  val eTitle: HTMLElement = div()
   val ele = div(css(style => {
     style.width = width
     style.position = "absolute"
@@ -24,17 +30,54 @@ case class FloatWindow(title: String, content: HTMLElement, width: String = "200
       style.marginBottom = "4px"
       style.cursor = "grab"
       style.setProperty("user-select", "none")
-    }))(onmousedown := (onMouseDown _), onmouseup := (onMouseUp _))(title),
+    }))(
+      div(css(style => {
+        style.display = "flex"
+        style.setProperty("align-items", "center")
+        style.setProperty("justify-content", "space-between")
+      }))(
+        title,
+        Icons.x(size = "1rem")(
+          css(style => style.cssFloat = "right"),
+          Icons.defaultStyle
+        )(
+          onclick := (close _)
+        )
+      )
+    )(
+      onmousedown := (onMouseDown _),
+      onmouseup := (onMouseUp _)
+    ),
     content
   )
+  var prevClickX: Double = 0
+  var prevClickY: Double = 0
 
-  def show(): Unit =
+  def open(): Unit =
     val body: HTMLElement = document.body
     body(ele)
 
+  def close(): Unit =
+    ele.remove()
+
+  val onMouseMove: js.Function1[MouseEvent, Unit] = (event: MouseEvent) => {
+    val x = event.clientX
+    val y = event.clientY
+    val dx = x - prevClickX
+    val dy = y - prevClickY
+    ele(css(style => {
+      val rect = ele.getClientRects()(0)
+      style.left = s"${rect.left + dx + window.scrollX}px"
+      style.top = s"${rect.top + dy + window.scrollY}px"
+    }))
+    prevClickX = x
+    prevClickY = y
+  }
+
   def onMouseDown(event: MouseEvent): Unit =
-    println(("down", event))
+    prevClickX = event.clientX
+    prevClickY = event.clientY
+    eTitle(onmousemove := onMouseMove)
 
   def onMouseUp(event: MouseEvent): Unit =
-    println(("up", event))
-  
+    eTitle(onmousemove :- onMouseMove)

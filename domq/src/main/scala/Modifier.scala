@@ -5,6 +5,7 @@ import org.scalajs.dom.raw.HTMLElement
 import org.scalajs.dom.raw.MouseEvent
 import scala.language.implicitConversions
 import org.scalajs.dom.raw.CSSStyleDeclaration
+import scala.scalajs.js
 
 case class Modifier(modifier: HTMLElement => Unit)
 
@@ -142,6 +143,15 @@ object Modifiers:
   object onmouseup:
     def :=(f: MouseEvent => Unit) = Modifier(e => {
       e.addEventListener("mouseup", f)
+    })
+
+  object onmousemove:
+    def :=(f: js.Function1[MouseEvent, Unit]) = Modifier(e => {
+      e.addEventListener("mousemove", f)
+    })
+
+    def :-(f: js.Function1[MouseEvent, Unit]) = Modifier(e => {
+      e.removeEventListener("mousemove", f)
     })
 
   object onmouseenter:
