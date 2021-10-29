@@ -31,11 +31,13 @@ object JsMain:
   @JSExport
   def main(isAdmin: Boolean): Unit =
     val body = document.body
-    body(cls := "px-5 pt-1 pb-5")
-    body.appendChild(banner(isAdmin))
-    openWebSocket()
+    val content = div(attr("id") := "content")
     val workarea = div()
-    body.appendChild(workarea)
+    body(content(
+      banner(isAdmin),
+      workarea
+    ))
+    openWebSocket()
     val sheet = if isAdmin then AdminAppointSheet() else AppointSheet()
     val startDate = DateUtil.startDayOfWeek(LocalDate.now())
     val endDate = startDate.plusDays(6)
@@ -44,16 +46,7 @@ object JsMain:
 
   def banner(isAdmin: Boolean): HTMLElement = 
     val text = "診察予約" + (if isAdmin then "（管理）" else "")
-    div(text)(
-      cls := "banner",
-      padding := "1.5rem 0",
-      mb := "0.5rem",
-      css(style => {
-        style.textAlign = "center"
-        style.fontSize = "2rem"
-        style.fontWeight = "bold"
-      })
-    )
+    div(text)(cls := "banner")
 
   def openWebSocket(): Future[Unit] =
     def f(startEventId: Int): Unit =
