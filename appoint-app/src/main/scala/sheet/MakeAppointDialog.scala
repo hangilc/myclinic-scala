@@ -81,6 +81,10 @@ object MakeAppointDialog:
               ml := "0.1rem",
               cursor := "pointer",
               onclick := (syncPatientId _)
+            ),
+            Icons.search(color = "gray", size = "1.2rem")(
+              Icons.defaultStyle,
+              onclick := (() => doSearchByPatientId())
             )
           ),
           patientIdWorkspace(
@@ -103,6 +107,19 @@ object MakeAppointDialog:
           case Left(msg)  => showError(msg)
         }
       }))
+
+    def doSearchByPatientId(): Unit ={
+      try
+        val patientId = patientIdInput.value.toInt
+        for
+          patient <- Api.getPatient(patientId)
+        yield {
+          nameInput.value = patient.fullName(" ")
+        }
+      catch {
+        case _: Throwable => showError("該当する患者情報をみつけられませんでした。")
+      }
+    }
 
     def doEnter(appoint: Appoint, close: () => Unit): Unit =
       def action(appoint: Appoint): Unit =
