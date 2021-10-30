@@ -5,13 +5,15 @@ import dev.myclinic.scala.model.{AppointTime, Appoint}
 import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
-import dev.fujiwara.domq.{Icons}
+import dev.fujiwara.domq.{Icons, ContextMenu, ShowMessage}
 import dev.myclinic.scala.web.appoint.Misc
 import dev.myclinic.scala.web.appoint
 import scala.language.implicitConversions
 import dev.myclinic.scala.web.appoint.sheet.Types.SortedElement
-import org.scalajs.dom.raw.HTMLElement
+import org.scalajs.dom.raw.{HTMLElement, MouseEvent}
 import cats.syntax.all.*
+import dev.myclinic.scala.webclient.Api
+import concurrent.ExecutionContext.Implicits.global
 
 given Ordering[AppointColumn] with
   def compare(a: AppointColumn, b: AppointColumn): Int =
@@ -31,7 +33,8 @@ case class AppointColumn(
   val ele = div(cls := "date-column")(
     dateElement(cls := "date")(
       dateRep,
-      vacantKindsArea
+      vacantKindsArea,
+      oncontextmenu := (onContextMenu _)
     ),
     boxWrapper
   )
@@ -64,7 +67,28 @@ case class AppointColumn(
         val icon = Icons.circleFilled(color = k.iconColor)(Icons.defaultStaticStyle)
         wrapper(icon)
       })
-      
+  
+  def totalAppoints: Int =
+    boxes.foldLeft(0)((acc, ele) => acc + ele.slots.size)
+
+  def onContextMenu(event: MouseEvent): Unit =
+    event.preventDefault
+    var menu: List[(String, () => Unit)] = List.empty
+    if totalAppoints == 0 then
+      menu = menu :+ ("予約枠全削除" -> (doDeleteAllAppointTimes _))
+    if !menu.isEmpty then
+      ContextMenu(menu: _*).open(event)
+
+  def doDeleteAllAppointTimes(): Unit =
+    val dateRep = Misc.formatAppointDate(date)
+    ShowMessage.confirm(s"${dateRep}の予約枠を全部削除していいですか？", yes => {
+      if yes then
+        val ids: List[Int] = boxes.map(_.appointTimeId).toList
+        for
+          _ <- ids.map(id => Api.deleteAppointTime(id)).sequence.void
+        yield ()
+    })
+    
   def hasAppointTimeId(appointTimeId: Int): Boolean =
     boxes.find(b => b.appointTime.appointTimeId == appointTimeId).isDefined
 

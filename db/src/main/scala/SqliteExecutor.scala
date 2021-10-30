@@ -16,6 +16,7 @@ object SqliteExecutor:
   val config = new SQLiteConfig()
   config.setEncoding(SQLiteConfig.Encoding.UTF8)
   config.enforceForeignKeys(true)
+  config.setBusyTimeout(60000)
   val ds = new SQLiteDataSource(config)
   ds.setUrl(url)
 
