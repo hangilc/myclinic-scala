@@ -3,6 +3,7 @@ package dev.myclinic.scala.web.appoint.sheet
 import dev.fujiwara.domq.ElementQ.{given, *}
 import dev.fujiwara.domq.Html.{given, *}
 import dev.fujiwara.domq.Modifiers.{given, *}
+import dev.fujiwara.domq.{Icons, ContextMenu, FloatWindow}
 import dev.myclinic.scala.model._
 import dev.myclinic.scala.util.DateUtil
 import math.Ordered.orderingToOrdered
@@ -71,7 +72,7 @@ class AppointSheet:
       case None => hideDaySpanDisp()
     }
 
-  def hideDaySpanDisp(): Unit = 
+  def hideDaySpanDisp(): Unit =
     daySpanDisp.innerHTML = ""
     daySpanDisp(displayNone)
 
@@ -92,6 +93,7 @@ class AppointSheet:
     }
 
   object TopMenu:
+    val topMenuBox: HTMLElement = span()
     val ele = div(
       mb := "0.5rem",
       css(style => {
@@ -102,8 +104,17 @@ class AppointSheet:
       button("前の週", onclick := (() => advanceDays(-7))),
       a("今週", href := "", leftGap, onclick := (onThisWeekClick _)),
       button("次の週", leftGap, onclick := (() => advanceDays(7))),
-      button("次の月", leftGap, onclick := (() => advanceDays(28)))
+      button("次の月", leftGap, onclick := (() => advanceDays(28))),
+      topMenuBox(attr("id") := "top-menu-box")(
+        Icons.menu(color = "gray")(Icons.defaultStyle, onclick := (onMenuClick _))
+      )
     )
+
+    def onMenuClick(event: MouseEvent): Unit = 
+      ContextMenu("変更履歴" -> (showHistory _)).show(event)
+
+    def showHistory(): Unit = 
+      FloatWindow("変更履歴", div("content")).open()
 
     def advanceDays(days: Int): Unit =
       dateRange match

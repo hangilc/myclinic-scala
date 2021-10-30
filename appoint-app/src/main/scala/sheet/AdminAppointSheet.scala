@@ -11,10 +11,8 @@ import org.scalajs.dom.raw.MouseEvent
 import dev.myclinic.scala.webclient.Api
 
 class AdminAppointSheet extends AppointSheet:
-  val cog = Icons.cog(color = "gray")
-  TopMenu.ele(
-    cog(css(style => style.cssFloat = "right"), attr("id") := "cog")
-  )
+  val cog = Icons.cog(color = "gray")(Icons.defaultStyle)
+  TopMenu.topMenuBox(cog)
   cog(onclick := onCogClick)
 
   override def makeAppointTimeBox(

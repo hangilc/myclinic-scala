@@ -135,6 +135,25 @@ object Modifiers:
       e.addEventListener("click", (_: MouseEvent) => f())
     })
 
+  object onmousedown:
+    def :=(f: MouseEvent => Unit) = Modifier(e => {
+      e.addEventListener("mousedown", f)
+    })
+
+  object onmouseup:
+    def :=(f: MouseEvent => Unit) = Modifier(e => {
+      e.addEventListener("mouseup", f)
+    })
+
+  object onmousemove:
+    def :=(f: js.Function1[MouseEvent, Unit]) = Modifier(e => {
+      e.addEventListener("mousemove", f)
+    })
+
+    def :-(f: js.Function1[MouseEvent, Unit]) = Modifier(e => {
+      e.removeEventListener("mousemove", f)
+    })
+
   object onmouseenter:
     def :=(f: MouseEvent => Unit) = Modifier(e => {
       e.addEventListener("mouseenter", f)
@@ -145,8 +164,12 @@ object Modifiers:
     })
 
   object onmouseleave:
-    def :=(f: MouseEvent => Unit) = Modifier(e => {
+    def :=(f: js.Function1[MouseEvent, Unit]) = Modifier(e => {
       e.addEventListener("mouseleave", f)
+    })
+
+    def :-(f: js.Function1[MouseEvent, Unit]) = Modifier(e => {
+      e.removeEventListener("mouseleave", f)
     })
 
     def :=(f: () => Unit) = Modifier(e => {

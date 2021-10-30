@@ -12,6 +12,10 @@ body {
   font-weight: bold;
 }
 
+#top-menu-box {
+  float: right;
+}
+
 .date-column {
   width: 160px;
 }
