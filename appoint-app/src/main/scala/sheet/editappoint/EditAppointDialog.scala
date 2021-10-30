@@ -32,7 +32,7 @@ class EditAppointDialog(var appoint: Appoint, appointTime: AppointTime):
     dlog.open()
 
   def onClose(cb: () => Unit): Unit =
-    dlog.onClose(cb)
+    dlog.onClose(_ => cb())
 
   def onAppointUpdated(updated: Appoint): Unit =
     val prev = appoint

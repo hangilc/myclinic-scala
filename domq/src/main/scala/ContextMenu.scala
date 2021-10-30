@@ -37,7 +37,7 @@ class ContextMenu:
       style.zIndex = "2001"
     }))
 
-  def show(event: MouseEvent): Unit =
+  def open(event: MouseEvent): Unit =
     document.body(
       screen(onclick := ((e: MouseEvent) => {
         e.preventDefault

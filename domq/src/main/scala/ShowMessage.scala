@@ -47,6 +47,22 @@ object ShowMessage:
     populateCommandBox(commandBox, commands, cmd => m.close())
     m.open()
 
+  def confirm(message: String, cb: Boolean => Unit): Unit =
+    val yesButton = button("はい")
+    val noButton = button("いいえ")
+    val m = Modal(
+      "確認",
+      div(innerText := message),
+      div(yesButton, noButton)
+    )
+    m.dialog(css(style => {
+      style.maxWidth = "400px"
+    }))
+    m.onClose(cb)
+    yesButton(onclick := (() => m.close(true)))
+    noButton(onclick := (() => m.close(false)))
+    m.open()
+
   def getString(
       title: String,
       message: String,

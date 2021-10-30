@@ -5,7 +5,7 @@ import dev.myclinic.scala.model.{AppointTime, Appoint, given}
 import dev.fujiwara.domq.ElementQ.{given, *}
 import dev.fujiwara.domq.Html.{given, *}
 import dev.fujiwara.domq.Modifiers.{given, *}
-import dev.fujiwara.domq.Bootstrap
+import dev.fujiwara.domq.{ContextMenu}
 import scala.language.implicitConversions
 import org.scalajs.dom.raw.HTMLElement
 import dev.myclinic.scala.webclient.Api
@@ -62,7 +62,7 @@ case class AppointTimeBox(
       cls := "appoint-time-box",
       cls := appointKindToCssClass(appointTime.kind),
       css(style => style.cursor = "pointer"),
-      onclick := (onElementClick)
+      onclick := (onElementClick),
     )(
       div(appointTimeSpanRep),
       div(appointTimeKindRep),
@@ -130,6 +130,9 @@ case class AppointTimeBox(
 
   def openAppointDialog(): Unit =
     MakeAppointDialog.open(appointTime)
+
+  def doDeleteAppointTime(): Unit =
+    ???
 
 object AppointTimeBox:
   def apply(appointTime: AppointTime, appoints: List[Appoint]): AppointTimeBox =

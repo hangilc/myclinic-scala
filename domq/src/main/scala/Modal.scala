@@ -10,7 +10,7 @@ import scala.language.implicitConversions
 class Modal(title: String, content: HTMLElement):
   val closeIcon = Icons.x(color = "gray")
   val workarea = content
-  var onCloseCallbacks: List[() => Unit] = List.empty
+  var onCloseCallbacks: List[Boolean => Unit] = List.empty
   val dialog = div(Modal.modalContent)(
     div(
       css(style => style.width = "*"),
@@ -29,12 +29,14 @@ class Modal(title: String, content: HTMLElement):
   def open(): Unit =
     document.body(Modal.modalBackdropInstance, dialog)
 
-  def close(): Unit =
+  def close(value: Boolean): Unit =
     dialog.remove()
     Modal.modalBackdropInstance.remove()
-    onCloseCallbacks.foreach(cb => cb())
+    onCloseCallbacks.foreach(_(value))
 
-  def onClose(cb: () => Unit): Unit =
+  def close(): Unit = close(false)
+
+  def onClose(cb: Boolean => Unit): Unit =
     onCloseCallbacks = onCloseCallbacks :+ cb
 
 class ModalModifiers:

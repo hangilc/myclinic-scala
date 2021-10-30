@@ -33,8 +33,9 @@ class AdminAppointTimeBox(appointTime: AppointTime)
       ContextMenu(
         "Convert" -> doConvert,
         "Combine" -> doCombine,
-        "Split" -> doSplit
-      ).show(event)
+        "Split" -> doSplit,
+        "削除" -> doDelete,
+      ).open(event)
     }
   )
 
@@ -50,6 +51,13 @@ class AdminAppointTimeBox(appointTime: AppointTime)
 
   def doSplit(): Unit = 
     SplitAppointTimeDialog(appointTime).open()
+
+  def doDelete(): Unit =
+    val msg = "本当に削除しますか？"
+    ShowMessage.confirm(msg, yes => {
+      if yes then
+        Api.deleteAppointTime(appointTime.appointTimeId)
+    })
 
 
 
