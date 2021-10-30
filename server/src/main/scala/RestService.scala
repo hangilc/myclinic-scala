@@ -93,6 +93,13 @@ object RestService:
       Ok(op)
     }
 
+    case POST -> Root / "delete-appoint-time" :? intAppointTimeId(appointTimeId) =>
+      val op = for
+        event <- Db.deleteAppointTime(appointTimeId)
+        _ <- publish(event)
+      yield true
+      Ok(op)
+
     case req @ POST -> Root / "combine-appoint-times" => {
       val op = for
         appointTimeIds <- req.as[List[Int]]

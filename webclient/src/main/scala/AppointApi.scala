@@ -22,6 +22,9 @@ object AppointApi extends ApiBase:
     def updateAppointTime(appointTime: AppointTime): Future[Unit] =
       post("update-appoint-time", Params(), appointTime)
 
+    def deleteAppointTime(appointTimeId: Int): Future[Boolean] = 
+      post("delete-appoint-time", Params("appoint-time-id" -> appointTimeId))
+
     def listAppointTimesForDate(date: LocalDate): Future[List[AppointTime]] =
       get("list-appoint-times-for-date", Params("date" -> date))
 

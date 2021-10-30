@@ -5,6 +5,7 @@ import org.scalajs.dom.raw.HTMLElement
 import org.scalajs.dom.raw.MouseEvent
 import scala.language.implicitConversions
 import org.scalajs.dom.raw.CSSStyleDeclaration
+import scala.scalajs.js
 
 case class Modifier(modifier: HTMLElement => Unit)
 
@@ -152,6 +153,6 @@ object Modifiers:
       e.addEventListener("mouseleave", (_: MouseEvent) => f())
     })
 
-  val oncontextmenu = Creator[MouseEvent => Unit]((ele, handler) => {
+  val oncontextmenu = Creator[js.Function1[MouseEvent, Unit]]((ele, handler) => {
     ele.addEventListener("contextmenu", handler)
   })
