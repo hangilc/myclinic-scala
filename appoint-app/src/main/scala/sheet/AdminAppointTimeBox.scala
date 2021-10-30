@@ -26,18 +26,31 @@ import scala.math.Ordered.orderingToOrdered
 
 class AdminAppointTimeBox(appointTime: AppointTime)
     extends AppointTimeBox(appointTime):
-  ele.addEventListener(
-    "contextmenu",
-    (event: MouseEvent) => {
-      event.preventDefault
-      ContextMenu(
-        "Convert" -> doConvert,
-        "Combine" -> doCombine,
-        "Split" -> doSplit,
-        "削除" -> doDelete,
-      ).open(event)
-    }
-  )
+  ele(oncontextmenu := (onContextMenu _))
+  // ele.addEventListener(
+  //   "contextmenu",
+  //   (event: MouseEvent) => {
+  //     event.preventDefault
+  //     ContextMenu(
+  //       "Convert" -> doConvert,
+  //       "Combine" -> doCombine,
+  //       "Split" -> doSplit,
+  //       "削除" -> doDelete,
+  //     ).open(event)
+  //   }
+  // )
+
+  def onContextMenu(event: MouseEvent): Unit =
+    event.preventDefault
+    var menu: List[(String, () => Unit)] = List(
+      "編集" -> doConvert,
+      "結合" -> doCombine,
+      "分割" -> doSplit
+    )
+    if slots.isEmpty then
+      menu = menu :+ ("削除" -> doDelete)
+    ContextMenu(menu: _*).open(event)
+
 
   def doConvert(): Unit =
     ConvertAppointTimeDialog(appointTime).open()
