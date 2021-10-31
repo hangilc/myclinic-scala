@@ -22,6 +22,7 @@ import dev.myclinic.scala.event.ModelEventSubscriberController
 import scala.language.implicitConversions
 import org.scalajs.dom.raw.MouseEvent
 import dev.myclinic.scala.web.appoint.{Misc, GlobalEvents}
+import dev.myclinic.scala.web.appoint.history.History
 import cats.syntax.all._
 import cats.implicits._
 import cats.Monoid
@@ -106,15 +107,28 @@ class AppointSheet:
       button("次の週", leftGap, onclick := (() => advanceDays(7))),
       button("次の月", leftGap, onclick := (() => advanceDays(28))),
       topMenuBox(attr("id") := "top-menu-box")(
-        Icons.menu(color = "gray")(Icons.defaultStyle, onclick := (onMenuClick _))
+        Icons
+          .menu(color = "gray")(Icons.defaultStyle, onclick := (onMenuClick _))
       )
     )
 
-    def onMenuClick(event: MouseEvent): Unit = 
+    def onMenuClick(event: MouseEvent): Unit =
       ContextMenu("変更履歴" -> (showHistory _)).open(event)
 
-    def showHistory(): Unit = 
-      FloatWindow("変更履歴", div("content")).open()
+    def showHistory(): Unit =
+      for
+        events <- Api.listAppointEvents(30, 0)
+        histories <- History.fromAppEvents(events)
+      yield {
+        val content: HTMLElement = div(
+          css(style => {
+            style.maxHeight = "360px"
+            style.overflowY = "auto"
+          }),
+          innerText := histories.map(_.description).mkString("\n")
+        )
+        FloatWindow("変更履歴", content).open()
+      }
 
     def advanceDays(days: Int): Unit =
       dateRange match

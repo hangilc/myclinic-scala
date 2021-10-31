@@ -35,10 +35,10 @@ trait DbAppoint extends Mysql:
   def batchEnterAppointTimes(
       appointTimes: List[AppointTime]
   ): IO[List[AppEvent]] =
-    sqlite(appointTimes.map(safeCreateAppointTime(_)).sequence)
+    mysql(appointTimes.map(safeCreateAppointTime(_)).sequence)
 
   def createAppointTime(appointTime: AppointTime): IO[AppEvent] =
-    sqlite(safeCreateAppointTime(appointTime))
+    mysql(safeCreateAppointTime(appointTime))
 
   private def safeDeleteAppointTime(
       appointTimeId: Int
@@ -58,7 +58,7 @@ trait DbAppoint extends Mysql:
     appointTimeIds.map(id => safeDeleteAppointTime(id)).sequence
 
   def deleteAppointTime(appointTimeId: Int): IO[AppEvent] =
-    sqlite(safeDeleteAppointTime(appointTimeId))
+    mysql(safeDeleteAppointTime(appointTimeId))
 
   private def safeUpdateAppointTime(
       appointTime: AppointTime
@@ -81,7 +81,10 @@ trait DbAppoint extends Mysql:
     yield event
 
   def updateAppointTime(appointTime: AppointTime): IO[AppEvent] =
-    sqlite(safeUpdateAppointTime(appointTime))
+    mysql(safeUpdateAppointTime(appointTime))
+
+  def getAppointTime(appointTimeId: Int): IO[AppointTime] =
+    mysql(Prim.getAppointTime(appointTimeId).unique)
 
   private def batchGetAppointTimes(
       appointTimeIds: List[Int]
@@ -99,7 +102,7 @@ trait DbAppoint extends Mysql:
         follows.last.untilTime
       def capacityInc(follows: List[AppointTime]): Int =
         follows.foldLeft(0)((acc, ele) => acc + ele.capacity)
-      sqlite {
+      mysql {
         for
           target <- Prim.getAppointTime(targetId).unique
           follows <- batchGetAppointTimes(followIds)
@@ -157,25 +160,25 @@ trait DbAppoint extends Mysql:
       updateEvent <- safeUpdateAppointTime(update)
       createEvent <- safeCreateAppointTime(follow)
     yield List(updateEvent, createEvent)
-    sqlite(op)
+    mysql(op)
 
   def listExistingAppointTimeDates(
       from: LocalDate,
       upto: LocalDate
   ): IO[List[LocalDate]] =
-    sqlite(Prim.listExistingAppointTimeDates(from, upto).to[List])
+    mysql(Prim.listExistingAppointTimeDates(from, upto).to[List])
 
   def listAppointTimes(
       from: LocalDate,
       upto: LocalDate
   ): IO[List[AppointTime]] =
-    sqlite(Prim.listAppointTimes(from, upto).to[List])
+    mysql(Prim.listAppointTimes(from, upto).to[List])
 
   def listAppointTimesForDate(date: LocalDate): IO[List[AppointTime]] =
-    sqlite(Prim.listAppointTimesForDate(date).to[List])
+    mysql(Prim.listAppointTimesForDate(date).to[List])
 
   def getAppointTimeById(appointTimeId: Int): IO[AppointTime] =
-    sqlite(Prim.getAppointTime(appointTimeId).unique)
+    mysql(Prim.getAppointTime(appointTimeId).unique)
 
   private def enterAppointWithEvent(
       a: Appoint
@@ -192,7 +195,7 @@ trait DbAppoint extends Mysql:
     yield (updated, event)
 
   def addAppoint(a: Appoint): IO[(Appoint, AppEvent)] =
-    sqlite({
+    mysql({
       for
         at <- Prim.getAppointTime(a.appointTimeId).unique
         existing <- Prim.listAppointsForAppointTime(at.appointTimeId).to[List]
@@ -203,7 +206,7 @@ trait DbAppoint extends Mysql:
     })
 
   def cancelAppoint(appointId: Int): IO[AppEvent] =
-    sqlite({
+    mysql({
       for
         appoint <- Prim.getAppoint(appointId).unique
         _ <- Prim.deleteAppoint(appointId)
@@ -212,7 +215,7 @@ trait DbAppoint extends Mysql:
     })
 
   def updateAppoint(appoint: Appoint): IO[AppEvent] =
-    sqlite({
+    mysql({
       for
         result <- safeUpdateAppoint(appoint)
         (updated, event) = result
@@ -220,10 +223,10 @@ trait DbAppoint extends Mysql:
     })
 
   def getAppoint(appointId: Int): IO[Appoint] =
-    sqlite(Prim.getAppoint(appointId).unique)
+    mysql(Prim.getAppoint(appointId).unique)
 
   def listAppointsForAppointTime(appointTimeId: Int): IO[List[Appoint]] =
-    sqlite(Prim.listAppointsForAppointTime(appointTimeId).to[List])
+    mysql(Prim.listAppointsForAppointTime(appointTimeId).to[List])
 
   def listAppointsForDate(date: LocalDate): IO[List[Appoint]] =
-    sqlite(Prim.listAppointsForDate(date).to[List])
+    mysql(Prim.listAppointsForDate(date).to[List])

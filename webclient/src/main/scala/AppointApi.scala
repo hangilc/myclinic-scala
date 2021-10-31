@@ -19,7 +19,10 @@ object AppointApi extends ApiBase:
     ): Future[List[AppointTime]] =
       get("list-appoint-times", Params("from" -> from, "upto" -> upto))
 
-    def updateAppointTime(appointTime: AppointTime): Future[Unit] =
+    def getAppointTime(appointTimeId: Int): Future[AppointTime] = 
+      get("get-appoint-time", Params("appoint-time-id" -> appointTimeId))
+
+    def updateAppointTime(appointTime: AppointTime): Future[Boolean] =
       post("update-appoint-time", Params(), appointTime)
 
     def deleteAppointTime(appointTimeId: Int): Future[Boolean] = 
@@ -52,17 +55,20 @@ object AppointApi extends ApiBase:
     def listAppEventInRange(fromEventId: Int, untilEventId: Int): Future[List[AppEvent]] =
       get("list-app-event-in-range", Params("from" -> fromEventId, "until" -> untilEventId))
 
+    def listAppointEvents(limit: Int, offset: Int): Future[List[AppEvent]] =
+      get("list-appoint-events", Params("limit" -> limit, "offset" -> offset))
+
     def getAppoint(appointId: Int): Future[Appoint] =
       get("get-appoint", Params("appoint-id" -> appointId))
 
     def updateAppoint(appoint: Appoint): Future[Boolean] =
       post("update-appoint", Params(), appoint)
 
-    def cancelAppoint(appointId: Int): Future[Unit] =
+    def cancelAppoint(appointId: Int): Future[Boolean] =
       post("cancel-appoint", Params("appoint-id" -> appointId))
 
-    def combineAppointTimes(appointTimeIds: List[Int]): Future[Unit] =
+    def combineAppointTimes(appointTimeIds: List[Int]): Future[Boolean] =
       post("combine-appoint-times", Params(), appointTimeIds)
 
-    def splitAppointTime(appointTimeId: Int, at: LocalTime): Future[Unit] =
+    def splitAppointTime(appointTimeId: Int, at: LocalTime): Future[Boolean] =
       post("split-appoint-time", Params("appoint-time-id" -> appointTimeId, "at" -> at))  

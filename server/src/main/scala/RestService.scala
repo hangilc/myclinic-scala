@@ -39,6 +39,8 @@ object RestService:
   object intAppointTimeId
       extends QueryParamDecoderMatcher[Int]("appoint-time-id")
   object intAppointId extends QueryParamDecoderMatcher[Int]("appoint-id")
+  object intLimit extends QueryParamDecoderMatcher[Int]("limit")
+  object intOffset extends QueryParamDecoderMatcher[Int]("offset")
 
   case class UserError(message: String) extends Exception
 
@@ -71,18 +73,11 @@ object RestService:
         ) =>
       Ok(Db.listAppointTimes(from, upto))
 
+    case GET -> Root / "get-appoint-time" :? intAppointTimeId(appointTimeId) =>
+      Ok(Db.getAppointTime(appointTimeId))
+
     case GET -> Root / "list-appoint-times-for-date" :? dateDate(date) =>
       Ok(Db.listAppointTimesForDate(date))
-
-    case req @ POST -> Root / "register-appoint" => {
-      val op = for
-        appoint <- req.as[Appoint]
-        result <- Db.addAppoint(appoint)
-        (entered, appEvent) = result
-        _ <- topic.publish1(Text(appEvent.asJson.toString()))
-      yield entered
-      Ok(op)
-    }
 
     case req @ POST -> Root / "update-appoint-time" => {
       val op = for
@@ -93,7 +88,9 @@ object RestService:
       Ok(op)
     }
 
-    case POST -> Root / "delete-appoint-time" :? intAppointTimeId(appointTimeId) =>
+    case POST -> Root / "delete-appoint-time" :? intAppointTimeId(
+          appointTimeId
+        ) =>
       val op = for
         event <- Db.deleteAppointTime(appointTimeId)
         _ <- publish(event)
@@ -109,20 +106,34 @@ object RestService:
       Ok(op)
     }
 
-    case POST -> Root / "split-appoint-time" :? intAppointTimeId(appointTimeId) +& 
-      timeAt(at) =>
-        val op = for
-          events <- Db.splitAppointTime(appointTimeId, at)
-          _ <- publishAll(events)
-        yield (true)
-        Ok(op)
+    case POST -> Root / "split-appoint-time" :? intAppointTimeId(
+          appointTimeId
+        ) +&
+        timeAt(at) =>
+      val op = for
+        events <- Db.splitAppointTime(appointTimeId, at)
+        _ <- publishAll(events)
+      yield (true)
+      Ok(op)
 
-    case POST -> Root / "fill-appoint-times" :? dateFrom(from) +& dateUpto(upto) =>
+    case POST -> Root / "fill-appoint-times" :? dateFrom(from) +& dateUpto(
+          upto
+        ) =>
       val op = for
         events <- AppointAdmin.fillAppointTimesUpto(from, upto)
         _ <- publishAll(events)
       yield (true)
       Ok(op)
+
+    case req @ POST -> Root / "register-appoint" => {
+      val op = for
+        appoint <- req.as[Appoint]
+        result <- Db.addAppoint(appoint)
+        (entered, appEvent) = result
+        _ <- topic.publish1(Text(appEvent.asJson.toString()))
+      yield entered
+      Ok(op)
+    }
 
     case GET -> Root / "get-appoint" :? intAppointId(appointId) =>
       Ok(Db.getAppoint(appointId))
@@ -134,6 +145,14 @@ object RestService:
         _ <- publish(event)
       yield true
       Ok(op)
+
+    case POST -> Root / "cancel-appoint" :? intAppointId(appointId) => {
+      val op = for
+        event <- Db.cancelAppoint(appointId)
+        _ <- publish(event)
+      yield true
+      Ok(op)
+    }
 
     case GET -> Root / "list-appoints-for-appoint-time" :? intAppointTimeId(
           appointTimeId
@@ -157,12 +176,9 @@ object RestService:
       Ok(Db.listGlobalEventInRange(from, until))
     }
 
-    case POST -> Root / "cancel-appoint" :? intAppointId(appointId) => {
-      val op = for
-        event <- Db.cancelAppoint(appointId)
-        _ <- publish(event)
-      yield ()
-      Ok(op)
-    }
-  } <+> PatientService.routes
+    case GET -> Root / "list-appoint-events" :? intLimit(limit) +& intOffset(
+          offset
+        ) =>
+      Ok(Db.listAppointEvents(limit, offset))
 
+  } <+> PatientService.routes
