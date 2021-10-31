@@ -1,5 +1,5 @@
 create table if not exists appoint_time (
-    appoint_time_id integer primary key,
+    appoint_time_id integer primary key auto_increment,
     date text not null,
     from_time text not null,
     until_time text not null,
@@ -8,7 +8,7 @@ create table if not exists appoint_time (
 );
 
 create table if not exists appoint (
-    appoint_id integer primary key,
+    appoint_id integer primary key auto_increment,
     appoint_time_id integer,
     patient_name text not null,
     patient_id integer not null,
@@ -17,7 +17,7 @@ create table if not exists appoint (
 );
 
 create table if not exists app_event (
-    app_event_id integer primary key,
+    app_event_id integer primary key auto_increment,
     created_at text not null,
     model text not null,
     kind text not null,

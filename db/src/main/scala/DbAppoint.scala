@@ -14,7 +14,7 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.temporal.ChronoUnit
 
-trait DbAppoint extends Sqlite:
+trait DbAppoint extends Mysql:
 
   def safeCreateAppointTime(appointTime: AppointTime): ConnectionIO[AppEvent] =
     assert(appointTime.appointTimeId == 0, "Non-zero appoint time to create.")

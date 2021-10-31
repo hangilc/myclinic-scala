@@ -6,7 +6,7 @@ import doobie._
 import doobie.implicits._
 import dev.myclinic.scala.model._
 
-trait DbEvent extends Sqlite {
+trait DbEvent extends Mysql {
 
   def nextGlobalEventId(): IO[Int] =
     sqlite(DbEventPrim.nextGlobalEventId())

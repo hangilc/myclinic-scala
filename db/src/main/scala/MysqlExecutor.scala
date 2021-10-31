@@ -32,3 +32,4 @@ object MysqlExecutor:
 
 trait Mysql:
   def mysql[A](op: ConnectionIO[A]): IO[A] = MysqlExecutor.execute(op)
+  def sqlite[A](op: ConnectionIO[A]): IO[A] = MysqlExecutor.execute(op)
