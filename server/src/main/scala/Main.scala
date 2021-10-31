@@ -48,7 +48,7 @@ object Main extends IOApp:
     given Topic[IO, WebSocketFrame] = topic
     BlazeServerBuilder[IO](global)
       .withSocketReuseAddress(true)
-      .bindHttp(8080, "localhost")
+      .bindHttp(8080, "0.0.0.0")
       .withHttpApp(
         Router(
           "/appoint" -> HttpRoutes.of[IO] { case GET -> Root =>
