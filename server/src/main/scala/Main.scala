@@ -14,6 +14,7 @@ import org.http4s.server.staticcontent.fileService
 import org.http4s.server.websocket.WebSocketBuilder
 import org.http4s.websocket.WebSocketFrame
 import org.http4s.websocket.WebSocketFrame.Text
+import javax.net.ssl.SSLContext
 
 import scala.concurrent.ExecutionContext.Implicits.global
 object Main extends IOApp:
@@ -44,11 +45,18 @@ object Main extends IOApp:
 
   val staticService = fileService[IO](FileService.Config("./web", "/"))
 
-  def buildServer(topic: Topic[IO, WebSocketFrame]) =
+  def buildServer(
+      topic: Topic[IO, WebSocketFrame],
+      port: Int,
+      sslContextOption: Option[SSLContext]
+  ) =
     given Topic[IO, WebSocketFrame] = topic
-    BlazeServerBuilder[IO](global)
+    var builder = BlazeServerBuilder[IO](global)
       .withSocketReuseAddress(true)
-      .bindHttp(8080, "0.0.0.0")
+      .bindHttp(port, "0.0.0.0")
+    if sslContextOption.isDefined then
+      builder = builder.withSslContext(sslContextOption.get)
+    builder
       .withHttpApp(
         Router(
           "/appoint" -> HttpRoutes.of[IO] { case GET -> Root =>
@@ -64,8 +72,18 @@ object Main extends IOApp:
       .as(ExitCode.Success)
 
   override def run(args: List[String]): IO[ExitCode] =
+    val cmdArgs = CmdArgs(args)
+    val port = if cmdArgs.ssl then 8443 else 8080
+    val sslContextOption: Option[SSLContext] =
+      if cmdArgs.ssl then
+        Some(
+          Ssl.createContext(
+            System.getenv("MYCLINIC_SERVER_CERT_KEYSTORE"),
+            System.getenv("MYCLINIC_SERVER_CERT_KEYSTORE_PASS")
+          )
+        )
+      else None
     for
       topic <- Topic[IO, WebSocketFrame]
-      exitCode <- buildServer(topic)
+      exitCode <- buildServer(topic, port, sslContextOption)
     yield exitCode
-
