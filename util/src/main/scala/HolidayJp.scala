@@ -29,12 +29,15 @@ type Year = Int
 object NationalHolidays:
   val yearMap: Map[Year, NationalHolidays] = Map(
     2021 -> NationalHolidays(2021),
-    2022 -> NationalHolidays(2022)
+    2022 -> NationalHolidays(2022),
+    2023 -> NationalHolidays(2023),
   )
 
   def findByDate(date: LocalDate): Option[Holiday] =
-    yearMap.get(date.getYear).flatMap(_.findByDate(date))
-
+    val year = date.getYear
+    if yearMap.contains(year) then yearMap(year).findByDate(date)
+    else NationalHolidays(year).findByDate(date)
+    //yearMap.get(date.getYear).flatMap(_.findByDate(date))
 
 enum NationalHolidayEnum(val name: String, val date: Year => Option[LocalDate]):
   case Ganjitsu extends NationalHolidayEnum("元日", Spec.at(1, 1))
