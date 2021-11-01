@@ -3,7 +3,7 @@ package dev.myclinic.scala.util
 import java.time.LocalDate
 import java.time.DayOfWeek.*
 import dev.myclinic.scala.util.DateUtil
-import dev.myclinic.scala.util.holidayjp.NationalHolidays
+import dev.fujiwara.holidayjp.NationalHolidays
 
 trait ClinicOperation
 object InOperation extends ClinicOperation

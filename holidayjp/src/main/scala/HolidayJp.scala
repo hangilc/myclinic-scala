@@ -1,4 +1,4 @@
-package dev.myclinic.scala.util.holidayjp
+package dev.fujiwara.holidayjp
 
 import dev.myclinic.scala.util.DateUtil
 import java.time.DayOfWeek.*

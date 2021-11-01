@@ -189,3 +189,20 @@ lazy val validator = crossProject(JSPlatform, JVMPlatform)
 
 val validatorJVM = validator.jvm
 val validatorJS = validator.js
+
+lazy val holidayjp = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Pure)
+  .in(file("holidayjp"))
+  .dependsOn(util)
+  .jsSettings(
+    scalaJSUseMainModuleInitializer := false,
+    zonesFilter := { (z: String) => z == "Asia/Tokyo" },
+    libraryDependencies ++= Seq(
+      "io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion
+    )
+  )
+
+val holidayjpJVM = holidayjp.jvm
+val holidayjpJS = holidayjp.js
+
+
