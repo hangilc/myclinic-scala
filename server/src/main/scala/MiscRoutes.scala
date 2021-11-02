@@ -21,11 +21,11 @@ import dev.myclinic.scala.model._
 import org.http4s.websocket.WebSocketFrame.Text
 import dev.myclinic.scala.appoint.admin.AppointAdmin
 
-object MiscService:
+object MiscService extends DateTimeQueryParam:
   object dateDate extends QueryParamDecoderMatcher[LocalDate]("date")
 
   def routes(using topic: Topic[IO, WebSocketFrame]) = HttpRoutes.of[IO] {
-    case GET -> Root / "resolve-clinic-operation" :? datDate(date) =>
+    case GET -> Root / "resolve-clinic-operation" :? dateDate(date) =>
       Ok(ClinicOperation.getClinicOperationAt(date))
 
   }

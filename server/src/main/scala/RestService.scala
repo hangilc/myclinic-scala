@@ -21,12 +21,12 @@ import dev.myclinic.scala.model._
 import org.http4s.websocket.WebSocketFrame.Text
 import dev.myclinic.scala.appoint.admin.AppointAdmin
 
-object RestService:
+object RestService extends DateTimeQueryParam:
 
-  given QueryParamDecoder[LocalDate] =
-    QueryParamDecoder[String].map(DateUtil.stringToDate(_))
-  given QueryParamDecoder[LocalTime] =
-    QueryParamDecoder[String].map(DateUtil.stringToTime(_))
+  // given QueryParamDecoder[LocalDate] =
+  //   QueryParamDecoder[String].map(DateUtil.stringToDate(_))
+  // given QueryParamDecoder[LocalTime] =
+  //   QueryParamDecoder[String].map(DateUtil.stringToTime(_))
 
   object dateFrom extends QueryParamDecoderMatcher[LocalDate]("from")
   object dateDate extends QueryParamDecoderMatcher[LocalDate]("date")

@@ -29,7 +29,7 @@ object ClinicOperation:
       val dow = date.getDayOfWeek
       if dow == SUNDAY || dow == WEDNESDAY then Some(RegularHoliday())
       else None
-    (isAdHocWorkday ||> isAdHocHoliday ||> isRegularHoliday).getOrElse(
+    (isAdHocWorkday ||> isAdHocHoliday ||> isRegularHoliday ||> isNationalHoliday).getOrElse(
       InOperation()
     )
 
