@@ -42,7 +42,10 @@ object JsMain:
     val startDate = DateUtil.startDayOfWeek(LocalDate.now())
     val endDate = startDate.plusDays(6)
     sheet.setupTo(workarea)
-    sheet.setupDateRange(startDate, endDate)
+    sheet.setupDateRange(startDate, endDate).onComplete {
+      case Success(_) => ()
+      case Failure(e) => System.err.println(e)
+    }
 
   def banner(isAdmin: Boolean): HTMLElement = 
     val text = "診察予約" + (if isAdmin then "（管理）" else "")

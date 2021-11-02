@@ -20,4 +20,4 @@ object MiscApi extends ApiBase:
     def batchResolveClinicOperations(
         dates: List[LocalDate]
     ): Future[Map[LocalDate, ClinicOperation]] =
-      get("batch-resolve-clinic-operations", Params(), dates)
+      post("batch-resolve-clinic-operations", Params(), dates)
