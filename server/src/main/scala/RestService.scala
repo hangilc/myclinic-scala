@@ -181,4 +181,4 @@ object RestService:
         ) =>
       Ok(Db.listAppointEvents(limit, offset))
 
-  } <+> PatientService.routes
+  } <+> PatientService.routes <+> MiscService.routes

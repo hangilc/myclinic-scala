@@ -31,9 +31,10 @@ object AppointAdmin:
     def filterOperationDate(date: LocalDate): Boolean =
       import ClinicOperation.*
       ClinicOperation.getClinicOperationAt(date) match {
-        case InOperation        => true
-        case RegularHoliday     => false
+        case InOperation()      => true
+        case RegularHoliday()   => false
         case AdHocHoliday(_)    => false
+        case AdHocWorkday(_)    => true
         case NationalHoliday(_) => false
       }
     def pickTimes(date: LocalDate): List[(LocalTime, LocalTime)] =
