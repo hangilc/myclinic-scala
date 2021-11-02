@@ -97,7 +97,7 @@ val utilJVM = util.jvm
 
 lazy val server = project
   .in(file("server"))
-  .dependsOn(db, modelJVM, utilJVM, modeljsonJVM, appointAdmin)
+  .dependsOn(db, modelJVM, utilJVM, modeljsonJVM, appointAdmin, clinicopJVM)
   .settings(
     name := "server",
     libraryDependencies ++= Seq(
@@ -150,13 +150,13 @@ lazy val appointApp = project
   )
 
 lazy val appointAdmin = project.in(file("appoint-admin"))
-  .dependsOn(modelJVM, db, utilJVM)
+  .dependsOn(modelJVM, db, utilJVM, clinicopJVM)
   .settings()
 
 lazy val modeljson = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Pure)
   .in(file("modeljson"))
-  .dependsOn(model)
+  .dependsOn(model, clinicop)
   .jsConfigure(_ enablePlugins TzdbPlugin)
   .jsSettings(
     scalaJSUseMainModuleInitializer := false,
@@ -206,4 +206,19 @@ lazy val holidayjp = crossProject(JSPlatform, JVMPlatform)
 val holidayjpJVM = holidayjp.jvm
 val holidayjpJS = holidayjp.js
 
+lazy val clinicop = crossProject(JVMPlatform, JSPlatform)
+  .crossType(CrossType.Pure)  
+  .in(file("clinicop"))
+  .dependsOn(util, holidayjp)
+  .jsConfigure(_ enablePlugins TzdbPlugin)
+  .jsSettings(
+    scalaJSUseMainModuleInitializer := false,
+    zonesFilter := { (z: String) => z == "Asia/Tokyo" },
+    libraryDependencies ++= Seq(
+      "io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion
+    )
+  )
+
+val clinicopJVM = clinicop.jvm
+val clinicopJS = clinicop.js
 

@@ -1,4 +1,4 @@
-package dev.myclinic.scala.model
+package dev.myclinic.scala.clinicop
 
 import java.time.LocalDate
 import java.time.DayOfWeek.*

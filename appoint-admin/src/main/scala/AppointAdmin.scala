@@ -6,6 +6,7 @@ import cats.effect.IO
 import dev.myclinic.scala.util.DateUtil
 import dev.myclinic.scala.db.Db
 import dev.myclinic.scala.model.*
+import dev.myclinic.scala.clinicop.*
 import java.time.{LocalDate, LocalTime, DayOfWeek}
 import java.time.DayOfWeek.*
 import java.time.temporal.ChronoUnit
