@@ -43,7 +43,7 @@ lazy val root = project
 lazy val model = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Pure)
   .in(file("model"))
-  .dependsOn(util)
+  .dependsOn(util, holidayjp)
   .settings(
     name := "model"
   )
@@ -194,6 +194,7 @@ lazy val holidayjp = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Pure)
   .in(file("holidayjp"))
   .dependsOn(util)
+  .jsConfigure(_ enablePlugins TzdbPlugin)
   .jsSettings(
     scalaJSUseMainModuleInitializer := false,
     zonesFilter := { (z: String) => z == "Asia/Tokyo" },

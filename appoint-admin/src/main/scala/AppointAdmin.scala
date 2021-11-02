@@ -4,7 +4,6 @@ import cats.*
 import cats.syntax.all.*
 import cats.effect.IO
 import dev.myclinic.scala.util.DateUtil
-import dev.myclinic.scala.util.ClinicOperation
 import dev.myclinic.scala.db.Db
 import dev.myclinic.scala.model.*
 import java.time.{LocalDate, LocalTime, DayOfWeek}

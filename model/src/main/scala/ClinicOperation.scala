@@ -1,13 +1,13 @@
-package dev.myclinic.scala.util
+package dev.myclinic.scala.model
 
 import java.time.LocalDate
 import java.time.DayOfWeek.*
 import dev.myclinic.scala.util.DateUtil
 import dev.fujiwara.holidayjp.NationalHolidays
 
-trait ClinicOperation
-object InOperation extends ClinicOperation
-object RegularHoliday extends ClinicOperation
+sealed trait ClinicOperation
+case class InOperation() extends ClinicOperation
+case class RegularHoliday() extends ClinicOperation
 case class AdHocHoliday(name: String) extends ClinicOperation
 case class AdHocWorkday(name: String) extends ClinicOperation
 case class NationalHoliday(name: String) extends ClinicOperation
@@ -27,10 +27,10 @@ object ClinicOperation:
       NationalHolidays.findByDate(date).map(h => NationalHoliday(h.name))
     def isRegularHoliday: Option[ClinicOperation] =
       val dow = date.getDayOfWeek
-      if dow == SUNDAY || dow == WEDNESDAY then Some(RegularHoliday)
+      if dow == SUNDAY || dow == WEDNESDAY then Some(RegularHoliday())
       else None
     (isAdHocWorkday ||> isAdHocHoliday ||> isRegularHoliday).getOrElse(
-      InOperation
+      InOperation()
     )
 
   def adHocHolidayRange(
