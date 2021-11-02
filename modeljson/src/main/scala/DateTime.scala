@@ -2,6 +2,8 @@ package dev.myclinic.scala.modeljson
 
 import io.circe.Decoder
 import io.circe.Encoder
+import io.circe.KeyEncoder
+import io.circe.KeyDecoder
 
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -38,3 +40,12 @@ trait DateTime:
   implicit val dateTimeDecoder: Decoder[LocalDateTime] = Decoder.decodeString.emapTry(str =>
     Try(LocalDateTime.parse(str, sqlDateTimeFormatter))
   )
+
+  implicit val dateKeyEncoder: KeyEncoder[LocalDate] = new KeyEncoder {
+    override def apply(date: LocalDate): String = date.toString
+  }
+
+  implicit val dateKeyDecoder: KeyDecoder[LocalDate] = new KeyDecoder {
+    override def apply(key: String): Option[LocalDate] = 
+      Try(LocalDate.parse(key, sqlDateFormatter)).toOption
+  }

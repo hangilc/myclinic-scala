@@ -6,6 +6,7 @@ import io.circe.generic.semiauto._
 import dev.myclinic.scala.model._
 
 import dev.myclinic.scala.clinicop.*
+import java.time.LocalDate
 
 trait ClinicOperationCodec:
   given Encoder[InOperation] with
@@ -62,3 +63,4 @@ trait ClinicOperationCodec:
             case _ => Left(DecodingFailure("Invalid type field: ${opType}.", c.history))
           }
         })
+

@@ -51,7 +51,9 @@ class AppointSheet:
         })
         .sequence
         .void
+      clinicOpMap <- Api.batchResolveClinicOperations(dates)
     yield
+      println(("clinic-op", clinicOpMap))
       AppointRow.init(appointTimes, makeAppointMap(appointList.flatten))
       dateRange = Some(from, upto)
       GlobalEvents.AppointColumnChanged.publish(AppointRow.columns)
