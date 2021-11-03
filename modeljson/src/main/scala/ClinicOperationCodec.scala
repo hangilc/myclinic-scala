@@ -48,7 +48,7 @@ trait ClinicOperationCodec:
           opType match {
             case "in-operation"    => Right(InOperation())
             case "regular-holiday" => Right(RegularHoliday())
-            case "ad-hoc-holday" => {
+            case "ad-hoc-holiday" => {
               for name <- c.downField("name").as[String]
               yield AdHocHoliday(name)
             }
@@ -56,11 +56,11 @@ trait ClinicOperationCodec:
               for name <- c.downField("name").as[String]
               yield AdHocWorkday(name)
             }
-            case "national-holday" => {
+            case "national-holiday" => {
               for name <- c.downField("name").as[String]
               yield NationalHoliday(name)
             }
-            case _ => Left(DecodingFailure("Invalid type field: ${opType}.", c.history))
+            case _ => Left(DecodingFailure(s"Invalid type field: ${opType}.", c.history))
           }
         })
 

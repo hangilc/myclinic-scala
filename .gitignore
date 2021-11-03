@@ -2,6 +2,7 @@ target/
 .bloop/
 .bsp/
 .metals/
+.vscode/
 server/web/**/scalajs/
 /*.log
 project/project/

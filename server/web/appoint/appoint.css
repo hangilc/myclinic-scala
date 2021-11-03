@@ -29,6 +29,16 @@ body {
   margin-bottom: 10px;
 }
 
+.date-column.national-holiday .date-label, 
+.date-column.ad-hoc-holiday .date-label {
+  color: red;
+}
+
+.date-column.national-holiday .date, 
+.date-column.ad-hoc-holiday .date {
+  border-color: red;
+}
+
 .appoint-time-box {
   margin-bottom: 6px;
   padding: 4px;

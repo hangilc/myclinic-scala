@@ -5,6 +5,7 @@ import dev.fujiwara.domq.Html.{given, *}
 import dev.fujiwara.domq.Modifiers.{given, *}
 import dev.fujiwara.domq.{Icons, ContextMenu, FloatWindow}
 import dev.myclinic.scala.model._
+import dev.myclinic.scala.clinicop.*
 import dev.myclinic.scala.util.DateUtil
 import math.Ordered.orderingToOrdered
 import org.scalajs.dom.raw.HTMLElement
@@ -40,7 +41,7 @@ class AppointSheet:
   def setupDateRange(from: LocalDate, upto: LocalDate): Future[Unit] =
     val dates = DateUtil.enumDates(from, upto)
     var appointList: List[List[Appoint]] = List.empty
-    for
+    val f = for
       appointTimes <- Api.listAppointTimes(from, upto)
       _ <- dates
         .map(d => {
@@ -53,10 +54,18 @@ class AppointSheet:
         .void
       clinicOpMap <- Api.batchResolveClinicOperations(dates)
     yield
-      println(("clinic-op", clinicOpMap))
-      AppointRow.init(appointTimes, makeAppointMap(appointList.flatten))
+      AppointRow.init(
+        dates,
+        appointTimes,
+        makeAppointMap(appointList.flatten),
+        clinicOpMap
+      )
       dateRange = Some(from, upto)
       GlobalEvents.AppointColumnChanged.publish(AppointRow.columns)
+    f transform (identity, ex => {
+      System.err.println(ex)
+      ex
+    })
 
   GlobalEvents.AppointColumnChanged.subscribe(cols => {
     if cols.size > 0 then hideDaySpanDisp()
@@ -139,7 +148,7 @@ class AppointSheet:
           val uptoNext = upto.plusDays(days)
           setupDateRange(fromNext, uptoNext)
         }
-        case None => Future.successful(())
+        case None => ()
 
     def onThisWeekClick(): Unit =
       val start = DateUtil.startDayOfWeek(LocalDate.now())
@@ -166,14 +175,17 @@ class AppointSheet:
     )
 
     def init(
+        dates: List[LocalDate],
         appointTimes: List[AppointTime],
-        appointMap: Map[AppointTimeId, List[Appoint]]
+        appointMap: Map[AppointTimeId, List[Appoint]],
+        clinicOpMap: Map[LocalDate, ClinicOperation]
     ): Unit =
       subscribers.foreach(_.stop())
       clear()
-      val dates: List[AppointDate] =
-        AppointDate.classify(appointTimes, appointMap)
-      dates
+      val appointDates: List[AppointDate] =
+        AppointDate.classify(dates, clinicOpMap, appointTimes, appointMap)
+      println(("appointDates", appointDates))
+      appointDates
         .foreach((date: AppointDate) => {
           val list: List[(AppointTime, List[Appoint])] =
             date.appointTimes.map(appointTime =>
@@ -182,7 +194,9 @@ class AppointSheet:
                 appointMap.get(appointTime.appointTimeId).getOrElse(List.empty)
               )
             )
-          addColumn(AppointColumn.create(date.date, list, makeAppointTimeBox))
+          addColumn(
+            AppointColumn.create(date.date, date.op, list, makeAppointTimeBox)
+          )
         })
       subscribers.foreach(_.start())
 
@@ -223,14 +237,6 @@ class AppointSheet:
     def onAppointTimeCreated(event: AppointTimeCreated): Unit =
       val date = event.created.date
       findColumnByDate(date)
-        .orElse {
-          if dateRangeIncludes(date) then
-            val c = AppointColumn(date, makeAppointTimeBox)
-            addColumn(c)
-            GlobalEvents.AppointColumnChanged.publish(columns)
-            Some(c)
-          else None
-        }
         .foreach(c => {
           c.addAppointTime(event.created)
         })
@@ -248,16 +254,30 @@ class AppointSheet:
 
 case class AppointDate(
     date: LocalDate,
+    op: ClinicOperation,
     appointTimes: List[AppointTime]
 )
 
 object AppointDate:
   type AppointTimeId = Int
   def classify(
+      dates: List[LocalDate],
+      clinicOpMap: Map[LocalDate, ClinicOperation],
       appList: List[AppointTime],
       appointMap: Map[AppointTimeId, List[Appoint]]
   ): List[AppointDate] =
+    val clinicDates: List[(LocalDate, ClinicOperation)] =
+      dates
+        .map(date => (date, clinicOpMap(date)))
+        .filter(item =>
+          item match {
+            case (_, RegularHoliday()) => false
+            case _                     => true
+          }
+        )
     val map = appList.groupBy(_.date)
     val result =
-      for k <- map.keys yield AppointDate(k, map(k).sortBy(_.fromTime))
+      for (date, op) <- clinicDates yield {
+        AppointDate(date, op, map.getOrElse(date, List.empty).sortBy(_.fromTime))
+      }
     result.toList.sortBy(_.date)

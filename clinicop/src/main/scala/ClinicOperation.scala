@@ -5,12 +5,18 @@ import java.time.DayOfWeek.*
 import dev.myclinic.scala.util.DateUtil
 import dev.fujiwara.holidayjp.NationalHolidays
 
-sealed trait ClinicOperation
-case class InOperation() extends ClinicOperation
-case class RegularHoliday() extends ClinicOperation
-case class AdHocHoliday(name: String) extends ClinicOperation
-case class AdHocWorkday(name: String) extends ClinicOperation
-case class NationalHoliday(name: String) extends ClinicOperation
+sealed trait ClinicOperation:
+  def code: String
+case class InOperation() extends ClinicOperation:
+  def code = "in-operation"
+case class RegularHoliday() extends ClinicOperation:
+  def code = "regular-holiday"
+case class AdHocHoliday(name: String) extends ClinicOperation:
+  def code = "ad-hoc-holiday"
+case class AdHocWorkday(name: String) extends ClinicOperation:
+  def code = "ad-hoc-workday"
+case class NationalHoliday(name: String) extends ClinicOperation:
+  def code = "national-holiday"
 
 object ClinicOperation:
   import ClinicOperation.*
@@ -19,19 +25,28 @@ object ClinicOperation:
     def ||>(other: Option[B]): Option[B] = opt.orElse(other)
 
   def getClinicOperationAt(date: LocalDate): ClinicOperation =
-    def isAdHocWorkday: Option[ClinicOperation] = 
+    def isAdHocWorkday: Option[ClinicOperation] =
       adHocWorkdayMap.get(date)
-    def isAdHocHoliday: Option[ClinicOperation] = 
+    def isAdHocHoliday: Option[ClinicOperation] =
       adHocHolidayMap.get(date)
-    def isNationalHoliday: Option[ClinicOperation] = 
+    def isNationalHoliday: Option[ClinicOperation] =
       NationalHolidays.findByDate(date).map(h => NationalHoliday(h.name))
     def isRegularHoliday: Option[ClinicOperation] =
       val dow = date.getDayOfWeek
       if dow == SUNDAY || dow == WEDNESDAY then Some(RegularHoliday())
       else None
-    (isAdHocWorkday ||> isAdHocHoliday ||> isRegularHoliday ||> isNationalHoliday).getOrElse(
-      InOperation()
-    )
+    (isAdHocWorkday ||> isRegularHoliday ||> isAdHocHoliday ||> isNationalHoliday)
+      .getOrElse(
+        InOperation()
+      )
+
+  def getLabel(op: ClinicOperation): String =
+    op match {
+      case AdHocHoliday(name)    => name
+      case AdHocWorkday(name)    => name
+      case NationalHoliday(name) => name
+      case _                     => ""
+    }
 
   def adHocHolidayRange(
       from: LocalDate,

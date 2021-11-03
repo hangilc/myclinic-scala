@@ -14,6 +14,7 @@ import org.scalajs.dom.raw.{HTMLElement, MouseEvent}
 import cats.syntax.all.*
 import dev.myclinic.scala.webclient.Api
 import concurrent.ExecutionContext.Implicits.global
+import dev.myclinic.scala.clinicop.*
 
 given Ordering[AppointColumn] with
   def compare(a: AppointColumn, b: AppointColumn): Int =
@@ -24,16 +25,20 @@ val sortedAppointColumn = new SortedElement[AppointColumn]:
 
 case class AppointColumn(
     date: LocalDate,
+    op: ClinicOperation,
     appointTimeBoxMaker: AppointTime => AppointTimeBox
 ):
   var boxes: Seq[AppointTimeBox] = Vector.empty
   val dateElement = div()
   val vacantKindsArea = span()
   var boxWrapper = div()
-  val ele = div(cls := "date-column")(
+  val ele = div(cls := "date-column", cls := op.code)(
     dateElement(cls := "date")(
       dateRep,
       vacantKindsArea,
+      div(cls := "date-label")(
+        ClinicOperation.getLabel(op)
+      ),
       oncontextmenu := (onContextMenu _)
     ),
     boxWrapper
@@ -138,10 +143,11 @@ object AppointColumn:
 
   def create(
       date: LocalDate,
+      op: ClinicOperation,
       list: List[(AppointTime, List[Appoint])],
       appointTimeBoxMaker: AppointTime => AppointTimeBox
   ): AppointColumn =
-    val c = AppointColumn(date, appointTimeBoxMaker)
+    val c = AppointColumn(date, op, appointTimeBoxMaker)
     list.foreach {
       case (appointTime, appoints) => {
         c.addAppointTime(appointTime)
