@@ -6,6 +6,7 @@ import org.scalajs.dom.raw.MouseEvent
 import scala.language.implicitConversions
 import org.scalajs.dom.raw.CSSStyleDeclaration
 import scala.scalajs.js
+import org.scalajs.dom.raw.Event
 
 case class Modifier(modifier: HTMLElement => Unit)
 
@@ -133,6 +134,11 @@ object Modifiers:
 
     def :=(f: () => Unit) = Modifier(e => {
       e.addEventListener("click", (_: MouseEvent) => f())
+    })
+
+  object onsubmit:
+    def :=(f: () => Unit) = Modifier(e => {
+      e.addEventListener("submit", (e: Event) => { e.preventDefault; f() })
     })
 
   object onmousedown:
