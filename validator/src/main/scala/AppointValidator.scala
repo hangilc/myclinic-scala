@@ -82,6 +82,23 @@ object AppointValidator:
         }
       }
 
+  def validate(
+      appointIdResult: Result[Int],
+      appointTimeIdResult: Result[Int],
+      patientNameResult: Result[String],
+      patientIdResult: Result[Int],
+      memoResult: Result[String],
+      patientOption: Option[Patient]
+  ): Result[Appoint] =
+    (
+      appointIdResult,
+      appointTimeIdResult,
+      patientNameResult,
+      patientIdResult,
+      memoResult
+    ).mapN(Appoint.apply)
+      .andThen(appoint => validatePatientIdConsistency(appoint, patientOption))
+
   def validateForEnter(
       appointTimeId: Int,
       nameInput: String,
@@ -89,27 +106,41 @@ object AppointValidator:
       memoInput: String,
       patientOption: Option[Patient]
   ): Result[Appoint] =
-    (
+    validate(
       validNec(0),
       validateAppointTimeId(appointTimeId),
       validateName(nameInput),
       patientIdResult,
-      validateMemo(memoInput)
-    ).mapN(Appoint.apply)
-      .andThen(appoint =>
-        validatePatientIdConsistency(appoint, patientOption)
-      )
+      validateMemo(memoInput),
+      patientOption
+    )
+
+  def validateForUpdate(
+      appointId: Int,
+      appointTimeId: Int,
+      nameInput: String,
+      patientIdResult: Result[Int],
+      memoInput: String,
+      patientOption: Option[Patient]
+  ): Result[Appoint] =
+    validate(
+      validateAppointIdForUpdate(appointId),
+      validateAppointTimeId(appointTimeId),
+      validateName(nameInput),
+      patientIdResult,
+      validateMemo(memoInput),
+      patientOption
+    )
 
   def validateForUpate(
       appoint: Appoint,
       patientOption: Option[Patient]
   ): Result[Appoint] =
-    (
+    validate(
       validateAppointIdForUpdate(appoint.appointId),
       validateAppointTimeId(appoint.appointTimeId),
       validateName(appoint.patientName),
       validatePatientIdValue(appoint.patientId),
-      validateMemo(appoint.memo)
-    ).tupled.andThen(_ =>
-      validatePatientIdConsistency(appoint, patientOption)
+      validateMemo(appoint.memo),
+      patientOption
     )

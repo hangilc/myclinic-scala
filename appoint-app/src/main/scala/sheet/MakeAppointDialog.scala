@@ -139,22 +139,6 @@ object MakeAppointDialog:
         }
       }
 
-    // if appoint.patientId != 0 then
-    //   for
-    //     patientOpt <- Api.findPatient(appoint.patientId)
-    //     _ = patientOpt match {
-    //       case Some(patient) => {
-    //         val validated =
-    //           AppointValidator.validatePatientIdConsistency(appoint, patient).toEither() match {
-    //           case Right(appoint) => action(appoint)
-    //           case Left(msg)      => showError(msg)
-    //         }
-    //       }
-    //       case None => showError("患者番号に該当する患者情報がみつかりません。")
-    //     }
-    //   yield ()
-    // else action(appoint)
-
     def makeNameSlot(patient: Patient): HTMLElement =
       div(hoverBackground("#eee"), padding := "2px 4px", cursor := "pointer")(
         s"(${patient.patientId}) ${patient.fullName()}"

@@ -10,6 +10,8 @@ import dev.myclinic.scala.webclient.Api
 import concurrent.ExecutionContext.Implicits.global
 import dev.myclinic.scala.model.{Patient}
 import org.scalajs.dom.document
+import dev.myclinic.scala.validator.AppointValidator
+import dev.myclinic.scala.validator.AppointValidator.given
 
 class PatientIdPart(var patientId: Int, appointId: Int, patientName: => String):
   val keyPart = span("患者番号：")
@@ -25,6 +27,10 @@ class PatientIdPart(var patientId: Int, appointId: Int, patientName: => String):
     def populate(): Unit
     def onPatientIdChanged(): Unit
 
+  def changeValuePartTo(handler: ValuePartHandler): Unit =
+    valuePartHandler = handler
+    valuePartHandler.populate()
+
   class Disp() extends ValuePartHandler:
     val wrapper: HTMLElement = valuePart
     def populate(): Unit =
@@ -35,10 +41,7 @@ class PatientIdPart(var patientId: Int, appointId: Int, patientName: => String):
           Icons.defaultStyle,
           ml := "0.5rem",
           displayNone,
-          onclick := (() => {
-            valuePartHandler = Edit()
-            valuePartHandler.populate()
-          })
+          onclick := (() => changeValuePartTo(Edit()))
         )
       )
       wrapper.innerHTML = ""
@@ -91,22 +94,30 @@ class PatientIdPart(var patientId: Int, appointId: Int, patientName: => String):
     def initialValue: String = if patientId == 0 then "" else patientId.toString
 
     def onEnter(): Unit =
-      val inputValue = input.value.trim
-      validateInput(inputValue) match {
-        case Right(ival) => doUpdate(ival)
-        case Left(msg)   => errBox.show(msg)
-      }
+      val patientIdResult = AppointValidator.validatePatientId(input.value.trim)
+      patientIdResult.toEither() match {
+        case Right(patientIdValue) => {
+          if patientId == patientIdValue then
+            changeValuePartTo(Disp())
+          else
+            for
+              appoint <- Api.getAppoint(appointId)
+              patientOption <- Api.findPatient(patientIdValue)
+            yield {
+              val newAppoint = appoint.copy(patientId = patientIdValue)
+              AppointValidator.validateForUpdate(newAppoint, patientOption)
+                .toEither() match {
+                  case Right(newAppoint) => {
+                    Api.updateAppoint(newAppoint)
+                    changeValuePartTo(Disp())
+                  }
+                  case Left(msg) => errBox.show(msg)
+                }
 
-    def validateInput(inputValue: String): Either[String, Int] =
-      if inputValue == "" then Right(0)
-      else
-        try
-          val ival = inputValue.toInt
-          if ival >= 0 then Right(ival)
-          else Left("入力が負数です。")
-        catch {
-          case _: Exception => Left("入力が数値でありません。")
+            }
         }
+        case Left(msg) => errBox.show(msg)
+      }
 
     def makePatientSlot(patient: Patient): HTMLElement =
       div(hoverBackground("#eee"), padding := "2px 4px", cursor := "pointer")(
@@ -130,33 +141,3 @@ class PatientIdPart(var patientId: Int, appointId: Int, patientName: => String):
           })
       }
 
-    def doUpdate(newPatientId: Int): Unit =
-      import dev.myclinic.scala.validator.AppointValidator
-      if newPatientId == patientId then
-        valuePartHandler = Disp()
-        valuePartHandler.populate()
-      else
-        for
-          patientOption <- Api.findPatient(newPatientId)
-          appoint <- Api.getAppoint(appointId)
-          appointUpdate = appoint.copy(patientId = newPatientId)
-        yield {
-          patientOption match {
-            case None => errBox.show("患者番号に該当する患者情報をみつけられません。")
-            case Some(patient) => {
-              AppointValidator
-                .validatePatientIdConsistency(
-                  appointUpdate,
-                  patient
-                )
-                .toEither() match {
-                case Right(app) => {
-                  Api.updateAppoint(app)
-                  valuePartHandler = Disp()
-                  valuePartHandler.populate()
-                }
-                case Left(msg) => errBox.show(msg)
-              }
-            }
-          }
-        }
