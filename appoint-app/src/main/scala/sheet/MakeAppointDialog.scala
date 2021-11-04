@@ -13,7 +13,8 @@ import org.scalajs.dom.raw.HTMLElement
 import org.scalajs.dom.raw.HTMLInputElement
 import dev.myclinic.scala.web.appoint.Misc
 import dev.myclinic.scala.webclient.Api
-import dev.myclinic.scala.validator.{AppointValidator, Validators}
+import dev.myclinic.scala.validator.AppointValidator
+import dev.myclinic.scala.validator.AppointValidator.given
 import cats.data.Validated.Valid
 import cats.data.Validated.Invalid
 import concurrent.ExecutionContext.Implicits.global
@@ -233,24 +234,23 @@ object MakeAppointDialog:
       errorBox(msg, display := "block")
 
     def validate(): Either[String, Appoint] =
-      for
-        patientOption <- 
-          AppointValidator.validatePatientId(patientIdInput.value).result match {
-            case Valid(patientId) => Api.findPatient(patientId)
-            case _ => Future.successful(None)
-          }
-      yield {
-
-      }
-      AppointValidator
-        .validateForEnter(
-          0,
-          appointTime.appointTimeId,
-          nameInput.value,
-          patientIdInput.value,
-          memoInput.value
-        )
-        .toEither()
+      ???
+      // val patientIdResult = AppointValidator.validatePatientId(patientIdInput.value)
+      // for
+      //   patientOption <- 
+      //     patientIdResult match {
+      //       case Valid(patientId) => Api.findPatient(patientId)
+      //       case _ => Future.successful(None)
+      //     }
+      // yield {
+      //   AppointValidator.validateForEnter(
+      //     appointTime.appointTimeId,
+      //     nameInput.value,
+      //     patientIdResult,
+      //     memoInput.value,
+      //     patientOption
+      //   ).toEither() 
+      // }
 
     def dateTimeRep(appointTime: AppointTime): String =
       Misc.formatAppointTimeSpan(appointTime)
