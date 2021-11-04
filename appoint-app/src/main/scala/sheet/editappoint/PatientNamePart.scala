@@ -9,6 +9,7 @@ import org.scalajs.dom.raw.HTMLElement
 import dev.myclinic.scala.webclient.Api
 import concurrent.ExecutionContext.Implicits.global
 import dev.myclinic.scala.model.{Patient}
+import dev.myclinic.scala.validator.AppointValidator
 
 class PatientNamePart(var patientName: String, appointId: Int):
   val keyPart = span("患者名：")
@@ -29,23 +30,31 @@ class PatientNamePart(var patientName: String, appointId: Int):
 
   class Disp() extends ValuePartHandler:
     val wrapper = valuePart
-    val searchIcon = Icons.search(color = "gray")
+    val searchIcon = Icons.search(color = "gray", size = "1.2rem")
+    val editIcon = Icons.pencilAlt(color = "gray", size = "1.2rem")
     val workarea = div()
     val errBox = ErrorBox()
     val ele = div(
       patientName,
-      searchIcon(displayNone, Icons.defaultStyle, ml := "0.5rem")(
+      searchIcon(displayNone, ml := "0.5rem")(
+        Icons.defaultStyle,
         onclick := (onSearchClick _)
+      ),
+      editIcon(displayNone, ml := "0.1rem")(
+      Icons.defaultStyle,
+      onclick := (onEditClick _)
       ),
       workarea,
       errBox.ele
     )
     ele(onmouseenter := (() => {
       searchIcon(displayDefault)
+      editIcon(displayDefault)
       ()
     }))
     ele(onmouseleave := (() => {
       searchIcon(displayNone)
+      editIcon(displayNone)
       ()
     }))
 
@@ -70,6 +79,12 @@ class PatientNamePart(var patientName: String, appointId: Int):
         })
       }
 
+    def onEditClick(): Unit =
+      errBox.hide()
+      workarea.innerHTML = ""
+      Edit().populate()
+      ()
+
     def applyPatient(patient: Patient): Unit =
       for
         appoint <- Api.getAppoint(appointId)
@@ -81,3 +96,40 @@ class PatientNamePart(var patientName: String, appointId: Int):
         }
         _ <- Api.updateAppoint(newAppoint)
       yield {}
+    
+  class Edit() extends ValuePartHandler:
+    val input = inputText()
+    val enterIcon = Icons.checkCircle(color = Colors.primary, size = "1.2rem")
+    val discardIcon = Icons.xCircle(color = Colors.danger, size = "1.2rem")
+    val searchIcon = Icons.search(color = "gray", size = "1.2rem")
+    val workarea = div()
+    val errBox = ErrorBox()
+    def populate(): Unit =
+      val wrapper = valuePart
+      wrapper.innerHTML = ""
+      wrapper(
+        input,
+        enterIcon(Icons.defaultStyle, ml := "0.1rem", onclick := (onEnterClick _)),
+        discardIcon(Icons.defaultStyle, onclick := (onDiscardClick _)),
+        searchIcon(Icons.defaultStyle),
+        workarea,
+        errBox.ele
+      )
+
+    def onEnterClick(): Unit =
+      val name = input.value
+      for
+        appoint <- Api.getAppoint(appointId)
+        patientOption <- Api.findPatient(appoint.patientId)
+      yield {
+        AppointValidator.validateForUpdate(appoint, patientOption).toEither() match {
+          case Right(appoint) => ()
+          case Left(msg) => errBox.show(msg)
+        }
+      }
+
+    def onDiscardClick(): Unit = 
+      Disp().populate()
+      ()
+
+      

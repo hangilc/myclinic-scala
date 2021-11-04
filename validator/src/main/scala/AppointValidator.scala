@@ -11,7 +11,9 @@ object AppointValidator:
   sealed trait AppointError:
     def message: String
   case class NonZeroAppointIdError(appointId: Int) extends AppointError:
-    def message = s"Non-zero appoint-id for enter: ${appointId}."
+    def message = s"Non-zero appoint-id: ${appointId}."
+  case class InvalidAppointIdError(appointId: Int) extends AppointError:
+    def message = s"Invalid appoint-id: ${appointId}."
   object InvalidAppointTimeError extends AppointError:
     def message = "Appoint-time-id is zero."
   case object EmptyNameError extends AppointError:
@@ -23,58 +25,87 @@ object AppointValidator:
   object InconsistentPatientIdError extends AppointError:
     def message = "患者情報が患者名と一致しません。"
 
-  type Result = ValidatedNec[AppointError, Appoint]
-
-  def toEither(validated: Result): Either[String, Appoint] =
-    Validators.toEither(validated, _.message)
+  case class Result[T](result: ValidatedNec[AppointError, T]):
+    def toEither(): Either[String, T] =
+      Validators.toEither(result, _.message)
 
   def validateAppointIdForEnter(
       appointId: Int
-  ): ValidatedNec[AppointError, Int] =
-    condNec(appointId == 0, appointId, NonZeroAppointIdError(appointId))
+  ): Result[Int] =
+    Result(condNec(appointId == 0, appointId, NonZeroAppointIdError(appointId)))
+
+  def validateAppointIdForUpdate(
+    appointId: Int
+  ): Result[Int] =
+    Result(condNec(appointId > 0, appointId, InvalidAppointIdError(appointId)))
 
   def validateAppointTimeId(
       appointTimeId: Int
-  ): ValidatedNec[AppointError, Int] =
-    positiveInt(appointTimeId, InvalidAppointTimeError)
+  ): Result[Int] =
+    Result(positiveInt(appointTimeId, InvalidAppointTimeError))
 
-  def validateName(name: String): ValidatedNec[AppointError, String] =
-    nonEmpty(name, EmptyNameError)
+  def validateName(name: String): Result[String] =
+    Result(nonEmpty(name, EmptyNameError))
 
-  def validatePatientId(patientId: String): ValidatedNec[AppointError, Int] =
-    if patientId.isEmpty then validNec(0)
+  def validatePatientId(patientId: String): Result[Int] =
+    Result(if patientId.isEmpty then validNec(0)
     else
       isInt(patientId, IsNotIntPatientIdError)
-        .andThen(ival => nonNegativeInt(ival, NegativePatientIdError))
+        .andThen(ival => nonNegativeInt(ival, NegativePatientIdError)))
 
-  def validateMemo(memo: String): ValidatedNec[AppointError, String] =
-    validNec(memo)
+  def validatePatientIdValue(patientId: Int): Result[Int] =
+    Result(nonNegativeInt(patientId, NegativePatientIdError))
+
+  def validateMemo(memo: String): Result[String] =
+    Result(validNec(memo))
 
   def validatePatientIdConsistency(
       appoint: Appoint,
-      patient: Patient
-  ): ValidatedNec[AppointError, Appoint] =
-    val parts = appoint.patientName.split(raw"[ 　]+", 2)
-    val b = parts.size == 2 && {
-      val last = parts(0)
-      last == patient.lastName || last == patient.lastNameYomi
-    } && {
-      val first = parts(1)
-      first == patient.firstName || first == patient.firstNameYomi
-    }
-    condNec(b, appoint, InconsistentPatientIdError)
+      patientOption: Option[Patient]
+  ): Result[Appoint] =
+    if appoint.patientId == 0 then
+      Result(condNec(patientOption.isEmpty, appoint, InconsistentPatientIdError))
+    else
+      patientOption match {
+        case None => Result(invalidNec(InconsistentPatientIdError))
+        case Some(patient) => {
+          val parts = appoint.patientName.split(raw"[ 　]+", 2)
+          val b = parts.size == 2 && {
+            val last = parts(0)
+            last == patient.lastName || last == patient.lastNameYomi
+          } && {
+            val first = parts(1)
+            first == patient.firstName || first == patient.firstNameYomi
+          }
+          Result(condNec(b, appoint, InconsistentPatientIdError))
+        }
+      }
+
 
   def validateForEnter(
       appointId: Int,
       appointTimeId: Int,
       nameInput: String,
       patientId: String,
-      memoInput: String
-  ): Result =
-    (
-      validateAppointIdForEnter(appointId),
-      validateAppointTimeId(appointTimeId),
-      validateName(nameInput),
-      validatePatientId(patientId),
-      validateMemo(memoInput)
+      memoInput: String,
+      patientOption: Option[Patient]
+  ): Result[Appoint] =
+    val r = (
+      validateAppointIdForEnter(appointId).result,
+      validateAppointTimeId(appointTimeId).result,
+      validateName(nameInput).result,
+      validatePatientId(patientId).result,
+      validateMemo(memoInput).result
     ).mapN(Appoint.apply)
+    .andThen(appoint => validatePatientIdConsistency(appoint, patientOption).result)
+    Result(r)
+
+  def validateForUpate(appoint: Appoint, patientOption: Option[Patient]): Result[Appoint] =
+    val r = (
+      validateAppointIdForUpdate(appoint.appointId).result,
+      validateAppointTimeId(appoint.appointTimeId).result,
+      validateName(appoint.patientName).result,
+      validatePatientIdValue(appoint.patientId).result,
+      validateMemo(appoint.memo).result
+    ).tupled.andThen(_ => validatePatientIdConsistency(appoint, patientOption).result)
+    Result(r)

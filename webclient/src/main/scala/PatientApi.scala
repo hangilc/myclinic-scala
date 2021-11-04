@@ -17,7 +17,8 @@ object PatientApi extends ApiBase:
       get("get-patient", Params("patient-id" -> patientId))
 
     def findPatient(patientId: Int): Future[Option[Patient]] = 
-      get("find-patient", Params("patient-id" -> patientId))
+      if patientId <= 0 then Future.successful(None)
+      else get("find-patient", Params("patient-id" -> patientId))
 
     def searchPatient(text: String): Future[List[Patient]] = 
       get("search-patient", Params("text" -> text))

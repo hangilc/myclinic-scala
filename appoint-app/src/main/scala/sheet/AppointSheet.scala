@@ -184,7 +184,6 @@ class AppointSheet:
       clear()
       val appointDates: List[AppointDate] =
         AppointDate.classify(dates, clinicOpMap, appointTimes, appointMap)
-      println(("appointDates", appointDates))
       appointDates
         .foreach((date: AppointDate) => {
           val list: List[(AppointTime, List[Appoint])] =

@@ -50,7 +50,10 @@ object MakeAppointDialog:
         cls := "error-box"
       ),
       Form.rows(
-        span("患者名：") -> form(displayInlineBlock, onsubmit := (doSearchPatient _))(
+        span("患者名：") -> form(
+          displayInlineBlock,
+          onsubmit := (doSearchPatient _)
+        )(
           div(
             nameInput(placeholder := "姓　名"),
             Icons.search(color = "gray", size = "1.2rem")(
@@ -108,11 +111,10 @@ object MakeAppointDialog:
         }
       }))
 
-    def doSearchByPatientId(): Unit ={
+    def doSearchByPatientId(): Unit = {
       try
         val patientId = patientIdInput.value.toInt
-        for
-          patient <- Api.getPatient(patientId)
+        for patient <- Api.getPatient(patientId)
         yield {
           nameInput.value = patient.fullName(" ")
         }
@@ -126,22 +128,31 @@ object MakeAppointDialog:
         Api.registerAppoint(appoint)
         close()
 
-      if appoint.patientId != 0 then
-        for
-          patientOpt <- Api.findPatient(appoint.patientId)
-          _ = patientOpt match {
-            case Some(patient) => {
-              val validated =
-                AppointValidator.validatePatientIdConsistency(appoint, patient)
-              AppointValidator.toEither(validated) match {
-                case Right(appoint) => action(appoint)
-                case Left(msg)      => showError(msg)
-              }
-            }
-            case None => showError("患者番号に該当する患者情報がみつかりません。")
-          }
-        yield ()
-      else action(appoint)
+      for patientOption <- Api.findPatient(appoint.patientId)
+      yield {
+        AppointValidator
+          .validatePatientIdConsistency(appoint, patientOption)
+          .toEither() match {
+          case Right(appoint) => action(appoint)
+          case Left(msg)      => showError(msg)
+        }
+      }
+
+    // if appoint.patientId != 0 then
+    //   for
+    //     patientOpt <- Api.findPatient(appoint.patientId)
+    //     _ = patientOpt match {
+    //       case Some(patient) => {
+    //         val validated =
+    //           AppointValidator.validatePatientIdConsistency(appoint, patient).toEither() match {
+    //           case Right(appoint) => action(appoint)
+    //           case Left(msg)      => showError(msg)
+    //         }
+    //       }
+    //       case None => showError("患者番号に該当する患者情報がみつかりません。")
+    //     }
+    //   yield ()
+    // else action(appoint)
 
     def makeNameSlot(patient: Patient): HTMLElement =
       div(hoverBackground("#eee"), padding := "2px 4px", cursor := "pointer")(
@@ -222,7 +233,16 @@ object MakeAppointDialog:
       errorBox(msg, display := "block")
 
     def validate(): Either[String, Appoint] =
-      val v = AppointValidator
+      for
+        patientOption <- 
+          AppointValidator.validatePatientId(patientIdInput.value).result match {
+            case Valid(patientId) => Api.findPatient(patientId)
+            case _ => Future.successful(None)
+          }
+      yield {
+
+      }
+      AppointValidator
         .validateForEnter(
           0,
           appointTime.appointTimeId,
@@ -230,7 +250,7 @@ object MakeAppointDialog:
           patientIdInput.value,
           memoInput.value
         )
-      AppointValidator.toEither(v)
+        .toEither()
 
     def dateTimeRep(appointTime: AppointTime): String =
       Misc.formatAppointTimeSpan(appointTime)

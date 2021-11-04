@@ -99,6 +99,8 @@ object Modifiers:
   val displayDefault = display := ""
   val justifyContent =
     styleSetter((style, value) => style.setProperty("justify-content", value))
+  val alignItems =
+    styleSetter((style, value) => style.setProperty("align-items", value))
   val maxHeight = styleSetter((s, v) => s.maxHeight = v)
   val minHeight = styleSetter((s, v) => s.minHeight = v)
   val width = styleSetter((s, v) => s.width = v)

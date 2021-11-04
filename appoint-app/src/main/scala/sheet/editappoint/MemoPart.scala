@@ -30,7 +30,7 @@ class MemoPart(var memo: String, appointId: Int):
 
   class Disp() extends ValuePartHandler:
     val wrapper = valuePart
-    val editIcon = Icons.pencilAlt(color = "gray")
+    val editIcon = Icons.pencilAlt(color = "gray", size = "1.2rem")
     def populate(): Unit =
       val ele = div(
         span(text),

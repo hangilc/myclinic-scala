@@ -9,6 +9,7 @@ import org.scalajs.dom.raw.HTMLElement
 import dev.myclinic.scala.webclient.Api
 import concurrent.ExecutionContext.Implicits.global
 import dev.myclinic.scala.model.{Patient}
+import org.scalajs.dom.document
 
 class PatientIdPart(var patientId: Int, appointId: Int, patientName: => String):
   val keyPart = span("患者番号：")
@@ -27,7 +28,7 @@ class PatientIdPart(var patientId: Int, appointId: Int, patientName: => String):
   class Disp() extends ValuePartHandler:
     val wrapper: HTMLElement = valuePart
     def populate(): Unit =
-      val editIcon = Icons.pencilAlt(color = "gray")
+      val editIcon = Icons.pencilAlt(color = "gray", size = "1.2rem")
       val ele = div(
         span(label),
         editIcon(
@@ -64,7 +65,7 @@ class PatientIdPart(var patientId: Int, appointId: Int, patientName: => String):
     val workarea = div()
     val errBox = ErrorBox()
     enterIcon(onclick := (() => onEnter()))
-    discardIcon(onclick := (() =>  {
+    discardIcon(onclick := (() => {
       valuePartHandler = Disp()
       valuePartHandler.populate()
     }))
@@ -115,11 +116,9 @@ class PatientIdPart(var patientId: Int, appointId: Int, patientName: => String):
     def doRefresh(): Unit =
       errBox.hide()
       workarea.innerHTML = ""
-      for
-        patients <- Api.searchPatient(patientName)
+      for patients <- Api.searchPatient(patientName)
       yield {
-        if patients.size == 1 then
-          input.value = patients(0).patientId.toString
+        if patients.size == 1 then input.value = patients(0).patientId.toString
         else if patients.size > 1 then
           patients.foreach(patient => {
             val slot = makePatientSlot(patient)
@@ -145,18 +144,18 @@ class PatientIdPart(var patientId: Int, appointId: Int, patientName: => String):
           patientOption match {
             case None => errBox.show("患者番号に該当する患者情報をみつけられません。")
             case Some(patient) => {
-              val v =
-                AppointValidator.validatePatientIdConsistency(
+              AppointValidator
+                .validatePatientIdConsistency(
                   appointUpdate,
                   patient
                 )
-              AppointValidator.toEither(v) match {
-                case Right(app) => { 
+                .toEither() match {
+                case Right(app) => {
                   Api.updateAppoint(app)
                   valuePartHandler = Disp()
                   valuePartHandler.populate()
                 }
-                case Left(msg)  => errBox.show(msg)
+                case Left(msg) => errBox.show(msg)
               }
             }
           }
