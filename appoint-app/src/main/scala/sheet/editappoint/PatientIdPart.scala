@@ -16,19 +16,19 @@ import scala.util.Success
 import scala.util.Failure
 import scala.concurrent.Future
 
-class PatientIdPart(var patientId: Int, appointId: Int, patientName: => String):
+class PatientIdPart(var appoint: Appoint):
   val keyPart = span("患者番号：")
   val valuePart = div()
   var valuePartHandler: ValuePartHandler = Disp()
   valuePartHandler.populate()
 
-  def onPatientIdChanged(newPatientId: Int): Unit =
-    patientId = newPatientId
-    valuePartHandler.onPatientIdChanged()
+  def onAppointChanged(newAppoint: Appoint): Unit =
+    appoint = newAppoint
+    valuePartHandler.updateUI()
 
   trait ValuePartHandler:
     def populate(): Unit
-    def onPatientIdChanged(): Unit
+    def updateUI(): Unit
 
   def changeValuePartTo(handler: ValuePartHandler): Unit =
     valuePartHandler = handler
@@ -163,9 +163,38 @@ class PatientIdPart(var patientId: Int, appointId: Int, patientName: => String):
         case Left(msg) => errBox.show(msg)
       }
 
+    def post(): Unit = 
+      val f =
+        for
+          appointResult <- validate()
+        yield {
+          appointResult match {
+            case Right(appoint) => {
+              if appoint.patientId != patientId then
+                Api.updateAppoint(appoint)
+            }
+            case Left(msg) => errBox.show(msg)
+          }
+          
+        }
+      f.onComplete {
+        case Success(_) => ()
+        case Failure(ex) => errBox.show(ex.toString)
+      }
+
     def validate(): Future[Either[String, Appoint]] =
       val patientIdResult = AppointValidator.validatePatientId(input.value)
       patientIdResult.toEither() match {
         case Left(msg) => Future.successful(Left(msg))
-        case Right(patientId) => ???
+        case Right(patientId) => {
+          for
+            appoint <- Api.getAppoint(appointId)
+            patientOption <- Api.findPatient(patientId)
+          yield {
+            AppointValidator.validateForUpdate(
+              appoint.copy(patientId = patientId),
+              patientOption
+            ).toEither()
+          }
+        }
       }

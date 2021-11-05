@@ -8,17 +8,17 @@ import scala.language.implicitConversions
 import org.scalajs.dom.raw.HTMLElement
 import dev.myclinic.scala.webclient.Api
 import concurrent.ExecutionContext.Implicits.global
-import dev.myclinic.scala.model.{Patient}
+import dev.myclinic.scala.model.{Patient, Appoint}
 
-class MemoPart(var memo: String, appointId: Int):
+class MemoPart(var appoint: Appoint):
   val keyPart: HTMLElement = span("メモ：")
   val valuePart: HTMLElement = div()
   var valuePartHandler: ValuePartHandler = Disp()
   valuePartHandler.populate()
 
-  def onMemoChanged(newMemo: String): Unit =
-    memo = newMemo
-    valuePartHandler.onMemoChanged()
+  def onAppointChanged(newAppoint: Appoint): Unit =
+    appoint = newAppoint
+    valuePartHandler.updateUI()
 
   def setValuePartHandler(handler: ValuePartHandler): Unit =
     valuePartHandler = handler
@@ -26,7 +26,7 @@ class MemoPart(var memo: String, appointId: Int):
 
   trait ValuePartHandler:
     def populate(): Unit
-    def onMemoChanged(): Unit
+    def updateUI(): Unit
 
   class Disp() extends ValuePartHandler:
     val wrapper = valuePart

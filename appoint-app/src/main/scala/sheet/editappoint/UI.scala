@@ -6,35 +6,34 @@ import scala.language.implicitConversions
 import dev.myclinic.scala.model.{Appoint, AppointTime}
 import dev.myclinic.scala.web.appoint
 import appoint.Misc
+import org.scalajs.dom.raw.HTMLElement
 
-class UI(
-    appointTime: AppointTime,
-    appointId: Int,
-    patientName: => String,
-    patientId: => Int,
-    memo: => String
-):
-  val execCancelButton = button("予約取消実行")
-  val closeButton = button("閉じる")
-  private val patientNamePart = PatientNamePart(patientName, appointId)
-  private val patientIdPart = PatientIdPart(patientId, appointId, patientName)
-  private val memoPart = MemoPart(memo, appointId)
-  val body = div(
-    div(timesRep),
-    Form.rows(
-      patientNamePart.keyPart -> patientNamePart.valuePart,
-      patientIdPart.keyPart -> patientIdPart.valuePart,
-      memoPart.keyPart -> memoPart.valuePart,
-    )
-  )
-  val commands = div(execCancelButton, closeButton)
+trait UI:
+  val body: HTMLElement
+  val commands: HTMLElement
+  val execCancelButton: HTMLElement
+  val closeButton: HTMLElement
+  def onAppointChanged(newAppoint: Appoint): Unit
+    
 
-  def dateRep: String = Misc.formatAppointDate(appointTime.date)
-  def timesRep: String = Misc.formatAppointTimeSpan(appointTime)
-
-  def onPatientNameChanged(): Unit =
-    patientNamePart.onPatientNameChanged(patientName)
-  def onPatientIdChanged(): Unit = 
-    patientIdPart.onPatientIdChanged(patientId)
-  def onMemoChanged(): Unit =
-    memoPart.onMemoChanged(memo)
+object UI:
+  def apply(appoint: Appoint, appointTime: AppointTime): UI =
+    new UI:
+      val execCancelButton = button("予約取消実行")
+      val closeButton = button("閉じる")
+      val patientNamePart = PatientNamePart(appoint)
+      val patientIdPart = PatientIdPart(appoint)
+      val memoPart = MemoPart(appoint)
+      val body = div(
+        div(Misc.formatAppointTimeSpan(appointTime)),
+        Form.rows(
+          patientNamePart.keyPart -> patientNamePart.valuePart,
+          patientIdPart.keyPart -> patientIdPart.valuePart,
+          memoPart.keyPart -> memoPart.valuePart
+        )
+      )
+      val commands = div(execCancelButton, closeButton)
+      def onAppointChanged(newAppoint: Appoint): Unit =
+        patientNamePart.onAppointChanged(newAppoint)
+        patientIdPart.onAppointChanged(newAppoint)
+        memoPart.onAppointChanged(newAppoint)

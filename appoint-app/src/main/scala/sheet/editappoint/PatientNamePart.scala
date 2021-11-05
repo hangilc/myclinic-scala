@@ -8,25 +8,29 @@ import scala.language.implicitConversions
 import org.scalajs.dom.raw.HTMLElement
 import dev.myclinic.scala.webclient.Api
 import concurrent.ExecutionContext.Implicits.global
-import dev.myclinic.scala.model.{Patient}
+import dev.myclinic.scala.model.{Patient, Appoint}
 import dev.myclinic.scala.validator.AppointValidator
+import scala.util.Success
+import scala.util.Failure
+import cats.data.Validated.Valid
 
-class PatientNamePart(var patientName: String, appointId: Int):
+class PatientNamePart(var appoint: Appoint):
   val keyPart = span("患者名：")
   val valuePart = div()
   var valuePartHandler: ValuePartHandler = Disp()
   valuePartHandler.populate()
 
-  def onPatientNameChanged(newPatientName: String): Unit =
-    patientName = newPatientName
-    setValuePartHandler(Disp())
+  def onAppointChanged(newAppoint: Appoint): Unit =
+    appoint = newAppoint
+    valuePartHandler.updateUI()
 
-  def setValuePartHandler(handler: ValuePartHandler): Unit =
+  def changeValuePartHandlerTo(handler: ValuePartHandler): Unit =
     valuePartHandler = handler
     valuePartHandler.populate()
 
   trait ValuePartHandler:
     def populate(): Unit
+    def updateUI(): Unit
 
   class Disp() extends ValuePartHandler:
     val wrapper = valuePart
@@ -35,7 +39,7 @@ class PatientNamePart(var patientName: String, appointId: Int):
     val workarea = div()
     val errBox = ErrorBox()
     val ele = div(
-      patientName,
+      appoint.patientName,
       searchIcon(displayNone, ml := "0.5rem")(
         Icons.defaultStyle,
         onclick := (onSearchClick _)
@@ -62,6 +66,9 @@ class PatientNamePart(var patientName: String, appointId: Int):
       wrapper.innerHTML = ""
       wrapper(ele)
 
+    def updateUI(): Unit = 
+      changeValuePartHandlerTo(Disp())
+
     def makeNameSlot(patient: Patient): HTMLElement =
       div(hoverBackground("#eee"), padding := "2px 4px", cursor := "pointer")(
         s"(${patient.patientId}) ${patient.fullName()}"
@@ -70,7 +77,7 @@ class PatientNamePart(var patientName: String, appointId: Int):
     def onSearchClick(): Unit =
       errBox.hide()
       workarea.innerHTML = ""
-      for patients <- Api.searchPatient(patientName)
+      for patients <- Api.searchPatient(appoint.patientName)
       yield {
         patients.foreach(patient => {
           val slot = makeNameSlot(patient)
@@ -87,15 +94,23 @@ class PatientNamePart(var patientName: String, appointId: Int):
 
     def applyPatient(patient: Patient): Unit =
       for
-        appoint <- Api.getAppoint(appointId)
+        appoint <- Api.getAppoint(appoint.appointId)
         newAppoint = {
           appoint.copy(
             patientName = patient.fullName("　"),
             patientId = patient.patientId
           )
         }
-        _ <- Api.updateAppoint(newAppoint)
-      yield {}
+        patientOption <- Api.findPatient(patient.patientId)
+      yield {
+        AppointValidator.validateForUpdate(appoint, patientOption).toEither() match {
+          case Right(appoint) => {
+            Api.updateAppoint(appoint)
+            changeValuePartHandlerTo(Disp())
+          }
+          case Left(msg) => errBox.show(msg)
+        }
+      }
     
   class Edit() extends ValuePartHandler:
     val input = inputText()
@@ -111,25 +126,40 @@ class PatientNamePart(var patientName: String, appointId: Int):
         input,
         enterIcon(Icons.defaultStyle, ml := "0.1rem", onclick := (onEnterClick _)),
         discardIcon(Icons.defaultStyle, onclick := (onDiscardClick _)),
-        searchIcon(Icons.defaultStyle),
+        searchIcon(Icons.defaultStyle, onclick := (onSearchClick _)),
         workarea,
         errBox.ele
       )
 
+    def updateUI(): Unit =
+      input.value = appoint.patientName
+      errBox.hide()
+      workarea.clear()
+
     def onEnterClick(): Unit =
-      val name = input.value
-      for
-        appoint <- Api.getAppoint(appointId)
-        patientOption <- Api.findPatient(appoint.patientId)
-      yield {
-        AppointValidator.validateForUpdate(appoint, patientOption).toEither() match {
-          case Right(appoint) => ()
-          case Left(msg) => errBox.show(msg)
+      val f = 
+        for
+          appoint <- Api.getAppoint(appoint.appointId)
+          newAppoint = appoint.copy(patientName = input.value)
+          patientOption <- Api.findPatient(appoint.patientId)
+        yield {
+          AppointValidator.validateForUpdate(newAppoint, patientOption).toEither() match {
+            case Right(appoint) => {
+              Api.updateAppoint(appoint)
+              changeValuePartHandlerTo(Disp())
+            }
+            case Left(msg) => errBox.show(msg)
+          }
         }
+      f.onComplete {
+        case Success(_) => ()
+        case Failure(ex) => errBox.show(ex.toString)
       }
 
     def onDiscardClick(): Unit = 
       Disp().populate()
-      ()
+
+    def onSearchClick(): Unit =
+      ???
 
       
