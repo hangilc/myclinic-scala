@@ -57,8 +57,8 @@ class PatientIdPart(var appoint: Appoint):
         editIcon(displayNone)
         ()
       }))
-      def updateUI(): Unit =
-        changeValuePartTo(Disp())
+    def updateUI(): Unit =
+      changeValuePartTo(Disp())
     def label: String =
       if appoint.patientId == 0 then "（設定なし）"
       else appoint.patientId.toString
@@ -191,7 +191,7 @@ class PatientIdPart(var appoint: Appoint):
         case Left(msg) => Future.successful(Left(msg))
         case Right(patientId) => {
           for
-            appoint <- Api.getAppoint(appointId)
+            appoint <- Api.getAppoint(appoint.appointId)
             patientOption <- Api.findPatient(patientId)
           yield {
             AppointValidator.validateForUpdate(

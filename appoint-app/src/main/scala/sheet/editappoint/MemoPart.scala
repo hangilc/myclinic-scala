@@ -9,6 +9,11 @@ import org.scalajs.dom.raw.HTMLElement
 import dev.myclinic.scala.webclient.Api
 import concurrent.ExecutionContext.Implicits.global
 import dev.myclinic.scala.model.{Patient, Appoint}
+import scala.util.Success
+import scala.util.Failure
+import dev.myclinic.scala.validator.AppointValidator
+import dev.myclinic.scala.validator.AppointValidator.given
+import scala.concurrent.Future
 
 class MemoPart(var appoint: Appoint):
   val keyPart: HTMLElement = span("メモ：")
@@ -63,25 +68,40 @@ class MemoPart(var appoint: Appoint):
     val input = inputText()
     val enterIcon = Icons.checkCircle(color = Colors.primary)
     val discardIcon = Icons.xCircle(color = Colors.danger)
+    val errBox = ErrorBox()
     enterIcon(onclick := (onEnter _))
     discardIcon(onclick := (() => {
-      setValuePartHandler(Disp())
+      changeValuePartHandlerTo(Disp())
     }))
     def populate(): Unit =
       wrapper.innerHTML = ""
       wrapper(
-        input(value := memo),
+        input(value := appoint.memo),
         enterIcon(Icons.defaultStyle, ml := "0.5rem"),
-        discardIcon(Icons.defaultStyle)
+        discardIcon(Icons.defaultStyle),
+        errBox.ele
       )
-    def onMemoChanged(): Unit = 
-      input.value = memo
+    def updateUI(): Unit =
+      input.value = appoint.memo
     def onEnter(): Unit = 
-      for
-        appoint <- Api.getAppoint(appointId)
-        newAppoint = appoint.copy(memo = input.value)
-        _ <- Api.updateAppoint(newAppoint)
-      yield {
-        setValuePartHandler(Disp())
+      val f =
+        for
+          appoint <- Api.getAppoint(appoint.appointId)
+          newAppoint = appoint.copy(memo = input.value)
+          patientOption <-Api.findPatient(appoint.patientId)
+          validated = AppointValidator.validateForUpdate(newAppoint, patientOption).toEither()
+          ok <- validated match {
+            case Right(appoint) => Api.updateAppoint(appoint)
+            case Left(msg) => {
+              errBox.show(msg)
+              Future.successful(false)
+            }
+          }
+        yield {
+          if ok then changeValuePartHandlerTo(Disp())
+        }
+      f.onComplete {
+        case Success(_) => ()
+        case Failure(ex) => errBox.show(ex.toString)
       }
 

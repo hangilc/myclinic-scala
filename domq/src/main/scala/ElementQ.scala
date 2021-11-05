@@ -37,6 +37,9 @@ case class ElementQ(ele: HTMLElement):
   def remove(): Unit =
     withParent(n => n.removeChild(ele))
 
+  def isEmpty: Boolean =
+    ele.childElementCount == 0
+
 object ElementQ {
   
   given Conversion[HTMLElement, ElementQ] = ElementQ(_)

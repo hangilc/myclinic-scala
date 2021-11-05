@@ -70,10 +70,12 @@ class PatientNamePart(var appoint: Appoint):
       changeValuePartHandlerTo(Disp())
 
     def onSearchClick(): Unit =
-      errBox.hide()
-      workarea.innerHTML = ""
-      for patients <- Api.searchPatient(appoint.patientName)
-      yield populateSearchResult(workarea, errBox, patients)
+      if workarea.isEmpty then
+        errBox.hide()
+        workarea.innerHTML = ""
+        for patients <- Api.searchPatient(appoint.patientName)
+        yield populateSearchResult(workarea, errBox, patients)
+      else workarea.clear()
 
     def onEditClick(): Unit =
       errBox.hide()
@@ -83,6 +85,7 @@ class PatientNamePart(var appoint: Appoint):
 
   class Edit() extends ValuePartHandler:
     val input = inputText()
+    input.value = appoint.patientName
     val enterIcon = Icons.checkCircle(color = Colors.primary, size = "1.2rem")
     val discardIcon = Icons.xCircle(color = Colors.danger, size = "1.2rem")
     val searchIcon = Icons.search(color = "gray", size = "1.2rem")
@@ -135,7 +138,17 @@ class PatientNamePart(var appoint: Appoint):
       Disp().populate()
 
     def onSearchClick(): Unit =
-      ???
+      if workarea.isEmpty then
+        val f = 
+          for
+            patients <- Api.searchPatient(input.value)
+          yield populateSearchResult(workarea, errBox, patients)
+        f.onComplete {
+          case Success(_) => ()
+          case Failure(ex) => errBox.show(ex.toString)
+        }
+      else
+        workarea.clear()
 
   def makeNameSlot(patient: Patient): HTMLElement =
     div(hoverBackground("#eee"), padding := "2px 4px", cursor := "pointer")(
