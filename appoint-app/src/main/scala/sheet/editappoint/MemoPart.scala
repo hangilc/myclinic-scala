@@ -17,79 +17,72 @@ import scala.concurrent.Future
 
 class MemoPart(var appoint: Appoint):
   val keyPart: HTMLElement = span("メモ：")
-  val valuePart: HTMLElement = div()
-  var valuePartHandler: ValuePartHandler = Disp()
-  valuePartHandler.populate()
+  val manager = ValuePartManager(Disp())
+  val valuePart: HTMLElement = manager.ele
 
   def onAppointChanged(newAppoint: Appoint): Unit =
     appoint = newAppoint
-    valuePartHandler.updateUI()
+    manager.updateUI()
 
-  def changeValuePartHandlerTo(handler: ValuePartHandler): Unit =
-    valuePartHandler = handler
-    valuePartHandler.populate()
+  def changeValuePartTo(part: ValuePart): Unit =
+    manager.changeValuePartTo(part)
 
-  trait ValuePartHandler:
-    def populate(): Unit
-    def updateUI(): Unit
-
-  class Disp() extends ValuePartHandler:
-    val wrapper = valuePart
+  class Disp() extends ValuePart:
     val editIcon = Icons.pencilAlt(color = "gray", size = "1.2rem")
-    def populate(): Unit =
-      val ele = div(
-        span(text),
-        editIcon(displayNone, ml := "0.5rem", Icons.defaultStyle)(
-          onclick := (onEditClick _)
-        )
-      )
-      ele(onmouseenter := (() => {
+    val main = div(
+      onmouseenter := (() => {
         editIcon(displayDefault)
         ()
-      }))
-      ele(onmouseleave := (() => {
+      }),
+      onmouseleave := (() => {
         editIcon(displayNone)
         ()
-      }))
-      wrapper.innerHTML = ""
-      wrapper(ele)
+      })
+    )(
+      span(text),
+      editIcon(displayNone, ml := "0.5rem", Icons.defaultStyle)(
+        onclick := (onEditClick _)
+      )
+    )
+
     def updateUI(): Unit =
-      changeValuePartHandlerTo(Disp())
+      changeValuePartTo(Disp())
 
     def onEditClick(): Unit =
-      changeValuePartHandlerTo(Edit())
+      changeValuePartTo(Edit())
 
-    def text: String = 
+    def text: String =
       if appoint.memo.isEmpty then "（設定なし）"
       else appoint.memo
 
-  class Edit() extends ValuePartHandler:
-    val wrapper = valuePart
-    val input = inputText()
+  class Edit() extends ValuePart:
+    val input = inputText(value := appoint.memo)
     val enterIcon = Icons.checkCircle(color = Colors.primary)
     val discardIcon = Icons.xCircle(color = Colors.danger)
-    val errBox = ErrorBox()
-    enterIcon(onclick := (onEnter _))
     discardIcon(onclick := (() => {
-      changeValuePartHandlerTo(Disp())
+      changeValuePartTo(Disp())
     }))
-    def populate(): Unit =
-      wrapper.innerHTML = ""
-      wrapper(
-        input(value := appoint.memo),
-        enterIcon(Icons.defaultStyle, ml := "0.5rem"),
-        discardIcon(Icons.defaultStyle),
-        errBox.ele
+    val main = div(
+      input(value := appoint.memo),
+      enterIcon(Icons.defaultStyle, ml := "0.5rem", onclick := (onEnter _)),
+      discardIcon(
+        Icons.defaultStyle,
+        onclick := (() => {
+          changeValuePartTo(Disp())
+        })
       )
+    )
     def updateUI(): Unit =
       input.value = appoint.memo
-    def onEnter(): Unit = 
+    def onEnter(): Unit =
       val f =
         for
           appoint <- Api.getAppoint(appoint.appointId)
           newAppoint = appoint.copy(memo = input.value)
-          patientOption <-Api.findPatient(appoint.patientId)
-          validated = AppointValidator.validateForUpdate(newAppoint, patientOption).toEither()
+          patientOption <- Api.findPatient(appoint.patientId)
+          validated = AppointValidator
+            .validateForUpdate(newAppoint, patientOption)
+            .toEither()
           ok <- validated match {
             case Right(appoint) => Api.updateAppoint(appoint)
             case Left(msg) => {
@@ -98,10 +91,9 @@ class MemoPart(var appoint: Appoint):
             }
           }
         yield {
-          if ok then changeValuePartHandlerTo(Disp())
+          if ok then changeValuePartTo(Disp())
         }
       f.onComplete {
-        case Success(_) => ()
+        case Success(_)  => ()
         case Failure(ex) => errBox.show(ex.toString)
       }
-

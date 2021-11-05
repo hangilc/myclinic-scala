@@ -16,29 +16,20 @@ import cats.data.Validated.Valid
 
 class PatientNamePart(var appoint: Appoint):
   val keyPart = span("患者名：")
-  val valuePart = div()
-  var valuePartHandler: ValuePartHandler = Disp()
-  valuePartHandler.populate()
+  val manager = ValuePartManager(Disp())
+  val valuePart = manager.ele
 
   def onAppointChanged(newAppoint: Appoint): Unit =
     appoint = newAppoint
-    valuePartHandler.updateUI()
+    manager.updateUI()
 
-  def changeValuePartHandlerTo(handler: ValuePartHandler): Unit =
-    valuePartHandler = handler
-    valuePartHandler.populate()
+  def changeValuePartTo(valuePart: ValuePart): Unit =
+    manager.changeValuePartTo(valuePart)
 
-  trait ValuePartHandler:
-    def populate(): Unit
-    def updateUI(): Unit
-
-  class Disp() extends ValuePartHandler:
-    val wrapper = valuePart
+  class Disp() extends ValuePart:
     val searchIcon = Icons.search(color = "gray", size = "1.2rem")
     val editIcon = Icons.pencilAlt(color = "gray", size = "1.2rem")
-    val workarea = div()
-    val errBox = ErrorBox()
-    val ele = div(
+    val main = div(
       appoint.patientName,
       searchIcon(displayNone, ml := "0.5rem")(
         Icons.defaultStyle,
@@ -47,27 +38,21 @@ class PatientNamePart(var appoint: Appoint):
       editIcon(displayNone, ml := "0.1rem")(
         Icons.defaultStyle,
         onclick := (onEditClick _)
-      ),
-      workarea,
-      errBox.ele
+      )
     )
-    ele(onmouseenter := (() => {
+    main(onmouseenter := (() => {
       searchIcon(displayDefault)
       editIcon(displayDefault)
       ()
     }))
-    ele(onmouseleave := (() => {
+    main(onmouseleave := (() => {
       searchIcon(displayNone)
       editIcon(displayNone)
       ()
     }))
 
-    def populate(): Unit =
-      wrapper.innerHTML = ""
-      wrapper(ele)
-
     def updateUI(): Unit =
-      changeValuePartHandlerTo(Disp())
+      changeValuePartTo(Disp())
 
     def onSearchClick(): Unit =
       if workarea.isEmpty then
@@ -77,36 +62,23 @@ class PatientNamePart(var appoint: Appoint):
         yield populateSearchResult(workarea, errBox, patients)
       else workarea.clear()
 
-    def onEditClick(): Unit =
-      errBox.hide()
-      workarea.innerHTML = ""
-      Edit().populate()
-      ()
+    def onEditClick(): Unit = changeValuePartTo(Edit())
 
-  class Edit() extends ValuePartHandler:
-    val input = inputText()
-    input.value = appoint.patientName
+  class Edit() extends ValuePart:
+    val input = inputText(value := appoint.patientName)
     val enterIcon = Icons.checkCircle(color = Colors.primary, size = "1.2rem")
     val discardIcon = Icons.xCircle(color = Colors.danger, size = "1.2rem")
     val searchIcon = Icons.search(color = "gray", size = "1.2rem")
-    val workarea = div()
-    val errBox = ErrorBox()
-    def populate(): Unit =
-      val wrapper = valuePart
-      wrapper.innerHTML = ""
-      wrapper(
-        input,
-        enterIcon(
-          Icons.defaultStyle,
-          ml := "0.1rem",
-          onclick := (onEnterClick _)
-        ),
-        discardIcon(Icons.defaultStyle, onclick := (onDiscardClick _)),
-        searchIcon(Icons.defaultStyle, onclick := (onSearchClick _)),
-        workarea,
-        errBox.ele
-      )
-
+    val main = div(
+      input,
+      enterIcon(
+        Icons.defaultStyle,
+        ml := "0.1rem",
+        onclick := (onEnterClick _)
+      ),
+      discardIcon(Icons.defaultStyle, onclick := (onDiscardClick _)),
+      searchIcon(Icons.defaultStyle, onclick := (onSearchClick _))
+    )
     def updateUI(): Unit =
       input.value = appoint.patientName
       errBox.hide()
@@ -124,7 +96,7 @@ class PatientNamePart(var appoint: Appoint):
             .toEither() match {
             case Right(appoint) => {
               Api.updateAppoint(appoint)
-              changeValuePartHandlerTo(Disp())
+              changeValuePartTo(Disp())
             }
             case Left(msg) => errBox.show(msg)
           }
@@ -134,21 +106,18 @@ class PatientNamePart(var appoint: Appoint):
         case Failure(ex) => errBox.show(ex.toString)
       }
 
-    def onDiscardClick(): Unit =
-      Disp().populate()
+    def onDiscardClick(): Unit = changeValuePartTo(Disp())
 
     def onSearchClick(): Unit =
       if workarea.isEmpty then
-        val f = 
-          for
-            patients <- Api.searchPatient(input.value)
+        val f =
+          for patients <- Api.searchPatient(input.value)
           yield populateSearchResult(workarea, errBox, patients)
         f.onComplete {
-          case Success(_) => ()
+          case Success(_)  => ()
           case Failure(ex) => errBox.show(ex.toString)
         }
-      else
-        workarea.clear()
+      else workarea.clear()
 
   def makeNameSlot(patient: Patient): HTMLElement =
     div(hoverBackground("#eee"), padding := "2px 4px", cursor := "pointer")(
@@ -183,7 +152,7 @@ class PatientNamePart(var appoint: Appoint):
         .toEither() match {
         case Right(appoint) => {
           Api.updateAppoint(appoint)
-          changeValuePartHandlerTo(Disp())
+          changeValuePartTo(Disp())
         }
         case Left(msg) => errBox.show(msg)
       }
