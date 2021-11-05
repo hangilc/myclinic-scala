@@ -8,10 +8,13 @@ import scala.language.implicitConversions
 import org.scalajs.dom.raw.HTMLElement
 import dev.myclinic.scala.webclient.Api
 import concurrent.ExecutionContext.Implicits.global
-import dev.myclinic.scala.model.{Patient}
+import dev.myclinic.scala.model.{Patient, Appoint}
 import org.scalajs.dom.document
 import dev.myclinic.scala.validator.AppointValidator
 import dev.myclinic.scala.validator.AppointValidator.given
+import scala.util.Success
+import scala.util.Failure
+import scala.concurrent.Future
 
 class PatientIdPart(var patientId: Int, appointId: Int, patientName: => String):
   val keyPart = span("患者番号：")
@@ -62,17 +65,16 @@ class PatientIdPart(var patientId: Int, appointId: Int, patientName: => String):
   class Edit() extends ValuePartHandler:
     val wrapper = valuePart
     val input = inputText()
-    val enterIcon = Icons.checkCircle(color = Colors.primary)
-    val discardIcon = Icons.xCircle(color = Colors.danger)
-    val refreshIcon = Icons.refresh(color = "gray")
+    val enterIcon = Icons.checkCircle(color = Colors.primary, size = "1.2rem")
+    val discardIcon = Icons.xCircle(color = Colors.danger, size = "1.2rem")
+    val refreshIcon = Icons.refresh(color = "gray", size = "1.2rem")
+    val searchIcon = Icons.search(color = "gray", size = "1.2rem")
     val workarea = div()
     val errBox = ErrorBox()
     enterIcon(onclick := (() => onEnter()))
-    discardIcon(onclick := (() => {
-      valuePartHandler = Disp()
-      valuePartHandler.populate()
-    }))
+    discardIcon(onclick := (() => changeValuePartTo(Disp())))
     refreshIcon(onclick := (() => doRefresh()))
+    searchIcon(onclick := (() => onSearchClick()))
 
     def populate(): Unit =
       wrapper.innerHTML = ""
@@ -84,6 +86,7 @@ class PatientIdPart(var patientId: Int, appointId: Int, patientName: => String):
         ),
         discardIcon(Icons.defaultStyle),
         refreshIcon(Icons.defaultStyle),
+        searchIcon(Icons.defaultStyle),
         workarea,
         errBox.ele
       )
@@ -97,22 +100,22 @@ class PatientIdPart(var patientId: Int, appointId: Int, patientName: => String):
       val patientIdResult = AppointValidator.validatePatientId(input.value.trim)
       patientIdResult.toEither() match {
         case Right(patientIdValue) => {
-          if patientId == patientIdValue then
-            changeValuePartTo(Disp())
+          if patientId == patientIdValue then changeValuePartTo(Disp())
           else
             for
               appoint <- Api.getAppoint(appointId)
               patientOption <- Api.findPatient(patientIdValue)
             yield {
               val newAppoint = appoint.copy(patientId = patientIdValue)
-              AppointValidator.validateForUpdate(newAppoint, patientOption)
+              AppointValidator
+                .validateForUpdate(newAppoint, patientOption)
                 .toEither() match {
-                  case Right(newAppoint) => {
-                    Api.updateAppoint(newAppoint)
-                    changeValuePartTo(Disp())
-                  }
-                  case Left(msg) => errBox.show(msg)
+                case Right(newAppoint) => {
+                  Api.updateAppoint(newAppoint)
+                  changeValuePartTo(Disp())
                 }
+                case Left(msg) => errBox.show(msg)
+              }
 
             }
         }
@@ -124,20 +127,45 @@ class PatientIdPart(var patientId: Int, appointId: Int, patientName: => String):
         s"(${patient.patientId}) ${patient.fullName()}"
       )
 
+    def populateWorkarea(patients: List[Patient]): Unit =
+      workarea.clear()
+      patients.foreach(patient => {
+        val slot = makePatientSlot(patient)
+        slot(onclick := (() => {
+          input.value = patient.patientId.toString
+          workarea.innerHTML = ""
+        }))
+        workarea(slot)
+      })
+
     def doRefresh(): Unit =
       errBox.hide()
-      workarea.innerHTML = ""
-      for patients <- Api.searchPatient(patientName)
-      yield {
-        if patients.size == 1 then input.value = patients(0).patientId.toString
-        else if patients.size > 1 then
-          patients.foreach(patient => {
-            val slot = makePatientSlot(patient)
-            slot(onclick := (() => {
-              input.value = patient.patientId.toString
-              workarea.innerHTML = ""
-            }))
-            workarea(slot)
-          })
+      val f =
+        for patients <- Api.searchPatient(patientName)
+        yield populateWorkarea(patients)
+      f.onComplete {
+        case Success(_) => ()
+        case Failure(ex) => errBox.show(ex.toString)
       }
 
+    def onSearchClick(): Unit =
+      errBox.hide()
+      AppointValidator.validatePatientId(input.value).toEither() match {
+        case Right(patientId) => {
+          val f = 
+            for patientOption <- Api.findPatient(patientId)
+            yield populateWorkarea(patientOption.toList)
+          f.onComplete {
+            case Success(_) => ()
+            case Failure(ex) => errBox.show(ex.toString)
+          }
+        }
+        case Left(msg) => errBox.show(msg)
+      }
+
+    def validate(): Future[Either[String, Appoint]] =
+      val patientIdResult = AppointValidator.validatePatientId(input.value)
+      patientIdResult.toEither() match {
+        case Left(msg) => Future.successful(Left(msg))
+        case Right(patientId) => ???
+      }

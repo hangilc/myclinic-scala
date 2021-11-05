@@ -4,7 +4,7 @@ import dev.fujiwara.domq.ElementQ.{given, *}
 import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.Html._
 import dev.fujiwara.domq.Modal
-import dev.fujiwara.domq.{Icons, Colors, LocalModal}
+import dev.fujiwara.domq.{Icons, Colors, LocalModal, ErrorBox}
 import dev.myclinic.scala.model.{AppointTime, Appoint, Patient}
 import dev.myclinic.scala.util.KanjiDate
 import dev.fujiwara.domq.Form
@@ -20,6 +20,8 @@ import cats.data.Validated.Invalid
 import concurrent.ExecutionContext.Implicits.global
 import org.scalajs.dom.raw.MouseEvent
 import scala.concurrent.Future
+import scala.util.Success
+import scala.util.Failure
 
 object MakeAppointDialog:
   def open(appointTime: AppointTime): Unit =
@@ -43,13 +45,10 @@ object MakeAppointDialog:
     val memoInput: HTMLInputElement = inputText()
     private val enterButton = button("入力")
     private val cancelButton = button("キャンセル")
-    private val errorBox: HTMLElement = div()
+    private val errBox = ErrorBox()
     body(
       div(dateTimeRep(appointTime)),
-      errorBox(
-        display := "none",
-        cls := "error-box"
-      ),
+      errBox.ele,
       Form.rows(
         span("患者名：") -> form(
           displayInlineBlock,
@@ -105,12 +104,7 @@ object MakeAppointDialog:
 
     def setup(close: () => Unit): Unit =
       cancelButton(onclick := close)
-      enterButton(onclick := (() => {
-        validate() match {
-          case Right(app) => doEnter(app, close)
-          case Left(msg)  => showError(msg)
-        }
-      }))
+      enterButton(onclick := (() => doEnter(close)))
 
     def doSearchByPatientId(): Unit = {
       try
@@ -124,19 +118,21 @@ object MakeAppointDialog:
       }
     }
 
-    def doEnter(appoint: Appoint, close: () => Unit): Unit =
-      def action(appoint: Appoint): Unit =
-        Api.registerAppoint(appoint)
-        close()
-
-      for patientOption <- Api.findPatient(appoint.patientId)
+    def doEnter(close: () => Unit): Unit =
+      val f = for
+        appointResult <- validate()
       yield {
-        AppointValidator
-          .validatePatientIdConsistency(appoint, patientOption)
-          .toEither() match {
-          case Right(appoint) => action(appoint)
-          case Left(msg)      => showError(msg)
+        appointResult match {
+          case Right(appoint) => {
+            Api.registerAppoint(appoint)
+            close()
+          }
+          case Left(msg) => errBox.show(msg)
         }
+      }
+      f.onComplete {
+        case Success(_) => ()
+        case Failure(ex) => errBox.show(ex.toString)
       }
 
     def makeNameSlot(patient: Patient): HTMLElement =
@@ -214,27 +210,25 @@ object MakeAppointDialog:
       patientIdWorkspace(display := "block")
 
     def showError(msg: String): Unit =
-      errorBox.clear()
-      errorBox(msg, display := "block")
+      errBox.show(msg)
 
-    def validate(): Either[String, Appoint] =
-      ???
-      // val patientIdResult = AppointValidator.validatePatientId(patientIdInput.value)
-      // for
-      //   patientOption <- 
-      //     patientIdResult match {
-      //       case Valid(patientId) => Api.findPatient(patientId)
-      //       case _ => Future.successful(None)
-      //     }
-      // yield {
-      //   AppointValidator.validateForEnter(
-      //     appointTime.appointTimeId,
-      //     nameInput.value,
-      //     patientIdResult,
-      //     memoInput.value,
-      //     patientOption
-      //   ).toEither() 
-      // }
+    def validate(): Future[Either[String, Appoint]] =
+      val patientIdResult = AppointValidator.validatePatientId(patientIdInput.value)
+      for
+        patientOption <- 
+          patientIdResult match {
+            case Valid(patientId) => Api.findPatient(patientId)
+            case _ => Future.successful(None)
+          }
+      yield {
+        AppointValidator.validateForEnter(
+          appointTime.appointTimeId,
+          nameInput.value,
+          patientIdResult,
+          memoInput.value,
+          patientOption
+        ).toEither() 
+      }
 
     def dateTimeRep(appointTime: AppointTime): String =
       Misc.formatAppointTimeSpan(appointTime)

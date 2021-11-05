@@ -132,7 +132,7 @@ object AppointValidator:
       patientOption
     )
 
-  def validateForUpate(
+  def validateForUpdate(
       appoint: Appoint,
       patientOption: Option[Patient]
   ): Result[Appoint] =
