@@ -57,10 +57,11 @@ class PatientIdPart(var appoint: Appoint):
         editIcon(displayNone)
         ()
       }))
+      def updateUI(): Unit =
+        changeValuePartTo(Disp())
     def label: String =
-      if patientId == 0 then "（設定なし）"
-      else patientId.toString
-    def onPatientIdChanged(): Unit = populate()
+      if appoint.patientId == 0 then "（設定なし）"
+      else appoint.patientId.toString
 
   class Edit() extends ValuePartHandler:
     val wrapper = valuePart
@@ -91,8 +92,10 @@ class PatientIdPart(var appoint: Appoint):
         errBox.ele
       )
 
-    def onPatientIdChanged(): Unit =
-      input.value = initialValue
+    def updateUI(): Unit =
+      input.value = appoint.patientId.toString
+
+    def patientId: Int = appoint.patientId
 
     def initialValue: String = if patientId == 0 then "" else patientId.toString
 
@@ -103,7 +106,7 @@ class PatientIdPart(var appoint: Appoint):
           if patientId == patientIdValue then changeValuePartTo(Disp())
           else
             for
-              appoint <- Api.getAppoint(appointId)
+              appoint <- Api.getAppoint(appoint.appointId)
               patientOption <- Api.findPatient(patientIdValue)
             yield {
               val newAppoint = appoint.copy(patientId = patientIdValue)
@@ -133,7 +136,7 @@ class PatientIdPart(var appoint: Appoint):
         val slot = makePatientSlot(patient)
         slot(onclick := (() => {
           input.value = patient.patientId.toString
-          workarea.innerHTML = ""
+          post()
         }))
         workarea(slot)
       })
@@ -141,7 +144,7 @@ class PatientIdPart(var appoint: Appoint):
     def doRefresh(): Unit =
       errBox.hide()
       val f =
-        for patients <- Api.searchPatient(patientName)
+        for patients <- Api.searchPatient(appoint.patientName)
         yield populateWorkarea(patients)
       f.onComplete {
         case Success(_) => ()

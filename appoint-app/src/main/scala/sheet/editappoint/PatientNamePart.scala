@@ -45,8 +45,8 @@ class PatientNamePart(var appoint: Appoint):
         onclick := (onSearchClick _)
       ),
       editIcon(displayNone, ml := "0.1rem")(
-      Icons.defaultStyle,
-      onclick := (onEditClick _)
+        Icons.defaultStyle,
+        onclick := (onEditClick _)
       ),
       workarea,
       errBox.ele
@@ -66,25 +66,14 @@ class PatientNamePart(var appoint: Appoint):
       wrapper.innerHTML = ""
       wrapper(ele)
 
-    def updateUI(): Unit = 
+    def updateUI(): Unit =
       changeValuePartHandlerTo(Disp())
-
-    def makeNameSlot(patient: Patient): HTMLElement =
-      div(hoverBackground("#eee"), padding := "2px 4px", cursor := "pointer")(
-        s"(${patient.patientId}) ${patient.fullName()}"
-      )
 
     def onSearchClick(): Unit =
       errBox.hide()
       workarea.innerHTML = ""
       for patients <- Api.searchPatient(appoint.patientName)
-      yield {
-        patients.foreach(patient => {
-          val slot = makeNameSlot(patient)
-          slot(onclick := (() => applyPatient(patient)))
-          workarea(slot)
-        })
-      }
+      yield populateSearchResult(workarea, errBox, patients)
 
     def onEditClick(): Unit =
       errBox.hide()
@@ -92,26 +81,6 @@ class PatientNamePart(var appoint: Appoint):
       Edit().populate()
       ()
 
-    def applyPatient(patient: Patient): Unit =
-      for
-        appoint <- Api.getAppoint(appoint.appointId)
-        newAppoint = {
-          appoint.copy(
-            patientName = patient.fullName("　"),
-            patientId = patient.patientId
-          )
-        }
-        patientOption <- Api.findPatient(patient.patientId)
-      yield {
-        AppointValidator.validateForUpdate(appoint, patientOption).toEither() match {
-          case Right(appoint) => {
-            Api.updateAppoint(appoint)
-            changeValuePartHandlerTo(Disp())
-          }
-          case Left(msg) => errBox.show(msg)
-        }
-      }
-    
   class Edit() extends ValuePartHandler:
     val input = inputText()
     val enterIcon = Icons.checkCircle(color = Colors.primary, size = "1.2rem")
@@ -124,7 +93,11 @@ class PatientNamePart(var appoint: Appoint):
       wrapper.innerHTML = ""
       wrapper(
         input,
-        enterIcon(Icons.defaultStyle, ml := "0.1rem", onclick := (onEnterClick _)),
+        enterIcon(
+          Icons.defaultStyle,
+          ml := "0.1rem",
+          onclick := (onEnterClick _)
+        ),
         discardIcon(Icons.defaultStyle, onclick := (onDiscardClick _)),
         searchIcon(Icons.defaultStyle, onclick := (onSearchClick _)),
         workarea,
@@ -137,13 +110,15 @@ class PatientNamePart(var appoint: Appoint):
       workarea.clear()
 
     def onEnterClick(): Unit =
-      val f = 
+      val f =
         for
           appoint <- Api.getAppoint(appoint.appointId)
           newAppoint = appoint.copy(patientName = input.value)
           patientOption <- Api.findPatient(appoint.patientId)
         yield {
-          AppointValidator.validateForUpdate(newAppoint, patientOption).toEither() match {
+          AppointValidator
+            .validateForUpdate(newAppoint, patientOption)
+            .toEither() match {
             case Right(appoint) => {
               Api.updateAppoint(appoint)
               changeValuePartHandlerTo(Disp())
@@ -152,14 +127,51 @@ class PatientNamePart(var appoint: Appoint):
           }
         }
       f.onComplete {
-        case Success(_) => ()
+        case Success(_)  => ()
         case Failure(ex) => errBox.show(ex.toString)
       }
 
-    def onDiscardClick(): Unit = 
+    def onDiscardClick(): Unit =
       Disp().populate()
 
     def onSearchClick(): Unit =
       ???
 
-      
+  def makeNameSlot(patient: Patient): HTMLElement =
+    div(hoverBackground("#eee"), padding := "2px 4px", cursor := "pointer")(
+      s"(${patient.patientId}) ${patient.fullName()}"
+    )
+
+  def populateSearchResult(
+      wrapper: HTMLElement,
+      errBox: ErrorBox,
+      patients: List[Patient]
+  ): Unit =
+    wrapper.clear()
+    patients.foreach(patient => {
+      val slot = makeNameSlot(patient)
+      wrapper(slot)
+      slot(onclick := (() => applyPatient(patient, errBox)))
+    })
+
+  def applyPatient(patient: Patient, errBox: ErrorBox): Unit =
+    for
+      appoint <- Api.getAppoint(appoint.appointId)
+      newAppoint = {
+        appoint.copy(
+          patientName = patient.fullName("　"),
+          patientId = patient.patientId
+        )
+      }
+      patientOption <- Api.findPatient(patient.patientId)
+    yield {
+      AppointValidator
+        .validateForUpdate(appoint, patientOption)
+        .toEither() match {
+        case Right(appoint) => {
+          Api.updateAppoint(appoint)
+          changeValuePartHandlerTo(Disp())
+        }
+        case Left(msg) => errBox.show(msg)
+      }
+    }

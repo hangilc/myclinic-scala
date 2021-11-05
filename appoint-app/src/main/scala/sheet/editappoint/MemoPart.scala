@@ -20,7 +20,7 @@ class MemoPart(var appoint: Appoint):
     appoint = newAppoint
     valuePartHandler.updateUI()
 
-  def setValuePartHandler(handler: ValuePartHandler): Unit =
+  def changeValuePartHandlerTo(handler: ValuePartHandler): Unit =
     valuePartHandler = handler
     valuePartHandler.populate()
 
@@ -48,12 +48,15 @@ class MemoPart(var appoint: Appoint):
       }))
       wrapper.innerHTML = ""
       wrapper(ele)
-    def onMemoChanged(): Unit = populate()
+    def updateUI(): Unit =
+      changeValuePartHandlerTo(Disp())
+
     def onEditClick(): Unit =
-      setValuePartHandler(Edit())
+      changeValuePartHandlerTo(Edit())
+
     def text: String = 
-      if memo.isEmpty then "（設定なし）"
-      else memo
+      if appoint.memo.isEmpty then "（設定なし）"
+      else appoint.memo
 
   class Edit() extends ValuePartHandler:
     val wrapper = valuePart
