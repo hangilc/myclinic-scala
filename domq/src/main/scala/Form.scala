@@ -20,6 +20,7 @@ object Form:
           key(css(style => {
             style.display = "table-cell"
             style.textAlign = "right"
+            style.wordBreak = "keep-all"
           })),
           input(css(style => style.display = "table-cell"))
         )

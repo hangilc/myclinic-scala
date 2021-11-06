@@ -28,7 +28,7 @@ object MakeAppointDialog:
     val ui = new UI(appointTime)
     val dlog = Modal(
       "診察予約入力",
-      ui.body,
+      ui.body(cls := "make-appoint-dialog-body"),
       ui.commands
     )
     ui.setup(() => dlog.close())

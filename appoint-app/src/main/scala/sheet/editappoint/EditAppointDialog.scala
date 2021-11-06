@@ -15,7 +15,7 @@ class EditAppointDialog(var appoint: Appoint, appointTime: AppointTime):
   val ui = UI(appoint, appointTime)
   val dlog = Modal(
     "予約の編集",
-    ui.body,
+    ui.body(cls := "edit-appoint-dialog-body"),
     ui.commands
   )
   ui.execCancelButton(onclick := (() => doExecCancel()))

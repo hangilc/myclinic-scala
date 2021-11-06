@@ -63,3 +63,15 @@ body {
 .appoint-time-box.appoint-flu-vac.vacant {
   background-color: #ffdab9
 }
+
+.make-appoint-dialog-body,
+.edit-appoint-dialog-body {
+  width: 280px;
+}
+
+.edit-appoint-dialog-body .patient-name-input-wrapper {
+  display: flex
+}
+.edit-appoint-dialog-body .patient-name-input {
+  flex-grow: 1
+}
