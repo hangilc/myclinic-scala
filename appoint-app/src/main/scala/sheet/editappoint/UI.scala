@@ -1,6 +1,8 @@
 package dev.myclinic.scala.web.appoint.sheet.editappoint
 
+import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
+import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.{Form}
 import scala.language.implicitConversions
 import dev.myclinic.scala.model.{Appoint, AppointTime}
@@ -30,7 +32,7 @@ object UI:
           patientNamePart.keyPart -> patientNamePart.valuePart,
           patientIdPart.keyPart -> patientIdPart.valuePart,
           memoPart.keyPart -> memoPart.valuePart
-        )
+        )(cls := "edit-appoint-form-table")
       )
       val commands = div(execCancelButton, closeButton)
       def onAppointChanged(newAppoint: Appoint): Unit =

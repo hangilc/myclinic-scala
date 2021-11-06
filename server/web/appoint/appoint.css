@@ -1,3 +1,7 @@
+*, *:before, *:after {
+  box-sizing: border-box;
+}
+
 body {
   display: flex;
   justify-content: center;
@@ -69,9 +73,32 @@ body {
   width: 280px;
 }
 
-.edit-appoint-dialog-body .patient-name-input-wrapper {
-  display: flex
+.edit-appoint-form-table {
+  table-layout: auto;
+  width: 100%
 }
-.edit-appoint-dialog-body .patient-name-input {
-  flex-grow: 1
+
+.edit-appoint-form-table .form-key {
+  width: 4rem;
+}
+
+.edit-appoint-form-table .name-input-wrapper {
+  display: flex;
+  width: 100%;
+  overflow: hidden;
+}
+
+.edit-appoint-form-table .name-input-wrapper input {
+  min-width: 0;
+  width: auto;
+}
+
+.edit-appoint-form-table .name-input {
+  flex-grow: 1;
+  flex-shrink: 1;
+}
+
+.edit-appoint-form-table svg {
+  flex-grow: 0;
+  flex-shrink: 0;
 }

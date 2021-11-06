@@ -21,8 +21,8 @@ object Form:
             style.display = "table-cell"
             style.textAlign = "right"
             style.wordBreak = "keep-all"
-          })),
-          input(css(style => style.display = "table-cell"))
+          }), cls := "form-key"),
+          input(css(style => style.display = "table-cell"), cls := "form-value")
         )
       )
     }
