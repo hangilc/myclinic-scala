@@ -73,7 +73,7 @@ class PatientNamePart(var appoint: Appoint):
     val discardIcon = Icons.xCircle(color = Colors.danger, size = "1.2rem")
     val searchIcon = Icons.search(color = "gray", size = "1.2rem")
     val main = div(cls := "name-input-wrapper")(
-      input(cls := "name-input"),
+      input(cls := "name-input", attr("size") := "2"),
       enterIcon(
         Icons.defaultStyle,
         ml := "0.1rem",
