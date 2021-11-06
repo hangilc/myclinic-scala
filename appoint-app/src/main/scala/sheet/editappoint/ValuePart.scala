@@ -11,41 +11,48 @@ import scala.concurrent.Future
 import concurrent.ExecutionContext.Implicits.global
 
 abstract class ValuePart:
-  val main: HTMLElement
+  def main: HTMLElement
   def updateUI(): Unit
 
-  val workarea: HTMLElement = div()
-  val errBox: ErrorBox = ErrorBox()
+  private val workarea: HTMLElement = div()
+  private val errBox: ErrorBox = ErrorBox()
   def ele: HTMLElement = 
-    div(
+    div(css(style => {
+      style.maxHeight = "300px"
+      style.overflowY = "auto"
+    }))(
       main,
       errBox.ele,
       workarea
     )
 
-  def clearWorkarea(): Unit = workarea.clear()
+  def initWorkarea(): Unit = 
+    workarea.clear()
+    errBox.hide()
 
   def addToWorkarea(e: HTMLElement): Unit = workarea(e)
+
+  def workareaIsEmpty: Boolean = workarea.isEmpty
 
   def showError(msg: String): Unit =
     errBox.show(msg)
 
+  def hideError(): Unit =
+    errBox.hide()
+
   extension [T] (f: Future[T])
-    def catchErr: Future[T] =
-      f.transform(t => t match {
-        case Success(_) => t
-        case Failure(ex) => {
-          errBox.show(ex.toString)
-          t
-        }
-      })
+    def catchErr: Unit =
+      f.onComplete {
+        case Success(_) => ()
+        case Failure(ex) => errBox.show(ex.toString)
+      }
 
 class ValuePartManager(var part: ValuePart):
   val ele = div(part.ele)
 
   def changeValuePartTo(nextPart: ValuePart): Unit =
     ele.clear()
-    ele(part.ele)
+    ele(nextPart.ele)
     part = nextPart
 
   def updateUI(): Unit =

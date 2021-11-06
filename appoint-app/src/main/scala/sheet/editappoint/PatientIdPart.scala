@@ -31,7 +31,7 @@ class PatientIdPart(var appoint: Appoint):
   class Disp() extends ValuePart:
     val editIcon = Icons.pencilAlt(color = "gray", size = "1.2rem")
     val main = div(
-      span(label),
+      span({ println(("label", label)); label }),
       editIcon(
         Icons.defaultStyle,
         ml := "0.5rem",
@@ -50,20 +50,21 @@ class PatientIdPart(var appoint: Appoint):
 
     def updateUI(): Unit =
       changeValuePartTo(Disp())
+
     def label: String =
       if appoint.patientId == 0 then "（設定なし）"
       else appoint.patientId.toString
 
-  class Edit() extends ValuePart:
+  class Edit() extends ValuePart with SearchResult:
     def patientId: Int = appoint.patientId
     val input = inputText(value := initialValue)
     val enterIcon = Icons.checkCircle(color = Colors.primary, size = "1.2rem")
     val discardIcon = Icons.xCircle(color = Colors.danger, size = "1.2rem")
-    val refreshIcon = Icons.refresh(color = "gray", size = "1.2rem")
+    //val refreshIcon = Icons.refresh(color = "gray", size = "1.2rem")
     val searchIcon = Icons.search(color = "gray", size = "1.2rem")
     enterIcon(onclick := (() => onEnter()))
     discardIcon(onclick := (() => changeValuePartTo(Disp())))
-    refreshIcon(onclick := (() => doRefresh()))
+    //refreshIcon(onclick := (() => doRefresh()))
     searchIcon(onclick := (() => onSearchClick()))
 
     val main = div(
@@ -73,10 +74,8 @@ class PatientIdPart(var appoint: Appoint):
         ml := "0.5rem"
       ),
       discardIcon(Icons.defaultStyle),
-      refreshIcon(Icons.defaultStyle),
-      searchIcon(Icons.defaultStyle),
-      workarea,
-      errBox.ele
+      //refreshIcon(Icons.defaultStyle),
+      searchIcon(Icons.defaultStyle)
     )
 
     def updateUI(): Unit =
@@ -102,87 +101,80 @@ class PatientIdPart(var appoint: Appoint):
                   Api.updateAppoint(newAppoint)
                   changeValuePartTo(Disp())
                 }
-                case Left(msg) => errBox.show(msg)
+                case Left(msg) => showError(msg)
               }
 
             }
         }
-        case Left(msg) => errBox.show(msg)
+        case Left(msg) => showError(msg)
       }
 
-    def makePatientSlot(patient: Patient): HTMLElement =
-      div(hoverBackground("#eee"), padding := "2px 4px", cursor := "pointer")(
-        s"(${patient.patientId}) ${patient.fullName()}"
-      )
+    // def makePatientSlot(patient: Patient): HTMLElement =
+    //   div(hoverBackground("#eee"), padding := "2px 4px", cursor := "pointer")(
+    //     s"(${patient.patientId}) ${patient.fullName()}"
+    //   )
 
-    def populateWorkarea(patients: List[Patient]): Unit =
-      workarea.clear()
-      patients.foreach(patient => {
-        val slot = makePatientSlot(patient)
-        slot(onclick := (() => {
-          input.value = patient.patientId.toString
-          post()
-        }))
-        workarea(slot)
-      })
+    // def populateWorkarea(patients: List[Patient]): Unit =
+    //   initWorkarea()
+    //   patients.foreach(patient => {
+    //     val slot = makePatientSlot(patient)
+    //     slot(onclick := (() => {
+    //       input.value = patient.patientId.toString
+    //       post()
+    //     }))
+    //     addToWorkarea(slot)
+    //   })
 
-    def doRefresh(): Unit =
-      errBox.hide()
-      val f =
-        for patients <- Api.searchPatient(appoint.patientName)
-        yield populateWorkarea(patients)
-      f.onComplete {
-        case Success(_)  => ()
-        case Failure(ex) => errBox.show(ex.toString)
-      }
+    // def doRefresh(): Unit =
+    //   initWorkarea()
+    //   val f =
+    //     for patients <- Api.searchPatient(appoint.patientName)
+    //     yield populateWorkarea(patients)
+    //   f.catchErr
 
     def onSearchClick(): Unit =
-      errBox.hide()
+      initWorkarea()
       AppointValidator.validatePatientId(input.value).toEither() match {
         case Right(patientId) => {
-          val f =
-            for patientOption <- Api.findPatient(patientId)
-            yield populateWorkarea(patientOption.toList)
-          f.onComplete {
-            case Success(_)  => ()
-            case Failure(ex) => errBox.show(ex.toString)
-          }
+          (for patientOption <- Api.findPatient(patientId)
+          yield populateSearchResult(
+            patientOption.toList,
+            appoint.appointId,
+            () => changeValuePartTo(Disp())
+          )).catchErr
         }
-        case Left(msg) => errBox.show(msg)
+        case Left(msg) => showError(msg)
       }
 
-    def post(): Unit =
-      val f =
-        for appointResult <- validate()
-        yield {
-          appointResult match {
-            case Right(appoint) => {
-              if appoint.patientId != patientId then Api.updateAppoint(appoint)
-            }
-            case Left(msg) => errBox.show(msg)
-          }
+// def post(): Unit =
+//   val f =
+//     for appointResult <- validate()
+//     yield {
+//       appointResult match {
+//         case Right(appoint) => {
+//           if appoint.patientId != patientId then Api.updateAppoint(appoint)
+//           initWorkarea()
+//         }
+//         case Left(msg) => showError(msg)
+//       }
+//     }
+//   f.catchErr
 
-        }
-      f.onComplete {
-        case Success(_)  => ()
-        case Failure(ex) => errBox.show(ex.toString)
-      }
-
-    def validate(): Future[Either[String, Appoint]] =
-      val patientIdResult = AppointValidator.validatePatientId(input.value)
-      patientIdResult.toEither() match {
-        case Left(msg) => Future.successful(Left(msg))
-        case Right(patientId) => {
-          for
-            appoint <- Api.getAppoint(appoint.appointId)
-            patientOption <- Api.findPatient(patientId)
-          yield {
-            AppointValidator
-              .validateForUpdate(
-                appoint.copy(patientId = patientId),
-                patientOption
-              )
-              .toEither()
-          }
-        }
-      }
+// def validate(): Future[Either[String, Appoint]] =
+//   val patientIdResult = AppointValidator.validatePatientId(input.value)
+//   patientIdResult.toEither() match {
+//     case Left(msg) => Future.successful(Left(msg))
+//     case Right(patientId) => {
+//       for
+//         appoint <- Api.getAppoint(appoint.appointId)
+//         patientOption <- Api.findPatient(patientId)
+//       yield {
+//         AppointValidator
+//           .validateForUpdate(
+//             appoint.copy(patientId = patientId),
+//             patientOption
+//           )
+//           .toEither()
+//       }
+//     }
+//   }

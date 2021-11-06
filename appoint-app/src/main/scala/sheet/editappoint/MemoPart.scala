@@ -86,14 +86,11 @@ class MemoPart(var appoint: Appoint):
           ok <- validated match {
             case Right(appoint) => Api.updateAppoint(appoint)
             case Left(msg) => {
-              errBox.show(msg)
+              showError(msg)
               Future.successful(false)
             }
           }
         yield {
           if ok then changeValuePartTo(Disp())
         }
-      f.onComplete {
-        case Success(_)  => ()
-        case Failure(ex) => errBox.show(ex.toString)
-      }
+      f.catchErr

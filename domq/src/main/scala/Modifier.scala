@@ -107,6 +107,8 @@ object Modifiers:
   val height = styleSetter((s, v) => s.height = v)
   val overflowY = styleSetter((s, v) => s.overflowY = v)
   val overflowYAuto = overflowY := "auto"
+  val cssFloat = styleSetter((s, v) => s.cssFloat = v)
+  val floatRight = cssFloat := "right"
 
   def hoverBackground(bg: String): Modifier =
     var save: String = ""
