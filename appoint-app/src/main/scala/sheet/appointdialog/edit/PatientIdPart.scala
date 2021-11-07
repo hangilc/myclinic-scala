@@ -1,4 +1,4 @@
-package dev.myclinic.scala.web.appoint.sheet.appointdialog
+package dev.myclinic.scala.web.appoint.sheet.appointdialog.edit
 
 import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.ElementQ.{*, given}
@@ -15,6 +15,10 @@ import dev.myclinic.scala.validator.AppointValidator.given
 import scala.util.Success
 import scala.util.Failure
 import scala.concurrent.Future
+import dev.myclinic.scala.web.appoint.sheet.appointdialog.{
+  ValuePart,
+  ValuePartManager
+}
 
 class PatientIdPart(var appoint: Appoint):
   val keyPart = span("患者番号：")

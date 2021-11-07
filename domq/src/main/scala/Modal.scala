@@ -1,7 +1,7 @@
 package dev.fujiwara.domq
 
 import org.scalajs.dom.raw.{Element, HTMLElement}
-import org.scalajs.dom.document
+import org.scalajs.dom.{document, window}
 import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
@@ -58,8 +58,6 @@ class ModalModifiers:
     style.zIndex = zIndex.toString
   })
 
-  //val modalBackdropInstance: HTMLElement = div(modalBackdrop(2001))
-
   val modalTitle = Modifier(e => {
     val style = e.style
     style.verticalAlign = "middle"
@@ -79,6 +77,7 @@ class ModalModifiers:
     style.zIndex = zIndex.toString
     style.overflow = "auto"
     style.borderRadius = "0.5rem"
+    style.maxHeight = (window.innerHeight - 60).toString + "px"
   })
 
   val modalBody = Modifier(e => {

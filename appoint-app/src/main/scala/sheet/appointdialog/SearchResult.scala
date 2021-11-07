@@ -20,14 +20,13 @@ trait SearchResult extends ValuePart:
 
   def populateSearchResult(
       patients: List[Patient],
-      appointId: Int,
-      cb: () => Unit
+      cb: Patient => Unit
   ): Unit =
     initWorkarea()
     patients.foreach(patient => {
       val slot = makeNameSlot(patient)
       addToWorkarea(slot)
-      slot(onclick := (() => applyPatient(patient, appointId, cb)))
+      slot(onclick := (() => cb(patient)))
     })
     addToWorkarea(
       div(
@@ -39,26 +38,3 @@ trait SearchResult extends ValuePart:
       )
     )
 
-  def applyPatient(patient: Patient, appointId: Int, cb: () => Unit): Unit =
-    val f =
-      for
-        appoint <- Api.getAppoint(appointId)
-        newAppoint = {
-          appoint.copy(
-            patientName = patient.fullName("　"),
-            patientId = patient.patientId
-          )
-        }
-        patientOption <- Api.findPatient(patient.patientId)
-      yield {
-        AppointValidator
-          .validateForUpdate(newAppoint, patientOption)
-          .toEither() match {
-          case Right(appoint) => {
-            (for _ <- Api.updateAppoint(appoint)
-            yield cb()).catchErr
-          }
-          case Left(msg) => showError(msg)
-        }
-      }
-    f.catchErr

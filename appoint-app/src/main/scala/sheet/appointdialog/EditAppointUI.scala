@@ -10,6 +10,11 @@ import dev.myclinic.scala.web.appoint
 import appoint.Misc
 import org.scalajs.dom.raw.HTMLElement
 import org.scalajs.dom.raw.MouseEvent
+import dev.myclinic.scala.web.appoint.sheet.appointdialog.edit.{
+  PatientNamePart,
+  PatientIdPart,
+  MemoPart
+}
 
 trait EditAppointUI:
   val body: HTMLElement

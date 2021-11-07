@@ -114,6 +114,9 @@ object Modifiers:
     e.setAttribute("size", "1")
     e.style.setProperty("flex-base", "0")
   })
+  val flexGrow = styleSetter((s, v) => s.setProperty("flex-grow", v))
+  val flexShrink = styleSetter((s, v) => s.setProperty("flex-shrink", v))
+  val flex = styleSetter((s, v) => s.setProperty("flex", v))
 
 
   def hoverBackground(bg: String): Modifier =

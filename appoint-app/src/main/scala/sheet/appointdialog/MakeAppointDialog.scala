@@ -24,7 +24,7 @@ import scala.util.Success
 import scala.util.Failure
 
 class MakeAppointDialog(appointTime: AppointTime):
-  val ui = MakeAppointUI(appointTime)
+  val ui = MakeAppointUI(appointTime, () => close())
   val dlog = Modal(
     "診察予約入力",
     ui.body(cls := "appoint-dialog-body"),
@@ -32,9 +32,11 @@ class MakeAppointDialog(appointTime: AppointTime):
   )
   ui.cancelButton(onclick := (() => dlog.close()))
 
-  def open(): Unit = dlog.open()
+  def open(): Unit = 
+    dlog.open()
+    ui.nameInput.focus()
 
-
+  def close(): Unit = dlog.close()
 
 
 object MakeAppointDialogOrig:
