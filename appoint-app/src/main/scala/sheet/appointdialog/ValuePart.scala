@@ -1,4 +1,4 @@
-package dev.myclinic.scala.web.appoint.sheet.editappoint
+package dev.myclinic.scala.web.appoint.sheet.appointdialog
 
 import org.scalajs.dom.raw.{HTMLElement}
 import dev.fujiwara.domq.ElementQ.{*, given}

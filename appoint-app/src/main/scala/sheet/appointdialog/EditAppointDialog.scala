@@ -1,4 +1,4 @@
-package dev.myclinic.scala.web.appoint.sheet.editappoint
+package dev.myclinic.scala.web.appoint.sheet.appointdialog
 
 import dev.fujiwara.domq.ElementQ.{given, *}
 import dev.fujiwara.domq.Html.{given, *}
@@ -16,10 +16,10 @@ import scala.util.Failure
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class EditAppointDialog(val appoint: Appoint, appointTime: AppointTime):
-  val ui = UI(appoint, appointTime)
+  val ui = EditAppointUI(appoint, appointTime)
   val dlog = Modal(
     "予約の編集",
-    ui.body(cls := "edit-appoint-dialog-body"),
+    ui.body(cls := "appoint-dialog-body"),
     ui.commands
   )
   dlog.auxMenu(

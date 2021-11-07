@@ -1,4 +1,4 @@
-package dev.myclinic.scala.web.appoint.sheet.editappoint
+package dev.myclinic.scala.web.appoint.sheet.appointdialog
 
 import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
@@ -11,17 +11,16 @@ import appoint.Misc
 import org.scalajs.dom.raw.HTMLElement
 import org.scalajs.dom.raw.MouseEvent
 
-trait UI:
+trait EditAppointUI:
   val body: HTMLElement
   val commands: HTMLElement
   val execCancelButton: HTMLElement
   val closeButton: HTMLElement
   def onAppointChanged(newAppoint: Appoint): Unit
-    
 
-object UI:
-  def apply(appoint: Appoint, appointTime: AppointTime): UI =
-    new UI:
+object EditAppointUI:
+  def apply(appoint: Appoint, appointTime: AppointTime): EditAppointUI =
+    new EditAppointUI:
       val execCancelButton = button("予約取消実行")
       val closeButton = button("閉じる")
       val patientNamePart = PatientNamePart(appoint)
@@ -33,7 +32,7 @@ object UI:
           patientNamePart.keyPart -> patientNamePart.valuePart,
           patientIdPart.keyPart -> patientIdPart.valuePart,
           memoPart.keyPart -> memoPart.valuePart
-        )(cls := "edit-appoint-form-table")
+        )(cls := "appoint-dialog-form-table")
       )
       val commands = div(execCancelButton, closeButton)
       def onAppointChanged(newAppoint: Appoint): Unit =

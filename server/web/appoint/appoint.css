@@ -80,21 +80,20 @@ body {
   align-content: center;
 }
 
-.make-appoint-dialog-body,
-.edit-appoint-dialog-body {
+.appoint-dialog-body {
   width: 280px;
 }
 
-.edit-appoint-form-table {
+.appoint-dialog-form-table {
   table-layout: auto;
   width: 100%
 }
 
-.edit-appoint-form-table .form-key {
+.appoint-dialog-form-table .form-key {
   width: 4rem;
 }
 
-.edit-appoint-form-table .name-input {
+.appoint-dialog-form-table .name-input {
   flex: 1;
   margin-right: 0.3rem;
 }

@@ -1,10 +1,10 @@
-package dev.myclinic.scala.web.appoint.sheet
+package dev.myclinic.scala.web.appoint.sheet.appointdialog
 
 import dev.fujiwara.domq.ElementQ.{given, *}
 import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.Html._
 import dev.fujiwara.domq.Modal
-import dev.fujiwara.domq.{Icons, Colors, LocalModal, ErrorBox}
+import dev.fujiwara.domq.{Icons, Colors, LocalModal, ErrorBox, Modal}
 import dev.myclinic.scala.model.{AppointTime, Appoint, Patient}
 import dev.myclinic.scala.util.KanjiDate
 import dev.fujiwara.domq.Form
@@ -23,7 +23,21 @@ import scala.concurrent.Future
 import scala.util.Success
 import scala.util.Failure
 
-object MakeAppointDialog:
+class MakeAppointDialog(appointTime: AppointTime):
+  val ui = MakeAppointUI(appointTime)
+  val dlog = Modal(
+    "診察予約入力",
+    ui.body(cls := "appoint-dialog-body"),
+    ui.commands
+  )
+  ui.cancelButton(onclick := (() => dlog.close()))
+
+  def open(): Unit = dlog.open()
+
+
+
+
+object MakeAppointDialogOrig:
   def open(appointTime: AppointTime): Unit =
     val ui = new UI(appointTime)
     val dlog = Modal(
@@ -46,7 +60,7 @@ object MakeAppointDialog:
     private val enterButton = button("入力")
     private val cancelButton = button("キャンセル")
     private val errBox = ErrorBox()
-    body(
+    body(cls := "make-appoint-dialog-body")(
       div(dateTimeRep(appointTime)),
       errBox.ele,
       Form.rows(
@@ -54,8 +68,8 @@ object MakeAppointDialog:
           displayInlineBlock,
           onsubmit := (doSearchPatient _)
         )(
-          div(
-            nameInput(placeholder := "姓　名"),
+          div(cls := "input-group")(
+            nameInput(placeholder := "姓　名", cls := "name-input", adjustForFlex),
             Icons.search(color = "gray", size = "1.2rem")(
               css(style => style.verticalAlign = "middle"),
               ml := "0.5rem",
@@ -95,7 +109,7 @@ object MakeAppointDialog:
           )
         ),
         span("メモ：") -> memoInput
-      )
+      )(cls := "make-appoint-form-table")
     )
     commands(
       enterButton,
