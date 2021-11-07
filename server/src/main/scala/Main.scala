@@ -44,6 +44,8 @@ object Main extends IOApp:
   }
 
   val staticService = fileService[IO](FileService.Config("./web", "/"))
+  val deployTestService =
+    fileService[IO](FileService.Config("./deploy", "/"))
 
   def buildServer(
       topic: Topic[IO, WebSocketFrame],
@@ -64,6 +66,7 @@ object Main extends IOApp:
           },
           "/api" -> RestService.routes,
           "/ws" -> ws(topic),
+          "/deploy" -> deployTestService,
           "/" -> staticService
         ).orNotFound
       )

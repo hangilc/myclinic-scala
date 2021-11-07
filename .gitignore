@@ -4,5 +4,6 @@ target/
 .metals/
 .vscode/
 server/web/**/scalajs/
+server/deploy/
 /*.log
 project/project/
