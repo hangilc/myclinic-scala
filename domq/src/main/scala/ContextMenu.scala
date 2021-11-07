@@ -9,7 +9,7 @@ import org.scalajs.dom.raw.MouseEvent
 import org.scalajs.dom.{document, window}
 import org.scalajs.dom.raw.ClientRect
 
-class ContextMenu:
+class ContextMenu(zIndex: Int):
   val menu: HTMLElement = makeEmptyMenu()
   val screen: HTMLElement = makeScreen()
 
@@ -19,7 +19,7 @@ class ContextMenu:
       style.background = "rgba(255, 255, 255, 1"
       style.border = "1px solid gray"
       style.padding = "10px"
-      style.zIndex = "2002"
+      style.zIndex = zIndex.toString
       style.visibility = "hidden"
     }))
 
@@ -34,7 +34,7 @@ class ContextMenu:
       style.backgroundColor = "#5a6268"
       style.opacity = "0"
       style.overflowY = "auto"
-      style.zIndex = "2001"
+      style.zIndex = (zIndex - 1).toString
     }))
 
   def open(event: MouseEvent): Unit =
@@ -66,8 +66,11 @@ class ContextMenu:
     screen.remove()
 
 object ContextMenu:
-  def apply(commands: (String, () => Unit)*): ContextMenu =
-    val m = new ContextMenu()
+  def apply(
+      commands: List[(String, () => Unit)],
+      zIndex: Int = 2002
+  ): ContextMenu =
+    val m = new ContextMenu(zIndex)
     def makeItem(label: String, f: () => Unit): HTMLElement =
       div(
         a(

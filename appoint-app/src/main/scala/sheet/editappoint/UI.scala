@@ -9,6 +9,7 @@ import dev.myclinic.scala.model.{Appoint, AppointTime}
 import dev.myclinic.scala.web.appoint
 import appoint.Misc
 import org.scalajs.dom.raw.HTMLElement
+import org.scalajs.dom.raw.MouseEvent
 
 trait UI:
   val body: HTMLElement

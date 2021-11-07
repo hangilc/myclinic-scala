@@ -37,7 +37,7 @@ class AdminAppointTimeBox(appointTime: AppointTime)
     )
     if slots.isEmpty then
       menu = menu :+ ("削除" -> doDelete)
-    ContextMenu(menu: _*).open(event)
+    ContextMenu(menu).open(event)
 
 
   def doConvert(): Unit =

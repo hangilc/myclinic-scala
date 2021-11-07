@@ -7,31 +7,35 @@ import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
 import scala.language.implicitConversions
 
-class Modal(title: String, content: HTMLElement):
+class Modal(title: String, content: HTMLElement, val zIndex: Int = 2002):
+  val backdrop = div(Modal.modalBackdrop(zIndex - 1))
+  val auxMenu: HTMLElement = span()
   val closeIcon = Icons.x(color = "gray")
   val workarea = content
   var onCloseCallbacks: List[Boolean => Unit] = List.empty
-  val dialog = div(Modal.modalContent)(
+  val dialog = div(Modal.modalContent(zIndex))(
     div(
       css(style => style.width = "*"),
       span(Modal.modalTitle)(title),
-      closeIcon(
-        css(style => {
-          style.cssFloat = "right"
-          style.verticalAlign = "middle"
-          style.marginLeft = "2rem"
-          style.cursor = "pointer"
-        })
-      )(onclick := (close _))
+      span(css(style => {
+        style.marginLeft = "2rem"
+        style.cssFloat = "right"
+      }))(
+        auxMenu,
+        closeIcon(
+          Icons.defaultStyle,
+          onclick := (close _)
+        )
+      )
     ),
     content
   )
   def open(): Unit =
-    document.body(Modal.modalBackdropInstance, dialog)
+    document.body(backdrop, dialog)
 
   def close(value: Boolean): Unit =
     dialog.remove()
-    Modal.modalBackdropInstance.remove()
+    backdrop.remove()
     onCloseCallbacks.foreach(_(value))
 
   def close(): Unit = close(false)
@@ -40,7 +44,7 @@ class Modal(title: String, content: HTMLElement):
     onCloseCallbacks = onCloseCallbacks :+ cb
 
 class ModalModifiers:
-  val modalBackdrop = Modifier(e => {
+  def modalBackdrop(zIndex: Int) = Modifier(e => {
     val style = e.style
     style.display = "block"
     style.position = "fixed"
@@ -51,10 +55,10 @@ class ModalModifiers:
     style.backgroundColor = "#5a6268"
     style.opacity = "0.4"
     style.overflowY = "auto"
-    style.zIndex = "2001"
+    style.zIndex = zIndex.toString
   })
 
-  val modalBackdropInstance: HTMLElement = div(modalBackdrop)
+  //val modalBackdropInstance: HTMLElement = div(modalBackdrop(2001))
 
   val modalTitle = Modifier(e => {
     val style = e.style
@@ -63,7 +67,7 @@ class ModalModifiers:
     style.fontWeight = "bold"
   })
 
-  val modalContent = Modifier(e => {
+  def modalContent(zIndex: Int) = Modifier(e => {
     val style = e.style
     style.position = "fixed"
     style.top = "20px"
@@ -72,7 +76,7 @@ class ModalModifiers:
     style.backgroundColor = "white"
     style.padding = "0.5rem 1.5rem"
     style.opacity = "1.0"
-    style.zIndex = "2002"
+    style.zIndex = zIndex.toString
     style.overflow = "auto"
     style.borderRadius = "0.5rem"
   })

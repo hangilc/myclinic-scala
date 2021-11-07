@@ -21,7 +21,7 @@ class AdminAppointSheet extends AppointSheet:
     AdminAppointTimeBox(appointTime)
 
   def onCogClick(event: MouseEvent): Unit =
-    ContextMenu("予約枠わりあて" -> doFillAppointTimes).open(event)
+    ContextMenu(List("予約枠わりあて" -> doFillAppointTimes)).open(event)
 
   def doFillAppointTimes(): Unit =
     dateRange.map {

@@ -82,7 +82,7 @@ case class AppointColumn(
     if totalAppoints == 0 then
       menu = menu :+ ("予約枠全削除" -> (doDeleteAllAppointTimes _))
     if !menu.isEmpty then
-      ContextMenu(menu: _*).open(event)
+      ContextMenu(menu).open(event)
 
   def doDeleteAllAppointTimes(): Unit =
     val dateRep = Misc.formatAppointDate(date)

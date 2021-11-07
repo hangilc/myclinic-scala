@@ -17,6 +17,17 @@ object ShowMessage:
     b(onclick := (() => m.close()))
     m.open()
 
+  def showError(msg: String, zIndex: Int = 2002): Unit =
+    val b = button("OK")
+    val m: Modal = Modal(
+      "エラー",
+      div(color := "red")(msg),
+      div(b)
+    )
+    b(onclick := (() => m.close()))
+    m.open()
+
+
   enum AskCommand(val label: String):
     case Ok extends AskCommand("OK")
     case Enter extends AskCommand("入力")

@@ -124,7 +124,7 @@ class AppointSheet:
     )
 
     def onMenuClick(event: MouseEvent): Unit =
-      ContextMenu("変更履歴" -> (showHistory _)).open(event)
+      ContextMenu(List("変更履歴" -> (showHistory _))).open(event)
 
     def showHistory(): Unit =
       for
