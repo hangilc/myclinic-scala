@@ -57,19 +57,23 @@ class MemoPart(var appoint: Appoint):
 
   class Edit() extends ValuePart:
     val input = inputText(value := appoint.memo)
-    val enterIcon = Icons.checkCircle(color = Colors.primary)
-    val discardIcon = Icons.xCircle(color = Colors.danger)
+    val enterIcon = Icons.checkCircle(color = Colors.primary, size = "1.2rem")
+    val discardIcon = Icons.xCircle(color = Colors.danger, size = "1.2rem")
     discardIcon(onclick := (() => {
       changeValuePartTo(Disp())
     }))
     val main = div(
-      input(value := appoint.memo),
-      enterIcon(Icons.defaultStyle, ml := "0.5rem", onclick := (onEnter _)),
-      discardIcon(
-        Icons.defaultStyle,
-        onclick := (() => {
-          changeValuePartTo(Disp())
-        })
+      div(
+        input(value := appoint.memo, width := "100%")
+      ),
+      div(
+        enterIcon(Icons.defaultStyle, ml := "0.5rem", onclick := (onEnter _)),
+        discardIcon(
+          Icons.defaultStyle,
+          onclick := (() => {
+            changeValuePartTo(Disp())
+          })
+        )
       )
     )
     def updateUI(): Unit =

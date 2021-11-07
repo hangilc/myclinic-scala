@@ -110,6 +110,12 @@ object Modifiers:
   val cssFloat = styleSetter((s, v) => s.cssFloat = v)
   val floatRight = cssFloat := "right"
 
+  val adjustForFlex = Modifier(e => {
+    e.setAttribute("size", "1")
+    e.style.setProperty("flex-base", "0")
+  })
+
+
   def hoverBackground(bg: String): Modifier =
     var save: String = ""
     Modifier(e => {

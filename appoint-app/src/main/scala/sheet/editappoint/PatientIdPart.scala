@@ -60,21 +60,18 @@ class PatientIdPart(var appoint: Appoint):
     val input = inputText(value := initialValue)
     val enterIcon = Icons.checkCircle(color = Colors.primary, size = "1.2rem")
     val discardIcon = Icons.xCircle(color = Colors.danger, size = "1.2rem")
-    //val refreshIcon = Icons.refresh(color = "gray", size = "1.2rem")
     val searchIcon = Icons.search(color = "gray", size = "1.2rem")
     enterIcon(onclick := (() => onEnter()))
     discardIcon(onclick := (() => changeValuePartTo(Disp())))
-    //refreshIcon(onclick := (() => doRefresh()))
     searchIcon(onclick := (() => onSearchClick()))
 
-    val main = div(
+    val main = div(cls := "input-group")(
       input(value := initialValue, width := "4rem"),
       enterIcon(
         Icons.defaultStyle,
         ml := "0.5rem"
       ),
       discardIcon(Icons.defaultStyle),
-      //refreshIcon(Icons.defaultStyle),
       searchIcon(Icons.defaultStyle)
     )
 
@@ -109,29 +106,6 @@ class PatientIdPart(var appoint: Appoint):
         case Left(msg) => showError(msg)
       }
 
-    // def makePatientSlot(patient: Patient): HTMLElement =
-    //   div(hoverBackground("#eee"), padding := "2px 4px", cursor := "pointer")(
-    //     s"(${patient.patientId}) ${patient.fullName()}"
-    //   )
-
-    // def populateWorkarea(patients: List[Patient]): Unit =
-    //   initWorkarea()
-    //   patients.foreach(patient => {
-    //     val slot = makePatientSlot(patient)
-    //     slot(onclick := (() => {
-    //       input.value = patient.patientId.toString
-    //       post()
-    //     }))
-    //     addToWorkarea(slot)
-    //   })
-
-    // def doRefresh(): Unit =
-    //   initWorkarea()
-    //   val f =
-    //     for patients <- Api.searchPatient(appoint.patientName)
-    //     yield populateWorkarea(patients)
-    //   f.catchErr
-
     def onSearchClick(): Unit =
       initWorkarea()
       AppointValidator.validatePatientId(input.value).toEither() match {
@@ -145,36 +119,3 @@ class PatientIdPart(var appoint: Appoint):
         }
         case Left(msg) => showError(msg)
       }
-
-// def post(): Unit =
-//   val f =
-//     for appointResult <- validate()
-//     yield {
-//       appointResult match {
-//         case Right(appoint) => {
-//           if appoint.patientId != patientId then Api.updateAppoint(appoint)
-//           initWorkarea()
-//         }
-//         case Left(msg) => showError(msg)
-//       }
-//     }
-//   f.catchErr
-
-// def validate(): Future[Either[String, Appoint]] =
-//   val patientIdResult = AppointValidator.validatePatientId(input.value)
-//   patientIdResult.toEither() match {
-//     case Left(msg) => Future.successful(Left(msg))
-//     case Right(patientId) => {
-//       for
-//         appoint <- Api.getAppoint(appoint.appointId)
-//         patientOption <- Api.findPatient(patientId)
-//       yield {
-//         AppointValidator
-//           .validateForUpdate(
-//             appoint.copy(patientId = patientId),
-//             patientOption
-//           )
-//           .toEither()
-//       }
-//     }
-//   }

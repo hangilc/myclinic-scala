@@ -68,6 +68,18 @@ body {
   background-color: #ffdab9
 }
 
+.form-value svg {
+  flex: 0 0 auto;
+}
+
+.form-value .input-group {
+  display: flex;
+  width: 100%;
+  overflow: hidden;
+  align-items: center;
+  align-content: center;
+}
+
 .make-appoint-dialog-body,
 .edit-appoint-dialog-body {
   width: 280px;
@@ -82,19 +94,8 @@ body {
   width: 4rem;
 }
 
-.edit-appoint-form-table .name-input-wrapper {
-  display: flex;
-  width: 100%;
-  overflow: hidden;
-  align-items: center;
-  align-content: center;
-}
-
 .edit-appoint-form-table .name-input {
-  flex: 1 1 0;
+  flex: 1;
+  margin-right: 0.3rem;
 }
 
-.edit-appoint-form-table svg {
-  flex-grow: 0;
-  flex-shrink: 0;
-}
