@@ -7,6 +7,8 @@ import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
 import scala.language.implicitConversions
 import dev.myclinic.scala.webclient.Api
+import dev.myclinic.scala.validator.AppointTimeValidator.*
+import dev.myclinic.scala.validator.AppointTimeValidator
 
 class ConvertAppointTimeDialog(appointTime: AppointTime):
   val errBox = ErrorBox()
@@ -34,7 +36,6 @@ class ConvertAppointTimeDialog(appointTime: AppointTime):
   def open(): Unit = dialog.open()
 
   def onEnter(): Unit =
-    import dev.myclinic.scala.validator.AppointTimeValidator.*
     val v = validateForUpdate(
       appointTime.appointTimeId,
       validateDateValue(appointTime.date),

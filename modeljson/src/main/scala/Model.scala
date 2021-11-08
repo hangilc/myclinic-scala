@@ -29,48 +29,8 @@ object Implicits extends DateTime with ClinicOperationCodec {
   given appointTimeDecoder: Decoder[AppointTime] =
     deriveDecoder[AppointTime]
 
-  // given appointEncoder: Encoder[Appoint] = deriveEncoder[Appoint]
-  // given appointDecoder: Decoder[Appoint] = deriveDecoder[Appoint]
-
-  given Encoder[Appoint] = new Encoder[Appoint]:
-    def apply(appoint: Appoint): Json =
-      Json.obj(
-        "appointId" -> Json.fromInt(appoint.appointId),
-        "appointTimeId" -> Json.fromInt(appoint.appointTimeId),
-        "patientName" -> Json.fromString(appoint.patientName),
-        "patientId" -> Json.fromInt(appoint.patientId),
-        "memo" -> encodeMemo(appoint.memo, appoint.tags)
-      )
-    def encodeMemo(memo: String, tags: Set[String]): Json =
-      val t = if tags.isEmpty then "" else "{{" + tags.mkString(",") + "}}"
-      Json.fromString(t + memo)
-
-  given Decoder[Appoint] = new Decoder[Appoint]:
-    def apply(c: HCursor): Decoder.Result[Appoint] =
-      for
-        appointId <- c.downField("appointId").as[Int]
-        appointTimeId <- c.downField("appointTimeId").as[Int]
-        patientName <- c.downField("patientName").as[String]
-        patientId <- c.downField("patientId").as[Int]
-        memoWithTags <- c.downField("memo").as[String]
-        (memo, tags) = decodeMemo(memoWithTags)
-      yield Appoint(
-        appointId,
-        appointTimeId,
-        patientName,
-        patientId,
-        memo,
-        tags
-      )
-    def decodeMemo(
-        s: String
-    ): (String, Set[String]) =
-      val stop = s.indexOf("}}")
-      if s.startsWith("{{") && stop >= 2 then
-        val tags = s.substring(2, stop).split(",").toSet
-        val memo = s.substring(stop + 2)
-        (memo, tags)
-      else (s, Set.empty)
+  given appointEncoder: Encoder[Appoint] = deriveEncoder[Appoint]
+  given appointDecoder: Decoder[Appoint] = deriveDecoder[Appoint]
 
   given patientEncoder: Encoder[Patient] = deriveEncoder[Patient]
   given patientDecoder: Decoder[Patient] = deriveDecoder[Patient]

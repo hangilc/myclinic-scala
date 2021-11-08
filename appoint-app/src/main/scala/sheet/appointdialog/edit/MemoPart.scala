@@ -56,8 +56,8 @@ class MemoPart(var appoint: Appoint):
       changeValuePartTo(Edit())
 
     def text: String =
-      if appoint.memo.isEmpty then "（設定なし）"
-      else appoint.memo
+      if appoint.memoString.isEmpty then "（設定なし）"
+      else appoint.memoString
 
   class Edit() extends ValuePart:
     val input = inputText(value := appoint.memo)
@@ -68,7 +68,7 @@ class MemoPart(var appoint: Appoint):
     }))
     val main = div(
       div(
-        input(value := appoint.memo, width := "100%")
+        input(value := appoint.memoString, width := "100%")
       ),
       div(
         enterIcon(Icons.defaultStyle, ml := "0.5rem", onclick := (onEnter _)),
@@ -81,12 +81,12 @@ class MemoPart(var appoint: Appoint):
       )
     )
     def updateUI(): Unit =
-      input.value = appoint.memo
+      input.value = appoint.memoString
     def onEnter(): Unit =
       val f =
         for
           appoint <- Api.getAppoint(appoint.appointId)
-          newAppoint = appoint.copy(memo = input.value)
+          newAppoint = appoint.modifyMemoString(input.value)
           patientOption <- Api.findPatient(appoint.patientId)
           validated = AppointValidator
             .validateForUpdate(newAppoint, patientOption)

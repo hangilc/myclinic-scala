@@ -24,7 +24,7 @@ case class AppointTime(
     date == other.date && untilTime == other.fromTime
 
   def overlapsWith(other: AppointTime): Boolean =
-    date == other.date && 
+    date == other.date &&
       untilTime > other.fromTime &&
       fromTime < other.untilTime
 
@@ -52,19 +52,49 @@ object AppointTime:
 
   def isAdjacentRun(as: List[AppointTime]): Boolean =
     if as.size < 2 then true
-    else
-      as.sliding(2).forall(e => e(0).isAdjacentTo(e(1)))
+    else as.sliding(2).forall(e => e(0).isAdjacentTo(e(1)))
 
 case class Appoint(
     appointId: Int,
     appointTimeId: Int,
     patientName: String,
     patientId: Int,
-    memo: String,
-    tags: Set[String]
+    memo: String
 ):
-  def hasTag(tag: String): Boolean =
-    tags.contains(tag)
+  private lazy val memoCache =
+    val stop = memo.indexOf("}}")
+    if memo.startsWith("{{") && stop >= 2 then
+      val t = memo.substring(2, stop).split(",").toSet
+      val m = memo.substring(stop + 2)
+      (m, t)
+    else (memo, Set.empty)
+  def memoString: String = memoCache._1
+  def tags: Set[String] = memoCache._2
+  def hasTag(tag: String): Boolean = tags.contains(tag)
+  def modifyMemoString(s: String): Appoint =
+    copy(memo = Appoint.constructMemo(s, tags))
+  def modifyTags(tags: Set[String]): Appoint =
+    copy(memo = Appoint.constructMemo(memoString, tags))
+
+object Appoint:
+  def create(
+      appointId: Int,
+      appointTimeId: Int,
+      patientName: String,
+      patientId: Int,
+      memoString: String,
+      tags: Set[String]
+  ): Appoint =
+    Appoint(
+      appointId,
+      appointTimeId,
+      patientName,
+      patientId,
+      constructMemo(memoString, tags)
+    )
+  def constructMemo(s: String, ts: Set[String]): String =
+    if ts.isEmpty then s
+    else "{{" + ts.mkString(",") + "}}" + s
 
 case class AppEvent(
     appEventId: Int,

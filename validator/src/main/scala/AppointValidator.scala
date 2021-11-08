@@ -60,6 +60,9 @@ object AppointValidator:
   def validateMemo(memo: String): Result[String] =
     validNec(memo)
 
+  def validateMemoString(memoString: String): Result[String] =
+    validNec(memoString)
+
   def validatePatientIdConsistency(
       appoint: Appoint,
       patientOption: Option[Patient]
@@ -88,7 +91,6 @@ object AppointValidator:
       patientNameResult: Result[String],
       patientIdResult: Result[Int],
       memoResult: Result[String],
-      tags: Set[String],
       patientOption: Option[Patient]
   ): Result[Appoint] =
     (
@@ -97,15 +99,33 @@ object AppointValidator:
       patientNameResult,
       patientIdResult,
       memoResult,
-      validNec(tags)
     ).mapN(Appoint.apply)
+      .andThen(appoint => validatePatientIdConsistency(appoint, patientOption))
+
+  def validate(
+      appointIdResult: Result[Int],
+      appointTimeIdResult: Result[Int],
+      patientNameResult: Result[String],
+      patientIdResult: Result[Int],
+      memoStringResult: Result[String],
+      tags: Set[String],
+      patientOption: Option[Patient]
+  ): Result[Appoint] =
+    (
+      appointIdResult,
+      appointTimeIdResult,
+      patientNameResult,
+      patientIdResult,
+      memoStringResult,
+      validNec(tags)
+    ).mapN(Appoint.create)
       .andThen(appoint => validatePatientIdConsistency(appoint, patientOption))
 
   def validateForEnter(
       appointTimeId: Int,
       nameInput: String,
       patientIdResult: Result[Int],
-      memoInput: String,
+      memoStringInput: String,
       tags: Set[String],
       patientOption: Option[Patient]
   ): Result[Appoint] =
@@ -114,7 +134,7 @@ object AppointValidator:
       validateAppointTimeId(appointTimeId),
       validateName(nameInput),
       patientIdResult,
-      validateMemo(memoInput),
+      validateMemoString(memoStringInput),
       tags,
       patientOption
     )
@@ -125,7 +145,6 @@ object AppointValidator:
       nameInput: String,
       patientIdResult: Result[Int],
       memoInput: String,
-      tags: Set[String],
       patientOption: Option[Patient]
   ): Result[Appoint] =
     validate(
@@ -133,8 +152,7 @@ object AppointValidator:
       validateAppointTimeId(appointTimeId),
       validateName(nameInput),
       patientIdResult,
-      validateMemo(memoInput),
-      tags,
+      validateMemoString(memoInput),
       patientOption
     )
 
@@ -147,7 +165,6 @@ object AppointValidator:
       validateAppointTimeId(appoint.appointTimeId),
       validateName(appoint.patientName),
       validatePatientIdValue(appoint.patientId),
-      validateMemo(appoint.memo),
-      appoint.tags,
+      validateMemoString(appoint.memo),
       patientOption
     )

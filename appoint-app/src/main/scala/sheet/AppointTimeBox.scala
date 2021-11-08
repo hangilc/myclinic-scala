@@ -47,7 +47,7 @@ case class AppointTimeBox(
         else s"(${appoint.patientId}) "
       val name: String = s"${appoint.patientName}"
       val memo: String =
-        if appoint.memo.isEmpty then "" else s" （${appoint.memo}）"
+        if appoint.memoString.isEmpty then "" else s" （${appoint.memoString}）"
       patientId + name + memo
     def tagsRep: String =
       appoint.tags.mkString("、")

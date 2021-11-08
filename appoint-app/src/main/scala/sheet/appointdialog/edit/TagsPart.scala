@@ -95,7 +95,7 @@ class TagsPart(var appoint: Appoint):
       val f =
         for
           appoint <- Api.getAppoint(appoint.appointId)
-          newAppoint = appoint.copy(tags = selectedTags)
+          newAppoint = appoint.modifyTags(selectedTags)
           patientOption <- Api.findPatient(appoint.patientId)
           validated = AppointValidator
             .validateForUpdate(newAppoint, patientOption)
