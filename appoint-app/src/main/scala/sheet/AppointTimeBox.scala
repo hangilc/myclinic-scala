@@ -31,16 +31,17 @@ case class AppointTimeBox(
     appointTime: AppointTime
 ):
   case class Slot(var appoint: Appoint):
-    val ele = div()
+    val eLabel = div()
+    val eTags = div()
+    val ele = div(onclick := (onClick _))(eLabel, eTags)
     var dialog: Option[EditAppointDialog] = None
     updateUI()
 
     def updateUI(): Unit =
-      ele.innerHTML = ""
-      ele(onclick := (onClick _))(
-        div(label),
-        div(tagsRep)
-      )
+      eLabel.clear()
+      eLabel(label)
+      eTags.clear()
+      eTags(tagsRep)
     def label: String =
       val patientId: String =
         if appoint.patientId == 0 then ""
@@ -68,7 +69,7 @@ case class AppointTimeBox(
       cls := "appoint-time-box",
       cls := appointKindToCssClass(appointTime.kind),
       css(style => style.cursor = "pointer"),
-      onclick := (onElementClick),
+      onclick := (onElementClick)
     )(
       div(appointTimeSpanRep),
       div(appointTimeKindRep),
@@ -135,7 +136,7 @@ case class AppointTimeBox(
     if slots.size < appointTime.capacity then openAppointDialog()
 
   def openAppointDialog(): Unit =
-    MakeAppointDialog(appointTime).open() 
+    MakeAppointDialog(appointTime).open()
 
   def doDeleteAppointTime(): Unit =
     System.err.println("doDeleteAppointTime not implemented.")
