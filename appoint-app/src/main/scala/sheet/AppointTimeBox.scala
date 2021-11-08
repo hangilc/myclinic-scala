@@ -138,7 +138,12 @@ case class AppointTimeBox(
     MakeAppointDialog(appointTime).open() 
 
   def doDeleteAppointTime(): Unit =
-    ???
+    System.err.println("doDeleteAppointTime not implemented.")
+
+  def countKenshin(): Int =
+    slots.foldLeft(0)((acc, ele) => {
+      if ele.appoint.hasTag("健診") then acc + 1 else acc
+    })
 
 object AppointTimeBox:
   def apply(appointTime: AppointTime, appoints: List[Appoint]): AppointTimeBox =

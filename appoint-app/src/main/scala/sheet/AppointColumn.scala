@@ -31,11 +31,13 @@ case class AppointColumn(
   var boxes: Seq[AppointTimeBox] = Vector.empty
   val dateElement = div()
   val vacantKindsArea = span()
+  val kenshinArea = span()
   var boxWrapper = div()
   val ele = div(cls := "date-column", cls := op.code)(
     dateElement(cls := "date")(
       dateRep,
       vacantKindsArea,
+      kenshinArea(cls := "kenshin-area"),
       div(cls := "date-label")(
         ClinicOperation.getLabel(op)
       ),
@@ -127,16 +129,28 @@ case class AppointColumn(
   def addAppoint(appoint: Appoint): Unit =
     findBoxByAppoint(appoint).foreach(b => b.addAppoint(appoint))
     adjustVacantClass()
+    markKenshin()
 
   def addAppoints(appoints: Seq[Appoint]): Unit =
     appoints.foreach(addAppoint(_))
 
   def updateAppoint(appoint: Appoint): Unit =
     findBoxByAppoint(appoint).foreach(b => b.updateAppoint(appoint))
+    markKenshin()
 
   def deleteAppoint(appoint: Appoint): Unit =
     findBoxByAppoint(appoint).foreach(b => b.removeAppoint(appoint))
     adjustVacantClass()
+    markKenshin()
+
+  def countKenshin(): Int =
+    boxes.foldLeft(0)((acc, ele) => acc + ele.countKenshin())
+
+  def markKenshin(): Unit =
+    val n = countKenshin()
+    kenshinArea.clear()
+    if n > 0 then
+      kenshinArea(s"健$n")
 
 object AppointColumn:
   type AppointTimeId = Int
@@ -154,4 +168,5 @@ object AppointColumn:
         c.addAppoints(appoints)
       }
     }
+    c.markKenshin()
     c

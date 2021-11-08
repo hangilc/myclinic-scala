@@ -62,7 +62,9 @@ case class Appoint(
     patientId: Int,
     memo: String,
     tags: Set[String]
-)
+):
+  def hasTag(tag: String): Boolean =
+    tags.contains(tag)
 
 case class AppEvent(
     appEventId: Int,
