@@ -37,3 +37,5 @@ class MakeAppointDialog(appointTime: AppointTime):
     ui.nameInput.focus()
 
   def close(): Unit = dlog.close()
+
+  

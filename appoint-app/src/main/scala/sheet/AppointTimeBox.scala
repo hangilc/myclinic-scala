@@ -135,7 +135,7 @@ case class AppointTimeBox(
     if slots.size < appointTime.capacity then openAppointDialog()
 
   def openAppointDialog(): Unit =
-    MakeAppointDialog(appointTime).open()
+    MakeAppointDialog(appointTime).open() 
 
   def doDeleteAppointTime(): Unit =
     ???

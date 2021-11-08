@@ -13,7 +13,8 @@ import org.scalajs.dom.raw.MouseEvent
 import dev.myclinic.scala.web.appoint.sheet.appointdialog.edit.{
   PatientNamePart,
   PatientIdPart,
-  MemoPart
+  MemoPart,
+  TagsPart
 }
 
 trait EditAppointUI:
@@ -31,12 +32,14 @@ object EditAppointUI:
       val patientNamePart = PatientNamePart(appoint)
       val patientIdPart = PatientIdPart(appoint)
       val memoPart = MemoPart(appoint)
+      val tagsPart = TagsPart(appoint)
       val body = div(
         div(Misc.formatAppointTimeSpan(appointTime)),
         Form.rows(
           patientNamePart.keyPart -> patientNamePart.valuePart,
           patientIdPart.keyPart -> patientIdPart.valuePart,
-          memoPart.keyPart -> memoPart.valuePart
+          memoPart.keyPart -> memoPart.valuePart,
+          tagsPart.keyPart -> tagsPart.valuePart
         )(cls := "appoint-dialog-form-table")
       )
       val commands = div(execCancelButton, closeButton)
@@ -44,3 +47,4 @@ object EditAppointUI:
         patientNamePart.onAppointChanged(newAppoint)
         patientIdPart.onAppointChanged(newAppoint)
         memoPart.onAppointChanged(newAppoint)
+        tagsPart.onAppointChanged(newAppoint)
