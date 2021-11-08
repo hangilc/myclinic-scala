@@ -51,6 +51,7 @@ class TagsPart(var appoint: Appoint):
     )
 
     def updateUI(): Unit =
+      labelSpan.clear()
       labelSpan(text)
 
     def onEditClick(): Unit =

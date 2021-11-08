@@ -8,6 +8,7 @@ import scala.language.implicitConversions
 import org.scalajs.dom.raw.MouseEvent
 import org.scalajs.dom.{document, window}
 import org.scalajs.dom.raw.ClientRect
+import org.scalajs.dom.raw.Event
 
 class ContextMenu(zIndex: Int):
   val menu: HTMLElement = makeEmptyMenu()
@@ -76,7 +77,8 @@ object ContextMenu:
         a(
           label,
           href := "",
-          onclick := (() => {
+          onclick := ((e: Event) => {
+            e.preventDefault
             m.remove()
             f()
           })
