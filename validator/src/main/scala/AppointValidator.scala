@@ -88,7 +88,7 @@ object AppointValidator:
       patientNameResult: Result[String],
       patientIdResult: Result[Int],
       memoResult: Result[String],
-      tags: List[String],
+      tags: Set[String],
       patientOption: Option[Patient]
   ): Result[Appoint] =
     (
@@ -106,7 +106,7 @@ object AppointValidator:
       nameInput: String,
       patientIdResult: Result[Int],
       memoInput: String,
-      tags: List[String],
+      tags: Set[String],
       patientOption: Option[Patient]
   ): Result[Appoint] =
     validate(
@@ -125,7 +125,7 @@ object AppointValidator:
       nameInput: String,
       patientIdResult: Result[Int],
       memoInput: String,
-      tags: List[String],
+      tags: Set[String],
       patientOption: Option[Patient]
   ): Result[Appoint] =
     validate(

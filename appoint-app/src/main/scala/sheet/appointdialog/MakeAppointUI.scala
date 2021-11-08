@@ -33,6 +33,7 @@ object MakeAppointUI:
     val namePart = NamePart(patient => setPatient(patient))
     val patientIdPart = PatientIdPart(patient => setPatient(patient))
     val memoPart = MemoPart()
+    val tagPart = TagPart()
     def setPatient(patient: Patient): Unit =
       namePart.input.value = patient.fullName(" ")
       patientIdPart.input.value = patient.patientId.toString
@@ -48,7 +49,8 @@ object MakeAppointUI:
             Form.rows(
               span("患者名：") -> namePart.ele,
               span("患者番号：") -> patientIdPart.ele,
-              span("メモ：") -> memoPart.ele
+              span("メモ：") -> memoPart.ele,
+              span("タグ：") -> tagPart.ele
             )(cls := "appoint-dialog-form-table")
           )
         val commands: HTMLElement =
@@ -86,7 +88,7 @@ object MakeAppointUI:
               namePart.input.value,
               patientIdResult,
               memoPart.input.value,
-              List.empty,
+              tagPart.tags,
               patientOption
             ).toEither()
           }
@@ -96,7 +98,7 @@ object MakeAppointUI:
       with SearchResult:
     def updateUI(): Unit = ()
     val input: HTMLInputElement = inputText(width := "100%")
-    def main: HTMLElement = Form.inputGroup(
+    val main: HTMLElement = Form.inputGroup(
       form(
         input,
         onsubmit := (() => doSearch()),
@@ -127,7 +129,7 @@ object MakeAppointUI:
       with SearchResult:
     def updateUI(): Unit = ()
     val input: HTMLInputElement = Form.fixedSizeInput("4rem")
-    def main: HTMLElement = Form.inputGroup(
+    val main: HTMLElement = Form.inputGroup(
       form(
         input,
         onsubmit := (() => doSearch())
@@ -164,6 +166,18 @@ object MakeAppointUI:
   class MemoPart extends ValuePart:
     def updateUI(): Unit = ()
     val input: HTMLInputElement = Form.input
-    def main: HTMLElement = Form.inputGroup(
+    val main: HTMLElement = Form.inputGroup(
       input
     )
+
+  class TagPart extends ValuePart:
+    def updateUI(): Unit = ()
+    val kenshinCheck: HTMLInputElement = checkbox()
+    val main: HTMLElement =
+      div(
+        kenshinCheck,
+        "健診"
+      )
+    def tags: Set[String] =
+      if kenshinCheck.checked then Set("健診") else Set.empty
+

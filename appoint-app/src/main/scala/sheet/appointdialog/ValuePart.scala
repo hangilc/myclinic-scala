@@ -11,7 +11,7 @@ import scala.concurrent.Future
 import concurrent.ExecutionContext.Implicits.global
 
 abstract class ValuePart:
-  def main: HTMLElement
+  val main: HTMLElement
   def updateUI(): Unit
 
   private val workarea: HTMLElement = div()

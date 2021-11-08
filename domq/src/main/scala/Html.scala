@@ -31,5 +31,6 @@ object Html {
   val span = Tag("span")
 
   def inputText = input(attr("type") := "text")
+  def checkbox = input(attr("type") := "checkbox")
 
 }

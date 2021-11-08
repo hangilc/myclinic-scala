@@ -41,7 +41,7 @@ object Implicits extends DateTime with ClinicOperationCodec {
         "patientId" -> Json.fromInt(appoint.patientId),
         "memo" -> encodeMemo(appoint.memo, appoint.tags)
       )
-    def encodeMemo(memo: String, tags: List[String]): Json =
+    def encodeMemo(memo: String, tags: Set[String]): Json =
       val t = if tags.isEmpty then "" else "{{" + tags.mkString(",") + "}}"
       Json.fromString(t + memo)
 
@@ -64,13 +64,13 @@ object Implicits extends DateTime with ClinicOperationCodec {
       )
     def decodeMemo(
         s: String
-    ): (String, List[String]) =
+    ): (String, Set[String]) =
       val stop = s.indexOf("}}")
       if s.startsWith("{{") && stop >= 2 then
-        val tags = s.substring(2, stop).split(",").toList
+        val tags = s.substring(2, stop).split(",").toSet
         val memo = s.substring(stop + 2)
         (memo, tags)
-      else (s, List.empty)
+      else (s, Set.empty)
 
   given patientEncoder: Encoder[Patient] = deriveEncoder[Patient]
   given patientDecoder: Decoder[Patient] = deriveDecoder[Patient]
