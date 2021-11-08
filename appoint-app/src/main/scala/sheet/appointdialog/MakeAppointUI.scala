@@ -86,6 +86,7 @@ object MakeAppointUI:
               namePart.input.value,
               patientIdResult,
               memoPart.input.value,
+              List.empty,
               patientOption
             ).toEither()
           }

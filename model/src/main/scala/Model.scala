@@ -60,7 +60,8 @@ case class Appoint(
     appointTimeId: Int,
     patientName: String,
     patientId: Int,
-    memo: String
+    memo: String,
+    tags: List[String]
 )
 
 case class AppEvent(

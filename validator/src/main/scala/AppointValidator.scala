@@ -88,6 +88,7 @@ object AppointValidator:
       patientNameResult: Result[String],
       patientIdResult: Result[Int],
       memoResult: Result[String],
+      tags: List[String],
       patientOption: Option[Patient]
   ): Result[Appoint] =
     (
@@ -95,7 +96,8 @@ object AppointValidator:
       appointTimeIdResult,
       patientNameResult,
       patientIdResult,
-      memoResult
+      memoResult,
+      validNec(tags)
     ).mapN(Appoint.apply)
       .andThen(appoint => validatePatientIdConsistency(appoint, patientOption))
 
@@ -104,6 +106,7 @@ object AppointValidator:
       nameInput: String,
       patientIdResult: Result[Int],
       memoInput: String,
+      tags: List[String],
       patientOption: Option[Patient]
   ): Result[Appoint] =
     validate(
@@ -112,6 +115,7 @@ object AppointValidator:
       validateName(nameInput),
       patientIdResult,
       validateMemo(memoInput),
+      tags,
       patientOption
     )
 
@@ -121,6 +125,7 @@ object AppointValidator:
       nameInput: String,
       patientIdResult: Result[Int],
       memoInput: String,
+      tags: List[String],
       patientOption: Option[Patient]
   ): Result[Appoint] =
     validate(
@@ -129,6 +134,7 @@ object AppointValidator:
       validateName(nameInput),
       patientIdResult,
       validateMemo(memoInput),
+      tags,
       patientOption
     )
 
@@ -142,5 +148,6 @@ object AppointValidator:
       validateName(appoint.patientName),
       validatePatientIdValue(appoint.patientId),
       validateMemo(appoint.memo),
+      appoint.tags,
       patientOption
     )
