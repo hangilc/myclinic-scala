@@ -37,7 +37,10 @@ case class AppointTimeBox(
 
     def updateUI(): Unit =
       ele.innerHTML = ""
-      ele(label)(onclick := (onClick _))
+      ele(onclick := (onClick _))(
+        div(label),
+        div(tagsRep)
+      )
     def label: String =
       val patientId: String =
         if appoint.patientId == 0 then ""
@@ -46,6 +49,8 @@ case class AppointTimeBox(
       val memo: String =
         if appoint.memo.isEmpty then "" else s" （${appoint.memo}）"
       patientId + name + memo
+    def tagsRep: String =
+      appoint.tags.mkString("、")
     def onClick(): Unit =
       val m = EditAppointDialog(appoint, appointTime)
       m.onClose(() => { dialog = None })
