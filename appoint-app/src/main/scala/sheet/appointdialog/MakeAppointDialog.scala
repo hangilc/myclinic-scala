@@ -27,7 +27,6 @@ class MakeAppointDialog(
     appointTime: AppointTime,
     followingVacantRegular: () => Option[AppointTime]
 ):
-  println(("follow", followingVacantRegular()))
   val ui = MakeAppointUI(appointTime, () => close(), followingVacantRegular)
   val dlog = Modal(
     "診察予約入力",

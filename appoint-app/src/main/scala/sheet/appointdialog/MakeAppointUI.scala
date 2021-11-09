@@ -4,7 +4,7 @@ import org.scalajs.dom.raw.{HTMLElement, HTMLInputElement}
 import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
-import dev.fujiwara.domq.{Form, Icons, ErrorBox, DomqUtil}
+import dev.fujiwara.domq.{Form, Icons, ErrorBox}
 import scala.language.implicitConversions
 import dev.myclinic.scala.model.{AppointTime, Patient, Appoint}
 import dev.myclinic.scala.web.appoint.Misc
@@ -17,6 +17,7 @@ import cats.data.Validated.Invalid
 import scala.concurrent.Future
 import scala.util.Success
 import scala.util.Failure
+import org.scalajs.dom.raw.Event
 
 trait MakeAppointUI:
   val body: HTMLElement
@@ -41,7 +42,7 @@ object MakeAppointUI:
     val namePart = NamePart(patient => setPatient(patient))
     val patientIdPart = PatientIdPart(patient => setPatient(patient))
     val memoPart = MemoPart()
-    val tagPart = TagPart()
+    val tagPart = TagPart(followingVacantRegular)
     def setPatient(patient: Patient): Unit =
       namePart.input.value = patient.fullName(" ")
       patientIdPart.input.value = patient.patientId.toString
@@ -180,17 +181,26 @@ object MakeAppointUI:
       input
     )
 
-  class TagPart extends ValuePart:
+  class TagPart(followingVacantRegular: () => Option[AppointTime]) extends ValuePart:
     def updateUI(): Unit = ()
     val kenshinCheck: HTMLInputElement = checkbox()
+    val alsoWrapper: HTMLElement = span()
     val alsoCheck: HTMLInputElement = checkbox()
-    val alsoCheckId: String = DomqUtil.genId()
+    val hasFollow: Boolean = followingVacantRegular().isDefined
     val main: HTMLElement =
       div(
-        kenshinCheck,
+        kenshinCheck(onchange := (onKenshinChange _)),
         "健診",
-        alsoCheck(attr("disabled") := "disabled"),
-        label("診察も")
+        alsoWrapper(showHide := hasFollow)(
+          alsoCheck(disabled := true),
+          label("診察も")
+        )
       )
     def tags: Set[String] =
       if kenshinCheck.checked then Set("健診") else Set.empty
+    def isFollowingChecked: Boolean =
+      alsoCheck.checked
+    def onKenshinChange(event: Event): Unit =
+      if kenshinCheck.checked then alsoCheck(disabled := false)
+      else
+        alsoCheck(disabled := true, checked := false)

@@ -7,6 +7,7 @@ import scala.language.implicitConversions
 import org.scalajs.dom.raw.CSSStyleDeclaration
 import scala.scalajs.js
 import org.scalajs.dom.raw.Event
+import org.scalajs.dom.raw.HTMLInputElement
 
 case class Modifier(modifier: HTMLElement => Unit)
 
@@ -65,10 +66,6 @@ object Modifiers:
 
   def attr(name: String): Attr = Attr(name)
 
-  // def attr(name: String) = Creator[String]((e, a) => {
-  //   e.setAttribute(name, a)
-  // })
-
   val value = attr("value")
 
   def attrNS(namespace: String, name: String) = Creator[String]((e, a) => {
@@ -76,6 +73,17 @@ object Modifiers:
   })
 
   def placeholder: Attr = attr("placeholder")
+
+  def disabled: Creator[Boolean] = Creator[Boolean]((e, disable) => {
+    if disable then e.setAttribute("disabled", "disabled")
+    else e.removeAttribute("disabled")
+  })
+
+  def checked: Creator[Boolean] = Creator[Boolean]((e, check) => {
+    if e.isInstanceOf[HTMLInputElement] then
+      val eCheck = e.asInstanceOf[HTMLInputElement]
+      eCheck.checked = check
+  })
 
   def css(f: CSSStyleDeclaration => Unit): Modifier = Modifier(e => f(e.style))
 
@@ -115,6 +123,11 @@ object Modifiers:
   val overflowYAuto = overflowY := "auto"
   val cssFloat = styleSetter((s, v) => s.cssFloat = v)
   val floatRight = cssFloat := "right"
+
+  val showHide = Creator[Boolean]((e, show: Boolean) => {
+    val q = ElementQ(e)
+    if show then q(displayDefault) else q(displayNone)
+  })
 
   val adjustForFlex = Modifier(e => {
     e.setAttribute("size", "1")
@@ -203,4 +216,8 @@ object Modifiers:
 
   val oncontextmenu = Creator[js.Function1[MouseEvent, Unit]]((ele, handler) => {
     ele.addEventListener("contextmenu", handler)
+  })
+
+  val onchange = Creator[js.Function1[Event, Unit]]((ele, handler) => {
+    ele.addEventListener("change", handler)
   })
