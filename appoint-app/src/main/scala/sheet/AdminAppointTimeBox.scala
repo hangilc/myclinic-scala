@@ -24,8 +24,10 @@ import java.time.LocalTime
 import dev.myclinic.scala.util.DateTimeOrdering.{*, given}
 import scala.math.Ordered.orderingToOrdered
 
-class AdminAppointTimeBox(appointTime: AppointTime)
-    extends AppointTimeBox(appointTime):
+class AdminAppointTimeBox(
+    appointTime: AppointTime,
+    followingVacantRegular: () => Option[AppointTime]
+) extends AppointTimeBox(appointTime, followingVacantRegular):
   ele(oncontextmenu := (onContextMenu _))
 
   def onContextMenu(event: MouseEvent): Unit =
@@ -35,32 +37,26 @@ class AdminAppointTimeBox(appointTime: AppointTime)
       "結合" -> doCombine,
       "分割" -> doSplit
     )
-    if slots.isEmpty then
-      menu = menu :+ ("削除" -> doDelete)
+    if slots.isEmpty then menu = menu :+ ("削除" -> doDelete)
     ContextMenu(menu).open(event)
-
 
   def doConvert(): Unit =
     ConvertAppointTimeDialog(appointTime).open()
 
   def doCombine(): Unit =
-    for
-      appointTimes <- Api.listAppointTimesForDate(appointTime.date)
+    for appointTimes <- Api.listAppointTimesForDate(appointTime.date)
     yield {
       CombineAppointTimesDialog(appointTime, appointTimes).open()
     }
 
-  def doSplit(): Unit = 
+  def doSplit(): Unit =
     SplitAppointTimeDialog(appointTime).open()
 
   def doDelete(): Unit =
     val msg = "本当に削除しますか？"
-    ShowMessage.confirm(msg, yes => {
-      if yes then
-        Api.deleteAppointTime(appointTime.appointTimeId)
-    })
-
-
-
-
-
+    ShowMessage.confirm(
+      msg,
+      yes => {
+        if yes then Api.deleteAppointTime(appointTime.appointTimeId)
+      }
+    )

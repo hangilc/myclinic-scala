@@ -28,7 +28,8 @@ val sortedAppointTimeBox: SortedElement[AppointTimeBox] =
     def element(a: AppointTimeBox): HTMLElement = a.ele
 
 case class AppointTimeBox(
-    appointTime: AppointTime
+    appointTime: AppointTime,
+    followingVacantRegular: () => Option[AppointTime]
 ):
   case class Slot(var appoint: Appoint):
     val eLabel = div()
@@ -136,7 +137,7 @@ case class AppointTimeBox(
     if slots.size < appointTime.capacity then openAppointDialog()
 
   def openAppointDialog(): Unit =
-    MakeAppointDialog(appointTime).open()
+    MakeAppointDialog(appointTime, followingVacantRegular).open()
 
   def doDeleteAppointTime(): Unit =
     System.err.println("doDeleteAppointTime not implemented.")
@@ -147,7 +148,11 @@ case class AppointTimeBox(
     })
 
 object AppointTimeBox:
-  def apply(appointTime: AppointTime, appoints: List[Appoint]): AppointTimeBox =
-    val box = AppointTimeBox(appointTime)
+  def apply(
+      appointTime: AppointTime,
+      appoints: List[Appoint],
+      followingVacantRegular: () => Option[AppointTime]
+  ): AppointTimeBox =
+    val box = AppointTimeBox(appointTime, followingVacantRegular)
     appoints.foreach(box.addAppoint(_))
     box

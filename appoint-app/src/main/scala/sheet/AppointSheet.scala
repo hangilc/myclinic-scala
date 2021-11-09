@@ -247,9 +247,10 @@ class AppointSheet:
       )
 
   def makeAppointTimeBox(
-      appointTime: AppointTime
+      appointTime: AppointTime,
+      followingVacantRegular: () => Option[AppointTime]
   ): AppointTimeBox =
-    AppointTimeBox(appointTime)
+    AppointTimeBox(appointTime, followingVacantRegular)
 
 case class AppointDate(
     date: LocalDate,

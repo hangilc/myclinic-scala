@@ -59,9 +59,15 @@ object Modifiers:
 
   val cb = Creator[HTMLElement => Unit]((e, handler) => handler(e))
 
-  def attr(name: String) = Creator[String]((e, a) => {
-    e.setAttribute(name, a)
-  })
+  case class Attr(name: String):
+    def :=(arg: String): Modifier = Modifier(e => e.setAttribute(name, arg))
+    def remove: Modifier = Modifier(e => e.removeAttribute(name))
+
+  def attr(name: String): Attr = Attr(name)
+
+  // def attr(name: String) = Creator[String]((e, a) => {
+  //   e.setAttribute(name, a)
+  // })
 
   val value = attr("value")
 
@@ -69,7 +75,7 @@ object Modifiers:
     e.setAttributeNS(namespace, name, a)
   })
 
-  def placeholder: Creator[String] = attr("placeholder")
+  def placeholder: Attr = attr("placeholder")
 
   def css(f: CSSStyleDeclaration => Unit): Modifier = Modifier(e => f(e.style))
 

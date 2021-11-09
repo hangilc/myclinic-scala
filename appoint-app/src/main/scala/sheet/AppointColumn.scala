@@ -26,7 +26,10 @@ val sortedAppointColumn = new SortedElement[AppointColumn]:
 case class AppointColumn(
     date: LocalDate,
     op: ClinicOperation,
-    appointTimeBoxMaker: AppointTime => AppointTimeBox
+    appointTimeBoxMaker: (
+        AppointTime,
+        () => Option[AppointTime]
+    ) => AppointTimeBox
 ):
   var boxes: Seq[AppointTimeBox] = Vector.empty
   val dateElement = div()
@@ -66,15 +69,15 @@ case class AppointColumn(
     val kinds = probeVacantKinds()
     val wrapper = vacantKindsArea
     wrapper.clear()
-    if kinds.isEmpty then
-      dateElement(cls :- "vacant")
+    if kinds.isEmpty then dateElement(cls :- "vacant")
     else
       dateElement(cls := "vacant")
       kinds.foreach(k => {
-        val icon = Icons.circleFilled(color = k.iconColor)(Icons.defaultStaticStyle)
+        val icon =
+          Icons.circleFilled(color = k.iconColor)(Icons.defaultStaticStyle)
         wrapper(icon)
       })
-  
+
   def totalAppoints: Int =
     boxes.foldLeft(0)((acc, ele) => acc + ele.slots.size)
 
@@ -83,24 +86,33 @@ case class AppointColumn(
     var menu: List[(String, () => Unit)] = List.empty
     if totalAppoints == 0 then
       menu = menu :+ ("予約枠全削除" -> (doDeleteAllAppointTimes _))
-    if !menu.isEmpty then
-      ContextMenu(menu).open(event)
+    if !menu.isEmpty then ContextMenu(menu).open(event)
 
   def doDeleteAllAppointTimes(): Unit =
     val dateRep = Misc.formatAppointDate(date)
-    ShowMessage.confirm(s"${dateRep}の予約枠を全部削除していいですか？", yes => {
-      if yes then
-        val ids: List[Int] = boxes.map(_.appointTimeId).toList
-        for
-          _ <- ids.map(id => Api.deleteAppointTime(id)).sequence.void
-        yield ()
-    })
-    
+    ShowMessage.confirm(
+      s"${dateRep}の予約枠を全部削除していいですか？",
+      yes => {
+        if yes then
+          val ids: List[Int] = boxes.map(_.appointTimeId).toList
+          for _ <- ids.map(id => Api.deleteAppointTime(id)).sequence.void
+          yield ()
+      }
+    )
+
+  def findFollowingVacantRegular(appointTime: AppointTime): Option[AppointTime] =
+    val idx = boxes.indexWhere(b => b.appointTime.appointTimeId == appointTime.appointTimeId)
+    if idx < 0 || (idx + 1) >= boxes.size then None
+    else
+      val f = boxes(idx + 1)
+      if f.appointTime.kind == "regular" && f.hasVacancy then Some(f.appointTime)
+      else None
+
   def hasAppointTimeId(appointTimeId: Int): Boolean =
     boxes.find(b => b.appointTime.appointTimeId == appointTimeId).isDefined
 
   def addAppointTime(appointTime: AppointTime): Unit =
-    val box = appointTimeBoxMaker(appointTime)
+    val box = appointTimeBoxMaker(appointTime, () => findFollowingVacantRegular(appointTime))
     boxes = sortedAppointTimeBox.insert(box, boxes, boxWrapper)
     adjustVacantClass()
 
@@ -110,7 +122,7 @@ case class AppointColumn(
     adjustVacantClass()
 
   def updateAppointTime(updated: AppointTime): Unit =
-    val box = appointTimeBoxMaker(updated)
+    val box = appointTimeBoxMaker(updated, () => findFollowingVacantRegular(updated))
     boxes = sortedAppointTimeBox.update(
       b => {
         if b.appointTimeId == updated.appointTimeId then
@@ -149,8 +161,7 @@ case class AppointColumn(
   def markKenshin(): Unit =
     val n = countKenshin()
     kenshinArea.clear()
-    if n > 0 then
-      kenshinArea(s"健$n")
+    if n > 0 then kenshinArea(s"健$n")
 
 object AppointColumn:
   type AppointTimeId = Int
@@ -159,7 +170,10 @@ object AppointColumn:
       date: LocalDate,
       op: ClinicOperation,
       list: List[(AppointTime, List[Appoint])],
-      appointTimeBoxMaker: AppointTime => AppointTimeBox
+      appointTimeBoxMaker: (
+          AppointTime,
+          () => Option[AppointTime]
+      ) => AppointTimeBox
   ): AppointColumn =
     val c = AppointColumn(date, op, appointTimeBoxMaker)
     list.foreach {

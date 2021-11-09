@@ -31,3 +31,6 @@ input[type=text] {
   border: 1px solid var(--secondary-color)
 }
 
+input[disabled]+label {
+  color: #ccc;
+}

@@ -17,8 +17,9 @@ class AdminAppointSheet extends AppointSheet:
 
   override def makeAppointTimeBox(
       appointTime: AppointTime,
+      followingVacantRegular: () => Option[AppointTime]
   ): AppointTimeBox =
-    AdminAppointTimeBox(appointTime)
+    AdminAppointTimeBox(appointTime, followingVacantRegular)
 
   def onCogClick(event: MouseEvent): Unit =
     ContextMenu(List("予約枠わりあて" -> doFillAppointTimes)).open(event)
