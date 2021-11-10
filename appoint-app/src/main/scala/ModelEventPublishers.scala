@@ -46,7 +46,6 @@ case class ModelEventPublisher[T <: AppModelEvent](
     sub
 
   def publish(event: T): Unit =
-    println(("publishing", event))
     subscribers.foreach(_.handle(event))
 
 object ModelEventPublishers:

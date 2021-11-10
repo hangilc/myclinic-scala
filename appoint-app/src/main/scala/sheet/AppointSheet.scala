@@ -212,7 +212,7 @@ class AppointSheet:
     ): Unit =
       columns
         .find(c => c.hasAppointTimeId(appoint.appointTimeId))
-        .foreach(c => { println(("column found", c, a)); f(c, appoint) })
+        .foreach(c => f(c, appoint))
 
     private def findColumnByDate(date: LocalDate): Option[AppointColumn] =
       columns.find(c => c.date == date)
@@ -221,13 +221,9 @@ class AppointSheet:
       propagateToColumn(event.created, _.addAppoint(_))
 
     def onAppointUpdated(event: AppointUpdated): Unit =
-      println(("appointUpdated", event, event.updated))
       propagateToColumn(
         event.updated,
-        (c, a) => {
-          println(("propagating", c, a))
-          c.updateAppoint(a)
-        }
+        (c, a) => c.updateAppoint(a)
       )
 
     def onAppointDeleted(event: AppointDeleted): Unit =
