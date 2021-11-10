@@ -3,10 +3,15 @@ package dev.myclinic.scala.model.jsoncodec
 import io.circe.*
 import io.circe.syntax.*
 import io.circe.parser.*
+import io.circe.generic.semiauto._
 import dev.myclinic.scala.model.*
 import java.time.LocalDateTime
 
-trait AppEventCodec extends Model:
+trait AppEventCodec extends Model with DateTime:
+
+  given Encoder[AppEvent] = deriveEncoder[AppEvent]
+  given Decoder[AppEvent] = deriveDecoder[AppEvent]
+
   given Encoder[AppModelEvent] with
     def apply(e: AppModelEvent): Json =
       e match {

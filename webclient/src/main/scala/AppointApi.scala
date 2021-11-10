@@ -5,8 +5,8 @@ import scala.concurrent.Future
 import dev.myclinic.scala.model._
 import io.circe._
 import io.circe.syntax._
-import dev.myclinic.scala.model.jsoncodec.Implicits.{given}
-import dev.myclinic.scala.webclient.ParamsImplicits.{given}
+import dev.myclinic.scala.model.jsoncodec.Implicits.given
+import dev.myclinic.scala.webclient.ParamsImplicits.given
 import scala.language.implicitConversions
 
 object AppointApi extends ApiBase:
@@ -19,13 +19,13 @@ object AppointApi extends ApiBase:
     ): Future[List[AppointTime]] =
       get("list-appoint-times", Params("from" -> from, "upto" -> upto))
 
-    def getAppointTime(appointTimeId: Int): Future[AppointTime] = 
+    def getAppointTime(appointTimeId: Int): Future[AppointTime] =
       get("get-appoint-time", Params("appoint-time-id" -> appointTimeId))
 
     def updateAppointTime(appointTime: AppointTime): Future[Boolean] =
       post("update-appoint-time", Params(), appointTime)
 
-    def deleteAppointTime(appointTimeId: Int): Future[Boolean] = 
+    def deleteAppointTime(appointTimeId: Int): Future[Boolean] =
       post("delete-appoint-time", Params("appoint-time-id" -> appointTimeId))
 
     def listAppointTimesForDate(date: LocalDate): Future[List[AppointTime]] =
@@ -52,8 +52,14 @@ object AppointApi extends ApiBase:
     def listAppEventSince(fromEventId: Int): Future[List[AppEvent]] =
       get("list-app-event-since", Params("from" -> fromEventId))
 
-    def listAppEventInRange(fromEventId: Int, untilEventId: Int): Future[List[AppEvent]] =
-      get("list-app-event-in-range", Params("from" -> fromEventId, "until" -> untilEventId))
+    def listAppEventInRange(
+        fromEventId: Int,
+        untilEventId: Int
+    ): Future[List[AppEvent]] =
+      get(
+        "list-app-event-in-range",
+        Params("from" -> fromEventId, "until" -> untilEventId)
+      )
 
     def listAppointEvents(limit: Int, offset: Int): Future[List[AppEvent]] =
       get("list-appoint-events", Params("limit" -> limit, "offset" -> offset))
@@ -67,8 +73,14 @@ object AppointApi extends ApiBase:
     def cancelAppoint(appointId: Int): Future[Boolean] =
       post("cancel-appoint", Params("appoint-id" -> appointId))
 
+    def appointHistoryAt(appointTimeId: Int): Future[List[AppEvent]] =
+      get("appoint-history-at", Params("appoint-time-id" -> appointTimeId))
+
     def combineAppointTimes(appointTimeIds: List[Int]): Future[Boolean] =
       post("combine-appoint-times", Params(), appointTimeIds)
 
     def splitAppointTime(appointTimeId: Int, at: LocalTime): Future[Boolean] =
-      post("split-appoint-time", Params("appoint-time-id" -> appointTimeId, "at" -> at))  
+      post(
+        "split-appoint-time",
+        Params("appoint-time-id" -> appointTimeId, "at" -> at)
+      )

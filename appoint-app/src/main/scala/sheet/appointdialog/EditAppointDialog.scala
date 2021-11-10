@@ -35,13 +35,23 @@ class EditAppointDialog(val appoint: Appoint, appointTime: AppointTime):
     dlog.onClose(_ => cb())
 
   def onMenuClick(event: MouseEvent): Unit =
-    ContextMenu(List("最初にもどす" -> (doRevert _)), zIndex = dlog.zIndex + 2)
+    ContextMenu(List(
+      "最初にもどす" -> (doRevert _),
+      "変更履歴" -> (doHistory _)
+      ), zIndex = dlog.zIndex + 2)
       .open(event)
+
   def doRevert(): Unit =
     Api.updateAppoint(appoint).onComplete {
       case Success(_)  => ()
       case Failure(ex) => ShowMessage.showError(s"予約の回復に失敗しました。\n${ex}")
     }
+
+  def doHistory(): Unit =
+    for
+      appEvents <- Api.appointHistoryAt(appointTime.appointTimeId)
+      _ = println(appEvents)
+    yield ()
 
   def onAppointUpdated(updated: Appoint): Unit =
     assert(appoint.appointId == updated.appointId)
