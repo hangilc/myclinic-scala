@@ -24,18 +24,18 @@ case class UnknownAppEvent(
     data: String
 ) extends AppModelEvent
 
-case class AppointCreated(val createdAt: LocalDateTime, created: Appoint)
+case class AppointCreated(createdAt: LocalDateTime, created: Appoint)
     extends AppModelEvent
-case class AppointUpdated(val createdAt: LocalDateTime, updated: Appoint)
+case class AppointUpdated(createdAt: LocalDateTime, updated: Appoint)
     extends AppModelEvent
-case class AppointDeleted(val createdAt: LocalDateTime, deleted: Appoint)
+case class AppointDeleted(createdAt: LocalDateTime, deleted: Appoint)
     extends AppModelEvent
 
-case class AppointTimeCreated(val createdAt: LocalDateTime, created: AppointTime)
+case class AppointTimeCreated(createdAt: LocalDateTime, created: AppointTime)
     extends AppModelEvent
-case class AppointTimeUpdated(val createdAt: LocalDateTime, updated: AppointTime)
+case class AppointTimeUpdated(createdAt: LocalDateTime, updated: AppointTime)
     extends AppModelEvent
-case class AppointTimeDeleted(val createdAt: LocalDateTime, deleted: AppointTime)
+case class AppointTimeDeleted(createdAt: LocalDateTime, deleted: AppointTime)
     extends AppModelEvent
 
 object AppModelEvent:
