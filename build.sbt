@@ -5,12 +5,10 @@ ThisBuild / version := "0.1.0-SNAPSHOT"
 ThisBuild / organization := "dev.myclinic.scala"
 ThisBuild / organizationName := "myclinic"
 
-val sqliteVersion = "3.36.0.1"
 val mysqlVersion = "6.0.6"
 val http4sVersion = "0.23.3"
 val doobieVersion = "1.0.0-M5"
 val circeVersion = "0.14.1"
-//val circeVersion = "0.15.0-M1"
 val scalaJavaTimeVersion = "2.3.0"
 val scalaJSDomVersion = "1.2.0"
 val catsVersion = "2.6.1"
@@ -71,7 +69,6 @@ lazy val db = project
   .settings(
     name := "db",
     libraryDependencies ++= Seq(
-      "org.xerial" % "sqlite-jdbc" % sqliteVersion,
       "mysql" % "mysql-connector-java" % mysqlVersion,
       "org.tpolecat" %% "doobie-core" % doobieVersion,
       "org.tpolecat" %% "doobie-hikari" % doobieVersion,

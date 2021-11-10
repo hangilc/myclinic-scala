@@ -69,20 +69,44 @@ object MakeAppointUI:
           )
         def onEnter(): Unit =
           val f =
-            for validated <- validate()
-            yield validated match {
-              case Right(appoint) => {
-                Api.registerAppoint(appoint).onComplete {
-                  case Success(_)  => cb()
-                  case Failure(ex) => errBox.show(ex.toString)
-                }
-              }
-              case Left(msg) => errBox.show(msg)
-            }
+            for
+              appoint <- enter()
+              _ <-
+                val followOpt = followingVacantRegular()
+                if tagPart.isFollowingChecked && followOpt.isDefined then
+                  enterFollow(appoint, followOpt.get)
+                else Future.successful(())
+            yield ()
           f.onComplete {
-            case Success(_)  => ()
-            case Failure(ex) => errBox.show(ex.toString)
+            case Success(_)  => cb()
+            case Failure(ex) => errBox.show(ex.getMessage)
           }
+        def enter(): Future[Appoint] =
+          for
+            validated <- validate()
+            appoint <- validated match {
+              case Right(appoint) => Api.registerAppoint(appoint)
+              case Left(msg)      => Future.failed(new Exception(msg))
+            }
+          yield appoint
+        def enterFollow(
+            appoint: Appoint,
+            appointTime: AppointTime
+        ): Future[Unit] =
+          for
+            patientOpt <- Api.findPatient(appoint.patientId)
+            _ <- AppointValidator.validateForEnter(
+              appointTime.appointTimeId,
+              appoint.patientName,
+              AppointValidator.validatePatientIdValue(appoint.patientId),
+              "",
+              Set.empty,
+              patientOpt
+            ).toEither() match {
+              case Right(newAppoint) => Api.registerAppoint(newAppoint)
+              case Left(msg) => Future.failed(new Exception(msg))
+            }
+          yield ()
         def validate(): Future[Either[String, Appoint]] =
           val patientIdResult =
             AppointValidator.validatePatientId(patientIdPart.input.value)
@@ -181,7 +205,8 @@ object MakeAppointUI:
       input
     )
 
-  class TagPart(followingVacantRegular: () => Option[AppointTime]) extends ValuePart:
+  class TagPart(followingVacantRegular: () => Option[AppointTime])
+      extends ValuePart:
     def updateUI(): Unit = ()
     val kenshinCheck: HTMLInputElement = checkbox()
     val alsoWrapper: HTMLElement = span()
@@ -202,5 +227,4 @@ object MakeAppointUI:
       alsoCheck.checked
     def onKenshinChange(event: Event): Unit =
       if kenshinCheck.checked then alsoCheck(disabled := false)
-      else
-        alsoCheck(disabled := true, checked := false)
+      else alsoCheck(disabled := true, checked := false)

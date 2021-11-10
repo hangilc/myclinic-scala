@@ -44,7 +44,7 @@ abstract class ValuePart:
     def catchErr: Unit =
       f.onComplete {
         case Success(_) => ()
-        case Failure(ex) => errBox.show(ex.toString)
+        case Failure(ex) => errBox.show(ex.getMessage)
       }
 
 class ValuePartManager(var part: ValuePart):
