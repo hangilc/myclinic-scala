@@ -48,14 +48,14 @@ object AppModelEvent:
     }
     (event.model, event.kind) match {
       case ("appoint", "created") => AppointCreated(at, as[Appoint])
-      case ("appoint", "updated") => AppointCreated(at, as[Appoint])
-      case ("appoint", "deleted") => AppointCreated(at, as[Appoint])
+      case ("appoint", "updated") => AppointUpdated(at, as[Appoint])
+      case ("appoint", "deleted") => AppointDeleted(at, as[Appoint])
       case ("appoint-time", "created") =>
         AppointTimeCreated(at, as[AppointTime])
       case ("appoint-time", "updated") =>
-        AppointTimeCreated(at, as[AppointTime])
+        AppointTimeUpdated(at, as[AppointTime])
       case ("appoint-time", "deleted") =>
-        AppointTimeCreated(at, as[AppointTime])
+        AppointTimeDeleted(at, as[AppointTime])
       case _ =>
         UnknownAppEvent(
           event.appEventId,

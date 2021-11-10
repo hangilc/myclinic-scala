@@ -37,12 +37,6 @@ object Main extends IOApp:
       WebSocketBuilder[IO].build(toClient, fromClient)
   }
 
-  def helloService() = HttpRoutes.of[IO] {
-    case GET -> Root => {
-      Ok("hello")
-    }
-  }
-
   val staticService = fileService[IO](FileService.Config("./web", "/"))
   val deployTestService =
     fileService[IO](FileService.Config("./deploy", "/"))

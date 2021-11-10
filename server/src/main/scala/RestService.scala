@@ -23,11 +23,6 @@ import dev.myclinic.scala.appoint.admin.AppointAdmin
 
 object RestService extends DateTimeQueryParam:
 
-  // given QueryParamDecoder[LocalDate] =
-  //   QueryParamDecoder[String].map(DateUtil.stringToDate(_))
-  // given QueryParamDecoder[LocalTime] =
-  //   QueryParamDecoder[String].map(DateUtil.stringToTime(_))
-
   object dateFrom extends QueryParamDecoderMatcher[LocalDate]("from")
   object dateDate extends QueryParamDecoderMatcher[LocalDate]("date")
   object dateUpto extends QueryParamDecoderMatcher[LocalDate]("upto")
@@ -44,10 +39,6 @@ object RestService extends DateTimeQueryParam:
 
   case class UserError(message: String) extends Exception
 
-  def hello(): IO[String] =
-    //throw new UserError("さようなら")
-    "こんにちは".pure[IO]
-
   private def publish(event: AppEvent)(using
       topic: Topic[IO, WebSocketFrame]
   ): IO[Unit] =
@@ -59,14 +50,6 @@ object RestService extends DateTimeQueryParam:
     events.map(publish(_)).sequence_
 
   def routes(using topic: Topic[IO, WebSocketFrame]) = HttpRoutes.of[IO] {
-
-    case GET -> Root / "hello" => {
-      try Ok(hello())
-      catch
-        case e: UserError => BadRequest(e.message, "X-User-Error" -> "true")
-        case e: Exception => throw e
-
-    }
 
     case GET -> Root / "list-appoint-times" :? dateFrom(from) +& dateUpto(
           upto
@@ -180,5 +163,8 @@ object RestService extends DateTimeQueryParam:
           offset
         ) =>
       Ok(Db.listAppointEvents(limit, offset))
+
+    case GET -> Root / "appoint-history-at" :? intAppointTimeId(appointTimeId) =>
+      Ok(Db.appointHistoryAt(appointTimeId))
 
   } <+> PatientService.routes <+> MiscService.routes

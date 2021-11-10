@@ -212,7 +212,7 @@ class AppointSheet:
     ): Unit =
       columns
         .find(c => c.hasAppointTimeId(appoint.appointTimeId))
-        .foreach(c => f(c, appoint))
+        .foreach(c => { println(("column found", c, a)); f(c, appoint) })
 
     private def findColumnByDate(date: LocalDate): Option[AppointColumn] =
       columns.find(c => c.date == date)
@@ -221,7 +221,14 @@ class AppointSheet:
       propagateToColumn(event.created, _.addAppoint(_))
 
     def onAppointUpdated(event: AppointUpdated): Unit =
-      propagateToColumn(event.updated, _.updateAppoint(_))
+      println(("appointUpdated", event, event.updated))
+      propagateToColumn(
+        event.updated,
+        (c, a) => {
+          println(("propagating", c, a))
+          c.updateAppoint(a)
+        }
+      )
 
     def onAppointDeleted(event: AppointDeleted): Unit =
       propagateToColumn(event.deleted, _.deleteAppoint(_))
@@ -276,6 +283,10 @@ object AppointDate:
     val map = appList.groupBy(_.date)
     val result =
       for (date, op) <- clinicDates yield {
-        AppointDate(date, op, map.getOrElse(date, List.empty).sortBy(_.fromTime))
+        AppointDate(
+          date,
+          op,
+          map.getOrElse(date, List.empty).sortBy(_.fromTime)
+        )
       }
     result.toList.sortBy(_.date)

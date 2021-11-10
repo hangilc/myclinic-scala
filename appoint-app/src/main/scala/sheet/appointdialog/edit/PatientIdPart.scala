@@ -35,7 +35,7 @@ class PatientIdPart(var appoint: Appoint):
   class Disp() extends ValuePart:
     val editIcon = Icons.pencilAlt(color = "gray", size = "1.2rem")
     val main = div(
-      span({ println(("label", label)); label }),
+      span(label),
       editIcon(
         Icons.defaultStyle,
         ml := "0.5rem",

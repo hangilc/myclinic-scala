@@ -5,6 +5,7 @@ import cats.implicits.*
 import cats.effect.IO
 import dev.myclinic.scala.model.*
 import dev.myclinic.scala.db.{DbAppointPrim => Prim}
+import dev.myclinic.scala.db.DoobieMapping.*
 import doobie.*
 import doobie.implicits.*
 import dev.myclinic.scala.util.DateTimeOrdering.{*, given}
@@ -25,7 +26,7 @@ trait DbAppoint extends Mysql:
     def confirmNoOverlap(appointTimes: List[AppointTime]): Unit =
       if AppointTime.overlaps(appointTimes.sortBy(_.fromTime)) then
         throw new RuntimeException(s"AppointTime overlaps. ${appointTimes}")
-    for 
+    for
       ats <- Prim.listAppointTimesForDate(appointTime.date).to[List]
       _ = confirmNoOverlap(appointTime :: ats)
       created <- Prim.enterAppointTime(appointTime)
@@ -188,7 +189,9 @@ trait DbAppoint extends Mysql:
       event <- DbEventPrim.logAppointCreated(created)
     yield (created, event)
 
-  private def safeUpdateAppoint(appoint: Appoint): ConnectionIO[(Appoint, AppEvent)] =
+  private def safeUpdateAppoint(
+      appoint: Appoint
+  ): ConnectionIO[(Appoint, AppEvent)] =
     for
       updated <- Prim.updateAppoint(appoint)
       event <- DbEventPrim.logAppointUpdated(updated)
@@ -231,7 +234,20 @@ trait DbAppoint extends Mysql:
   def listAppointsForDate(date: LocalDate): IO[List[Appoint]] =
     mysql(Prim.listAppointsForDate(date).to[List])
 
-  def appointHistoryAt(appointTimeId: Int): IO[List[Appoint]] =
-    mysql(sql"""
-      select * from app_event where model = 'appoint'
-    """.query[Appoint].to[List])
+  def appointHistoryAt(appointTimeId: Int): IO[List[AppEvent]] =
+    mysql(
+      sql"""
+      select * from app_event where model = 'appoint' order by app_event_id desc
+    """.query[AppEvent]
+        .stream
+        .filter(e => {
+          AppModelEvent.from(e) match {
+            case AppointCreated(_, a) => a.appointTimeId == appointTimeId
+            case AppointUpdated(_, a) => a.appointTimeId == appointTimeId
+            case AppointDeleted(_, a) => a.appointTimeId == appointTimeId
+            case _ => false
+          }
+        })
+        .compile
+        .toList
+    )
