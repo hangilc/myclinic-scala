@@ -1,6 +1,10 @@
 package dev.myclinic.scala.model
 
 import java.time.LocalDateTime
+import io.circe.*
+import io.circe.syntax.*
+import io.circe.parser.decode
+import dev.myclinic.scala.model.jsoncodec.Implicits.given
 
 case class AppEvent(
     appEventId: Int,
@@ -20,32 +24,44 @@ case class UnknownAppEvent(
     data: String
 ) extends AppModelEvent
 
-case class AppointCreated(
-    val appEventId: Int,
-    val createdAt: LocalDateTime,
-    data: Appoint
-) extends AppModelEvent
+case class AppointCreated(val createdAt: LocalDateTime, created: Appoint)
+    extends AppModelEvent
+case class AppointUpdated(val createdAt: LocalDateTime, updated: Appoint)
+    extends AppModelEvent
+case class AppointDeleted(val createdAt: LocalDateTime, deleted: Appoint)
+    extends AppModelEvent
 
-case class AppointUpdated(
-    val appEventId: Int,
-    val createdAt: LocalDateTime,
-    data: Appoint
-) extends AppModelEvent
-
-case class AppointDeleted(
-    val appEventId: Int,
-    val createdAt: LocalDateTime,
-    data: Appoint
-) extends AppModelEvent
+case class AppointTimeCreated(val createdAt: LocalDateTime, created: AppointTime)
+    extends AppModelEvent
+case class AppointTimeUpdated(val createdAt: LocalDateTime, updated: AppointTime)
+    extends AppModelEvent
+case class AppointTimeDeleted(val createdAt: LocalDateTime, deleted: AppointTime)
+    extends AppModelEvent
 
 object AppModelEvent:
   def from(event: AppEvent): AppModelEvent =
-    event match {
-      case _ => UnknownAppEvent(
-        event.appEventId,
-        event.createdAt,
-        event.model,
-        event.kind,
-        event.data
-      )
+    val at = event.createdAt
+    val data = event.data
+    def as[T](using Decoder[T]): T = decode[T](data) match {
+      case Right(t: T) => t
+      case Left(ex)    => throw ex
+    }
+    (event.model, event.kind) match {
+      case ("appoint", "created") => AppointCreated(at, as[Appoint])
+      case ("appoint", "updated") => AppointCreated(at, as[Appoint])
+      case ("appoint", "deleted") => AppointCreated(at, as[Appoint])
+      case ("appoint-time", "created") =>
+        AppointTimeCreated(at, as[AppointTime])
+      case ("appoint-time", "updated") =>
+        AppointTimeCreated(at, as[AppointTime])
+      case ("appoint-time", "deleted") =>
+        AppointTimeCreated(at, as[AppointTime])
+      case _ =>
+        UnknownAppEvent(
+          event.appEventId,
+          event.createdAt,
+          event.model,
+          event.kind,
+          event.data
+        )
     }

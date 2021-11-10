@@ -6,12 +6,6 @@ import java.time.LocalDateTime
 import dev.myclinic.scala.util.DateTimeOrdering.{*, given}
 import scala.math.Ordered.orderingToOrdered
 
-given Ordering[AppointTime] with
-  def compare(a: AppointTime, b: AppointTime): Int =
-    val cmp: Int = summon[Ordering[LocalDate]].compare(a.date, b.date)
-    if cmp == 0 then summon[Ordering[LocalTime]].compare(a.fromTime, b.fromTime)
-    else cmp
-
 case class AppointTime(
     appointTimeId: Int,
     date: LocalDate,
@@ -53,6 +47,12 @@ object AppointTime:
   def isAdjacentRun(as: List[AppointTime]): Boolean =
     if as.size < 2 then true
     else as.sliding(2).forall(e => e(0).isAdjacentTo(e(1)))
+
+  given Ordering[AppointTime] with
+    def compare(a: AppointTime, b: AppointTime): Int =
+      val cmp: Int = summon[Ordering[LocalDate]].compare(a.date, b.date)
+      if cmp == 0 then summon[Ordering[LocalTime]].compare(a.fromTime, b.fromTime)
+      else cmp
 
 case class Appoint(
     appointId: Int,

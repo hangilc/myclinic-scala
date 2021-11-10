@@ -1,7 +1,8 @@
 package dev.myclinic.scala.web.appoint.sheet
 
 import dev.myclinic.scala.web.appoint.Misc
-import dev.myclinic.scala.model.{AppointTime, Appoint, given}
+import dev.myclinic.scala.model.*
+import dev.myclinic.scala.model.jsoncodec.Implicits.given
 import dev.fujiwara.domq.ElementQ.{given, *}
 import dev.fujiwara.domq.Html.{given, *}
 import dev.fujiwara.domq.Modifiers.{given, *}

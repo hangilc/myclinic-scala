@@ -1,12 +1,12 @@
 package dev.myclinic.scala.web.appoint.history
 
-import dev.myclinic.scala.model.{AppEvent, Appoint, AppointTime}
+import dev.myclinic.scala.model.*
+import dev.myclinic.scala.model.jsoncodec.given
 import scala.concurrent.Future
 import dev.myclinic.scala.web.appoint.Misc
 import concurrent.ExecutionContext.Implicits.global
 import dev.myclinic.scala.webclient.Api
 import java.time.LocalDateTime
-import dev.myclinic.scala.event.ModelEvents
 import cats._
 import cats.syntax.all._
 
@@ -25,34 +25,34 @@ object History:
       .sequence
 
   def appEventToHistory(appEvent: AppEvent): Option[Future[History]] =
-    val modelEvent = ModelEvents.convert(appEvent)
+    val modelEvent = AppModelEvent.from(appEvent)
     val createdAt: LocalDateTime = appEvent.createdAt
     modelEvent match {
-      case m: ModelEvents.AppointCreated => {
+      case m: AppointCreated => {
         Some(Api
           .getAppointTime(m.created.appointTimeId)
           .map(appointTime =>
-            AppointCreated(m.created, appointTime, createdAt)
+            AppointCreatedHistory(m.created, appointTime, createdAt)
           ))
       }
-      case m: ModelEvents.AppointUpdated => {
+      case m: AppointUpdated => {
         Some(Api
           .getAppointTime(m.updated.appointTimeId)
           .map(appointTime =>
-            AppointUpdated(m.updated, appointTime, createdAt)
+            AppointUpdatedHistory(m.updated, appointTime, createdAt)
           ))
       }
-      case m: ModelEvents.AppointDeleted => {
+      case m: AppointDeleted => {
         Some(Api
           .getAppointTime(m.deleted.appointTimeId)
           .map(appointTime =>
-            AppointDeleted(m.deleted, appointTime, createdAt)
+            AppointDeletedHistory(m.deleted, appointTime, createdAt)
           ))
       }
       case _ => None
     }
 
-case class AppointCreated(
+case class AppointCreatedHistory(
     appoint: Appoint,
     appointTime: AppointTime,
     val createdAt: LocalDateTime
@@ -64,7 +64,7 @@ case class AppointCreated(
   }
   def resume: Option[() => Future[Either[String, Unit]]] = None
 
-case class AppointUpdated(
+case class AppointUpdatedHistory(
     appoint: Appoint,
     appointTime: AppointTime,
     val createdAt: LocalDateTime
@@ -76,7 +76,7 @@ case class AppointUpdated(
   }
   def resume: Option[() => Future[Either[String, Unit]]] = None
 
-case class AppointDeleted(
+case class AppointDeletedHistory(
     appoint: Appoint,
     appointTime: AppointTime,
     val createdAt: LocalDateTime

@@ -4,7 +4,7 @@ import dev.fujiwara.domq.ElementQ.{given, *}
 import dev.fujiwara.domq.Html.{given, *}
 import dev.fujiwara.domq.Modifiers.{given, *}
 import dev.fujiwara.domq.{Icons, ContextMenu, FloatWindow}
-import dev.myclinic.scala.model._
+import dev.myclinic.scala.model.*
 import dev.myclinic.scala.clinicop.*
 import dev.myclinic.scala.util.DateUtil
 import math.Ordered.orderingToOrdered
@@ -16,8 +16,6 @@ import scala.util.Success
 import scala.concurrent.Future
 import scala.collection.mutable
 import dev.myclinic.scala.webclient.Api
-import dev.myclinic.scala.event.ModelEvents.ModelEvent
-import dev.myclinic.scala.event.ModelEvents.*
 import dev.myclinic.scala.event.{ModelEventPublishers => Pub}
 import dev.myclinic.scala.event.ModelEventSubscriberController
 import scala.language.implicitConversions

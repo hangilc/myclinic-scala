@@ -21,7 +21,6 @@ import io.circe.parser.decode
 import dev.myclinic.scala.model.jsoncodec.Implicits.{given}
 import dev.myclinic.scala.web.appoint.sheet.{AppointSheet, AdminAppointSheet}
 import dev.myclinic.scala.event.ModelEventPublishers
-import dev.myclinic.scala.event.ModelEvents
 import scala.scalajs.js.annotation.JSExportTopLevel
 import scala.scalajs.js.annotation.JSExport
 import org.scalajs.dom.raw.HTMLElement
@@ -67,7 +66,7 @@ object JsMain:
         println(("message", src))
         decode[AppEvent](src) match
           case Right(appEvent) =>
-            val modelEvent = ModelEvents.convert(appEvent)
+            val modelEvent = AppModelEvent.from(appEvent)
             if appEvent.appEventId == nextEventId then
               ModelEventPublishers.publish(modelEvent)
               nextEventId += 1
@@ -76,7 +75,7 @@ object JsMain:
                 .listAppEventInRange(nextEventId, appEvent.appEventId)
                 .onComplete({
                   case Success(events) =>
-                    val modelEvents = events.map(ModelEvents.convert(_))
+                    val modelEvents = events.map(AppModelEvent.from(_))
                     modelEvents.foreach(ModelEventPublishers.publish(_))
                     ModelEventPublishers.publish(modelEvent)
                     nextEventId = appEvent.appEventId + 1

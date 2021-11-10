@@ -1,13 +1,13 @@
 package dev.myclinic.scala.event
 
-import dev.myclinic.scala.event.ModelEvents.*
+import dev.myclinic.scala.model.*
 import scala.collection.mutable
 
 trait ModelEventSubscriberController:
   def start(): Unit
   def stop(): Unit
 
-case class ModelEventSubscriber[T <: ModelEvent](private val handler: T => Unit)
+case class ModelEventSubscriber[T <: AppModelEvent](private val handler: T => Unit)
     extends dev.myclinic.scala.event.ModelEventSubscriberController:
   var isStopped: Boolean = true
   val queue = mutable.Queue[T]()
@@ -36,7 +36,7 @@ case class ModelEventSubscriber[T <: ModelEvent](private val handler: T => Unit)
       case e: Throwable => System.err.println(e.toString)
     }
 
-case class ModelEventPublisher[T <: ModelEvent](
+case class ModelEventPublisher[T <: AppModelEvent](
     var subscribers: Set[ModelEventSubscriber[T]] =
       Set.empty[ModelEventSubscriber[T]]
 ):
@@ -56,7 +56,7 @@ object ModelEventPublishers:
   val appointTimeUpdated = ModelEventPublisher[AppointTimeUpdated]()
   val appointTimeDeleted = ModelEventPublisher[AppointTimeDeleted]()
 
-  def publish(event: ModelEvent): Unit =
+  def publish(event: AppModelEvent): Unit =
     event match {
       case e: AppointCreated     => appointCreated.publish(e)
       case e: AppointUpdated     => appointUpdated.publish(e)
