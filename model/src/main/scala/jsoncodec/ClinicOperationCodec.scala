@@ -1,4 +1,4 @@
-package dev.myclinic.scala.modeljson
+package dev.myclinic.scala.model.jsoncodec
 
 import io.circe._
 import io.circe.syntax._

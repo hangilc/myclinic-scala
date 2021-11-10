@@ -4,7 +4,7 @@ import dev.myclinic.scala.model._
 import io.circe._
 import io.circe.syntax._
 import io.circe.parser.decode
-import dev.myclinic.scala.modeljson.Implicits.{given}
+import dev.myclinic.scala.model.jsoncodec.Implicits.{given}
 import scala.util.Success
 import scala.util.Failure
 import cats.Foldable

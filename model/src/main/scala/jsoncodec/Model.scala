@@ -1,11 +1,11 @@
-package dev.myclinic.scala.modeljson
+package dev.myclinic.scala.model.jsoncodec
 
 import io.circe._
 import io.circe.syntax._
 import io.circe.generic.semiauto._
 import dev.myclinic.scala.model._
 
-object Implicits extends DateTime with ClinicOperationCodec {
+trait Model extends DateTime:
 
   given Encoder[Sex] = new Encoder[Sex]:
     def apply(sex: Sex): Json =
@@ -37,4 +37,3 @@ object Implicits extends DateTime with ClinicOperationCodec {
   given Encoder[Option[Patient]] = Encoder.encodeOption[Patient]
   given Decoder[Option[Patient]] = Decoder.decodeOption[Patient]
 
-}

@@ -10,13 +10,13 @@ import org.http4s.circe.CirceEntityEncoder._
 import org.http4s.circe.CirceEntityDecoder._
 import io.circe._
 import io.circe.syntax._
-import dev.myclinic.scala.modeljson.Implicits.{given}
 import dev.myclinic.scala.db.Db
 import java.time.LocalDate
 import dev.myclinic.scala.util.DateUtil
 import dev.myclinic.scala.clinicop.ClinicOperation
 import fs2.concurrent.Topic
 import org.http4s.websocket.WebSocketFrame
+import dev.myclinic.scala.model.jsoncodec.Implicits.given
 
 object MiscService extends DateTimeQueryParam:
   object dateDate extends QueryParamDecoderMatcher[LocalDate]("date")

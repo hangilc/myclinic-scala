@@ -28,8 +28,6 @@ lazy val root = project
     server,
     webclient,
     domq,
-    modeljsonJVM,
-    modeljsonJS,
     appointApp,
     appointAdmin,
   )
@@ -41,9 +39,14 @@ lazy val root = project
 lazy val model = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Pure)
   .in(file("model"))
-  .dependsOn(util, holidayjp)
+  .dependsOn(util, holidayjp, clinicop)
   .settings(
-    name := "model"
+    name := "model",
+    libraryDependencies ++= Seq(
+      "io.circe" %%% "circe-core" % circeVersion,
+      "io.circe" %%% "circe-generic" % circeVersion,
+      "io.circe" %%% "circe-parser" % circeVersion
+    )
   )
   .jsConfigure(_ enablePlugins TzdbPlugin)
   .jsSettings(
@@ -65,7 +68,7 @@ val modelJVM = model.jvm
 
 lazy val db = project
   .in(file("db"))
-  .dependsOn(modelJVM, modeljsonJVM)
+  .dependsOn(modelJVM)
   .settings(
     name := "db",
     libraryDependencies ++= Seq(
@@ -94,7 +97,7 @@ val utilJVM = util.jvm
 
 lazy val server = project
   .in(file("server"))
-  .dependsOn(db, modelJVM, utilJVM, modeljsonJVM, appointAdmin, clinicopJVM)
+  .dependsOn(db, modelJVM, utilJVM, appointAdmin, clinicopJVM)
   .settings(
     name := "server",
     libraryDependencies ++= Seq(
@@ -108,7 +111,7 @@ lazy val server = project
 lazy val webclient = project
   .in(file("webclient"))
   .enablePlugins(ScalaJSPlugin)
-  .dependsOn(modelJS, modeljsonJS, utilJS)
+  .dependsOn(modelJS, utilJS)
   .settings(
     name := "webclient",
     scalaJSUseMainModuleInitializer := false,
@@ -149,29 +152,6 @@ lazy val appointApp = project
 lazy val appointAdmin = project.in(file("appoint-admin"))
   .dependsOn(modelJVM, db, utilJVM, clinicopJVM)
   .settings()
-
-lazy val modeljson = crossProject(JSPlatform, JVMPlatform)
-  .crossType(CrossType.Pure)
-  .in(file("modeljson"))
-  .dependsOn(model, clinicop)
-  .jsConfigure(_ enablePlugins TzdbPlugin)
-  .jsSettings(
-    scalaJSUseMainModuleInitializer := false,
-    zonesFilter := { (z: String) => z == "Asia/Tokyo" },
-    libraryDependencies ++= Seq(
-      "io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion
-    )
-  )
-  .settings(
-    libraryDependencies ++= Seq(
-      "io.circe" %%% "circe-core" % circeVersion,
-      "io.circe" %%% "circe-generic" % circeVersion,
-      "io.circe" %%% "circe-parser" % circeVersion
-    )
-  )
-
-val modeljsonJVM = modeljson.jvm
-val modeljsonJS = modeljson.js
 
 lazy val validator = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Pure)

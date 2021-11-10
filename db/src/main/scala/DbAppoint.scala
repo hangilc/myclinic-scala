@@ -230,3 +230,8 @@ trait DbAppoint extends Mysql:
 
   def listAppointsForDate(date: LocalDate): IO[List[Appoint]] =
     mysql(Prim.listAppointsForDate(date).to[List])
+
+  def appointHistoryAt(appointTimeId: Int): IO[List[Appoint]] =
+    mysql(sql"""
+      select * from app_event where model = 'appoint'
+    """.query[Appoint].to[List])

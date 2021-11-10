@@ -18,7 +18,7 @@ import scala.language.implicitConversions
 import io.circe._
 import io.circe.syntax._
 import io.circe.parser.decode
-import dev.myclinic.scala.modeljson.Implicits.{given}
+import dev.myclinic.scala.model.jsoncodec.Implicits.{given}
 import dev.myclinic.scala.web.appoint.sheet.{AppointSheet, AdminAppointSheet}
 import dev.myclinic.scala.event.ModelEventPublishers
 import dev.myclinic.scala.event.ModelEvents

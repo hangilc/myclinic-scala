@@ -96,10 +96,3 @@ object Appoint:
     if ts.isEmpty then s
     else "{{" + ts.mkString(",") + "}}" + s
 
-case class AppEvent(
-    appEventId: Int,
-    createdAt: LocalDateTime,
-    model: String,
-    kind: String,
-    data: String
-)

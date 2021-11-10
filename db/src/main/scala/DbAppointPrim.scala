@@ -138,3 +138,4 @@ object DbAppointPrim:
     sql"""
       select count(*) from appoint where appoint_time_id = ${appointTimeId}
     """.query[Int].unique
+
