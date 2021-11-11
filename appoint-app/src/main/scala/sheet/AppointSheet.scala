@@ -129,14 +129,14 @@ class AppointSheet:
         events <- Api.listAppointEvents(30, 0)
         histories <- History.fromAppEvents(events)
       yield {
-        val content: HTMLElement = div(
+        val content: HTMLElement = div(cls := "appoint-history")(
           css(style => {
             style.maxHeight = "360px"
             style.overflowY = "auto"
           }),
           innerText := histories.map(_.description).mkString("\n")
         )
-        FloatWindow("変更履歴", content).open()
+        FloatWindow("変更履歴", content, width = "").open()
       }
 
     def advanceDays(days: Int): Unit =

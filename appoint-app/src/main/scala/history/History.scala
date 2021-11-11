@@ -9,6 +9,7 @@ import dev.myclinic.scala.webclient.Api
 import java.time.LocalDateTime
 import cats._
 import cats.syntax.all._
+import dev.myclinic.scala.util.KanjiDate
 
 trait History:
   def description: String
@@ -19,9 +20,11 @@ object History:
   def fromAppEvents(appEvents: List[AppEvent]): Future[List[History]] =
     appEvents
       .map(e => appEventToHistory(e))
-      .collect(opt => opt match {
-        case Some(f) => f
-      })
+      .collect(opt =>
+        opt match {
+          case Some(f) => f
+        }
+      )
       .sequence
 
   def appEventToHistory(appEvent: AppEvent): Option[Future[History]] =
@@ -29,25 +32,31 @@ object History:
     val createdAt: LocalDateTime = appEvent.createdAt
     modelEvent match {
       case m: AppointCreated => {
-        Some(Api
-          .getAppointTime(m.created.appointTimeId)
-          .map(appointTime =>
-            AppointCreatedHistory(m.created, appointTime, createdAt)
-          ))
+        Some(
+          Api
+            .getAppointTime(m.created.appointTimeId)
+            .map(appointTime =>
+              AppointCreatedHistory(m.created, appointTime, createdAt)
+            )
+        )
       }
       case m: AppointUpdated => {
-        Some(Api
-          .getAppointTime(m.updated.appointTimeId)
-          .map(appointTime =>
-            AppointUpdatedHistory(m.updated, appointTime, createdAt)
-          ))
+        Some(
+          Api
+            .getAppointTime(m.updated.appointTimeId)
+            .map(appointTime =>
+              AppointUpdatedHistory(m.updated, appointTime, createdAt)
+            )
+        )
       }
       case m: AppointDeleted => {
-        Some(Api
-          .getAppointTime(m.deleted.appointTimeId)
-          .map(appointTime =>
-            AppointDeletedHistory(m.deleted, appointTime, createdAt)
-          ))
+        Some(
+          Api
+            .getAppointTime(m.deleted.appointTimeId)
+            .map(appointTime =>
+              AppointDeletedHistory(m.deleted, appointTime, createdAt)
+            )
+        )
       }
       case _ => None
     }
@@ -55,12 +64,10 @@ object History:
 case class AppointCreatedHistory(
     appoint: Appoint,
     appointTime: AppointTime,
-    val createdAt: LocalDateTime
+    createdAt: LocalDateTime
 ) extends History:
   def description: String = {
-    val date = Misc.formatAppointDate(appointTime.date)
-    val time = Misc.formatAppointTime(appointTime.fromTime)
-    s"予約作成：${appoint.patientName} ${date} ${time}"
+    "【作成】" + Renderer.renderAppoint(appoint, appointTime, createdAt)
   }
   def resume: Option[() => Future[Either[String, Unit]]] = None
 
@@ -70,9 +77,7 @@ case class AppointUpdatedHistory(
     val createdAt: LocalDateTime
 ) extends History:
   def description: String = {
-    val date = Misc.formatAppointDate(appointTime.date)
-    val time = Misc.formatAppointTime(appointTime.fromTime)
-    s"予約の修正：${appoint.patientName} ${date} ${time}"
+    "【変更】" + Renderer.renderAppoint(appoint, appointTime, createdAt)
   }
   def resume: Option[() => Future[Either[String, Unit]]] = None
 
@@ -82,8 +87,17 @@ case class AppointDeletedHistory(
     val createdAt: LocalDateTime
 ) extends History:
   def description: String = {
-    val date = Misc.formatAppointDate(appointTime.date)
-    val time = Misc.formatAppointTime(appointTime.fromTime)
-    s"予約キャンセル：${appoint.patientName} ${date} ${time}"
+    "【削除】" + Renderer.renderAppoint(appoint, appointTime, createdAt)
   }
   def resume: Option[() => Future[Either[String, Unit]]] = None
+
+object Renderer:
+  def renderAppoint(a: Appoint, t: AppointTime, stamp: LocalDateTime): String =
+    val dt: String = Misc.formatAppointDateTime(t)
+    val patientIdRep = if a.patientId == 0 then "" else a.patientId.toString
+    val tagsRep = a.tags.mkString("、")
+    val createdAt =
+      KanjiDate.dateToKanji(stamp.toLocalDate) + KanjiDate.timeToKanji(
+        stamp.toLocalTime
+      )
+    s"${dt}:${a.patientName}:${patientIdRep}:${a.memoString}:${tagsRep}（${createdAt}）"

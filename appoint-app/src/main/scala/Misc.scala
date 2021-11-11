@@ -3,7 +3,7 @@ package dev.myclinic.scala.web.appoint
 import java.time.LocalDate
 import dev.myclinic.scala.util.KanjiDate
 import java.time.LocalTime
-import dev.myclinic.scala.model.AppointTime
+import dev.myclinic.scala.model.{AppointTime}
 
 object Misc {
 
@@ -13,6 +13,11 @@ object Misc {
 
   def formatAppointTime(t: LocalTime): String =
     f"${t.getHour()}%02d:${t.getMinute()}%02d"
+
+  def formatAppointDateTime(appointTime: AppointTime): String =
+    formatAppointDate(appointTime.date) + formatAppointTime(
+      appointTime.fromTime
+    )
 
   def formatAppointTimeSpan(appointTime: AppointTime): String =
     val d = appointTime.date

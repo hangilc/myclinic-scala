@@ -117,7 +117,7 @@ object Modifiers:
     styleSetter((style, value) => style.setProperty("align-items", value))
   val maxHeight = styleSetter((s, v) => s.maxHeight = v)
   val minHeight = styleSetter((s, v) => s.minHeight = v)
-  val width = styleSetter((s, v) => s.width = v)
+  val width = styleSetter((s, v) => if !v.isEmpty then s.width = v)
   val height = styleSetter((s, v) => s.height = v)
   val overflowY = styleSetter((s, v) => s.overflowY = v)
   val overflowYAuto = overflowY := "auto"
