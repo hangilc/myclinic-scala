@@ -14,6 +14,7 @@ import org.scalajs.dom.raw.MouseEvent
 import scala.util.Success
 import scala.util.Failure
 import scala.concurrent.ExecutionContext.Implicits.global
+import dev.myclinic.scala.web.appoint.AppointHistoryWindow
 
 class EditAppointDialog(val appoint: Appoint, appointTime: AppointTime):
   val ui = EditAppointUI(appoint, appointTime)
@@ -48,10 +49,15 @@ class EditAppointDialog(val appoint: Appoint, appointTime: AppointTime):
     }
 
   def doHistory(): Unit =
-    for
-      appEvents <- Api.appointHistoryAt(appointTime.appointTimeId)
-      _ = println(appEvents)
-    yield ()
+    val f = 
+      for
+        appEvents <- Api.appointHistoryAt(appointTime.appointTimeId)
+        _ <- AppointHistoryWindow.open(appEvents, zIndex = Some(dlog.zIndex + 2))
+      yield ()
+    f.onComplete {
+      case Success(_) => ()
+      case Failure(ex) => System.err.println(ex.getMessage)
+    }
 
   def onAppointUpdated(updated: Appoint): Unit =
     assert(appoint.appointId == updated.appointId)

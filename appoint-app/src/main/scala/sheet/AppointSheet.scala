@@ -3,7 +3,7 @@ package dev.myclinic.scala.web.appoint.sheet
 import dev.fujiwara.domq.ElementQ.{given, *}
 import dev.fujiwara.domq.Html.{given, *}
 import dev.fujiwara.domq.Modifiers.{given, *}
-import dev.fujiwara.domq.{Icons, ContextMenu, FloatWindow}
+import dev.fujiwara.domq.{Icons, ContextMenu, FloatWindow, ShowMessage}
 import dev.myclinic.scala.model.*
 import dev.myclinic.scala.clinicop.*
 import dev.myclinic.scala.util.DateUtil
@@ -25,6 +25,7 @@ import dev.myclinic.scala.web.appoint.history.History
 import cats.syntax.all._
 import cats.implicits._
 import cats.Monoid
+import dev.myclinic.scala.web.appoint.AppointHistoryWindow
 
 class AppointSheet:
   val daySpanDisp: HTMLElement = div(css(style => {
@@ -125,19 +126,29 @@ class AppointSheet:
       ContextMenu(List("変更履歴" -> (showHistory _))).open(event)
 
     def showHistory(): Unit =
-      for
-        events <- Api.listAppointEvents(30, 0)
-        histories <- History.fromAppEvents(events)
-      yield {
-        val content: HTMLElement = div(cls := "appoint-history")(
-          css(style => {
-            style.maxHeight = "360px"
-            style.overflowY = "auto"
-          }),
-          innerText := histories.map(_.description).mkString("\n")
-        )
-        FloatWindow("変更履歴", content, width = "").open()
+      val f = 
+        for
+          events <- Api.listAppointEvents(30, 0)
+          _ <- AppointHistoryWindow.open(events)
+        yield ()
+      f.onComplete {
+        case Success(_) => ()
+        case Failure(ex) => ShowMessage.showError(ex.getMessage)
       }
+
+      // for
+      //   events <- Api.listAppointEvents(30, 0)
+      //   histories <- History.fromAppEvents(events)
+      // yield {
+      //   val content: HTMLElement = div(cls := "appoint-history")(
+      //     css(style => {
+      //       style.maxHeight = "360px"
+      //       style.overflowY = "auto"
+      //     }),
+      //     innerText := histories.map(_.description).mkString("\n")
+      //   )
+      //   FloatWindow("変更履歴", content, width = "").open()
+      // }
 
     def advanceDays(days: Int): Unit =
       dateRange match

@@ -12,6 +12,7 @@ import scala.scalajs.js
 case class FloatWindow(
     title: String,
     content: HTMLElement,
+    zIndex: Option[Int] = None,
     width: String = "200px"
 ):
   val eTitle: HTMLElement = div()
@@ -22,6 +23,7 @@ case class FloatWindow(
     style.padding = "4px"
     style.backgroundColor = "white"
     style.borderRadius = "4px"
+    style.zIndex = zIndex.getOrElse(1980).toString
   }))(
     eTitle(css(style => {
       style.fontWeight = "bold"
