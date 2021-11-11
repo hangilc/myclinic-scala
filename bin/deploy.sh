@@ -33,7 +33,7 @@ if [[ "$IS_WINDOW" ]]; then
 else
   sbt server/assembly
 fi
-bin/make-deploy.sh
+bash bin/make-deploy.sh
 SERVER=myclinic-remote-server
 BASEDIR="$SERVER:~/myclinic-scala-server/"
 ssh $SERVER sudo systemctl stop myclinic-appoint

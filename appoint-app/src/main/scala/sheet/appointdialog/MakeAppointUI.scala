@@ -133,7 +133,7 @@ object MakeAppointUI:
       with SearchResult:
     def updateUI(): Unit = ()
     val input: HTMLInputElement = inputText(width := "100%")
-    val main: HTMLElement = Form.inputGroup(
+    val main: HTMLElement = div(Form.inputGroup)(
       form(
         input,
         onsubmit := (() => doSearch()),
@@ -164,7 +164,7 @@ object MakeAppointUI:
       with SearchResult:
     def updateUI(): Unit = ()
     val input: HTMLInputElement = Form.fixedSizeInput("4rem")
-    val main: HTMLElement = Form.inputGroup(
+    val main: HTMLElement = div(Form.inputGroup)(
       form(
         input,
         onsubmit := (() => doSearch())
@@ -201,7 +201,7 @@ object MakeAppointUI:
   class MemoPart extends ValuePart:
     def updateUI(): Unit = ()
     val input: HTMLInputElement = Form.input
-    val main: HTMLElement = Form.inputGroup(
+    val main: HTMLElement = div(Form.inputGroup)(
       input
     )
 

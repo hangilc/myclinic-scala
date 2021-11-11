@@ -3,7 +3,7 @@ package dev.myclinic.scala.web.appoint.sheet.appointdialog.edit
 import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
-import dev.fujiwara.domq.{Icons, Colors, ErrorBox}
+import dev.fujiwara.domq.{Icons, Colors, ErrorBox, Form}
 import scala.language.implicitConversions
 import org.scalajs.dom.raw.HTMLElement
 import dev.myclinic.scala.webclient.Api
@@ -72,12 +72,12 @@ class PatientNamePart(var appoint: Appoint):
     def onEditClick(): Unit = changeValuePartTo(Edit())
 
   class Edit() extends ValuePart with SearchResult:
-    val input = inputText(value := appoint.patientName)
+    val input = Form.input(value := appoint.patientName)
     val enterIcon = Icons.checkCircle(color = Colors.primary, size = "1.2rem")
     val discardIcon = Icons.xCircle(color = Colors.danger, size = "1.2rem")
     val searchIcon = Icons.search(color = "gray", size = "1.2rem")
-    val main = div(cls := "input-group")(
-      input(cls := "name-input", adjustForFlex),
+    val main = form(onsubmit := (onSearchClick _), Form.inputGroup)(
+      input,
       enterIcon(
         Icons.defaultStyle,
         ml := "0.1rem",
