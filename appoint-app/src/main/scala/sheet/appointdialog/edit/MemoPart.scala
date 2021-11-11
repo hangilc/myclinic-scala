@@ -102,3 +102,4 @@ class MemoPart(var appoint: Appoint):
           if ok then changeValuePartTo(Disp())
         }
       f.catchErr
+    
