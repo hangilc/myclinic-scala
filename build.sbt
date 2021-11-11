@@ -138,7 +138,7 @@ lazy val domq = project
 lazy val appointApp = project
   .in(file("appoint-app"))
   .enablePlugins(ScalaJSPlugin)
-  .dependsOn(domq, modelJS, utilJS, utilJS, webclient, validatorJS)
+  .dependsOn(domq, modelJS, utilJS, webclient, validatorJS)
   .settings(
     name := "myclinic-appoint",
     Compile / fastLinkJS / scalaJSLinkerOutputDirectory :=
@@ -152,6 +152,20 @@ lazy val appointApp = project
 lazy val appointAdmin = project.in(file("appoint-admin"))
   .dependsOn(modelJVM, db, utilJVM, clinicopJVM)
   .settings()
+
+lazy val receptionApp = project
+  .in(file("reception-app"))
+  .enablePlugins(ScalaJSPlugin)
+  .dependsOn(domq, modelJS, utilJS, webclient, validatorJS)
+  .settings(
+    name := "myclinic-appoint",
+    Compile / fastLinkJS / scalaJSLinkerOutputDirectory :=
+      (rootDir.value / "server" / "web" / "reception" / "scalajs"),
+    libraryDependencies ++= Seq(
+      ("org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion)
+        .cross(CrossVersion.for3Use2_13)
+    )
+  )
 
 lazy val validator = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Pure)

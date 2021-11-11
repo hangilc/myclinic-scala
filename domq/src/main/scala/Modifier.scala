@@ -67,6 +67,7 @@ object Modifiers:
   def attr(name: String): Attr = Attr(name)
 
   val value = attr("value")
+  val id = attr("id")
 
   def attrNS(namespace: String, name: String) = Creator[String]((e, a) => {
     e.setAttributeNS(namespace, name, a)

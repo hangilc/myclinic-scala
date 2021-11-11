@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>受付</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="../default.css">
+    <link rel="stylesheet" href="./reception.css">
+  </head>
+  <body>
+    <script type="text/javascript" src="./scalajs/main.js"></script>
+    <script type="text/javascript">
+      let url = new URL(document.location)
+      JsMain.main(url.searchParams.get("admin") === "true")
+    </script>
+  </body>
+</html>

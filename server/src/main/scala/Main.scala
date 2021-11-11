@@ -56,7 +56,9 @@ object Main extends IOApp:
       .withHttpApp(
         Router(
           "/appoint" -> HttpRoutes.of[IO] { case GET -> Root =>
-            PermanentRedirect(Location(uri"/appoint/"))
+            PermanentRedirect(Location(uri"/appoint/")) },
+          "/reception" -> HttpRoutes.of[IO] { case GET -> Root =>
+            PermanentRedirect(Location(uri"/reception/"))
           },
           "/api" -> RestService.routes,
           "/ws" -> ws(topic),
