@@ -32,7 +32,7 @@ object JsMain:
             ),
             textarea(id := "hotline-messages")
           ),
-          div(id := "main", "MAIN")
+          div(id := "main")
         )
       )
     )
