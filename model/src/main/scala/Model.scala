@@ -96,3 +96,6 @@ object Appoint:
     if ts.isEmpty then s
     else "{{" + ts.mkString(",") + "}}" + s
 
+case class Hotline(message: String, sender: String, recipient: String)
+
+

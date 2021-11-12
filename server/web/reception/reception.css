@@ -51,10 +51,8 @@ button {
 #hotline-input {
   width: 100%;
   height: 5rem;
-  padding: 0;
   margin: 10px 0 0 0;
   resize: vertical;
-  border: 1px solid red;
 }
 
 #hotline-commands {

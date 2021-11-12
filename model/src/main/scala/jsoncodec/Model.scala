@@ -37,3 +37,7 @@ trait Model extends DateTime:
   given Encoder[Option[Patient]] = Encoder.encodeOption[Patient]
   given Decoder[Option[Patient]] = Decoder.decodeOption[Patient]
 
+  given Encoder[Hotline] = deriveEncoder[Hotline]
+  given Decoder[Hotline] = deriveDecoder[Hotline]
+
+

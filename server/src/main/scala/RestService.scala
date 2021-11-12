@@ -167,4 +167,13 @@ object RestService extends DateTimeQueryParam:
     case GET -> Root / "appoint-history-at" :? intAppointTimeId(appointTimeId) =>
       Ok(Db.appointHistoryAt(appointTimeId))
 
+    case req @ POST -> Root / "post-hotline" =>
+      val op = 
+        for 
+          hotline <- req.as[Hotline]
+          event <- Db.postHotline(hotline)
+          _ <- publish(event)
+        yield true
+      Ok(op)
+
   } <+> PatientService.routes <+> MiscService.routes

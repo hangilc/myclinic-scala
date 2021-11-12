@@ -30,7 +30,8 @@ object JsMain:
               a("常用"),
               a("患者")
             ),
-            textarea(id := "hotline-messages")
+            textarea(id := "hotline-messages", attr("readonly") := "readonly",
+            attr("tabindex") := "-1")
           ),
           div(id := "main")
         )

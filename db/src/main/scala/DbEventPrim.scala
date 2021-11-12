@@ -76,3 +76,5 @@ object DbEventPrim:
   def logAppointDeleted(a: Appoint): ConnectionIO[AppEvent] =
     enterAppEvent("appoint", DELETED, a.asJson.toString)
 
+  def logHotlineCreated(hotline: Hotline): ConnectionIO[AppEvent] =
+    enterAppEvent("hotline", CREATED, hotline.asJson.toString)
