@@ -118,4 +118,4 @@ object ContextMenu:
   ): Double =
     val bottom = refY + menuRect.height
     if bottom <= viewHeight then refY
-    else viewHeight - menuRect.height
+    else refY - menuRect.height
