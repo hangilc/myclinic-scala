@@ -27,7 +27,7 @@ object Html {
     val e = element("a")
     e.setAttribute("href", "javascript:void(0);")
     e
-  val button = Tag("button")
+  def button: HTMLElement = element("button")
   val p = Tag("p")
   val form = Tag("form")
   val input = Tag("input")
@@ -35,7 +35,7 @@ object Html {
   val ul = Tag("ul")
   val li = Tag("li")
   val span = Tag("span")
-  def textarea: HTMLElement = element("textarea")
+  def textarea: HTMLInputElement = element("textarea").asInstanceOf[HTMLInputElement]
   def inputText = input(attr("type") := "text")
   def checkbox = input(attr("type") := "checkbox")
 

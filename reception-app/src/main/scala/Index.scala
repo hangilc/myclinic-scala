@@ -5,10 +5,17 @@ import org.scalajs.dom.document
 import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
+import dev.fujiwara.domq.{ShowMessage}
 import scala.language.implicitConversions
+import dev.myclinic.scala.webclient.Api
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.Success
+import scala.util.Failure
+import dev.myclinic.scala.model.{Hotline}
 
 @JSExportTopLevel("JsMain")
 object JsMain:
+  val hotlineInput = textarea()
   @JSExport
   def main(isAdmin: Boolean): Unit =
     document.body(
@@ -22,9 +29,9 @@ object JsMain:
               a("診療記録"),
               a("スキャン"),
             ),
-            textarea(id := "hotline-input"),
+            hotlineInput(id := "hotline-input"),
             div(id := "hotline-commands")(
-              button("送信"),
+              button("送信", onclick := (postHotline _)),
               button("了解"),
               button("Beep"),
               a("常用"),
@@ -37,3 +44,13 @@ object JsMain:
         )
       )
     )
+
+  def postHotline(): Unit =
+    val msg = hotlineInput.value
+    if !msg.isEmpty then
+      val h = Hotline(msg, Setting.hotlineSender, Setting.hotlineRecipient)
+      Api.postHotline(h).onComplete {
+        case Success(_) => ()
+        case Failure(ex) => ShowMessage.showError(ex.getMessage)
+      }
+    
