@@ -28,8 +28,10 @@ lazy val root = project
     server,
     webclient,
     domq,
+    appbase,
     appointApp,
     appointAdmin,
+    receptionApp,
   )
   .settings(
     publish := {},
@@ -135,10 +137,22 @@ lazy val domq = project
     )
   )
 
+lazy val appbase = project
+  .in(file("app-base"))
+  .enablePlugins(ScalaJSPlugin)
+  .dependsOn(domq, modelJS, utilJS, webclient, validatorJS)
+  .settings(
+    name := "myclinic-appbase",
+    libraryDependencies ++= Seq(
+      ("org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion)
+        .cross(CrossVersion.for3Use2_13)
+    )
+  )
+
 lazy val appointApp = project
   .in(file("appoint-app"))
   .enablePlugins(ScalaJSPlugin)
-  .dependsOn(domq, modelJS, utilJS, webclient, validatorJS)
+  .dependsOn(domq, modelJS, utilJS, webclient, validatorJS, appbase)
   .settings(
     name := "myclinic-appoint",
     Compile / fastLinkJS / scalaJSLinkerOutputDirectory :=
@@ -158,7 +172,7 @@ lazy val receptionApp = project
   .enablePlugins(ScalaJSPlugin)
   .dependsOn(domq, modelJS, utilJS, webclient, validatorJS)
   .settings(
-    name := "myclinic-appoint",
+    name := "myclinic-reception",
     Compile / fastLinkJS / scalaJSLinkerOutputDirectory :=
       (rootDir.value / "server" / "web" / "reception" / "scalajs"),
     libraryDependencies ++= Seq(
