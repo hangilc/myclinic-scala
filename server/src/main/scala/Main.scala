@@ -17,6 +17,8 @@ import org.http4s.websocket.WebSocketFrame.Text
 import javax.net.ssl.SSLContext
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import java.nio.file.Files
+import cats.data.OptionT
 object Main extends IOApp:
 
   object AppEventBroadcaster:
@@ -38,8 +40,10 @@ object Main extends IOApp:
   }
 
   val staticService = fileService[IO](FileService.Config("./web", "/"))
-  val deployTestService =
-    fileService[IO](FileService.Config("./deploy", "/"))
+  val deployTestService: HttpRoutes[IO] =
+    if Files.exists(java.nio.file.Path.of("./deploy")) then
+      fileService[IO](FileService.Config("./deploy", "/"))
+    else HttpRoutes[IO](_ => OptionT.some(Response.notFound[IO]))
 
   def buildServer(
       topic: Topic[IO, WebSocketFrame],

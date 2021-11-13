@@ -29,9 +29,9 @@ if [[ "$WSL_DISTRO_NAME" ]]; then
 fi
 
 if [[ "$IS_WINDOW" ]]; then
-  cmd.exe /C "sbt server/assembly"
+  cmd.exe /C "sbt clean server/assembly appointApp/fastLinkJS"
 else
-  sbt server/assembly
+  sbt server/assembly appointApp/fastLinkJS
 fi
 bash bin/make-deploy.sh
 SERVER=myclinic-remote-server

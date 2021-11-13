@@ -11,5 +11,5 @@ cp -r $SRC/* $DEPLOY
 TARGET=$DEPLOY/appoint
 mv $TARGET/scalajs/main.js $TARGET/scalajs/main-$STAMP.js
 mv $TARGET/scalajs/main.js.map $TARGET/scalajs/main-$STAMP.js.map
-cat $TARGET/index.html | sed s/scalajs\\\/main.js/scalajs\\\/main-$STAMP.js/ >$TARGET/index.html
+sed -i s/scalajs\\\/main.js/scalajs\\\/main-$STAMP.js/ $TARGET/index.html
 

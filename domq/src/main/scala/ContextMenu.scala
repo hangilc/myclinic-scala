@@ -54,8 +54,8 @@ class ContextMenu(zIndex: Int):
       window.innerWidth,
       window.innerHeight
     )
-    val xx = x + window.scrollX
-    val yy = y + window.scrollY
+    val xx = (x + window.scrollX).toInt
+    val yy = (y + window.scrollY).toInt
     menu(css(style => {
       style.left = s"${xx}px"
       style.top = s"${yy}.px"
