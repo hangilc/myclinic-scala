@@ -5,7 +5,7 @@ import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.{ShowMessage, Icons, Colors, ContextMenu}
 import scala.language.implicitConversions
-import dev.myclinic.scala.model.{HotlineCreated}
+import dev.myclinic.scala.model.{HotlineCreated, Patient}
 import org.scalajs.dom.raw.{HTMLElement, MouseEvent}
 import dev.myclinic.scala.webclient.Api
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -75,39 +75,46 @@ abstract class MainUI:
       ml := "0.2rem"
     )
 
+  private def insertIntoHotlineInput(s: String): Unit =
+    val start = hotlineInput.selectionStart
+    val end = hotlineInput.selectionEnd
+    val left = hotlineInput.value.substring(0, start)
+    val right = hotlineInput.value.substring(end)
+    val index = s.indexOf("{}")
+    val msgLeft = if index < 0 then s else s.substring(0, index)
+    val msgRight = if index < 0 then "" else s.substring(index + 2)
+    hotlineInput.value = left + msgLeft + msgRight + right
+    hotlineInput.focus()
+    val pos = start + msgLeft.size
+    hotlineInput.selectionStart = pos
+    hotlineInput.selectionEnd = pos
+
   private def doRegular(event: MouseEvent): Unit =
     val items: List[String] = Setting.regularHotlineMessages
-    def cmd(msg: String): Unit = 
-      val start = hotlineInput.selectionStart
-      val end = hotlineInput.selectionEnd
-      val left = hotlineInput.value.substring(0, start)
-      val right = hotlineInput.value.substring(end)
-      val index = msg.indexOf("{}")
-      val msgLeft = if index < 0 then msg else msg.substring(0, index)
-      val msgRight = if index < 0 then "" else msg.substring(index + 2)
-      hotlineInput.value = left + msgLeft + msgRight + right
-      hotlineInput.focus()
-      val pos = start + msgLeft.size
-      hotlineInput.selectionStart = pos
-      hotlineInput.selectionEnd = pos
-
     val menu = ContextMenu(items.map(
-      msg => msg -> (() => cmd(msg))
+      msg => msg -> (() => insertIntoHotlineInput(msg))
     ))
     menu.open(event)
 
-private def doPatients(event: MouseEvent): Unit =
-  val f = 
-    for
-      wqueue <- Api.listWqueue()
-      visitIds = wqueue.map(_.visitId)
-      visitMap <- Api.batchGetVisit(visitIds)
-    yield {
-      println(("wqueue", wqueue, visitMap))
+  private def doPatients(event: MouseEvent): Unit =
+    def exec(patient: Patient): Unit =
+      insertIntoHotlineInput(patient.fullName(""))
+    val f = 
+      for
+        wqueue <- Api.listWqueue()
+        visitIds = wqueue.map(_.visitId)
+        visitMap <- Api.batchGetVisit(visitIds)
+        patientMap <- Api.batchGetPatient(visitMap.values.map(_.patientId).toList)
+      yield {
+        val patients = patientMap.values.toList
+        val menu = ContextMenu(patients.map(patient => {
+          patient.fullName("") -> (() => exec(patient))
+        }))
+        menu.open(event)
+      }
+    f.onComplete {
+      case Success(_) => ()
+      case Failure(ex) => System.err.println(ex.getMessage)
     }
-  f.onComplete {
-    case Success(_) => ()
-    case Failure(ex) => System.err.println(ex.getMessage)
-  }
 
 

@@ -35,4 +35,12 @@ object PatientService:
 
     case GET -> Root / "search-patient" :? strText(text) =>
       Ok(Db.searchPatient(text))
+
+    case req @ POST -> Root / "batch-get-patient" =>
+      Ok(
+        for
+          patientIds <- req.as[List[Int]]
+          map <- Db.batchGetPatient(patientIds)
+        yield map
+      )
   }

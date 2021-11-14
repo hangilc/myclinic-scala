@@ -26,3 +26,11 @@ trait DbPatient extends Mysql:
     if parts.size == 0 then IO(List.empty)
     else if parts.size == 1 then mysql(Prim.searchPatient(text).to[List])
     else mysql(Prim.searchPatient(parts(0), parts(1)).to[List])
+
+  def batchGetPatient(patientIds: List[Int]): IO[Map[Int, Patient]] =
+    mysql(for
+      patients <- patientIds
+        .map(patientId => Prim.getPatient(patientId).unique)
+        .sequence
+      items = patients.map(patient => (patient.patientId, patient))
+    yield Map(items: _*))
