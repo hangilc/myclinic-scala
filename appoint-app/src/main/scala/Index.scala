@@ -20,11 +20,15 @@ import io.circe.syntax._
 import io.circe.parser.decode
 import dev.myclinic.scala.model.jsoncodec.Implicits.{given}
 import dev.myclinic.scala.web.appoint.sheet.{AppointSheet, AdminAppointSheet}
-import dev.myclinic.scala.event.ModelEventPublishers
+//import dev.myclinic.scala.event.ModelEventPublishers
 import scala.scalajs.js.annotation.JSExportTopLevel
 import scala.scalajs.js.annotation.JSExport
 import org.scalajs.dom.raw.HTMLElement
-import dev.myclinic.scala.web.appbase.EventFetcher
+import dev.myclinic.scala.web.appbase.{
+  EventFetcher,
+  EventPublishers,
+  EventDispatcher
+}
 
 @JSExportTopLevel("JsMain")
 object JsMain:
@@ -33,11 +37,14 @@ object JsMain:
     val body = document.body
     val content = div(attr("id") := "content")
     val workarea = div()
-    body(content(
-      banner(isAdmin),
-      workarea
-    ))
-    AppointEventFetcher().start()
+    body(
+      content(
+        banner(isAdmin),
+        workarea
+      )
+    )
+    AppEvents.start()
+    given EventPublishers = AppEvents.publishers
     val sheet = if isAdmin then AdminAppointSheet() else AppointSheet()
     val startDate = DateUtil.startDayOfWeek(LocalDate.now())
     val endDate = startDate.plusDays(6)
@@ -47,10 +54,11 @@ object JsMain:
       case Failure(e) => System.err.println(e)
     }
 
-  def banner(isAdmin: Boolean): HTMLElement = 
+  def banner(isAdmin: Boolean): HTMLElement =
     val text = "診察予約" + (if isAdmin then "（管理）" else "")
     div(text)(cls := "banner")
 
-class AppointEventFetcher extends EventFetcher:
+object AppEvents extends EventFetcher:
+  val publishers = EventDispatcher()
   override def publish(event: AppModelEvent): Unit =
-    ModelEventPublishers.publish(event)
+    publishers.publish(event)

@@ -16,8 +16,12 @@ import scala.util.Success
 import scala.concurrent.Future
 import scala.collection.mutable
 import dev.myclinic.scala.webclient.Api
-import dev.myclinic.scala.event.{ModelEventPublishers => Pub}
-import dev.myclinic.scala.event.ModelEventSubscriberController
+//import dev.myclinic.scala.event.{ModelEventPublishers => Pub}
+//import dev.myclinic.scala.event.ModelEventSubscriberController
+import dev.myclinic.scala.web.appbase.{
+  EventPublishers,
+  EventSubscriberController
+}
 import scala.language.implicitConversions
 import org.scalajs.dom.raw.MouseEvent
 import dev.myclinic.scala.web.appoint.{Misc, GlobalEvents}
@@ -27,7 +31,7 @@ import cats.implicits._
 import cats.Monoid
 import dev.myclinic.scala.web.appoint.AppointHistoryWindow
 
-class AppointSheet:
+class AppointSheet(using eventPublishers: EventPublishers):
   val daySpanDisp: HTMLElement = div(css(style => {
     style.display = "none"
     style.textAlign = "center"
@@ -126,29 +130,15 @@ class AppointSheet:
       ContextMenu(List("変更履歴" -> (showHistory _))).open(event)
 
     def showHistory(): Unit =
-      val f = 
+      val f =
         for
           events <- Api.listAppointEvents(30, 0)
           _ <- AppointHistoryWindow.open(events)
         yield ()
       f.onComplete {
-        case Success(_) => ()
+        case Success(_)  => ()
         case Failure(ex) => ShowMessage.showError(ex.getMessage)
       }
-
-      // for
-      //   events <- Api.listAppointEvents(30, 0)
-      //   histories <- History.fromAppEvents(events)
-      // yield {
-      //   val content: HTMLElement = div(cls := "appoint-history")(
-      //     css(style => {
-      //       style.maxHeight = "360px"
-      //       style.overflowY = "auto"
-      //     }),
-      //     innerText := histories.map(_.description).mkString("\n")
-      //   )
-      //   FloatWindow("変更履歴", content, width = "").open()
-      // }
 
     def advanceDays(days: Int): Unit =
       dateRange match
@@ -174,13 +164,13 @@ class AppointSheet:
       justifyContent := "center"
     )
 
-    val subscribers: List[ModelEventSubscriberController] = List(
-      Pub.appointCreated.subscribe(onAppointCreated),
-      Pub.appointUpdated.subscribe(onAppointUpdated),
-      Pub.appointDeleted.subscribe(onAppointDeleted),
-      Pub.appointTimeCreated.subscribe(onAppointTimeCreated),
-      Pub.appointTimeUpdated.subscribe(onAppointTimeUpdated),
-      Pub.appointTimeDeleted.subscribe(onAppointTimeDeleted)
+    val subscribers: List[EventSubscriberController] = List(
+      eventPublishers.appointCreated.subscribe(onAppointCreated),
+      eventPublishers.appointUpdated.subscribe(onAppointUpdated),
+      eventPublishers.appointDeleted.subscribe(onAppointDeleted),
+      eventPublishers.appointTimeCreated.subscribe(onAppointTimeCreated),
+      eventPublishers.appointTimeUpdated.subscribe(onAppointTimeUpdated),
+      eventPublishers.appointTimeDeleted.subscribe(onAppointTimeDeleted)
     )
 
     def init(
