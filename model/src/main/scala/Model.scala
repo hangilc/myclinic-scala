@@ -51,7 +51,8 @@ object AppointTime:
   given Ordering[AppointTime] with
     def compare(a: AppointTime, b: AppointTime): Int =
       val cmp: Int = summon[Ordering[LocalDate]].compare(a.date, b.date)
-      if cmp == 0 then summon[Ordering[LocalTime]].compare(a.fromTime, b.fromTime)
+      if cmp == 0 then
+        summon[Ordering[LocalTime]].compare(a.fromTime, b.fromTime)
       else cmp
 
 case class Appoint(
@@ -96,3 +97,30 @@ object Appoint:
     if ts.isEmpty then s
     else "{{" + ts.mkString(",") + "}}" + s
 
+case class Hotline(message: String, sender: String, recipient: String)
+
+enum WaitState(val code: Int, val label: String):
+  case WaitExam extends WaitState(0, "診待")
+  case InExam extends WaitState(1, "診中")
+  case WaitCashier extends WaitState(2, "会待")
+  case WaitDrug extends WaitState(3, "薬待")
+  case WaitReExam extends WaitState(4, "再待")
+
+object WaitState:
+  def fromCode(code: Int): WaitState =
+    WaitState.values.find(_.code == code).get
+
+case class Wqueue(visitId: Int, waitState: WaitState)
+
+case class Visit(
+    visitId: Int,
+    patientId: Int,
+    visitedAt: LocalDateTime,
+    shahokokuhoId: Int,
+    roujinId: Int,
+    kouhi1Id: Int,
+    kouhi2Id: Int,
+    kouhi3Id: Int,
+    koukikoureiId: Int,
+    attributes: Option[String]
+)

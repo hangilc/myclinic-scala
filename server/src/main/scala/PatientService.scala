@@ -26,7 +26,7 @@ object PatientService:
   object intPatientId extends QueryParamDecoderMatcher[Int]("patient-id")
   object strText extends QueryParamDecoderMatcher[String]("text")
 
-  def routes(using topic: Topic[IO, WebSocketFrame]) = HttpRoutes.of[IO] {
+  def routes = HttpRoutes.of[IO] {
     case GET -> Root / "get-patient" :? intPatientId(patientId) =>
       Ok(Db.getPatient(patientId))
 
@@ -35,4 +35,12 @@ object PatientService:
 
     case GET -> Root / "search-patient" :? strText(text) =>
       Ok(Db.searchPatient(text))
+
+    case req @ POST -> Root / "batch-get-patient" =>
+      Ok(
+        for
+          patientIds <- req.as[List[Int]]
+          map <- Db.batchGetPatient(patientIds)
+        yield map
+      )
   }

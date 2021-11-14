@@ -20,10 +20,15 @@ import io.circe.syntax._
 import io.circe.parser.decode
 import dev.myclinic.scala.model.jsoncodec.Implicits.{given}
 import dev.myclinic.scala.web.appoint.sheet.{AppointSheet, AdminAppointSheet}
-import dev.myclinic.scala.event.ModelEventPublishers
+//import dev.myclinic.scala.event.ModelEventPublishers
 import scala.scalajs.js.annotation.JSExportTopLevel
 import scala.scalajs.js.annotation.JSExport
 import org.scalajs.dom.raw.HTMLElement
+import dev.myclinic.scala.web.appbase.{
+  EventFetcher,
+  EventPublishers,
+  EventDispatcher
+}
 
 @JSExportTopLevel("JsMain")
 object JsMain:
@@ -32,11 +37,14 @@ object JsMain:
     val body = document.body
     val content = div(attr("id") := "content")
     val workarea = div()
-    body(content(
-      banner(isAdmin),
-      workarea
-    ))
-    openWebSocket()
+    body(
+      content(
+        banner(isAdmin),
+        workarea
+      )
+    )
+    AppEvents.start()
+    given EventPublishers = AppEvents.publishers
     val sheet = if isAdmin then AdminAppointSheet() else AppointSheet()
     val startDate = DateUtil.startDayOfWeek(LocalDate.now())
     val endDate = startDate.plusDays(6)
@@ -46,43 +54,11 @@ object JsMain:
       case Failure(e) => System.err.println(e)
     }
 
-  def banner(isAdmin: Boolean): HTMLElement = 
+  def banner(isAdmin: Boolean): HTMLElement =
     val text = "診察予約" + (if isAdmin then "（管理）" else "")
     div(text)(cls := "banner")
 
-  def openWebSocket(): Future[Unit] =
-    def f(startEventId: Int): Unit =
-      var nextEventId = startEventId
-      val location = dom.window.location
-      val origProtocol = location.protocol
-      val host = location.host
-      val protocol = origProtocol match
-        case "https:" => "wss:"
-        case _        => "ws:"
-      val url = s"${protocol}//${host}/ws/events"
-      val ws = new dom.WebSocket(url)
-      ws.onmessage = { (e: dom.raw.MessageEvent) =>
-        val src = e.data.asInstanceOf[String]
-        println(("message", src))
-        decode[AppEvent](src) match
-          case Right(appEvent) =>
-            val modelEvent = AppModelEvent.from(appEvent)
-            if appEvent.appEventId == nextEventId then
-              ModelEventPublishers.publish(modelEvent)
-              nextEventId += 1
-            else if appEvent.appEventId > nextEventId then
-              Api
-                .listAppEventInRange(nextEventId, appEvent.appEventId)
-                .onComplete({
-                  case Success(events) =>
-                    val modelEvents = events.map(AppModelEvent.from(_))
-                    modelEvents.foreach(ModelEventPublishers.publish(_))
-                    ModelEventPublishers.publish(modelEvent)
-                    nextEventId = appEvent.appEventId + 1
-                  case Failure(ex) => System.err.println(ex)
-                })
-          case Left(ex) => System.err.println(ex.toString())
-      }
-
-    for nextEventId <- Api.getNextAppEventId()
-    yield f(nextEventId)
+object AppEvents extends EventFetcher:
+  val publishers = EventDispatcher()
+  override def publish(event: AppModelEvent): Unit =
+    publishers.publish(event)

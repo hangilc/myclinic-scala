@@ -35,7 +35,6 @@ private object LocalDateTimeMapping:
   def fromString(s: String): LocalDateTime = LocalDateTime.parse(s, sqlDateTimeFormatter)
   def toString(dt: LocalDateTime): String = dt.format(sqlDateTimeFormatter)
 
-
 private object SexMapping:
   def fromString(s: String): Sex = s match
     case "M" => Sex.Male
@@ -67,3 +66,11 @@ object DoobieMapping:
 
   implicit val sexGet: Get[Sex] = Get[String].map(SexMapping.fromString _)
   implicit val sexSet: Put[Sex] = Put[String].tcontramap(SexMapping.toString _)
+
+  implicit val optionStringGet: Get[Option[String]] =
+    Get[String].map(str => if str == null then None else Some(str))
+  implicit val optionStringSet: Put[Option[String]] =
+    Put[String].tcontramap(opt => opt match {
+      case Some(s) => s
+      case None => null
+    })

@@ -21,3 +21,12 @@ object MiscApi extends ApiBase:
         dates: List[LocalDate]
     ): Future[Map[LocalDate, ClinicOperation]] =
       post("batch-resolve-clinic-operations", Params(), dates)
+
+    def postHotline(hotline: Hotline): Future[Boolean] =
+      post("post-hotline", Params(), hotline)
+
+    def listTodaysHotline(): Future[List[HotlineCreated]] =
+      get("list-todays-hotline", Params())
+
+    def listWqueue(): Future[List[Wqueue]] =
+      get("list-wqueue", Params())
