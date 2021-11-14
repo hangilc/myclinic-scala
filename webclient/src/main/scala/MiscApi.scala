@@ -27,3 +27,6 @@ object MiscApi extends ApiBase:
 
     def listTodaysHotline(): Future[List[HotlineCreated]] =
       get("list-todays-hotline", Params())
+
+    def listWqueue(): Future[List[Wqueue]] =
+      get("list-wqueue", Params())

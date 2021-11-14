@@ -7,10 +7,13 @@ import dev.fujiwara.domq.{ShowMessage, Icons, Colors, ContextMenu}
 import scala.language.implicitConversions
 import dev.myclinic.scala.model.{HotlineCreated}
 import org.scalajs.dom.raw.{HTMLElement, MouseEvent}
+import dev.myclinic.scala.webclient.Api
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.Success
+import scala.util.Failure
 
 abstract class MainUI:
   def postHotline(msg: String): Unit
-  def beep(): Unit
 
   private var lastHotlineAppEventId = 0
   private val hotlineInput = textarea()
@@ -41,12 +44,12 @@ abstract class MainUI:
                 postHotline("了解")
               })
             ),
-            button("Beep", onclick := (beep _)),
+            button("Beep", onclick := (() => { Api.beep(); ()})),
             a(
               span( "常用", downTriangle()),
               onclick := (doRegular _)
             ),
-            a("患者", downTriangle())
+            a("患者", downTriangle(), onclick := (doPatients _))
           ),
           hotlineMessages(
             id := "hotline-messages",
@@ -92,5 +95,17 @@ abstract class MainUI:
       msg => msg -> (() => cmd(msg))
     ))
     menu.open(event)
+
+private def doPatients(event: MouseEvent): Unit =
+  val f = 
+    for
+      wqueue <- Api.listWqueue()
+    yield {
+      println(("wqueue", wqueue))
+    }
+  f.onComplete {
+    case Success(_) => ()
+    case Failure(ex) => System.err.println(ex.getMessage)
+  }
 
 

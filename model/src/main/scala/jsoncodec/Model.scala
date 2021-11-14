@@ -5,7 +5,7 @@ import io.circe.syntax._
 import io.circe.generic.semiauto._
 import dev.myclinic.scala.model._
 
-trait Model extends DateTime:
+trait Model extends DateTime with WaitStateCodec:
 
   given Encoder[Sex] = new Encoder[Sex]:
     def apply(sex: Sex): Json =
@@ -39,5 +39,8 @@ trait Model extends DateTime:
 
   given Encoder[Hotline] = deriveEncoder[Hotline]
   given Decoder[Hotline] = deriveDecoder[Hotline]
+
+  given Encoder[Wqueue] = deriveEncoder[Wqueue]
+  given Decoder[Wqueue] = deriveDecoder[Wqueue]
 
 

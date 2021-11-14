@@ -39,7 +39,6 @@ object JsMain:
             case Success(_)  => ()
             case Failure(ex) => ShowMessage.showError(ex.getMessage)
           }
-      def beep(): Unit = Api.beep()
 
   def setupHotline(): Unit =
     for
