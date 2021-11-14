@@ -13,7 +13,10 @@ import scala.util.Failure
 
 case class SideMenuItem(label: String, creator: () => HTMLElement)
 
-class SideMenu(args: List[(String, () => Future[HTMLElement])]):
+class SideMenu(
+    main: HTMLElement,
+    args: List[(String, () => Future[HTMLElement])]
+):
   val ele: HTMLElement = div()
 
   private case class Item(
@@ -29,29 +32,29 @@ class SideMenu(args: List[(String, () => Future[HTMLElement])]):
       })
     def activate(): Future[Unit] =
       cache.fold({
-        for
-          e <- creator()
+        for e <- creator()
         yield {
           cache = Some(e)
-          ele(e)
+          main(e)
           link(cls := "current")
           ()
         }
       })(e => {
-        ele(e)
+        main(e)
         link(cls := "current")
         Future.successful(())
       })
 
-
-  private val items: List[Item] = args.map(arg => arg match {
-    case (label, creator) => {
-      val link = a(label)
-      val item = Item(label, link, creator, None)
-      link(onclick := (() => invoke(item)))
-      item
+  private val items: List[Item] = args.map(arg =>
+    arg match {
+      case (label, creator) => {
+        val link = a(label)
+        val item = Item(label, link, creator, None)
+        link(onclick := (() => invoke(item)))
+        item
+      }
     }
-  })
+  )
   items.foreach(item => {
     ele(item.link)
   })
@@ -63,6 +66,6 @@ class SideMenu(args: List[(String, () => Future[HTMLElement])]):
       current = None
     })
     item.activate().onComplete {
-      case Success(_) => current = Some(item)
+      case Success(_)  => current = Some(item)
       case Failure(ex) => ShowMessage.showError(ex.getMessage)
     }
