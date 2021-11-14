@@ -17,15 +17,18 @@ import dev.myclinic.scala.web.appbase.{
   EventDispatcher,
   EventPublishers
 }
+import scala.concurrent.Future
 
 @JSExportTopLevel("JsMain")
 object JsMain:
+  val ui = createUI()
+  given EventPublishers = ReceptionEventFetcher.publishers
+  
   @JSExport
   def main(isAdmin: Boolean): Unit =
-    ReceptionEventFetcher.start()
-    given EventPublishers = ReceptionEventFetcher.publishers
-    val ui = createUI()
     document.body(ui.ele)
+    setupHotline()
+    ReceptionEventFetcher.start()
     
   def createUI(): MainUI =
     new MainUI:
@@ -36,6 +39,26 @@ object JsMain:
             case Success(_)  => ()
             case Failure(ex) => ShowMessage.showError(ex.getMessage)
           }
+
+  def setupHotline(): Unit =
+    for
+      _ <- loadHotlines()
+    yield {
+      setupHotlineSubscriber()
+    }
+
+  def loadHotlines(): Future[Unit] =
+    for
+      hotlines <- Api.listTodaysHotline()
+    yield hotlines.foreach(ui.appendHotline(_))
+
+  def setupHotlineSubscriber()(using eventPublishers: EventPublishers): Unit =
+    val subscriber = eventPublishers.hotlineCreated.subscribe(event => {
+      val hotline = event.created
+      if hotline.sender == "reception" || hotline.recipient == "reception" then
+        ui.appendHotline(event)
+    })
+    subscriber.start()
 
 object ReceptionEventFetcher extends EventFetcher:
   val publishers = EventDispatcher()

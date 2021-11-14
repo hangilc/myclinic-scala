@@ -12,7 +12,10 @@ trait AppEventCodec extends Model with DateTime:
   given Encoder[AppEvent] = deriveEncoder[AppEvent]
   given Decoder[AppEvent] = deriveDecoder[AppEvent]
 
-  given Encoder[AppModelEvent] with
+  given Encoder[HotlineCreated] with
+    def apply(e: HotlineCreated): Json = appModelEventEncoder(e)
+
+  given appModelEventEncoder: Encoder[AppModelEvent] with
     def apply(e: AppModelEvent): Json =
       e match {
         case AppointCreated(at, created) =>
@@ -57,11 +60,12 @@ trait AppEventCodec extends Model with DateTime:
             "createdAt" -> at.asJson,
             "deleted" -> deleted.asJson
           )
-        case HotlineCreated(at, created) =>
+        case HotlineCreated(at, appEventId, created) =>
           Json.obj(
             "model" -> Json.fromString("hotline"),
             "kind" -> Json.fromString("created"),
             "createdAt" -> at.asJson,
+            "appEventId" -> Json.fromInt(appEventId),
             "created" -> created.asJson
           )
         case HotlineBeep(at, recipient) =>
@@ -81,13 +85,17 @@ trait AppEventCodec extends Model with DateTime:
           )
       }
 
-  given Decoder[AppModelEvent] with
+  given Decoder[HotlineCreated] = appModelEventDecoder.map(
+    evt => evt.asInstanceOf[HotlineCreated]
+  )
+
+  given appModelEventDecoder: Decoder[AppModelEvent] with
     def apply(c: HCursor): Decoder.Result[AppModelEvent] =
       val pre =
         for
           model <- c.downField("model").as[String]
           kind <- c.downField("kind").as[String]
-          createdAt <- c.downField("createdAT").as[LocalDateTime]
+          createdAt <- c.downField("createdAt").as[LocalDateTime]
         yield (model, kind, createdAt)
       pre.flatMap(tup =>
         tup match {
@@ -110,8 +118,10 @@ trait AppEventCodec extends Model with DateTime:
             for deleted <- c.downField("deleted").as[AppointTime]
             yield AppointTimeDeleted(at, deleted)
           case ("hotline", "created", at) =>
-            for created <- c.downField("created").as[Hotline]
-            yield HotlineCreated(at, created)
+            for 
+              created <- c.downField("created").as[Hotline]
+              appEventId <- c.downField("appEventId").as[Int]
+            yield HotlineCreated(at, appEventId, created)
           case ("hotline", "beep", at) =>
             for recipient <- c.downField("recipient").as[String]
             yield HotlineBeep(at, recipient)

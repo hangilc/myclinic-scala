@@ -5,11 +5,14 @@ import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.{ShowMessage}
 import scala.language.implicitConversions
+import dev.myclinic.scala.model.{HotlineCreated}
 
 abstract class MainUI:
   def postHotline(msg: String): Unit
 
-  val hotlineInput = textarea()
+  private var lastHotlineAppEventId = 0
+  private val hotlineInput = textarea()
+  private val hotlineMessages = textarea()
   val ele =
     div(id := "content")(
       div(id := "banner")("受付"),
@@ -29,7 +32,7 @@ abstract class MainUI:
             a("常用"),
             a("患者")
           ),
-          textarea(
+          hotlineMessages(
             id := "hotline-messages",
             attr("readonly") := "readonly",
             attr("tabindex") := "-1"
@@ -38,3 +41,13 @@ abstract class MainUI:
         div(id := "main")
       )
     )
+
+  def appendHotline(evt: HotlineCreated): Unit =
+    val id = evt.appEventId
+    if id > lastHotlineAppEventId then
+      val rep = Setting.hotlineNameRep(evt.created.sender)
+      val msg = evt.created.message
+      hotlineMessages.value += s"${rep}> ${msg}\n"
+      lastHotlineAppEventId = id
+
+

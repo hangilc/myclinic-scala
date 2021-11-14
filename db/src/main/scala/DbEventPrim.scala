@@ -58,6 +58,13 @@ object DbEventPrim:
       case None => 1
     })
 
+  def listHotlineByDate(date: LocalDate): Query0[AppEvent] =
+    sql"""
+      select * from app_event where model = 'hotline' and kind = 'created'
+        and date(created_at) = ${date}
+        order by app_event_id
+    """.query[AppEvent]
+
   def logAppointTimeCreated(a: AppointTime): ConnectionIO[AppEvent] =
     enterAppEvent("appoint-time", CREATED, a.asJson.toString)
 

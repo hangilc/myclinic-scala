@@ -176,4 +176,7 @@ object RestService extends DateTimeQueryParam:
         yield true
       Ok(op)
 
+    case GET -> Root / "list-todays-hotline" =>
+      Ok(Db.listTodaysHotline())
+
   } <+> PatientService.routes <+> MiscService.routes
