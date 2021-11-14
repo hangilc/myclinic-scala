@@ -55,6 +55,8 @@ class EventPublishers:
   val appointTimeCreated = EventPublisher[AppointTimeCreated]()
   val appointTimeUpdated = EventPublisher[AppointTimeUpdated]()
   val appointTimeDeleted = EventPublisher[AppointTimeDeleted]()
+  val hotlineCreated = EventPublisher[HotlineCreated]()
+  val hotlineBeep = EventPublisher[HotlineBeep]()
 
 class EventDispatcher extends EventPublishers:
   def publish(event: AppModelEvent): Unit =
@@ -65,5 +67,7 @@ class EventDispatcher extends EventPublishers:
       case e: AppointTimeCreated => appointTimeCreated.publish(e)
       case e: AppointTimeUpdated => appointTimeUpdated.publish(e)
       case e: AppointTimeDeleted => appointTimeDeleted.publish(e)
+      case e: HotlineCreated => hotlineCreated.publish(e)
+      case e: HotlineBeep => hotlineBeep.publish(e)
       case _                     => ()
     }

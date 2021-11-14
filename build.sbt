@@ -170,7 +170,7 @@ lazy val appointAdmin = project.in(file("appoint-admin"))
 lazy val receptionApp = project
   .in(file("reception-app"))
   .enablePlugins(ScalaJSPlugin)
-  .dependsOn(domq, modelJS, utilJS, webclient, validatorJS)
+  .dependsOn(domq, modelJS, utilJS, webclient, validatorJS, appbase)
   .settings(
     name := "myclinic-reception",
     Compile / fastLinkJS / scalaJSLinkerOutputDirectory :=

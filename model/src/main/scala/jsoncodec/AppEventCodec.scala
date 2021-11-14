@@ -57,6 +57,20 @@ trait AppEventCodec extends Model with DateTime:
             "createdAt" -> at.asJson,
             "deleted" -> deleted.asJson
           )
+        case HotlineCreated(at, created) =>
+          Json.obj(
+            "model" -> Json.fromString("hotline"),
+            "kind" -> Json.fromString("created"),
+            "createdAt" -> at.asJson,
+            "created" -> created.asJson
+          )
+        case HotlineBeep(at, recipient) =>
+          Json.obj(
+            "model" -> Json.fromString("hotline"),
+            "kind" -> Json.fromString("beep"),
+            "createdAt" -> at.asJson,
+            "recipient" -> recipient.asJson
+          )
         case UnknownAppEvent(appEventId, createdAt, model, kind, data) =>
           Json.obj(
             "appEventId" -> Json.fromInt(appEventId),
@@ -95,6 +109,12 @@ trait AppEventCodec extends Model with DateTime:
           case ("appoint-time", "deleted", at) =>
             for deleted <- c.downField("deleted").as[AppointTime]
             yield AppointTimeDeleted(at, deleted)
+          case ("hotline", "created", at) =>
+            for created <- c.downField("created").as[Hotline]
+            yield HotlineCreated(at, created)
+          case ("hotline", "beep", at) =>
+            for recipient <- c.downField("recipient").as[String]
+            yield HotlineBeep(at, recipient)
           case (model, kind, at) =>
             for
               appEventId <- c.downField("appEventId").as[Int]

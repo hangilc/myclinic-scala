@@ -26,12 +26,14 @@ object MiscService extends DateTimeQueryParam:
       Ok(ClinicOperation.getClinicOperationAt(date))
 
     case req @ POST -> Root / "batch-resolve-clinic-operations" =>
-      val op = for
-        dates <- req.as[List[LocalDate]]
-      yield {
-        val items = dates.map(date => (date, ClinicOperation.getClinicOperationAt(date)))
-        Map(items: _*)
-      }
+      val op =
+        for dates <- req.as[List[LocalDate]]
+        yield {
+          val items = dates.map(date =>
+            (date, ClinicOperation.getClinicOperationAt(date))
+          )
+          Map(items: _*)
+        }
       Ok(op)
 
   }
