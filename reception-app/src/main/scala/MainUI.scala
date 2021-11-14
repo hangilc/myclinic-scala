@@ -26,8 +26,16 @@ abstract class MainUI:
           ),
           hotlineInput(id := "hotline-input"),
           div(id := "hotline-commands")(
-            button("送信", onclick := (() => postHotline(hotlineInput.value))),
-            button("了解"),
+            button(
+              "送信",
+              onclick := (() => {
+                postHotline(hotlineInput.value)
+                hotlineInput.value = ""
+              })
+            ),
+            button("了解", onclick := (() => {
+              postHotline("了解")
+            })),
             button("Beep"),
             a("常用"),
             a("患者")
@@ -49,5 +57,3 @@ abstract class MainUI:
       val msg = evt.created.message
       hotlineMessages.value += s"${rep}> ${msg}\n"
       lastHotlineAppEventId = id
-
-
