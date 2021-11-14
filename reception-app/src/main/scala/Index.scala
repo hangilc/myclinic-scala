@@ -20,49 +20,22 @@ import dev.myclinic.scala.web.appbase.{
 
 @JSExportTopLevel("JsMain")
 object JsMain:
-  val hotlineInput = textarea()
   @JSExport
   def main(isAdmin: Boolean): Unit =
     ReceptionEventFetcher.start()
     given EventPublishers = ReceptionEventFetcher.publishers
-    document.body(
-      div(id := "content")(
-        div(id := "banner")("受付"),
-        div(id := "workarea")(
-          div(id := "side-bar")(
-            div(id := "side-menu")(
-              a("メイン"),
-              a("患者管理"),
-              a("診療記録"),
-              a("スキャン")
-            ),
-            hotlineInput(id := "hotline-input"),
-            div(id := "hotline-commands")(
-              button("送信", onclick := (postHotline _)),
-              button("了解"),
-              button("Beep"),
-              a("常用"),
-              a("患者")
-            ),
-            textarea(
-              id := "hotline-messages",
-              attr("readonly") := "readonly",
-              attr("tabindex") := "-1"
-            )
-          ),
-          div(id := "main")
-        )
-      )
-    )
-
-  def postHotline(): Unit =
-    val msg = hotlineInput.value
-    if !msg.isEmpty then
-      val h = Hotline(msg, Setting.hotlineSender, Setting.hotlineRecipient)
-      Api.postHotline(h).onComplete {
-        case Success(_)  => ()
-        case Failure(ex) => ShowMessage.showError(ex.getMessage)
-      }
+    val ui = createUI()
+    document.body(ui.ele)
+    
+  def createUI(): MainUI =
+    new MainUI:
+      def postHotline(msg: String): Unit =
+        if !msg.isEmpty then
+          val h = Hotline(msg, Setting.hotlineSender, Setting.hotlineRecipient)
+          Api.postHotline(h).onComplete {
+            case Success(_)  => ()
+            case Failure(ex) => ShowMessage.showError(ex.getMessage)
+          }
 
 object ReceptionEventFetcher extends EventFetcher:
   val publishers = EventDispatcher()

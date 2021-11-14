@@ -6,7 +6,10 @@ import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.{ShowMessage}
 import scala.language.implicitConversions
 
-class MainUI:
+abstract class MainUI:
+  def postHotline(msg: String): Unit
+
+  val hotlineInput = textarea()
   val ele =
     div(id := "content")(
       div(id := "banner")("受付"),
@@ -20,7 +23,7 @@ class MainUI:
           ),
           hotlineInput(id := "hotline-input"),
           div(id := "hotline-commands")(
-            button("送信", onclick := (postHotline _)),
+            button("送信", onclick := (() => postHotline(hotlineInput.value))),
             button("了解"),
             button("Beep"),
             a("常用"),
