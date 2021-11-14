@@ -9,6 +9,7 @@ import dev.myclinic.scala.model.{HotlineCreated}
 
 abstract class MainUI:
   def postHotline(msg: String): Unit
+  def beep(): Unit
 
   private var lastHotlineAppEventId = 0
   private val hotlineInput = textarea()
@@ -36,7 +37,7 @@ abstract class MainUI:
             button("了解", onclick := (() => {
               postHotline("了解")
             })),
-            button("Beep"),
+            button("Beep", onclick := (beep _)),
             a("常用"),
             a("患者")
           ),
