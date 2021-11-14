@@ -9,3 +9,16 @@ object Setting:
 
   def hotlineNameRep(code: String): String =
     hotlineNameRepMap.getOrElse(code, "不明")
+
+  val regularHotlineMessages: List[String] =
+    List(
+      "おはようございます。体温 {} 度でした。",
+      "退出します。",
+      "戻りました。",
+      "検温中です。",
+      "体温 {} 度でした。",
+      "胃腸の調子が悪いそうです。",
+      "相談です。",
+      "セットできました。",
+      "面会の肩がいらしてます。",
+    )

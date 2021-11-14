@@ -123,6 +123,53 @@ object Icons:
       )
     )
 
+  def downTriangle(
+      size: String = "1.5rem",
+      color: String = "black",
+      strokeWidth: String = "6"
+  ): HTMLElement =
+    val w: Double = 240
+    val pad: Double = 0.15
+    val x0 = w * pad
+    val y0 = x0
+    val x1 = w * (1 - pad)
+    val y1 = y0
+    val x2 = w * 0.5
+    val y2 = w * (1 - pad)
+    makeIcon(
+      size,
+      "none",
+      List(
+        s"M $x0 $y0 L $x1 $y1 L $x2 $y2 Z"
+      ),
+      viewBox = s"0 0 $w $w",
+      fillColor = color
+    )
+
+  def downTriangleFlat(
+      size: String = "1.5rem",
+      color: String = "black",
+      strokeWidth: String = "6"
+  ): HTMLElement =
+    val w: Double = 240
+    val padx: Double = 0.1
+    val pady: Double = 0.3
+    val x0 = w * padx
+    val y0 = w * pady
+    val x1 = w * (1 - padx)
+    val y1 = y0
+    val x2 = w * 0.5
+    val y2 = w * (1 - pady)
+    makeIcon(
+      size,
+      "none",
+      List(
+        s"M $x0 $y0 L $x1 $y1 L $x2 $y2 Z"
+      ),
+      viewBox = s"0 0 $w $w",
+      fillColor = color
+    )
+
   // Based from Heroicons
   // src: https://github.com/tailwindlabs/heroicons
   // <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

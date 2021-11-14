@@ -3,9 +3,10 @@ package dev.myclinic.scala.web.reception
 import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
-import dev.fujiwara.domq.{ShowMessage}
+import dev.fujiwara.domq.{ShowMessage, Icons, Colors, ContextMenu}
 import scala.language.implicitConversions
 import dev.myclinic.scala.model.{HotlineCreated}
+import org.scalajs.dom.raw.{HTMLElement, MouseEvent}
 
 abstract class MainUI:
   def postHotline(msg: String): Unit
@@ -34,12 +35,18 @@ abstract class MainUI:
                 hotlineInput.value = ""
               })
             ),
-            button("了解", onclick := (() => {
-              postHotline("了解")
-            })),
+            button(
+              "了解",
+              onclick := (() => {
+                postHotline("了解")
+              })
+            ),
             button("Beep", onclick := (beep _)),
-            a("常用"),
-            a("患者")
+            a(
+              span( "常用", downTriangle()),
+              onclick := (doRegular _)
+            ),
+            a("患者", downTriangle())
           ),
           hotlineMessages(
             id := "hotline-messages",
@@ -58,3 +65,32 @@ abstract class MainUI:
       val msg = evt.created.message
       hotlineMessages.value += s"${rep}> ${msg}\n"
       lastHotlineAppEventId = id
+
+  private def downTriangle(): HTMLElement =
+    Icons.downTriangleFlat(size = "0.6rem", color = Colors.primary)(
+      Icons.defaultStaticStyle,
+      ml := "0.2rem"
+    )
+
+  private def doRegular(event: MouseEvent): Unit =
+    val items: List[String] = Setting.regularHotlineMessages
+    def cmd(msg: String): Unit = 
+      val start = hotlineInput.selectionStart
+      val end = hotlineInput.selectionEnd
+      val left = hotlineInput.value.substring(0, start)
+      val right = hotlineInput.value.substring(end)
+      val index = msg.indexOf("{}")
+      val msgLeft = if index < 0 then msg else msg.substring(0, index)
+      val msgRight = if index < 0 then "" else msg.substring(index + 2)
+      hotlineInput.value = left + msgLeft + msgRight + right
+      hotlineInput.focus()
+      val pos = start + msgLeft.size
+      hotlineInput.selectionStart = pos
+      hotlineInput.selectionEnd = pos
+
+    val menu = ContextMenu(items.map(
+      msg => msg -> (() => cmd(msg))
+    ))
+    menu.open(event)
+
+
