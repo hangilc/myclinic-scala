@@ -111,3 +111,16 @@ object WaitState:
     WaitState.values.find(_.code == code).get
 
 case class Wqueue(visitId: Int, waitState: WaitState)
+
+case class Visit(
+    visitId: Int,
+    patientId: Int,
+    visitedAt: LocalDateTime,
+    shahokokuhoId: Int,
+    roujinId: Int,
+    kouhi1Id: Int,
+    kouhi2Id: Int,
+    kouhi3Id: Int,
+    koukikoureiId: Int,
+    attributes: Option[String]
+)

@@ -43,4 +43,9 @@ trait Model extends DateTime with WaitStateCodec:
   given Encoder[Wqueue] = deriveEncoder[Wqueue]
   given Decoder[Wqueue] = deriveDecoder[Wqueue]
 
+  given Encoder[Visit] = deriveEncoder[Visit]
+  given Decoder[Visit] = deriveDecoder[Visit]
+
+  
+
 

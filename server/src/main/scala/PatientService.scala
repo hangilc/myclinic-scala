@@ -26,7 +26,7 @@ object PatientService:
   object intPatientId extends QueryParamDecoderMatcher[Int]("patient-id")
   object strText extends QueryParamDecoderMatcher[String]("text")
 
-  def routes(using topic: Topic[IO, WebSocketFrame]) = HttpRoutes.of[IO] {
+  def routes = HttpRoutes.of[IO] {
     case GET -> Root / "get-patient" :? intPatientId(patientId) =>
       Ok(Db.getPatient(patientId))
 

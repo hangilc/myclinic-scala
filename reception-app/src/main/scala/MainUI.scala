@@ -100,8 +100,10 @@ private def doPatients(event: MouseEvent): Unit =
   val f = 
     for
       wqueue <- Api.listWqueue()
+      visitIds = wqueue.map(_.visitId)
+      visitMap <- Api.batchGetVisit(visitIds)
     yield {
-      println(("wqueue", wqueue))
+      println(("wqueue", wqueue, visitMap))
     }
   f.onComplete {
     case Success(_) => ()
