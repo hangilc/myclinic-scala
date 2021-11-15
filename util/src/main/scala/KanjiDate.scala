@@ -13,15 +13,19 @@ object KanjiDate:
     val i = d.getDayOfWeek().getValue() % 7
     youbiList(i)
 
-  def dateToKanji(d: LocalDate, includeYoubi: Boolean = false): String =
-    val year = d.getYear
-    val month = d.getMonthValue
-    val day = d.getDayOfMonth
-    val dow = if includeYoubi then {
-      s"（${youbi(d)}）"
-    } else ""
-
-    s"${year}年${month}月${day}日${dow}"
+  def dateToKanji(
+      d: LocalDate,
+      formatYear: DateInfo => String = i => s"${i.gengou}${i.nen}年",
+      formatMonth: DateInfo => String = i => s"${i.month}月",
+      formatDay: DateInfo => String = i => s"${i.day}日",
+      formatYoubi: DateInfo => String = _.youbi
+  ): String =
+    val i: DateInfo = DateInfo(d)
+    val year = formatYear(i)
+    val month = formatMonth(i)
+    val day = formatDay(i)
+    val youbi = formatYoubi(i)
+    s"${year}${month}${day}${youbi}"
 
   def timeToKanji(t: LocalTime): String =
     val hour = t.getHour
@@ -57,3 +61,5 @@ object KanjiDate:
     def dayOfWeek: DayOfWeek = date.getDayOfWeek
     def dayOfWeekValue: Int = dayOfWeek.getValue() % 7
     def youbi: String = youbiList(dayOfWeekValue)
+    def gengouAlpha: String = warekiOption.map(w => w.gengou.alpha).getOrElse("")
+    def gengouAlphaChar: String = if gengouAlpha.isEmpty then "" else gengouAlpha.substring(0, 1)
