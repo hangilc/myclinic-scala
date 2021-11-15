@@ -17,7 +17,7 @@ import scala.concurrent.Future
 class Cashier(using publishers: EventPublishers):
   val table = makeTable()
   val ele = div(
-    h1("会計"),
+    h1("受付患者"),
     table.ele,
     div(
       button("更新", onclick := (onRefreshClick _), mt := "10px")
