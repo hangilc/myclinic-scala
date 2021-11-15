@@ -18,6 +18,8 @@ class SideMenu(
     args: List[(String, () => Future[HTMLElement])]
 ):
   val ele: HTMLElement = div()
+  def invokeByLabel(label: String): Unit =
+    items.find(_.label == label).foreach(invoke(_))
 
   private case class Item(
       label: String,

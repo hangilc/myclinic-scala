@@ -5,7 +5,8 @@ import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.{ShowMessage, Icons, Colors, ContextMenu}
 import scala.language.implicitConversions
-import dev.myclinic.scala.web.appbase.{SideMenu}
+import dev.myclinic.scala.web.appbase.{SideMenu, EventPublishers}
+import dev.myclinic.scala.web.reception.cashier.Cashier
 import dev.myclinic.scala.model.{HotlineCreated, Patient}
 import dev.myclinic.scala.webclient.Api
 import org.scalajs.dom.raw.{HTMLElement, MouseEvent}
@@ -14,8 +15,10 @@ import scala.util.Success
 import scala.util.Failure
 import scala.concurrent.Future
 
-abstract class MainUI:
+abstract class MainUI(using publishers: EventPublishers):
   def postHotline(msg: String): Unit
+  def invoke(label: String): Unit =
+    sideMenu.invokeByLabel(label)
 
   private var lastHotlineAppEventId = 0
   private val hotlineInput = textarea()
@@ -23,7 +26,7 @@ abstract class MainUI:
   private val eMain: HTMLElement = div()
   private val sideMenu = SideMenu(eMain,
     List(
-      "メイン" -> (() => Future.successful(div("メイン"))),
+      "メイン" -> (makeCashier _),
       "患者管理" -> (() => Future.successful(div("患者管理"))),
       "診療記録" -> (() => Future.successful(div("診療記録"))),
       "スキャン" -> (() => Future.successful(div("スキャン")))
@@ -124,3 +127,8 @@ abstract class MainUI:
       case Success(_)  => ()
       case Failure(ex) => System.err.println(ex.getMessage)
     }
+
+  def makeCashier(): Future[HTMLElement] =
+    val cashier = Cashier()
+    Future.successful(cashier.ele)
+

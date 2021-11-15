@@ -78,3 +78,13 @@ button {
   flex: 1 1 auto;
   margin: 10px 0 0 10px;
 }
+
+#main h1 {
+  font-weight: normal;
+  margin: 0 0 10px 0;
+  font-size: 1.5rem;
+}
+
+.table .header {
+  font-weight: bold;
+}
