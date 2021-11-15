@@ -88,5 +88,8 @@ class Cashier(using publishers: EventPublishers):
     val msg = s"${patient.fullName()}\n削除していいですか？"
     ShowMessage.confirm(msg, ok => {
       if ok then
-        ???
+        Api.deleteVisit(visit.visitId).onComplete {
+          case Success(_) => ()
+          case Failure(ex) => ShowMessage.showError(ex.getMessage)
+        }
     })

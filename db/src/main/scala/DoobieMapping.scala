@@ -6,7 +6,7 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
-import dev.myclinic.scala.model.Sex
+import dev.myclinic.scala.model.{Sex, WaitState}
 import java.time.LocalDateTime
 
 private object LocalDateMapping:
@@ -74,3 +74,6 @@ object DoobieMapping:
       case Some(s) => s
       case None => null
     })
+
+  implicit val waitStateGet: Get[WaitState] = Get[Int].map(WaitState.fromCode _)
+  implicit val waitStatePut: Put[WaitState] = Put[Int].tcontramap(_.code)
