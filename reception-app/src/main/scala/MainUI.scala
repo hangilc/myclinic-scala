@@ -130,5 +130,7 @@ abstract class MainUI(using publishers: EventPublishers):
 
   def makeCashier(): Future[HTMLElement] =
     val cashier = Cashier()
-    Future.successful(cashier.ele)
+    for 
+      _ <- cashier.refresh()
+    yield cashier.ele
 

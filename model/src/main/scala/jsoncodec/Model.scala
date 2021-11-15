@@ -46,6 +46,33 @@ trait Model extends DateTime with WaitStateCodec:
   given Encoder[Visit] = deriveEncoder[Visit]
   given Decoder[Visit] = deriveDecoder[Visit]
 
+  given Encoder[Text] = deriveEncoder[Text]
+  given Decoder[Text] = deriveDecoder[Text]
+
+  given Encoder[Drug] = deriveEncoder[Drug]
+  given Decoder[Drug] = deriveDecoder[Drug]
+
+  given Encoder[Shinryou] = deriveEncoder[Shinryou]
+  given Decoder[Shinryou] = deriveDecoder[Shinryou]
+
+  given Encoder[Conduct] = deriveEncoder[Conduct]
+  given Decoder[Conduct] = deriveDecoder[Conduct]
+
+  given Encoder[ConductDrug] = deriveEncoder[ConductDrug]
+  given Decoder[ConductDrug] = deriveDecoder[ConductDrug]
+
+  given Encoder[ConductShinryou] = deriveEncoder[ConductShinryou]
+  given Decoder[ConductShinryou] = deriveDecoder[ConductShinryou]
+
+  given Encoder[ConductKizai] = deriveEncoder[ConductKizai]
+  given Decoder[ConductKizai] = deriveDecoder[ConductKizai]
+
+  given Encoder[Charge] = deriveEncoder[Charge]
+  given Decoder[Charge] = deriveDecoder[Charge]
+
+  given Encoder[Payment] = deriveEncoder[Payment]
+  given Decoder[Payment] = deriveDecoder[Payment]
+
   
 
 

@@ -46,6 +46,13 @@ case class HotlineCreated(
 case class HotlineBeep(createdAt: LocalDateTime, recipient: String)
     extends AppModelEvent
 
+case class VisitCreated(createdAt: LocalDateTime, created: Visit)
+    extends AppModelEvent
+case class VisitUpdated(createdAt: LocalDateTime, updated: Visit)
+    extends AppModelEvent
+case class VisitDeleted(createdAt: LocalDateTime, deleted: Visit)
+    extends AppModelEvent
+
 object AppModelEvent:
   def from(event: AppEvent): AppModelEvent =
     val at = event.createdAt
@@ -67,6 +74,9 @@ object AppModelEvent:
       case ("hotline", "created") =>
         HotlineCreated(at, event.appEventId, as[Hotline])
       case ("hotline", "beep") => HotlineBeep(at, as[String])
+      case ("visit", "created") => VisitCreated(at, as[Visit])
+      case ("visit", "updated") => VisitUpdated(at, as[Visit])
+      case ("visit", "deleted") => VisitDeleted(at, as[Visit])
       case _ =>
         UnknownAppEvent(
           event.appEventId,

@@ -124,3 +124,63 @@ case class Visit(
     koukikoureiId: Int,
     attributes: Option[String]
 )
+
+case class Text(
+  textId: Int,
+  visitId: Int,
+  content: String
+)
+
+case class Drug(
+  drugId: Int,
+  visitId: Int,
+  iyakuhincode: Int,
+  amount: Double,
+  usage: String,
+  days: Int,
+  category: Int,
+  prescribed: Boolean
+)
+
+case class Shinryou(
+  shinryouId: Int,
+  visitId: Int,
+  shinryoucode: Int
+)
+
+case class Conduct(
+  conductId: Int,
+  visitId: Int,
+  kind: Int
+)
+
+case class ConductDrug(
+  conductDrugId: Int,
+  conductId: Int,
+  iyakuhincode: Int,
+  amount: Double
+)
+
+case class ConductShinryou(
+  conductShinryouId: Int,
+  conductId: Int,
+  shinryoucode: Int
+)
+
+case class ConductKizai(
+  conductKizaiId: Int,
+  conductId: Int,
+  kizaicode: Int,
+  amount: Double
+)
+
+case class Charge(
+  visitId: Int,
+  charge: Int
+)
+
+case class Payment(
+  visitId: Int,
+  amount: Int,
+  paytime: LocalDateTime
+)
