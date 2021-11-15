@@ -6,7 +6,7 @@ import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.{ShowMessage, Icons, Colors, ContextMenu, Table}
 import scala.language.implicitConversions
 import dev.myclinic.scala.web.appbase.{SideMenu, EventPublishers}
-import dev.myclinic.scala.model.{HotlineCreated, Patient}
+import dev.myclinic.scala.model.{HotlineCreated, Patient, WaitState}
 import dev.myclinic.scala.util.{KanjiDate, DateUtil}
 import dev.myclinic.scala.webclient.Api
 import org.scalajs.dom.raw.{HTMLElement, MouseEvent}
@@ -73,7 +73,13 @@ class Cashier(using publishers: EventPublishers):
               e => e(patient.fullNameYomi()),
               e => e(patient.sex.rep),
               e => e(birthday),
-              e => e(s"${age}才")
+              e => e(s"${age}才"),
+              e => {
+                if wq.waitState == WaitState.WaitCashier then
+                  e(button("会計"))
+                if wq.waitState == WaitState.WaitExam then
+                  e(a("削除"))
+              }
             )
           )
         })
