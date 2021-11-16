@@ -32,36 +32,37 @@ private object LocalTimeMapping:
 private object LocalDateTimeMapping:
   val sqlDateTimeFormatter = DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss")
 
-  def fromString(s: String): LocalDateTime = LocalDateTime.parse(s, sqlDateTimeFormatter)
+  def fromString(s: String): LocalDateTime =
+    LocalDateTime.parse(s, sqlDateTimeFormatter)
   def toString(dt: LocalDateTime): String = dt.format(sqlDateTimeFormatter)
 
 private object SexMapping:
   def fromString(s: String): Sex = s match
     case "M" => Sex.Male
     case "F" => Sex.Female
-    case _ => throw new RuntimeException("Unknown sex: " + s)
+    case _   => throw new RuntimeException("Unknown sex: " + s)
 
   def toString(s: Sex): String = s match
-    case Sex.Male => "M"
+    case Sex.Male   => "M"
     case Sex.Female => "F"
 
 object DoobieMapping:
   implicit val localDateGet: Get[LocalDate] =
     Get[String].map(LocalDateMapping.fromString _)
 
-  implicit val localDateSet: Put[LocalDate] = 
+  implicit val localDateSet: Put[LocalDate] =
     Put[String].tcontramap(LocalDateMapping.toString _)
-  
+
   implicit val localTimeGet: Get[LocalTime] =
     Get[String].map(LocalTimeMapping.fromString _)
-  
-  implicit val localTimeSet: Put[LocalTime] = 
+
+  implicit val localTimeSet: Put[LocalTime] =
     Put[String].tcontramap(LocalTimeMapping.toString _)
-  
-  implicit val localDateTimeGet: Get[LocalDateTime] = 
+
+  implicit val localDateTimeGet: Get[LocalDateTime] =
     Get[String].map(LocalDateTimeMapping.fromString)
 
-  implicit val localDateTimeSet: Put[LocalDateTime] = 
+  implicit val localDateTimeSet: Put[LocalDateTime] =
     Put[String].tcontramap(LocalDateTimeMapping.toString _)
 
   implicit val sexGet: Get[Sex] = Get[String].map(SexMapping.fromString _)
@@ -69,11 +70,24 @@ object DoobieMapping:
 
   implicit val optionStringGet: Get[Option[String]] =
     Get[String].map(str => if str == null then None else Some(str))
-  implicit val optionStringSet: Put[Option[String]] =
-    Put[String].tcontramap(opt => opt match {
-      case Some(s) => s
-      case None => null
-    })
+  implicit val optionStringPut: Put[Option[String]] =
+    Put[String].tcontramap(opt =>
+      opt match {
+        case Some(s) => s
+        case None    => null
+      }
+    )
 
   implicit val waitStateGet: Get[WaitState] = Get[Int].map(WaitState.fromCode _)
   implicit val waitStatePut: Put[WaitState] = Put[Int].tcontramap(_.code)
+
+  implicit val optionLocalDateGet: Get[Option[LocalDate]] =
+    Get[String].map(date =>
+      if (date == null || date == "0000-00-00") then None
+      else Some(LocalDateMapping.fromString(date))
+    )
+  implicit val optionLocalDatePut: Put[Option[LocalDate]] =
+    Put[String].tcontramap({
+      case Some(date) => LocalDateMapping.toString(date)
+      case None => "0000-00-00"
+    })

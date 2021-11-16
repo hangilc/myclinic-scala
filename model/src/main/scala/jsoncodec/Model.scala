@@ -73,6 +73,15 @@ trait Model extends DateTime with WaitStateCodec:
   given Encoder[Payment] = deriveEncoder[Payment]
   given Decoder[Payment] = deriveDecoder[Payment]
 
+  given Encoder[IyakuhinMaster] = deriveEncoder[IyakuhinMaster]
+  given Decoder[IyakuhinMaster] = deriveDecoder[IyakuhinMaster]
+
+  given Encoder[ShinryouMaster] = deriveEncoder[ShinryouMaster]
+  given Decoder[ShinryouMaster] = deriveDecoder[ShinryouMaster]
+
+  given Encoder[KizaiMaster] = deriveEncoder[KizaiMaster]
+  given Decoder[KizaiMaster] = deriveDecoder[KizaiMaster]
+
   
 
 

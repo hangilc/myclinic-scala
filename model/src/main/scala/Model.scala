@@ -184,3 +184,43 @@ case class Payment(
   amount: Int,
   paytime: LocalDateTime
 )
+
+case class IyakuhinMaster(
+  iyakuhincode: Int,
+  yakkacode: String,
+  name: String,
+  yomi: String,
+  unit: String,
+  yakkaStore: String,
+  madoku: String,
+  kouhatsu: String,
+  zaikei: String,
+  validFrom: LocalDate,
+  validUpto: Option[LocalDate]
+):
+  def yakka: Double = yakkaStore.toDouble
+
+case class ShinryouMaster(
+  shinryoucode: Int,
+  name: String,
+  tensuuStore: String,
+  tensuuShikibetsu: String,
+  shuukeisaki: String,
+  houkatsukensa: String,
+  oushinkubun: String,
+  kensagroup: String,
+  validFrom: LocalDate,
+  validUpto: Option[LocalDate]
+):
+  def tensuu: Int = tensuuStore.toDouble.toInt
+
+case class KizaiMaster(
+  kizaicode: Int,
+  name: String,
+  yomi: String,
+  unit: String,
+  kingakuStore: String,
+  validFrom: LocalDate,
+  validUpto: Option[LocalDate]
+):
+  def kingaku: Double = kingakuStore.toDouble
