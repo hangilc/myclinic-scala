@@ -22,6 +22,8 @@ object MasterService extends DateTimeQueryParam:
   object intIyakuhincode extends QueryParamDecoderMatcher[Int]("iyakuhincode")
   object intShinryoucode extends QueryParamDecoderMatcher[Int]("shinryoucode")
   object intKizaicode extends QueryParamDecoderMatcher[Int]("kizaicode")
+  object intVisitId extends QueryParamDecoderMatcher[Int]("visit-id")
+  object intConductId extends QueryParamDecoderMatcher[Int]("conduct-id")
   object dateAt extends QueryParamDecoderMatcher[LocalDate]("at")
 
   def routes = HttpRoutes.of[IO] {
@@ -57,4 +59,22 @@ object MasterService extends DateTimeQueryParam:
         codes <- req.as[List[Int]]
         map <- Db.batchResolveKizaiMaster(codes, at)
       yield map)
+
+    case GET -> Root / "list-drug-for-visit" :? intVisitId(visitId) =>
+      Ok(Db.listDrugForVisit(visitId))
+
+    case GET -> Root / "list-shinryou-for-visit" :? intVisitId(visitId) =>
+      Ok(Db.listShinryouForVisit(visitId))
+
+    case GET -> Root / "list-conduct-for-visit" :? intVisitId(visitId) =>
+      Ok(Db.listConductForVisit(visitId))
+
+    case GET -> Root / "list-conduct-drug-for-visit" :? intConductId(conductId) =>
+      Ok(Db.listConductDrugForConduct(conductId))
+
+    case GET -> Root / "list-conduct-shinryou-for-visit" :? intConductId(conductId) =>
+      Ok(Db.listConductShinryouForConduct(conductId))
+
+    case GET -> Root / "list-conduct-kizai-for-visit" :? intConductId(conductId) =>
+      Ok(Db.listConductKizaiForConduct(conductId))
   }

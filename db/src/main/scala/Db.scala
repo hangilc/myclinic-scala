@@ -20,6 +20,9 @@ object Db
     with DbDrug
     with DbShinryou
     with DbConduct
+    with DbConductDrug
+    with DbConductShinryou
+    with DbConductKizai
     with DbCharge
     with DbPayment
     with DbIyakuhinMaster

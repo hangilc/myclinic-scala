@@ -4,7 +4,7 @@ import cats.*
 import cats.implicits.*
 import cats.effect.IO
 import dev.myclinic.scala.model.*
-import dev.myclinic.scala.db.{DbPatientPrim => Prim}
+import dev.myclinic.scala.db.{DbConductKizaiPrim => Prim}
 import doobie.*
 import doobie.implicits.*
 
@@ -13,8 +13,11 @@ import java.time.LocalTime
 import java.time.temporal.ChronoUnit
 import java.util.regex.Pattern
 
-trait DbConductKiazi extends Mysql:
+trait DbConductKizai extends Mysql:
   def countConductKiaziForConduct(conductId: Int): IO[Int] =
     mysql(sql"""
       select count(*) from visit_conduct_kiazi where conduct_id = ${conductId}
     """.query[Int].unique)
+
+  def listConductKizaiForConduct(conductId: Int): IO[List[ConductKizai]] =
+    mysql(Prim.listConductKizaiForConduct(conductId))

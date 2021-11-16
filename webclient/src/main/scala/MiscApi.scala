@@ -30,3 +30,21 @@ object MiscApi extends ApiBase:
 
     def listWqueue(): Future[List[Wqueue]] =
       get("list-wqueue", Params())
+
+    def listDrugForVisit(visitId: Int): Future[List[Drug]] =
+      get("list-drug-for-visit", Params("visit-id" -> visitId))
+
+    def listShinryouForVisit(visitId: Int): Future[List[Shinryou]] =
+      get("list-shinryou-for-visit", Params("visit-id" -> visitId))
+
+    def listConductForVisit(visitId: Int): Future[List[Conduct]] =
+      get("list-conduct-for-visit", Params("visit-id" -> visitId))
+
+    def listConductDrugForVisit(conductId: Int): Future[List[ConductDrug]] =
+      get("list-conduct-drug-for-visit", Params("visit-id" -> conductId))
+
+    def listConductShinryouForVisit(conductId: Int): Future[List[ConductShinryou]] =
+      get("list-conduct-shinryou-for-visit", Params("visit-id" -> conductId))
+
+    def listConductKizaiForVisit(conductId: Int): Future[List[ConductKizai]] =
+      get("list-conduct-kizai-for-visit", Params("visit-id" -> conductId))
