@@ -20,15 +20,41 @@ import dev.myclinic.scala.model.jsoncodec.Implicits.given
 object MasterService extends DateTimeQueryParam:
 
   object intIyakuhincode extends QueryParamDecoderMatcher[Int]("iyakuhincode")
+  object intShinryoucode extends QueryParamDecoderMatcher[Int]("shinryoucode")
+  object intKizaicode extends QueryParamDecoderMatcher[Int]("kizaicode")
   object dateAt extends QueryParamDecoderMatcher[LocalDate]("at")
 
   def routes = HttpRoutes.of[IO] {
-    case GET -> Root / "get-iyakuhin-master" :? intIyakuhincode(iyakuhincode) +& dateAt(at) =>
+    case GET -> Root / "get-iyakuhin-master" :? intIyakuhincode(
+          iyakuhincode
+        ) +& dateAt(at) =>
       Ok(Db.getIyakuhinMaster(iyakuhincode, at))
 
     case req @ POST -> Root / "batch-get-iyakuhin-master" :? dateAt(at) =>
-      Ok(for 
+      Ok(for
         codes <- req.as[List[Int]]
         map <- Db.batchResolveIyakuhinMaster(codes, at)
+      yield map)
+
+    case GET -> Root / "get-shinryou-master" :? intShinryoucode(
+          shinryoucode
+        ) +& dateAt(at) =>
+      Ok(Db.getShinryouMaster(shinryoucode, at))
+
+    case req @ POST -> Root / "batch-get-shinryou-master" :? dateAt(at) =>
+      Ok(for
+        codes <- req.as[List[Int]]
+        map <- Db.batchResolveShinryouMaster(codes, at)
+      yield map)
+
+    case GET -> Root / "get-kizai-master" :? intKizaicode(
+          kizaicode
+        ) +& dateAt(at) =>
+      Ok(Db.getKizaiMaster(kizaicode, at))
+
+    case req @ POST -> Root / "batch-get-kizai-master" :? dateAt(at) =>
+      Ok(for
+        codes <- req.as[List[Int]]
+        map <- Db.batchResolveKizaiMaster(codes, at)
       yield map)
   }

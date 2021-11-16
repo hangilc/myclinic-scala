@@ -4,7 +4,7 @@ import cats.*
 import cats.implicits.*
 import cats.effect.IO
 import dev.myclinic.scala.model.*
-import dev.myclinic.scala.db.{DbPatientPrim => Prim}
+import dev.myclinic.scala.db.{DbDrugPrim => Prim}
 import doobie.*
 import doobie.implicits.*
 
@@ -18,3 +18,6 @@ trait DbDrug extends Mysql:
     mysql(sql"""
       select count(*) from visit_drug where visit_id = ${visitId}
     """.query[Int].unique)
+
+  def listDrugForVisit(visitId: Int): IO[List[Drug]] =
+    mysql(Prim.listDrugForVisit(visitId))
