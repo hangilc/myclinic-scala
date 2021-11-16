@@ -224,3 +224,47 @@ case class KizaiMaster(
   validUpto: Option[LocalDate]
 ):
   def kingaku: Double = kingakuStore.toDouble
+
+case class Shahokokuho(
+  shahokokuhoId: Int,
+  patientId: Int,
+  hokenshaBangou: Int,
+  hihokanshaKigou: String,
+  hihokenshaBangou: String,
+  honnin: Int,
+  validFrom: LocalDate,
+  validUpto: Option[LocalDate],
+  kourei: Int,
+  edaban: String
+)
+
+case class Roujin(
+  roujinId: Int,
+  patientId: Int,
+  shichouson: Int,
+  jukyuusha: Int,
+  futanWari: Int,
+  validFrom: LocalDate,
+  validUpt: Option[LocalDate]
+)
+
+case class Koukikourei(
+  koukikoureiId: Int,
+  patientId: Int,
+  hokenshaBangou: String,
+  hihokenshaBangou: String,
+  futanWari: Int,
+  validFrom: LocalDate,
+  validUpt: Option[LocalDate]
+)
+
+case class Kouhi(
+  kouhiId: Int,
+  futansha: Int,
+  jukyuusha: Int,
+  validFrom: LocalDate,
+  validUpto: Option[LocalDate],
+  patientId: Int
+)
+
+

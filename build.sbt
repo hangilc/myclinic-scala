@@ -227,3 +227,15 @@ lazy val clinicop = crossProject(JVMPlatform, JSPlatform)
 val clinicopJVM = clinicop.jvm
 val clinicopJS = clinicop.js
 
+lazy val rcpt = crossProject(JVMPlatform, JSPlatform)
+  .crossType(CrossType.Pure)  
+  .in(file("rcpt"))
+  .dependsOn()
+  .jsConfigure(_ enablePlugins TzdbPlugin)
+  .jsSettings(
+    scalaJSUseMainModuleInitializer := false,
+    zonesFilter := { (z: String) => z == "Asia/Tokyo" },
+    libraryDependencies ++= Seq(
+      "io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion
+    )
+  )
