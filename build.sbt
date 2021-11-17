@@ -230,7 +230,7 @@ val clinicopJS = clinicop.js
 lazy val rcpt = crossProject(JVMPlatform, JSPlatform)
   .crossType(CrossType.Pure)  
   .in(file("rcpt"))
-  .dependsOn()
+  //.dependsOn()
   .jsConfigure(_ enablePlugins TzdbPlugin)
   .jsSettings(
     scalaJSUseMainModuleInitializer := false,
@@ -238,4 +238,15 @@ lazy val rcpt = crossProject(JVMPlatform, JSPlatform)
     libraryDependencies ++= Seq(
       "io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion
     )
+  )
+
+val rcptJVM = rcpt.jvm
+val rcptJS = rcpt.js
+
+lazy val javalib = project
+  .in(file("javalib"))
+  .settings(
+    version := "1.0.0-SHANPSHOT",
+    crossPaths := false,
+    autoScalaLibrary := false
   )
