@@ -36,4 +36,9 @@ object MiscService extends DateTimeQueryParam:
         }
       Ok(op)
 
+    case GET -> Root / "rcpt-age-test" => Ok({
+      val calc = new dev.myclinic.java.RcptCalc()
+      calc.calcRcptAge
+    })
+
   }

@@ -99,7 +99,7 @@ val utilJVM = util.jvm
 
 lazy val server = project
   .in(file("server"))
-  .dependsOn(db, modelJVM, utilJVM, appointAdmin, clinicopJVM)
+  .dependsOn(db, modelJVM, utilJVM, appointAdmin, clinicopJVM, javalib)
   .settings(
     name := "server",
     libraryDependencies ++= Seq(
