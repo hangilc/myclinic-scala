@@ -36,6 +36,20 @@ case class DrugEx(
     master: IyakuhinMaster
 )
 
+object DrugEx:
+  def apply(drug: Drug, master: IyakuhinMaster): DrugEx =
+    DrugEx(
+      drug.drugId,
+      drug.visitId,
+      drug.iyakuhincode,
+      drug.amount,
+      drug.usage,
+      drug.days,
+      drug.category,
+      drug.prescribed,
+      master
+    )
+
 case class ShinryouEx(
     shinryouId: Int,
     visitId: Int,
@@ -69,12 +83,31 @@ case class ConductDrugEx(
     master: IyakuhinMaster
 )
 
+object ConductDrugEx:
+  def apply(d: ConductDrug, master: IyakuhinMaster): ConductDrugEx =
+    ConductDrugEx(
+      d.conductDrugId,
+      d.conductId,
+      d.iyakuhincode,
+      d.amount,
+      master
+    )
+
 case class ConductShinryouEx(
     conductShinryouId: Int,
     conductId: Int,
     shinryoucode: Int,
     master: ShinryouMaster
 )
+
+object ConductShinryouEx:
+  def apply(s: ConductShinryou, master: ShinryouMaster): ConductShinryouEx =
+    ConductShinryouEx(
+      s.conductShinryouId,
+      s.conductId,
+      s.shinryoucode,
+      master
+    )
 
 case class ConductKizaiEx(
     conductKizaiId: Int,
@@ -83,3 +116,7 @@ case class ConductKizaiEx(
     amount: Double,
     master: KizaiMaster
 )
+
+object ConductKizaiEx:
+  def apply(k: ConductKizai, master: KizaiMaster): ConductKizaiEx =
+    ConductKizaiEx(k.conductKizaiId, k.conductId, k.kizaicode, k.amount, master)
