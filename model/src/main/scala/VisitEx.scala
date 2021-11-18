@@ -43,6 +43,15 @@ case class ShinryouEx(
     master: ShinryouMaster
 )
 
+object ShinryouEx:
+  def apply(shinryou: Shinryou, master: ShinryouMaster): ShinryouEx =
+    ShinryouEx(
+      shinryou.shinryouId,
+      shinryou.visitId,
+      shinryou.shinryoucode,
+      master
+    )
+
 case class ConductEx(
     conductId: Int,
     visitId: Int,

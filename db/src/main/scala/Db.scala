@@ -27,7 +27,8 @@ object Db
     with DbPayment
     with DbIyakuhinMaster
     with DbShinryouMaster
-    with DbKizaiMaster:
+    with DbKizaiMaster
+    with DbVisitEx:
 
   def tryDeleteWqueue(visitId: Int): ConnectionIO[Option[AppEvent]] =
     for
