@@ -123,7 +123,8 @@ case class Visit(
     kouhi3Id: Int,
     koukikoureiId: Int,
     attributes: Option[String]
-)
+):
+  def kouhiIds: List[Int] = List(kouhi1Id, kouhi2Id, kouhi3Id).filter(_ > 0)
 
 case class Text(
   textId: Int,

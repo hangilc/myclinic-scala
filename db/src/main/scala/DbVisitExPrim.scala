@@ -22,6 +22,30 @@ object DbVisitExPrim:
       )) 
     """
 
+  def getDrugEx(drugId: Int): Query0[DrugEx] =
+    (sql"""
+      select d.*, m.* from visit_drug as d inner join visit as v 
+        inner join iyakuhin_master_arch as m 
+        where d.drug_id = ${drugId} and d.visit_id = v.visit_id 
+        and d.d_iyakuhincode = m.iyakuhincode 
+        and """ ++ validAt(frag("date(v.v_datetime)"), frag("m")))
+      .query[(Drug, IyakuhinMaster)]
+      .map({ case (d, m) =>
+        DrugEx(d, m)
+      })
+
+  def getShinryouEx(shinryouId: Int): Query0[ShinryouEx] =
+    (sql"""
+      select s.*, m.* from visit_shinryou as s inner join visit as v 
+        inner join shinryoukoui_master_arch as m 
+        where s.shinryou_id = ${shinryouId} and s.visit_id = v.visit_id 
+        and s.shinryoucode = m.shinryoucode 
+        and """ ++ validAt(frag("date(v.v_datetime)"), frag("m")))
+      .query[(Shinryou, ShinryouMaster)]
+      .map({ case (s, m) =>
+        ShinryouEx(s, m)
+      })
+
   def getConductDrugEx(conductDrugId: Int): Query0[ConductDrugEx] =
     (sql"""
       select d.*, m.* from visit_conduct_drug as d inner join visit_conduct as c 
@@ -84,7 +108,9 @@ object DbVisitExPrim:
       conduct <- DbConductPrim.getConduct(conductId).unique
       drugIds <- DbConductDrugPrim.listConductDrugIdForConduct(conductId)
       drugs <- listConductDrugEx(drugIds)
-      shinryouIds <- DbConductShinryouPrim.listConductShinryouIdForConduct(conductId)
+      shinryouIds <- DbConductShinryouPrim.listConductShinryouIdForConduct(
+        conductId
+      )
       shinryouList <- listConductShinryouEx(shinryouIds)
       kizaiIds <- DbConductKizaiPrim.listConductKizaiIdForConduct(conductId)
       kizaiList <- listConductKizaiEx(kizaiIds)
@@ -92,3 +118,37 @@ object DbVisitExPrim:
 
   def listConductEx(conductIds: List[Int]): ConnectionIO[List[ConductEx]] =
     conductIds.map(getConductEx(_)).sequence
+
+  private def optShahokokuho(shahokokuhoId: Int): ConnectionIO[Option[Shahokokuho]] =
+    if shahokokuhoId > 0 then
+      DbShahokokuhoPrim.getShahokokuho(shahokokuhoId).unique.map(Some(_))
+    else None.pure[ConnectionIO]
+
+  private def optRoujin(roujinId: Int): ConnectionIO[Option[Roujin]] =
+    if roujinId > 0 then
+      DbRoujinPrim.getRoujin(roujinId).unique.map(Some(_))
+    else None.pure[ConnectionIO]
+
+  private def optKoukikourei(koukikoureiId: Int): ConnectionIO[Option[Koukikourei]] =
+    if koukikoureiId > 0 then
+      DbKoukikoureiPrim.getKoukikourei(koukikoureiId).unique.map(Some(_))
+    else None.pure[ConnectionIO]
+
+  private def optKouhi(kouhiId: Int): ConnectionIO[Option[Kouhi]] =
+    if kouhiId > 0 then
+      DbKouhiPrim.getKouhi(kouhiId).unique.map(Some(_))
+    else None.pure[ConnectionIO]
+
+  private def kouhiList(kouhiIds: List[Int]): ConnectionIO[List[Kouhi]] =
+    kouhiIds.map(DbKouhiPrim.getKouhi(_).unique).sequence
+
+  def getVisitEx(visitId: Int): ConnectionIO[VisitEx] =
+    for
+      visit <- DbVisitPrim.getVisit(visitId).unique
+      patient <- DbPatientPrim.getPatient(visit.patientId).unique
+      shahokokuho <- optShahokokuho(visit.shahokokuhoId)
+      roujin <- optRoujin(visit.roujinId)
+      koukikourei <- optKoukikourei(visit.koukikoureiId)
+      kouhiList <- kouhiList(visit.kouhiIds)
+      texts <- DbTextPrim.list
+    yield ???

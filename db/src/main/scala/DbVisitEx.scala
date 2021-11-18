@@ -21,32 +21,10 @@ trait DbVisitEx extends Mysql:
     """
 
   def getDrugEx(drugId: Int): IO[DrugEx] =
-    val op = (sql"""
-      select d.*, m.* from visit_drug as d inner join visit as v 
-        inner join iyakuhin_master_arch as m 
-        where d.drug_id = ${drugId} and d.visit_id = v.visit_id 
-        and d.d_iyakuhincode = m.iyakuhincode 
-        and """ ++ validAt(frag("date(v.v_datetime)"), frag("m")))
-      .query[(Drug, IyakuhinMaster)]
-      .unique
-      .map({ case (d, m) =>
-        DrugEx(d, m)
-      })
-    mysql(op)
+    mysql(DbVisitExPrim.getDrugEx(drugId).unique)
 
   def getShinryouEx(shinryouId: Int): IO[ShinryouEx] =
-    val op = (sql"""
-      select s.*, m.* from visit_shinryou as s inner join visit as v 
-        inner join shinryoukoui_master_arch as m 
-        where s.shinryou_id = ${shinryouId} and s.visit_id = v.visit_id 
-        and s.shinryoucode = m.shinryoucode 
-        and """ ++ validAt(frag("date(v.v_datetime)"), frag("m")))
-      .query[(Shinryou, ShinryouMaster)]
-      .unique
-      .map({ case (s, m) =>
-        ShinryouEx(s, m)
-      })
-    mysql(op)
+    mysql(DbVisitExPrim.getShinryouEx(shinryouId).unique)
 
   def getConductDrugEx(conductDrugId: Int): IO[ConductDrugEx] =
     mysql(DbVisitExPrim.getConductDrugEx(conductDrugId).unique)
@@ -62,3 +40,4 @@ trait DbVisitEx extends Mysql:
 
   def listConductEx(conductIds: List[Int]): IO[List[ConductEx]] =
     mysql(DbVisitExPrim.listConductEx(conductIds))
+    
