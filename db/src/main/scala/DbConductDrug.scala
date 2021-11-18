@@ -21,3 +21,6 @@ trait DbConductDrug extends Mysql:
 
   def listConductDrugForConduct(conductId: Int): IO[List[ConductDrug]] =
     mysql(Prim.listConductDrugForConduct(conductId))
+
+  def listConductDrugIdForConduct(conductId: Int): IO[List[Int]] =
+    mysql(Prim.listConductDrugIdForConduct(conductId))

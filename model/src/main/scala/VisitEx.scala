@@ -75,6 +75,22 @@ case class ConductEx(
     kizaiList: List[ConductKizaiEx] = List.empty
 )
 
+object ConductEx:
+  def apply(
+      c: Conduct,
+      drugs: List[ConductDrugEx],
+      shinryouList: List[ConductShinryouEx],
+      kizaiList: List[ConductKizaiEx]
+  ): ConductEx =
+    ConductEx(
+      c.conductId,
+      c.visitId,
+      c.kind,
+      drugs,
+      shinryouList,
+      kizaiList
+    )
+
 case class ConductDrugEx(
     conductDrugId: Int,
     conductId: Int,

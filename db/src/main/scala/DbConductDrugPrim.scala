@@ -15,8 +15,17 @@ import java.time.LocalTime
 import java.time.temporal.ChronoUnit
 
 object DbConductDrugPrim:
+  private val tConductDrug = Fragment.const("visit_conduct_drug")
+  private val cConductDrugId = Fragment.const("id")
+  private val cConductId = Fragment.const("visit_conduct_id")
   def listConductDrugForConduct(conductId: Int): ConnectionIO[List[ConductDrug]] =
     sql"""
-      select * from visit_conduct_drug where conduct_id = ${conductId} 
-      order by conduct_drug_id
+      select * from $tConductDrug where $cConductId = ${conductId} 
+      order by $cConductDrugId
     """.query[ConductDrug].to[List]
+
+  def listConductDrugIdForConduct(conductId: Int): ConnectionIO[List[Int]] =
+    sql"""
+      select $cConductDrugId from $tConductDrug where $cConductId = ${conductId} 
+      order by $cConductDrugId
+    """.query[Int].to[List]
