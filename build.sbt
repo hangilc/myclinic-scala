@@ -99,7 +99,7 @@ val utilJVM = util.jvm
 
 lazy val server = project
   .in(file("server"))
-  .dependsOn(db, modelJVM, utilJVM, appointAdmin, clinicopJVM, javalib)
+  .dependsOn(db, modelJVM, utilJVM, appointAdmin, clinicopJVM, rcpt, javalib)
   .settings(
     name := "server",
     libraryDependencies ++= Seq(
@@ -227,21 +227,9 @@ lazy val clinicop = crossProject(JVMPlatform, JSPlatform)
 val clinicopJVM = clinicop.jvm
 val clinicopJS = clinicop.js
 
-lazy val rcpt = crossProject(JVMPlatform, JSPlatform)
-  .crossType(CrossType.Pure)  
+lazy val rcpt = project
   .in(file("rcpt"))
-  //.dependsOn()
-  .jsConfigure(_ enablePlugins TzdbPlugin)
-  .jsSettings(
-    scalaJSUseMainModuleInitializer := false,
-    zonesFilter := { (z: String) => z == "Asia/Tokyo" },
-    libraryDependencies ++= Seq(
-      "io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion
-    )
-  )
-
-val rcptJVM = rcpt.jvm
-val rcptJS = rcpt.js
+  .dependsOn(javalib)
 
 lazy val javalib = project
   .in(file("javalib"))
