@@ -41,3 +41,5 @@ trait DbVisitEx extends Mysql:
   def listConductEx(conductIds: List[Int]): IO[List[ConductEx]] =
     mysql(DbVisitExPrim.listConductEx(conductIds))
     
+  def getVisitEx(visitId: Int): IO[VisitEx] =
+    mysql(DbVisitExPrim.getVisitEx(visitId))

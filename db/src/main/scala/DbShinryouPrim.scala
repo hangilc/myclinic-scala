@@ -19,3 +19,9 @@ object DbShinryouPrim:
     sql"""
       select * from visit_shinryou where visit_id = ${visitId} order by shinryou_id
     """.query[Shinryou].to[List]
+    
+  def listShinryouIdForVisit(visitId: Int): ConnectionIO[List[Int]] =
+    sql"""
+      select shinryou_id from visit_shinryou where visit_id = ${visitId} order by shinryou_id
+    """.query[Int].to[List]
+    

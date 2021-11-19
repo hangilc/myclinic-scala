@@ -15,7 +15,7 @@ import java.time.LocalTime
 import java.time.temporal.ChronoUnit
 
 object DbTextPrim:
-  def listTextIdForVisit(visitId: Int): ConnectionIO[List[Text]] =
+  def listTextForVisit(visitId: Int): ConnectionIO[List[Text]] =
     sql"""
-      select text_id from visit_text where visit_id = $visitId order by text_id
+      select * from visit_text where visit_id = $visitId order by text_id
     """.query[Text].to[List]

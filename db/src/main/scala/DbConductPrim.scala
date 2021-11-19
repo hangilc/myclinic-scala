@@ -24,6 +24,11 @@ object DbConductPrim:
       select * from $tConduct where $cVisitId = ${visitId} order by $cConductId
     """.query[Conduct].to[List]
 
+  def listConductIdForVisit(visitId: Int): ConnectionIO[List[Int]] =
+    sql"""
+      select * from $tConduct where $cVisitId = ${visitId} order by $cConductId
+    """.query[Int].to[List]
+
   def getConduct(conductId: Int): Query0[Conduct] =
     sql"""
       select * from $tConduct where $cConductId = $conductId

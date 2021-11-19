@@ -34,6 +34,9 @@ object DbVisitExPrim:
         DrugEx(d, m)
       })
 
+  def listDrugEx(drugIds: List[Int]): ConnectionIO[List[DrugEx]] =
+    drugIds.map(getDrugEx(_).unique).sequence
+
   def getShinryouEx(shinryouId: Int): Query0[ShinryouEx] =
     (sql"""
       select s.*, m.* from visit_shinryou as s inner join visit as v 
@@ -45,6 +48,9 @@ object DbVisitExPrim:
       .map({ case (s, m) =>
         ShinryouEx(s, m)
       })
+
+  def listShinryouEx(shinryouIds: List[Int]): ConnectionIO[List[ShinryouEx]] =
+    shinryouIds.map(getShinryouEx(_).unique).sequence
 
   def getConductDrugEx(conductDrugId: Int): Query0[ConductDrugEx] =
     (sql"""
@@ -150,5 +156,12 @@ object DbVisitExPrim:
       roujin <- optRoujin(visit.roujinId)
       koukikourei <- optKoukikourei(visit.koukikoureiId)
       kouhiList <- kouhiList(visit.kouhiIds)
-      texts <- DbTextPrim.list
-    yield ???
+      texts <- DbTextPrim.listTextForVisit(visitId)
+      drugIds <- DbDrugPrim.listDrugIdForVisit(visitId)
+      drugs <- listDrugEx(drugIds)
+      shinryouIds <- DbShinryouPrim.listShinryouIdForVisit(visitId)
+      shinryouList <- listShinryouEx(shinryouIds)
+      conductIds <- DbConductPrim.listConductIdForVisit(visitId)
+      conducts <- listConductEx(conductIds)
+    yield VisitEx(visit, patient, shahokokuho, roujin, koukikourei, kouhiList,
+    texts, drugs, shinryouList, conducts)

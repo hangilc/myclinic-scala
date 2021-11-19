@@ -18,4 +18,9 @@ object DbDrugPrim:
   def listDrugForVisit(visitId: Int): ConnectionIO[List[Drug]] =
     sql"""
       select * from visit_drug where visit_id = ${visitId} order by drug_id
-    """.query[Drug].to[List]
+    """.query[Drug].to[List]  
+
+  def listDrugIdForVisit(visitId: Int): ConnectionIO[List[Int]] =
+    sql"""
+      select drug_id from visit_drug where visit_id = ${visitId} order by drug_id
+    """.query[Int].to[List]

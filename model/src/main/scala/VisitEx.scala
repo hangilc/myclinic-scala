@@ -24,6 +24,32 @@ case class VisitEx(
     conducts: List[ConductEx] = List.empty
 )
 
+object VisitEx:
+  def apply(visit: Visit, patient: Patient, shahokokuho: Option[Shahokokuho], roujin: Option[Roujin],
+  koukikourei: Option[Koukikourei], kouhiList: List[Kouhi], texts: List[Text], drugs: List[DrugEx],
+  shinryouList: List[ShinryouEx], conducts: List[ConductEx]): VisitEx =
+    VisitEx(
+      visit.visitId,
+      visit.patientId,
+      visit.visitedAt,
+      visit.shahokokuhoId,
+      visit.roujinId,
+      visit.kouhi1Id,
+      visit.kouhi2Id,
+      visit.kouhi3Id,
+      visit.koukikoureiId,
+      visit.attributes,
+      patient,
+      shahokokuho,
+      roujin,
+      koukikourei,
+      kouhiList,
+      texts,
+      drugs,
+      shinryouList,
+      conducts
+    )
+
 case class DrugEx(
     drugId: Int,
     visitId: Int,
