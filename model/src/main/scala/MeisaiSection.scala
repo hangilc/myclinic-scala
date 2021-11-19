@@ -10,3 +10,18 @@ enum MeisaiSection(val label: String):
 	case Chuusha extends MeisaiSection("注射")
 	case Shochi extends MeisaiSection("処置")
 	case Sonota extends MeisaiSection("その他")
+
+object MeisaiSection:
+  trait Item:
+    def tanka: Int
+    def count: Int
+    def label: String
+    def total: Int = tanka * count
+
+  class ShinryouItem(shinryou: ShinryouEx, override val count: Int = 1) extends Item:
+    override def tanka: Int = shinryou.master.tensuu
+    override def label: String = shinryou.master.name
+    def shinryoucode: Int = shinryou.master.shinryoucode
+    def canMerge(that: ShinryouItem): Boolean =
+      shinryou.shinryoucode == that.shinryoucode
+
