@@ -232,7 +232,7 @@ val clinicopJS = clinicop.js
 
 lazy val rcpt = project
   .in(file("rcpt"))
-  .dependsOn(javalib)
+  .dependsOn(javalib, modelJVM)
 
 lazy val javalib = project
   .in(file("javalib"))
