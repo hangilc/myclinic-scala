@@ -17,9 +17,14 @@ import dev.myclinic.scala.clinicop.ClinicOperation
 import fs2.concurrent.Topic
 import org.http4s.websocket.WebSocketFrame
 import dev.myclinic.scala.model.jsoncodec.Implicits.given
+import dev.myclinic.java.{Config, HoukatsuKensa}
+import dev.myclinic.scala.rcpt.RcptVisit
 
 object MiscService extends DateTimeQueryParam:
   object dateDate extends QueryParamDecoderMatcher[LocalDate]("date")
+  object intVisitId extends QueryParamDecoderMatcher[Int]("visit-id")
+
+  given houkatsuKensa: HoukatsuKensa = (new Config).getHoukatsuKensa
 
   def routes(using topic: Topic[IO, WebSocketFrame]) = HttpRoutes.of[IO] {
     case GET -> Root / "resolve-clinic-operation" :? dateDate(date) =>
@@ -35,5 +40,12 @@ object MiscService extends DateTimeQueryParam:
           Map(items: _*)
         }
       Ok(op)
+
+    case GET -> Root / "get-meisai" :? intVisitId(visitId) =>
+      Ok({
+        for
+          visit <- Db.getVisitEx(visitId)
+        yield RcptVisit.getMeisai(visit)
+      })
 
   }

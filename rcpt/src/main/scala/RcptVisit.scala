@@ -1,27 +1,18 @@
 package dev.myclinic.scala.rcpt
 
-import dev.myclinic.scala.model.*
+import dev.myclinic.scala.model.{VisitEx, MeisaiSection, MeisaiSectionItem}
+import dev.myclinic.java.HoukatsuKensa
+import scala.collection.mutable.ListBuffer
 
 object RcptVisit:
-  def getMeisai(visit: VisitEx)(using houkatsuKensa: HoukatsuKensa): List[MeisaiSection] =
-    val simpleShinryouGroups = BufferList[SimpleShinryouGroup]()
-    val houkatsuKensaGroups = BufferList[SimpleShinryouGroup]()
-    def addShinryou(s: ShinryouEx): Unit =
-      val houkatsuKensaKind = HoukatsuKensaKind.fromCode(s.master.houkatsukensa)
-      if houkatsuKensaKind == HoukatsuKensaKind.NONE then
-        simpleShinryouGroups
-          .find(g => g.canAdd(s))
-          .fold[Unit](
-            simpleShinryouGroups :+ SimpleShinryouGroup(s)
-          )(
-            g => g.add(s)
-          )
-        houkatsuKensaGroups.find(g => g.canAdd(s))
-          .fold[Unit]({
-            val hg = HoukatsuKensaGroup(houkatsuKensa, visit.visitedAt.toLocalDate, houkatsuKensaKind)
-            hg.add(s)
-            houkatsuKensaGroups :+ hg
-          })(hg => hg.add(s))
-    if !visit.drugs.isEmpty then
-      throw new RuntimeException("visit drugs not supported")
-    visit.shinryouList.foreach(s => addShinryou(s))
+  def getMeisai(visit: VisitEx)(using
+      houkatsuKensa: HoukatsuKensa
+  ): List[(MeisaiSection, List[MeisaiSectionItem])] =
+    val items: ListBuffer[MeisaiUnit] = ListBuffer()
+    if !visit.drugs.isEmpty then new RuntimeException("visit drug is not supported")
+    visit.shinryouList.foreach(s => items :+ MeisaiUnit.fromShinryou(s))
+    visit.conducts.foreach(c => items :+ MeisaiUnit.fromConduct(c))
+    items.toList.groupBy(_.section).toList.sortBy(_._1.ordinal)
+    .map({
+      case (sect, units) => (sect, units.map(_.toItem))
+    })

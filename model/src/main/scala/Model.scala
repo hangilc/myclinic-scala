@@ -6,6 +6,8 @@ import java.time.LocalDateTime
 import dev.myclinic.scala.util.DateTimeOrdering.{*, given}
 import scala.math.Ordered.orderingToOrdered
 
+case class ValidUpto(value: Option[LocalDate])
+
 case class AppointTime(
     appointTimeId: Int,
     date: LocalDate,
@@ -197,7 +199,7 @@ case class IyakuhinMaster(
   kouhatsu: String,
   zaikei: String,
   validFrom: LocalDate,
-  validUpto: Option[LocalDate]
+  validUpto: ValidUpto
 ):
   def yakka: Double = yakkaStore.toDouble
 
@@ -211,7 +213,7 @@ case class ShinryouMaster(
   oushinkubun: String,
   kensagroup: String,
   validFrom: LocalDate,
-  validUpto: Option[LocalDate]
+  validUpto: ValidUpto
 ):
   def tensuu: Int = tensuuStore.toDouble.toInt
 
@@ -222,7 +224,7 @@ case class KizaiMaster(
   unit: String,
   kingakuStore: String,
   validFrom: LocalDate,
-  validUpto: Option[LocalDate]
+  validUpto: ValidUpto
 ):
   def kingaku: Double = kingakuStore.toDouble
 
@@ -234,7 +236,7 @@ case class Shahokokuho(
   hihokenshaBangou: String,
   honnin: Int,
   validFrom: LocalDate,
-  validUpto: Option[LocalDate],
+  validUpto: ValidUpto,
   kourei: Int,
   edaban: String
 )
@@ -246,7 +248,7 @@ case class Roujin(
   jukyuusha: Int,
   futanWari: Int,
   validFrom: LocalDate,
-  validUpt: Option[LocalDate]
+  validUpt: ValidUpto
 )
 
 case class Koukikourei(
@@ -256,7 +258,7 @@ case class Koukikourei(
   hihokenshaBangou: String,
   futanWari: Int,
   validFrom: LocalDate,
-  validUpt: Option[LocalDate]
+  validUpt: ValidUpto
 )
 
 case class Kouhi(
@@ -264,7 +266,7 @@ case class Kouhi(
   futansha: Int,
   jukyuusha: Int,
   validFrom: LocalDate,
-  validUpto: Option[LocalDate],
+  validUpto: ValidUpto,
   patientId: Int
 )
 

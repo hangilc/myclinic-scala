@@ -4,6 +4,8 @@ import io.circe._
 import io.circe.syntax._
 import io.circe.generic.semiauto._
 import dev.myclinic.scala.model._
+import scala.util.Try
+import java.time.LocalDate
 
 trait Model extends DateTime with WaitStateCodec:
 
@@ -136,28 +138,33 @@ trait Model extends DateTime with WaitStateCodec:
   given Decoder[MeisaiSectionItem] = deriveDecoder[MeisaiSectionItem]
 
   given Encoder[MeisaiSection] = new Encoder[MeisaiSection]{
-    def apply(m: MeisaiSection): Json = 
-      Json.obj(
-        "label" -> Json.fromString(m.label),
-        "items" -> m.items.asJson
-      )
+    def apply(m: MeisaiSection): Json = Json.fromString(m.label)
   }
   given Decoder[MeisaiSection] = new Decoder[MeisaiSection]{
     def apply(c: HCursor): Decoder.Result[MeisaiSection] =
       for
         label <- c.downField("label").as[String]
-        items <- c.downField("items").as[List[MeisaiSectionItem]]
       yield {
         label match {
-          case "初・再診料" => MeisaiSection.ShoshinSaisin(items)
-          case "医学管理等" => MeisaiSection.IgakuKanri(items)
-          case "在宅医療" => MeisaiSection.Zaitaku(items)
-          case "検査" => MeisaiSection.Kensa(items)
-          case "画像診断" => MeisaiSection.Gazou(items)
-          case "投薬" => MeisaiSection.Touyaku(items)
-          case "注射" => MeisaiSection.Chuusha(items)
-          case "処置" => MeisaiSection.Shochi(items)
-          case "その他" => MeisaiSection.Sonota(items)
+          case "初・再診料" => MeisaiSection.ShoshinSaisin
+          case "医学管理等" => MeisaiSection.IgakuKanri
+          case "在宅医療" => MeisaiSection.Zaitaku
+          case "検査" => MeisaiSection.Kensa
+          case "画像診断" => MeisaiSection.Gazou
+          case "投薬" => MeisaiSection.Touyaku
+          case "注射" => MeisaiSection.Chuusha
+          case "処置" => MeisaiSection.Shochi
+          case "その他" => MeisaiSection.Sonota
         }
       }
   }
+
+  given Encoder[ValidUpto] = Encoder.encodeString.contramap(validUpto => validUpto.value match {
+    case Some(date) => sqlDateFormatter.format(date)
+    case None => "0000-00-00"
+  })
+
+  given Decoder[ValidUpto] = Decoder.decodeString.emapTry(str => Try{
+    if str == "0000-00-00" then ValidUpto(None)
+    else ValidUpto(Some(LocalDate.parse(str, sqlDateFormatter)))
+  })

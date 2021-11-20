@@ -6,7 +6,7 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
-import dev.myclinic.scala.model.{Sex, WaitState}
+import dev.myclinic.scala.model.{Sex, WaitState, ValidUpto}
 import java.time.LocalDateTime
 
 private object LocalDateMapping:
@@ -81,13 +81,11 @@ object DoobieMapping:
   implicit val waitStateGet: Get[WaitState] = Get[Int].map(WaitState.fromCode _)
   implicit val waitStatePut: Put[WaitState] = Put[Int].tcontramap(_.code)
 
-  implicit val optionLocalDateGet: Get[Option[LocalDate]] =
-    Get[String].map(date =>
-      if (date == null || date == "0000-00-00") then None
-      else Some(LocalDateMapping.fromString(date))
-    )
-  implicit val optionLocalDatePut: Put[Option[LocalDate]] =
-    Put[String].tcontramap({
-      case Some(date) => LocalDateMapping.toString(date)
-      case None => "0000-00-00"
-    })
+  implicit val validUptoGet: Get[ValidUpto] = Get[String].map(str => {
+    if str == "0000-00-00" then ValidUpto(None)
+    else ValidUpto(Some(LocalDateMapping.fromString(str)))
+  })
+  implicit val validUptoPut: Put[ValidUpto] = Put[String].tcontramap({
+    case ValidUpto(Some(date)) => LocalDateMapping.toString(date)
+    case ValidUpto(None) => "0000-00-00"
+  })

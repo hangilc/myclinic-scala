@@ -10,7 +10,7 @@ trait RcptGroup:
 
 class SimpleShinryouGroup(shinryou: ShinryouEx) extends RcptGroup:
   private var count: Int = 1
-  def canAdd(that: ShnryouEx): Boolean = shinryou.master.shinryoucode == that.master.shinryoucode
+  def canAdd(that: ShinryouEx): Boolean = shinryou.master.shinryoucode == that.master.shinryoucode
   def add(that: ShinryouEx): Unit = count += 1
   def toItem(): MeisaiSectionItem =
     MeisaiSectionItem(shinryou.master.tensuu, count, shinryou.master.name)
