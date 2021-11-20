@@ -131,3 +131,26 @@ trait Model extends DateTime with WaitStateCodec:
 
   given Encoder[VisitEx] = deriveEncoder[VisitEx]
   given Decoder[VisitEx] = deriveDecoder[VisitEx]
+
+  given Encoder[MeisaiSectionItem] = deriveEncoder[MeisaiSectionItem]
+  given Decoder[MeisaiSectionItem] = deriveDecoder[MeisaiSectionItem]
+
+  given Encoder[MeisaiSection] = new Encoder[MeisaiSection]{
+    def apply(m: MeisaiSection): Json = 
+      Json.obj(
+        "label" -> Json.fromString(m.label),
+        "items" -> m.items.asJson
+      )
+  }
+  given Decoder[MeisaiSection] = new Decoder[MeisaiSection]{
+    def apply(c: HCursor): Decoder.Result[MeisaiSection] =
+      for
+        label <- c.downField("label").as[String]
+        items <- c.downField("items").as[List[MeisaiSectionItem]]
+      yield {
+        label match {
+          case "初・再診料" => MeisaiSection.ShoshinSaisin(items)
+          case _ => ???
+        }
+      }
+  }
