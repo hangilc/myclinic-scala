@@ -150,7 +150,14 @@ trait Model extends DateTime with WaitStateCodec:
       yield {
         label match {
           case "初・再診料" => MeisaiSection.ShoshinSaisin(items)
-          case _ => ???
+          case "医学管理等" => MeisaiSection.IgakuKanri(items)
+          case "在宅医療" => MeisaiSection.Zaitaku(items)
+          case "検査" => MeisaiSection.Kensa(items)
+          case "画像診断" => MeisaiSection.Gazou(items)
+          case "投薬" => MeisaiSection.Touyaku(items)
+          case "注射" => MeisaiSection.Chuusha(items)
+          case "処置" => MeisaiSection.Shochi(items)
+          case "その他" => MeisaiSection.Sonota(items)
         }
       }
   }
