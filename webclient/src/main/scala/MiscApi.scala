@@ -48,3 +48,6 @@ object MiscApi extends ApiBase:
 
     def listConductKizaiForVisit(conductId: Int): Future[List[ConductKizai]] =
       get("list-conduct-kizai-for-visit", Params("visit-id" -> conductId))
+
+    def getMeisai(visitId: Int): Future[Meisai] =
+      get("get-meisai", Params("visit-id" -> visitId))

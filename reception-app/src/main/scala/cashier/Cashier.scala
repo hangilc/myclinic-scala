@@ -75,7 +75,9 @@ class Cashier(using publishers: EventPublishers):
             e => e(birthday),
             e => e(s"${age}才"),
             e => {
-              if wq.waitState == WaitState.WaitCashier then e(button("会計"))
+              if wq.waitState == WaitState.WaitCashier then e(button("会計")(
+                onclick := (() => doCashier(wq.visitId))
+              ))
               if wq.waitState == WaitState.WaitExam then
                 e(a("削除", onclick := (() => doDelete(visit, patient))))
             }
@@ -93,3 +95,10 @@ class Cashier(using publishers: EventPublishers):
           case Failure(ex) => ShowMessage.showError(ex.getMessage)
         }
     })
+
+  private def doCashier(visitId: Int): Unit =
+    for
+      meisai <- Api.getMeisai(visitId)
+    yield {
+      println(("meisai", meisai))
+    }

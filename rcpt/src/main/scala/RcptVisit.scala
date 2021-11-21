@@ -4,6 +4,7 @@ import dev.myclinic.scala.model.{
   VisitEx,
   MeisaiSection,
   MeisaiSectionItem,
+  MeisaiSectionData,
   Meisai
 }
 import dev.myclinic.java.{HoukatsuKensa, HokenUtil, RcptCalc}
@@ -29,7 +30,7 @@ object RcptVisit:
       .toList
       .sortBy(_._1.ordinal)
       .map({ case (sect, units) =>
-        (sect, units.map(_.toItem))
+        MeisaiSectionData(sect, units.map(_.toItem))
       })
     val futanWari: Int = calcFutanWari(visit)
     val calc: RcptCalc = new RcptCalc()

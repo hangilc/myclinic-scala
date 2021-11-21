@@ -143,7 +143,7 @@ trait Model extends DateTime with WaitStateCodec:
   given Decoder[MeisaiSection] = new Decoder[MeisaiSection]{
     def apply(c: HCursor): Decoder.Result[MeisaiSection] =
       for
-        label <- c.downField("label").as[String]
+        label <- c.as[String]
       yield {
         label match {
           case "初・再診料" => MeisaiSection.ShoshinSaisin
@@ -158,6 +158,9 @@ trait Model extends DateTime with WaitStateCodec:
         }
       }
   }
+
+  given Encoder[MeisaiSectionData] = deriveEncoder[MeisaiSectionData]
+  given Decoder[MeisaiSectionData] = deriveDecoder[MeisaiSectionData]
 
   given Encoder[Meisai] = deriveEncoder[Meisai]
   given Decoder[Meisai] = deriveDecoder[Meisai]

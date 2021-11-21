@@ -295,17 +295,16 @@ case class Kouhi(
     patientId: Int
 )
 
+case class MeisaiSectionData(section: MeisaiSection, entries: List[MeisaiSectionItem]):
+  def subtotal: Int = entries.map(_.total).sum
+
 case class Meisai(
-    items: List[(MeisaiSection, List[MeisaiSectionItem])],
+    items: List[MeisaiSectionData],
     futanWari: Int,
     charge: Int
 ):
   def totalTen: Int = Meisai.calcTotalTen(items)
 
 object Meisai:
-  def calcTotalTen(items: List[(MeisaiSection, List[MeisaiSectionItem])]): Int =
-    items
-      .map({ case (_, sectItems) =>
-        sectItems.map(_.total).sum
-      })
-      .sum
+  def calcTotalTen(items: List[MeisaiSectionData]): Int =
+    items.map(_.subtotal).sum
