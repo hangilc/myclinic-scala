@@ -7,8 +7,8 @@ import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
 import scala.language.implicitConversions
 import dev.myclinic.scala.webclient.Api
-import dev.myclinic.scala.validator.AppointTimeValidator.*
-import dev.myclinic.scala.validator.AppointTimeValidator
+import dev.myclinic.scala.validator.AppointTimeValidator.{*, given}
+import cats.syntax.*
 
 class ConvertAppointTimeDialog(appointTime: AppointTime):
   val errBox = ErrorBox()
@@ -21,8 +21,8 @@ class ConvertAppointTimeDialog(appointTime: AppointTime):
     div(
       errBox.ele,
       Form.rows(
-        span("kind") -> kindInput(attr("type") := "text"),
-        span("capacity") -> capacityInput(attr("type") := "text")
+        span("種類") -> kindInput(attr("type") := "text"),
+        span("人数") -> capacityInput(attr("type") := "text")
       )
     ),
     div(
@@ -43,8 +43,7 @@ class ConvertAppointTimeDialog(appointTime: AppointTime):
       validateUntilTimeValue(appointTime.untilTime),
       validateKindInput(kindInput.value),
       validateCapacityInput(capacityInput.value)
-    )
-    toEither(v) match {
+    ).asEither match {
       case Right(at) => { Api.updateAppointTime(at); dialog.close() }
-      case Left(msg) => errBox.show(msg)
+      case Left(err) => errBox.show(err)
     }

@@ -102,7 +102,7 @@ object MakeAppointUI:
               "",
               Set.empty,
               patientOpt
-            ).toEither() match {
+            ).asEither match {
               case Right(newAppoint) => Api.registerAppoint(newAppoint)
               case Left(msg) => Future.failed(new Exception(msg))
             }
@@ -125,7 +125,7 @@ object MakeAppointUI:
                 tagPart.tags,
                 patientOption
               )
-              .toEither()
+              .asEither
           }
 
   class NamePart(setPatient: Patient => Unit)

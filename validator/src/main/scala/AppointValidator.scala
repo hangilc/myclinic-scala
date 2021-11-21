@@ -28,7 +28,7 @@ object AppointValidator:
   type Result[T] = ValidatedNec[AppointError, T]
 
   extension [T](r: Result[T])
-    def toEither(): Either[String, T] = Validators.toEither(r, _.message)
+    def asEither: Either[String, T] = Validators.toEither(r, _.message)
 
   def validateAppointIdForEnter(
       appointId: Int

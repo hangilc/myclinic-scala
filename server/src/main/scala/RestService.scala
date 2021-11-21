@@ -62,6 +62,16 @@ object RestService extends DateTimeQueryParam:
     case GET -> Root / "list-appoint-times-for-date" :? dateDate(date) =>
       Ok(Db.listAppointTimesForDate(date))
 
+    case req @ POST -> Root / "add-appoint-time" => {
+      Ok({
+        for
+          appointTime <- req.as[AppointTime]
+          event <- Db.createAppointTime(appointTime)
+          _ <- publish(event)
+        yield true
+      })
+    }
+
     case req @ POST -> Root / "update-appoint-time" => {
       val op = for
         appointTime <- req.as[AppointTime]

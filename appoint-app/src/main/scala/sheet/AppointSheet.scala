@@ -16,8 +16,6 @@ import scala.util.Success
 import scala.concurrent.Future
 import scala.collection.mutable
 import dev.myclinic.scala.webclient.Api
-//import dev.myclinic.scala.event.{ModelEventPublishers => Pub}
-//import dev.myclinic.scala.event.ModelEventSubscriberController
 import dev.myclinic.scala.web.appbase.{
   EventPublishers,
   EventSubscriberController
@@ -106,6 +104,8 @@ class AppointSheet(using eventPublishers: EventPublishers):
       case Some(from, upto) => from <= date && date <= upto
       case None             => false
     }
+
+  def modifyColumn(col: AppointColumn): AppointColumn = col
 
   object TopMenu:
     val topMenuBox: HTMLElement = span()
@@ -205,7 +205,8 @@ class AppointSheet(using eventPublishers: EventPublishers):
 
     def addColumn(col: AppointColumn): Unit =
       col.ele(margin := "0 0.5rem")
-      columns = sortedAppointColumn.insert(col, columns, columnWrapper)
+      val modified = modifyColumn(col)
+      columns = sortedAppointColumn.insert(modified, columns, columnWrapper)
 
     private def propagateToColumn(
         appoint: Appoint,

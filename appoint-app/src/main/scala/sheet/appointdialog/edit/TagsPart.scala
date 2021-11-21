@@ -99,7 +99,7 @@ class TagsPart(var appoint: Appoint):
           patientOption <- Api.findPatient(appoint.patientId)
           validated = AppointValidator
             .validateForUpdate(newAppoint, patientOption)
-            .toEither()
+            .asEither
           ok <- validated match {
             case Right(appoint) => Api.updateAppoint(appoint)
             case Left(msg) => {

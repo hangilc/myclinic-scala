@@ -38,7 +38,7 @@ trait SearchResult extends ValuePart with BaseSearchResult:
       yield {
         AppointValidator
           .validateForUpdate(newAppoint, patientOption)
-          .toEither() match {
+          .asEither match {
           case Right(appoint) => {
             (for _ <- Api.updateAppoint(appoint)
             yield cb()).catchErr

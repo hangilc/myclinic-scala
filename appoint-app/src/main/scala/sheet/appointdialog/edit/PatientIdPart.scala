@@ -86,7 +86,7 @@ class PatientIdPart(var appoint: Appoint):
 
     def onEnter(): Unit =
       val patientIdResult = AppointValidator.validatePatientId(input.value.trim)
-      patientIdResult.toEither() match {
+      patientIdResult.asEither match {
         case Right(patientIdValue) => {
           if patientId == patientIdValue then changeValuePartTo(Disp())
           else
@@ -97,7 +97,7 @@ class PatientIdPart(var appoint: Appoint):
               val newAppoint = appoint.copy(patientId = patientIdValue)
               AppointValidator
                 .validateForUpdate(newAppoint, patientOption)
-                .toEither() match {
+                .asEither match {
                 case Right(newAppoint) => {
                   Api.updateAppoint(newAppoint)
                   changeValuePartTo(Disp())
@@ -112,7 +112,7 @@ class PatientIdPart(var appoint: Appoint):
 
     def onSearchClick(): Unit =
       initWorkarea()
-      AppointValidator.validatePatientId(input.value).toEither() match {
+      AppointValidator.validatePatientId(input.value).asEither match {
         case Right(patientId) => {
           (for patientOption <- Api.findPatient(patientId)
           yield populateSearchResult(

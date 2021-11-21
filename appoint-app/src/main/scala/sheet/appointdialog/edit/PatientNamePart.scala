@@ -99,7 +99,7 @@ class PatientNamePart(var appoint: Appoint):
         yield {
           AppointValidator
             .validateForUpdate(newAppoint, patientOption)
-            .toEither() match {
+            .asEither match {
             case Right(appoint) => {
               Api.updateAppoint(appoint)
               changeValuePartTo(Disp())

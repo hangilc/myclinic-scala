@@ -31,6 +31,9 @@ object AppointTimeValidator:
 
   type Result[T] = ValidatedNec[AppointTimeError, T]
 
+  extension [T](r: Result[T])
+    def asEither: Either[String, T] = Validators.toEither(r, _.message)
+
   def validateAppointTimeIdForCreate(appointTimeId: Int): Result[Int] =
     condNec(appointTimeId == 0, appointTimeId, NonZeroAppointTimeIdError)
 
@@ -52,10 +55,12 @@ object AppointTimeValidator:
   def validateUntilTimeValue(time: LocalTime): Result[LocalTime] =
     validNec(time)
 
-  def validateKindInput(input: String): ValidatedNec[AppointTimeError, String] =
+  def validateKindInput(input: String): Result[String] =
     nonEmpty(input, KindEmptyError)
 
-  def validateCapacityInput(input: String): ValidatedNec[AppointTimeError, Int] =
+  def validateCapacityInput(
+      input: String
+  ): Result[Int] =
     nonEmpty(input, CapacityEmptyError)
       .andThen(s => isInt(s, CapacityNumberFormatError))
       .andThen(i => validateCapacityValue(i))
@@ -71,9 +76,6 @@ object AppointTimeValidator:
       TimesOrderError
     )
 
-  def toEither(validated: Result[AppointTime]): Either[String, AppointTime] =
-    Validators.toEither(validated, _.message)
-  
   def validateForUpdate(
       appointTimeId: Int,
       dateValidate: Result[LocalDate],
@@ -91,3 +93,20 @@ object AppointTimeValidator:
       capacityValidate
     ).mapN(AppointTime.apply)
     r.andThen(a => validateTimes(a))
+
+  def validateForEnter(
+      date: LocalDate,
+      fromTimeValidate: Result[LocalTime],
+      untilTimeValidate: Result[LocalTime],
+      kindValidate: Result[String],
+      capacityValidate: Result[Int]
+  ): Result[AppointTime] =
+    (
+      validNec(0),
+      validNec(date),
+      fromTimeValidate,
+      untilTimeValidate,
+      kindValidate,
+      capacityValidate
+    ).mapN(AppointTime.apply)
+      .andThen(a => validateTimes(a))

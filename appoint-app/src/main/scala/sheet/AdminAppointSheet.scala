@@ -10,6 +10,7 @@ import scala.language.implicitConversions
 import org.scalajs.dom.raw.MouseEvent
 import dev.myclinic.scala.webclient.Api
 import dev.myclinic.scala.web.appbase.EventPublishers
+import java.time.LocalDate
 
 class AdminAppointSheet(using EventPublishers) extends AppointSheet:
   val cog = Icons.cog(color = "gray")(Icons.defaultStyle)
@@ -29,4 +30,17 @@ class AdminAppointSheet(using EventPublishers) extends AppointSheet:
     dateRange.map {
       case (from, upto) => Api.fillAppointTimes(from, upto)
     }
+
+  override def modifyColumn(col: AppointColumn): AppointColumn =
+    val modified = super.modifyColumn(col)
+    modified.dateElement(oncontextmenu := (event => onDateContextMenu(event, modified.date)))
+    modified
+
+  def onDateContextMenu(event: MouseEvent, date: LocalDate): Unit =
+    ContextMenu(List(
+      "予約枠追加" -> (() => doAddAppointTime(date))
+    )).open(event)
+
+  def doAddAppointTime(date: LocalDate): Unit =
+    AddAppointTimeDialog(date).open()
     
