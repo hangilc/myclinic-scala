@@ -1,7 +1,7 @@
 package dev.myclinic.scala.rcpt
 
 import dev.myclinic.scala.model.*
-import dev.myclinic.java.{HoukatsuKensa, HoukatsuKensaKind}
+import dev.myclinic.java.{HoukatsuKensa, HoukatsuKensaKind, MyclinicConsts}
 import scala.collection.mutable.ListBuffer
 import java.time.LocalDate
 import scala.jdk.OptionConverters.*
@@ -22,7 +22,11 @@ object MeisaiUnit:
   ): MeisaiUnit =
     val houkatsuKind = HoukatsuKensaKind.fromCode(shinryou.master.houkatsukensa)
     houkatsuKind match {
-      case HoukatsuKensaKind.NONE => SimpleShinryouUnit(shinryou)
+      case HoukatsuKensaKind.NONE => {
+        val section: MeisaiSection =
+          Shuukei.shuukeisakiToMeisaiSection(shinryou.master.shuukeisaki)
+        SimpleShinryouUnit(section, shinryou.master)
+      }
       case _ =>
         HoukatsuKensaUnit(
           houkatsuKind,
@@ -30,13 +34,20 @@ object MeisaiUnit:
           List(shinryou)
         )
     }
-  def fromConduct(conduct: ConductEx): MeisaiUnit =
-    ???
+  def fromConduct(conduct: ConductEx): List[MeisaiUnit] =
+    val section: MeisaiSection =
+      if conduct.kind == MyclinicConsts.ConductKindGazou then
+        MeisaiSection.Gazou
+      else MeisaiSection.Shochi
+    conduct.shinryouList.map(s => SimpleShinryouUnit(section, s.master))
 
-case class SimpleShinryouUnit(shinryou: ShinryouEx, count: Int = 1)
-    extends MeisaiUnit:
-  def tanka: Int = shinryou.master.tensuu
-  def label: String = shinryou.master.name
+case class SimpleShinryouUnit(
+    section: Meisaisection,
+    master: ShinryouMaster,
+    count: Int = 1
+) extends MeisaiUnit:
+  def tanka: Int = master.tensuu
+  def label: String = master.name
   def merge(that: MeisaiUnit): Option[MeisaiUnit] =
     that match {
       case u: SimpleShinryouUnit =>
@@ -45,9 +56,7 @@ case class SimpleShinryouUnit(shinryou: ShinryouEx, count: Int = 1)
         else None
       case _ => None
     }
-  def section: MeisaiSection =
-    Shuukei.shuukeisakiToMeisaiSection(shinryou.master.shuukeisaki)
-  def shinryoucode: Int = shinryou.master.shinryoucode
+  def shinryoucode: Int = master.shinryoucode
 
 case class HoukatsuKensaUnit(
     kind: HoukatsuKensaKind,
@@ -69,3 +78,8 @@ case class HoukatsuKensaUnit(
       case _ => None
     }
   def section: MeisaiSection = MeisaiSection.Kensa
+
+case class ConductDrugUnit(section: MeisaiSection, drug: ConductDrugEx, val count: Int = 1)
+    extends MeisaiUnit:
+  def tanka: Int = 
+    val kingaku: Double = drug.m

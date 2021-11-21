@@ -16,8 +16,7 @@ object RcptVisit:
       units = add(u, units)
     })
     visit.conducts.foreach(c => {
-      val u = MeisaiUnit.fromConduct(c)
-      units = add(u, units)
+      MeisaiUnit.fromConduct(c).foreach(u => { units = add(u, units) })
     })
     val items = units
       .groupBy(_.section)
@@ -32,13 +31,16 @@ object RcptVisit:
     Meisai(items, futanWari, calc.calcCharge(totalTen, futanWari))
 
   private def add(unit: MeisaiUnit, repo: List[MeisaiUnit]): List[MeisaiUnit] =
+    val section: MeisaiSection = unit.section
     repo match {
       case Nil => List(unit)
       case h :: t =>
-        h.merge(unit) match {
-          case Some(merged) => merged :: t
-          case None         => h :: add(unit, t)
-        }
+        if h.section == section then
+          h.merge(unit) match {
+            case Some(merged) => merged :: t
+            case None         => h :: add(unit, t)
+          }
+        else h :: add(unit, t)
     }
 
   def calcFutanWari(visit: VisitEx): Int =
