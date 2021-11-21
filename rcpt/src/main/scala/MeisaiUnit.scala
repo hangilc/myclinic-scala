@@ -27,8 +27,7 @@ object MeisaiUnit:
         HoukatsuKensaUnit(
           houkatsuKind,
           at,
-          List(shinryou),
-          1
+          List(shinryou)
         )
     }
   def fromConduct(conduct: ConductEx): MeisaiUnit =
@@ -53,8 +52,7 @@ case class SimpleShinryouUnit(shinryou: ShinryouEx, count: Int = 1)
 case class HoukatsuKensaUnit(
     kind: HoukatsuKensaKind,
     at: LocalDate,
-    items: List[ShinryouEx],
-    val count: Int
+    items: List[ShinryouEx]
 )(using houkatsuKensa: HoukatsuKensa)
     extends MeisaiUnit:
   def tanka: Int =
@@ -62,11 +60,12 @@ case class HoukatsuKensaUnit(
       case Some(ten) => ten
       case None      => items.map(_.master.tensuu).sum
     }
+  def count: Int = 1
   def label: String = items.map(_.master.name).mkString("、")
   def merge(that: MeisaiUnit): Option[MeisaiUnit] =
     that match {
-      case HoukatsuKensaUnit(k, a, is, c) if k == kind && a == at =>
-        Some(HoukatsuKensaUnit(kind, at, items ++ is, count + c))
+      case HoukatsuKensaUnit(k, a, is) if k == kind && a == at =>
+        Some(HoukatsuKensaUnit(kind, at, items ++ is))
       case _ => None
     }
   def section: MeisaiSection = MeisaiSection.Kensa

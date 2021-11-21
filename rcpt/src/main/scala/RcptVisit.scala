@@ -1,13 +1,13 @@
 package dev.myclinic.scala.rcpt
 
-import dev.myclinic.scala.model.{VisitEx, MeisaiSection, MeisaiSectionItem}
-import dev.myclinic.java.{HoukatsuKensa, HokenUtil}
+import dev.myclinic.scala.model.{VisitEx, MeisaiSection, MeisaiSectionItem, Meisai}
+import dev.myclinic.java.{HoukatsuKensa, HokenUtil, RcptCalc}
 import java.time.LocalDate
 
 object RcptVisit:
   def getMeisai(visit: VisitEx)(using
       houkatsuKensa: HoukatsuKensa
-  ): List[(MeisaiSection, List[MeisaiSectionItem])] =
+  ): Meisai =
     if !visit.drugs.isEmpty then
       new RuntimeException("visit drug is not supported")
     var units: List[MeisaiUnit] = List.empty
@@ -19,13 +19,17 @@ object RcptVisit:
       val u = MeisaiUnit.fromConduct(c)
       units = add(u, units)
     })
-    units
+    val items = units
       .groupBy(_.section)
       .toList
       .sortBy(_._1.ordinal)
       .map({ case (sect, units) =>
         (sect, units.map(_.toItem))
       })
+    val futanWari: Int = calcFutanWari(visit)
+    val calc: RcptCalc = new RcptCalc()
+    val totalTen: Int = Meisai.calcTotalTen(items)
+    Meisai(items, futanWari, calc.calcCharge(totalTen, futanWari))
 
   private def add(unit: MeisaiUnit, repo: List[MeisaiUnit]): List[MeisaiUnit] =
     repo match {
