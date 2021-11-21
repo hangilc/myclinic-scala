@@ -159,6 +159,9 @@ trait Model extends DateTime with WaitStateCodec:
       }
   }
 
+  given Encoder[Meisai] = deriveEncoder[Meisai]
+  given Decoder[Meisai] = deriveDecoder[Meisai]
+
   given Encoder[ValidUpto] = Encoder.encodeString.contramap(validUpto => validUpto.value match {
     case Some(date) => sqlDateFormatter.format(date)
     case None => "0000-00-00"

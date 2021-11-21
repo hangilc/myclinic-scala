@@ -12,4 +12,4 @@ enum MeisaiSection(val label: String):
   case Sonota extends MeisaiSection("その他")
 
 case class MeisaiSectionItem(tanka: Int, count: Int, label: String):
-  def toal: Int = tanka * count
+  def total: Int = tanka * count

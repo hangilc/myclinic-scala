@@ -5,6 +5,10 @@ import java.time.LocalTime
 import java.time.LocalDateTime
 import dev.myclinic.scala.util.DateTimeOrdering.{*, given}
 import scala.math.Ordered.orderingToOrdered
+import io.circe.*
+import io.circe.syntax.*
+import io.circe.parser.decode
+import io.circe.generic.semiauto._
 
 case class ValidUpto(value: Option[LocalDate])
 
@@ -114,6 +118,10 @@ object WaitState:
 
 case class Wqueue(visitId: Int, waitState: WaitState)
 
+case class VisitAttributes(
+  val futanWari: Option[Int] = None
+)
+
 case class Visit(
     visitId: Int,
     patientId: Int,
@@ -124,9 +132,25 @@ case class Visit(
     kouhi2Id: Int,
     kouhi3Id: Int,
     koukikoureiId: Int,
-    attributes: Option[String]
+    attributesStore: Option[String]
 ):
   def kouhiIds: List[Int] = List(kouhi1Id, kouhi2Id, kouhi3Id).filter(_ > 0)
+  given Decoder[VisitAttributes] = deriveDecoder[VisitAttributes]
+  def attributes: VisitAttributes =
+    attributesStore match {
+      case None => VisitAttributes()
+      case Some(src) => decode(src) match {
+        case Right(a) => a
+        case Left(ex) => throw ex
+      }
+    }
+  def futanWariOverride: Option[Int] =
+    attributes.futanWari
+
+object Visit:
+  given Encoder[VisitAttributes] = deriveEncoder[VisitAttributes]
+  def encodeAttributes(value: VisitAttributes): String =
+    value.asJson.toString
 
 case class Text(
   textId: Int,
@@ -269,5 +293,15 @@ case class Kouhi(
   validUpto: ValidUpto,
   patientId: Int
 )
+
+case class Meisai(
+  items: List[(MeisaiSection, List[MeisaiSectionItem])],
+  futanWari: Int,
+  charge: Int
+):
+  def totalTen: Int = items.map({
+    case (_, sectItems) => sectItems.map(_.total).sum
+  }).sum
+
 
 

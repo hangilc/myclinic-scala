@@ -12,7 +12,7 @@ case class VisitEx(
     kouhi2Id: Int,
     kouhi3Id: Int,
     koukikoureiId: Int,
-    attributes: Option[String],
+    attributesStore: Option[String],
     patient: Patient,
     shahokokuho: Option[Shahokokuho] = None,
     roujin: Option[Roujin] = None,
@@ -22,12 +22,34 @@ case class VisitEx(
     drugs: List[DrugEx] = List.empty,
     shinryouList: List[ShinryouEx] = List.empty,
     conducts: List[ConductEx] = List.empty
-)
+):
+  def toVisit: Visit =
+    Visit(
+      visitId,
+      patientId,
+      visitedAt,
+      shahokokuhoId,
+      roujinId,
+      kouhi1Id,
+      kouhi2Id,
+      kouhi3Id,
+      koukikoureiId,
+      attributesStore
+    )
 
 object VisitEx:
-  def apply(visit: Visit, patient: Patient, shahokokuho: Option[Shahokokuho], roujin: Option[Roujin],
-  koukikourei: Option[Koukikourei], kouhiList: List[Kouhi], texts: List[Text], drugs: List[DrugEx],
-  shinryouList: List[ShinryouEx], conducts: List[ConductEx]): VisitEx =
+  def apply(
+      visit: Visit,
+      patient: Patient,
+      shahokokuho: Option[Shahokokuho],
+      roujin: Option[Roujin],
+      koukikourei: Option[Koukikourei],
+      kouhiList: List[Kouhi],
+      texts: List[Text],
+      drugs: List[DrugEx],
+      shinryouList: List[ShinryouEx],
+      conducts: List[ConductEx]
+  ): VisitEx =
     VisitEx(
       visit.visitId,
       visit.patientId,
@@ -38,7 +60,7 @@ object VisitEx:
       visit.kouhi2Id,
       visit.kouhi3Id,
       visit.koukikoureiId,
-      visit.attributes,
+      visit.attributesStore,
       patient,
       shahokokuho,
       roujin,
