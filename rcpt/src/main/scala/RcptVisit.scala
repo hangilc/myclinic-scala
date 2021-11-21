@@ -1,6 +1,11 @@
 package dev.myclinic.scala.rcpt
 
-import dev.myclinic.scala.model.{VisitEx, MeisaiSection, MeisaiSectionItem, Meisai}
+import dev.myclinic.scala.model.{
+  VisitEx,
+  MeisaiSection,
+  MeisaiSectionItem,
+  Meisai
+}
 import dev.myclinic.java.{HoukatsuKensa, HokenUtil, RcptCalc}
 import java.time.LocalDate
 
@@ -10,6 +15,7 @@ object RcptVisit:
   ): Meisai =
     if !visit.drugs.isEmpty then
       new RuntimeException("visit drug is not supported")
+    given RcptCalc = new RcptCalc()
     var units: List[MeisaiUnit] = List.empty
     visit.shinryouList.foreach(s => {
       val u = MeisaiUnit.fromShinryou(s, visit.visitedAt.toLocalDate)
@@ -65,8 +71,9 @@ object RcptVisit:
         })
         visit.roujin.foreach(roujin => update(roujin.futanWari))
         visit.koukikourei.foreach(koukikourei => update(koukikourei.futanWari))
-        visit.kouhiList.foreach(kouhi => 
-          update(util.kouhiFutanWari(kouhi.futansha)))
+        visit.kouhiList.foreach(kouhi =>
+          update(util.kouhiFutanWari(kouhi.futansha))
+        )
         futanWari
       }
     }

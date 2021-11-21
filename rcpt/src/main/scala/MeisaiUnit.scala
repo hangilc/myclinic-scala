@@ -1,7 +1,12 @@
 package dev.myclinic.scala.rcpt
 
 import dev.myclinic.scala.model.*
-import dev.myclinic.java.{HoukatsuKensa, HoukatsuKensaKind, MyclinicConsts}
+import dev.myclinic.java.{
+  HoukatsuKensa,
+  HoukatsuKensaKind,
+  MyclinicConsts,
+  RcptCalc
+}
 import scala.collection.mutable.ListBuffer
 import java.time.LocalDate
 import scala.jdk.OptionConverters.*
@@ -34,15 +39,17 @@ object MeisaiUnit:
           List(shinryou)
         )
     }
-  def fromConduct(conduct: ConductEx): List[MeisaiUnit] =
+  def fromConduct(conduct: ConductEx)(using RcptCalc): List[MeisaiUnit] =
     val section: MeisaiSection =
       if conduct.kind == MyclinicConsts.ConductKindGazou then
         MeisaiSection.Gazou
       else MeisaiSection.Shochi
     conduct.shinryouList.map(s => SimpleShinryouUnit(section, s.master))
+      ++ conduct.drugs.map(d => ConductDrugUnit(section, d))
+      ++ conduct.kizaiList.map(k => ConductKizaiUnit(section, k))
 
 case class SimpleShinryouUnit(
-    section: Meisaisection,
+    section: MeisaiSection,
     master: ShinryouMaster,
     count: Int = 1
 ) extends MeisaiUnit:
@@ -79,7 +86,42 @@ case class HoukatsuKensaUnit(
     }
   def section: MeisaiSection = MeisaiSection.Kensa
 
-case class ConductDrugUnit(section: MeisaiSection, drug: ConductDrugEx, val count: Int = 1)
+case class ConductDrugUnit(
+    section: MeisaiSection,
+    drug: ConductDrugEx,
+    val count: Int = 1
+)(using rcptCalc: RcptCalc)
     extends MeisaiUnit:
-  def tanka: Int = 
-    val kingaku: Double = drug.m
+  def tanka: Int =
+    val kingaku: Double = drug.master.yakka * drug.amount
+    if section == MeisaiSection.Gazou then rcptCalc.shochiKingakuToTen(kingaku)
+    else rcptCalc.touyakuKingakuToTen(kingaku)
+  def label: String = s"${drug.master.name} ${amount}${drug.master.unit}"
+  def merge(that: MeisaiUnit): Option[MeisaiUnit] =
+    that match {
+      case ConductDrugUnit(_, d, c)
+          if d.iyakuhincode == iyakuhincode && d.amount == amount =>
+        Some(ConductDrugUnit(section, drug, count + c))
+      case _ => None
+    }
+  def iyakuhincode: Int = drug.master.iyakuhincode
+  def amount: Double = drug.amount
+
+case class ConductKizaiUnit(
+  section: MeisaiSection,
+  kizai: ConductKizaiEx,
+  val count: Int = 1
+)(using rcptCalc: RcptCalc) extends MeisaiUnit:
+  def tanka: Int =
+    val kingaku: Double = kizai.master.kingaku * kizai.amount
+    rcptCalc.kizaiKingakuToTen(kingaku)
+  def label: String = s"${kizai.master.name} ${amount}${kizai.master.unit}"
+  def merge(that: MeisaiUnit): Option[MeisaiUnit] =
+    that match {
+      case ConductKizaiUnit(_, k, c)
+          if k.kizaicode == kizaicode && k.amount == amount =>
+        Some(ConductKizaiUnit(section, kizai, count + c))
+      case _ => None
+    }
+  def kizaicode: Int = kizai.master.kizaicode
+  def amount: Double = kizai.amount
