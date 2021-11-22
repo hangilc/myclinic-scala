@@ -88,3 +88,29 @@ button {
 .table .header {
   font-weight: bold;
 }
+
+.cashier-dialog {
+  width: 360px;
+}
+
+.cashier-dialog .detail-table {
+  width: 100%;
+  border-top: 1px solid gray;
+  border-bottom: 1px solid gray;
+  margin: 10px 0;
+  padding: 6px 0;
+}
+
+.cashier-dialog .detail-table .right-columng {
+  width: 6rem;
+}
+
+.cashier-dialog .detail-table .section-title {
+  font-weight: bold;
+}
+
+.cashier-dialog .charge-line {
+  font-weight: bold;
+  color: var(--primary-color);
+}
+

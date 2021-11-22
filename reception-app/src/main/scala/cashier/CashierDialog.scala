@@ -11,8 +11,8 @@ import org.scalajs.dom.raw.{HTMLElement}
 class CashierDialog(meisai: Meisai, patient: Patient):
   val table = Table()
   table.setColumns(List(
-    (e: HTMLElement) => e(width := "*"),
-    (e: HTMLElement) => e(width := "4rem")
+    e => e(width := "*"),
+    e => e(cls := "right-column")
   ))
   meisai.items.foreach(item => {
     table.addRow(List(
@@ -30,11 +30,22 @@ class CashierDialog(meisai: Meisai, patient: Patient):
     "会計",
     div(cls := "cashier-dialog")(
       div(cls := "patient-rep")(patientRep),
-      table.ele
+      table.ele(cls := "detail-table"),
+      div(
+        div(summaryLine),
+        div(cls := "charge-line")(chargeLine)
+      )
     ),
-    div()
+    div(
+      button("領収書印刷"),
+      button("会計終了"),
+      button("キャンセル", onclick := (() => modal.close()))
+    )
   )
   def open(): Unit = 
     modal.open()
   private def patientRep: String =
     s"(${patient.patientId}) ${patient.fullName()}（${patient.fullNameYomi()})"
+  private def summaryLine: String = 
+    s"総点：${meisai.totalTen}点、負担割：${meisai.futanWari}割"
+  private def chargeLine: String = s"請求額：${meisai.charge}円"
