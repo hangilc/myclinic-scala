@@ -52,7 +52,6 @@ class Cashier(using publishers: EventPublishers):
         visitMap.values.toList.map(_.patientId)
       )
     yield {
-      println(("data", list, visitMap, patientMap))
       table.clear()
       list.foreach(wq => {
         val visit = visitMap(wq.visitId)
@@ -76,7 +75,7 @@ class Cashier(using publishers: EventPublishers):
             e => e(s"${age}才"),
             e => {
               if wq.waitState == WaitState.WaitCashier then e(button("会計")(
-                onclick := (() => doCashier(wq.visitId))
+                onclick := (() => doCashier(wq.visitId, patient))
               ))
               if wq.waitState == WaitState.WaitExam then
                 e(a("削除", onclick := (() => doDelete(visit, patient))))
@@ -96,9 +95,9 @@ class Cashier(using publishers: EventPublishers):
         }
     })
 
-  private def doCashier(visitId: Int): Unit =
+  private def doCashier(visitId: Int, patient: Patient): Unit =
     for
       meisai <- Api.getMeisai(visitId)
     yield {
-      println(("meisai", meisai))
+      CashierDialog(meisai, patient).open()
     }
