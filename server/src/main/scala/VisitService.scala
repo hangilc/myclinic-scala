@@ -33,4 +33,10 @@ object VisitService:
         visitIds <- req.as[List[Int]]
         map <- Db.batchGetVisit(visitIds)
       yield map)
+
+    case GET -> Root / "delete-visit" :? intVisitId(visitId) =>
+      Ok(Db.deleteVisit(visitId))
+
+    case GET -> Root / "get-visit-ex" :? intVisitId(visitId) =>
+      Ok(Db.getVisitEx(visitId))
   }

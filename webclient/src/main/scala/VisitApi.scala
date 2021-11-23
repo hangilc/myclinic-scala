@@ -18,3 +18,9 @@ object VisitApi extends ApiBase:
 
     def batchGetVisit(visitIds: List[Int]): Future[Map[Int, Visit]] =
       post("batch-get-visit", Params(), visitIds)
+
+    def deleteVisit(visitId: Int): Future[List[AppEvent]] =
+      get("delete-visit", Params("visit-id" -> visitId))
+
+    def getVisitEx(visitId: Int): Future[VisitEx] =
+      get("get-visit-ex", Params("visit-id" -> visitId))

@@ -5,6 +5,12 @@ import java.time.LocalTime
 import java.time.LocalDateTime
 import dev.myclinic.scala.util.DateTimeOrdering.{*, given}
 import scala.math.Ordered.orderingToOrdered
+import io.circe.*
+import io.circe.syntax.*
+import io.circe.parser.decode
+import io.circe.generic.semiauto._
+
+case class ValidUpto(value: Option[LocalDate])
 
 case class AppointTime(
     appointTimeId: Int,
@@ -112,6 +118,10 @@ object WaitState:
 
 case class Wqueue(visitId: Int, waitState: WaitState)
 
+case class VisitAttributes(
+    val futanWari: Option[Int] = None
+)
+
 case class Visit(
     visitId: Int,
     patientId: Int,
@@ -122,5 +132,179 @@ case class Visit(
     kouhi2Id: Int,
     kouhi3Id: Int,
     koukikoureiId: Int,
-    attributes: Option[String]
+    attributesStore: Option[String]
+):
+  def kouhiIds: List[Int] = List(kouhi1Id, kouhi2Id, kouhi3Id).filter(_ > 0)
+  given Decoder[VisitAttributes] = deriveDecoder[VisitAttributes]
+  def attributes: VisitAttributes =
+    attributesStore match {
+      case None => VisitAttributes()
+      case Some(src) =>
+        decode(src) match {
+          case Right(a) => a
+          case Left(ex) => throw ex
+        }
+    }
+  def futanWariOverride: Option[Int] =
+    attributes.futanWari
+
+object Visit:
+  given Encoder[VisitAttributes] = deriveEncoder[VisitAttributes]
+  def encodeAttributes(value: VisitAttributes): String =
+    value.asJson.toString
+
+case class Text(
+    textId: Int,
+    visitId: Int,
+    content: String
 )
+
+case class Drug(
+    drugId: Int,
+    visitId: Int,
+    iyakuhincode: Int,
+    amount: Double,
+    usage: String,
+    days: Int,
+    category: Int,
+    prescribed: Boolean
+)
+
+case class Shinryou(
+    shinryouId: Int,
+    visitId: Int,
+    shinryoucode: Int
+)
+
+case class Conduct(
+    conductId: Int,
+    visitId: Int,
+    kind: Int
+)
+
+case class ConductDrug(
+    conductDrugId: Int,
+    conductId: Int,
+    iyakuhincode: Int,
+    amount: Double
+)
+
+case class ConductShinryou(
+    conductShinryouId: Int,
+    conductId: Int,
+    shinryoucode: Int
+)
+
+case class ConductKizai(
+    conductKizaiId: Int,
+    conductId: Int,
+    kizaicode: Int,
+    amount: Double
+)
+
+case class Charge(
+    visitId: Int,
+    charge: Int
+)
+
+case class Payment(
+    visitId: Int,
+    amount: Int,
+    paytime: LocalDateTime
+)
+
+case class IyakuhinMaster(
+    iyakuhincode: Int,
+    yakkacode: String,
+    name: String,
+    yomi: String,
+    unit: String,
+    yakkaStore: String,
+    madoku: String,
+    kouhatsu: String,
+    zaikei: String,
+    validFrom: LocalDate,
+    validUpto: ValidUpto
+):
+  def yakka: Double = yakkaStore.toDouble
+
+case class ShinryouMaster(
+    shinryoucode: Int,
+    name: String,
+    tensuuStore: String,
+    tensuuShikibetsu: String,
+    shuukeisaki: String,
+    houkatsukensa: String,
+    oushinkubun: String,
+    kensagroup: String,
+    validFrom: LocalDate,
+    validUpto: ValidUpto
+):
+  def tensuu: Int = tensuuStore.toDouble.toInt
+
+case class KizaiMaster(
+    kizaicode: Int,
+    name: String,
+    yomi: String,
+    unit: String,
+    kingakuStore: String,
+    validFrom: LocalDate,
+    validUpto: ValidUpto
+):
+  def kingaku: Double = kingakuStore.toDouble
+
+case class Shahokokuho(
+    shahokokuhoId: Int,
+    patientId: Int,
+    hokenshaBangou: Int,
+    hihokanshaKigou: String,
+    hihokenshaBangou: String,
+    honnin: Int,
+    validFrom: LocalDate,
+    validUpto: ValidUpto,
+    kourei: Int,
+    edaban: String
+)
+
+case class Roujin(
+    roujinId: Int,
+    patientId: Int,
+    shichouson: Int,
+    jukyuusha: Int,
+    futanWari: Int,
+    validFrom: LocalDate,
+    validUpt: ValidUpto
+)
+
+case class Koukikourei(
+    koukikoureiId: Int,
+    patientId: Int,
+    hokenshaBangou: String,
+    hihokenshaBangou: String,
+    futanWari: Int,
+    validFrom: LocalDate,
+    validUpt: ValidUpto
+)
+
+case class Kouhi(
+    kouhiId: Int,
+    futansha: Int,
+    jukyuusha: Int,
+    validFrom: LocalDate,
+    validUpto: ValidUpto,
+    patientId: Int
+)
+
+case class MeisaiSectionData(section: MeisaiSection, entries: List[MeisaiSectionItem]):
+  def subtotal: Int = entries.map(_.total).sum
+
+case class Meisai(
+    items: List[MeisaiSectionData],
+    futanWari: Int,
+    charge: Int
+):
+  def totalTen: Int = Meisai.calcTotalTen(items)
+
+object Meisai:
+  def calcTotalTen(items: List[MeisaiSectionData]): Int =
+    items.map(_.subtotal).sum

@@ -5,30 +5,39 @@ import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.{ShowMessage, Icons, Colors, ContextMenu}
 import scala.language.implicitConversions
+import dev.myclinic.scala.web.appbase.{SideMenu, EventPublishers}
+import dev.myclinic.scala.web.reception.cashier.Cashier
 import dev.myclinic.scala.model.{HotlineCreated, Patient}
-import org.scalajs.dom.raw.{HTMLElement, MouseEvent}
 import dev.myclinic.scala.webclient.Api
+import org.scalajs.dom.raw.{HTMLElement, MouseEvent}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Success
 import scala.util.Failure
+import scala.concurrent.Future
 
-abstract class MainUI:
+abstract class MainUI(using publishers: EventPublishers):
   def postHotline(msg: String): Unit
+  def invoke(label: String): Unit =
+    sideMenu.invokeByLabel(label)
 
   private var lastHotlineAppEventId = 0
   private val hotlineInput = textarea()
   private val hotlineMessages = textarea()
+  private val eMain: HTMLElement = div()
+  private val sideMenu = SideMenu(eMain,
+    List(
+      "メイン" -> (makeCashier _),
+      "患者管理" -> (() => Future.successful(div("患者管理"))),
+      "診療記録" -> (() => Future.successful(div("診療記録"))),
+      "スキャン" -> (() => Future.successful(div("スキャン")))
+    )
+  )
   val ele =
     div(id := "content")(
       div(id := "banner")("受付"),
       div(id := "workarea")(
         div(id := "side-bar")(
-          div(id := "side-menu")(
-            a("メイン"),
-            a("患者管理"),
-            a("診療記録"),
-            a("スキャン")
-          ),
+          sideMenu.ele(id := "side-menu"),
           hotlineInput(id := "hotline-input"),
           div(id := "hotline-commands")(
             button(
@@ -44,9 +53,9 @@ abstract class MainUI:
                 postHotline("了解")
               })
             ),
-            button("Beep", onclick := (() => { Api.beep(); ()})),
+            button("Beep", onclick := (() => { Api.beep(); () })),
             a(
-              span( "常用", downTriangle()),
+              span("常用", downTriangle()),
               onclick := (doRegular _)
             ),
             a("患者", downTriangle(), onclick := (doPatients _))
@@ -57,7 +66,7 @@ abstract class MainUI:
             attr("tabindex") := "-1"
           )
         ),
-        div(id := "main")
+        eMain(id := "main")
       )
     )
 
@@ -91,20 +100,22 @@ abstract class MainUI:
 
   private def doRegular(event: MouseEvent): Unit =
     val items: List[String] = Setting.regularHotlineMessages
-    val menu = ContextMenu(items.map(
-      msg => msg -> (() => insertIntoHotlineInput(msg))
-    ))
+    val menu = ContextMenu(
+      items.map(msg => msg -> (() => insertIntoHotlineInput(msg)))
+    )
     menu.open(event)
 
   private def doPatients(event: MouseEvent): Unit =
     def exec(patient: Patient): Unit =
       insertIntoHotlineInput(patient.fullName(""))
-    val f = 
+    val f =
       for
         wqueue <- Api.listWqueue()
         visitIds = wqueue.map(_.visitId)
         visitMap <- Api.batchGetVisit(visitIds)
-        patientMap <- Api.batchGetPatient(visitMap.values.map(_.patientId).toList)
+        patientMap <- Api.batchGetPatient(
+          visitMap.values.map(_.patientId).toList
+        )
       yield {
         val patients = patientMap.values.toList
         val menu = ContextMenu(patients.map(patient => {
@@ -113,8 +124,13 @@ abstract class MainUI:
         menu.open(event)
       }
     f.onComplete {
-      case Success(_) => ()
+      case Success(_)  => ()
       case Failure(ex) => System.err.println(ex.getMessage)
     }
 
+  def makeCashier(): Future[HTMLElement] =
+    val cashier = Cashier()
+    for 
+      _ <- cashier.refresh()
+    yield cashier.ele
 

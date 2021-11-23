@@ -13,6 +13,9 @@ val scalaJavaTimeVersion = "2.3.0"
 val scalaJSDomVersion = "1.2.0"
 val catsVersion = "2.6.1"
 
+val jacksonVersion = "2.12.5"
+val slf4jVersion = "1.7.25"
+
 ThisBuild / scalacOptions ++= Seq("-deprecation", "-encoding", "UTF-8")
 
 val rootDir = ThisBuild / baseDirectory
@@ -99,7 +102,7 @@ val utilJVM = util.jvm
 
 lazy val server = project
   .in(file("server"))
-  .dependsOn(db, modelJVM, utilJVM, appointAdmin, clinicopJVM)
+  .dependsOn(db, modelJVM, utilJVM, appointAdmin, clinicopJVM, rcpt, javalib)
   .settings(
     name := "server",
     libraryDependencies ++= Seq(
@@ -227,3 +230,21 @@ lazy val clinicop = crossProject(JVMPlatform, JSPlatform)
 val clinicopJVM = clinicop.jvm
 val clinicopJS = clinicop.js
 
+lazy val rcpt = project
+  .in(file("rcpt"))
+  .dependsOn(javalib, modelJVM)
+
+lazy val javalib = project
+  .in(file("javalib"))
+  .settings(
+    version := "1.0.0-SHANPSHOT",
+    crossPaths := false,
+    autoScalaLibrary := false,
+    libraryDependencies ++= Seq(
+      "org.slf4j" % "slf4j-api" % slf4jVersion,
+      "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion,
+      "com.fasterxml.jackson.core" % "jackson-annotations" % jacksonVersion,
+      "com.fasterxml.jackson.dataformat" % "jackson-dataformat-yaml" % jacksonVersion,
+      "com.fasterxml.jackson.dataformat" % "jackson-dataformat-xml" % jacksonVersion,
+    )
+  )

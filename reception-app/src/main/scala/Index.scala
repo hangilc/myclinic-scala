@@ -29,6 +29,7 @@ object JsMain:
     document.body(ui.ele)
     setupHotline()
     ReceptionEventFetcher.start()
+    ui.invoke("メイン")
     
   def createUI(): MainUI =
     new MainUI:

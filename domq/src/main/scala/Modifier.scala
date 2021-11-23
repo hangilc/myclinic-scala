@@ -124,6 +124,7 @@ object Modifiers:
   val overflowYAuto = overflowY := "auto"
   val cssFloat = styleSetter((s, v) => s.cssFloat = v)
   val floatRight = cssFloat := "right"
+  val textAlign = styleSetter((s, v) => s.textAlign = v)
 
   val showHide = Creator[Boolean]((e, show: Boolean) => {
     val q = ElementQ(e)

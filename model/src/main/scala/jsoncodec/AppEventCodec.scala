@@ -75,6 +75,27 @@ trait AppEventCodec extends Model with DateTime:
             "createdAt" -> at.asJson,
             "recipient" -> recipient.asJson
           )
+        case VisitCreated(at, created) =>
+          Json.obj(
+            "model" -> Json.fromString("visit"),
+            "kind" -> Json.fromString("created"),
+            "createdAt" -> at.asJson,
+            "created" -> created.asJson
+          )
+        case VisitUpdated(at, updated) =>
+          Json.obj(
+            "model" -> Json.fromString("visit"),
+            "kind" -> Json.fromString("updated"),
+            "createdAt" -> at.asJson,
+            "updated" -> updated.asJson
+          )
+        case VisitDeleted(at, deleted) =>
+          Json.obj(
+            "model" -> Json.fromString("visit"),
+            "kind" -> Json.fromString("deleted"),
+            "createdAt" -> at.asJson,
+            "deleted" -> deleted.asJson
+          )
         case UnknownAppEvent(appEventId, createdAt, model, kind, data) =>
           Json.obj(
             "appEventId" -> Json.fromInt(appEventId),
@@ -125,6 +146,15 @@ trait AppEventCodec extends Model with DateTime:
           case ("hotline", "beep", at) =>
             for recipient <- c.downField("recipient").as[String]
             yield HotlineBeep(at, recipient)
+          case ("visit", "created", at) =>
+            for created <- c.downField("created").as[Visit]
+            yield VisitCreated(at, created)
+          case ("visit", "updated", at) =>
+            for updated <- c.downField("updated").as[Visit]
+            yield VisitUpdated(at, updated)
+          case ("visit", "deleted", at) =>
+            for deleted <- c.downField("deleted").as[Visit]
+            yield VisitDeleted(at, deleted)
           case (model, kind, at) =>
             for
               appEventId <- c.downField("appEventId").as[Int]

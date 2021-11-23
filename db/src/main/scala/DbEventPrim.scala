@@ -85,3 +85,31 @@ object DbEventPrim:
 
   def logHotlineCreated(hotline: Hotline): ConnectionIO[AppEvent] =
     enterAppEvent("hotline", CREATED, hotline.asJson.toString)
+
+  def logVisitCreated(a: Visit): ConnectionIO[AppEvent] =
+    enterAppEvent("visit", CREATED, a.asJson.toString)
+
+  def logVisitUpdated(a: Visit): ConnectionIO[AppEvent] =
+    enterAppEvent("visit", UPDATED, a.asJson.toString)
+
+  def logVisitDeleted(a: Visit): ConnectionIO[AppEvent] =
+    enterAppEvent("visit", DELETED, a.asJson.toString)
+
+  def logWqueueCreated(a: Wqueue): ConnectionIO[AppEvent] =
+    enterAppEvent("wqueue", CREATED, a.asJson.toString)
+
+  def logWqueueUpdated(a: Wqueue): ConnectionIO[AppEvent] =
+    enterAppEvent("wqueue", UPDATED, a.asJson.toString)
+
+  def logWqueueDeleted(a: Wqueue): ConnectionIO[AppEvent] =
+    enterAppEvent("wqueue", DELETED, a.asJson.toString)
+
+  def logPaymentCreated(a: Payment): ConnectionIO[AppEvent] =
+    enterAppEvent("payment", CREATED, a.asJson.toString)
+
+  def logPaymentUpdated(a: Payment): ConnectionIO[AppEvent] =
+    enterAppEvent("payment", UPDATED, a.asJson.toString)
+
+  def logPaymentDeleted(a: Payment): ConnectionIO[AppEvent] =
+    enterAppEvent("payment", DELETED, a.asJson.toString)
+

@@ -15,3 +15,5 @@ case class Patient(
 ):
     def fullName(sep: String = " "): String = 
         s"${lastName}${sep}${firstName}"
+    def fullNameYomi(sep: String = " "): String =
+        s"${lastNameYomi}${sep}${firstNameYomi}"

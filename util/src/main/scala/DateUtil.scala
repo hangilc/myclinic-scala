@@ -74,3 +74,9 @@ object DateUtil:
   def enumDates(from: LocalDate, upto: LocalDate): List[LocalDate] =
     datesFrom(from).takeWhile(d => d.isBefore(upto) || d.isEqual(upto)).toList
 
+  def calcAge(birthday: LocalDate, at: LocalDate): Int =
+    birthday.until(at, ChronoUnit.YEARS).toInt
+
+
+  
+

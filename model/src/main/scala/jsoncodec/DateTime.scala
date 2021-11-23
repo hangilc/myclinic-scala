@@ -10,6 +10,7 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import scala.util.Try
+import scala.util.Success
 
 trait DateTime:
   val sqlDateFormatter: DateTimeFormatter =
@@ -26,6 +27,18 @@ trait DateTime:
   implicit val dateDecoder: Decoder[LocalDate] = Decoder.decodeString.emapTry(str =>
     Try(LocalDate.parse(str, sqlDateFormatter))
   )
+
+  implicit val dateOptionEncoder: Encoder[Option[LocalDate]] = 
+    Encoder.encodeString.contramap({
+      case Some(date) => sqlDateFormatter.format(date)
+      case None => "0000-00-00"
+    })
+
+  implicit val dateOptionDecoder: Decoder[Option[LocalDate]] =
+    Decoder.decodeString.emapTry(str => {
+      if str == null || str == "0000-00-00" then Success(None)
+      else Try(Some(LocalDate.parse(str, sqlDateFormatter)))
+    })
 
   implicit val timeEncoder: Encoder[LocalTime] =
     Encoder.encodeString.contramap(_.format(sqlTimeFormatter))
