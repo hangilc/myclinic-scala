@@ -28,13 +28,14 @@ class Table:
     })
     ele(row)
     row
-  def addHeaderRow(cells: List[HTMLElement => Unit]): Unit =
+  def addHeaderRow(cells: List[HTMLElement => Unit]): HTMLElement =
     addRowElements(
       cells.map(m => (e: HTMLElement) => { e(cls := "header"); m(e) })
     )
-  def addRow(cells: List[HTMLElement => Unit]): Unit =
+  def addRow(cells: List[HTMLElement => Unit]): HTMLElement =
     val row = addRowElements(cells)
     rowBuf += row
+    row
   def clear(): Unit =
     rowBuf.foreach(_.remove())
     rowBuf.clear

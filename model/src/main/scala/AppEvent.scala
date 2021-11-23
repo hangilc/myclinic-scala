@@ -53,6 +53,13 @@ case class VisitUpdated(createdAt: LocalDateTime, updated: Visit)
 case class VisitDeleted(createdAt: LocalDateTime, deleted: Visit)
     extends AppModelEvent
 
+case class WqueueCreated(createdAt: LocalDateTime, created: Wqueue)
+    extends AppModelEvent
+case class WqueueUpdated(createdAt: LocalDateTime, updated: Wqueue)
+    extends AppModelEvent
+case class WqueueDeleted(createdAt: LocalDateTime, deleted: Wqueue)
+    extends AppModelEvent
+
 object AppModelEvent:
   def from(event: AppEvent): AppModelEvent =
     val at = event.createdAt
@@ -77,6 +84,9 @@ object AppModelEvent:
       case ("visit", "created") => VisitCreated(at, as[Visit])
       case ("visit", "updated") => VisitUpdated(at, as[Visit])
       case ("visit", "deleted") => VisitDeleted(at, as[Visit])
+      case ("wqueue", "created") => WqueueCreated(at, as[Wqueue])
+      case ("wqueue", "updated") => WqueueUpdated(at, as[Wqueue])
+      case ("wqueue", "deleted") => WqueueDeleted(at, as[Wqueue])
       case _ =>
         UnknownAppEvent(
           event.appEventId,

@@ -20,11 +20,12 @@ import dev.myclinic.scala.model.*
 import dev.myclinic.scala.model.jsoncodec.Implicits.given
 import org.http4s.websocket.WebSocketFrame.Text
 import dev.myclinic.scala.appoint.admin.AppointAdmin
+import dev.myclinic.scala.server.Publisher
 
-object VisitService:
+object VisitService extends Publisher:
   object intVisitId extends QueryParamDecoderMatcher[Int]("visit-id")
 
-  def routes = HttpRoutes.of[IO] {
+  def routes(using topic: Topic[IO, WebSocketFrame]) = HttpRoutes.of[IO] {
     case GET -> Root / "get-visit" :? intVisitId(visitId) => 
       Ok(Db.getVisit(visitId))
 
@@ -35,7 +36,13 @@ object VisitService:
       yield map)
 
     case GET -> Root / "delete-visit" :? intVisitId(visitId) =>
-      Ok(Db.deleteVisit(visitId))
+      val op = {
+        for
+          events <- Db.deleteVisit(visitId)
+          _ <- publishAll(events)
+        yield true
+      }
+      Ok(op)
 
     case GET -> Root / "get-visit-ex" :? intVisitId(visitId) =>
       Ok(Db.getVisitEx(visitId))

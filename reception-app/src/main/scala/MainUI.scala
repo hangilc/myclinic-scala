@@ -26,10 +26,10 @@ abstract class MainUI(using publishers: EventPublishers):
   private val eMain: HTMLElement = div()
   private val sideMenu = SideMenu(eMain,
     List(
-      "メイン" -> (makeCashier _),
-      "患者管理" -> (() => Future.successful(div("患者管理"))),
-      "診療記録" -> (() => Future.successful(div("診療記録"))),
-      "スキャン" -> (() => Future.successful(div("スキャン")))
+      "メイン" -> (() => Cashier()),
+      "患者管理" -> (() => ???),
+      "診療記録" -> (() => ???),
+      "スキャン" -> (() => ???)
     )
   )
   val ele =
@@ -127,10 +127,4 @@ abstract class MainUI(using publishers: EventPublishers):
       case Success(_)  => ()
       case Failure(ex) => System.err.println(ex.getMessage)
     }
-
-  def makeCashier(): Future[HTMLElement] =
-    val cashier = Cashier()
-    for 
-      _ <- cashier.refresh()
-    yield cashier.ele
 

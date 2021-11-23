@@ -28,7 +28,10 @@ object JsMain:
   def main(isAdmin: Boolean): Unit =
     document.body(ui.ele)
     setupHotline()
-    ReceptionEventFetcher.start()
+    ReceptionEventFetcher.start().onComplete {
+      case Success(_) => ()
+      case Failure(ex) => ShowMessage.showError(ex.getMessage)
+    }
     ui.invoke("メイン")
     
   def createUI(): MainUI =

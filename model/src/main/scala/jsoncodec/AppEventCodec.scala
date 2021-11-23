@@ -96,6 +96,27 @@ trait AppEventCodec extends Model with DateTime:
             "createdAt" -> at.asJson,
             "deleted" -> deleted.asJson
           )
+        case WqueueCreated(at, created) =>
+          Json.obj(
+            "model" -> Json.fromString("wqueue"),
+            "kind" -> Json.fromString("created"),
+            "createdAt" -> at.asJson,
+            "created" -> created.asJson
+          )
+        case WqueueUpdated(at, updated) =>
+          Json.obj(
+            "model" -> Json.fromString("wqueue"),
+            "kind" -> Json.fromString("updated"),
+            "createdAt" -> at.asJson,
+            "updated" -> updated.asJson
+          )
+        case WqueueDeleted(at, deleted) =>
+          Json.obj(
+            "model" -> Json.fromString("wqueue"),
+            "kind" -> Json.fromString("deleted"),
+            "createdAt" -> at.asJson,
+            "deleted" -> deleted.asJson
+          )
         case UnknownAppEvent(appEventId, createdAt, model, kind, data) =>
           Json.obj(
             "appEventId" -> Json.fromInt(appEventId),

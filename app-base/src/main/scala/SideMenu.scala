@@ -13,9 +13,15 @@ import scala.util.Failure
 
 case class SideMenuItem(label: String, creator: () => HTMLElement)
 
+trait SideMenuService:
+  def getElement: HTMLElement
+  def init: Future[Unit] = Future.successful(())
+  def onReactivate: Future[Unit] = Future.successful(())
+  def dispose: Unit = ()
+
 class SideMenu(
     main: HTMLElement,
-    args: List[(String, () => Future[HTMLElement])]
+    args: List[(String, () => SideMenuService)]
 ):
   val ele: HTMLElement = div()
   def invokeByLabel(label: String): Unit =
@@ -24,34 +30,33 @@ class SideMenu(
   private case class Item(
       label: String,
       link: HTMLElement,
-      creator: () => Future[HTMLElement],
-      var cache: Option[HTMLElement]
+      builder: () => SideMenuService,
+      var cache: Option[SideMenuService]
   ):
     def inactivate(): Unit =
-      cache.foreach(e => {
-        e.remove()
+      cache.foreach(service => {
+        service.getElement.remove()
         link(cls :- "current")
       })
     def activate(): Future[Unit] =
       cache.fold({
-        for e <- creator()
-        yield {
-          cache = Some(e)
-          main(e)
-          link(cls := "current")
-          ()
-        }
-      })(e => {
+        val service = builder()
+        val e = service.getElement
         main(e)
         link(cls := "current")
-        Future.successful(())
+        cache = Some(service)
+        service.init
+      })(service => {
+        main(service.getElement)
+        link(cls := "current")
+        service.onReactivate
       })
 
   private val items: List[Item] = args.map(arg =>
     arg match {
-      case (label, creator) => {
+      case (label, builder) => {
         val link = a(label)
-        val item = Item(label, link, creator, None)
+        val item = Item(label, link, builder, None)
         link(onclick := (() => invoke(item)))
         item
       }
