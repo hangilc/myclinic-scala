@@ -16,11 +16,12 @@ import dev.myclinic.scala.util.DateUtil
 import dev.myclinic.scala.clinicop.ClinicOperation
 import fs2.concurrent.Topic
 import org.http4s.websocket.WebSocketFrame
+import dev.myclinic.scala.model.*
 import dev.myclinic.scala.model.jsoncodec.Implicits.given
 import dev.myclinic.java.{Config, HoukatsuKensa}
 import dev.myclinic.scala.rcpt.RcptVisit
 
-object MiscService extends DateTimeQueryParam:
+object MiscService extends DateTimeQueryParam with Publisher:
   object dateDate extends QueryParamDecoderMatcher[LocalDate]("date")
   object intVisitId extends QueryParamDecoderMatcher[Int]("visit-id")
 
@@ -48,4 +49,12 @@ object MiscService extends DateTimeQueryParam:
         yield RcptVisit.getMeisai(visit)
       })
 
+    case req @ POST -> Root / "finish-cashier" =>
+      Ok {
+        for 
+          payment <- req.as[Payment]
+          events <- Db.finishCashier(payment)
+          _ <- publishAll(events)
+        yield true
+      }
   }

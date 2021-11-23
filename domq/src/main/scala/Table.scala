@@ -27,6 +27,7 @@ class Table:
       row(e)
     })
     ele(row)
+    row
   def addHeaderRow(cells: List[HTMLElement => Unit]): Unit =
     addRowElements(
       cells.map(m => (e: HTMLElement) => { e(cls := "header"); m(e) })

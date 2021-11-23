@@ -51,3 +51,6 @@ object MiscApi extends ApiBase:
 
     def getMeisai(visitId: Int): Future[Meisai] =
       get("get-meisai", Params("visit-id" -> visitId))
+
+    def finishCashier(payment: Payment): Future[Boolean] =
+      post("finish-cashier", Params(), payment)

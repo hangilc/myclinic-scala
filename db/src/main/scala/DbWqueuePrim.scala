@@ -19,19 +19,30 @@ object DbWqueuePrim:
       select * from wqueue where visit_id = ${visitId}
     """.query[Wqueue]
 
-  def deleteWqueue(visitId: Int): ConnectionIO[Unit] =
-    sql"""
+  def deleteWqueue(visitId: Int): ConnectionIO[AppEvent] =
+    val op = sql"""
       delete from wqueue where visit_id = ${visitId}
-    """.update.run.map(affected => {
-      if affected != 1 then
+    """
+    for
+      wqueue <- getWqueue(visitId).unique
+      affected <- op.update.run
+      _ = 
+        if affected != 1 then
         throw new RuntimeException("Failed to delete wqueue.")
-    })
+      event <- DbEventPrim.logWqueueDeleted(wqueue)
+    yield event
     
-  def tryDeleteWqueue(visitId: Int): ConnectionIO[Boolean] =
-    sql"""
-      delete from wqueue where visit_id = ${visitId}
-    """.update.run.map({
-      case 0 => false
-      case 1 => true
-      case _ => throw new RuntimeException("Failed to delete wqueue.")
+  def tryDeleteWqueue(visitId: Int): ConnectionIO[Option[AppEvent]] =
+    getWqueue(visitId).option.flatMap(optWqueue => {
+      optWqueue match {
+        case Some(wqueue) => deleteWqueue(visitId).map(Some(_))
+        case None => None.pure[ConnectionIO]
+      }
     })
+    // sql"""
+    //   delete from wqueue where visit_id = ${visitId}
+    // """.update.run.map({
+    //   case 0 => false
+    //   case 1 => true
+    //   case _ => throw new RuntimeException("Failed to delete wqueue.")
+    // })

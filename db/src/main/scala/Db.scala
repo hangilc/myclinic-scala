@@ -30,31 +30,17 @@ object Db
     with DbKizaiMaster
     with DbVisitEx:
 
-  def tryDeleteWqueue(visitId: Int): ConnectionIO[Option[AppEvent]] =
-    for
-      wqueueOpt <- DbWqueuePrim.getWqueue(visitId).option
-      _ <- wqueueOpt match {
-        case Some(_) => DbWqueuePrim.deleteWqueue(visitId)
-        case None => ().pure[ConnectionIO]
-      }
-      eventOpt <- wqueueOpt match {
-        case Some(wqueue) => DbEventPrim.logWqueueDeleted(wqueue).map(Some(_))
-        case None => None.pure[ConnectionIO]
-      }
-    yield eventOpt
-
   def deleteVisit(visitId: Int): IO[List[AppEvent]] =
     def check(chk: Int => IO[Int], err: String): EitherT[IO, String, Unit] =
       EitherT(chk(visitId).map(c => if c > 0 then Left(err) else Right(())))
     def proc(): IO[List[AppEvent]] =
       val op =
         for
-          wqueueEvents <- tryDeleteWqueue(visitId)
-          del <- DbWqueuePrim.tryDeleteWqueue(visitId)
+          wqueueEventOpt <- DbWqueuePrim.tryDeleteWqueue(visitId)
           visit <- DbVisitPrim.getVisit(visitId).unique
           _ <- DbVisitPrim.deleteVisit(visitId)
           visitEvent <- DbEventPrim.logVisitDeleted(visit)
-        yield wqueueEvents.toList :+ visitEvent
+        yield wqueueEventOpt.toList :+ visitEvent
       mysql(op)
     val op = List(
       check(countTextForVisit, "テキストがあるため、削除できません。"),
@@ -72,3 +58,10 @@ object Db
       }
       events <- proc()
     yield events
+
+  def finishCashier(payment: Payment): IO[List[AppEvent]] =
+    mysql(for
+      paymentEvent <- DbPaymentPrim.enterPayment(payment)
+      wqEventOpt <- DbWqueuePrim.tryDeleteWqueue(payment.visitId)
+    yield List(paymentEvent) ++ wqEventOpt.toList)
+

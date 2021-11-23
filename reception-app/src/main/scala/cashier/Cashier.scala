@@ -22,7 +22,12 @@ class Cashier(using publishers: EventPublishers):
     h1("受付患者"),
     table.ele,
     div(
-      button("更新", onclick := (() => { refresh(); () }), mt := "10px")
+      button("更新", onclick := (() => { 
+        refresh().onComplete {
+          case Success(_) => ()
+          case Failure(ex) => ShowMessage.showError(ex.getMessage)
+        }
+       }), mt := "10px")
     )
   )
 
@@ -99,5 +104,5 @@ class Cashier(using publishers: EventPublishers):
     for
       meisai <- Api.getMeisai(visitId)
     yield {
-      CashierDialog(meisai, patient).open()
+      CashierDialog(meisai, patient, visitId).open()
     }
