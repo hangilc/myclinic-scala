@@ -35,6 +35,8 @@ object Html {
   val ul = Tag("ul")
   val li = Tag("li")
   val span = Tag("span")
+  def select: HTMLElement = element("select")
+  def option: HTMLElement = element("option").asInstanceOf[HTMLInputElement]
   def textarea: HTMLInputElement = element("textarea").asInstanceOf[HTMLInputElement]
   def inputText = input(attr("type") := "text")
   def checkbox = input(attr("type") := "checkbox")

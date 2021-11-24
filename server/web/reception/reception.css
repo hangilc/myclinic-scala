@@ -16,6 +16,10 @@ button {
   height: 1.68rem;
 }
 
+.domq-modal {
+  border: 2px solid gray;
+}
+
 #content {
   margin: 10px 30px;
   width: 100%;

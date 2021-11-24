@@ -6,24 +6,13 @@ import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.{Modal, Table, ErrorBox}
 import scala.language.implicitConversions
 import dev.myclinic.scala.model.*
+import dev.myclinic.scala.web.appbase.{PrintDialog}
+import dev.myclinic.scala.webclient.Api
 import org.scalajs.dom.raw.{HTMLElement}
 import java.time.LocalDateTime
-import dev.myclinic.scala.webclient.Api
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Success
 import scala.util.Failure
-import scala.scalajs.js
-import scala.scalajs.js.annotation.*
-
-@js.native
-@JSGlobalScope
-object DrawerSVG extends js.Object:
-  def drawerJsonToSvg(
-      opsJson: String,
-      width: Double,
-      height: Double,
-      viewBox: String
-  ): HTMLElement = js.native
 
 class CashierDialog(meisai: Meisai, patient: Patient, visitId: Int):
   val table = Table()
@@ -50,7 +39,6 @@ class CashierDialog(meisai: Meisai, patient: Patient, visitId: Int):
     })
   })
   val errBox = ErrorBox()
-  val svgTest = div()
   val modal: Modal = Modal(
     "会計",
     div(cls := "cashier-dialog")(
@@ -60,8 +48,7 @@ class CashierDialog(meisai: Meisai, patient: Patient, visitId: Int):
         div(summaryLine),
         div(cls := "charge-line")(chargeLine)
       ),
-      errBox.ele,
-      svgTest
+      errBox.ele
     ),
     div(
       button("領収書印刷", onclick := (doPrintReceipt _)),
@@ -73,10 +60,24 @@ class CashierDialog(meisai: Meisai, patient: Patient, visitId: Int):
     modal.open()
 
   def doPrintReceipt(): Unit =
-    val svg = DrawerSVG.drawerJsonToSvg("""
-      []
-    """, 148, 105, "0, 0, 148, 105");
-    svgTest(svg);
+    for opsJson <- Api.drawReceipt()
+    yield {
+      //val svg = DrawerSVG.drawerJsonToSvg(opsJson, 148, 105, "0, 0, 148, 105")
+      val scale = 3
+      val w = 148
+      val h = 105
+      val settingNames = List("手動", "処方箋", "会計")
+      val dlog = PrintDialog(
+        "領収書印刷",
+        opsJson,
+        w * scale,
+        h * scale, 
+        s"0, 0, $w, $h",
+        settingNames = settingNames,
+        zIndex = modal.zIndex + 2
+      )
+      dlog.open()
+    }
 
   def doFinishCashier(): Unit =
     val payment = Payment(visitId, meisai.charge, LocalDateTime.now())

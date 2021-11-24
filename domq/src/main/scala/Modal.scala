@@ -13,7 +13,7 @@ class Modal(title: String, content: HTMLElement, val zIndex: Int = 2002):
   val closeIcon = Icons.x(color = "gray")
   val workarea = content
   var onCloseCallbacks: List[Boolean => Unit] = List.empty
-  val dialog = div(Modal.modalContent(zIndex))(
+  val dialog = div(Modal.modalContent(zIndex), cls := "domq-modal")(
     div(
       css(style => style.width = "*"),
       span(Modal.modalTitle)(title),

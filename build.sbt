@@ -105,11 +105,13 @@ lazy val server = project
   .dependsOn(db, modelJVM, utilJVM, appointAdmin, clinicopJVM, rcpt, javalib)
   .settings(
     name := "server",
+    resolvers += Resolver.mavenLocal,
     libraryDependencies ++= Seq(
       "ch.qos.logback" % "logback-classic" % "1.1.3" % "runtime",
       "org.http4s" %% "http4s-blaze-server" % http4sVersion,
       "org.http4s" %% "http4s-dsl" % http4sVersion,
-      "org.http4s" %% "http4s-circe" % http4sVersion
+      "org.http4s" %% "http4s-circe" % http4sVersion,
+      "dev.fujiwara" % "drawer" % "1.0.0-SNAPSHOT",
     ),
   )
 

@@ -57,4 +57,16 @@ object MiscService extends DateTimeQueryParam with Publisher:
           _ <- publishAll(events)
         yield true
       }
+
+    case req @ GET -> Root / "draw-receipt" =>
+      val d = new dev.fujiwara.drawer.forms.receipt.ReceiptDrawerData()
+      val c = new dev.fujiwara.drawer.forms.receipt.ReceiptDrawer(d)
+      val m = dev.fujiwara.drawer.op.JsonCodec.createMapper()
+      val s = m.writeValueAsString(c.getOps())
+      Ok(s)
+      // val s = m.writeValueAsBytes(c.getOps())
+      // import org.http4s.headers.`Content-Type`
+      // import org.http4s.MediaType
+      // given EntityEncoder[IO, Array[Byte]] = org.http4s.EntityEncoder.byteArrayEncoder
+      // Ok(s).map(r => r.withContentType(`Content-Type`(MediaType("application", "json"))))
   }
