@@ -6,27 +6,29 @@ import io.circe.parser.*
 import io.circe.generic.semiauto._
 
 case class ReceiptDrawerData(
-  patientName: String = "",
-  charge: String = "",
-  visitDate: String = "",
-  issueDate: String = "",
-  patientId: String = "",
-  hoken: String = "",
-  futanWari: String = "",
-  shoshin: String = "",
-  kanri: String = "",
-  zaitaku: String = "",
-  kensa: String = "",
-  gazou: String = "",
-  touyaku: String = "",
-  chuusha: String = "",
-  shochi: String = "",
-  sonota: String = "",
-  souten: String = "",
-  hokengai: List[String] = List("", "", "", ""),
-  clinicName: String = "",
-  addressLines: List[String] = List.empty
-)
+  var patientName: String = "",
+  var charge: Int = 0,
+  var visitDate: String = "",
+  var issueDate: String = "",
+  var patientId: String = "",
+  var hoken: String = "",
+  var futanWari: String = "",
+  var shoshin: String = "",
+  var kanri: String = "",
+  var zaitaku: String = "",
+  var kensa: String = "",
+  var gazou: String = "",
+  var touyaku: String = "",
+  var chuusha: String = "",
+  var shochi: String = "",
+  var sonota: String = "",
+  var souten: String = "",
+  var hokengai: List[String] = List("", "", "", "")
+):
+  def setPatient(patient: Patient): Unit =
+    patientName = patient.fullName()
+    patientId = patient.patientId.toString
+
 
 object ReceiptDrawerData:
   given Encoder[ReceiptDrawerData] = deriveEncoder[ReceiptDrawerData]

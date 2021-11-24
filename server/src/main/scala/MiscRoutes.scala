@@ -18,14 +18,15 @@ import fs2.concurrent.Topic
 import org.http4s.websocket.WebSocketFrame
 import dev.myclinic.scala.model.*
 import dev.myclinic.scala.model.jsoncodec.Implicits.given
-import dev.myclinic.java.{Config, HoukatsuKensa}
+import dev.myclinic.java.{Config => ConfigJava, HoukatsuKensa}
 import dev.myclinic.scala.rcpt.RcptVisit
+import dev.myclinic.scala.config.Config
 
 object MiscService extends DateTimeQueryParam with Publisher:
   object dateDate extends QueryParamDecoderMatcher[LocalDate]("date")
   object intVisitId extends QueryParamDecoderMatcher[Int]("visit-id")
 
-  given houkatsuKensa: HoukatsuKensa = (new Config).getHoukatsuKensa
+  given houkatsuKensa: HoukatsuKensa = (new ConfigJava).getHoukatsuKensa
 
   def routes(using topic: Topic[IO, WebSocketFrame]) = HttpRoutes.of[IO] {
     case GET -> Root / "resolve-clinic-operation" :? dateDate(date) =>
@@ -44,29 +45,62 @@ object MiscService extends DateTimeQueryParam with Publisher:
 
     case GET -> Root / "get-meisai" :? intVisitId(visitId) =>
       Ok({
-        for
-          visit <- Db.getVisitEx(visitId)
+        for visit <- Db.getVisitEx(visitId)
         yield RcptVisit.getMeisai(visit)
       })
 
     case req @ POST -> Root / "finish-cashier" =>
       Ok {
-        for 
+        for
           payment <- req.as[Payment]
           events <- Db.finishCashier(payment)
           _ <- publishAll(events)
         yield true
       }
 
-    case req @ GET -> Root / "draw-receipt" =>
-      val d = new dev.fujiwara.drawer.forms.receipt.ReceiptDrawerData()
-      val c = new dev.fujiwara.drawer.forms.receipt.ReceiptDrawer(d)
-      val m = dev.fujiwara.drawer.op.JsonCodec.createMapper()
-      val s = m.writeValueAsString(c.getOps())
-      Ok(s)
-      // val s = m.writeValueAsBytes(c.getOps())
-      // import org.http4s.headers.`Content-Type`
-      // import org.http4s.MediaType
-      // given EntityEncoder[IO, Array[Byte]] = org.http4s.EntityEncoder.byteArrayEncoder
-      // Ok(s).map(r => r.withContentType(`Content-Type`(MediaType("application", "json"))))
+    case GET -> Root / "draw-blank-receipt" =>
+      Ok {
+        val d = new dev.fujiwara.drawer.forms.receipt.ReceiptDrawerData()
+        val clinicInfo = Config.getClinicInfo
+        d.setClinicName(clinicInfo.name)
+          d.setAddressLines(
+            Array(
+              clinicInfo.postalCode,
+              clinicInfo.address,
+              clinicInfo.tel,
+              clinicInfo.fax,
+              clinicInfo.homepage
+            )
+          )
+        val compiler = new dev.fujiwara.drawer.forms.receipt.ReceiptDrawer(d)
+        val mapper = dev.fujiwara.drawer.op.JsonCodec.createMapper()
+        mapper.writeValueAsString(compiler.getOps())
+      }
+
+    case req @ POST -> Root / "draw-receipt" =>
+      Ok {
+        for data <- req.as[ReceiptDrawerData]
+        yield {
+          val d = new dev.fujiwara.drawer.forms.receipt.ReceiptDrawerData()
+          val clinicInfo = Config.getClinicInfo
+          d.setClinicName(clinicInfo.name)
+          d.setAddressLines(
+            Array(
+              clinicInfo.postalCode,
+              clinicInfo.address,
+              clinicInfo.tel,
+              clinicInfo.fax,
+              clinicInfo.homepage
+            )
+          )
+          d.setPatientName(data.patientName)
+          d.setPatientId(data.patientId)
+          d.setChargeByInt(data.charge)
+          d.setVisitDate(data.visitDate)
+          d.setIssueDate(data.issueDate)
+          val compiler = new dev.fujiwara.drawer.forms.receipt.ReceiptDrawer(d)
+          val mapper = dev.fujiwara.drawer.op.JsonCodec.createMapper()
+          mapper.writeValueAsString(compiler.getOps())
+        }
+      }
   }

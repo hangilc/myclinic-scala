@@ -295,7 +295,10 @@ case class Kouhi(
     patientId: Int
 )
 
-case class MeisaiSectionData(section: MeisaiSection, entries: List[MeisaiSectionItem]):
+case class MeisaiSectionData(
+    section: MeisaiSection,
+    entries: List[MeisaiSectionItem]
+):
   def subtotal: Int = entries.map(_.total).sum
 
 case class Meisai(
@@ -308,3 +311,16 @@ case class Meisai(
 object Meisai:
   def calcTotalTen(items: List[MeisaiSectionData]): Int =
     items.map(_.subtotal).sum
+
+case class ClinicInfo(
+    name: String,
+    postalCode: String,
+    address: String,
+    tel: String,
+    fax: String,
+    todoufukencode: String,
+    tensuuhyoucode: String,
+    kikancode: String,
+    homepage: String,
+    doctorName: String
+)

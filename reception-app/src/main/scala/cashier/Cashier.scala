@@ -93,7 +93,7 @@ class Cashier(using publishers: EventPublishers) extends SideMenuService:
           if wq.waitState == WaitState.WaitCashier then
             e(
               button("会計")(
-                onclick := (() => doCashier(wq.visitId, patient))
+                onclick := (() => doCashier(wq.visitId, patient, visit.visitedAt.toLocalDate))
               )
             )
           if wq.waitState == WaitState.WaitExam then
@@ -141,8 +141,8 @@ class Cashier(using publishers: EventPublishers) extends SideMenuService:
       }
     )
 
-  private def doCashier(visitId: Int, patient: Patient): Unit =
+  private def doCashier(visitId: Int, patient: Patient, at: LocalDate): Unit =
     for meisai <- Api.getMeisai(visitId)
     yield {
-      CashierDialog(meisai, patient, visitId).open()
+      CashierDialog(meisai, patient, visitId, at).open()
     }

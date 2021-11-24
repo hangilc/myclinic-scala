@@ -102,7 +102,7 @@ val utilJVM = util.jvm
 
 lazy val server = project
   .in(file("server"))
-  .dependsOn(db, modelJVM, utilJVM, appointAdmin, clinicopJVM, rcpt, javalib)
+  .dependsOn(db, modelJVM, utilJVM, appointAdmin, clinicopJVM, rcpt, javalib, config)
   .settings(
     name := "server",
     resolvers += Resolver.mavenLocal,
@@ -239,6 +239,7 @@ lazy val rcpt = project
 lazy val javalib = project
   .in(file("javalib"))
   .settings(
+    name := "javalib",
     version := "1.0.0-SHANPSHOT",
     crossPaths := false,
     autoScalaLibrary := false,
@@ -249,4 +250,11 @@ lazy val javalib = project
       "com.fasterxml.jackson.dataformat" % "jackson-dataformat-yaml" % jacksonVersion,
       "com.fasterxml.jackson.dataformat" % "jackson-dataformat-xml" % jacksonVersion,
     )
+  )
+
+lazy val config = project
+  .in(file("config"))
+  .dependsOn(javalib, modelJVM)
+  .settings(
+    name := "config",
   )

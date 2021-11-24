@@ -14,15 +14,40 @@ import java.util.List;
 
 public class Config {
 
+  private final String configDir;
+  private final ObjectMapper yamlMapper;
+  private final ObjectMapper mapper;
+
   public Config(){
     this(defaultConfigDir());
   }
 
   public Config(String configDir){
     this.configDir = configDir;
-  }
+    this.yamlMapper = new ObjectMapper(new YAMLFactory())
+      .addMixIn(ClinicInfoDTO.class, ClinicInfoMixIn.class)
+      .addMixIn(DiseaseExampleDTO.class, DiseaseExampleMixIn.class)
+      .addMixIn(PracticeConfigDTO.class, PracticeConfigMixIn.class);
+    this.mapper = new ObjectMapper();
+ }
 
-  private String configDir;
+    private static class ClinicInfoMixIn {
+        @JsonProperty("postal-code")
+        public String postalCode;
+        @JsonProperty("doctor-name")
+        public String doctorName;
+    }
+
+    private static class DiseaseExampleMixIn {
+        @JsonProperty("adj-list")
+        public List<String> adjList;
+    }
+
+    private static class PracticeConfigMixIn {
+        @JsonProperty("kouhatsu-kasan")
+        public String kouhatsuKasan;
+    }
+
 
   private static String defaultConfigDir() {
     String configDir = System.getenv("MYCLINIC_CONFIG_DIR");
@@ -41,5 +66,14 @@ public class Config {
       }
   }
 
+  public ClinicInfoDTO getClinicInfo() throws Exception {
+      File file = new File(configDir, "clinic-info.yml");
+      return fromYamlFile(file, new TypeReference<>() {
+      });
+  }
+
+  private <T> T fromYamlFile(File file, TypeReference<T> typeRef) throws Exception {
+    return yamlMapper.readValue(file, typeRef);
+  }
 
 }

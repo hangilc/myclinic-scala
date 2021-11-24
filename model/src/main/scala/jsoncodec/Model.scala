@@ -174,3 +174,7 @@ trait Model extends DateTime with WaitStateCodec:
     if str == "0000-00-00" then ValidUpto(None)
     else ValidUpto(Some(LocalDate.parse(str, sqlDateFormatter)))
   })
+
+  given Encoder[ClinicInfo] = deriveEncoder[ClinicInfo]
+  given Decoder[ClinicInfo] = deriveDecoder[ClinicInfo]
+

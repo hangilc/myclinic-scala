@@ -9,12 +9,13 @@ import dev.myclinic.scala.model.*
 import dev.myclinic.scala.web.appbase.{PrintDialog}
 import dev.myclinic.scala.webclient.Api
 import org.scalajs.dom.raw.{HTMLElement}
-import java.time.LocalDateTime
+import java.time.{LocalDateTime, LocalDate}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Success
 import scala.util.Failure
+import dev.myclinic.scala.util.KanjiDate
 
-class CashierDialog(meisai: Meisai, patient: Patient, visitId: Int):
+class CashierDialog(meisai: Meisai, patient: Patient, visitId: Int, at: LocalDate):
   val table = Table()
   table.setColumns(
     List(
@@ -60,9 +61,13 @@ class CashierDialog(meisai: Meisai, patient: Patient, visitId: Int):
     modal.open()
 
   def doPrintReceipt(): Unit =
-    for opsJson <- Api.drawReceipt()
+    val data = ReceiptDrawerData()
+    data.setPatient(patient)
+    data.charge = meisai.charge
+    data.visitDate = KanjiDate.dateToKanji(at, formatYoubi = _ => "")
+    data.issueDate = KanjiDate.dateToKanji(LocalDate.now(), formatYoubi = _ => "")
+    for opsJson <- Api.drawReceipt(data)
     yield {
-      //val svg = DrawerSVG.drawerJsonToSvg(opsJson, 148, 105, "0, 0, 148, 105")
       val scale = 3
       val w = 148
       val h = 105

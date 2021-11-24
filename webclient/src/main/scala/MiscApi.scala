@@ -55,5 +55,8 @@ object MiscApi extends ApiBase:
     def finishCashier(payment: Payment): Future[Boolean] =
       post("finish-cashier", Params(), payment)
 
-    def drawReceipt(): Future[String] =
-      get("draw-receipt", Params())
+    def drawBlankReceipt(): Future[String] =
+      get("draw-blank-receipt", Params())
+
+    def drawReceipt(data: ReceiptDrawerData): Future[String] =
+      post("draw-receipt", Params(), data)
