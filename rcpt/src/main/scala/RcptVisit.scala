@@ -7,7 +7,9 @@ import dev.myclinic.scala.model.{
   MeisaiSectionData,
   Meisai
 }
-import dev.myclinic.java.{HoukatsuKensa, HokenUtil, RcptCalc}
+import dev.myclinic.java.{HoukatsuKensa}
+import dev.myclinic.scala.util.RcptUtil
+import dev.myclinic.scala.apputil.FutanWari
 import java.time.LocalDate
 
 object RcptVisit:
@@ -16,7 +18,6 @@ object RcptVisit:
   ): Meisai =
     if !visit.drugs.isEmpty then
       new RuntimeException("visit drug is not supported")
-    given RcptCalc = new RcptCalc()
     var units: List[MeisaiUnit] = List.empty
     visit.shinryouList.foreach(s => {
       val u = MeisaiUnit.fromShinryou(s, visit.visitedAt.toLocalDate)
@@ -32,10 +33,9 @@ object RcptVisit:
       .map({ case (sect, units) =>
         MeisaiSectionData(sect, units.map(_.toItem))
       })
-    val futanWari: Int = calcFutanWari(visit)
-    val calc: RcptCalc = new RcptCalc()
+    val futanWari: Int = FutanWari.calcFutanWari(visit)
     val totalTen: Int = Meisai.calcTotalTen(items)
-    Meisai(items, futanWari, calc.calcCharge(totalTen, futanWari))
+    Meisai(items, futanWari, RcptUtil.calcCharge(totalTen, futanWari))
 
   private def add(unit: MeisaiUnit, repo: List[MeisaiUnit]): List[MeisaiUnit] =
     val section: MeisaiSection = unit.section
@@ -48,33 +48,4 @@ object RcptVisit:
             case None         => h :: add(unit, t)
           }
         else h :: add(unit, t)
-    }
-
-  def calcFutanWari(visit: VisitEx): Int =
-    val util = new HokenUtil()
-    visit.toVisit.futanWariOverride match {
-      case Some(futanWari) => futanWari
-      case None => {
-        var futanWari = 10
-        def update(value: Int): Unit =
-          futanWari = Math.min(futanWari, value)
-        visit.shahokokuho.foreach(shahokokuho => {
-          val birthday: LocalDate = visit.patient.birthday
-          val rcptAge = util.calcRcptAge(
-            birthday.getYear,
-            birthday.getMonthValue,
-            birthday.getDayOfMonth,
-            visit.visitedAt.getYear,
-            visit.visitedAt.getMonthValue
-          )
-          update(util.calcShahokokuhoFutanWariByAge(rcptAge))
-          if shahokokuho.kourei > 0 then update(shahokokuho.kourei)
-        })
-        visit.roujin.foreach(roujin => update(roujin.futanWari))
-        visit.koukikourei.foreach(koukikourei => update(koukikourei.futanWari))
-        visit.kouhiList.foreach(kouhi =>
-          update(util.kouhiFutanWari(kouhi.futansha))
-        )
-        futanWari
-      }
     }

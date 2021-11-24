@@ -39,7 +39,7 @@ object MeisaiUnit:
           List(shinryou)
         )
     }
-  def fromConduct(conduct: ConductEx)(using RcptCalc): List[MeisaiUnit] =
+  def fromConduct(conduct: ConductEx): List[MeisaiUnit] =
     val section: MeisaiSection =
       if conduct.kind == MyclinicConsts.ConductKindGazou then
         MeisaiSection.Gazou
@@ -90,8 +90,7 @@ case class ConductDrugUnit(
     section: MeisaiSection,
     drug: ConductDrugEx,
     val count: Int = 1
-)(using rcptCalc: RcptCalc)
-    extends MeisaiUnit:
+) extends MeisaiUnit:
   def tanka: Int =
     val kingaku: Double = drug.master.yakka * drug.amount
     if section == MeisaiSection.Gazou then rcptCalc.shochiKingakuToTen(kingaku)
@@ -108,10 +107,10 @@ case class ConductDrugUnit(
   def amount: Double = drug.amount
 
 case class ConductKizaiUnit(
-  section: MeisaiSection,
-  kizai: ConductKizaiEx,
-  val count: Int = 1
-)(using rcptCalc: RcptCalc) extends MeisaiUnit:
+    section: MeisaiSection,
+    kizai: ConductKizaiEx,
+    val count: Int = 1
+) extends MeisaiUnit:
   def tanka: Int =
     val kingaku: Double = kizai.master.kingaku * kizai.amount
     rcptCalc.kizaiKingakuToTen(kingaku)

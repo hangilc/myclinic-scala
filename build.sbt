@@ -175,7 +175,7 @@ lazy val appointAdmin = project.in(file("appoint-admin"))
 lazy val receptionApp = project
   .in(file("reception-app"))
   .enablePlugins(ScalaJSPlugin)
-  .dependsOn(domq, modelJS, utilJS, webclient, validatorJS, appbase)
+  .dependsOn(domq, modelJS, utilJS, webclient, validatorJS, appbase, appUtilJS)
   .settings(
     name := "myclinic-reception",
     Compile / fastLinkJS / scalaJSLinkerOutputDirectory :=
@@ -234,7 +234,7 @@ val clinicopJS = clinicop.js
 
 lazy val rcpt = project
   .in(file("rcpt"))
-  .dependsOn(javalib, modelJVM)
+  .dependsOn(javalib, modelJVM, appUtilJVM)
 
 lazy val javalib = project
   .in(file("javalib"))
@@ -258,3 +258,19 @@ lazy val config = project
   .settings(
     name := "config",
   )
+
+lazy val appUtil = crossProject(JVMPlatform, JSPlatform)
+  .crossType(CrossType.Pure)  
+  .in(file("app-util"))
+  .dependsOn(util, model)
+  .jsConfigure(_ enablePlugins TzdbPlugin)
+  .jsSettings(
+    scalaJSUseMainModuleInitializer := false,
+    zonesFilter := { (z: String) => z == "Asia/Tokyo" },
+    libraryDependencies ++= Seq(
+      "io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion
+    )
+  )
+
+val appUtilJS = appUtil.js
+val appUtilJVM = appUtil.jvm

@@ -20,26 +20,17 @@ public class RcptCalc {
 		return (int)Math.round(kingaku/10.0);
 	}
 
-	public int calcRcptAge(int bdYear, int bdMonth, int bdDay, int atYear, int atMonth){
-	    int age;
-		age = atYear - bdYear;
-		if( atMonth < bdMonth ){
-			age -= 1;
-		} else if( atMonth == bdMonth ){
-			if( bdDay != 1 ){
-				age -= 1;
-			}
-		}
-		return age;
-	}
+	// public int calcRcptAge(int bdYear, int bdMonth, int bdDay, int atYear, int atMonth){
+	//     int age;
+	// 	age = atYear - bdYear;
+	// 	if( atMonth < bdMonth ){
+	// 		age -= 1;
+	// 	} else if( atMonth == bdMonth ){
+	// 		if( bdDay != 1 ){
+	// 			age -= 1;
+	// 		}
+	// 	}
+	// 	return age;
+	// }
 
-	public int calcCharge(int ten, int futanWari){
-		int c = ten * futanWari;
-		int r = c % 10;
-		if( r < 5 )
-			c -= r;
-		else
-			c += (10 - r);
-		return c;
-	}
 }
