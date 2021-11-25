@@ -15,6 +15,7 @@ class PrintDialog(
     height: Double,
     viewBox: String,
     settingNames: List[String] = List.empty,
+    prefSetting: String = "手動",
     zIndex: Int
 ):
   val svg = DrawerSvg.drawerJsonToSvg(opsJson, width, height, viewBox)

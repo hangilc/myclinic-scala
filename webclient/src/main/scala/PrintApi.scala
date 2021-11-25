@@ -10,3 +10,9 @@ object PrintApi extends ApiBase:
   trait Api:
     def beep(): Future[Unit] =
       get("beep", Params())
+
+    def listPrintSetting(): Future[List[String]] =
+      get("setting/", Params())
+
+    def getPrintPref(kind: String): Future[Option[String]] =
+      get("pref/" + kind, Params())
