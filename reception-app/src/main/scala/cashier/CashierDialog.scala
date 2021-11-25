@@ -70,7 +70,23 @@ class CashierDialog(meisai: Meisai, visit: VisitEx):
     data.visitDate = KanjiDate.dateToKanji(at, formatYoubi = _ => "")
     data.issueDate = KanjiDate.dateToKanji(LocalDate.now(), formatYoubi = _ => "")
     data.hoken = HokenUtil.hokenRep(visit)
-    println(("hoken", data.hoken))
+    data.futanWari = 
+      if meisai.futanWari == 10 then "" else meisai.futanWari.toString
+    meisai.items.foreach(sect => {
+      val ten = if sect.subtotal > 0 then sect.subtotal.toString else ""
+      sect.section match {
+        case MeisaiSection.ShoshinSaisin => data.shoshin = ten
+        case MeisaiSection.IgakuKanri => data.kanri = ten
+        case MeisaiSection.Zaitaku => data.zaitaku = ten
+        case MeisaiSection.Kensa => data.kensa = ten
+        case MeisaiSection.Gazou => data.gazou = ten
+        case MeisaiSection.Touyaku => data.touyaku = ten
+        case MeisaiSection.Chuusha => data.chuusha = ten
+        case MeisaiSection.Shochi => data.shochi = ten
+        case MeisaiSection.Sonota => data.sonota = ten
+      }
+    })
+    data.souten = meisai.totalTen.toString
     for opsJson <- Api.drawReceipt(data)
     yield {
       val scale = 3

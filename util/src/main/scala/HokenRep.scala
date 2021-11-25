@@ -14,9 +14,6 @@ object HokenRep:
   ): String =
     val terms = ListBuffer[String]()
     def add(s: String): Unit = terms += s
-    println(
-      ("hoken-rep", shahokokuhoHokenshaBangou, shahokokuhoKoureiFutanWari)
-    )
     for bangou <- shahokokuhoHokenshaBangou
     yield add(shahokokuhoRep(bangou, shahokokuhoKoureiFutanWari))
     for futan <- koukikoureiFutanWari yield add(koukikoureiRep(futan))
