@@ -40,6 +40,22 @@ case class ElementQ(ele: HTMLElement):
   def isEmpty: Boolean =
     ele.childElementCount == 0
 
+  def selectOptionByValue(value: String): Option[HTMLElement] =
+    val nodes = ele.querySelectorAll("option")
+    val n = nodes.length
+    var i = 0
+    var opt: Option[HTMLElement] = None
+    while (i < n) do
+      val e = nodes.item(i).asInstanceOf[HTMLElement]
+      if e.getAttribute("value") == value then
+        e.setAttribute("selected", "selected")
+        opt = Some(e)
+        i = n
+      else
+        e.removeAttribute("selected")
+        i += 1
+    opt
+
 object ElementQ {
   
   given Conversion[HTMLElement, ElementQ] = ElementQ(_)

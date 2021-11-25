@@ -21,15 +21,16 @@ class PrintDialog(
   val svg = DrawerSvg.drawerJsonToSvg(opsJson, width, height, viewBox)
   val eDisplay: HTMLElement = div()
   val eSetting: HTMLElement = div()
+  val eSelect: HTMLElement = select()
   val settingOptions: List[Modifier] =
-    settingNames.map(name => option(name))
+    ("手動" :: settingNames).map(name => option(name, value := name))
   val dlog: Modal = Modal(
     title,
     div(
       eDisplay(svg),
       eSetting(
         "設定",
-        select(settingOptions: _*)(ml := "0.3rem"),
+        eSelect(settingOptions: _*)(ml := "0.3rem"),
         a(
           "管理画面表示",
           href := "http://127.0.0.1:48080",
@@ -44,5 +45,6 @@ class PrintDialog(
     )
   )
   dlog.dialog(cls := "pring-dialog")
+  eSelect.selectOptionByValue(prefSetting)
 
   def open(): Unit = dlog.open()
