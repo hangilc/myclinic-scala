@@ -4,6 +4,7 @@ ThisBuild / scalaVersion := "3.0.2"
 ThisBuild / version := "0.1.0-SNAPSHOT"
 ThisBuild / organization := "dev.myclinic.scala"
 ThisBuild / organizationName := "myclinic"
+ThisBuild / resolvers += Resolver.mavenLocal
 
 val mysqlVersion = "6.0.6"
 val http4sVersion = "0.23.3"
@@ -23,18 +24,31 @@ val rootDir = ThisBuild / baseDirectory
 lazy val root = project
   .in(file("."))
   .aggregate(
+    appUtilJS,
+    appUtilJVM,
+    appbase,
+    appointAdmin,
+    appointApp,
+    clinicopJS,
+    clinicopJVM,
+    config,
+    db,
+    domq,
+    drawerJS,
+    drawerJVM,
+    holidayjpJS,
+    holidayjpJVM,
+    javalib,
     modelJS,
     modelJVM,
-    db,
-    utilJVM,
-    utilJS,
-    server,
-    webclient,
-    domq,
-    appbase,
-    appointApp,
-    appointAdmin,
+    rcpt,
     receptionApp,
+    server,
+    utilJS,
+    utilJVM,
+    validatorJS,
+    validatorJVM,
+    webclient,
   )
   .settings(
     publish := {},
@@ -274,3 +288,32 @@ lazy val appUtil = crossProject(JVMPlatform, JSPlatform)
 
 val appUtilJS = appUtil.js
 val appUtilJVM = appUtil.jvm
+
+lazy val drawer = crossProject(JVMPlatform, JSPlatform)
+  .crossType(CrossType.Full)
+  .in(file("drawer"))
+  .settings(
+    name := "drawer",
+    libraryDependencies ++= Seq(
+      "io.circe" %%% "circe-core" % circeVersion,
+      "io.circe" %%% "circe-generic" % circeVersion,
+      "io.circe" %%% "circe-parser" % circeVersion
+    )
+  )
+  .jsConfigure(_ enablePlugins TzdbPlugin)
+  .jsSettings(
+    scalaJSUseMainModuleInitializer := false,
+    zonesFilter := { (z: String) => z == "Asia/Tokyo" },
+    libraryDependencies ++= Seq(
+      "io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion
+    )
+  )
+  .jvmSettings(
+    libraryDependencies ++= Seq(
+      "dev.fujiwara" % "drawer" % "1.0.0-SNAPSHOT"
+    )
+  )
+
+val drawerJVM = drawer.jvm
+val drawerJS = drawer.js
+
