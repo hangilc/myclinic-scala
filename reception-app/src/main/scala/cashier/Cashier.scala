@@ -142,7 +142,9 @@ class Cashier(using publishers: EventPublishers) extends SideMenuService:
     )
 
   private def doCashier(visitId: Int, patient: Patient, at: LocalDate): Unit =
-    for meisai <- Api.getMeisai(visitId)
+    for 
+      meisai <- Api.getMeisai(visitId)
+      visit <- Api.getVisitEx(visitId)
     yield {
-      CashierDialog(meisai, patient, visitId, at).open()
+      CashierDialog(meisai, visit).open()
     }

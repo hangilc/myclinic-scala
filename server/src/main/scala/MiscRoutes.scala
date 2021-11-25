@@ -98,6 +98,7 @@ object MiscService extends DateTimeQueryParam with Publisher:
           d.setChargeByInt(data.charge)
           d.setVisitDate(data.visitDate)
           d.setIssueDate(data.issueDate)
+          d.setHoken(data.hoken)
           val compiler = new dev.fujiwara.drawer.forms.receipt.ReceiptDrawer(d)
           val mapper = dev.fujiwara.drawer.op.JsonCodec.createMapper()
           mapper.writeValueAsString(compiler.getOps())

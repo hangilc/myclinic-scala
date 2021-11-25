@@ -4,9 +4,9 @@ import dev.myclinic.scala.model.*
 import dev.myclinic.java.{
   HoukatsuKensa,
   HoukatsuKensaKind,
-  MyclinicConsts,
-  RcptCalc
+  MyclinicConsts
 }
+import dev.myclinic.scala.util.RcptUtil
 import scala.collection.mutable.ListBuffer
 import java.time.LocalDate
 import scala.jdk.OptionConverters.*
@@ -93,8 +93,8 @@ case class ConductDrugUnit(
 ) extends MeisaiUnit:
   def tanka: Int =
     val kingaku: Double = drug.master.yakka * drug.amount
-    if section == MeisaiSection.Gazou then rcptCalc.shochiKingakuToTen(kingaku)
-    else rcptCalc.touyakuKingakuToTen(kingaku)
+    if section == MeisaiSection.Gazou then RcptUtil.shochiKingakuToTen(kingaku)
+    else RcptUtil.touyakuKingakuToTen(kingaku)
   def label: String = s"${drug.master.name} ${amount}${drug.master.unit}"
   def merge(that: MeisaiUnit): Option[MeisaiUnit] =
     that match {
@@ -113,7 +113,7 @@ case class ConductKizaiUnit(
 ) extends MeisaiUnit:
   def tanka: Int =
     val kingaku: Double = kizai.master.kingaku * kizai.amount
-    rcptCalc.kizaiKingakuToTen(kingaku)
+    RcptUtil.kizaiKingakuToTen(kingaku)
   def label: String = s"${kizai.master.name} ${amount}${kizai.master.unit}"
   def merge(that: MeisaiUnit): Option[MeisaiUnit] =
     that match {

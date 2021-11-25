@@ -8,6 +8,7 @@ import scala.language.implicitConversions
 import dev.myclinic.scala.model.*
 import dev.myclinic.scala.web.appbase.{PrintDialog}
 import dev.myclinic.scala.webclient.Api
+import dev.myclinic.scala.apputil.HokenUtil
 import org.scalajs.dom.raw.{HTMLElement}
 import java.time.{LocalDateTime, LocalDate}
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -15,7 +16,9 @@ import scala.util.Success
 import scala.util.Failure
 import dev.myclinic.scala.util.KanjiDate
 
-class CashierDialog(meisai: Meisai, patient: Patient, visitId: Int, at: LocalDate):
+class CashierDialog(meisai: Meisai, visit: VisitEx):
+  val patient: Patient = visit.patient
+  val at: LocalDate = visit.visitedAt.toLocalDate
   val table = Table()
   table.setColumns(
     List(
@@ -66,6 +69,8 @@ class CashierDialog(meisai: Meisai, patient: Patient, visitId: Int, at: LocalDat
     data.charge = meisai.charge
     data.visitDate = KanjiDate.dateToKanji(at, formatYoubi = _ => "")
     data.issueDate = KanjiDate.dateToKanji(LocalDate.now(), formatYoubi = _ => "")
+    data.hoken = HokenUtil.hokenRep(visit)
+    println(("hoken", data.hoken))
     for opsJson <- Api.drawReceipt(data)
     yield {
       val scale = 3
@@ -85,7 +90,7 @@ class CashierDialog(meisai: Meisai, patient: Patient, visitId: Int, at: LocalDat
     }
 
   def doFinishCashier(): Unit =
-    val payment = Payment(visitId, meisai.charge, LocalDateTime.now())
+    val payment = Payment(visit.visitId, meisai.charge, LocalDateTime.now())
     Api.finishCashier(payment).onComplete {
       case Success(_)  => modal.close()
       case Failure(ex) => errBox.show(ex.getMessage)

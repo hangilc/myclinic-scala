@@ -14,10 +14,11 @@ object HokenRep:
   ): String =
     val terms = ListBuffer[String]()
     def add(s: String): Unit = terms += s
-    for
-      bangou <- shahokokuhoHokenshaBangou
-      futan <- shahokokuhoKoureiFutanWari
-    yield add(shahokokuhoRep(bangou, futan))
+    println(
+      ("hoken-rep", shahokokuhoHokenshaBangou, shahokokuhoKoureiFutanWari)
+    )
+    for bangou <- shahokokuhoHokenshaBangou
+    yield add(shahokokuhoRep(bangou, shahokokuhoKoureiFutanWari))
     for futan <- koukikoureiFutanWari yield add(koukikoureiRep(futan))
     for futan <- roujinFutanWari yield add(roujinRep(futan))
     terms ++= List(
@@ -32,12 +33,12 @@ object HokenRep:
 
   def shahokokuhoRep(
       shahokokuhoHokenshaBangou: Int,
-      shahokokuhoKoureiFutanWari: Int
+      shahokokuhoKoureiFutanWari: Option[Int]
   ): String =
     val name: String = shahokokuhoName(shahokokuhoHokenshaBangou)
-    if (shahokokuhoKoureiFutanWari > 0) then
-      name + "・高齢" + shahokokuhoKoureiFutanWari.toString + "割"
-    else name
+    shahokokuhoKoureiFutanWari.fold(name)(futan =>
+      (name + "・高齢" + futan.toString + "割")
+    )
 
   def shahokokuhoName(hokenshaBangou: Int): String =
     if hokenshaBangou <= 9999 then "政管健保"

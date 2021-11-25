@@ -30,3 +30,14 @@ object RcptUtil:
     if (r < 5) then c -= r
     else c += (10 - r)
     c
+
+  def touyakuKingakuToTen(kingaku: Double): Int =
+    if (kingaku <= 15.0) then 1
+    else Math.ceil((kingaku - 15) / 10.0).toInt + 1
+
+  def shochiKingakuToTen(kingaku: Double): Int =
+    if (kingaku <= 15) then 0
+    else Math.ceil((kingaku - 15) / 10).toInt + 1
+
+  def kizaiKingakuToTen(kingaku: Double): Int =
+    Math.round(kingaku / 10.0).toInt
