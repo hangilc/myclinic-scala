@@ -16,6 +16,8 @@ import dev.myclinic.scala.util.DateUtil
 import dev.myclinic.scala.clinicop.ClinicOperation
 import fs2.concurrent.Topic
 import org.http4s.websocket.WebSocketFrame
+import org.http4s.headers.`Content-Type`
+import org.http4s.MediaType
 import dev.myclinic.scala.model.*
 import dev.myclinic.scala.model.jsoncodec.Implicits.given
 import dev.myclinic.java.{Config => ConfigJava, HoukatsuKensa}
@@ -59,7 +61,8 @@ object MiscService extends DateTimeQueryParam with Publisher:
       }
 
     case GET -> Root / "draw-blank-receipt" =>
-      Ok {
+      given EntityEncoder[IO, Array[Byte]] = EntityEncoder.byteArrayEncoder[IO]
+      val resp = {
         val d = new dev.fujiwara.drawer.forms.receipt.ReceiptDrawerData()
         val clinicInfo = Config.getClinicInfo
         d.setClinicName(clinicInfo.name)
@@ -74,11 +77,13 @@ object MiscService extends DateTimeQueryParam with Publisher:
           )
         val compiler = new dev.fujiwara.drawer.forms.receipt.ReceiptDrawer(d)
         val mapper = dev.fujiwara.drawer.op.JsonCodec.createMapper()
-        mapper.writeValueAsString(compiler.getOps())
+        mapper.writeValueAsBytes(compiler.getOps())
       }
+      Ok(resp).map(r => r.withContentType(`Content-Type`(new MediaType("application", "json"))))
 
     case req @ POST -> Root / "draw-receipt" =>
-      Ok {
+      given EntityEncoder[IO, Array[Byte]] = EntityEncoder.byteArrayEncoder[IO]
+      val resp = {
         for data <- req.as[ReceiptDrawerData]
         yield {
           val d = new dev.fujiwara.drawer.forms.receipt.ReceiptDrawerData()
@@ -112,7 +117,8 @@ object MiscService extends DateTimeQueryParam with Publisher:
           d.setSouten(data.souten)
           val compiler = new dev.fujiwara.drawer.forms.receipt.ReceiptDrawer(d)
           val mapper = dev.fujiwara.drawer.op.JsonCodec.createMapper()
-          mapper.writeValueAsString(compiler.getOps())
+          mapper.writeValueAsBytes(compiler.getOps())
         }
       }
+      Ok(resp).map(r => r.withContentType(`Content-Type`(new MediaType("application", "json"))))
   }

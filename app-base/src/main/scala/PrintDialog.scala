@@ -7,10 +7,11 @@ import dev.fujiwara.domq.Modifier
 import dev.fujiwara.domq.{Modal}
 import scala.language.implicitConversions
 import org.scalajs.dom.raw.{HTMLElement}
+import dev.fujiwara.scala.drawer.Op
 
 class PrintDialog(
     title: String,
-    opsJson: String,
+    ops: List[Op],
     width: Double,
     height: Double,
     viewBox: String,
@@ -18,7 +19,7 @@ class PrintDialog(
     prefSetting: String = "手動",
     zIndex: Int
 ):
-  val svg = DrawerSvg.drawerJsonToSvg(opsJson, width, height, viewBox)
+  val svg = DrawerSvg.drawerToSvg(ops, width, height, viewBox)
   val eDisplay: HTMLElement = div()
   val eSetting: HTMLElement = div()
   val eSelect: HTMLElement = select()

@@ -1,4 +1,4 @@
-package dev.myclinic.scala.drawer
+package dev.fujiwara.scala.drawer
 
 import io.circe.*
 import io.circe.syntax.*

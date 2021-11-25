@@ -116,7 +116,7 @@ val utilJVM = util.jvm
 
 lazy val server = project
   .in(file("server"))
-  .dependsOn(db, modelJVM, utilJVM, appointAdmin, clinicopJVM, rcpt, javalib, config)
+  .dependsOn(db, modelJVM, utilJVM, appointAdmin, clinicopJVM, rcpt, javalib, config, drawerJVM)
   .settings(
     name := "server",
     resolvers += Resolver.mavenLocal,
@@ -132,7 +132,7 @@ lazy val server = project
 lazy val webclient = project
   .in(file("webclient"))
   .enablePlugins(ScalaJSPlugin)
-  .dependsOn(modelJS, utilJS)
+  .dependsOn(modelJS, utilJS, drawerJS)
   .settings(
     name := "webclient",
     scalaJSUseMainModuleInitializer := false,
@@ -159,7 +159,7 @@ lazy val domq = project
 lazy val appbase = project
   .in(file("app-base"))
   .enablePlugins(ScalaJSPlugin)
-  .dependsOn(domq, modelJS, utilJS, webclient, validatorJS)
+  .dependsOn(domq, modelJS, utilJS, webclient, validatorJS, drawerJS)
   .settings(
     name := "myclinic-appbase",
     libraryDependencies ++= Seq(
@@ -189,7 +189,7 @@ lazy val appointAdmin = project.in(file("appoint-admin"))
 lazy val receptionApp = project
   .in(file("reception-app"))
   .enablePlugins(ScalaJSPlugin)
-  .dependsOn(domq, modelJS, utilJS, webclient, validatorJS, appbase, appUtilJS)
+  .dependsOn(domq, modelJS, utilJS, webclient, validatorJS, appbase, appUtilJS, drawerJS)
   .settings(
     name := "myclinic-reception",
     Compile / fastLinkJS / scalaJSLinkerOutputDirectory :=

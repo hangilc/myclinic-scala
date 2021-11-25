@@ -9,6 +9,7 @@ import io.circe.syntax._
 import dev.myclinic.scala.model.jsoncodec.Implicits.{given}
 import dev.myclinic.scala.webclient.ParamsImplicits.{given}
 import scala.language.implicitConversions
+import dev.fujiwara.scala.drawer.Op
 
 object MiscApi extends ApiBase:
   def baseUrl: String = "/api/"
@@ -55,8 +56,8 @@ object MiscApi extends ApiBase:
     def finishCashier(payment: Payment): Future[Boolean] =
       post("finish-cashier", Params(), payment)
 
-    def drawBlankReceipt(): Future[String] =
+    def drawBlankReceipt(): Future[List[Op]] =
       get("draw-blank-receipt", Params())
 
-    def drawReceipt(data: ReceiptDrawerData): Future[String] =
+    def drawReceipt(data: ReceiptDrawerData): Future[List[Op]] =
       post("draw-receipt", Params(), data)

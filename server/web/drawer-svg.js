@@ -1,11 +1,12 @@
 (function () {
+  window.drawerJsonToSvg = drawerJsonToSvg
+  window.drawerToSvg = drawerToSvg
+
   function drawerJsonToSvg(opsJson, width, height, viewBox) {
     let ops = JSON.parse(opsJson);
     let options = { width, height, viewBox };
     return drawerToSvg(ops, options);
   }
-
-  window.drawerJsonToSvg = drawerJsonToSvg
 
   function drawerToSvg(ops, options) {
     options = options || {};
