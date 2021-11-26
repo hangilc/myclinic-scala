@@ -37,7 +37,7 @@ object Op:
         case OpMoveTo(x, y) => ("move_to", x, y).asJson
         case OpLineTo(x, y) => ("line_to", x, y).asJson
         case OpCreateFont(name, fontName, size, weight, italic) =>
-          ("create_font", name, fontName, size, weight, italic).asJson
+          ("create_font", name, fontName, size, weight, if italic then 1 else 0).asJson
         case OpSetFont(name)            => ("set_font", name).asJson
         case OpSetTextColor(r, g, b)    => ("set_text_color", r, g, b).asJson
         case OpDrawChars(chars, xs, ys) => ("draw_chars", chars, xs, ys).asJson
@@ -70,8 +70,8 @@ object Op:
                 fontName <- iter.next.as[String]
                 size <- iter.next.as[Double]
                 weight <- iter.next.as[Int]
-                italic <- iter.next.as[Boolean]
-              yield OpCreateFont(name, fontName, size, weight, italic)
+                italic <- iter.next.as[Int]
+              yield OpCreateFont(name, fontName, size, weight, if italic == 0 then false else true)
             case "set_font"       => 
               for
                 name <- iter.next.as[String]

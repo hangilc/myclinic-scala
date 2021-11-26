@@ -88,7 +88,7 @@ class CashierDialog(meisai: Meisai, visit: VisitEx):
     })
     data.souten = meisai.totalTen.toString
     for 
-      opsJson <- Api.drawReceipt(data)
+      ops <- Api.drawReceipt(data)
       settings <- Api.listPrintSetting()
       pref <- Api.getPrintPref("rceipt")
     yield {
@@ -98,7 +98,7 @@ class CashierDialog(meisai: Meisai, visit: VisitEx):
       val settingNames = List("手動", "処方箋", "会計")
       val dlog = PrintDialog(
         "領収書印刷",
-        opsJson,
+        ops,
         w * scale,
         h * scale, 
         s"0, 0, $w, $h",
