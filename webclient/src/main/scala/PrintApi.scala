@@ -4,11 +4,16 @@ import scala.concurrent.Future
 import dev.myclinic.scala.webclient.ParamsImplicits.given
 import scala.language.implicitConversions
 import dev.fujiwara.scala.drawer.PrintRequest
+import io.circe.*
+import io.circe.syntax.*
+import io.circe.Decoder
 
 object PrintApi extends ApiBase:
   def baseUrl: String = "http://localhost:48080/"
 
   trait Api:
+    given Decoder[Option[String]] = Decoder.decodeOption[String]
+
     def beep(): Future[Unit] =
       get("beep", Params())
 

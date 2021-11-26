@@ -6,7 +6,7 @@ import org.scalajs.dom.raw.XMLHttpRequest
 import org.scalajs.dom.raw.Event
 import io.circe._
 import io.circe.syntax._
-import io.circe.parser.decode
+import io.circe.parser.*
 
 object Ajax:
   def request[T](
