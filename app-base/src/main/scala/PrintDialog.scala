@@ -7,9 +7,10 @@ import dev.fujiwara.domq.Modifier
 import dev.fujiwara.domq.{Modal}
 import scala.language.implicitConversions
 import org.scalajs.dom.raw.{HTMLElement}
-import dev.fujiwara.scala.drawer.Op
+import dev.fujiwara.scala.drawer.{Op, PrintRequest}
 import io.circe.*
 import io.circe.syntax.*
+import dev.myclinic.scala.webclient.Api
 
 class PrintDialog(
     title: String,
@@ -43,7 +44,7 @@ class PrintDialog(
       )
     ),
     div(
-      button("印刷"),
+      button("印刷", onclick := (doPrint _)),
       button("キャンセル", onclick := (() => dlog.close()))
     )
   )
@@ -51,3 +52,8 @@ class PrintDialog(
   eSelect.selectOptionByValue(prefSetting)
 
   def open(): Unit = dlog.open()
+
+  def doPrint(): Unit = 
+    val req = PrintRequest(List.empty, List(ops))
+    val setting: Option[String] = 
+    Api.printDrawer(req, setting)
