@@ -7,6 +7,7 @@ import org.scalajs.dom.raw.HTMLDocument
 import org.scalajs.dom.raw.HTMLInputElement
 import scala.concurrent.Future
 import org.scalajs.dom.raw.Node
+import scala.collection.mutable.ListBuffer
 
 case class ElementQ(ele: HTMLElement):
 
@@ -55,6 +56,18 @@ case class ElementQ(ele: HTMLElement):
         e.removeAttribute("selected")
         i += 1
     opt
+
+  def getSelectedOptionValues: List[String] =
+    val nodes = ele.querySelectorAll("option:checked")
+     val n = nodes.length
+    var i = 0
+    val buf = ListBuffer[String]()
+    while (i < n) do
+      val e = nodes.item(i).asInstanceOf[HTMLElement]
+      buf += e.getAttribute("value")
+      i += 1
+    buf.toList
+   
 
 object ElementQ {
   

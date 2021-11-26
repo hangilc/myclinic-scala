@@ -90,8 +90,9 @@ class CashierDialog(meisai: Meisai, visit: VisitEx):
     for 
       ops <- Api.drawReceipt(data)
       settings <- Api.listPrintSetting()
-      pref <- Api.getPrintPref("rceipt")
+      pref <- Api.getPrintPref("receipt")
     yield {
+      println(("pref", pref))
       val scale = 3
       val w = 148
       val h = 105

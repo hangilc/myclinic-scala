@@ -22,7 +22,8 @@ class PrintDialog(
     prefSetting: String = "手動",
     zIndex: Int
 ):
-  val svg = DrawerSvg.drawerJsonToSvg(ops.asJson.toString, width, height, viewBox)
+  val svg =
+    DrawerSvg.drawerJsonToSvg(ops.asJson.toString, width, height, viewBox)
   val eDisplay: HTMLElement = div()
   val eSetting: HTMLElement = div()
   val eSelect: HTMLElement = select()
@@ -53,7 +54,9 @@ class PrintDialog(
 
   def open(): Unit = dlog.open()
 
-  def doPrint(): Unit = 
+  def doPrint(): Unit =
     val req = PrintRequest(List.empty, List(ops))
-    val setting: Option[String] = 
+    val setting: Option[String] = eSelect.getSelectedOptionValues.headOption
+      .flatMap(s => if s == "手動" then None else Some(s))
+    println(("setting", setting))
     Api.printDrawer(req, setting)
