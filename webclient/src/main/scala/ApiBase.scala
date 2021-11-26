@@ -26,3 +26,21 @@ trait ApiBase:
   def post[T](service: String, params: Params)(using Decoder[T]): Future[T] =
     Ajax.request("POST", url(service), params, "{}")
 
+  def put[B, T](service: String, params: Params, body: B)(using
+      Encoder[B],
+      Decoder[T]
+  ): Future[T] =
+    Ajax.request("PUT", url(service), params, body.asJson.toString())
+
+  def put[T](service: String, params: Params)(using Decoder[T]): Future[T] =
+    Ajax.request("PUT", url(service), params, "{}")
+
+  def delete[B, T](service: String, params: Params, body: B)(using
+      Encoder[B],
+      Decoder[T]
+  ): Future[T] =
+    Ajax.request("DELETE", url(service), params, body.asJson.toString())
+
+  def delete[T](service: String, params: Params)(using Decoder[T]): Future[T] =
+    Ajax.request("DELETE", url(service), params, "{}")
+

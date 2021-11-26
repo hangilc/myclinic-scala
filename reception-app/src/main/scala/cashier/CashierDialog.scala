@@ -89,10 +89,7 @@ class CashierDialog(meisai: Meisai, visit: VisitEx):
     data.souten = meisai.totalTen.toString
     for 
       ops <- Api.drawReceipt(data)
-      settings <- Api.listPrintSetting()
-      pref <- Api.getPrintPref("receipt")
     yield {
-      println(("pref", pref))
       val scale = 3
       val w = 148
       val h = 105
@@ -103,11 +100,9 @@ class CashierDialog(meisai: Meisai, visit: VisitEx):
         w * scale,
         h * scale, 
         s"0, 0, $w, $h",
-        settingNames = settings,
-        prefSetting = pref.getOrElse("手動"),
         zIndex = modal.zIndex + 2
       )
-      dlog.open()
+      dlog.open(prefKind = "receipt")
     }
 
   def doFinishCashier(): Unit =

@@ -11,6 +11,10 @@ import dev.fujiwara.scala.drawer.{Op, PrintRequest}
 import io.circe.*
 import io.circe.syntax.*
 import dev.myclinic.scala.webclient.Api
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.Success
+import scala.util.Failure
 
 class PrintDialog(
     title: String,
@@ -18,24 +22,23 @@ class PrintDialog(
     width: Double,
     height: Double,
     viewBox: String,
-    settingNames: List[String] = List.empty,
-    prefSetting: String = "手動",
-    zIndex: Int
+    zIndex: Int = Modal.zIndexDefault
 ):
   val svg =
     DrawerSvg.drawerJsonToSvg(ops.asJson.toString, width, height, viewBox)
   val eDisplay: HTMLElement = div()
   val eSetting: HTMLElement = div()
   val eSelect: HTMLElement = select()
-  val settingOptions: List[Modifier] =
-    ("手動" :: settingNames).map(name => option(name, value := name))
+  val eDefaultCheck: HTMLElement = checkbox()
   val dlog: Modal = Modal(
     title,
     div(
       eDisplay(svg),
       eSetting(
         "設定",
-        eSelect(settingOptions: _*)(ml := "0.3rem"),
+        eSelect(ml := "0.3rem"),
+        eDefaultCheck(attr("checked") := "checked"),
+        span("既定に"),
         a(
           "管理画面表示",
           href := "http://127.0.0.1:48080",
@@ -50,9 +53,25 @@ class PrintDialog(
     )
   )
   dlog.dialog(cls := "pring-dialog")
-  eSelect.selectOptionByValue(prefSetting)
 
-  def open(): Unit = dlog.open()
+  def initSetting(prefKind: String = "手動"): Future[Unit] =
+    for
+      settings <- Api.listPrintSetting()
+      pref <- Api.getPrintPref(prefKind)
+    yield {
+      val settingOptions: List[Modifier] =
+        ("手動" :: settings).map(name => option(name, value := name))
+      eSelect(settingOptions: _*)
+      eSelect.selectOptionByValue(pref.getOrElse("手動"))
+    }
+
+  def open(prefKind: String = "手動"): Unit = 
+    initSetting(prefKind).onComplete {
+      case Success(_) => dlog.open()
+      case Failure(ex) => 
+        System.err.println(ex.getMessage)
+        dlog.open()
+    }
 
   def doPrint(): Unit =
     val req = PrintRequest(List.empty, List(ops))

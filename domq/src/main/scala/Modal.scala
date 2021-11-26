@@ -7,7 +7,7 @@ import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
 import scala.language.implicitConversions
 
-class Modal(title: String, content: HTMLElement, val zIndex: Int = 2002):
+class Modal(title: String, content: HTMLElement, val zIndex: Int = Modal.zIndexDefault):
   val backdrop = div(Modal.modalBackdrop(zIndex - 1))
   val auxMenu: HTMLElement = span()
   val closeIcon = Icons.x(color = "gray")
@@ -97,6 +97,7 @@ object Modal extends ModalModifiers:
   def ok = button("ＯＫ")
   def execute = button("実行")
   def yes = button("はい")
+  val zIndexDefault = 2002
 
   def apply(title: String, content: HTMLElement): Modal =
     new Modal(title, content(modalBody))

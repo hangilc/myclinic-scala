@@ -23,6 +23,12 @@ object PrintApi extends ApiBase:
     def getPrintPref(kind: String): Future[Option[String]] =
       get("pref/" + kind, Params())
 
+    def setPrintPref(kind: String, pref: String): Future[Option[String]] =
+      post("pref/" + kind, Params(), pref)
+
+    def deletePrintPref(kind: String): Future[Option[String]] =
+      delete("pref/" + kind, Params())
+
     def printDrawer(req: PrintRequest, setting: Option[String]): Future[Boolean] =
       val sub: String = setting.getOrElse("")
       post("print/" + sub, Params(), req)
