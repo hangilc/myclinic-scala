@@ -4,7 +4,7 @@ import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.Modifier
-import dev.fujiwara.domq.{Modal}
+import dev.fujiwara.domq.{Modal, ShowMessage}
 import scala.language.implicitConversions
 import org.scalajs.dom.raw.{HTMLElement, HTMLInputElement}
 import dev.fujiwara.scala.drawer.{Op, PrintRequest}
@@ -84,8 +84,8 @@ class PrintDialog(
         _ <- handlePrefUpdate(setting)
       yield ()
     f.onComplete {
-      case Success(_) => ()
-      case Failure(ex) => System.err.println(ex.getMessage)
+      case Success(_) => dlog.close()
+      case Failure(ex) => ShowMessage.showError(ex.getMessage, zIndex = zIndex + 2)
     }
 
   def handlePrefUpdate(setting: Option[String]): Future[Boolean] = 
