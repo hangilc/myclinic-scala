@@ -67,6 +67,12 @@ case class ElementQ(ele: HTMLElement):
       buf += e.getAttribute("value")
       i += 1
     buf.toList
+
+  def asInputElement: HTMLInputElement = ele.asInstanceOf[HTMLInputElement]
+
+  def selector(query: String): Option[HTMLElement] =
+    val result = ele.querySelector(query)
+    if result == null then None else Some(result.asInstanceOf[HTMLElement]) 
    
 
 object ElementQ {

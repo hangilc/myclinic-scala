@@ -6,7 +6,7 @@ import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.Modifier
 import dev.fujiwara.domq.{Modal}
 import scala.language.implicitConversions
-import org.scalajs.dom.raw.{HTMLElement}
+import org.scalajs.dom.raw.{HTMLElement, HTMLInputElement}
 import dev.fujiwara.scala.drawer.{Op, PrintRequest}
 import io.circe.*
 import io.circe.syntax.*
@@ -22,6 +22,7 @@ class PrintDialog(
     width: Double,
     height: Double,
     viewBox: String,
+    prefKind: String = "手動",
     zIndex: Int = Modal.zIndexDefault
 ):
   val svg =
@@ -54,7 +55,7 @@ class PrintDialog(
   )
   dlog.dialog(cls := "pring-dialog")
 
-  def initSetting(prefKind: String = "手動"): Future[Unit] =
+  def initSetting(): Future[Unit] =
     for
       settings <- Api.listPrintSetting()
       pref <- Api.getPrintPref(prefKind)
@@ -65,8 +66,8 @@ class PrintDialog(
       eSelect.selectOptionByValue(pref.getOrElse("手動"))
     }
 
-  def open(prefKind: String = "手動"): Unit = 
-    initSetting(prefKind).onComplete {
+  def open(): Unit = 
+    initSetting().onComplete {
       case Success(_) => dlog.open()
       case Failure(ex) => 
         System.err.println(ex.getMessage)
@@ -77,5 +78,24 @@ class PrintDialog(
     val req = PrintRequest(List.empty, List(ops))
     val setting: Option[String] = eSelect.getSelectedOptionValues.headOption
       .flatMap(s => if s == "手動" then None else Some(s))
-    println(("setting", setting))
-    Api.printDrawer(req, setting)
+    val f = 
+      for
+        _ <- Api.printDrawer(req, setting)
+        _ <- handlePrefUpdate(setting)
+      yield ()
+    f.onComplete {
+      case Success(_) => ()
+      case Failure(ex) => System.err.println(ex.getMessage)
+    }
+
+  def handlePrefUpdate(setting: Option[String]): Future[Boolean] = 
+    val asDefaultChecked = eDefaultCheck.asInputElement.checked
+    if asDefaultChecked then
+      val currentDefaultOpt = eSelect.selector("option[selected]").map(_.getAttribute("value"))
+      if currentDefaultOpt != setting then
+        Api.setPrintPref(prefKind, setting.getOrElse("手動")).map(_ => true)
+      else
+        Future.successful(false)
+    else
+      Future.successful(false)
+

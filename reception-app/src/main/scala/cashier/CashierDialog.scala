@@ -100,9 +100,10 @@ class CashierDialog(meisai: Meisai, visit: VisitEx):
         w * scale,
         h * scale, 
         s"0, 0, $w, $h",
+        prefKind = "receipt",
         zIndex = modal.zIndex + 2
       )
-      dlog.open(prefKind = "receipt")
+      dlog.open()
     }
 
   def doFinishCashier(): Unit =
