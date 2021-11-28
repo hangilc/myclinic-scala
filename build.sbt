@@ -164,7 +164,8 @@ lazy val appbase = project
     name := "myclinic-appbase",
     libraryDependencies ++= Seq(
       ("org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion)
-        .cross(CrossVersion.for3Use2_13)
+        .cross(CrossVersion.for3Use2_13),
+      "org.typelevel" %%% "cats-core" % catsVersion
     )
   )
 

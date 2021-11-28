@@ -44,10 +44,18 @@ class PatientManagement() extends SideMenuService:
   private def onMenu(event: MouseEvent): Unit =
     ()
 
-  private val newPatientBlock = NewPatientBlock()
+  private var newPatientBlock: Option[NewPatientBlock] = None
 
   private def onNewPatient(): Unit =
-    eWorkarea.prepend(newPatientBlock.ele)
+    val block: NewPatientBlock = newPatientBlock.getOrElse({
+      val b = NewPatientBlock(bb => {
+        bb.ele.remove()
+        newPatientBlock = None
+      })
+      newPatientBlock = Some(b)
+      b
+    })
+    eWorkarea.prepend(block.ele)
 
   private def onSearch(): Unit =
     val txt = eSearchText.value.trim

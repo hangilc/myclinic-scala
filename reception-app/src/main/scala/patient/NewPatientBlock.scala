@@ -13,7 +13,7 @@ import dev.myclinic.scala.webclient.Api
 import scala.concurrent.ExecutionContext.Implicits.global
 import dev.myclinic.scala.web.appbase.DateInput
 
-class NewPatientBlock:
+class NewPatientBlock(onClose: (NewPatientBlock => Unit)):
   val ele = Block(
     "新規患者入力",
     div(
@@ -38,7 +38,10 @@ class NewPatientBlock:
       )(cls := "new-patient-form")
     ),
     div(
-      button("入力"),
-      button("キャンセル")
+      button("入力", onclick := (onEnter _)),
+      button("キャンセル", onclick := (() => onClose(this)))
     )
   ).ele
+
+  private def onEnter(): Unit =
+    ???

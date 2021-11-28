@@ -32,7 +32,7 @@ object KanjiDate:
     val minute = t.getMinute
     s"${hour}時${minute}分"
 
-  enum Gengou(val label: String, val alpha: String, val startDate: LocalDate):
+  enum Gengou(val name: String, val alpha: String, val startDate: LocalDate):
     case Meiji extends Gengou("明治", "Meiji", LocalDate.of(1873, 1, 1))
     case Taishou extends Gengou("大正", "Taishou", LocalDate.of(1912, 7, 30))
     case Shouwa extends Gengou("昭和", "Shouwa", LocalDate.of(1926, 12, 25))
@@ -42,6 +42,15 @@ object KanjiDate:
   object Gengou:
     val list: List[Gengou] =
       (0 until Gengou.values.size).reverse.map(Gengou.fromOrdinal(_)).toList
+
+    val current: Gengou = Gengou.Reiwa
+    val recent: List[Gengou] = List(Gengou.Reiwa, Gengou.Heisei)
+
+    def findByName(name: String): Option[Gengou] =
+      Gengou.values.find(_.name == name)
+
+    def gengouToYear(g: Gengou, nen: Int): Int =
+      g.startDate.getYear + nen - 1
 
   case class Wareki(gengou: Gengou, nen: Int)
 
@@ -53,7 +62,7 @@ object KanjiDate:
 
   class DateInfo(date: LocalDate):
     lazy val warekiOption: Option[Wareki] = Wareki.fromDate(date)
-    def gengou: String = warekiOption.map(_.gengou.label).getOrElse("西暦")
+    def gengou: String = warekiOption.map(_.gengou.name).getOrElse("西暦")
     def nen: Int = warekiOption.map(_.nen).getOrElse(year)
     def year: Int = date.getYear
     def month: Int = date.getMonthValue
