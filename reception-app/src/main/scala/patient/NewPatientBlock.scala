@@ -12,19 +12,24 @@ import org.scalajs.dom.raw.MouseEvent
 import dev.myclinic.scala.webclient.Api
 import scala.concurrent.ExecutionContext.Implicits.global
 import dev.myclinic.scala.web.appbase.DateInput
+import dev.myclinic.scala.validator.{PatientValidator, SexValidator}
 
 class NewPatientBlock(onClose: (NewPatientBlock => Unit)):
+  val eLastNameInput = Form.fixedSizeInput("10rem")
+  val eFirstNameInput = Form.fixedSizeInput("10rem")
+  val eLastNameYomiInput = Form.fixedSizeInput("10rem")
+  val eFirstNameYomiInput = Form.fixedSizeInput("10rem")
   val ele = Block(
     "新規患者入力",
     div(
       Form.rows(
         span("氏名") -> div(Form.inputGroup, cls := "name")(
-          Form.fixedSizeInput("10rem"),
-          Form.fixedSizeInput("10rem")
+          eLastNameInput,
+          eFirstNameInput
         ),
         span("よみ") -> div(Form.inputGroup, cls := "yomi")(
-          Form.fixedSizeInput("10rem"),
-          Form.fixedSizeInput("10rem")
+          eLastNameYomiInput,
+          eFirstNameYomiInput
         ),
         span("生年月日") -> DateInput().ele,
         span("性別") -> div(
@@ -44,4 +49,10 @@ class NewPatientBlock(onClose: (NewPatientBlock => Unit)):
   ).ele
 
   private def onEnter(): Unit =
-    ???
+    PatientValidator.validatePatientForEnter(
+      PatientValidator.validateLastName(eLastNameInput.value),
+      PatientValidator.validateFirstName(eFirstNameInput.value),
+      PatientValidator.validateLastNameYomi(eLastNameYomiInput.value),
+      PatientValidator.validateFirstNameYomi(eFirstNameYomiInput.value),
+      PatientValidator.validateSex(SexValidator.validateSex())
+    )

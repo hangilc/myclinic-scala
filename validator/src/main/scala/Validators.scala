@@ -10,8 +10,11 @@ import scala.util.matching.Regex
 import cats.instances.try_
 
 object Validators:
+  def nonNull[E, T <: AnyRef](input: T, err: => E): ValidatedNec[E, T] =
+    condNec(input != null, input, err)
+
   def nonEmpty[E](input: String, err: => E): ValidatedNec[E, String] =
-    condNec(!input.isEmpty, input, err)
+    condNec(input != null && !input.isEmpty, input, err)
 
   def isInt[E](input: String, err: => E): ValidatedNec[E, Int] =
     try validNec(input.toInt)
