@@ -6,7 +6,6 @@ import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.{ShowMessage, Icons, Colors, ContextMenu}
 import scala.language.implicitConversions
 import dev.myclinic.scala.web.appbase.{SideMenu, EventPublishers}
-import dev.myclinic.scala.web.reception.cashier.Cashier
 import dev.myclinic.scala.model.{HotlineCreated, Patient}
 import dev.myclinic.scala.webclient.Api
 import org.scalajs.dom.raw.{HTMLElement, MouseEvent}
@@ -14,6 +13,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Success
 import scala.util.Failure
 import scala.concurrent.Future
+import dev.myclinic.scala.web.reception.cashier.Cashier
+import dev.myclinic.scala.web.reception.patient.PatientManagement
 
 abstract class MainUI(using publishers: EventPublishers):
   def postHotline(msg: String): Unit
@@ -27,7 +28,7 @@ abstract class MainUI(using publishers: EventPublishers):
   private val sideMenu = SideMenu(eMain,
     List(
       "メイン" -> (() => Cashier()),
-      "患者管理" -> (() => ???),
+      "患者管理" -> (() => PatientManagement()),
       "診療記録" -> (() => ???),
       "スキャン" -> (() => ???)
     )

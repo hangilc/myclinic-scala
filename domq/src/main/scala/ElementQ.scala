@@ -29,6 +29,11 @@ case class ElementQ(ele: HTMLElement):
     val parent = ele.parentNode
     if parent != null then f(parent)
 
+  def getParent(): Option[HTMLElement] =
+    val parent = ele.parentNode
+    if parent != null then Some(parent.asInstanceOf[HTMLElement])
+    else None
+
   def replaceBy(newElement: HTMLElement): Unit =
     withParent(p => p.replaceChild(newElement, ele))
 
@@ -40,6 +45,11 @@ case class ElementQ(ele: HTMLElement):
 
   def isEmpty: Boolean =
     ele.childElementCount == 0
+
+  def prepend(e: HTMLElement): Unit =
+    val first = ele.firstChild
+    if first == null then ele.appendChild(e)
+    else ele.insertBefore(e, first)
 
   def selectOptionByValue(value: String): Option[HTMLElement] =
     val nodes = ele.querySelectorAll("option")

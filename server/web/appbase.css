@@ -1,0 +1,16 @@
+/* DateInput ************************************************************/
+
+.date-input .nen {
+  width: 5rem;
+  margin-left: 0.2rem;
+}
+
+.date-input .month,
+.date-input .day {
+  width: 3rem;
+  margin-left: 0.3rem;
+}
+
+.date-input .label {
+  margin-left: 0.1rem;
+}

@@ -48,15 +48,6 @@ object Form:
       style.setProperty("align-content", "center")
     })
 
-  // def inputGroup: HTMLElement =
-  //   div(css(style => {
-  //     style.display = "flex"
-  //     style.width = "100%"
-  //     style.overflow = "hidden"
-  //     style.setProperty("align-items", "center")
-  //     style.setProperty("align-content", "center")
-  //   }))
-
   def input: HTMLInputElement =
     Html.inputText(
       attr("size") := "1",

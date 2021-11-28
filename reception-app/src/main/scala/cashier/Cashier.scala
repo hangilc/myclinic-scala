@@ -48,8 +48,10 @@ class Cashier(using publishers: EventPublishers) extends SideMenuService:
   val rowMap: mutable.Map[Int, HTMLElement] = mutable.Map.empty
 
   override def getElement: HTMLElement = ele
-  override def init: Future[Unit] = refresh()
+  override def init(): Future[Unit] = refresh()
   override def onReactivate: Future[Unit] = refresh()
+  override def dispose(): Unit =
+    subscribers.foreach(sub => sub.unsubscribe())
 
   val subscribers: List[EventSubscriber[_]] =
     val publishers = ReceptionEventFetcher.publishers

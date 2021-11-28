@@ -7,7 +7,8 @@ trait EventSubscriberController:
   def start(): Unit
   def stop(): Unit
 
-case class EventSubscriber[T <: AppModelEvent](private val handler: T => Unit)
+case class EventSubscriber[T <: AppModelEvent](private val handler: T => Unit,
+  publisher: EventPublisher[T])
     extends EventSubscriberController:
   var isStopped: Boolean = true
   val queue = mutable.Queue[T]()
@@ -25,6 +26,9 @@ case class EventSubscriber[T <: AppModelEvent](private val handler: T => Unit)
   def stop(): Unit =
     isStopped = true
 
+  def unsubscribe(): Unit =
+    publisher.unsubscribe(this)
+
   private def handleQueue(): Unit =
     while !queue.isEmpty do
       val event = queue.dequeue()
@@ -41,12 +45,15 @@ case class EventPublisher[T <: AppModelEvent](
       Set.empty[EventSubscriber[T]]
 ):
   def subscribe(handler: T => Unit): EventSubscriber[T] =
-    val sub = EventSubscriber(handler)
+    val sub = EventSubscriber(handler, this)
     subscribers = subscribers + sub
     sub
 
   def publish(event: T): Unit =
     subscribers.foreach(_.handle(event))
+
+  def unsubscribe(subscriber: EventSubscriber[T]): Unit =
+    subscribers = subscribers - subscriber
 
 class EventPublishers:
   val appointCreated = EventPublisher[AppointCreated]()

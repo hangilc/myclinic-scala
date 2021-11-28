@@ -15,9 +15,9 @@ case class SideMenuItem(label: String, creator: () => HTMLElement)
 
 trait SideMenuService:
   def getElement: HTMLElement
-  def init: Future[Unit] = Future.successful(())
+  def init(): Future[Unit] = Future.successful(())
   def onReactivate: Future[Unit] = Future.successful(())
-  def dispose: Unit = ()
+  def dispose(): Unit = ()
 
 class SideMenu(
     main: HTMLElement,
@@ -45,7 +45,7 @@ class SideMenu(
         main(e)
         link(cls := "current")
         cache = Some(service)
-        service.init
+        service.init()
       })(service => {
         main(service.getElement)
         link(cls := "current")

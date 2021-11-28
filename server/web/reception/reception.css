@@ -118,3 +118,41 @@ button {
   color: var(--primary-color);
 }
 
+/* Patient Management ***************************************************************/
+
+.patient-management .search-patient-box {
+  display: inline-box;
+  float: right;
+}
+
+.patient-management .search-patient-box * {
+  margin-left: 0.2rem;
+  vertical-align: middle;
+}
+
+.patient-management .work-block {
+  padding: 0.2rem;
+  border: 1px solid gray;
+  border-radius: 4px;
+}
+
+.patient-management .work-block .title {
+  font-weight: bold;
+  padding: 0.3rem;
+  background-color: #eee;
+}
+
+.patient-management .work-block .content {
+  margin: 1rem;
+}
+
+.patient-management .work-block .commands {
+  margin: 1rem 1rem 0.5rem 1rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.patient-management .new-patient-form .name input + input, 
+.patient-management .new-patient-form .yomi input + input{
+  margin-left: 0.3rem;
+}
