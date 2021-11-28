@@ -21,8 +21,8 @@ button {
 }
 
 #content {
-  margin: 10px 30px;
-  width: 100%;
+  margin: 10px auto;
+  width: 860px;
 }
 
 #banner {
@@ -39,7 +39,7 @@ button {
 }
 
 #side-bar {
-  width: 200px;
+  width: 180px;
   margin-top: 10px;
 }
 

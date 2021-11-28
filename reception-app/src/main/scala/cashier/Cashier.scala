@@ -5,7 +5,7 @@ import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.{ShowMessage, Icons, Colors, ContextMenu, Table}
 import scala.language.implicitConversions
-import dev.myclinic.scala.web.appbase.{SideMenu, EventPublishers}
+import dev.myclinic.scala.web.appbase.{SideMenu, EventPublishers, PrintDialog}
 import dev.myclinic.scala.model.*
 import dev.myclinic.scala.util.{KanjiDate, DateUtil}
 import dev.myclinic.scala.webclient.Api
@@ -20,11 +20,17 @@ import dev.myclinic.scala.web.appbase.EventSubscriber
 import dev.myclinic.scala.web.reception.ReceptionEventFetcher
 import scala.collection.mutable
 
-
 class Cashier(using publishers: EventPublishers) extends SideMenuService:
   val table = makeTable()
   val ele: HTMLElement = div(
-    h1("受付患者"),
+    div(
+      h1("受付患者", display := "inline-block"),
+      Icons.menu(size = "1.2rem", color = "gray")(
+        cssFloat := "right",
+        onclick := (onMenu _),
+        cursor := "pointer"
+      )
+    ),
     table.ele,
     div(
       button(
@@ -52,6 +58,22 @@ class Cashier(using publishers: EventPublishers) extends SideMenuService:
         removeRow(event.deleted.visitId)
       })
     )
+
+  private def onMenu(event: MouseEvent): Unit =
+    val m = ContextMenu(List(
+      "手書き領収書印刷" -> printBlankReceipt
+    ))
+    m.open(event)
+
+  private def printBlankReceipt(): Unit = 
+    val f = 
+      for
+        ops <- Api.drawBlankReceipt()
+      yield CashierLib.openPrintDialog("手書き領収書", ops)
+    f.onComplete {
+      case Success(_) => ()
+      case Failure(ex) => ShowMessage.showError(ex.getMessage)
+    }
 
   private def makeTable(): Table =
     val tab = Table()

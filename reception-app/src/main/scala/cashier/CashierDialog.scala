@@ -90,20 +90,21 @@ class CashierDialog(meisai: Meisai, visit: VisitEx):
     for 
       ops <- Api.drawReceipt(data)
     yield {
-      val scale = 3
-      val w = 148
-      val h = 105
-      val settingNames = List("手動", "処方箋", "会計")
-      val dlog = PrintDialog(
-        "領収書印刷",
-        ops,
-        w * scale,
-        h * scale, 
-        s"0, 0, $w, $h",
-        prefKind = "receipt",
-        zIndex = modal.zIndex + 2
-      )
-      dlog.open()
+      CashierLib.openPrintDialog("領収書印刷", ops, modal.zIndex + 2)
+      // val scale = 3
+      // val w = 148
+      // val h = 105
+      // val settingNames = List("手動", "処方箋", "会計")
+      // val dlog = PrintDialog(
+      //   "領収書印刷",
+      //   ops,
+      //   w * scale,
+      //   h * scale, 
+      //   s"0, 0, $w, $h",
+      //   prefKind = "receipt",
+      //   zIndex = modal.zIndex + 2
+      // )
+      // dlog.open()
     }
 
   def doFinishCashier(): Unit =
