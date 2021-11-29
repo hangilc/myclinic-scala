@@ -14,3 +14,13 @@
 .date-input .label {
   margin-left: 0.1rem;
 }
+
+/* Selection *********************************************************************/
+
+.appbase-selection .appbase-selection-item {
+  cursor: pointer;
+}
+
+.appbase-selection .appbase-selection-item .appbase-selection-item-selected{
+  background-color: #eee;
+}

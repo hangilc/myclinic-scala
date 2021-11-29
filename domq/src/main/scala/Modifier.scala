@@ -174,7 +174,11 @@ object Modifiers:
 
   object onsubmit:
     def :=(f: () => Unit) = Modifier(e => {
-      e.addEventListener("submit", (e: Event) => { e.preventDefault; f() })
+      e.addEventListener("submit", (e: Event) => { 
+        e.preventDefault
+        e.stopPropagation
+        f() 
+      })
     })
 
   object onmousedown:

@@ -4,7 +4,7 @@ import dev.myclinic.scala.web.appbase.SideMenuService
 import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
-import dev.fujiwara.domq.{Icons}
+import dev.fujiwara.domq.{Icons, ShowMessage}
 import scala.language.implicitConversions
 import org.scalajs.dom.raw.{HTMLElement, HTMLInputElement}
 import scala.concurrent.Future
@@ -25,10 +25,12 @@ class PatientManagement() extends SideMenuService:
         ml := "0.5rem",
         Icons.defaultStyle
       ),
-      form(cls := "search-patient-box", onsubmit := (onSearch _))(
+      div(cls := "search-patient-box")(
         button("新規患者", onclick := (onNewPatient _)),
-        eSearchText(),
-        button("検索", attr("type") := "submit")
+        form(cls := "search-patient-form", onsubmit := (onSearch _))(
+          eSearchText(),
+          button("検索", attr("type") := "submit")
+        )
       )
     ),
     eWorkarea
@@ -46,7 +48,9 @@ class PatientManagement() extends SideMenuService:
 
   private var newPatientBlock: Option[NewPatientBlock] = None
 
-  private def onNewPatient(): Unit =
+  private def onNewPatient(event: MouseEvent): Unit =
+    event.stopPropagation
+    event.preventDefault
     val block: NewPatientBlock = newPatientBlock.getOrElse({
       val b = NewPatientBlock(bb => {
         bb.ele.remove()
@@ -61,10 +65,10 @@ class PatientManagement() extends SideMenuService:
   private def onSearch(): Unit =
     val txt = eSearchText.value.trim
     if !txt.isEmpty then
-      for
-        patients <- Api.searchPatient(txt)
+      for patients <- Api.searchPatient(txt)
       yield {
-        println(("patients", patients))
+        if patients.size > 0 then
+          val block = SearchPatientBlock(patients, _.remove())
+          eWorkarea.prepend(block.ele)
+        else ShowMessage.showMessage("該当患者が見つかりませんでした。")
       }
-
-  

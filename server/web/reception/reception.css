@@ -1,7 +1,3 @@
-*, *:before, *:after {
-  box-sizing: border-box;
-}
-
 body {
   display: flex;
   justify-content: center;
@@ -123,11 +119,16 @@ button {
 .patient-management .search-patient-box {
   display: inline-box;
   float: right;
+  vertical-align: "middle"
 }
 
-.patient-management .search-patient-box * {
+.patient-management .search-patient-form {
+  margin-left: 0.4rem;
+  display: inline-block;
+}
+
+.patient-management .search-patient-form button {
   margin-left: 0.2rem;
-  vertical-align: middle;
 }
 
 .patient-management .work-block {
@@ -136,17 +137,17 @@ button {
   border-radius: 4px;
 }
 
-.patient-management .work-block .title {
+.patient-management .work-block .block-title {
   font-weight: bold;
   padding: 0.3rem;
   background-color: #eee;
 }
 
-.patient-management .work-block .content {
+.patient-management .work-block .block-content {
   margin: 1rem;
 }
 
-.patient-management .work-block .commands {
+.patient-management .work-block .block-commands {
   margin: 1rem 1rem 0.5rem 1rem;
   display: flex;
   justify-content: flex-end;
@@ -155,4 +156,19 @@ button {
 .patient-management .new-patient-form .name input + input, 
 .patient-management .new-patient-form .yomi input + input{
   margin-left: 0.3rem;
+}
+
+.patient-management .search-patient-block .content {
+  display: flex;
+  width: 100%;
+}
+
+.patient-management .search-patient-block .content .left-pane {
+  flex: 1 1 0;
+  max-height: 360px;
+  overflow: auto;
+}
+
+.patient-management .search-patient-block .content .right-pane {
+  flex: 1 1 0;
 }

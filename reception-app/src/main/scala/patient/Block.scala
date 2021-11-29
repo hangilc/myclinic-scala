@@ -9,7 +9,7 @@ import org.scalajs.dom.raw.{HTMLElement, HTMLInputElement}
 
 class Block(title: String, content: HTMLElement, commands: HTMLElement):
   val ele = div(cls := "work-block")(
-    div(cls := "title")(title),
-    div(cls := "content")(content),
-    div(cls := "commands")(commands)
+    div(cls := "block-title")(title),
+    div(cls := "block-content")(content),
+    div(cls := "block-commands")(commands)
   )
