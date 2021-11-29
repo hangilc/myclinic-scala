@@ -5,6 +5,7 @@ import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.{Icons, Form, ErrorBox}
 import scala.language.implicitConversions
+import scala.util.{Success, Failure}
 import org.scalajs.dom.raw.{HTMLElement, HTMLInputElement}
 import scala.concurrent.Future
 import dev.myclinic.scala.web.appbase.EventSubscriber
@@ -14,6 +15,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import dev.myclinic.scala.web.appbase.DateInput
 import dev.myclinic.scala.validator.{PatientValidator, SexValidator}
 import dev.myclinic.scala.model.{Sex, Patient}
+import dev.myclinic.scala.util.KanjiDate.Gengou
 
 class NewPatientBlock(onClose: (NewPatientBlock => Unit)):
   val eErrorBox = ErrorBox()
@@ -54,10 +56,16 @@ class NewPatientBlock(onClose: (NewPatientBlock => Unit)):
       button("キャンセル", onclick := (() => onClose(this)))
     )
   ).ele
+  eBirthdayInput.selectGengou(Gengou.Shouwa)
 
   private def onEnter(): Unit = 
     validate().asEither match {
-      case Right(patient) => ()
+      case Right(patient) => {
+        Api.enterPatient(patient).onComplete {
+          case Success(_) => onClose(this)
+          case Failure(ex) => eErrorBox.show(ex.getMessage)
+        }
+      }
       case Left(msg) => eErrorBox.show(msg)
     }
 

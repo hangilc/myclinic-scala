@@ -36,6 +36,9 @@ class DateInput(gengouList: List[KanjiDate.Gengou] = KanjiDate.Gengou.list):
       span("日", cls := "label")
     )
 
+  def selectGengou(gengou: KanjiDate.Gengou): Unit =
+    eGengouSelect.selectOptionByValue(gengou.name).foreach(e => e.check())
+
   def validate(): DateValidator.Result[LocalDate] =
     DateValidator
       .validateDate(

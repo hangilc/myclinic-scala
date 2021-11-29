@@ -42,5 +42,7 @@ object DbPatientPrim:
           ${patient.sex.code}, ${patient.birthday}, ${patient.address}, ${patient.phone})
     """
     for 
-      _ <- op.update.run
+      patientId <- op.update.withUniqueGeneratedKeys[Int]("patient_id")
+      entered <- getPatient(patientId).unique
+      event <- DbEventPrim.logPatientCreated(entered)
     yield event

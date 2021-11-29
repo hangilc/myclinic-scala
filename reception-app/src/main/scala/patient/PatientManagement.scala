@@ -56,6 +56,7 @@ class PatientManagement() extends SideMenuService:
       b
     })
     eWorkarea.prepend(block.ele)
+    block.eLastNameInput.focus()
 
   private def onSearch(): Unit =
     val txt = eSearchText.value.trim

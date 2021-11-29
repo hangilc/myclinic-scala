@@ -34,3 +34,6 @@ trait DbPatient extends Mysql:
         .sequence
       items = patients.map(patient => (patient.patientId, patient))
     yield Map(items: _*))
+
+  def enterPatient(patient: Patient): IO[AppEvent] =
+    mysql(Prim.enterPatient(patient))

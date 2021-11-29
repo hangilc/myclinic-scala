@@ -83,6 +83,10 @@ case class ElementQ(ele: HTMLElement):
     if n == null then None
     else Some(n.asInstanceOf[HTMLInputElement].value)
 
+  def check(bool: Boolean = true): Unit =
+    if bool then  ele.setAttribute("checked", "checked")
+    else ele.removeAttribute("checked")
+
   def asInputElement: HTMLInputElement = ele.asInstanceOf[HTMLInputElement]
 
   def selector(query: String): Option[HTMLElement] =

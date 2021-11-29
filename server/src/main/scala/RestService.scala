@@ -191,5 +191,13 @@ object RestService extends DateTimeQueryParam:
 
     case GET -> Root / "list-wqueue" => Ok(Db.listWqueue())
 
+    case req @ POST -> Root / "enter-patient" => Ok {
+      for
+        patient <- req.as[Patient]
+        event <- Db.enterPatient(patient)
+        _ <- publish(event)
+      yield true
+    }
+
   } <+> PatientService.routes <+> VisitService.routes <+> MiscService.routes
     <+> ConfigService.routes

@@ -113,3 +113,12 @@ object DbEventPrim:
   def logPaymentDeleted(a: Payment): ConnectionIO[AppEvent] =
     enterAppEvent("payment", DELETED, a.asJson.toString)
 
+  def logPatientCreated(a: Patient): ConnectionIO[AppEvent] =
+    enterAppEvent("patient", CREATED, a.asJson.toString)
+
+  def logPatientUpdated(a: Patient): ConnectionIO[AppEvent] =
+    enterAppEvent("patient", UPDATED, a.asJson.toString)
+
+  def logPatientDeleted(a: Patient): ConnectionIO[AppEvent] =
+    enterAppEvent("patien", DELETED, a.asJson.toString)
+
