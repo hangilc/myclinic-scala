@@ -13,6 +13,12 @@ object Validators:
   def nonNull[E, T <: AnyRef](input: T, err: => E): ValidatedNec[E, T] =
     condNec(input != null, input, err)
 
+  def nonNullOpt[E, T <: AnyRef](input: Option[T], err: => E): ValidatedNec[E, T] =
+    input match {
+      case None => invalidNec(err)
+      case Some(t) => condNec(t != null, t, err)
+    }
+
   def nonEmpty[E](input: String, err: => E): ValidatedNec[E, String] =
     condNec(input != null && !input.isEmpty, input, err)
 

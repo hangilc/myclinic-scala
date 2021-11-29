@@ -1,6 +1,6 @@
 package dev.myclinic.scala.db
 
-import dev.myclinic.scala.model.Patient
+import dev.myclinic.scala.model.{Patient, AppEvent}
 import cats._
 import cats.implicits._
 import doobie._
@@ -8,13 +8,12 @@ import doobie.implicits._
 import doobie.util.log.LogHandler.jdkLogHandler
 import dev.myclinic.scala.db.DoobieMapping._
 
-
 object DbPatientPrim:
-  def getPatient(patientId: Int): Query0[Patient] = 
+  def getPatient(patientId: Int): Query0[Patient] =
     sql"""
       select * from patient where patient_id = ${patientId}
     """.query[Patient]
-    
+
   def searchPatient(text: String): Query0[Patient] =
     val t: String = s"%${text}%"
     sql""" 
@@ -34,3 +33,14 @@ object DbPatientPrim:
         (first_name like ${t2} or first_name_yomi like ${t2})
         order by last_name_yomi, first_name_yomi
     """.query[Patient]
+
+  def enterPatient(patient: Patient): ConnectionIO[AppEvent] =
+    val op = sql"""
+      insert into patient (last_name, first_name, last_name_yomi, first_name_yomi,
+          sex, birth_day, address, phone) 
+        values (${patient.lastName}, ${patient.firstName}, ${patient.lastNameYomi}, ${patient.firstNameYomi},
+          ${patient.sex.code}, ${patient.birthday}, ${patient.address}, ${patient.phone})
+    """
+    for 
+      _ <- op.update.run
+    yield event

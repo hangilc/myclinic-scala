@@ -78,6 +78,11 @@ case class ElementQ(ele: HTMLElement):
       i += 1
     buf.toList
 
+  def getCheckedRadioValue: Option[String] = 
+    val n = ele.querySelector("input[type=radio]:checked")
+    if n == null then None
+    else Some(n.asInstanceOf[HTMLInputElement].value)
+
   def asInputElement: HTMLInputElement = ele.asInstanceOf[HTMLInputElement]
 
   def selector(query: String): Option[HTMLElement] =

@@ -86,6 +86,8 @@ object Modifiers:
       eCheck.checked = check
   })
 
+  val name: Attr = attr("name")
+
   def css(f: CSSStyleDeclaration => Unit): Modifier = Modifier(e => f(e.style))
 
   val mt = Creator[String]((e, value) => e.style.marginTop = value)

@@ -30,9 +30,9 @@ object PatientValidator:
   object EmptyLastNameYomiError extends PatientError:
     def message: String = "名のよみが入力されていません。"
   case class SexError(error: NonEmptyChain[SexValidator.SexError]) extends PatientError:
-    def message: String = error.toList.map(_.message).mkString("")
+    def message: String = error.toList.map(_.message).mkString("\n")
   case class BirthdayError(error: NonEmptyChain[DateValidator.DateError]) extends PatientError:
-    def message: String = error.toList.map(_.message).mkString("")
+    def message: String = error.toList.map("（生年月日）" + _.message).mkString("\n")
 
   type Result[T] = ValidatedNec[PatientError, T]
 

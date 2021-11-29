@@ -3,7 +3,7 @@ package dev.myclinic.scala.web.reception.patient
 import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
-import dev.fujiwara.domq.{Icons, Form}
+import dev.fujiwara.domq.{Icons, Form, ErrorBox}
 import scala.language.implicitConversions
 import org.scalajs.dom.raw.{HTMLElement, HTMLInputElement}
 import scala.concurrent.Future
@@ -13,15 +13,22 @@ import dev.myclinic.scala.webclient.Api
 import scala.concurrent.ExecutionContext.Implicits.global
 import dev.myclinic.scala.web.appbase.DateInput
 import dev.myclinic.scala.validator.{PatientValidator, SexValidator}
+import dev.myclinic.scala.model.{Sex, Patient}
 
 class NewPatientBlock(onClose: (NewPatientBlock => Unit)):
+  val eErrorBox = ErrorBox()
   val eLastNameInput = Form.fixedSizeInput("10rem")
   val eFirstNameInput = Form.fixedSizeInput("10rem")
   val eLastNameYomiInput = Form.fixedSizeInput("10rem")
   val eFirstNameYomiInput = Form.fixedSizeInput("10rem")
+  val eSexInput = form()
+  val eBirthdayInput = DateInput()
+  val eAddressInput = inputText()
+  val ePhoneInput = inputText()
   val ele = Block(
     "新規患者入力",
     div(
+      eErrorBox.ele,
       Form.rows(
         span("氏名") -> div(Form.inputGroup, cls := "name")(
           eLastNameInput,
@@ -31,15 +38,15 @@ class NewPatientBlock(onClose: (NewPatientBlock => Unit)):
           eLastNameYomiInput,
           eFirstNameYomiInput
         ),
-        span("生年月日") -> DateInput().ele,
-        span("性別") -> div(
-          input(attr("type") := "radio"),
+        span("生年月日") -> eBirthdayInput.ele,
+        span("性別") -> eSexInput(
+          input(attr("type") := "radio", name := "sex", value := Sex.Male.code),
           span("男"),
-          input(attr("type") := "radio", attr("checked") := "checked"),
+          input(attr("type") := "radio", name := "sex", value := Sex.Female.code, attr("checked") := "checked"),
           span("女")
         ),
-        span("住所") -> inputText(width := "100%"),
-        span("電話") -> inputText(width := "100%")
+        span("住所") -> eAddressInput(width := "100%"),
+        span("電話") -> ePhoneInput(width := "100%")
       )(cls := "new-patient-form")
     ),
     div(
@@ -48,11 +55,20 @@ class NewPatientBlock(onClose: (NewPatientBlock => Unit)):
     )
   ).ele
 
-  private def onEnter(): Unit =
+  private def onEnter(): Unit = 
+    validate().asEither match {
+      case Right(patient) => ()
+      case Left(msg) => eErrorBox.show(msg)
+    }
+
+  private def validate(): PatientValidator.Result[Patient] =
     PatientValidator.validatePatientForEnter(
       PatientValidator.validateLastName(eLastNameInput.value),
       PatientValidator.validateFirstName(eFirstNameInput.value),
       PatientValidator.validateLastNameYomi(eLastNameYomiInput.value),
       PatientValidator.validateFirstNameYomi(eFirstNameYomiInput.value),
-      PatientValidator.validateSex(SexValidator.validateSex())
+      PatientValidator.validateSex(SexValidator.validateSexInput(eSexInput.getCheckedRadioValue)),
+      PatientValidator.validateBirthday(eBirthdayInput.validate()),
+      PatientValidator.validateAddress(eAddressInput.value),
+      PatientValidator.validatePhone(ePhoneInput.value)
     )

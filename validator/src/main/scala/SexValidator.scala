@@ -14,12 +14,15 @@ object SexValidator:
   object InvalidSexError extends SexError:
     def message: String = "性別の入力が不適切です。"
 
-  def validateSexInput(input: String): Result[Sex] =
-    input match {
-      case "M" | "男" => validNec(Sex.Male)
-      case "F" | "女" => validNec(Sex.Female)
-      case _ => invalidNec(InvalidSexError)
-    }
+  def validateSexInput(input: Option[String]): Result[Sex] =
+    nonNullOpt(input, InvalidSexError)
+      .andThen(input =>
+        input match {
+          case "M" | "男" => validNec(Sex.Male)
+          case "F" | "女" => validNec(Sex.Female)
+          case _         => invalidNec(InvalidSexError)
+        }
+      )
 
   type Result[T] = ValidatedNec[SexError, T]
 
@@ -27,5 +30,5 @@ object SexValidator:
     def asEither: Either[String, T] = Validators.toEither(r, _.message)
 
   def validateSex(
-    sexResult: Result[Sex]
+      sexResult: Result[Sex]
   ) = sexResult

@@ -23,8 +23,7 @@ case class ErrorBox():
   )
 
   def show(msg: String): Unit =
-    eMessage.innerHTML = ""
-    eMessage(msg)
+    eMessage.innerText = msg
     ele(displayBlock)
 
   def hide(): Unit =

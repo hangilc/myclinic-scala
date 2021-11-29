@@ -36,7 +36,7 @@ class DateInput(gengouList: List[KanjiDate.Gengou] = KanjiDate.Gengou.list):
       span("日", cls := "label")
     )
 
-  def validate(): Either[String, LocalDate] =
+  def validate(): DateValidator.Result[LocalDate] =
     DateValidator
       .validateDate(
         DateValidator.validateGengouInput(
@@ -46,5 +46,4 @@ class DateInput(gengouList: List[KanjiDate.Gengou] = KanjiDate.Gengou.list):
         DateValidator.validateMonthInput(eMonthInput.value),
         DateValidator.validateDayInput(eDayInput.value)
       )
-      .asEither
 

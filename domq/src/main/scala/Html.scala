@@ -3,7 +3,9 @@ package dev.fujiwara.domq
 import org.scalajs.dom.document
 import org.scalajs.dom.raw.HTMLElement
 import org.scalajs.dom.raw.HTMLInputElement
-import dev.fujiwara.domq.Modifiers.{attr}
+import dev.fujiwara.domq.ElementQ.{*, given}
+import dev.fujiwara.domq.Modifiers.{*, given}
+import scala.language.implicitConversions
 
 object Html {
 
@@ -29,7 +31,10 @@ object Html {
     e
   def button: HTMLElement = element("button")
   val p = Tag("p")
-  val form = Tag("form")
+  def form: HTMLElement = {
+    val e = element("form")
+    e(onsubmit := (() => ()))
+  }
   val input = Tag("input")
   val label = Tag("label")
   val ul = Tag("ul")
