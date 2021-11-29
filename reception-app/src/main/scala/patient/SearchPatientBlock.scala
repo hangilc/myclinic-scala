@@ -19,15 +19,11 @@ class SearchPatientBlock(
     patients: List[Patient],
     onClose: SearchPatientBlock => Unit
 ):
-  val eResult = Selection[Patient](
-    patients.map(patient =>
-      String.format(
-        "[%04d] %s",
-        patient.patientId,
-        patient.fullName()
-      ) -> patient
+  val eResult =
+    Selection[Patient](
+      patients.map(patient => itemRep(patient) -> patient),
+      onSelect(_)
     )
-  )
   val eDisp: HTMLElement = div()
   val block = Block(
     "患者検索結果",
@@ -38,9 +34,28 @@ class SearchPatientBlock(
       eDisp(cls := "right-pane")
     ),
     div(
+      button("診察受付"),
+      button("患者管理"),
       button("閉じる", onclick := (() => onClose(this)))
     )
   )
   block.ele(cls := "search-patient-block")
   val ele = block.ele
   def remove(): Unit = ele.remove()
+  private def itemRep(patient: Patient): String =
+    String.format(
+      "[%04d] %s",
+      patient.patientId,
+      patient.fullName()
+    )
+  private def onSelect(patient: Patient): Unit =
+    val disp = PatientDisp(patient)
+    eDisp.innerHTML = ""
+    eDisp(
+      div(cls := "patient-disp-wrapper")(
+        disp.ele(cls := "disp"),
+        div(cls := "commands")(
+          button("編集")
+        )
+      )
+    )

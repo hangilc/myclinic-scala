@@ -160,15 +160,30 @@ button {
 
 .patient-management .search-patient-block .content {
   display: flex;
+  align-items: stretch;
   width: 100%;
 }
 
 .patient-management .search-patient-block .content .left-pane {
   flex: 1 1 0;
-  max-height: 360px;
+  height: 300px;
   overflow: auto;
+  margin-right: 0.5rem;
 }
 
 .patient-management .search-patient-block .content .right-pane {
   flex: 1 1 0;
+  margin-left: 0.5rem;
+}
+
+.patient-management .search-patient-block .content .right-pane .patient-disp-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.patient-management .search-patient-block .content .right-pane .patient-disp-wrapper .commands {
+  display: flex;
+  justify-content: flex-end;
 }

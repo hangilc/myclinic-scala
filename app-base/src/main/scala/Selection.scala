@@ -22,12 +22,13 @@ class Selection[T](
     for i <- 0 until nodes.length do
       nodes.item(i).asInstanceOf[HTMLElement].classList.remove("appbase-selection-item-selected")
 
-  class SelectionItem[T](label: String, value: T):
+  class SelectionItem(label: String, value: T):
     val ele: HTMLElement = div(cls := "appbase-selection-item")(
       label,
       onclick := (() => {
         clearSelected()
         addSelected()
+        onSelect(value)
         ()
       })
     )
