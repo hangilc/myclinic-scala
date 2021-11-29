@@ -1,12 +1,17 @@
 package dev.myclinic.scala.validator
 
-import cats.data.ValidatedNec
+import cats.*
+import cats.syntax.*
+import cats.data.{ValidatedNec, NonEmptyChain}
+import cats.data.Validated.*
 import cats.implicits.*
 import dev.myclinic.scala.model.{Patient, Sex}
-import cats.data.Validated.{validNec, invalidNec, condNec}
 import dev.myclinic.scala.validator.Validators.*
 import dev.myclinic.scala.validator.{SexValidator, DateValidator}
 import java.time.LocalDate
+import cats.data.Validated.Valid
+import cats.data.Validated.Invalid
+import scala.quoted.Type
 
 object PatientValidator:
   sealed trait PatientError:
@@ -24,10 +29,10 @@ object PatientValidator:
     def message: String = "姓のよみが入力されていません。"
   object EmptyLastNameYomiError extends PatientError:
     def message: String = "名のよみが入力されていません。"
-  case class SexError(error: SexValidator.SexError) extends PatientError:
-    def message: String = error.message
-  case class BirthdayError(error: DateValidator.DateError) extends PatientError:
-    def message: String = error.message
+  case class SexError(error: NonEmptyChain[SexValidator.SexError]) extends PatientError:
+    def message: String = error.toList.map(_.message).mkString("")
+  case class BirthdayError(error: NonEmptyChain[DateValidator.DateError]) extends PatientError:
+    def message: String = error.toList.map(_.message).mkString("")
 
   type Result[T] = ValidatedNec[PatientError, T]
 
@@ -42,6 +47,16 @@ object PatientValidator:
     nonEmpty(input, EmptyLastNameYomiError)
   def validateFirstNameYomi(input: String): Result[String] =
     nonEmpty(input, EmptyFirstNameYomiError)
+  def validateSex(result: SexValidator.Result[Sex]): Result[Sex] =
+    result match {
+      case Valid(sex) => validNec(sex)
+      case Invalid(err) => invalidNec(SexError(err))
+    }
+  def validateBirthday(result: DateValidator.Result[LocalDate]): Result[LocalDate] =
+    result match {
+      case Valid(sex) => validNec(sex)
+      case Invalid(err) => invalidNec(BirthdayError(err))
+    }
   def validateAddress(input: String): Result[String] =
     validNec(if input == null then "" else input)
   def validatePhone(input: String): Result[String] =
