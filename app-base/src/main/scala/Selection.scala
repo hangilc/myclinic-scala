@@ -13,20 +13,27 @@ class Selection[T](
 ):
   val ele = div(cls := "appbase-selection")(
     (items.map { case (label, value) =>
-      makeItem(label, value)
+      SelectionItem(label, value).ele
     }: List[Modifier]): _*
   )
 
-class SelectionItem[T](label: String, value: T):
-  val ele: HTMLElement = div(cls := "appbase-selection-item")(
-    label,
-    onclick := (() => {
-      clearSelected()
-      e(cls := "appbase-selection-item-selected")
-      ()
-    })
-  )
-  e
-
   private def clearSelected(): Unit =
-    ()
+    val nodes = ele.querySelectorAll(".appbase-selection-item-selected")
+    for i <- 0 until nodes.length do
+      nodes.item(i).asInstanceOf[HTMLElement].classList.remove("appbase-selection-item-selected")
+
+  class SelectionItem[T](label: String, value: T):
+    val ele: HTMLElement = div(cls := "appbase-selection-item")(
+      label,
+      onclick := (() => {
+        clearSelected()
+        addSelected()
+        ()
+      })
+    )
+
+    def addSelected(): Unit =
+      ele(cls := "appbase-selection-item-selected")
+
+    
+

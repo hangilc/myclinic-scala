@@ -21,6 +21,6 @@
   cursor: pointer;
 }
 
-.appbase-selection .appbase-selection-item .appbase-selection-item-selected{
+.appbase-selection .appbase-selection-item.appbase-selection-item-selected{
   background-color: #eee;
 }
