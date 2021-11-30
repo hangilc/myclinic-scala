@@ -39,10 +39,14 @@ object DbWqueuePrim:
         case None => None.pure[ConnectionIO]
       }
     })
-    // sql"""
-    //   delete from wqueue where visit_id = ${visitId}
-    // """.update.run.map({
-    //   case 0 => false
-    //   case 1 => true
-    //   case _ => throw new RuntimeException("Failed to delete wqueue.")
-    // })
+
+  def enterWqueue(wq: Wqueue): ConnectionIO[AppEvent] =
+    val op = sql"""
+      insert into wqueue (visit_id, wait_state) values (${wq.visitId}, ${wq.waitState.code})
+    """
+    for 
+      _ <- op.update.run
+      entered <- getWqueue(wq.visitId).unique
+      event <- DbEventPrim.logWqueueCreated(entered)
+    yield event
+

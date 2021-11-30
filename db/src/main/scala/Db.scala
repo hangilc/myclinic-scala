@@ -7,6 +7,7 @@ import cats.effect.IO
 import dev.myclinic.scala.model.*
 import doobie.free.ConnectionIO
 import scala.util.Try
+import java.time.LocalDateTime
 
 object Db
     extends Mysql
@@ -66,7 +67,38 @@ object Db
     yield List(paymentEvent) ++ wqEventOpt.toList)
 
   def startVisit(patientId: Int, at: LocalDateTime): IO[List[AppEvent]] =
+    val date = at.toLocalDate
     mysql(
-      
+      for
+        shahokokuhoOpt <- DbShahokokuhoPrim
+          .getAvailableShahokokuho(patientId, date)
+          .option
+        shahokokuhoId = shahokokuhoOpt.map(_.shahokokuhoId).getOrElse(0)
+        koukikoureiOpt <- DbKoukikoureiPrim
+          .getAvailableKoukikourei(patientId, date)
+          .option
+        koukikoureiId = koukikoureiOpt.map(_.koukikoureiId).getOrElse(0)
+        roujinOpt <- DbRoujinPrim.getAvailableRoujin(patientId, date).option
+        roujinId = roujinOpt.map(_.roujinId).getOrElse(0)
+        kouhiList <- DbKouhiPrim.listAvailableKouhi(patientId, date)
+        kouhi1Id = kouhiList.map(_.kouhiId).get(0).getOrElse(0)
+        kouhi2Id = kouhiList.map(_.kouhiId).get(1).getOrElse(0)
+        kouhi3Id = kouhiList.map(_.kouhiId).get(2).getOrElse(0)
+        visitEvent <-
+          val visit = Visit(
+            0,
+            patientId,
+            at,
+            shahokokuhoId,
+            roujinId,
+            kouhi1Id,
+            kouhi2Id,
+            kouhi3Id,
+            koukikoureiId,
+            None
+          )
+          DbVisitPrim.enterVisit(visit)
+        wqEvent <- 
+          val wqueue = Wqueue()
+      yield ???
     )
-
