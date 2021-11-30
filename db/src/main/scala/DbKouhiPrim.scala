@@ -19,3 +19,12 @@ object DbKouhiPrim:
     sql"""
       select * from hoken_kouhi where kouhi_id = $kouhiId
     """.query[Kouhi]
+
+
+  def listAvailableKouhi(patientId: Int, at: LocalDate): ConnectionIO[List[Kouhi]] =
+    sql"""
+      select * from kouhi where patient_id = ${patientId} 
+        and valid_from <= ${at}
+        and (valid_upto = '0000-00-00' || ${at} <= valid_upto)
+        order by kouhi_id
+    """.query[Kouhi].to[List]

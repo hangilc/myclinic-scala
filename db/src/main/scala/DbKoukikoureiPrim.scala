@@ -19,3 +19,11 @@ object DbKoukikoureiPrim:
     sql"""
       select * from hoken_koukikourei where koukikourei_id = $koukikoureiId
     """.query[Koukikourei]
+
+
+  def getAvailableKoukikourei(patientId: Int, at: LocalDate): Query0[Koukikourei] =
+    sql"""
+      select * from hoken_koukikourei where patient_id = ${patientId} 
+        and valid_from <= ${at}
+        and (valid_upto = '0000-00-00' || ${at} <= valid_upto)
+    """.query[Koukikourei]

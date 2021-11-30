@@ -19,3 +19,11 @@ object DbRoujinPrim:
     sql"""
       select * from hoken_roujin where roujin_id = $roujinId
     """.query[Roujin]
+
+
+  def getAvailableRoujin(patientId: Int, at: LocalDate): Query0[Roujin] =
+    sql"""
+      select * from hoken_roujin where patient_id = ${patientId} 
+        and valid_from <= ${at}
+        and (valid_upto = '0000-00-00' || ${at} <= valid_upto)
+    """.query[Roujin]

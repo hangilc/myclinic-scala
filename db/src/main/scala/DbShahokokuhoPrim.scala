@@ -19,3 +19,10 @@ object DbShahokokuhoPrim:
     sql"""
       select * from hoken_shahokokuho where shahokokuho_id = $shahokokuhoId
     """.query[Shahokokuho]
+
+  def getAvailableShahokokuho(patientId: Int, at: LocalDate): Query0[Shahokokuho] =
+    sql"""
+      select * from hoken_shahokokuho where patient_id = ${patientId} 
+        and valid_from <= ${at}
+        and (valid_upto = '0000-00-00' || ${at} <= valid_upto)
+    """.query[Shahokokuho]

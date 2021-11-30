@@ -19,6 +19,7 @@ class SearchPatientBlock(
     patients: List[Patient],
     onClose: SearchPatientBlock => Unit
 ):
+  var disp: Option[PatientDisp] = None
   val eResult =
     Selection[Patient](
       patients.map(patient => itemRep(patient) -> patient),
@@ -34,12 +35,15 @@ class SearchPatientBlock(
       eDisp(cls := "right-pane")
     ),
     div(
-      button("診察受付"),
+      button("診察受付", onclick := (onRegisterForExam _)),
       button("患者管理"),
       button("閉じる", onclick := (() => onClose(this)))
     )
   )
   block.ele(cls := "search-patient-block")
+  if patients.size == 1 then
+    onSelect(patients(0))
+
   val ele = block.ele
   def remove(): Unit = ele.remove()
   private def itemRep(patient: Patient): String =
@@ -48,14 +52,17 @@ class SearchPatientBlock(
       patient.patientId,
       patient.fullName()
     )
+
   private def onSelect(patient: Patient): Unit =
-    val disp = PatientDisp(patient)
+    val newDisp = PatientDisp(patient)
     eDisp.innerHTML = ""
-    eDisp(
-      div(cls := "patient-disp-wrapper")(
-        disp.ele(cls := "disp"),
-        div(cls := "commands")(
-          button("編集")
-        )
-      )
-    )
+    eDisp(newDisp.ele)
+    disp = Some(newDisp)
+
+  private def withCurrentPatient(f: Patient => Unit): Unit =
+    disp.foreach(f(_))
+
+  private def onRegisterForExam(): Unit =
+    withCurrentPatient(patient => {
+      ???
+    })

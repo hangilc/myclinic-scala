@@ -65,3 +65,8 @@ object Db
       wqEventOpt <- DbWqueuePrim.tryDeleteWqueue(payment.visitId)
     yield List(paymentEvent) ++ wqEventOpt.toList)
 
+  def startVisit(patientId: Int, at: LocalDateTime): IO[List[AppEvent]] =
+    mysql(
+      
+    )
+

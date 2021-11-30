@@ -25,6 +25,7 @@ object PatientService:
 
   object intPatientId extends QueryParamDecoderMatcher[Int]("patient-id")
   object strText extends QueryParamDecoderMatcher[String]("text")
+  val digitsPattern = "[0-9]+".r
 
   def routes = HttpRoutes.of[IO] {
     case GET -> Root / "get-patient" :? intPatientId(patientId) =>
@@ -34,7 +35,20 @@ object PatientService:
       Ok(Db.findPatient(patientId))
 
     case GET -> Root / "search-patient" :? strText(text) =>
-      Ok(Db.searchPatient(text))
+      if text.isEmpty then
+        val result = List.empty[Patient]
+        Ok(result)
+      else if digitsPattern.matches(text) then
+        Ok(for 
+          patient <- Db.getPatient(text.toInt).option
+        yield {
+          patient match {
+            case Some(p) => List(p)
+            case None => List.empty
+          }
+        })
+      else
+        Ok(Db.searchPatient(text))
 
     case req @ POST -> Root / "batch-get-patient" =>
       Ok(
