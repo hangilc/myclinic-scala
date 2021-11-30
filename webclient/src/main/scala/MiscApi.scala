@@ -1,6 +1,6 @@
 package dev.myclinic.scala.webclient
 
-import java.time.{LocalDate, LocalTime}
+import java.time.{LocalDate, LocalTime, LocalDateTime}
 import scala.concurrent.Future
 import dev.myclinic.scala.model._
 import dev.myclinic.scala.clinicop.*
@@ -61,3 +61,6 @@ object MiscApi extends ApiBase:
 
     def drawReceipt(data: ReceiptDrawerData): Future[List[Op]] =
       post("draw-receipt", Params(), data)
+
+    def startVisit(patientId: Int, at: LocalDateTime): Future[Boolean] =
+      get("start-visit", Params("patient-id" -> patientId, "at" -> at))

@@ -11,7 +11,7 @@ import org.http4s.circe.CirceEntityDecoder._
 import io.circe._
 import io.circe.syntax._
 import dev.myclinic.scala.db.Db
-import java.time.LocalDate
+import java.time.{LocalDate, LocalDateTime}
 import dev.myclinic.scala.util.DateUtil
 import dev.myclinic.scala.clinicop.ClinicOperation
 import fs2.concurrent.Topic
@@ -26,7 +26,9 @@ import dev.myclinic.scala.config.Config
 
 object MiscService extends DateTimeQueryParam with Publisher:
   object dateDate extends QueryParamDecoderMatcher[LocalDate]("date")
+  object atDateTime extends QueryParamDecoderMatcher[LocalDateTime]("at")
   object intVisitId extends QueryParamDecoderMatcher[Int]("visit-id")
+  object intPatientId extends QueryParamDecoderMatcher[Int]("patient-id")
 
   given houkatsuKensa: HoukatsuKensa = (new ConfigJava).getHoukatsuKensa
 
@@ -121,4 +123,14 @@ object MiscService extends DateTimeQueryParam with Publisher:
         }
       }
       Ok(resp).map(r => r.withContentType(`Content-Type`(new MediaType("application", "json"))))
+
+    case GET -> Root / "start-visit" :? intPatientId(patientId) +& atDateTime(at) =>
+      Ok(
+        for
+          events <- Db.startVisit(patientId, at)
+          _ <- publishAll(events)
+        yield true
+      )
+
   }
+

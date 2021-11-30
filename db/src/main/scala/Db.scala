@@ -84,7 +84,7 @@ object Db
         kouhi1Id = kouhiList.map(_.kouhiId).get(0).getOrElse(0)
         kouhi2Id = kouhiList.map(_.kouhiId).get(1).getOrElse(0)
         kouhi3Id = kouhiList.map(_.kouhiId).get(2).getOrElse(0)
-        visitEvent <-
+        enterVisitResult <-
           val visit = Visit(
             0,
             patientId,
@@ -98,7 +98,9 @@ object Db
             None
           )
           DbVisitPrim.enterVisit(visit)
-        wqEvent <- 
-          val wqueue = Wqueue()
-      yield ???
+        (visitCreatedEvent, enteredVisit) = enterVisitResult
+        wqCreatedEvent <- 
+          val wqueue = Wqueue(enteredVisit.visitId, WaitState.WaitExam)
+          DbWqueuePrim.enterWqueue(wqueue)
+      yield List(visitCreatedEvent, wqCreatedEvent)
     )

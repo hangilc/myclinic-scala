@@ -14,11 +14,13 @@ import dev.myclinic.scala.webclient.Api
 import scala.concurrent.ExecutionContext.Implicits.global
 import dev.myclinic.scala.web.appbase.DateInput
 import dev.myclinic.scala.model.{Sex, Patient}
+import java.time.LocalDateTime
 
 class SearchPatientBlock(
     patients: List[Patient],
     onClose: SearchPatientBlock => Unit
 ):
+  val errorBox = ErrorBox()
   var disp: Option[PatientDisp] = None
   val eResult =
     Selection[Patient](
@@ -32,7 +34,10 @@ class SearchPatientBlock(
       div(cls := "left-pane")(
         eResult.ele
       ),
-      eDisp(cls := "right-pane")
+      div(cls := "right-pane")(
+        errorBox.ele,
+        eDisp
+      )
     ),
     div(
       button("診察受付", onclick := (onRegisterForExam _)),
@@ -60,9 +65,12 @@ class SearchPatientBlock(
     disp = Some(newDisp)
 
   private def withCurrentPatient(f: Patient => Unit): Unit =
-    disp.foreach(f(_))
+    disp.foreach(d => f(d.patient))
 
   private def onRegisterForExam(): Unit =
     withCurrentPatient(patient => {
-      ???
+      Api.startVisit(patient.patientId, LocalDateTime.now()).onComplete {
+        case Success(_) => onClose(this)
+        case Failure(ex) => errorBox.show(ex.getMessage)
+      }
     })

@@ -31,7 +31,7 @@ object DateUtil:
 
   def timeToString(t: LocalTime): String = t.format(sqlTimeFormatter)
 
-  def stringtoDateTime(str: String): LocalDateTime =
+  def stringToDateTime(str: String): LocalDateTime =
     LocalDateTime.parse(str, sqlDateTimeFormatter)
 
   def dateTimeToString(dt: LocalDateTime): String =

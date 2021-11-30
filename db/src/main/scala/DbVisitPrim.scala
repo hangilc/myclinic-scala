@@ -27,7 +27,7 @@ object DbVisitPrim:
         throw new RuntimeException("Failed to delete visit.")
     })
 
-  def enterVisit(visit: Visit): ConnectionIO[AppEvent] =
+  def enterVisit(visit: Visit): ConnectionIO[(AppEvent, Visit)] =
     val op = sql"""
       insert into visit (patient_id, v_datetime, shahokokuho_id, roujin_id,
         kouhi_1_id, kouhi_2_id, kouhi_3_id, koukikourei_id, attributes)
@@ -39,5 +39,5 @@ object DbVisitPrim:
       visitId <- op.update.withUniqueGeneratedKeys[Int]("visit_id")
       entered <- getVisit(visitId).unique
       event <- DbEventPrim.logVisitCreated(entered)
-    yield event
+    yield (event, entered)
      

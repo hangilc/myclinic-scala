@@ -10,7 +10,7 @@ import dev.myclinic.scala.util.{KanjiDate, DateUtil}
 import dev.myclinic.scala.model.{Sex, Patient}
 import java.time.LocalDate
 
-class PatientDisp(patient: Patient):
+class PatientDisp(val patient: Patient):
   val ele: HTMLElement = Form.rows(
     span("氏名") -> span(patient.fullName()),
     span("よみ") -> span(patient.fullNameYomi()),
