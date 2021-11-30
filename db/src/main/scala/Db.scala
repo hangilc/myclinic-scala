@@ -26,6 +26,10 @@ object Db
     with DbConductKizai
     with DbCharge
     with DbPayment
+    with DbShahokokuho
+    with DbRoujin
+    with DbKoukikourei
+    with DbKouhi
     with DbIyakuhinMaster
     with DbShinryouMaster
     with DbKizaiMaster

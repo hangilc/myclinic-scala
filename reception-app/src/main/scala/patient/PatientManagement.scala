@@ -12,6 +12,7 @@ import dev.myclinic.scala.web.appbase.EventSubscriber
 import org.scalajs.dom.raw.MouseEvent
 import dev.myclinic.scala.webclient.Api
 import scala.concurrent.ExecutionContext.Implicits.global
+import dev.myclinic.scala.model.Patient
 
 class PatientManagement() extends SideMenuService:
   val eSearchText: HTMLInputElement = inputText()
@@ -68,7 +69,16 @@ class PatientManagement() extends SideMenuService:
       for patients <- Api.searchPatient(txt)
       yield {
         if patients.size > 0 then
-          val block = SearchPatientBlock(patients, _.remove())
+          val block = SearchPatientBlock(
+            patients, 
+            _.remove(),
+            addManagePatientBlock
+          )
           eWorkarea.prepend(block.ele)
         else ShowMessage.showMessage("該当患者が見つかりませんでした。")
       }
+
+  private def addManagePatientBlock(patient: Patient): Unit =
+    val manage = ManagePatientBlock(patient, _.ele.remove())
+    eWorkarea.prepend(manage.ele)
+    manage.init()

@@ -135,6 +135,7 @@ button {
   padding: 0.2rem;
   border: 1px solid gray;
   border-radius: 4px;
+  margin-bottom: 10px;
 }
 
 .patient-management .work-block .block-title {
@@ -178,3 +179,17 @@ button {
   margin-left: 0.5rem;
 }
 
+/* Manage Patient Block **********************************************************/
+
+.manage-patient-block-content {
+  display: flex;
+  width: 100%;
+}
+
+.manage-patient-block-content .left {
+  flex: 1 1 0;
+}
+
+.manage-patient-block-content .right {
+  flex: 1 1 0;
+}

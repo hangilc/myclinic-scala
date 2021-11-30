@@ -18,7 +18,8 @@ import java.time.LocalDateTime
 
 class SearchPatientBlock(
     patients: List[Patient],
-    onClose: SearchPatientBlock => Unit
+    onClose: SearchPatientBlock => Unit,
+    onManagePatient: Patient => Unit
 ):
   val errorBox = ErrorBox()
   var disp: Option[PatientDisp] = None
@@ -41,13 +42,12 @@ class SearchPatientBlock(
     ),
     div(
       button("診察受付", onclick := (onRegisterForExam _)),
-      button("患者管理"),
+      button("患者管理", onclick := (onManage _)),
       button("閉じる", onclick := (() => onClose(this)))
     )
   )
   block.ele(cls := "search-patient-block")
-  if patients.size == 1 then
-    onSelect(patients(0))
+  if patients.size == 1 then onSelect(patients(0))
 
   val ele = block.ele
   def remove(): Unit = ele.remove()
@@ -70,7 +70,13 @@ class SearchPatientBlock(
   private def onRegisterForExam(): Unit =
     withCurrentPatient(patient => {
       Api.startVisit(patient.patientId, LocalDateTime.now()).onComplete {
-        case Success(_) => onClose(this)
+        case Success(_)  => onClose(this)
         case Failure(ex) => errorBox.show(ex.getMessage)
       }
+    })
+
+  private def onManage(): Unit =
+    withCurrentPatient(patient => {
+      onClose(this)
+      onManagePatient(patient)
     })
