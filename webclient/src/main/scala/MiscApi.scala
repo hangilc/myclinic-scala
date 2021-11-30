@@ -64,3 +64,15 @@ object MiscApi extends ApiBase:
 
     def startVisit(patientId: Int, at: LocalDateTime): Future[Boolean] =
       get("start-visit", Params("patient-id" -> patientId, "at" -> at))
+
+    def findAvailableShahokokuho(patientId: Int, at: LocalDate): Future[Option[Shahokokuho]] =
+      get("find-available-shahokokuho", Params("patient-id" -> patientId, "at" -> at))
+
+    def findAvailableRoujin(patientId: Int, at: LocalDate): Future[Option[Roujin]] =
+      get("find-available-roujin", Params("patient-id" -> patientId, "at" -> at))
+
+    def findAvailableKoukikourei(patientId: Int, at: LocalDate): Future[Option[Koukikourei]] =
+      get("find-available-koukikourei", Params("patient-id" -> patientId, "at" -> at))
+
+    def listAvailableKouhi(patientId: Int, at: LocalDate): Future[List[Kouhi]] =
+      get("list-available-kouhi", Params("patient-id" -> patientId, "at" -> at))

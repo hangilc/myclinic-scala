@@ -15,6 +15,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import dev.myclinic.scala.web.appbase.DateInput
 import dev.myclinic.scala.model.{Sex, Patient}
 import java.time.LocalDateTime
+import java.time.LocalDate
 
 class ManagePatientBlock(patient: Patient, onClose: ManagePatientBlock => Unit):
   val eDispWrapper = div(PatientDisp(patient).ele)
@@ -31,5 +32,12 @@ class ManagePatientBlock(patient: Patient, onClose: ManagePatientBlock => Unit):
   block.ele(cls := "manage-patient-block")
   val ele = block.ele
   def init(): Unit =
+    val date = LocalDate.now()
     for
-      shahoOpt <- Api.getAvai
+      shahoOpt <- Api.findAvailableShahokokuho(patient.patientId, date)
+      roujinOpt <- Api.findAvailableRoujin(patient.patientId, date)
+      koukikoureiOpt <- Api.findAvailableKoukikourei(patient.patientId, date)
+      kouhiList <- Api.listAvailableKouhi(patient.patientId, date)
+    yield {
+      println(("shahoOpt", shahoOpt, roujinOpt, koukikoureiOpt, kouhiList))
+    }
