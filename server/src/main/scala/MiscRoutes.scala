@@ -26,6 +26,7 @@ import dev.myclinic.scala.config.Config
 
 object MiscService extends DateTimeQueryParam with Publisher:
   object dateDate extends QueryParamDecoderMatcher[LocalDate]("date")
+  object atDate extends QueryParamDecoderMatcher[LocalDate]("at")
   object atDateTime extends QueryParamDecoderMatcher[LocalDateTime]("at")
   object intVisitId extends QueryParamDecoderMatcher[Int]("visit-id")
   object intPatientId extends QueryParamDecoderMatcher[Int]("patient-id")
@@ -132,16 +133,16 @@ object MiscService extends DateTimeQueryParam with Publisher:
         yield true
       )
 
-    case GET -> Root / "find-available-shahokokuho" :? intPatientId(patientId) +& atDateTime(at) =>
+    case GET -> Root / "find-available-shahokokuho" :? intPatientId(patientId) +& atDate(at) =>
       Ok(Db.findAvailableShahokokuho(patientId, at))
 
-    case GET -> Root / "find-available-roujin" :? intPatientId(patientId) +& atDateTime(at) =>
+    case GET -> Root / "find-available-roujin" :? intPatientId(patientId) +& atDate(at) =>
       Ok(Db.findAvailableRoujin(patientId, at))
 
-    case GET -> Root / "find-available-koukikourei" :? intPatientId(patientId) +& atDateTime(at) =>
+    case GET -> Root / "find-available-koukikourei" :? intPatientId(patientId) +& atDate(at) =>
       Ok(Db.findAvailableKoukikourei(patientId, at))
 
-    case GET -> Root / "list-available-kouhi" :? intPatientId(patientId) +& atDateTime(at) =>
+    case GET -> Root / "list-available-kouhi" :? intPatientId(patientId) +& atDate(at) =>
       Ok(Db.listAvailableKouhi(patientId, at))
 
   }
