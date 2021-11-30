@@ -13,17 +13,20 @@ import org.scalajs.dom.raw.MouseEvent
 import dev.myclinic.scala.webclient.Api
 import scala.concurrent.ExecutionContext.Implicits.global
 import dev.myclinic.scala.web.appbase.DateInput
-import dev.myclinic.scala.model.{Sex, Patient}
+import dev.myclinic.scala.model.*
 import java.time.LocalDateTime
 import java.time.LocalDate
+import dev.myclinic.scala.util.{HokenRep, RcptUtil}
+import dev.myclinic.scala.apputil.FutanWari
 
 class ManagePatientBlock(patient: Patient, onClose: ManagePatientBlock => Unit):
   val eDispWrapper = div(PatientDisp(patient).ele)
+  val eRightPane = div()
   val block = Block(
     s"${patient.fullName()} (${patient.patientId})",
     div(cls := "manage-patient-block-content")(
       div(cls := "left")(eDispWrapper),
-      div(cls := "right")
+      eRightPane(cls := "right")
     ),
     div(
       button("閉じる", onclick := (() => onClose(this)))
@@ -31,6 +34,7 @@ class ManagePatientBlock(patient: Patient, onClose: ManagePatientBlock => Unit):
   )
   block.ele(cls := "manage-patient-block")
   val ele = block.ele
+
   def init(): Unit =
     val date = LocalDate.now()
     for
@@ -39,5 +43,11 @@ class ManagePatientBlock(patient: Patient, onClose: ManagePatientBlock => Unit):
       koukikoureiOpt <- Api.findAvailableKoukikourei(patient.patientId, date)
       kouhiList <- Api.listAvailableKouhi(patient.patientId, date)
     yield {
-      println(("shahoOpt", shahoOpt, roujinOpt, koukikoureiOpt, kouhiList))
+      val list = shahoOpt.map(ShahokokuhoHokenItem(_)).toList
+        ++ roujinOpt.map(RoujinHokenItem(_)).toList
+        ++ koukikoureiOpt.map(KoukikoureiHokenItem(_)).toList
+        ++ kouhiList.map(KouhiHokenItem(_))
+      val hokenList = HokenList(list)
+      eRightPane.innerHTML = ""
+      eRightPane(hokenList.ele)
     }

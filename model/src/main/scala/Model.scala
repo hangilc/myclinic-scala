@@ -262,9 +262,12 @@ case class Shahokokuho(
     honnin: Int,
     validFrom: LocalDate,
     validUpto: ValidUpto,
-    kourei: Int,
+    koureiStore: Int,
     edaban: String
-)
+):
+  def koureiFutanWari: Option[Int] =
+    if koureiStore == 0 then None
+    else Some(koureiStore)
 
 case class Roujin(
     roujinId: Int,

@@ -17,7 +17,7 @@ object FutanWari:
           val rcptAge =
             RcptUtil.calcRcptAge(birthday, visit.visitedAt.toLocalDate)
           update(calcShahokokuhoFutanWariByAge(rcptAge))
-          if shahokokuho.kourei > 0 then update(shahokokuho.kourei)
+          shahokokuho.koureiFutanWari.foreach(update(_))
         })
         visit.roujin.foreach(roujin => update(roujin.futanWari))
         visit.koukikourei.foreach(koukikourei => update(koukikourei.futanWari))
