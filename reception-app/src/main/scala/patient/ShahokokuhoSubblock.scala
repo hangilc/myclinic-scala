@@ -26,12 +26,19 @@ class ShahokokuhoSubblock(shahokokuho: Shahokokuho):
     "社保国保",
     eContent,
     eCommands(
+      button("編集", onclick := (onEdit _)),
       button("閉じる", onclick := (() => block.ele.remove()))
     )
   )
   disp()
 
   def disp(): Unit =
-    println("disp")
     eContent.clear()
     eContent(ShahokokuhoDisp(shahokokuho).ele)
+
+  def edit(): Unit =
+    eContent.clear()
+    eContent(ShahokokuhoForm(shahokokuho).ele)
+
+  def onEdit(): Unit =
+    edit()

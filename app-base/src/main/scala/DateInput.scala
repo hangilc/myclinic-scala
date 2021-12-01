@@ -26,7 +26,7 @@ class DateInput(gengouList: List[KanjiDate.Gengou] = KanjiDate.Gengou.list):
   val eMonthInput = inputText()
   val eDayInput = inputText()
   val ele =
-    div(display := "inline-flex", alignItems := "center", cls := "date-input")(
+    div(display := "inline-flex", alignItems := "center", cls := "appbase-date-input")(
       eGengouSelect(cls := "gengou"),
       eNenInput(cls := "nen"),
       span("年", cls := "label"),

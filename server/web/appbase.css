@@ -1,17 +1,17 @@
 /* DateInput ************************************************************/
 
-.date-input .nen {
+.appbase-date-input .nen {
   width: 5rem;
   margin-left: 0.2rem;
 }
 
-.date-input .month,
-.date-input .day {
+.appbase-date-input .month,
+.appbase-date-input .day {
   width: 3rem;
   margin-left: 0.3rem;
 }
 
-.date-input .label {
+.appbase-date-input .label {
   margin-left: 0.1rem;
 }
 

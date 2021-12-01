@@ -239,7 +239,24 @@ button {
 
 /* Hoken Disp ***********************************************************************/
 
-.shahokokuho-disp .domq-form-key:after {
+.shahokokuho-disp .domq-form-key:after,
+.shahokokuho-form .domq-form-key:after {
   content: "："
+}
+
+.shahokokuho-form .appbase-date-input .nen {
+  width: 2rem;
+}
+
+.shahokokuho-form .appbase-date-input .nen::after {
+  width: 2rem;
+}
+
+.shahokokuho-form .appbase-date-input .month {
+  width: 2rem;
+}
+
+.shahokokuho-form .appbase-date-input .day {
+  width: 2rem;
 }
 
