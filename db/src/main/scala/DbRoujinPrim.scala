@@ -27,3 +27,9 @@ object DbRoujinPrim:
         and valid_from <= ${at}
         and (valid_upto = '0000-00-00' || ${at} <= valid_upto)
     """.query[Roujin]
+ 
+  def listRoujin(patientId: Int): ConnectionIO[List[Roujin]] =
+    sql"""
+      select * from hoken_roujin where patient_id = ${patientId}
+      order by roujin_id desc
+    """.query[Roujin].to[List]   

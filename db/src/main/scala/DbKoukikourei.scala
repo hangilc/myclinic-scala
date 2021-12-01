@@ -15,3 +15,6 @@ import java.util.regex.Pattern
 trait DbKoukikourei extends Mysql:
   def findAvailableKoukikourei(patientId: Int, at: LocalDate): IO[Option[Koukikourei]] =
     mysql(DbKoukikoureiPrim.getAvailableKoukikourei(patientId, at).option)
+
+  def listKoukikourei(patientId: Int): IO[List[Koukikourei]] =
+    mysql(DbKoukikoureiPrim.listKoukikourei(patientId))

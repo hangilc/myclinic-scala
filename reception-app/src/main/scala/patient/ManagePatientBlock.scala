@@ -22,11 +22,14 @@ import dev.myclinic.scala.apputil.FutanWari
 class ManagePatientBlock(patient: Patient, onClose: ManagePatientBlock => Unit):
   val eDispWrapper = div(PatientDisp(patient).ele)
   val eRightPane = div()
+  val hokenList = HokenList(patient.patientId)
   val block = Block(
     s"${patient.fullName()} (${patient.patientId})",
     div(cls := "manage-patient-block-content")(
       div(cls := "left")(eDispWrapper),
-      eRightPane(cls := "right")
+      eRightPane(cls := "right")(
+        hokenList.ele
+      )
     ),
     div(
       button("閉じる", onclick := (() => onClose(this)))
@@ -36,18 +39,4 @@ class ManagePatientBlock(patient: Patient, onClose: ManagePatientBlock => Unit):
   val ele = block.ele
 
   def init(): Unit =
-    val date = LocalDate.now()
-    for
-      shahoOpt <- Api.findAvailableShahokokuho(patient.patientId, date)
-      roujinOpt <- Api.findAvailableRoujin(patient.patientId, date)
-      koukikoureiOpt <- Api.findAvailableKoukikourei(patient.patientId, date)
-      kouhiList <- Api.listAvailableKouhi(patient.patientId, date)
-    yield {
-      val list = shahoOpt.map(ShahokokuhoHokenItem(_)).toList
-        ++ roujinOpt.map(RoujinHokenItem(_)).toList
-        ++ koukikoureiOpt.map(KoukikoureiHokenItem(_)).toList
-        ++ kouhiList.map(KouhiHokenItem(_))
-      val hokenList = HokenList(list)
-      eRightPane.innerHTML = ""
-      eRightPane(hokenList.ele)
-    }
+    hokenList.init()

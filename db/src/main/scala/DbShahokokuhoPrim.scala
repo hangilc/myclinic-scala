@@ -26,3 +26,9 @@ object DbShahokokuhoPrim:
         and valid_from <= ${at}
         and (valid_upto = '0000-00-00' || ${at} <= valid_upto)
     """.query[Shahokokuho]
+
+  def listShahokokuho(patientId: Int): ConnectionIO[List[Shahokokuho]] =
+    sql"""
+      select * from hoken_shahokokuho where patient_id = ${patientId}
+      order by shahokokuho_id desc
+    """.query[Shahokokuho].to[List]

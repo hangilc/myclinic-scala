@@ -15,3 +15,6 @@ import java.util.regex.Pattern
 trait DbRoujin extends Mysql:
   def findAvailableRoujin(patientId: Int, at: LocalDate): IO[Option[Roujin]] =
     mysql(DbRoujinPrim.getAvailableRoujin(patientId, at).option)
+
+  def listRoujin(patientId: Int): IO[List[Roujin]] =
+    mysql(DbRoujinPrim.listRoujin(patientId))

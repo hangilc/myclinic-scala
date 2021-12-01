@@ -15,3 +15,6 @@ import java.util.regex.Pattern
 trait DbShahokokuho extends Mysql:
   def findAvailableShahokokuho(patientId: Int, at: LocalDate): IO[Option[Shahokokuho]] =
     mysql(DbShahokokuhoPrim.getAvailableShahokokuho(patientId, at).option)
+
+  def listShahokokuho(patientId: Int): IO[List[Shahokokuho]] =
+    mysql(DbShahokokuhoPrim.listShahokokuho(patientId))
