@@ -42,12 +42,14 @@ class SideMenu(
       cache.fold({
         val service = builder()
         val e = service.getElement
-        main(e)
+        main.clear()
+        main(div(e))
         link(cls := "current")
         cache = Some(service)
         service.init()
       })(service => {
-        main(service.getElement)
+        main.clear()
+        main(div(service.getElement))
         link(cls := "current")
         service.onReactivate
       })

@@ -31,6 +31,6 @@ object DbKouhiPrim:
 
   def listKouhi(patientId: Int): ConnectionIO[List[Kouhi]] =
     sql"""
-      select * from hoken_kouhi where patient_id = ${patientId}
+      select * from kouhi where patient_id = ${patientId}
       order by kouhi_id desc
     """.query[Kouhi].to[List]

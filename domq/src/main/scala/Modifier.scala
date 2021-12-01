@@ -193,15 +193,18 @@ object Modifiers:
 
   object onmousemove:
     def :=(f: js.Function1[MouseEvent, Unit]) = Modifier(e => {
+      if f == null then System.err.println("null handler for onmousemove")
       e.addEventListener("mousemove", f)
     })
 
     def :-(f: js.Function1[MouseEvent, Unit]) = Modifier(e => {
+      if f == null then System.err.println("null handler for onmousemove")
       e.removeEventListener("mousemove", f)
     })
 
   object onmouseenter:
     def :=(f: MouseEvent => Unit) = Modifier(e => {
+      if f == null then System.err.println("null handler for onmouseenter")
       e.addEventListener("mouseenter", f)
     })
 
@@ -211,10 +214,12 @@ object Modifiers:
 
   object onmouseleave:
     def :=(f: js.Function1[MouseEvent, Unit]) = Modifier(e => {
+      if f == null then System.err.println("null handler for onmouseleave")
       e.addEventListener("mouseleave", f)
     })
 
     def :-(f: js.Function1[MouseEvent, Unit]) = Modifier(e => {
+      if f == null then System.err.println("null handler for onmouseleave")
       e.removeEventListener("mouseleave", f)
     })
 
@@ -223,9 +228,11 @@ object Modifiers:
     })
 
   val oncontextmenu = Creator[js.Function1[MouseEvent, Unit]]((ele, handler) => {
+    if handler == null then System.err.println("null handler for oncontextmenu")
     ele.addEventListener("contextmenu", handler)
   })
 
   val onchange = Creator[js.Function1[Event, Unit]]((ele, handler) => {
+    if handler == null then System.err.println("null handler for onchange")
     ele.addEventListener("change", handler)
   })

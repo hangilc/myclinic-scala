@@ -22,7 +22,8 @@ import dev.myclinic.scala.apputil.FutanWari
 class ManagePatientBlock(patient: Patient, onClose: ManagePatientBlock => Unit):
   val eDispWrapper = div(PatientDisp(patient).ele)
   val eRightPane = div()
-  val hokenList = HokenList(patient.patientId)
+  val eSubblocks = div()
+  val hokenList = HokenList(patient.patientId, eSubblocks)
   val block = Block(
     s"${patient.fullName()} (${patient.patientId})",
     div(cls := "manage-patient-block-content")(
@@ -36,6 +37,7 @@ class ManagePatientBlock(patient: Patient, onClose: ManagePatientBlock => Unit):
     )
   )
   block.ele(cls := "manage-patient-block")
+  block.ele(eSubblocks(cls := "subblocks"))
   val ele = block.ele
 
   def init(): Unit =

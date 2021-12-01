@@ -159,6 +159,23 @@ button {
   margin-left: 0.3rem;
 }
 
+/* Subblocks ************************************************************************/
+
+.work-block .subblocks {
+  margin: 1rem;
+  display: grid;
+  grid-template-columns: calc(50% - 5px) calc(50% - 5px);
+  justify-content: space-between;
+  row-gap: 10px;
+}
+
+.work-block .subblocks .subblock {
+  border: 2px solid orange;
+  border-style: dotted;
+  border-radius: 4px;
+  padding: 10px;
+}
+
 /* Patient Management / Search ******************************************************/
 
 .patient-management .search-patient-block .content {
@@ -193,3 +210,15 @@ button {
 .manage-patient-block-content .right {
   flex: 1 1 0;
 }
+
+/* Hoken List Disp ****************************************************************/
+
+.hoken-list-disp {
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.hoken-list-disp .zoom-in-icon {
+  margin-right: 0.3rem;
+}
+

@@ -75,6 +75,7 @@ class PatientManagement() extends SideMenuService:
             addManagePatientBlock
           )
           eWorkarea.prepend(block.ele)
+          eSearchText.value = ""
         else ShowMessage.showMessage("該当患者が見つかりませんでした。")
       }
 

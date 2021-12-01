@@ -7,7 +7,7 @@ import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
 import scala.language.implicitConversions
 
-object Html {
+object Html:
 
   case class Tag(tag: String):
     def apply(modifiers: Modifier*): ElementQ =
@@ -44,6 +44,7 @@ object Html {
   def option: HTMLElement = element("option").asInstanceOf[HTMLInputElement]
   def textarea: HTMLInputElement = element("textarea").asInstanceOf[HTMLInputElement]
   def inputText = input(attr("type") := "text")
-  def checkbox = input(attr("type") := "checkbox")
-
-}
+  def checkbox: HTMLElement = 
+    val e = element("input")
+    e.setAttribute("type", "checkbox")
+    e

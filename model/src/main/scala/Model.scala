@@ -268,6 +268,7 @@ case class Shahokokuho(
   def koureiFutanWari: Option[Int] =
     if koureiStore == 0 then None
     else Some(koureiStore)
+  def validUptoOption: Option[LocalDate] = validUpto.value
 
 case class Roujin(
     roujinId: Int,
@@ -276,8 +277,10 @@ case class Roujin(
     jukyuusha: Int,
     futanWari: Int,
     validFrom: LocalDate,
-    validUpt: ValidUpto
-)
+    validUpto: ValidUpto
+):
+  def validUptoOption: Option[LocalDate] = validUpto.value
+
 
 case class Koukikourei(
     koukikoureiId: Int,
@@ -286,8 +289,9 @@ case class Koukikourei(
     hihokenshaBangou: String,
     futanWari: Int,
     validFrom: LocalDate,
-    validUpt: ValidUpto
-)
+    validUpto: ValidUpto
+):
+  def validUptoOption: Option[LocalDate] = validUpto.value
 
 case class Kouhi(
     kouhiId: Int,
@@ -296,7 +300,8 @@ case class Kouhi(
     validFrom: LocalDate,
     validUpto: ValidUpto,
     patientId: Int
-)
+):
+  def validUptoOption: Option[LocalDate] = validUpto.value
 
 case class MeisaiSectionData(
     section: MeisaiSection,

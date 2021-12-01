@@ -87,6 +87,12 @@ case class ElementQ(ele: HTMLElement):
     if bool then  ele.setAttribute("checked", "checked")
     else ele.removeAttribute("checked")
 
+  def isChecked: Boolean =
+    ele match {
+      case e: HTMLInputElement => e.checked
+      case _ => false
+    }
+
   def asInputElement: HTMLInputElement = ele.asInstanceOf[HTMLInputElement]
 
   def selector(query: String): Option[HTMLElement] =
