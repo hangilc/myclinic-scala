@@ -259,7 +259,7 @@ case class Shahokokuho(
     hokenshaBangou: Int,
     hihokanshaKigou: String,
     hihokenshaBangou: String,
-    honnin: Int,
+    honninStore: Int,
     validFrom: LocalDate,
     validUpto: ValidUpto,
     koureiStore: Int,
@@ -269,6 +269,7 @@ case class Shahokokuho(
     if koureiStore == 0 then None
     else Some(koureiStore)
   def validUptoOption: Option[LocalDate] = validUpto.value
+  def isHonnin: Boolean = honninStore > 0
 
 case class Roujin(
     roujinId: Int,

@@ -116,9 +116,7 @@ class ShahokokuhoHokenItem(shahokokuho: Shahokokuho) extends HokenItem:
   def validFrom: LocalDate = shahokokuho.validFrom
   def validUpto: Option[LocalDate] = shahokokuho.validUptoOption
   def key: String = s"shahokokuho-${shahokokuho.shahokokuhoId}"
-  def createDisp(): Subblock = Subblock(
-    "社保国保", div(), div()
-  )
+  def createDisp(): Subblock = ShahokokuhoSubblock(shahokokuho).block
 
 class RoujinHokenItem(roujin: Roujin) extends HokenItem:
   def rep: String = HokenRep.roujinRep(roujin.futanWari)

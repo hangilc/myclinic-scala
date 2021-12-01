@@ -68,11 +68,11 @@ body {
   background-color: #ffdab9
 }
 
-.form-value svg {
+.domq-form-value svg {
   flex: 0 0 auto;
 }
 
-.form-value .input-group {
+.domq-form-value .input-group {
   display: flex;
   width: 100%;
   overflow: hidden;
@@ -89,7 +89,7 @@ body {
   width: 100%
 }
 
-.appoint-dialog-form-table .form-key {
+.appoint-dialog-form-table .domq-form-key {
   width: 4rem;
 }
 

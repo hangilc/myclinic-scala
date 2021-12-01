@@ -25,14 +25,14 @@ object Form:
               style.textAlign = "right"
               style.wordBreak = "keep-all"
             }),
-            cls := "form-key"
+            cls := "domq-form-key"
           ),
           input(
             css(style => {
               style.display = "table-cell"
               style.verticalAlign = "middle"
             }),
-            cls := "form-value"
+            cls := "domq-form-value"
           )
         )
       )
