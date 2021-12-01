@@ -1,5 +1,11 @@
 /* DateInput ************************************************************/
 
+.appbase-date-input {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
 .appbase-date-input .nen {
   width: 5rem;
   margin-left: 0.2rem;

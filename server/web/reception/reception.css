@@ -245,18 +245,19 @@ button {
 }
 
 .shahokokuho-form .appbase-date-input .nen {
-  width: 2rem;
+  width: 3rem;
 }
 
-.shahokokuho-form .appbase-date-input .nen::after {
-  width: 2rem;
+.shahokokuho-form .appbase-date-input .nen + span {
+  margin-right: 60px;
 }
 
 .shahokokuho-form .appbase-date-input .month {
-  width: 2rem;
+  width: 3rem;
+  margin-left: 0;
 }
 
 .shahokokuho-form .appbase-date-input .day {
-  width: 2rem;
+  width: 3rem;
 }
 

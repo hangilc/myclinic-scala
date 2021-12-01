@@ -27,12 +27,14 @@ object Form:
             }),
             cls := "domq-form-key"
           ),
-          input(
+          div(
             css(style => {
               style.display = "table-cell"
               style.verticalAlign = "middle"
             }),
             cls := "domq-form-value"
+          )(
+            input
           )
         )
       )
