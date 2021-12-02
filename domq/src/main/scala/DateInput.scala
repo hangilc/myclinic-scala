@@ -3,7 +3,7 @@ package dev.fujiwara.domq
 import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
-import dev.fujiwara.domq
+import dev.fujiwara.domq.{Icons}
 import dev.myclinic.scala.util.KanjiDate
 import dev.myclinic.scala.util.KanjiDate.Gengou
 import dev.myclinic.scala.util.ZenkakuUtil
@@ -21,11 +21,16 @@ import scala.util.Failure
 import scala.util.Success
 import cats.data.Validated.Valid
 import cats.data.Validated.Invalid
+import org.scalajs.dom.raw.MouseEvent
 
 class DateInput(gengouList: List[Gengou] = Gengou.list):
-  val eInput: HTMLInputElement = inputText()
+  val eInput: HTMLInputElement = inputText(placeholder := "平成３０年１２月２３日")
   val ele: HTMLElement = div(cls := "domq-date-input-wrapper")(
-    eInput(cls := "domq-date-input")
+    eInput(cls := "domq-date-input"),
+    Icons.calendar(color = "gray")(
+      Icons.defaultStyle,
+      onclick := ((event: MouseEvent) => (new DatePicker(LocalDate.now())).open(event))
+    )
   )
   def validate(): Either[String, LocalDate] =
     DateInput.validateDateInput(eInput.value) match {

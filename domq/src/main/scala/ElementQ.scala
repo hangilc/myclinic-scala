@@ -15,6 +15,11 @@ case class ElementQ(ele: HTMLElement):
     modifiers.foreach(_.modifier(ele))
     this
 
+  def setChildren(elements: List[HTMLElement]): ElementQ =
+    ele.innerHTML = ""
+    elements.foreach(e => ele.appendChild(e))
+    this
+
   def onclick(handler: MouseEvent => _): HTMLElement =
     ele.addEventListener("click", handler)
     ele

@@ -239,9 +239,9 @@ button {
 
 /* Hoken Disp ***********************************************************************/
 
-.shahokokuho-disp .domq-form-key:after,
-.shahokokuho-form .domq-form-key:after {
-  content: "："
+.shahokokuho-disp .domq-form-key,
+.shahokokuho-form .domq-form-key {
+  color: #666;
 }
 
 .shahokokuho-form .appbase-date-input .nen {

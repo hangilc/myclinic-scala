@@ -17,3 +17,22 @@
   align-items: center;
 }
 
+.domq-date-input {
+  width: 10rem;
+}
+
+.domq-date-picker-dates-tab {
+  display: grid;
+  grid-template-columns: 2rem 2rem 2rem 2rem 2rem 2rem 2rem;
+}
+
+.domq-date-picker-date-box {
+  display: inline-block;
+  text-align: right;
+  cursor: pointer;
+}
+
+.domq-date-picker-date-box:hover {
+  background-color: #ccc;
+}
+
