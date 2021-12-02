@@ -34,7 +34,7 @@ class DateInput(gengouList: List[Gengou] = Gengou.list):
     }
 
 object DateInput:
-  val pat: Regex = raw"(\S+)\s*(\S+)\s*年\s*(\S+)\s*月\s*(\S+)日".r
+  val pat: Regex = raw"(\D*)\s*(\d+)\s*年\s*(\d+)\s*月\s*(\d+)日".r
 
   sealed trait DateInputError:
     def message: String
