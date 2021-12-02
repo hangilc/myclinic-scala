@@ -3,13 +3,12 @@ package dev.myclinic.scala.web.reception.patient
 import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
-import dev.fujiwara.domq.{Icons, Form, ErrorBox, Modifier}
+import dev.fujiwara.domq.{Icons, Form, ErrorBox, Modifier, DateInput}
 import scala.language.implicitConversions
 import org.scalajs.dom.raw.{HTMLElement, HTMLInputElement}
 import dev.myclinic.scala.util.{KanjiDate, DateUtil}
 import dev.myclinic.scala.model.*
 import java.time.LocalDate
-import dev.myclinic.scala.web.appbase.DateInput
 
 class ShahokokuhoForm(shahokokuho: Shahokokuho):
   val eHokenshaBangou = inputText()

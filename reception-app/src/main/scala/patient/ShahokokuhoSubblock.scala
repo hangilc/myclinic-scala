@@ -25,20 +25,30 @@ class ShahokokuhoSubblock(shahokokuho: Shahokokuho):
   val block: Subblock = Subblock(
     "社保国保",
     eContent,
-    eCommands(
-      button("編集", onclick := (onEdit _)),
-      button("閉じる", onclick := (() => block.ele.remove()))
-    )
+    eCommands
   )
   disp()
 
   def disp(): Unit =
     eContent.clear()
     eContent(ShahokokuhoDisp(shahokokuho).ele)
+    eCommands.clear()
+    eCommands(
+      button("編集", onclick := (onEdit _)),
+      button("閉じる", onclick := (() => block.ele.remove()))
+    )
 
   def edit(): Unit =
+    val form = ShahokokuhoForm(shahokokuho)
     eContent.clear()
-    eContent(ShahokokuhoForm(shahokokuho).ele)
+    eContent(form.ele)
+    eCommands.clear()
+    eCommands(
+      button("入力", onclick := (() => {
+        println(("validate", form.eValidFrom.validate()))
+      })),
+      button("キャンセル", onclick := (() => disp()))
+    )
 
   def onEdit(): Unit =
     edit()

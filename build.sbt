@@ -148,11 +148,13 @@ lazy val webclient = project
 lazy val domq = project
   .in(file("domq"))
   .enablePlugins(ScalaJSPlugin)
+  .dependsOn(utilJS)
   .settings(
     name := "domq",
     libraryDependencies ++= Seq(
       ("org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion)
-        .cross(CrossVersion.for3Use2_13)
+        .cross(CrossVersion.for3Use2_13),
+      "org.typelevel" %%% "cats-core" % catsVersion
     )
   )
 
