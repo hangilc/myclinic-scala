@@ -42,7 +42,8 @@ class Cashier(using publishers: EventPublishers) extends SideMenuService:
           }
         }),
         mt := "10px"
-      )
+      ),
+      dev.fujiwara.domq.DateInput().ele
     )
   )
   val rowMap: mutable.Map[Int, HTMLElement] = mutable.Map.empty

@@ -26,6 +26,10 @@
   grid-template-columns: 2rem 2rem 2rem 2rem 2rem 2rem 2rem;
 }
 
+.domq-date-picker-month-block{
+  user-select: none;
+}
+
 .domq-date-picker-date-box {
   display: inline-block;
   text-align: right;

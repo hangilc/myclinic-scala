@@ -39,6 +39,19 @@ object KanjiDate:
     case Heisei extends Gengou("平成", "Heisei", LocalDate.of(1989, 1, 8))
     case Reiwa extends Gengou("令和", "Reiwa", LocalDate.of(2019, 5, 1))
 
+    def next: Option[Gengou] =
+      val nextOrd = ordinal + 1
+      if nextOrd < Gengou.values.size then Some(Gengou.fromOrdinal(nextOrd))
+      else None
+
+    def lastDay: Option[LocalDate] =
+      next.map(ng => ng.startDate.minusDays(1))
+
+    def listNen: Range =
+      val firstYear = startDate.getYear
+      val lastYear: Int = lastDay.map(_.getYear).getOrElse(LocalDate.now().getYear)
+      1 to (lastYear - firstYear + 1)
+
   object Gengou:
     val list: List[Gengou] =
       (0 until Gengou.values.size).reverse.map(Gengou.fromOrdinal(_)).toList
