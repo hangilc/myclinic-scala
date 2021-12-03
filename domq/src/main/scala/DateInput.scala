@@ -29,7 +29,7 @@ class DateInput(gengouList: List[Gengou] = Gengou.list):
     eInput(cls := "domq-date-input"),
     Icons.calendar(color = "gray")(
       Icons.defaultStyle,
-      onclick := ((event: MouseEvent) => (new DatePicker(LocalDate.now())).open(event))
+      onclick := ((event: MouseEvent) => (new DatePicker(LocalDate.now(), (println _))).open(event))
     )
   )
   def validate(): Either[String, LocalDate] =

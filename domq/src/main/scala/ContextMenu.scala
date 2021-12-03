@@ -43,7 +43,7 @@ class ContextMenu(zIndex: Int):
       screen(onclick := ((e: MouseEvent) => {
         e.preventDefault
         e.stopPropagation
-        remove()
+        close()
       })),
       menu
     )
@@ -62,7 +62,7 @@ class ContextMenu(zIndex: Int):
     }))
     menu(css(style => style.visibility = "visible"))
 
-  def remove(): Unit =
+  def close(): Unit =
     menu.remove()
     screen.remove()
 
@@ -79,7 +79,7 @@ object ContextMenu:
           href := "",
           onclick := ((e: Event) => {
             e.preventDefault
-            m.remove()
+            m.close()
             f()
           })
         )

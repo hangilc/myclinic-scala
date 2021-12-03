@@ -21,9 +21,18 @@
   width: 10rem;
 }
 
+.domq-nen-select,
+.domq-nen-label,
+.domq-month-select,
+.domq-month-label {
+  margin-left: 3px;
+}
+
 .domq-date-picker-dates-tab {
   display: grid;
-  grid-template-columns: 2rem 2rem 2rem 2rem 2rem 2rem 2rem;
+  grid-template-columns: 1.5rem 1.5rem 1.5rem 1.5rem 1.5rem 1.5rem 1.5rem;
+  margin-top: 6px;
+  margin-right: 0.5rem;
 }
 
 .domq-date-picker-month-block{
@@ -34,6 +43,7 @@
   display: inline-block;
   text-align: right;
   cursor: pointer;
+  user-select: none;
 }
 
 .domq-date-picker-date-box:hover {
