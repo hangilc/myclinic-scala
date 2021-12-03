@@ -4,55 +4,91 @@ import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.{ContextMenu, Modal}
-import dev.myclinic.scala.util.KanjiDate.Gengou
+import dev.myclinic.scala.util.KanjiDate.{Gengou, Wareki}
 import scala.language.implicitConversions
-import scala.collection.JavaConverters.*
-import org.scalajs.dom.raw.{MouseEvent, HTMLElement}
+import scala.scalajs.js
+import org.scalajs.dom.raw.{MouseEvent, HTMLElement, Event}
 import java.time.LocalDate
 import scala.collection.mutable.ListBuffer
 
 class DatePicker(
     initialDate: LocalDate,
+    cb: LocalDate => Unit,
     gengouList: List[Gengou] = Gengou.list,
     zIndex: Int = Modal.zIndexDefault
 ):
   val menu = new ContextMenu(zIndex)
   val eGengouSelect = select()
   val eNenSelect = select()
+  val eMonthSelect = select()
   val eDatesTab = div()
   menu.menu(
     div(cls := "domq-date-picker-month-block")(
-      eGengouSelect.setChildren(
+      eGengouSelect(onchange := (adaptToCurrentMonth _)).setChildren(
         gengouList.map(g => option(g.name, value := g.name).ele)
-          ++ List(option("西暦", value := "西暦").ele)
       ),
       eNenSelect,
-      span("年", cls := "label"),
-      "１２月"
+      a("年", onclick := (advanceYear _)),
+      eMonthSelect.setChildren(
+        (1 to 12).toList.map(i => option(i.toString, value := i.toString))
+      ),
+      a("月", onclick := (advanceMonth _))
     ),
     eDatesTab(cls := "domq-date-picker-dates-tab")
   )
-  stuffDates(initialDate.getYear, initialDate.getMonthValue)
-  adaptNenInput()
-
+  setMonth(2021, 12)
 
   def open(event: MouseEvent) = menu.open(event)
 
-  private case class Seireki()
- 
-  private def adaptNenInput(): Unit =
-    selectedGengou match {
-      case g: Gengou => setupNenSelect(g)
-      case _: Seireki => ()
+  def setMonth(year: Int, month: Int): Unit =
+    val d = LocalDate.of(year, month, 1)
+    Wareki.fromDate(d) match {
+      case Some(w) => 
+        eGengouSelect.selectOptionByValue(w.gengou.name)
+        setupNenSelect(w.gengou)
+        eNenSelect(onchange := (adaptToCurrentMonth _)).selectOptionByValue(w.nen.toString)
+        eMonthSelect(onclick := (adaptToCurrentMonth _)).selectOptionByValue(month.toString)
+        stuffDates(year, month)
+      case None => System.err.println(s"Cannot get Gengou of ${year}-${month}")
     }
 
+  private def advanceYear(event: MouseEvent): Unit =
+    var n = 1
+    if event.ctrlKey then n = 5
+    if event.shiftKey then n = -n
+    advance(_.plusYears(n))
 
-  private def selectedGengou: Gengou | Seireki =
-    val valueOpt: Option[String] =
-      eGengouSelect.getSelectedOptionValues.headOption
-    valueOpt.fold(new Seireki())(s =>
-      Gengou.findByName(s).getOrElse(new Seireki())
-    )
+  private def advanceMonth(event: MouseEvent): Unit =
+    var n = 1
+    if event.ctrlKey then n = 5
+    if event.shiftKey then n = -n
+    advance(_.plusMonths(n))
+
+  private def advance(f: LocalDate => LocalDate): Unit =
+    val d = f(LocalDate.of(currentYear, currentMonth, 1))
+    setMonth(d.getYear, d.getMonthValue)
+
+  private def currentGengou: Gengou = 
+    Gengou.findByName(eGengouSelect.getSelectedOptionValues.head).get
+    
+  private def currentNen: Int = 
+    eNenSelect.getSelectedOptionValues.head.toInt
+
+  private def currentYear: Int =
+    Gengou.gengouToYear(currentGengou, currentNen)
+    
+  private def currentMonth: Int = 
+    eMonthSelect.getSelectedOptionValues.head.toInt
+    
+  private def adaptToCurrentMonth(): Unit =
+    val g = currentGengou
+    val m = currentNen
+    val y = Gengou.gengouToYear(g, m)
+    setMonth(y, currentMonth)
+
+  private def selectedGengou: Gengou =
+    val v = eGengouSelect.getSelectedOptionValues.headOption.get
+    Gengou.findByName(v).get
 
   private def setupNenSelect(g: Gengou): Unit =
     eNenSelect.setChildren(
@@ -61,7 +97,11 @@ class DatePicker(
 
   private def stuffDates(year: Int, month: Int): Unit =
     eDatesTab.clear()
-    eDatesTab.setChildren(makeDates(year, month))
+    val d1 = LocalDate.of(year, month, 1)
+    val pad = d1.getDayOfWeek.getValue % 7
+    for _ <- 0 until pad do
+      eDatesTab(div())
+    eDatesTab.addChildren(makeDates(year, month))
 
   private def makeDates(year: Int, month: Int): List[HTMLElement] =
     val start = LocalDate.of(year, month, 1)

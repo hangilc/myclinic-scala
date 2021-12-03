@@ -16,7 +16,10 @@ case class ElementQ(ele: HTMLElement):
     this
 
   def setChildren(elements: List[HTMLElement]): ElementQ =
-    ele.innerHTML = ""
+    clear()
+    addChildren(elements)
+
+  def addChildren(elements: List[HTMLElement]): ElementQ =
     elements.foreach(e => ele.appendChild(e))
     this
 

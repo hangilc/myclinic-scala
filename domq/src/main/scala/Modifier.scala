@@ -141,7 +141,6 @@ object Modifiers:
   val flexShrink = styleSetter((s, v) => s.setProperty("flex-shrink", v))
   val flex = styleSetter((s, v) => s.setProperty("flex", v))
 
-
   def hoverBackground(bg: String): Modifier =
     var save: String = ""
     Modifier(e => {
@@ -174,11 +173,14 @@ object Modifiers:
 
   object onsubmit:
     def :=(f: () => Unit) = Modifier(e => {
-      e.addEventListener("submit", (e: Event) => { 
-        e.preventDefault
-        e.stopPropagation
-        f() 
-      })
+      e.addEventListener(
+        "submit",
+        (e: Event) => {
+          e.preventDefault
+          e.stopPropagation
+          f()
+        }
+      )
     })
 
   object onmousedown:
@@ -227,12 +229,17 @@ object Modifiers:
       e.addEventListener("mouseleave", (_: MouseEvent) => f())
     })
 
-  val oncontextmenu = Creator[js.Function1[MouseEvent, Unit]]((ele, handler) => {
-    if handler == null then System.err.println("null handler for oncontextmenu")
-    ele.addEventListener("contextmenu", handler)
-  })
+  val oncontextmenu =
+    Creator[js.Function1[MouseEvent, Unit]]((ele, handler) => {
+      if handler == null then
+        System.err.println("null handler for oncontextmenu")
+      ele.addEventListener("contextmenu", handler)
+    })
 
-  val onchange = Creator[js.Function1[Event, Unit]]((ele, handler) => {
-    if handler == null then System.err.println("null handler for onchange")
-    ele.addEventListener("change", handler)
-  })
+  object onchange:
+    def :=(handler: js.Function1[Event, Unit]) = Modifier(ele => {
+      if handler == null then System.err.println("null handler for onchange")
+      ele.addEventListener("change", handler)
+    })
+    def :=(handler: () => Unit) =
+      Modifier(ele => ele.addEventListener("change", (_: Event) => handler()))
