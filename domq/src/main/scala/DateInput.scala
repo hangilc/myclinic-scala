@@ -22,6 +22,7 @@ import scala.util.Success
 import cats.data.Validated.Valid
 import cats.data.Validated.Invalid
 import org.scalajs.dom.raw.MouseEvent
+import org.scalajs.dom.raw.KeyboardEvent
 
 class DateInput(gengouList: List[Gengou] = Gengou.list):
   val eInput: HTMLInputElement = inputText(placeholder := "平成３０年１２月２３日")
@@ -29,12 +30,18 @@ class DateInput(gengouList: List[Gengou] = Gengou.list):
     eInput(cls := "domq-date-input"),
     Icons.calendar(color = "gray")(
       Icons.defaultStyle,
-      onclick := ((event: MouseEvent) => (new DatePicker(LocalDate.now(), (println _))).open(event))
+      onclick := ((event: MouseEvent) =>
+        (new DatePicker(LocalDate.now(), (setDate _))).open(event)
+      )
     )
   )
+  def setDate(date: LocalDate): Unit =
+    println(("date", date, KanjiDate.dateToKanji(date)))
+    eInput(value := KanjiDate.dateToKanji(date))
+
   def validate(): Either[String, LocalDate] =
     DateInput.validateDateInput(eInput.value) match {
-      case Valid(d) => Right(d)
+      case Valid(d)     => Right(d)
       case Invalid(err) => Left(err.toList.map(_.message).mkString("\n"))
     }
 
@@ -83,7 +90,6 @@ object DateInput:
   class Seireki
 
   def validateGengou(src: String): Result[Gengou | Seireki] =
-    println(("gengou src", src))
     if (src == null || src.isEmpty || src == "西暦") then validNec(Seireki())
     else
       Gengou.findByName(src) match {
@@ -124,9 +130,7 @@ object DateInput:
       }
 
   def validateDateInput(src: String): Result[LocalDate] =
-    println(("validate src", src))
     val input = ZenkakuUtil.convertZenkakuDigits(src.trim)
-    println(("validate input", input))
     input match {
       case DateInput.pat(gengou, nen, month, day) => {
         (
@@ -134,14 +138,14 @@ object DateInput:
           validateNen(nen),
           validateMonth(month),
           validateDay(day)
-        ).tupled.andThen((g: Gengou|Seireki, n: Int, m: Int, d: Int) => {
+        ).tupled.andThen((g: Gengou | Seireki, n: Int, m: Int, d: Int) => {
           val year = g match {
             case _: Seireki => n
-            case g: Gengou => Gengou.gengouToYear(g, n)
+            case g: Gengou  => Gengou.gengouToYear(g, n)
           }
           Try(LocalDate.of(year, m, d)) match {
             case Success(date) => validNec(date)
-            case Failure(_) => invalidNec(InvalidDateError)
+            case Failure(_)    => invalidNec(InvalidDateError)
           }
         })
       }

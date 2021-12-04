@@ -63,7 +63,7 @@ class PrintDialog(
       val settingOptions: List[Modifier] =
         ("手動" :: settings).map(name => option(name, value := name))
       eSelect(settingOptions: _*)
-      eSelect.selectOptionByValue(pref.getOrElse("手動"))
+      eSelect.setSelectValue(pref.getOrElse("手動"))
     }
 
   def open(): Unit = 

@@ -59,32 +59,61 @@ case class ElementQ(ele: HTMLElement):
     if first == null then ele.appendChild(e)
     else ele.insertBefore(e, first)
 
-  def selectOptionByValue(value: String): Option[HTMLElement] =
-    val nodes = ele.querySelectorAll("option")
-    val n = nodes.length
+  def qSelector(querySelector: String): Option[HTMLElement] =
+    val node = ele.querySelector(querySelector)
+    if node == null then None else Some(node.asInstanceOf[HTMLElement])
+
+  def qSelectorAll(querySelector: String): List[HTMLElement] =
+    val nodes = ele.querySelectorAll(querySelector)
+    val buf = ListBuffer[HTMLElement]()
+    for i <- 0 until nodes.length do
+      buf.addOne(nodes.item(i).asInstanceOf[HTMLElement])
+    buf.toList
+
+  def qSelectorAllFind(querySelector: String, f: HTMLElement => Boolean): Option[HTMLElement] =
+    val nodes = ele.querySelectorAll(querySelector)
+    var result: Option[HTMLElement] = None
     var i = 0
-    var opt: Option[HTMLElement] = None
-    while (i < n) do
+    while i < nodes.length do
       val e = nodes.item(i).asInstanceOf[HTMLElement]
-      if e.getAttribute("value") == value then
-        e.setAttribute("selected", "selected")
-        opt = Some(e)
-        i = n
-      else
-        e.removeAttribute("selected")
-        i += 1
-    opt
+      if f(e) then
+        result = Some(e)
+        i = nodes.length
+      i += 1
+    result
+
+  def setSelectValue(value: String): Boolean =
+    val opt = qSelectorAllFind("option", e => e.asInstanceOf[HTMLInputElement].value == value)
+    opt.fold(false)(o => {
+      o.setAttribute("selected", "selected")
+      true
+    })
+    // val nodes = ele.querySelectorAll("option")
+    // val n = nodes.length
+    // var i = 0
+    // var opt: Option[HTMLElement] = None
+    // while (i < n) do
+    //   val e = nodes.item(i).asInstanceOf[HTMLElement]
+    //   if e.getAttribute("value") == value then
+    //     e.setAttribute("selected", "selected")
+    //     opt = Some(e)
+    //     i = n
+    //   else
+    //     e.removeAttribute("selected")
+    //     i += 1
+    // opt
 
   def getSelectedOptionValues: List[String] =
-    val nodes = ele.querySelectorAll("option:checked")
-     val n = nodes.length
-    var i = 0
-    val buf = ListBuffer[String]()
-    while (i < n) do
-      val e = nodes.item(i).asInstanceOf[HTMLElement]
-      buf += e.getAttribute("value")
-      i += 1
-    buf.toList
+    qSelectorAll("option:checked").map(_.asInstanceOf[HTMLInputElement].value)
+    // val nodes = ele.querySelectorAll("option:checked")
+    //  val n = nodes.length
+    // var i = 0
+    // val buf = ListBuffer[String]()
+    // while (i < n) do
+    //   val e = nodes.item(i).asInstanceOf[HTMLElement]
+    //   buf += e.getAttribute("value")
+    //   i += 1
+    // buf.toList
 
   def getCheckedRadioValue: Option[String] = 
     val n = ele.querySelector("input[type=radio]:checked")

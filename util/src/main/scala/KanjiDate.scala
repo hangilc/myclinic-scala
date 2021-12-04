@@ -18,7 +18,7 @@ object KanjiDate:
       formatYear: DateInfo => String = i => s"${i.gengou}${i.nen}年",
       formatMonth: DateInfo => String = i => s"${i.month}月",
       formatDay: DateInfo => String = i => s"${i.day}日",
-      formatYoubi: DateInfo => String = _.youbi
+      formatYoubi: DateInfo => String = _ => ""
   ): String =
     val i: DateInfo = DateInfo(d)
     val year = formatYear(i)

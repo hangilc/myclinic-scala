@@ -67,7 +67,10 @@ object Modifiers:
 
   def attr(name: String): Attr = Attr(name)
 
-  val value = attr("value")
+  object value:
+    def :=(arg: String) = Modifier(e => e.asInstanceOf[HTMLInputElement].value = arg)
+
+//  val value = attr("value")
   val id = attr("id")
 
   def attrNS(namespace: String, name: String) = Creator[String]((e, a) => {

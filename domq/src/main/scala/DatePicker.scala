@@ -11,6 +11,7 @@ import org.scalajs.dom.raw.{MouseEvent, HTMLElement, Event}
 import java.time.LocalDate
 import scala.collection.mutable.ListBuffer
 import org.scalajs.dom.raw.KeyboardEvent
+import org.scalajs.dom.raw.HTMLInputElement
 
 class DatePicker(
     initialDate: LocalDate,
@@ -23,7 +24,7 @@ class DatePicker(
   val eNenSelect = select()
   val eMonthSelect = select()
   val eDatesTab = div()
-  menu.menu(onkeyup := (onKeyup _))(
+  menu.menu(
     div(cls := "domq-date-picker-month-block")(
       eGengouSelect(
         cls := "domq-gengou-select",
@@ -31,9 +32,12 @@ class DatePicker(
       ).setChildren(
         gengouList.map(g => option(g.name, value := g.name).ele)
       ),
-      eNenSelect(cls := "domq-nen-select"),
+      eNenSelect(cls := "domq-nen-select", onchange := (adaptToCurrentMonth _)),
       a("年", cls := "domq-nen-label", onclick := (advanceYear _)),
-      eMonthSelect(cls := "domq-month-select").setChildren(
+      eMonthSelect(
+        cls := "domq-month-select",
+        onclick := (adaptToCurrentMonth _)
+      ).setChildren(
         (1 to 12).toList.map(i => option(i.toString, value := i.toString))
       ),
       a("月", cls := "domq-month-label", onclick := (advanceMonth _))
@@ -42,29 +46,32 @@ class DatePicker(
   )
   setMonth(2021, 12)
 
-  def open(event: MouseEvent) = 
+  def open(event: MouseEvent) =
     menu.open(event)
-    eMonthSelect.focus()
-
-  private def onKeyup(event: KeyboardEvent): Unit =
-    event.key match {
-      case "Escape" => menu.close()
-      case _ => ()
-    }
 
   def setMonth(year: Int, month: Int): Unit =
     val d = LocalDate.of(year, month, 1)
     Wareki.fromDate(d) match {
       case Some(w) =>
-        eGengouSelect.selectOptionByValue(w.gengou.name)
+        eGengouSelect.setSelectValue(w.gengou.name)
         setupNenSelect(w.gengou)
-        eNenSelect(onchange := (adaptToCurrentMonth _))
-          .selectOptionByValue(w.nen.toString)
-        eMonthSelect(onclick := (adaptToCurrentMonth _))
-          .selectOptionByValue(month.toString)
+        ensureNen(w.nen)
+        eNenSelect.setSelectValue(w.nen.toString)
+        eMonthSelect.setSelectValue(month.toString)
         stuffDates(year, month)
       case None => System.err.println(s"Cannot get Gengou of ${year}-${month}")
     }
+
+  private def ensureNen(nen: Int): Unit =
+    val last: Int = eNenSelect
+      .qSelectorAll("option")
+      .lastOption
+      .map(_.asInstanceOf[HTMLInputElement].value.toInt)
+      .getOrElse(0)
+    println(("last", last, nen))
+    if last < nen then
+      val opts: List[Modifier] = ((last + 1) to nen).toList.map(mkNenOption(_))
+      eNenSelect(opts)
 
   private def advanceYear(event: MouseEvent): Unit =
     var n = 1
@@ -106,8 +113,12 @@ class DatePicker(
 
   private def setupNenSelect(g: Gengou): Unit =
     eNenSelect.setChildren(
-      g.listNen.toList.map(n => option(n.toString, value := n.toString))
+      g.listNen.toList.map(n => mkNenOption(n))
     )
+
+  private def mkNenOption(nen: Int): HTMLElement =
+    val v = nen.toString
+    option(v, value := v)
 
   private def stuffDates(year: Int, month: Int): Unit =
     eDatesTab.clear()
