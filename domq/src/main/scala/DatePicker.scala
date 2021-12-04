@@ -14,8 +14,8 @@ import org.scalajs.dom.raw.KeyboardEvent
 import org.scalajs.dom.raw.HTMLInputElement
 
 class DatePicker(
-    initialDate: LocalDate,
-    cb: LocalDate => Unit,
+    cb: LocalDate => Unit = _ => (),
+    anchor: Option[LocalDate],
     gengouList: List[Gengou] = Gengou.list,
     zIndex: Int = Modal.zIndexDefault
 ):
@@ -44,7 +44,15 @@ class DatePicker(
     ),
     eDatesTab(cls := "domq-date-picker-dates-tab")
   )
-  setMonth(2021, 12)
+  anchor match {
+    case Some(d) => {
+      setMonth(d.getYear, d.getMonthValue)
+    }
+    case None => {
+      val today = LocalDate.now()
+      setMonth(today.getYear, today.getMonthValue)
+    }
+  }
 
   def open(event: MouseEvent) =
     menu.open(event)
@@ -61,6 +69,21 @@ class DatePicker(
         stuffDates(year, month)
       case None => System.err.println(s"Cannot get Gengou of ${year}-${month}")
     }
+    markAnchor()
+
+  private def markAnchor(): Unit =
+    anchor.foreach(a => {
+      val day = a.getDayOfMonth
+      val isCurrent =
+        a.getYear == currentYear && a.getMonthValue == currentMonth
+      eDatesTab
+        .qSelector(
+          s".domq-date-picker-date-box[data-date='${day}']"
+        )
+        .foreach(e =>
+          if isCurrent then e(cls := "current") else e(cls :- "current")
+        )
+    })
 
   private def ensureNen(nen: Int): Unit =
     val last: Int = eNenSelect
@@ -138,7 +161,8 @@ class DatePicker(
     buf.toList.map(d => {
       div(d.getDayOfMonth.toString)(
         cls := "domq-date-picker-date-box",
-        onclick := (() => onDayClick(d))
+        onclick := (() => onDayClick(d)),
+        attr("data-date") := d.getDayOfMonth.toString
       ).ele
     })
 

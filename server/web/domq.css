@@ -50,3 +50,7 @@
   background-color: #ccc;
 }
 
+.domq-date-picker-date-box.current {
+  background-color: #ffa700;
+}
+

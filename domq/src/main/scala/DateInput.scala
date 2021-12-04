@@ -30,14 +30,15 @@ class DateInput(gengouList: List[Gengou] = Gengou.list):
     eInput(cls := "domq-date-input"),
     Icons.calendar(color = "gray")(
       Icons.defaultStyle,
-      onclick := ((event: MouseEvent) =>
-        (new DatePicker(LocalDate.now(), (setDate _))).open(event)
-      )
+      onclick := (openPicker _)
     )
   )
   def setDate(date: LocalDate): Unit =
     println(("date", date, KanjiDate.dateToKanji(date)))
     eInput(value := KanjiDate.dateToKanji(date))
+
+  def openPicker(event: MouseEvent): Unit =
+    new DatePicker(setDate, validate().toOption).open(event)
 
   def validate(): Either[String, LocalDate] =
     DateInput.validateDateInput(eInput.value) match {
