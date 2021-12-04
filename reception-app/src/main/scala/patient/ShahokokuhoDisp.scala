@@ -14,7 +14,7 @@ class ShahokokuhoDisp(shahokokuho: Shahokokuho):
   val ele = Form.rows(
     span("保険者番号") -> div(shahokokuho.hokenshaBangou.toString),
     span("被保険者") -> div(
-      shahokokuho.hihokanshaKigou,
+      shahokokuho.hihokenshaKigou,
       "・",
       shahokokuho.hihokenshaBangou
     ),

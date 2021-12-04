@@ -257,7 +257,7 @@ case class Shahokokuho(
     shahokokuhoId: Int,
     patientId: Int,
     hokenshaBangou: Int,
-    hihokanshaKigou: String,
+    hihokenshaKigou: String,
     hihokenshaBangou: String,
     honninStore: Int,
     validFrom: LocalDate,
