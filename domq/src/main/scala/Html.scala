@@ -48,3 +48,7 @@ object Html:
     val e = element("input")
     e.setAttribute("type", "checkbox")
     e
+  def radio: HTMLElement =
+    val e = element("input")
+    e.setAttribute("type", "radio")
+    e

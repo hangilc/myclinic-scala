@@ -19,6 +19,7 @@ class ShahokokuhoDisp(shahokokuho: Shahokokuho):
       shahokokuho.hihokenshaBangou
     ),
     span("本人・家族") -> div(if shahokokuho.isHonnin then "本人" else "家族"),
+    span("高齢") -> span(koureiRep(shahokokuho.koureiStore)),
     span("期限開始") -> div(KanjiDate.dateToKanji(shahokokuho.validFrom)),
     span("期限終了") -> div(shahokokuho.validUptoOption match {
       case Some(d) => KanjiDate.dateToKanji(d)
@@ -26,3 +27,10 @@ class ShahokokuhoDisp(shahokokuho: Shahokokuho):
     })
   )
   ele(cls := "shahokokuho-disp")
+
+  def koureiRep(kourei: Int): String = kourei match {
+    case 0 => "高齢でない"
+    case 2 => "２割"
+    case 3 => "３割"
+    case i => s"${i}割"
+  }

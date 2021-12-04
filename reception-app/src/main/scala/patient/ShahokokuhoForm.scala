@@ -15,6 +15,7 @@ class ShahokokuhoForm(shahokokuho: Shahokokuho):
   val eHihokenshaKigou = inputText()
   val eHihokenshaBangou = inputText()
   val eHonninForm = form()
+  val eKoureiForm = form()
   val eValidFrom = DateInput()
   val eValidUpto = DateInput()
   val ele = Form.rows(
@@ -23,12 +24,25 @@ class ShahokokuhoForm(shahokokuho: Shahokokuho):
       attr("value") := shahokokuho.hokenshaBangou.toString
     ),
     span("被保険者") -> div(
-      eHihokenshaKigou(cls := "hihokensha-kigou"),
-      eHihokenshaBangou(cls := "hihokensha-bangou")
+      eHihokenshaKigou(cls := "hihokensha-kigou", placeholder := "記号"),
+      eHihokenshaBangou(cls := "hihokensha-bangou", placeholder := "番号")
     ),
     span("本人・家族") -> eHonninForm(
-      input(attr("type") := "radio", value := "1"), "本人",
-      input(attr("type") := "radio", value := "0"), "家族",
+      radio(value := "1"),
+      "本人",
+      radio(
+        value := "0",
+        checked := true
+      ),
+      "家族"
+    ),
+    span("高齢") -> eKoureiForm(
+      radio(value := "0", checked := true),
+      "高齢でない",
+      radio(value := "2"),
+      "２割",
+      radio(value := "3"),
+      "３割"
     ),
     span("期限開始") -> eValidFrom.ele,
     span("期限終了") -> eValidUpto.ele
