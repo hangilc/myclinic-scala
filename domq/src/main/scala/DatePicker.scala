@@ -10,6 +10,7 @@ import scala.scalajs.js
 import org.scalajs.dom.raw.{MouseEvent, HTMLElement, Event}
 import java.time.LocalDate
 import scala.collection.mutable.ListBuffer
+import org.scalajs.dom.raw.KeyboardEvent
 
 class DatePicker(
     initialDate: LocalDate,
@@ -22,7 +23,7 @@ class DatePicker(
   val eNenSelect = select()
   val eMonthSelect = select()
   val eDatesTab = div()
-  menu.menu(
+  menu.menu(onkeyup := (onKeyup _))(
     div(cls := "domq-date-picker-month-block")(
       eGengouSelect(
         cls := "domq-gengou-select",
@@ -41,7 +42,15 @@ class DatePicker(
   )
   setMonth(2021, 12)
 
-  def open(event: MouseEvent) = menu.open(event)
+  def open(event: MouseEvent) = 
+    menu.open(event)
+    eMonthSelect.focus()
+
+  private def onKeyup(event: KeyboardEvent): Unit =
+    event.key match {
+      case "Escape" => menu.close()
+      case _ => ()
+    }
 
   def setMonth(year: Int, month: Int): Unit =
     val d = LocalDate.of(year, month, 1)

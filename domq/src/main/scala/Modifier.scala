@@ -8,6 +8,7 @@ import org.scalajs.dom.raw.CSSStyleDeclaration
 import scala.scalajs.js
 import org.scalajs.dom.raw.Event
 import org.scalajs.dom.raw.HTMLInputElement
+import org.scalajs.dom.raw.KeyboardEvent
 
 case class Modifier(modifier: HTMLElement => Unit)
 
@@ -243,3 +244,7 @@ object Modifiers:
     })
     def :=(handler: () => Unit) =
       Modifier(ele => ele.addEventListener("change", (_: Event) => handler()))
+
+  object onkeyup:
+    def :=(handler: KeyboardEvent => Unit): Modifier =
+      Modifier(ele => ele.addEventListener("keyup", handler))
