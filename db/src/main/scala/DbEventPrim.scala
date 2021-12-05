@@ -120,5 +120,41 @@ object DbEventPrim:
     enterAppEvent("patient", UPDATED, a.asJson.toString)
 
   def logPatientDeleted(a: Patient): ConnectionIO[AppEvent] =
-    enterAppEvent("patien", DELETED, a.asJson.toString)
+    enterAppEvent("patient", DELETED, a.asJson.toString)
+
+  def logShahokokuhoCreated(a: Shahokokuho): ConnectionIO[AppEvent] =
+    enterAppEvent("shahokokuho", CREATED, a.asJson.toString)
+
+  def logShahokokuhoUpdated(a: Shahokokuho): ConnectionIO[AppEvent] =
+    enterAppEvent("shahokokuho", UPDATED, a.asJson.toString)
+
+  def logShahokokuhoDeleted(a: Shahokokuho): ConnectionIO[AppEvent] =
+    enterAppEvent("shahokokuho", DELETED, a.asJson.toString)
+
+  def logRoujinCreated(a: Roujin): ConnectionIO[AppEvent] =
+    enterAppEvent("roujin", CREATED, a.asJson.toString)
+
+  def logRoujinUpdated(a: Roujin): ConnectionIO[AppEvent] =
+    enterAppEvent("roujin", UPDATED, a.asJson.toString)
+
+  def logRoujinDeleted(a: Roujin): ConnectionIO[AppEvent] =
+    enterAppEvent("roujin", DELETED, a.asJson.toString)
+
+  def logKoukikoureiCreated(a: Koukikourei): ConnectionIO[AppEvent] =
+    enterAppEvent("koukikourei", CREATED, a.asJson.toString)
+
+  def logKoukikoureiUpdated(a: Koukikourei): ConnectionIO[AppEvent] =
+    enterAppEvent("koukikourei", UPDATED, a.asJson.toString)
+
+  def logKoukikoureiDeleted(a: Koukikourei): ConnectionIO[AppEvent] =
+    enterAppEvent("koukikourei", DELETED, a.asJson.toString)
+
+  def logKouhiCreated(a: Kouhi): ConnectionIO[AppEvent] =
+    enterAppEvent("kouhi", CREATED, a.asJson.toString)
+
+  def logKouhiUpdated(a: Kouhi): ConnectionIO[AppEvent] =
+    enterAppEvent("kouhi", UPDATED, a.asJson.toString)
+
+  def logKouhiDeleted(a: Kouhi): ConnectionIO[AppEvent] =
+    enterAppEvent("kouhi", DELETED, a.asJson.toString)
 

@@ -18,3 +18,6 @@ trait DbShahokokuho extends Mysql:
 
   def listShahokokuho(patientId: Int): IO[List[Shahokokuho]] =
     mysql(DbShahokokuhoPrim.listShahokokuho(patientId))
+
+  def enterShahokokuho(shahokokuho: Shahokokuho): IO[AppEvent] =
+    mysql(DbShahokokuhoPrim.enterShahokokuho(shahokokuho))

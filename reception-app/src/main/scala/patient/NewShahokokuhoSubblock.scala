@@ -38,6 +38,11 @@ class NewShahokokuhoSubblock(patientId: Int):
 
   private def onEnter(): Unit =
       form.validateForEnter(patientId).asEither match {
-          case Right(h) => println(("data", h))
+          case Right(h) => {
+              Api.enterShahokokuho(h).onComplete {
+                  case Success(_) => close()
+                  case Failure(ex) => errBox.show(ex.getMessage)
+              }
+          }
           case Left(msg) => errBox.show(msg)
       }

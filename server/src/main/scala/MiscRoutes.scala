@@ -157,5 +157,14 @@ object MiscService extends DateTimeQueryParam with Publisher:
     case GET -> Root / "list-kouhi" :? intPatientId(patientId) =>
       Ok(Db.listKouhi(patientId))
 
+    case req @ POST -> Root / "enter-shahokokuho" =>
+      Ok(
+        for 
+          shahokokuho <- req.as[Shahokokuho]
+          event <- Db.enterShahokokuho(shahokokuho)
+          _ <- publish(event)
+        yield true
+      )
+
   }
 

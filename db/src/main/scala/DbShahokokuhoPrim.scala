@@ -33,9 +33,17 @@ object DbShahokokuhoPrim:
       order by shahokokuho_id desc
     """.query[Shahokokuho].to[List]
 
-  def enterShahokokuho(shahokokuho: Shahokokuho): ConnectionIO[AppEvent] =
-    sql"""
+  def enterShahokokuho(d: Shahokokuho): ConnectionIO[AppEvent] =
+    val op = sql"""
       insert into hoken_shahokokuho 
         (patient_id, hokensha_bangou, hihokensha_kigou, hihokensha_bangou,
-        honnin, valid_from, valid_upto, kourei)
+        honnin, valid_from, valid_upto, kourei, edaban)
+        values (${d.patientId}, ${d.hokenshaBangou}, ${d.hihokenshaKigou},
+        ${d.hihokenshaBangou}, ${d.honninStore}, ${d.validFrom}, ${d.validUpto},
+        ${d.koureiStore}, ${d.edaban})
     """
+    for
+      id <- op.update.withUniqueGeneratedKeys[Int]("shahokokuho_id")
+      entered <- getShahokokuho(id).unique
+      event <- DbEventPrim.logShahokokuhoCreated(entered)
+    yield event
