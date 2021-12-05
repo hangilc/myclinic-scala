@@ -8,9 +8,11 @@ import scala.language.implicitConversions
 import org.scalajs.dom.raw.{HTMLElement, HTMLInputElement}
 import dev.myclinic.scala.util.{KanjiDate, DateUtil}
 import dev.myclinic.scala.model.*
+import dev.myclinic.scala.web.appbase.validator.ShahokokuhoValidator
+import dev.myclinic.scala.web.appbase.validator.ShahokokuhoValidator.*
 import java.time.LocalDate
 
-class ShahokokuhoForm(shahokokuho: Shahokokuho):
+class ShahokokuhoForm:
   val eHokenshaBangou = inputText()
   val eHihokenshaKigou = inputText()
   val eHihokenshaBangou = inputText()
@@ -18,15 +20,16 @@ class ShahokokuhoForm(shahokokuho: Shahokokuho):
   val eKoureiForm = form()
   val eValidFrom = DateInput()
   val eValidUpto = DateInput()
+  val eEdaban = inputText()
   val ele = Form.rows(
     span("保険者番号") -> eHokenshaBangou(
-      cls := "hokensha-bangou-input",
-      attr("value") := shahokokuho.hokenshaBangou.toString
+      cls := "hokensha-bangou-input"
     ),
     span("被保険者") -> div(
       eHihokenshaKigou(cls := "hihokensha-kigou", placeholder := "記号"),
       eHihokenshaBangou(cls := "hihokensha-bangou", placeholder := "番号")
     ),
+    span("枝番") -> eEdaban,
     span("本人・家族") -> eHonninForm(
       radio(value := "1"),
       "本人",
@@ -48,3 +51,27 @@ class ShahokokuhoForm(shahokokuho: Shahokokuho):
     span("期限終了") -> eValidUpto.ele
   )
   ele(cls := "shahokokuho-form")
+
+  def setData(data: Shahokokuho): Unit =
+    eHokenshaBangou.value = data.hokenshaBangou.toString
+    eHihokenshaKigou.value = data.hihokenshaKigou
+    eHihokenshaBangou.value = data.hihokenshaBangou
+    eEdaban.value = data.edaban
+    eHonninForm.setRadioGroupValue(data.honninStore.toString)
+    eKoureiForm.setRadioGroupValue(data.koureiStore.toString)
+    eValidFrom.eInput.value = KanjiDate.dateToKanji(data.validFrom)
+    eValidFrom.eInput.value = KanjiDate.dateToKanji(data.validFrom)
+    eValidUpto.eInput.value = data.validUpto.value.fold("")(KanjiDate.dateToKanji(_))
+
+  def validateForEnter(patientId: Int): ShahokokuhoValidator.Result[Shahokokuho] =
+    ShahokokuhoValidator.validateShahokokuhoForEnter(
+      validatePatientId(patientId),
+      validateHokenshaBangouInput(eHokenshaBangou.value),
+      validateHihokenshaKigou(eHihokenshaKigou.value),
+      validateHihokenshaBangou(eHihokenshaBangou.value),
+      validateHonnin(eHonninForm.getCheckedRadioValue),
+      validateValidFrom(eValidFrom.eInput.value),
+      validateValidUpto(eValidUpto.eInput.value),
+      validateKourei(eKoureiForm.getCheckedRadioValue),
+      validateEdaban(eEdaban.value)
+    )

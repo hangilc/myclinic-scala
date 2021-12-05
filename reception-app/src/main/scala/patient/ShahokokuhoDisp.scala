@@ -18,6 +18,7 @@ class ShahokokuhoDisp(shahokokuho: Shahokokuho):
       "・",
       shahokokuho.hihokenshaBangou
     ),
+    span("枝番") -> div(shahokokuho.edaban),
     span("本人・家族") -> div(if shahokokuho.isHonnin then "本人" else "家族"),
     span("高齢") -> span(koureiRep(shahokokuho.koureiStore)),
     span("期限開始") -> div(KanjiDate.dateToKanji(shahokokuho.validFrom)),

@@ -33,6 +33,9 @@ class ManagePatientBlock(patient: Patient, onClose: ManagePatientBlock => Unit):
       )
     ),
     div(
+      button("新規社保国保", onclick := (onNewShahokokuho _)),
+      button("新規後期高齢"),
+      button("新規公費"),
       button("閉じる", onclick := (() => onClose(this)))
     )
   )
@@ -42,3 +45,7 @@ class ManagePatientBlock(patient: Patient, onClose: ManagePatientBlock => Unit):
 
   def init(): Unit =
     hokenList.init()
+
+  private def onNewShahokokuho(): Unit =
+    val b = new NewShahokokuhoSubblock(patient.patientId)
+    eSubblocks.prepend(b.block.ele)

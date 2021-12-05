@@ -1,4 +1,4 @@
-package dev.myclinic.scala.validator
+package dev.myclinic.scala.web.appbase.validator
 
 import cats.*
 import cats.syntax.*
@@ -65,7 +65,8 @@ object ShahokokuhoValidator:
     validNec(if src == null then "" else src)
   def validateHihokenshaBangou(src: String): Result[String] =
     validNec(if src == null then "" else src)
-  def validateHonnin(src: String): Result[Int] =
+  def validateHonnin(srcOpt: Option[String]): Result[Int] =
+    val src = srcOpt.getOrElse("")
     condNec(!(src == null || src.isEmpty), src, InvalidHonnin)
       .andThen(str => {
         Try(str.toInt) match {
@@ -90,7 +91,8 @@ object ShahokokuhoValidator:
         case Valid(d)     => validNec(ValidUpto(Some(d)))
         case Invalid(err) => invalidNec(InvalidValidUpto(err))
       }
-  def validateKourei(src: String): Result[Int] =
+  def validateKourei(srcOpt: Option[String]): Result[Int] =
+    val src = srcOpt.getOrElse("")
     condNec(!(src == null || src.isEmpty), src, InvalidKourei)
       .andThen(str => {
         Try(str.toInt) match {

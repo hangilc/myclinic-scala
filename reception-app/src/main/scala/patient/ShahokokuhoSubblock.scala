@@ -39,7 +39,8 @@ class ShahokokuhoSubblock(shahokokuho: Shahokokuho):
     )
 
   def edit(): Unit =
-    val form = ShahokokuhoForm(shahokokuho)
+    val form = ShahokokuhoForm()
+    form.setData(shahokokuho)
     eContent.clear()
     eContent(form.ele)
     eCommands.clear()

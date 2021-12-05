@@ -88,37 +88,24 @@ case class ElementQ(ele: HTMLElement):
       o.setAttribute("selected", "selected")
       true
     })
-    // val nodes = ele.querySelectorAll("option")
-    // val n = nodes.length
-    // var i = 0
-    // var opt: Option[HTMLElement] = None
-    // while (i < n) do
-    //   val e = nodes.item(i).asInstanceOf[HTMLElement]
-    //   if e.getAttribute("value") == value then
-    //     e.setAttribute("selected", "selected")
-    //     opt = Some(e)
-    //     i = n
-    //   else
-    //     e.removeAttribute("selected")
-    //     i += 1
-    // opt
 
   def getSelectedOptionValues: List[String] =
     qSelectorAll("option:checked").map(_.asInstanceOf[HTMLInputElement].value)
-    // val nodes = ele.querySelectorAll("option:checked")
-    //  val n = nodes.length
-    // var i = 0
-    // val buf = ListBuffer[String]()
-    // while (i < n) do
-    //   val e = nodes.item(i).asInstanceOf[HTMLElement]
-    //   buf += e.getAttribute("value")
-    //   i += 1
-    // buf.toList
 
   def getCheckedRadioValue: Option[String] = 
     val n = ele.querySelector("input[type=radio]:checked")
     if n == null then None
     else Some(n.asInstanceOf[HTMLInputElement].value)
+
+  def setRadioGroupValue(value: String): Boolean =
+    qSelectorAllFind("option", e => {
+      e.asInstanceOf[HTMLInputElement].value == value
+    })
+    .map(e => {
+      e.asInstanceOf[HTMLInputElement].checked = true
+      true
+    })
+    .getOrElse(false)
 
   def check(bool: Boolean = true): Unit =
     if bool then  ele.setAttribute("checked", "checked")
