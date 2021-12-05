@@ -7,18 +7,16 @@ import org.scalajs.dom.raw.EventInit
 
 @js.native
 @JSGlobal
-class CustomEvent[T](typeArg: String, init: js.UndefOr[CustomEventInit[T]])
+class CustomEvent[T](typeArg: String, init: js.UndefOr[CustomEventInit[T]] = js.undefined)
     extends Event(typeArg, init) {
 
   def detail: T = js.native
 }
 
-class CustomEventInit[T] extends EventInit {
-  var detail: js.UndefOr[T] = js.undefined
-}
+class CustomEventInit[T](val detail: js.UndefOr[T] = js.undefined) extends EventInit 
 
 object CustomEventInit:
-  def apply[T](detailValue: T): CustomEventInit[T] = 
-    val init = new CustomEventInit[T]()
-    init.detail = detailValue
+  def apply[T](detailValue: T, bubbles: Boolean = false): CustomEventInit[T] = 
+    val init = new CustomEventInit[T](detailValue)
+    init.bubbles = bubbles
     init

@@ -26,30 +26,13 @@ object JsMain:
   
   @JSExport
   def main(isAdmin: Boolean): Unit =
-    // document.body(ui.ele)
-    // setupHotline()
-    // ReceptionEventFetcher.start().onComplete {
-    //   case Success(_) => ()
-    //   case Failure(ex) => ShowMessage.showError(ex.getMessage)
-    // }
-    // ui.invoke("メイン")
-    {
-      //import dev.fujiwara.domq.{CustomEvent, CustomEventInit}
-      import org.scalajs.dom.raw.*
-      import org.scalajs.dom.raw.HTMLElement
-      import scala.scalajs.js
-      val e = CustomEvent("custom-evt", js.undefined)
-      println(("e", e))
-
-      val d: HTMLElement = div("EVENT").ele
-      val wrapper: HTMLElement = div(d)
-      val f: js.Function1[CustomEvent, Unit] = (e: CustomEvent) => {
-        println("invoked")
-      }
-      wrapper.addEventListener("custom-evt", f)
-      document.body(wrapper)
-      document.body(button("dispatch"), onclick := (() => {d.dispatchEvent(e); ()}))
+    document.body(ui.ele)
+    setupHotline()
+    ReceptionEventFetcher.start().onComplete {
+      case Success(_) => ()
+      case Failure(ex) => ShowMessage.showError(ex.getMessage)
     }
+    ui.invoke("メイン")
     
   def createUI(): MainUI =
     new MainUI:
