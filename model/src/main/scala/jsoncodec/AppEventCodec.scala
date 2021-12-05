@@ -117,6 +117,90 @@ trait AppEventCodec extends Model with DateTime:
             "createdAt" -> at.asJson,
             "deleted" -> deleted.asJson
           )
+        case ShahokokuhoCreated(at, created) =>
+          Json.obj(
+            "model" -> Json.fromString("shahokokuho"),
+            "kind" -> Json.fromString("created"),
+            "createdAt" -> at.asJson,
+            "created" -> created.asJson
+          )
+        case ShahokokuhoUpdated(at, updated) =>
+          Json.obj(
+            "model" -> Json.fromString("shahokokuho"),
+            "kind" -> Json.fromString("updated"),
+            "createdAt" -> at.asJson,
+            "updated" -> updated.asJson
+          )
+        case ShahokokuhoDeleted(at, deleted) =>
+          Json.obj(
+            "model" -> Json.fromString("shahokokuho"),
+            "kind" -> Json.fromString("deleted"),
+            "createdAt" -> at.asJson,
+            "deleted" -> deleted.asJson
+          )
+        case RoujinCreated(at, created) =>
+          Json.obj(
+            "model" -> Json.fromString("roujin"),
+            "kind" -> Json.fromString("created"),
+            "createdAt" -> at.asJson,
+            "created" -> created.asJson
+          )
+        case RoujinUpdated(at, updated) =>
+          Json.obj(
+            "model" -> Json.fromString("roujin"),
+            "kind" -> Json.fromString("updated"),
+            "createdAt" -> at.asJson,
+            "updated" -> updated.asJson
+          )
+        case RoujinDeleted(at, deleted) =>
+          Json.obj(
+            "model" -> Json.fromString("roujin"),
+            "kind" -> Json.fromString("deleted"),
+            "createdAt" -> at.asJson,
+            "deleted" -> deleted.asJson
+          )
+        case KoukikoureiCreated(at, created) =>
+          Json.obj(
+            "model" -> Json.fromString("koukikourei"),
+            "kind" -> Json.fromString("created"),
+            "createdAt" -> at.asJson,
+            "created" -> created.asJson
+          )
+        case KoukikoureiUpdated(at, updated) =>
+          Json.obj(
+            "model" -> Json.fromString("koukikourei"),
+            "kind" -> Json.fromString("updated"),
+            "createdAt" -> at.asJson,
+            "updated" -> updated.asJson
+          )
+        case KoukikoureiDeleted(at, deleted) =>
+          Json.obj(
+            "model" -> Json.fromString("koukikourei"),
+            "kind" -> Json.fromString("deleted"),
+            "createdAt" -> at.asJson,
+            "deleted" -> deleted.asJson
+          )
+        case KouhiCreated(at, created) =>
+          Json.obj(
+            "model" -> Json.fromString("kouhi"),
+            "kind" -> Json.fromString("created"),
+            "createdAt" -> at.asJson,
+            "created" -> created.asJson
+          )
+        case KouhiUpdated(at, updated) =>
+          Json.obj(
+            "model" -> Json.fromString("kouhi"),
+            "kind" -> Json.fromString("updated"),
+            "createdAt" -> at.asJson,
+            "updated" -> updated.asJson
+          )
+        case KouhiDeleted(at, deleted) =>
+          Json.obj(
+            "model" -> Json.fromString("kouhi"),
+            "kind" -> Json.fromString("deleted"),
+            "createdAt" -> at.asJson,
+            "deleted" -> deleted.asJson
+          )
         case UnknownAppEvent(appEventId, createdAt, model, kind, data) =>
           Json.obj(
             "appEventId" -> Json.fromInt(appEventId),
@@ -176,6 +260,51 @@ trait AppEventCodec extends Model with DateTime:
           case ("visit", "deleted", at) =>
             for deleted <- c.downField("deleted").as[Visit]
             yield VisitDeleted(at, deleted)
+          case ("wqueue", "created", at) =>
+            for created <- c.downField("created").as[Wqueue]
+            yield WqueueCreated(at, created)
+          case ("wqueue", "updated", at) =>
+            for updated <- c.downField("updated").as[Wqueue]
+            yield WqueueUpdated(at, updated)
+          case ("wqueue", "deleted", at) =>
+            for deleted <- c.downField("deleted").as[Wqueue]
+            yield WqueueDeleted(at, deleted)
+          case ("shahokokuho", "created", at) =>
+            for created <- c.downField("created").as[Shahokokuho]
+            yield ShahokokuhoCreated(at, created)
+          case ("shahokokuho", "updated", at) =>
+            for updated <- c.downField("updated").as[Shahokokuho]
+            yield ShahokokuhoUpdated(at, updated)
+          case ("shahokokuho", "deleted", at) =>
+            for deleted <- c.downField("deleted").as[Shahokokuho]
+            yield ShahokokuhoDeleted(at, deleted)
+          case ("roujin", "created", at) =>
+            for created <- c.downField("created").as[Roujin]
+            yield RoujinCreated(at, created)
+          case ("roujin", "updated", at) =>
+            for updated <- c.downField("updated").as[Roujin]
+            yield RoujinUpdated(at, updated)
+          case ("roujin", "deleted", at) =>
+            for deleted <- c.downField("deleted").as[Roujin]
+            yield RoujinDeleted(at, deleted)
+          case ("koukikourei", "created", at) =>
+            for created <- c.downField("created").as[Koukikourei]
+            yield KoukikoureiCreated(at, created)
+          case ("koukikourei", "updated", at) =>
+            for updated <- c.downField("updated").as[Koukikourei]
+            yield KoukikoureiUpdated(at, updated)
+          case ("koukikourei", "deleted", at) =>
+            for deleted <- c.downField("deleted").as[Koukikourei]
+            yield KoukikoureiDeleted(at, deleted)
+          case ("kouhi", "created", at) =>
+            for created <- c.downField("created").as[Kouhi]
+            yield KouhiCreated(at, created)
+          case ("kouhi", "updated", at) =>
+            for updated <- c.downField("updated").as[Kouhi]
+            yield KouhiUpdated(at, updated)
+          case ("kouhi", "deleted", at) =>
+            for deleted <- c.downField("deleted").as[Kouhi]
+            yield KouhiDeleted(at, deleted)
           case (model, kind, at) =>
             for
               appEventId <- c.downField("appEventId").as[Int]

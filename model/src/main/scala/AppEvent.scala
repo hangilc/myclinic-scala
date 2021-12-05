@@ -60,6 +60,34 @@ case class WqueueUpdated(createdAt: LocalDateTime, updated: Wqueue)
 case class WqueueDeleted(createdAt: LocalDateTime, deleted: Wqueue)
     extends AppModelEvent
 
+case class ShahokokuhoCreated(createdAt: LocalDateTime, created: Shahokokuho)
+    extends AppModelEvent
+case class ShahokokuhoUpdated(createdAt: LocalDateTime, updated: Shahokokuho)
+    extends AppModelEvent
+case class ShahokokuhoDeleted(createdAt: LocalDateTime, deleted: Shahokokuho)
+    extends AppModelEvent
+
+case class RoujinCreated(createdAt: LocalDateTime, created: Roujin)
+    extends AppModelEvent
+case class RoujinUpdated(createdAt: LocalDateTime, updated: Roujin)
+    extends AppModelEvent
+case class RoujinDeleted(createdAt: LocalDateTime, deleted: Roujin)
+    extends AppModelEvent
+
+case class KoukikoureiCreated(createdAt: LocalDateTime, created: Koukikourei)
+    extends AppModelEvent
+case class KoukikoureiUpdated(createdAt: LocalDateTime, updated: Koukikourei)
+    extends AppModelEvent
+case class KoukikoureiDeleted(createdAt: LocalDateTime, deleted: Koukikourei)
+    extends AppModelEvent
+
+case class KouhiCreated(createdAt: LocalDateTime, created: Kouhi)
+    extends AppModelEvent
+case class KouhiUpdated(createdAt: LocalDateTime, updated: Kouhi)
+    extends AppModelEvent
+case class KouhiDeleted(createdAt: LocalDateTime, deleted: Kouhi)
+    extends AppModelEvent
+
 object AppModelEvent:
   def from(event: AppEvent): AppModelEvent =
     val at = event.createdAt
@@ -87,6 +115,18 @@ object AppModelEvent:
       case ("wqueue", "created") => WqueueCreated(at, as[Wqueue])
       case ("wqueue", "updated") => WqueueUpdated(at, as[Wqueue])
       case ("wqueue", "deleted") => WqueueDeleted(at, as[Wqueue])
+      case ("shahokokuho", "created") => ShahokokuhoCreated(at, as[Shahokokuho])
+      case ("shahokokuho", "updated") => ShahokokuhoUpdated(at, as[Shahokokuho])
+      case ("shahokokuho", "deleted") => ShahokokuhoDeleted(at, as[Shahokokuho])
+      case ("roujin", "created") => RoujinCreated(at, as[Roujin])
+      case ("roujin", "updated") => RoujinUpdated(at, as[Roujin])
+      case ("roujin", "deleted") => RoujinDeleted(at, as[Roujin])
+      case ("koukikourei", "created") => KoukikoureiCreated(at, as[Koukikourei])
+      case ("koukikourei", "updated") => KoukikoureiUpdated(at, as[Koukikourei])
+      case ("koukikourei", "deleted") => KoukikoureiDeleted(at, as[Koukikourei])
+      case ("kouhi", "created") => KouhiCreated(at, as[Kouhi])
+      case ("kouhi", "updated") => KouhiUpdated(at, as[Kouhi])
+      case ("kouhi", "deleted") => KouhiDeleted(at, as[Kouhi])
       case _ =>
         UnknownAppEvent(
           event.appEventId,
