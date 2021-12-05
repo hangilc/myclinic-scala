@@ -75,3 +75,18 @@ class ShahokokuhoForm:
       validateKourei(eKoureiForm.getCheckedRadioValue),
       validateEdaban(eEdaban.value)
     )
+
+  def validateForUpdate(shahokokuhoId: Int, patientId: Int): ShahokokuhoValidator.Result[Shahokokuho] =
+    ShahokokuhoValidator.validateShahokokuhoForUpdate(
+      shahokokuhoId,
+      validatePatientId(patientId),
+      validateHokenshaBangouInput(eHokenshaBangou.value),
+      validateHihokenshaKigou(eHihokenshaKigou.value),
+      validateHihokenshaBangou(eHihokenshaBangou.value),
+      validateHonnin(eHonninForm.getCheckedRadioValue),
+      validateValidFrom(eValidFrom.eInput.value),
+      validateValidUpto(eValidUpto.eInput.value),
+      validateKourei(eKoureiForm.getCheckedRadioValue),
+      validateEdaban(eEdaban.value)
+    )
+

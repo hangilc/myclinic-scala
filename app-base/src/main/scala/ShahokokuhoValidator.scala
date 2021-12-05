@@ -107,7 +107,8 @@ object ShahokokuhoValidator:
   def validateEdaban(src: String): Result[String] =
     validNec(if src == null then "" else src)
 
-  def validateShahokokuhoForEnter(
+  def validateShahokokuho(
+      shahokokuhoIdResult: Result[Int],
       patientIdResult: Result[Int],
       hokenshaBangouResult: Result[Int],
       hihokenshaKigouResult: Result[String],
@@ -119,7 +120,7 @@ object ShahokokuhoValidator:
       edabanResult: Result[String]
   ): Result[Shahokokuho] =
     (
-      validNec(0),
+      shahokokuhoIdResult,
       patientIdResult,
       hokenshaBangouResult,
       hihokenshaKigouResult,
@@ -135,3 +136,52 @@ object ShahokokuhoValidator:
           invalidNec(HihokenshaKigouBangouError)
         else validNec(shaho)
       )
+
+  def validateShahokokuhoForEnter(
+      patientIdResult: Result[Int],
+      hokenshaBangouResult: Result[Int],
+      hihokenshaKigouResult: Result[String],
+      hihokenshaBangouResult: Result[String],
+      honninResult: Result[Int],
+      validFromResult: Result[LocalDate],
+      validUptoResult: Result[ValidUpto],
+      koureiResult: Result[Int],
+      edabanResult: Result[String]
+  ): Result[Shahokokuho] =
+    validateShahokokuho(
+      validNec(0),
+      patientIdResult,
+      hokenshaBangouResult,
+      hihokenshaKigouResult,
+      hihokenshaBangouResult,
+      honninResult,
+      validFromResult,
+      validUptoResult,
+      koureiResult,
+      edabanResult
+    )
+
+  def validateShahokokuhoForUpdate(
+      shahokokuhoId: Int,
+      patientIdResult: Result[Int],
+      hokenshaBangouResult: Result[Int],
+      hihokenshaKigouResult: Result[String],
+      hihokenshaBangouResult: Result[String],
+      honninResult: Result[Int],
+      validFromResult: Result[LocalDate],
+      validUptoResult: Result[ValidUpto],
+      koureiResult: Result[Int],
+      edabanResult: Result[String]
+  ): Result[Shahokokuho] =
+    validateShahokokuho(
+      validateShahokokuhoIdForUpdate(shahokokuhoId),
+      patientIdResult,
+      hokenshaBangouResult,
+      hihokenshaKigouResult,
+      hihokenshaBangouResult,
+      honninResult,
+      validFromResult,
+      validUptoResult,
+      koureiResult,
+      edabanResult
+    )

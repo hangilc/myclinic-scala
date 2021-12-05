@@ -21,3 +21,8 @@ trait DbShahokokuho extends Mysql:
 
   def enterShahokokuho(shahokokuho: Shahokokuho): IO[AppEvent] =
     mysql(DbShahokokuhoPrim.enterShahokokuho(shahokokuho))
+
+  def updateShahokokuho(shahokokuho: Shahokokuho): IO[AppEvent] =
+    mysql(DbShahokokuhoPrim.updateShahokokuho(shahokokuho))
+
+    

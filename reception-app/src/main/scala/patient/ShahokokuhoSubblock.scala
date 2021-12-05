@@ -40,16 +40,28 @@ class ShahokokuhoSubblock(shahokokuho: Shahokokuho):
 
   def edit(): Unit =
     val form = ShahokokuhoForm()
+    val errBox = ErrorBox()
     form.setData(shahokokuho)
     eContent.clear()
-    eContent(form.ele)
+    eContent(errBox.ele, form.ele)
     eCommands.clear()
     eCommands(
-      button("入力", onclick := (() => {
-        println(("validate", form.eValidFrom.validate()))
-      })),
+      button("入力", onclick := (() => onEnter(form, errBox))),
       button("キャンセル", onclick := (() => disp()))
     )
 
   def onEdit(): Unit =
     edit()
+
+  private def onEnter(form: ShahokokuhoForm, errBox: ErrorBox): Unit =
+    form
+      .validateForUpdate(shahokokuho.shahokokuhoId, shahokokuho.patientId)
+      .asEither match {
+      case Right(h)  => {
+        Api.updateShahokokuho(h).onComplete {
+          case Success(_) => disp()
+          case Failure(ex) => errBox.show(ex.getMessage)
+        }
+      }
+      case Left(msg) => errBox.show(msg)
+    }

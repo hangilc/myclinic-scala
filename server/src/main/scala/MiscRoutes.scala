@@ -166,5 +166,14 @@ object MiscService extends DateTimeQueryParam with Publisher:
         yield true
       )
 
+    case req @ POST -> Root / "update-shahokokuho" =>
+      Ok(
+        for
+          shahokokuho <- req.as[Shahokokuho]
+          event <- Db.updateShahokokuho(shahokokuho)
+          _ <- publish(event)
+        yield true
+      )
+
   }
 

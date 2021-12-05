@@ -91,3 +91,7 @@ object MiscApi extends ApiBase:
 
     def enterShahokokuho(shahokokuho: Shahokokuho): Future[Boolean] =
       post("enter-shahokokuho", Params(), shahokokuho)
+
+    def updateShahokokuho(shahokokuho: Shahokokuho): Future[Boolean] =
+      post("update-shahokokuho", Params(), shahokokuho)
+      

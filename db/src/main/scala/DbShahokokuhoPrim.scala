@@ -46,4 +46,23 @@ object DbShahokokuhoPrim:
       id <- op.update.withUniqueGeneratedKeys[Int]("shahokokuho_id")
       entered <- getShahokokuho(id).unique
       event <- DbEventPrim.logShahokokuhoCreated(entered)
+    yield event  
+    
+  def updateShahokokuho(d: Shahokokuho): ConnectionIO[AppEvent] =
+    val op = sql"""
+      update hoken_shahokokuho set
+        patient_id = ${d.patientId}, hokensha_bangou = ${d.hokenshaBangou},
+        hihokensha_kigou = ${d.hihokenshaKigou}, 
+        hihokensha_bangou = ${d.hihokenshaBangou},
+        honnin = ${d.honninStore},
+        valid_from = ${d.validFrom},
+        valid_upto = ${d.validUpto},
+        kourei = ${d.koureiStore},
+        edaban = ${d.edaban}
+        where shahokokuho_id = ${d.shahokokuhoId}
+    """
+    for
+      _ <- op.update.run
+      updated <- getShahokokuho(d.shahokokuhoId).unique
+      event <- DbEventPrim.logShahokokuhoUpdated(updated)
     yield event
