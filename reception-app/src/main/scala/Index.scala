@@ -67,4 +67,17 @@ object JsMain:
 object ReceptionEventFetcher extends EventFetcher:
   val publishers = EventDispatcher()
   override def publish(event: AppModelEvent): Unit =
+    import dev.myclinic.scala.model.*
     publishers.publish(event)
+    event match {
+      case e: ShahokokuhoCreated => dispatch(".shahokokuho-created", "shahokokuho-created", e)
+      case _ => ()
+    }
+  def dispatch[T](selector: String, eventType: String, detail: T): Unit =
+    import dev.fujiwara.domq.{CustomEvent, CustomEventInit}
+    val evt: CustomEvent[T] = CustomEvent(eventType, detail, false)
+    println(("dispatching", eventType))
+    document.body.qSelectorAll(selector).foreach(e => {
+      e.dispatchEvent(evt)
+    })
+    

@@ -70,7 +70,6 @@ object Modifiers:
   object value:
     def :=(arg: String) = Modifier(e => e.asInstanceOf[HTMLInputElement].value = arg)
 
-//  val value = attr("value")
   val id = attr("id")
 
   def attrNS(namespace: String, name: String) = Creator[String]((e, a) => {
@@ -251,3 +250,8 @@ object Modifiers:
   object onkeyup:
     def :=(handler: KeyboardEvent => Unit): Modifier =
       Modifier(ele => ele.addEventListener("keyup", handler))
+
+  class CustomEventModifier[T](eventType: String):
+    def :=(f: CustomEvent[T] => Any) = Modifier(e => e.addEventListener(eventType, f))
+
+  def oncustomevent[T](eventType: String) = new CustomEventModifier(eventType)

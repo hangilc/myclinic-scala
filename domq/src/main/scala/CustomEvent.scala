@@ -13,6 +13,10 @@ class CustomEvent[T](typeArg: String, init: js.UndefOr[CustomEventInit[T]] = js.
   def detail: T = js.native
 }
 
+object CustomEvent:
+  def apply[T](typeArg: String, detail: T, bubbles: Boolean = false): CustomEvent[T] =
+    new CustomEvent(typeArg, CustomEventInit(detail, bubbles))
+
 class CustomEventInit[T](val detail: js.UndefOr[T] = js.undefined) extends EventInit 
 
 object CustomEventInit:
