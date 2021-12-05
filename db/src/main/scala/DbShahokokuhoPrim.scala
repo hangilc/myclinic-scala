@@ -32,3 +32,10 @@ object DbShahokokuhoPrim:
       select * from hoken_shahokokuho where patient_id = ${patientId}
       order by shahokokuho_id desc
     """.query[Shahokokuho].to[List]
+
+  def enterShahokokuho(shahokokuho: Shahokokuho): ConnectionIO[AppEvent] =
+    sql"""
+      insert into hoken_shahokokuho 
+        (patient_id, hokensha_bangou, hihokensha_kigou, hihokensha_bangou,
+        honnin, valid_from, valid_upto, kourei)
+    """
