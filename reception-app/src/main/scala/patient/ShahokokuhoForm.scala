@@ -31,10 +31,11 @@ class ShahokokuhoForm:
     ),
     span("枝番") -> eEdaban,
     span("本人・家族") -> eHonninForm(
-      radio(value := "1"),
+      radio(value := "1", name := "honnin"),
       "本人",
       radio(
         value := "0",
+        name := "honnin",
         checked := true
       ),
       "家族"
