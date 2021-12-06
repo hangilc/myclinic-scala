@@ -20,12 +20,13 @@ object DbShahokokuhoPrim:
       select * from hoken_shahokokuho where shahokokuho_id = $shahokokuhoId
     """.query[Shahokokuho]
 
-  def getAvailableShahokokuho(patientId: Int, at: LocalDate): Query0[Shahokokuho] =
+  def listAvailableShahokokuho(patientId: Int, at: LocalDate): ConnectionIO[List[Shahokokuho]] =
     sql"""
       select * from hoken_shahokokuho where patient_id = ${patientId} 
         and valid_from <= ${at}
         and (valid_upto = '0000-00-00' || ${at} <= valid_upto)
-    """.query[Shahokokuho]
+        order by shahokokuho_id desc
+    """.query[Shahokokuho].to[List]
 
   def listShahokokuho(patientId: Int): ConnectionIO[List[Shahokokuho]] =
     sql"""

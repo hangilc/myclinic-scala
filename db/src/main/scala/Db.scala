@@ -75,8 +75,8 @@ object Db
     mysql(
       for
         shahokokuhoOpt <- DbShahokokuhoPrim
-          .getAvailableShahokokuho(patientId, date)
-          .option
+          .listAvailableShahokokuho(patientId, date)
+          .map(_.headOption)
         shahokokuhoId = shahokokuhoOpt.map(_.shahokokuhoId).getOrElse(0)
         koukikoureiOpt <- DbKoukikoureiPrim
           .getAvailableKoukikourei(patientId, date)

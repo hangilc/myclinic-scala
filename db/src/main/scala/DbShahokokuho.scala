@@ -13,8 +13,21 @@ import java.time.temporal.ChronoUnit
 import java.util.regex.Pattern
 
 trait DbShahokokuho extends Mysql:
-  def findAvailableShahokokuho(patientId: Int, at: LocalDate): IO[Option[Shahokokuho]] =
-    mysql(DbShahokokuhoPrim.getAvailableShahokokuho(patientId, at).option)
+  def findAvailableShahokokuho(
+      patientId: Int,
+      at: LocalDate
+  ): IO[Option[Shahokokuho]] =
+    mysql(
+      DbShahokokuhoPrim
+        .listAvailableShahokokuho(patientId, at)
+        .map(_.headOption)
+    )
+
+  def listAvailableShahokokuho(
+      patientId: Int,
+      at: LocalDate
+  ): IO[List[Shahokokuho]] =
+    mysql(DbShahokokuhoPrim.listAvailableShahokokuho(patientId, at))
 
   def listShahokokuho(patientId: Int): IO[List[Shahokokuho]] =
     mysql(DbShahokokuhoPrim.listShahokokuho(patientId))
@@ -24,5 +37,3 @@ trait DbShahokokuho extends Mysql:
 
   def updateShahokokuho(shahokokuho: Shahokokuho): IO[AppEvent] =
     mysql(DbShahokokuhoPrim.updateShahokokuho(shahokokuho))
-
-    

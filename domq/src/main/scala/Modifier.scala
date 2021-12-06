@@ -254,4 +254,4 @@ object Modifiers:
   class CustomEventModifier[T](eventType: String):
     def :=(f: CustomEvent[T] => Any) = Modifier(e => e.addEventListener(eventType, f))
 
-  def oncustomevent[T](eventType: String) = new CustomEventModifier(eventType)
+  def oncustomevent[T](eventType: String) = new CustomEventModifier[T](eventType)

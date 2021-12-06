@@ -22,9 +22,12 @@ class HokenList(patientId: Int, subblocks: HTMLElement):
   val errorBox = ErrorBox()
   val eDisp = div()
   val eListAll: HTMLElement = checkbox()
-  val ele = div(cls := "shahokokuho-created", oncustomevent[ShahokokuhoCreated]("shahokokuho-created") := (e => {
-    println(("custom-listen", e.detail))
-  }))(
+  val ele = div(
+    cls := "shahokokuho-created",
+    oncustomevent[ShahokokuhoCreated]("shahokokuho-created") := (
+      (e: CustomEvent[ShahokokuhoCreated]) => onShahokokuhoCreated(e)
+    )
+  )(
     errorBox.ele,
     eDisp(cls := "hoken-list-disp"),
     div(
@@ -36,6 +39,12 @@ class HokenList(patientId: Int, subblocks: HTMLElement):
   def init(): Unit =
     loadAvailable()
 
+  private def onShahokokuhoCreated(
+      event: CustomEvent[ShahokokuhoCreated]
+  ): Unit =
+    val item = ShahokokuhoHokenItem(event.detail.created)
+    subblocks.prepend(createSubblock(item).ele)
+
   private def setHokenList(list: List[HokenItem]): Unit =
     val listSorted = list.sortBy(list => list.validFrom).reverse
     eDisp.clear()
@@ -45,16 +54,17 @@ class HokenList(patientId: Int, subblocks: HTMLElement):
           Icons.defaultStyle,
           cls := "zoom-in-icon",
           onclick := (() => {
-            addSubBlock(item)
+            subblocks.prepend(createSubblock(item).ele)
           })
         ),
         item.repFull
       )
     }): List[Modifier]): _*)
 
-  private def addSubBlock(item: HokenItem): Unit =
+  private def createSubblock(item: HokenItem): Subblock =
     val sub = item.createDisp()
-    subblocks.prepend(sub.ele)
+    sub.ele(cls := item.key)
+    sub
 
   private def loadAvailable(): Unit =
     val date = LocalDate.now()
@@ -91,10 +101,11 @@ class HokenList(patientId: Int, subblocks: HTMLElement):
       case Failure(ex) => errorBox.show(ex.getMessage)
     }
 
-  private lazy val onListAllChange: js.Function1[Event, Unit] = (event: Event) => {
-    if eListAll.isChecked then loadAll()
-    else loadAvailable()
-  }
+  private lazy val onListAllChange: js.Function1[Event, Unit] =
+    (event: Event) => {
+      if eListAll.isChecked then loadAll()
+      else loadAvailable()
+    }
 
 sealed trait HokenItem:
   def rep: String
@@ -106,7 +117,7 @@ sealed trait HokenItem:
     val from = KanjiDate.dateToKanji(validFrom) + "から"
     val upto = validUpto match {
       case Some(d) => KanjiDate.dateToKanji(d) + "まで"
-      case None => ""
+      case None    => ""
     }
     rep + s"（${from}${upto}）"
 
@@ -126,7 +137,9 @@ class RoujinHokenItem(roujin: Roujin) extends HokenItem:
   def validUpto: Option[LocalDate] = roujin.validUptoOption
   def key: String = s"roujin-${roujin.roujinId}"
   def createDisp(): Subblock = Subblock(
-    "老人保険", div(), div()
+    "老人保険",
+    div(),
+    div()
   )
 
 class KoukikoureiHokenItem(koukikourei: Koukikourei) extends HokenItem:
@@ -135,7 +148,9 @@ class KoukikoureiHokenItem(koukikourei: Koukikourei) extends HokenItem:
   def validUpto: Option[LocalDate] = koukikourei.validUptoOption
   def key: String = s"koukikourei-${koukikourei.koukikoureiId}"
   def createDisp(): Subblock = Subblock(
-    "後期高齢", div(), div()
+    "後期高齢",
+    div(),
+    div()
   )
 
 class KouhiHokenItem(kouhi: Kouhi) extends HokenItem:
@@ -144,5 +159,7 @@ class KouhiHokenItem(kouhi: Kouhi) extends HokenItem:
   def validUpto: Option[LocalDate] = kouhi.validUptoOption
   def key: String = s"kouhi-${kouhi.kouhiId}"
   def createDisp(): Subblock = Subblock(
-    "公費", div(), div()
+    "公費",
+    div(),
+    div()
   )
