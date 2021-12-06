@@ -26,6 +26,8 @@ object DateUtil:
 
   def dateToString(d: LocalDate): String = d.format(sqlDateFormatter)
 
+  def toSqlDate(d: LocalDate): String = d.format(sqlDateFormatter)
+
   def stringToTime(str: String): LocalTime =
     LocalTime.parse(str, sqlTimeFormatter)
 

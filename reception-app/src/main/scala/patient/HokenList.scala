@@ -17,6 +17,7 @@ import scala.concurrent.Future
 import org.scalajs.dom.raw.Event
 import dev.myclinic.scala.util.DateTimeOrdering
 import scala.math.Ordered.orderingToOrdered
+import dev.fujiwara.domq.DomqUtil
 
 class HokenList(patientId: Int, subblocks: HTMLElement):
   val errorBox = ErrorBox()
@@ -43,23 +44,26 @@ class HokenList(patientId: Int, subblocks: HTMLElement):
       event: CustomEvent[ShahokokuhoCreated]
   ): Unit =
     val item = ShahokokuhoHokenItem(event.detail.created)
-    subblocks.prepend(createSubblock(item).ele)
+    val e = createDisp(item)
+    val eles = eDisp.qSelectorAll("[data-valid-from]")
+    DomqUtil.insertInOrderDesc(e, eles, _.getAttribute("data-valid-from"))
 
   private def setHokenList(list: List[HokenItem]): Unit =
     val listSorted = list.sortBy(list => list.validFrom).reverse
     eDisp.clear()
-    eDisp((listSorted.map(item => {
-      div(
-        Icons.zoomIn(color = "gray", size = "1.2rem")(
-          Icons.defaultStyle,
-          cls := "zoom-in-icon",
-          onclick := (() => {
-            subblocks.prepend(createSubblock(item).ele)
-          })
-        ),
-        item.repFull
-      )
-    }): List[Modifier]): _*)
+    eDisp((listSorted.map(createDisp(_)): List[Modifier]): _*)
+
+  private def createDisp(item: HokenItem): HTMLElement =
+    div(attr("data-valid-from") := DateUtil.toSqlDate(item.validFrom))(
+      Icons.zoomIn(color = "gray", size = "1.2rem")(
+        Icons.defaultStyle,
+        cls := "zoom-in-icon",
+        onclick := (() => {
+          subblocks.prepend(createSubblock(item).ele)
+        })
+      ),
+      item.repFull
+    )
 
   private def createSubblock(item: HokenItem): Subblock =
     val sub = item.createDisp()
