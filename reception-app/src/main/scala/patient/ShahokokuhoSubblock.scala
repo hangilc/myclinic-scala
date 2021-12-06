@@ -3,7 +3,7 @@ package dev.myclinic.scala.web.reception.patient
 import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
-import dev.fujiwara.domq.{Icons, Form, ErrorBox, Modifier}
+import dev.fujiwara.domq.{Icons, Form, ErrorBox, Modifier, ShowMessage}
 import scala.language.implicitConversions
 import scala.util.{Success, Failure}
 import org.scalajs.dom.raw.{HTMLElement, HTMLInputElement}
@@ -34,6 +34,7 @@ class ShahokokuhoSubblock(shahokokuho: Shahokokuho):
     eContent(ShahokokuhoDisp(shahokokuho).ele)
     eCommands.clear()
     eCommands(
+      button("削除", onclick := (onDelete _)),
       button("編集", onclick := (onEdit _)),
       button("閉じる", onclick := (() => block.ele.remove()))
     )
@@ -57,11 +58,23 @@ class ShahokokuhoSubblock(shahokokuho: Shahokokuho):
     form
       .validateForUpdate(shahokokuho.shahokokuhoId, shahokokuho.patientId)
       .asEither match {
-      case Right(h)  => {
+      case Right(h) => {
         Api.updateShahokokuho(h).onComplete {
-          case Success(_) => disp()
+          case Success(_)  => disp()
           case Failure(ex) => errBox.show(ex.getMessage)
         }
       }
       case Left(msg) => errBox.show(msg)
+    }
+
+  private def onDelete(): Unit =
+    ShowMessage.confirm(
+      "この保険を削除していいですか？",
+      ok => if ok then doDelete(shahokokuho.shahokokuhoId)
+    )
+
+  private def doDelete(shahokokuhoId: Int): Unit =
+    Api.deleteShahokokuho(shahokokuhoId).onComplete {
+      case Success(_) => block.close()
+      case Failure(ex) => ShowMessage.showError(ex.getMessage)
     }

@@ -67,3 +67,14 @@ object DbShahokokuhoPrim:
       updated <- getShahokokuho(d.shahokokuhoId).unique
       event <- DbEventPrim.logShahokokuhoUpdated(updated)
     yield event
+
+  def deleteShahokokuho(shahokokuhoId: Int): ConnectionIO[AppEvent] =
+    val op = sql"""
+      delete from hoken_shahokokuho where shahokokuho_id = ${shahokokuhoId}
+    """
+    for
+      target <- getShahokokuho(shahokokuhoId).unique
+      affected <- op.update.run
+      _ = if affected != 1 then throw new RuntimeException(s"Failed to delete shahokokuho: ${shahokokuhoId}")
+      event <- DbEventPrim.logShahokokuhoDeleted(target)
+    yield event

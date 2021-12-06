@@ -103,4 +103,16 @@ object MiscApi extends ApiBase:
 
     def updateShahokokuho(shahokokuho: Shahokokuho): Future[Boolean] =
       post("update-shahokokuho", Params(), shahokokuho)
+
+    def deleteShahokokuho(shahokokuhoId: Int): Future[Boolean] =
+      get("delete-shahokokuho", Params("shahokokuho-id" -> shahokokuhoId))
+
+    def deleteRoujin(roujinId: Int): Future[Boolean] =
+      get("delete-roujin", Params("roujin-id" -> roujinId))
+
+    def deleteKoukikourei(koukikoureiId: Int): Future[Boolean] =
+      get("delete-koukikourei", Params("koukikourei-id" -> koukikoureiId))
+
+    def deleteKouhi(kouhiId: Int): Future[Boolean] =
+      get("delete-kouhi", Params("kouhi-id" -> kouhiId))
       

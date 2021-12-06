@@ -13,3 +13,6 @@ class Subblock(title: String, content: HTMLElement, commands: HTMLElement):
     div(cls := "subblock-content")(content),
     div(cls := "subblock-commands")(commands)
   )
+
+  def close(): Unit =
+    ele.remove()

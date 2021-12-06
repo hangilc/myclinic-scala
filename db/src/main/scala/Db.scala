@@ -110,3 +110,15 @@ object Db
           DbWqueuePrim.enterWqueue(wqueue)
       yield List(visitCreatedEvent, wqCreatedEvent)
     )
+
+  def deleteShahokokuho(shahokokuhoId: Int): IO[AppEvent] =
+    mysql {
+      for
+        used <- DbVisitPrim.countByShahokokuho(shahokokuhoId)
+        _ = if used != 0 then
+          throw new RuntimeException(
+            s"Cannot delete used shahokokuho: ${shahokokuhoId}."
+          )
+        event <- DbShahokokuhoPrim.deleteShahokokuho(shahokokuhoId)
+      yield event
+    }

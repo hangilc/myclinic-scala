@@ -73,14 +73,14 @@ class HokenList(patientId: Int, subblocks: HTMLElement):
   private def loadAvailable(): Unit =
     val date = LocalDate.now()
     (for
-      shahoOpt <- Api.findAvailableShahokokuho(patientId, date)
-      roujinOpt <- Api.findAvailableRoujin(patientId, date)
-      koukikoureiOpt <- Api.findAvailableKoukikourei(patientId, date)
+      shahoList <- Api.listAvailableShahokokuho(patientId, date)
+      roujinList <- Api.listAvailableRoujin(patientId, date)
+      koukikoureiList <- Api.listAvailableKoukikourei(patientId, date)
       kouhiList <- Api.listAvailableKouhi(patientId, date)
     yield {
-      val list = shahoOpt.map(ShahokokuhoHokenItem(_)).toList
-        ++ roujinOpt.map(RoujinHokenItem(_)).toList
-        ++ koukikoureiOpt.map(KoukikoureiHokenItem(_)).toList
+      val list = shahoList.map(ShahokokuhoHokenItem(_))
+        ++ roujinList.map(RoujinHokenItem(_))
+        ++ koukikoureiList.map(KoukikoureiHokenItem(_))
         ++ kouhiList.map(KouhiHokenItem(_))
       setHokenList(list)
     }).onComplete {

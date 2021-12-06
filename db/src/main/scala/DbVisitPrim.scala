@@ -40,4 +40,9 @@ object DbVisitPrim:
       entered <- getVisit(visitId).unique
       event <- DbEventPrim.logVisitCreated(entered)
     yield (event, entered)
+
+  def countByShahokokuho(shahokokuhoId: Int): ConnectionIO[Int] =
+    sql"""
+      select count(*) from visit where shahokokuho_id = ${shahokokuhoId}
+    """.query[Int].unique
      

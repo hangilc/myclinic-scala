@@ -30,6 +30,10 @@ object MiscService extends DateTimeQueryParam with Publisher:
   object atDateTime extends QueryParamDecoderMatcher[LocalDateTime]("at")
   object intVisitId extends QueryParamDecoderMatcher[Int]("visit-id")
   object intPatientId extends QueryParamDecoderMatcher[Int]("patient-id")
+  object intShahokokuhoId extends QueryParamDecoderMatcher[Int]("shahokokuho-id")
+  object intRoujinId extends QueryParamDecoderMatcher[Int]("roujin-id")
+  object intKoukikoureiId extends QueryParamDecoderMatcher[Int]("koukikourei-id")
+  object intKouhiId extends QueryParamDecoderMatcher[Int]("kouhi-id")
 
   given houkatsuKensa: HoukatsuKensa = (new ConfigJava).getHoukatsuKensa
 
@@ -200,6 +204,14 @@ object MiscService extends DateTimeQueryParam with Publisher:
         for
           shahokokuho <- req.as[Shahokokuho]
           event <- Db.updateShahokokuho(shahokokuho)
+          _ <- publish(event)
+        yield true
+      )
+
+    case GET -> Root / "delete-shahokokuho" :? intShahokokuhoId(shahokokuhoId) =>
+      Ok(
+        for 
+          event <- Db.deleteShahokokuho(shahokokuhoId)
           _ <- publish(event)
         yield true
       )
