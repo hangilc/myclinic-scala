@@ -69,20 +69,22 @@ object MiscService extends DateTimeQueryParam with Publisher:
         val d = new dev.fujiwara.drawer.forms.receipt.ReceiptDrawerData()
         val clinicInfo = Config.getClinicInfo
         d.setClinicName(clinicInfo.name)
-          d.setAddressLines(
-            Array(
-              clinicInfo.postalCode,
-              clinicInfo.address,
-              clinicInfo.tel,
-              clinicInfo.fax,
-              clinicInfo.homepage
-            )
+        d.setAddressLines(
+          Array(
+            clinicInfo.postalCode,
+            clinicInfo.address,
+            clinicInfo.tel,
+            clinicInfo.fax,
+            clinicInfo.homepage
           )
+        )
         val compiler = new dev.fujiwara.drawer.forms.receipt.ReceiptDrawer(d)
         val mapper = dev.fujiwara.drawer.op.JsonCodec.createMapper()
         mapper.writeValueAsBytes(compiler.getOps())
       }
-      Ok(resp).map(r => r.withContentType(`Content-Type`(new MediaType("application", "json"))))
+      Ok(resp).map(r =>
+        r.withContentType(`Content-Type`(new MediaType("application", "json")))
+      )
 
     case req @ POST -> Root / "draw-receipt" =>
       given EntityEncoder[IO, Array[Byte]] = EntityEncoder.byteArrayEncoder[IO]
@@ -123,9 +125,13 @@ object MiscService extends DateTimeQueryParam with Publisher:
           mapper.writeValueAsBytes(compiler.getOps())
         }
       }
-      Ok(resp).map(r => r.withContentType(`Content-Type`(new MediaType("application", "json"))))
+      Ok(resp).map(r =>
+        r.withContentType(`Content-Type`(new MediaType("application", "json")))
+      )
 
-    case GET -> Root / "start-visit" :? intPatientId(patientId) +& atDateTime(at) =>
+    case GET -> Root / "start-visit" :? intPatientId(patientId) +& atDateTime(
+          at
+        ) =>
       Ok(
         for
           events <- Db.startVisit(patientId, at)
@@ -133,19 +139,39 @@ object MiscService extends DateTimeQueryParam with Publisher:
         yield true
       )
 
-    case GET -> Root / "find-available-shahokokuho" :? intPatientId(patientId) +& atDate(at) =>
+    case GET -> Root / "find-available-shahokokuho" :? intPatientId(
+          patientId
+        ) +& atDate(at) =>
       Ok(Db.findAvailableShahokokuho(patientId, at))
 
-    case GET -> Root / "list-available-shahokokuho" :? intPatientId(patientId) +& atDate(at) =>
+    case GET -> Root / "list-available-shahokokuho" :? intPatientId(
+          patientId
+        ) +& atDate(at) =>
       Ok(Db.listAvailableShahokokuho(patientId, at))
 
-    case GET -> Root / "find-available-roujin" :? intPatientId(patientId) +& atDate(at) =>
+    case GET -> Root / "find-available-roujin" :? intPatientId(
+          patientId
+        ) +& atDate(at) =>
       Ok(Db.findAvailableRoujin(patientId, at))
 
-    case GET -> Root / "find-available-koukikourei" :? intPatientId(patientId) +& atDate(at) =>
+    case GET -> Root / "list-available-roujin" :? intPatientId(
+          patientId
+        ) +& atDate(at) =>
+      Ok(Db.listAvailableRoujin(patientId, at))
+
+    case GET -> Root / "find-available-koukikourei" :? intPatientId(
+          patientId
+        ) +& atDate(at) =>
       Ok(Db.findAvailableKoukikourei(patientId, at))
 
-    case GET -> Root / "list-available-kouhi" :? intPatientId(patientId) +& atDate(at) =>
+    case GET -> Root / "list-available-koukikourei" :? intPatientId(
+          patientId
+        ) +& atDate(at) =>
+      Ok(Db.listAvailableKoukikourei(patientId, at))
+
+    case GET -> Root / "list-available-kouhi" :? intPatientId(
+          patientId
+        ) +& atDate(at) =>
       Ok(Db.listAvailableKouhi(patientId, at))
 
     case GET -> Root / "list-shahokokuho" :? intPatientId(patientId) =>
@@ -162,7 +188,7 @@ object MiscService extends DateTimeQueryParam with Publisher:
 
     case req @ POST -> Root / "enter-shahokokuho" =>
       Ok(
-        for 
+        for
           shahokokuho <- req.as[Shahokokuho]
           event <- Db.enterShahokokuho(shahokokuho)
           _ <- publish(event)
@@ -179,4 +205,3 @@ object MiscService extends DateTimeQueryParam with Publisher:
       )
 
   }
-

@@ -79,10 +79,12 @@ object Db
           .map(_.headOption)
         shahokokuhoId = shahokokuhoOpt.map(_.shahokokuhoId).getOrElse(0)
         koukikoureiOpt <- DbKoukikoureiPrim
-          .getAvailableKoukikourei(patientId, date)
-          .option
+          .listAvailableKoukikourei(patientId, date)
+          .map(_.headOption)
         koukikoureiId = koukikoureiOpt.map(_.koukikoureiId).getOrElse(0)
-        roujinOpt <- DbRoujinPrim.getAvailableRoujin(patientId, date).option
+        roujinOpt <- DbRoujinPrim
+          .listAvailableRoujin(patientId, date)
+          .map(_.headOption)
         roujinId = roujinOpt.map(_.roujinId).getOrElse(0)
         kouhiList <- DbKouhiPrim.listAvailableKouhi(patientId, date)
         kouhi1Id = kouhiList.map(_.kouhiId).get(0).getOrElse(0)
@@ -103,7 +105,7 @@ object Db
           )
           DbVisitPrim.enterVisit(visit)
         (visitCreatedEvent, enteredVisit) = enterVisitResult
-        wqCreatedEvent <- 
+        wqCreatedEvent <-
           val wqueue = Wqueue(enteredVisit.visitId, WaitState.WaitExam)
           DbWqueuePrim.enterWqueue(wqueue)
       yield List(visitCreatedEvent, wqCreatedEvent)

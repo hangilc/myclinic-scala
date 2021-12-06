@@ -21,12 +21,13 @@ object DbKoukikoureiPrim:
     """.query[Koukikourei]
 
 
-  def getAvailableKoukikourei(patientId: Int, at: LocalDate): Query0[Koukikourei] =
+  def listAvailableKoukikourei(patientId: Int, at: LocalDate): ConnectionIO[List[Koukikourei]] =
     sql"""
       select * from hoken_koukikourei where patient_id = ${patientId} 
         and valid_from <= ${at}
         and (valid_upto = '0000-00-00' || ${at} <= valid_upto)
-    """.query[Koukikourei]
+        order by koukikourei_id desc
+    """.query[Koukikourei].to[List]
 
   def listKoukikourei(patientId: Int): ConnectionIO[List[Koukikourei]] =
     sql"""
