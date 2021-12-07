@@ -34,3 +34,45 @@ object DbKoukikoureiPrim:
       select * from hoken_koukikourei where patient_id = ${patientId}
       order by koukikourei_id desc
     """.query[Koukikourei].to[List]
+
+  def enterKoukikourei(d: Koukikourei): ConnectionIO[AppEvent] =
+    val op = sql"""
+      insert into hoken_koukikourei 
+        (patient_id, hokensha_bangou, hihokensha_bangou, futan_wari,
+        valid_from, valid_upto)
+        values (${d.patientId}, ${d.hokenshaBangou}, ${d.hihokenshaBangou}, ${d.futanWari}, 
+        ${d.validFrom}, ${d.validUpto})
+    """
+    for
+      id <- op.update.withUniqueGeneratedKeys[Int]("koukikourei_id")
+      entered <- getKoukikourei(id).unique
+      event <- DbEventPrim.logKoukikoureiCreated(entered)
+    yield event  
+    
+  def updateKoukikourei(d: Koukikourei): ConnectionIO[AppEvent] =
+    val op = sql"""
+      update hoken_koukikourei set
+        patient_id = ${d.patientId}, 
+        hokensha_bangou = ${d.hokenshaBangou},
+        hihokensha_bangou = ${d.hihokenshaBangou},
+        futan_wari = ${d.futanWari},
+        valid_from = ${d.validFrom},
+        valid_upto = ${d.validUpto},
+        where koukikourei_id = ${d.koukikoureiId}
+    """
+    for
+      _ <- op.update.run
+      updated <- getKoukikourei(d.koukikoureiId).unique
+      event <- DbEventPrim.logKoukikoureiUpdated(updated)
+    yield event
+
+  def deleteKoukikourei(koukikoureiId: Int): ConnectionIO[AppEvent] =
+    val op = sql"""
+      delete from hoken_koukikourei where koukikourei_id = ${koukikoureiId}
+    """
+    for
+      target <- getKoukikourei(koukikoureiId).unique
+      affected <- op.update.run
+      _ = if affected != 1 then throw new RuntimeException(s"Failed to delete koukikourei: ${koukikoureiId}")
+      event <- DbEventPrim.logKoukikoureiDeleted(target)
+    yield event
