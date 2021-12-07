@@ -65,7 +65,11 @@ class HokenList(patientId: Int, subblocks: HTMLElement):
       cls := item.key,
       oncustomevent[ShahokokuhoDeleted]("shahokokuho-deleted") := ((e: CustomEvent[ShahokokuhoDeleted]) => {
         e.target.asInstanceOf[HTMLElement].remove()
-        ()
+      }),
+      oncustomevent[ShahokokuhoUpdated]("shahokokuho-updated") := ((e: CustomEvent[ShahokokuhoUpdated]) => {
+        val updated = e.detail.updated
+        val item = HokenItem(updated)
+        e.target.asInstanceOf[HTMLElement].replaceBy(createDisp(item))
       })
     )(
       Icons.zoomIn(color = "gray", size = "1.2rem")(
@@ -137,6 +141,15 @@ sealed trait HokenItem:
       case None    => ""
     }
     rep + s"（${from}${upto}）"
+
+object HokenItem:
+  def apply(src: Shahokokuho | Roujin | Koukikourei | Kouhi): HokenItem =
+    src match {
+      case h: Shahokokuho => ShahokokuhoHokenItem(h)
+      case h: Roujin => RoujinHokenItem(h)
+      case h: Koukikourei => KoukikoureiHokenItem(h)
+      case h: Kouhi => KouhiHokenItem(h)
+    }
 
 class ShahokokuhoHokenItem(shahokokuho: Shahokokuho) extends HokenItem:
   def rep: String = HokenRep.shahokokuhoRep(

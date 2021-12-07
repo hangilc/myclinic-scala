@@ -71,6 +71,9 @@ object ReceptionEventFetcher extends EventFetcher:
     publishers.publish(event)
     event match {
       case e: ShahokokuhoCreated => dispatch(".shahokokuho-created", "shahokokuho-created", e)
+      case e: ShahokokuhoUpdated => 
+        dispatch(".shahokokuho-updated", "shahokokuho-updated", e)
+        dispatch(s".shahokokuho-${e.updated.shahokokuhoId}", "shahokokuho-updated", e)
       case e: ShahokokuhoDeleted => 
         dispatch(".shahokokuho-deleted", "shahokokuho-deleted", e)
         dispatch(s".shahokokuho-${e.deleted.shahokokuhoId}", "shahokokuho-deleted", e)
