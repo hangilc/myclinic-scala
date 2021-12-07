@@ -20,8 +20,10 @@ object DbKoukikoureiPrim:
       select * from hoken_koukikourei where koukikourei_id = $koukikoureiId
     """.query[Koukikourei]
 
-
-  def listAvailableKoukikourei(patientId: Int, at: LocalDate): ConnectionIO[List[Koukikourei]] =
+  def listAvailableKoukikourei(
+      patientId: Int,
+      at: LocalDate
+  ): ConnectionIO[List[Koukikourei]] =
     sql"""
       select * from hoken_koukikourei where patient_id = ${patientId} 
         and valid_from <= ${at}
@@ -47,8 +49,8 @@ object DbKoukikoureiPrim:
       id <- op.update.withUniqueGeneratedKeys[Int]("koukikourei_id")
       entered <- getKoukikourei(id).unique
       event <- DbEventPrim.logKoukikoureiCreated(entered)
-    yield event  
-    
+    yield event
+
   def updateKoukikourei(d: Koukikourei): ConnectionIO[AppEvent] =
     val op = sql"""
       update hoken_koukikourei set
@@ -73,6 +75,9 @@ object DbKoukikoureiPrim:
     for
       target <- getKoukikourei(koukikoureiId).unique
       affected <- op.update.run
-      _ = if affected != 1 then throw new RuntimeException(s"Failed to delete koukikourei: ${koukikoureiId}")
+      _ = if affected != 1 then
+        throw new RuntimeException(
+          s"Failed to delete koukikourei: ${koukikoureiId}"
+        )
       event <- DbEventPrim.logKoukikoureiDeleted(target)
     yield event

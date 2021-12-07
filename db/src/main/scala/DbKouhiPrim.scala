@@ -17,11 +17,13 @@ import java.time.temporal.ChronoUnit
 object DbKouhiPrim:
   def getKouhi(kouhiId: Int): Query0[Kouhi] =
     sql"""
-      select * from hoken_kouhi where kouhi_id = $kouhiId
+      select * from kouhi where kouhi_id = $kouhiId
     """.query[Kouhi]
 
-
-  def listAvailableKouhi(patientId: Int, at: LocalDate): ConnectionIO[List[Kouhi]] =
+  def listAvailableKouhi(
+      patientId: Int,
+      at: LocalDate
+  ): ConnectionIO[List[Kouhi]] =
     sql"""
       select * from kouhi where patient_id = ${patientId} 
         and valid_from <= ${at}
@@ -34,3 +36,45 @@ object DbKouhiPrim:
       select * from kouhi where patient_id = ${patientId}
       order by kouhi_id desc
     """.query[Kouhi].to[List]
+
+  def enterKouhi(d: Kouhi): ConnectionIO[AppEvent] =
+    val op = sql"""
+      insert into kouhi 
+        (patient_id, futansha, jukyuusha, 
+        valid_from, valid_upto)
+        values (${d.patientId}, ${d.futansha}, ${d.jukyuusha},
+        ${d.validFrom}, ${d.validUpto})
+    """
+    for
+      id <- op.update.withUniqueGeneratedKeys[Int]("kouhi_id")
+      entered <- getKouhi(id).unique
+      event <- DbEventPrim.logKouhiCreated(entered)
+    yield event
+
+  def updateKouhi(d: Kouhi): ConnectionIO[AppEvent] =
+    val op = sql"""
+      update kouhi set
+        patient_id = ${d.patientId},
+        futansha = ${d.futansha},
+        jukyuusha = ${d.jukyuusha},
+        valid_from = ${d.validFrom},
+        valid_upto = ${d.validUpto}
+        where kouhi_id = ${d.kouhiId}
+    """
+    for
+      _ <- op.update.run
+      updated <- getKouhi(d.kouhiId).unique
+      event <- DbEventPrim.logKouhiUpdated(updated)
+    yield event
+
+  def deleteKouhi(kouhiId: Int): ConnectionIO[AppEvent] =
+    val op = sql"""
+      delete from kouhi where kouhi_id = ${kouhiId}
+    """
+    for
+      target <- getKouhi(kouhiId).unique
+      affected <- op.update.run
+      _ = if affected != 1 then
+        throw new RuntimeException(s"Failed to delete kouhi: ${kouhiId}")
+      event <- DbEventPrim.logKouhiDeleted(target)
+    yield event
