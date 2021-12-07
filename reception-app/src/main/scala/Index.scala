@@ -71,12 +71,15 @@ object ReceptionEventFetcher extends EventFetcher:
     publishers.publish(event)
     event match {
       case e: ShahokokuhoCreated => dispatch(".shahokokuho-created", "shahokokuho-created", e)
+      case e: ShahokokuhoDeleted => 
+        dispatch(".shahokokuho-deleted", "shahokokuho-deleted", e)
+        dispatch(s".shahokokuho-${e.deleted.shahokokuhoId}", "shahokokuho-deleted", e)
       case _ => ()
     }
+
   def dispatch[T](selector: String, eventType: String, detail: T): Unit =
     import dev.fujiwara.domq.{CustomEvent, CustomEventInit}
     val evt: CustomEvent[T] = CustomEvent(eventType, detail, false)
-    println(("dispatching", eventType))
     document.body.qSelectorAll(selector).foreach(e => {
       e.dispatchEvent(evt)
     })

@@ -43,10 +43,16 @@ class HokenList(patientId: Int, subblocks: HTMLElement):
   private def onShahokokuhoCreated(
       event: CustomEvent[ShahokokuhoCreated]
   ): Unit =
-    val item = ShahokokuhoHokenItem(event.detail.created)
-    val e = createDisp(item)
-    val eles = eDisp.qSelectorAll("[data-valid-from]")
-    DomqUtil.insertInOrderDesc(e, eles, _.getAttribute("data-valid-from"))
+    val created = event.detail.created
+    eDisp.qSelector(s".shahokokuho-${created.shahokokuhoId}").match {
+      case Some(_) => ()
+      case None => {
+        val item = ShahokokuhoHokenItem(event.detail.created)
+        val e = createDisp(item)
+        val eles = eDisp.qSelectorAll("[data-valid-from]")
+        DomqUtil.insertInOrderDesc(e, eles, _.getAttribute("data-valid-from"))
+      }
+    }
 
   private def setHokenList(list: List[HokenItem]): Unit =
     val listSorted = list.sortBy(list => list.validFrom).reverse
@@ -54,7 +60,14 @@ class HokenList(patientId: Int, subblocks: HTMLElement):
     eDisp((listSorted.map(createDisp(_)): List[Modifier]): _*)
 
   private def createDisp(item: HokenItem): HTMLElement =
-    div(attr("data-valid-from") := DateUtil.toSqlDate(item.validFrom))(
+    div(
+      attr("data-valid-from") := DateUtil.toSqlDate(item.validFrom),
+      cls := item.key,
+      oncustomevent[ShahokokuhoDeleted]("shahokokuho-deleted") := ((e: CustomEvent[ShahokokuhoDeleted]) => {
+        e.target.asInstanceOf[HTMLElement].remove()
+        ()
+      })
+    )(
       Icons.zoomIn(color = "gray", size = "1.2rem")(
         Icons.defaultStyle,
         cls := "zoom-in-icon",
