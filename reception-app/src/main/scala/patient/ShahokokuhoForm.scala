@@ -52,7 +52,6 @@ class ShahokokuhoForm:
     eHonninForm.setRadioGroupValue(data.honninStore.toString)
     eKoureiForm.setRadioGroupValue(data.koureiStore.toString)
     eValidFrom.eInput.value = KanjiDate.dateToKanji(data.validFrom)
-    eValidFrom.eInput.value = KanjiDate.dateToKanji(data.validFrom)
     eValidUpto.eInput.value = data.validUpto.value.fold("")(KanjiDate.dateToKanji(_))
 
   def validateForEnter(patientId: Int): ShahokokuhoValidator.Result[Shahokokuho] =

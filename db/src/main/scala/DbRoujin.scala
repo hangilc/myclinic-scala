@@ -21,3 +21,10 @@ trait DbRoujin extends Mysql:
 
   def listRoujin(patientId: Int): IO[List[Roujin]] =
     mysql(DbRoujinPrim.listRoujin(patientId))
+
+  def enterRoujin(roujin: Roujin): IO[AppEvent] =
+    mysql(DbRoujinPrim.enterRoujin(roujin))
+
+  def updateRoujin(roujin: Roujin): IO[AppEvent] =
+    mysql(DbRoujinPrim.updateRoujin(roujin))
+

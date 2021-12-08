@@ -122,3 +122,39 @@ object Db
         event <- DbShahokokuhoPrim.deleteShahokokuho(shahokokuhoId)
       yield event
     }
+
+  def deleteRoujin(roujinId: Int): IO[AppEvent] =
+    mysql {
+      for
+        used <- DbVisitPrim.countByRoujin(roujinId)
+        _ = if used != 0 then
+          throw new RuntimeException(
+            s"Cannot delete used roujin: ${roujinId}."
+          )
+        event <- DbRoujinPrim.deleteRoujin(roujinId)
+      yield event
+    }
+
+  def deleteKoukikourei(koukikoureiId: Int): IO[AppEvent] =
+    mysql {
+      for
+        used <- DbVisitPrim.countByKoukikourei(koukikoureiId)
+        _ = if used != 0 then
+          throw new RuntimeException(
+            s"Cannot delete used koukikourei: ${koukikoureiId}."
+          )
+        event <- DbKoukikoureiPrim.deleteKoukikourei(koukikoureiId)
+      yield event
+    }
+
+  def deleteKouhi(kouhiId: Int): IO[AppEvent] =
+    mysql {
+      for
+        used <- DbVisitPrim.countByKouhi(kouhiId)
+        _ = if used != 0 then
+          throw new RuntimeException(
+            s"Cannot delete used kouhi: ${kouhiId}."
+          )
+        event <- DbKouhiPrim.deleteKouhi(kouhiId)
+      yield event
+    }

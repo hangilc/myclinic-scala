@@ -45,4 +45,19 @@ object DbVisitPrim:
     sql"""
       select count(*) from visit where shahokokuho_id = ${shahokokuhoId}
     """.query[Int].unique
+
+  def countByRoujin(roujinId: Int): ConnectionIO[Int] =
+    sql"""
+      select count(*) from visit where roujin_id = ${roujinId}
+    """.query[Int].unique
+
+  def countByKoukikourei(koukikoureiId: Int): ConnectionIO[Int] =
+    sql"""
+      select count(*) from visit where koukikourei_id = ${koukikoureiId}
+    """.query[Int].unique
+
+  def countByKouhi(kouhiId: Int): ConnectionIO[Int] =
+    sql"""
+      select count(*) from visit where kouhi_id = ${kouhiId}
+    """.query[Int].unique
      

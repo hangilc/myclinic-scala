@@ -59,7 +59,7 @@ object DbKoukikoureiPrim:
         hihokensha_bangou = ${d.hihokenshaBangou},
         futan_wari = ${d.futanWari},
         valid_from = ${d.validFrom},
-        valid_upto = ${d.validUpto},
+        valid_upto = ${d.validUpto}
         where koukikourei_id = ${d.koukikoureiId}
     """
     for

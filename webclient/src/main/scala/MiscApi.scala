@@ -101,8 +101,26 @@ object MiscApi extends ApiBase:
     def enterShahokokuho(shahokokuho: Shahokokuho): Future[Boolean] =
       post("enter-shahokokuho", Params(), shahokokuho)
 
+    def enterRoujin(roujin: Roujin): Future[Boolean] =
+      post("enter-roujin", Params(), roujin)
+
+    def enterKoukikourei(koukikourei: Koukikourei): Future[Boolean] =
+      post("enter-koukikourei", Params(), koukikourei)
+
+    def enterKouhi(kouhi: Kouhi): Future[Boolean] =
+      post("enter-kouhi", Params(), kouhi)
+
     def updateShahokokuho(shahokokuho: Shahokokuho): Future[Boolean] =
       post("update-shahokokuho", Params(), shahokokuho)
+
+    def updateRoujin(roujin: Roujin): Future[Boolean] =
+      post("update-roujin", Params(), roujin)
+
+    def updateKoukikourei(koukikourei: Koukikourei): Future[Boolean] =
+      post("update-koukikourei", Params(), koukikourei)
+
+    def updateKouhi(kouhi: Kouhi): Future[Boolean] =
+      post("update-kouhi", Params(), kouhi)
 
     def deleteShahokokuho(shahokokuhoId: Int): Future[Boolean] =
       get("delete-shahokokuho", Params("shahokokuho-id" -> shahokokuhoId))

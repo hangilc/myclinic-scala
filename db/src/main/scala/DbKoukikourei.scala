@@ -21,3 +21,10 @@ trait DbKoukikourei extends Mysql:
 
   def listKoukikourei(patientId: Int): IO[List[Koukikourei]] =
     mysql(DbKoukikoureiPrim.listKoukikourei(patientId))
+
+  def enterKoukikourei(koukikourei: Koukikourei): IO[AppEvent] =
+    mysql(DbKoukikoureiPrim.enterKoukikourei(koukikourei))
+
+  def updateKoukikourei(koukikourei: Koukikourei): IO[AppEvent] =
+    mysql(DbKoukikoureiPrim.updateKoukikourei(koukikourei))
+

@@ -98,7 +98,7 @@ case class ElementQ(ele: HTMLElement):
     else Some(n.asInstanceOf[HTMLInputElement].value)
 
   def setRadioGroupValue(value: String): Boolean =
-    qSelectorAllFind("option", e => {
+    qSelectorAllFind("input[type=radio]", e => {
       e.asInstanceOf[HTMLInputElement].value == value
     })
     .map(e => {

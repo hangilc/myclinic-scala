@@ -216,4 +216,82 @@ object MiscService extends DateTimeQueryParam with Publisher:
         yield true
       )
 
+    case req @ POST -> Root / "enter-roujin" =>
+      Ok(
+        for
+          roujin <- req.as[Roujin]
+          event <- Db.enterRoujin(roujin)
+          _ <- publish(event)
+        yield true
+      )
+
+    case req @ POST -> Root / "update-roujin" =>
+      Ok(
+        for
+          roujin <- req.as[Roujin]
+          event <- Db.updateRoujin(roujin)
+          _ <- publish(event)
+        yield true
+      )
+
+    case GET -> Root / "delete-roujin" :? intRoujinId(roujinId) =>
+      Ok(
+        for 
+          event <- Db.deleteRoujin(roujinId)
+          _ <- publish(event)
+        yield true
+      )
+
+    case req @ POST -> Root / "enter-koukikourei" =>
+      Ok(
+        for
+          koukikourei <- req.as[Koukikourei]
+          event <- Db.enterKoukikourei(koukikourei)
+          _ <- publish(event)
+        yield true
+      )
+
+    case req @ POST -> Root / "update-koukikourei" =>
+      Ok(
+        for
+          koukikourei <- req.as[Koukikourei]
+          event <- Db.updateKoukikourei(koukikourei)
+          _ <- publish(event)
+        yield true
+      )
+
+    case GET -> Root / "delete-koukikourei" :? intKoukikoureiId(koukikoureiId) =>
+      Ok(
+        for 
+          event <- Db.deleteKoukikourei(koukikoureiId)
+          _ <- publish(event)
+        yield true
+      )
+
+    case req @ POST -> Root / "enter-kouhi" =>
+      Ok(
+        for
+          kouhi <- req.as[Kouhi]
+          event <- Db.enterKouhi(kouhi)
+          _ <- publish(event)
+        yield true
+      )
+
+    case req @ POST -> Root / "update-kouhi" =>
+      Ok(
+        for
+          kouhi <- req.as[Kouhi]
+          event <- Db.updateKouhi(kouhi)
+          _ <- publish(event)
+        yield true
+      )
+
+    case GET -> Root / "delete-kouhi" :? intKouhiId(kouhiId) =>
+      Ok(
+        for 
+          event <- Db.deleteKouhi(kouhiId)
+          _ <- publish(event)
+        yield true
+      )
+
   }

@@ -63,14 +63,18 @@ class HokenList(patientId: Int, subblocks: HTMLElement):
     div(
       attr("data-valid-from") := DateUtil.toSqlDate(item.validFrom),
       cls := item.key,
-      oncustomevent[ShahokokuhoDeleted]("shahokokuho-deleted") := ((e: CustomEvent[ShahokokuhoDeleted]) => {
-        e.target.asInstanceOf[HTMLElement].remove()
-      }),
-      oncustomevent[ShahokokuhoUpdated]("shahokokuho-updated") := ((e: CustomEvent[ShahokokuhoUpdated]) => {
-        val updated = e.detail.updated
-        val item = HokenItem(updated)
-        e.target.asInstanceOf[HTMLElement].replaceBy(createDisp(item))
-      })
+      oncustomevent[ShahokokuhoDeleted]("shahokokuho-deleted") := (
+        (e: CustomEvent[ShahokokuhoDeleted]) => {
+          e.target.asInstanceOf[HTMLElement].remove()
+        }
+      ),
+      oncustomevent[ShahokokuhoUpdated]("shahokokuho-updated") := (
+        (e: CustomEvent[ShahokokuhoUpdated]) => {
+          val updated = e.detail.updated
+          val item = HokenItem(updated)
+          e.target.asInstanceOf[HTMLElement].replaceBy(createDisp(item))
+        }
+      )
     )(
       Icons.zoomIn(color = "gray", size = "1.2rem")(
         Icons.defaultStyle,
@@ -146,9 +150,9 @@ object HokenItem:
   def apply(src: Shahokokuho | Roujin | Koukikourei | Kouhi): HokenItem =
     src match {
       case h: Shahokokuho => ShahokokuhoHokenItem(h)
-      case h: Roujin => RoujinHokenItem(h)
+      case h: Roujin      => RoujinHokenItem(h)
       case h: Koukikourei => KoukikoureiHokenItem(h)
-      case h: Kouhi => KouhiHokenItem(h)
+      case h: Kouhi       => KouhiHokenItem(h)
     }
 
 class ShahokokuhoHokenItem(shahokokuho: Shahokokuho) extends HokenItem:
@@ -177,11 +181,7 @@ class KoukikoureiHokenItem(koukikourei: Koukikourei) extends HokenItem:
   def validFrom: LocalDate = koukikourei.validFrom
   def validUpto: Option[LocalDate] = koukikourei.validUptoOption
   def key: String = s"koukikourei-${koukikourei.koukikoureiId}"
-  def createDisp(): Subblock = Subblock(
-    "後期高齢",
-    div(),
-    div()
-  )
+  def createDisp(): Subblock = KoukikoureiSubblock(koukikourei).block
 
 class KouhiHokenItem(kouhi: Kouhi) extends HokenItem:
   def rep: String = HokenRep.kouhiRep(kouhi.futansha)
