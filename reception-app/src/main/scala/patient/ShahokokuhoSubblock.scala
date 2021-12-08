@@ -3,7 +3,7 @@ package dev.myclinic.scala.web.reception.patient
 import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
-import dev.fujiwara.domq.{Icons, Form, ErrorBox, Modifier, ShowMessage}
+import dev.fujiwara.domq.{Icons, Form, ErrorBox, Modifier, ShowMessage, CustomEvent}
 import scala.language.implicitConversions
 import scala.util.{Success, Failure}
 import org.scalajs.dom.raw.{HTMLElement, HTMLInputElement}
@@ -26,6 +26,10 @@ class ShahokokuhoSubblock(shahokokuho: Shahokokuho):
     "社保国保",
     eContent,
     eCommands
+  )
+  block.ele(
+    cls := s"shahokokuho-${shahokokuho.shahokokuhoId}",
+    oncustomevent[ShahokokuhoUpdated]("shahokokuho-updated") := (onUpdated _),
   )
   disp()
 
@@ -60,7 +64,7 @@ class ShahokokuhoSubblock(shahokokuho: Shahokokuho):
       .asEither match {
       case Right(h) => {
         Api.updateShahokokuho(h).onComplete {
-          case Success(_)  => disp()
+          case Success(_)  => ()
           case Failure(ex) => errBox.show(ex.getMessage)
         }
       }
@@ -78,3 +82,9 @@ class ShahokokuhoSubblock(shahokokuho: Shahokokuho):
       case Success(_) => block.close()
       case Failure(ex) => ShowMessage.showError(ex.getMessage)
     }
+
+  private def onUpdated(event: CustomEvent[ShahokokuhoUpdated]): Unit =
+    val updated = event.detail.updated
+    val newSub = ShahokokuhoSubblock(updated)
+    block.ele.replaceBy(newSub.block.ele)
+

@@ -5,12 +5,21 @@ import java.time.LocalTime
 import java.time.LocalDateTime
 import dev.myclinic.scala.util.DateTimeOrdering.{*, given}
 import scala.math.Ordered.orderingToOrdered
+import scala.language.implicitConversions
 import io.circe.*
 import io.circe.syntax.*
 import io.circe.parser.decode
 import io.circe.generic.semiauto._
 
 case class ValidUpto(value: Option[LocalDate])
+
+object ValidUpto:
+  given Conversion[ValidUpto, LocalDate] with
+    def apply(src: ValidUpto): LocalDate =
+      src.value match {
+        case Some(v) => v
+        case None => LocalDate.MAX
+      }
 
 case class AppointTime(
     appointTimeId: Int,
@@ -270,6 +279,8 @@ case class Shahokokuho(
     else Some(koureiStore)
   def validUptoOption: Option[LocalDate] = validUpto.value
   def isHonnin: Boolean = honninStore > 0
+  def isValidAt(at: LocalDate): Boolean =
+    validFrom <= at && at <= validUpto
 
 case class Roujin(
     roujinId: Int,
@@ -281,7 +292,8 @@ case class Roujin(
     validUpto: ValidUpto
 ):
   def validUptoOption: Option[LocalDate] = validUpto.value
-
+  def isValidAt(at: LocalDate): Boolean =
+    validFrom <= at && at <= validUpto
 
 case class Koukikourei(
     koukikoureiId: Int,
@@ -293,6 +305,8 @@ case class Koukikourei(
     validUpto: ValidUpto
 ):
   def validUptoOption: Option[LocalDate] = validUpto.value
+  def isValidAt(at: LocalDate): Boolean =
+    validFrom <= at && at <= validUpto
 
 case class Kouhi(
     kouhiId: Int,
@@ -303,6 +317,8 @@ case class Kouhi(
     patientId: Int
 ):
   def validUptoOption: Option[LocalDate] = validUpto.value
+  def isValidAt(at: LocalDate): Boolean =
+    validFrom <= at && at <= validUpto
 
 case class MeisaiSectionData(
     section: MeisaiSection,

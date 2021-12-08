@@ -3,7 +3,7 @@ package dev.myclinic.scala.web.reception.patient
 import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
-import dev.fujiwara.domq.{Icons, Form, ErrorBox}
+import dev.fujiwara.domq.{Icons, Form, ErrorBox, DateInput}
 import scala.language.implicitConversions
 import scala.util.{Success, Failure}
 import org.scalajs.dom.raw.{HTMLElement, HTMLInputElement}
@@ -12,7 +12,6 @@ import dev.myclinic.scala.web.appbase.EventSubscriber
 import org.scalajs.dom.raw.MouseEvent
 import dev.myclinic.scala.webclient.Api
 import scala.concurrent.ExecutionContext.Implicits.global
-import dev.myclinic.scala.web.appbase.DateInput
 import dev.myclinic.scala.validator.{PatientValidator, SexValidator}
 import dev.myclinic.scala.model.{Sex, Patient}
 import dev.myclinic.scala.util.KanjiDate.Gengou
@@ -44,7 +43,12 @@ class NewPatientBlock(onClose: (NewPatientBlock => Unit)):
         span("性別") -> eSexInput(
           input(attr("type") := "radio", name := "sex", value := Sex.Male.code),
           span("男"),
-          input(attr("type") := "radio", name := "sex", value := Sex.Female.code, attr("checked") := "checked"),
+          input(
+            attr("type") := "radio",
+            name := "sex",
+            value := Sex.Female.code,
+            attr("checked") := "checked"
+          ),
           span("女")
         ),
         span("住所") -> eAddressInput(width := "100%"),
@@ -56,13 +60,12 @@ class NewPatientBlock(onClose: (NewPatientBlock => Unit)):
       button("キャンセル", onclick := (() => onClose(this)))
     )
   ).ele
-  eBirthdayInput.selectGengou(Gengou.Shouwa)
 
-  private def onEnter(): Unit = 
+  private def onEnter(): Unit =
     validate().asEither match {
       case Right(patient) => {
         Api.enterPatient(patient).onComplete {
-          case Success(_) => onClose(this)
+          case Success(_)  => onClose(this)
           case Failure(ex) => eErrorBox.show(ex.getMessage)
         }
       }
@@ -75,7 +78,9 @@ class NewPatientBlock(onClose: (NewPatientBlock => Unit)):
       PatientValidator.validateFirstName(eFirstNameInput.value),
       PatientValidator.validateLastNameYomi(eLastNameYomiInput.value),
       PatientValidator.validateFirstNameYomi(eFirstNameYomiInput.value),
-      PatientValidator.validateSex(SexValidator.validateSexInput(eSexInput.getCheckedRadioValue)),
+      PatientValidator.validateSex(
+        SexValidator.validateSexInput(eSexInput.getCheckedRadioValue)
+      ),
       PatientValidator.validateBirthday(eBirthdayInput.validate()),
       PatientValidator.validateAddress(eAddressInput.value),
       PatientValidator.validatePhone(ePhoneInput.value)

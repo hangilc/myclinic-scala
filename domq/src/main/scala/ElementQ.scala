@@ -3,11 +3,10 @@ package dev.fujiwara.domq
 import org.scalajs.dom.raw.HTMLElement
 import org.scalajs.dom.raw.MouseEvent
 import scala.language.implicitConversions
-import org.scalajs.dom.raw.HTMLDocument
-import org.scalajs.dom.raw.HTMLInputElement
+import org.scalajs.dom.raw.{HTMLDocument, HTMLInputElement, Node, HTMLSelectElement}
 import scala.concurrent.Future
-import org.scalajs.dom.raw.Node
 import scala.collection.mutable.ListBuffer
+import math.Ordering.Implicits.infixOrderingOps
 
 case class ElementQ(ele: HTMLElement):
 
@@ -82,15 +81,11 @@ case class ElementQ(ele: HTMLElement):
       i += 1
     result
 
-  def setSelectValue(value: String): Boolean =
-    val opt = qSelectorAllFind("option", e => e.asInstanceOf[HTMLInputElement].value == value)
-    opt.fold(false)(o => {
-      o.setAttribute("selected", "selected")
-      true
-    })
+  def setSelectValue(value: String): Unit =
+    ele.asInstanceOf[HTMLSelectElement].value = value
 
-  def getSelectedOptionValues: List[String] =
-    qSelectorAll("option:checked").map(_.asInstanceOf[HTMLInputElement].value)
+  def getSelectValue: String =
+    ele.asInstanceOf[HTMLSelectElement].value
 
   def getCheckedRadioValue: Option[String] = 
     val n = ele.querySelector("input[type=radio]:checked")
@@ -123,6 +118,18 @@ case class ElementQ(ele: HTMLElement):
     val result = ele.querySelector(query)
     if result == null then None else Some(result.asInstanceOf[HTMLElement]) 
    
+  def insertInOrderDesc[T](
+      e: HTMLElement,
+      selector: String,
+      extract: HTMLElement => T
+  )(using Ordering[T]): Unit =
+    val eles = qSelectorAll(selector)
+    val o = extract(e)
+    val fOpt = eles.find(ele => extract(ele) < o)
+    fOpt match {
+      case Some(f) => f.parentElement.insertBefore(e, f)
+      case None => ele.appendChild(e)
+    }
 
 object ElementQ {
   

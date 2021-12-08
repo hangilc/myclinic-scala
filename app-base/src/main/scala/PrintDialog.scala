@@ -76,8 +76,10 @@ class PrintDialog(
 
   def doPrint(): Unit =
     val req = PrintRequest(List.empty, List(ops))
-    val setting: Option[String] = eSelect.getSelectedOptionValues.headOption
-      .flatMap(s => if s == "手動" then None else Some(s))
+    val setting: Option[String] = 
+      val s = eSelect.getSelectValue
+      if s == null || s == "" || s == "手動" then None
+      else Some(s)
     val f = 
       for
         _ <- Api.printDrawer(req, setting)

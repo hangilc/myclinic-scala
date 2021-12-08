@@ -1,10 +1,10 @@
-package dev.fujiwara.domq
+package dev.fujiwara.dateinput
 
 import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
-import dev.fujiwara.domq.{ContextMenu, Modal}
-import dev.myclinic.scala.util.KanjiDate.{Gengou, Wareki}
+import dev.fujiwara.domq.{ContextMenu, Modal, Modifier}
+import dev.fujiwara.kanjidate.KanjiDate.{Gengou, Wareki}
 import scala.language.implicitConversions
 import scala.scalajs.js
 import org.scalajs.dom.raw.{MouseEvent, HTMLElement, Event}
@@ -15,7 +15,6 @@ import org.scalajs.dom.raw.HTMLInputElement
 
 class DatePicker(
     cb: LocalDate => Unit = _ => (),
-    anchor: Option[LocalDate],
     gengouList: List[Gengou] = Gengou.list,
     zIndex: Int = Modal.zIndexDefault
 ):
@@ -28,15 +27,15 @@ class DatePicker(
     div(cls := "domq-date-picker-month-block")(
       eGengouSelect(
         cls := "domq-gengou-select",
-        onchange := (adaptToCurrentMonth _)
+        onchange := (onGengouChange _)
       ).setChildren(
         gengouList.map(g => option(g.name, value := g.name).ele)
       ),
-      eNenSelect(cls := "domq-nen-select", onchange := (adaptToCurrentMonth _)),
+      eNenSelect(cls := "domq-nen-select", onchange := (onNenOrMonthChange _)),
       a("年", cls := "domq-nen-label", onclick := (advanceYear _)),
       eMonthSelect(
         cls := "domq-month-select",
-        onclick := (adaptToCurrentMonth _)
+        onclick := (onNenOrMonthChange _)
       ).setChildren(
         (1 to 12).toList.map(i => option(i.toString, value := i.toString))
       ),
@@ -44,46 +43,28 @@ class DatePicker(
     ),
     eDatesTab(cls := "domq-date-picker-dates-tab")
   )
-  anchor match {
-    case Some(d) => {
-      setMonth(d.getYear, d.getMonthValue)
-    }
-    case None => {
-      val today = LocalDate.now()
-      setMonth(today.getYear, today.getMonthValue)
-    }
-  }
 
-  def open(event: MouseEvent) =
+  def open(event: MouseEvent, year: Int, month: Int) =
+    set(year, month)
     menu.open(event)
 
-  def setMonth(year: Int, month: Int): Unit =
+  private def init(): Unit =
+    val g = eGengouSelect
+
+  def set(year: Int, month: Int): Unit =
     val d = LocalDate.of(year, month, 1)
     Wareki.fromDate(d) match {
       case Some(w) =>
-        eGengouSelect.setSelectValue(w.gengou.name)
-        setupNenSelect(w.gengou)
+        if currentGengou != w.gengou then
+          eGengouSelect.setSelectValue(w.gengou.name)
+          setupNenSelect(w.gengou)
         ensureNen(w.nen)
+        println(("set", w))
         eNenSelect.setSelectValue(w.nen.toString)
         eMonthSelect.setSelectValue(month.toString)
         stuffDates(year, month)
       case None => System.err.println(s"Cannot get Gengou of ${year}-${month}")
     }
-    markAnchor()
-
-  private def markAnchor(): Unit =
-    anchor.foreach(a => {
-      val day = a.getDayOfMonth
-      val isCurrent =
-        a.getYear == currentYear && a.getMonthValue == currentMonth
-      eDatesTab
-        .qSelector(
-          s".domq-date-picker-date-box[data-date='${day}']"
-        )
-        .foreach(e =>
-          if isCurrent then e(cls := "current") else e(cls :- "current")
-        )
-    })
 
   private def ensureNen(nen: Int): Unit =
     val last: Int = eNenSelect
@@ -91,7 +72,6 @@ class DatePicker(
       .lastOption
       .map(_.asInstanceOf[HTMLInputElement].value.toInt)
       .getOrElse(0)
-    println(("last", last, nen))
     if last < nen then
       val opts: List[Modifier] = ((last + 1) to nen).toList.map(mkNenOption(_))
       eNenSelect(opts)
@@ -110,29 +90,34 @@ class DatePicker(
 
   private def advance(f: LocalDate => LocalDate): Unit =
     val d = f(LocalDate.of(currentYear, currentMonth, 1))
-    setMonth(d.getYear, d.getMonthValue)
+    set(d.getYear, d.getMonthValue)
 
   private def currentGengou: Gengou =
-    Gengou.findByName(eGengouSelect.getSelectedOptionValues.head).get
+    Gengou.findByName(eGengouSelect.getSelectValue).get
 
   private def currentNen: Int =
-    eNenSelect.getSelectedOptionValues.head.toInt
+    eNenSelect.getSelectValue.toInt
 
   private def currentYear: Int =
     Gengou.gengouToYear(currentGengou, currentNen)
 
   private def currentMonth: Int =
-    eMonthSelect.getSelectedOptionValues.head.toInt
+    eMonthSelect.getSelectValue.toInt
 
-  private def adaptToCurrentMonth(): Unit =
+  private def onGengouChange(): Unit =
     val g = currentGengou
-    val m = currentNen
-    val y = Gengou.gengouToYear(g, m)
-    setMonth(y, currentMonth)
+    val n = currentNen
+    setupNenSelect(g)
+    ensureNen(n)
+    eNenSelect.setSelectValue(n.toString)
+    val y = Gengou.gengouToYear(g, currentNen)
+    stuffDates(y, currentMonth)
 
-  private def selectedGengou: Gengou =
-    val v = eGengouSelect.getSelectedOptionValues.headOption.get
-    Gengou.findByName(v).get
+  private def onNenOrMonthChange(): Unit =
+    val g = currentGengou
+    val n = currentNen
+    val y = Gengou.gengouToYear(g, n)
+    stuffDates(y, currentMonth)
 
   private def setupNenSelect(g: Gengou): Unit =
     eNenSelect.setChildren(

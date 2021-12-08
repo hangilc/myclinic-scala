@@ -148,13 +148,11 @@ lazy val webclient = project
 lazy val domq = project
   .in(file("domq"))
   .enablePlugins(ScalaJSPlugin)
-  .dependsOn(utilJS)
   .settings(
     name := "domq",
     libraryDependencies ++= Seq(
       ("org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion)
         .cross(CrossVersion.for3Use2_13),
-      "org.typelevel" %%% "cats-core" % catsVersion
     )
   )
 
@@ -319,4 +317,35 @@ lazy val drawer = crossProject(JVMPlatform, JSPlatform)
 
 val drawerJVM = drawer.jvm
 val drawerJS = drawer.js
+
+lazy val dateinput = project
+  .in(file("dateinput"))
+  .enablePlugins(ScalaJSPlugin)
+  .dependsOn(domq, kanjidateJS)
+  .settings(
+    name := "dateinput",
+    scalaJSUseMainModuleInitializer := false,
+    libraryDependencies ++= Seq(
+      ("org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion)
+        .cross(CrossVersion.for3Use2_13),
+      "org.typelevel" %%% "cats-core" % catsVersion
+    )
+  )
+
+lazy val kanjidate = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Pure)
+  .in(file("kanjidate"))
+  .jsConfigure(_ enablePlugins TzdbPlugin)
+  .jsSettings(
+    scalaJSUseMainModuleInitializer := false,
+    zonesFilter := { (z: String) => z == "Asia/Tokyo" },
+    libraryDependencies ++= Seq(
+      "io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion
+    )
+  )
+
+val kanjidateJVM = kanjidate.jvm
+val kanjidateJS = kanjidate.js
+
+
 

@@ -24,9 +24,26 @@ class HokenList(patientId: Int, subblocks: HTMLElement):
   val eDisp = div()
   val eListAll: HTMLElement = checkbox()
   val ele = div(
-    cls := "shahokokuho-created",
+    cls := """shahokokuho-created koukikourei-created kouhi-created
+      shahokokuho-updated koukikourei-updated kouhi-updated
+    """,
     oncustomevent[ShahokokuhoCreated]("shahokokuho-created") := (
       (e: CustomEvent[ShahokokuhoCreated]) => onShahokokuhoCreated(e)
+    ),
+    oncustomevent[KoukikoureiCreated]("koukikourei-created") := (
+      (e: CustomEvent[KoukikoureiCreated]) => onKoukikoureiCreated(e)
+    ),
+    oncustomevent[KouhiCreated]("kouhi-created") := (
+      (e: CustomEvent[KouhiCreated]) => onKouhiCreated(e)
+    ),
+    oncustomevent[ShahokokuhoUpdated]("shahokokuho-updated") := (
+      (e: CustomEvent[ShahokokuhoUpdated]) => onShahokokuhoUpdated(e)
+    ),
+    oncustomevent[KoukikoureiUpdated]("koukikourei-updated") := (
+      (e: CustomEvent[KoukikoureiUpdated]) => onKoukikoureiUpdated(e)
+    ),
+    oncustomevent[KouhiUpdated]("kouhi-updated") := (
+      (e: CustomEvent[KouhiUpdated]) => onKouhiUpdated(e)
     )
   )(
     errorBox.ele,
@@ -44,15 +61,126 @@ class HokenList(patientId: Int, subblocks: HTMLElement):
       event: CustomEvent[ShahokokuhoCreated]
   ): Unit =
     val created = event.detail.created
-    eDisp.qSelector(s".shahokokuho-${created.shahokokuhoId}").match {
-      case Some(_) => ()
-      case None => {
-        val item = ShahokokuhoHokenItem(event.detail.created)
-        val e = createDisp(item)
-        val eles = eDisp.qSelectorAll("[data-valid-from]")
-        DomqUtil.insertInOrderDesc(e, eles, _.getAttribute("data-valid-from"))
+    if eListAll.isChecked || created.isValidAt(LocalDate.now()) then
+      eDisp.qSelector(s".shahokokuho-${created.shahokokuhoId}").match {
+        case Some(_) => ()
+        case None => {
+          val item = ShahokokuhoHokenItem(event.detail.created)
+          val e = createDisp(item)
+          val eles = eDisp.qSelectorAll("[data-valid-from]")
+          eDisp.insertInOrderDesc(
+            e,
+            "[data-valid-from]",
+            _.getAttribute("data-valid-from")
+          )
+        }
       }
-    }
+
+  private def onKoukikoureiCreated(
+      event: CustomEvent[KoukikoureiCreated]
+  ): Unit =
+    val created = event.detail.created
+    if eListAll.isChecked || created.isValidAt(LocalDate.now()) then
+      eDisp.qSelector(s".koukikourei-${created.koukikoureiId}").match {
+        case Some(_) => ()
+        case None => {
+          val item = KoukikoureiHokenItem(event.detail.created)
+          val e = createDisp(item)
+          eDisp.insertInOrderDesc(
+            e,
+            "[data-valid-from]",
+            _.getAttribute("data-valid-from")
+          )
+        }
+      }
+
+  private def onKouhiCreated(
+      event: CustomEvent[KouhiCreated]
+  ): Unit =
+    val created = event.detail.created
+    if eListAll.isChecked || created.isValidAt(LocalDate.now()) then
+      eDisp.qSelector(s".kouhi-${created.kouhiId}").match {
+        case Some(_) => ()
+        case None => {
+          val item = KouhiHokenItem(event.detail.created)
+          val e = createDisp(item)
+          eDisp.insertInOrderDesc(
+            e,
+            "[data-valid-from]",
+            _.getAttribute("data-valid-from")
+          )
+        }
+      }
+
+  private def onShahokokuhoUpdated(
+      event: CustomEvent[ShahokokuhoUpdated]
+  ): Unit =
+    val updated = event.detail.updated
+    val cur = eDisp.qSelector(s".shahokokuho-${updated.shahokokuhoId}")
+    println(("isValidAt", updated.isValidAt(LocalDate.now())))
+    if eListAll.isChecked || updated.isValidAt(LocalDate.now()) then
+      val item = HokenItem(updated)
+      val newEle = createDisp(item)
+      cur match {
+        case Some(c) => c.replaceBy(HokenItem(updated).createSubblock().ele)
+        case None =>
+          eDisp.insertInOrderDesc(
+            newEle,
+            "[data-valid-from]",
+            _.getAttribute("data-valid-from")
+          )
+      }
+    else
+      cur match {
+        case Some(c) => c.remove()
+        case None => ()
+      }
+
+  private def onKoukikoureiUpdated(
+      event: CustomEvent[KoukikoureiUpdated]
+  ): Unit =
+    val updated = event.detail.updated
+    val cur = eDisp.qSelector(s".koukikourei-${updated.koukikoureiId}")
+    if eListAll.isChecked || updated.isValidAt(LocalDate.now()) then
+      val item = HokenItem(updated)
+      val newEle = createDisp(item)
+      cur match {
+        case Some(c) => c.replaceBy(HokenItem(updated).createSubblock().ele)
+        case None =>
+          eDisp.insertInOrderDesc(
+            newEle,
+            "[data-valid-from]",
+            _.getAttribute("data-valid-from")
+          )
+      }
+    else
+      cur match {
+        case Some(c) => c.remove()
+        case None => ()
+      }
+
+  private def onKouhiUpdated(
+      event: CustomEvent[KouhiUpdated]
+  ): Unit =
+    val updated = event.detail.updated
+    val cur = eDisp.qSelector(s".kouhi-${updated.kouhiId}")
+    if eListAll.isChecked || updated.isValidAt(LocalDate.now()) then
+      val item = HokenItem(updated)
+      val newEle = createDisp(item)
+      cur match {
+        case Some(c) => c.replaceBy(HokenItem(updated).createSubblock().ele)
+        case None =>
+          eDisp.insertInOrderDesc(
+            newEle,
+            "[data-valid-from]",
+            _.getAttribute("data-valid-from")
+          )
+      }
+    else
+      cur match {
+        case Some(c) => c.remove()
+        case None => ()
+      }
 
   private def setHokenList(list: List[HokenItem]): Unit =
     val listSorted = list.sortBy(list => list.validFrom).reverse
@@ -68,13 +196,37 @@ class HokenList(patientId: Int, subblocks: HTMLElement):
           e.target.asInstanceOf[HTMLElement].remove()
         }
       ),
-      oncustomevent[ShahokokuhoUpdated]("shahokokuho-updated") := (
-        (e: CustomEvent[ShahokokuhoUpdated]) => {
-          val updated = e.detail.updated
-          val item = HokenItem(updated)
-          e.target.asInstanceOf[HTMLElement].replaceBy(createDisp(item))
+      // oncustomevent[ShahokokuhoUpdated]("shahokokuho-updated") := (
+      //   (e: CustomEvent[ShahokokuhoUpdated]) => {
+      //     val updated = e.detail.updated
+      //     val item = HokenItem(updated)
+      //     e.target.asInstanceOf[HTMLElement].replaceBy(createSubblock(item))
+      //   }
+      // ),
+      oncustomevent[KoukikoureiDeleted]("koukikourei-deleted") := (
+        (e: CustomEvent[KoukikoureiDeleted]) => {
+          e.target.asInstanceOf[HTMLElement].remove()
+        }
+      ),
+      // oncustomevent[KoukikoureiUpdated]("koukikourei-updated") := (
+      //   (e: CustomEvent[KoukikoureiUpdated]) => {
+      //     val updated = e.detail.updated
+      //     val item = HokenItem(updated)
+      //     e.target.asInstanceOf[HTMLElement].replaceBy(createSubblock(item))
+      //   }
+      // ),
+      oncustomevent[KouhiDeleted]("kouhi-deleted") := (
+        (e: CustomEvent[KouhiDeleted]) => {
+          e.target.asInstanceOf[HTMLElement].remove()
         }
       )
+      // oncustomevent[KouhiUpdated]("kouhi-updated") := (
+      //   (e: CustomEvent[KouhiUpdated]) => {
+      //     val updated = e.detail.updated
+      //     val item = HokenItem(updated)
+      //     e.target.asInstanceOf[HTMLElement].replaceBy(createSubblock(item))
+      //   }
+      // ),
     )(
       Icons.zoomIn(color = "gray", size = "1.2rem")(
         Icons.defaultStyle,
@@ -87,7 +239,7 @@ class HokenList(patientId: Int, subblocks: HTMLElement):
     )
 
   private def createSubblock(item: HokenItem): Subblock =
-    val sub = item.createDisp()
+    val sub = item.createSubblock()
     sub.ele(cls := item.key)
     sub
 
@@ -137,7 +289,7 @@ sealed trait HokenItem:
   def validFrom: LocalDate
   def validUpto: Option[LocalDate]
   def key: String
-  def createDisp(): Subblock
+  def createSubblock(): Subblock
   def repFull: String =
     val from = KanjiDate.dateToKanji(validFrom) + "から"
     val upto = validUpto match {
@@ -163,14 +315,14 @@ class ShahokokuhoHokenItem(shahokokuho: Shahokokuho) extends HokenItem:
   def validFrom: LocalDate = shahokokuho.validFrom
   def validUpto: Option[LocalDate] = shahokokuho.validUptoOption
   def key: String = s"shahokokuho-${shahokokuho.shahokokuhoId}"
-  def createDisp(): Subblock = ShahokokuhoSubblock(shahokokuho).block
+  def createSubblock(): Subblock = ShahokokuhoSubblock(shahokokuho).block
 
 class RoujinHokenItem(roujin: Roujin) extends HokenItem:
   def rep: String = HokenRep.roujinRep(roujin.futanWari)
   def validFrom: LocalDate = roujin.validFrom
   def validUpto: Option[LocalDate] = roujin.validUptoOption
   def key: String = s"roujin-${roujin.roujinId}"
-  def createDisp(): Subblock = Subblock(
+  def createSubblock(): Subblock = Subblock(
     "老人保険",
     div(),
     div()
@@ -181,14 +333,14 @@ class KoukikoureiHokenItem(koukikourei: Koukikourei) extends HokenItem:
   def validFrom: LocalDate = koukikourei.validFrom
   def validUpto: Option[LocalDate] = koukikourei.validUptoOption
   def key: String = s"koukikourei-${koukikourei.koukikoureiId}"
-  def createDisp(): Subblock = KoukikoureiSubblock(koukikourei).block
+  def createSubblock(): Subblock = KoukikoureiSubblock(koukikourei).block
 
 class KouhiHokenItem(kouhi: Kouhi) extends HokenItem:
   def rep: String = HokenRep.kouhiRep(kouhi.futansha)
   def validFrom: LocalDate = kouhi.validFrom
   def validUpto: Option[LocalDate] = kouhi.validUptoOption
   def key: String = s"kouhi-${kouhi.kouhiId}"
-  def createDisp(): Subblock = Subblock(
+  def createSubblock(): Subblock = Subblock(
     "公費",
     div(),
     div()

@@ -1,7 +1,7 @@
-package dev.myclinic.scala.util
+package dev.fujiwara.kanjidate
 
 import java.time.{LocalDate, LocalTime}
-import dev.myclinic.scala.util.DateTimeOrdering
+import dev.fujiwara.kanjidate.DateTimeOrdering
 import scala.Ordered.orderingToOrdered
 import java.time.DayOfWeek
 
