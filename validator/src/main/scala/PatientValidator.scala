@@ -7,7 +7,7 @@ import cats.data.Validated.*
 import cats.implicits.*
 import dev.myclinic.scala.model.{Patient, Sex}
 import dev.myclinic.scala.validator.Validators.*
-import dev.myclinic.scala.validator.{SexValidator, DateValidator}
+import dev.myclinic.scala.validator.SexValidator
 import java.time.LocalDate
 import cats.data.Validated.Valid
 import cats.data.Validated.Invalid
@@ -29,10 +29,12 @@ object PatientValidator:
     def message: String = "姓のよみが入力されていません。"
   object EmptyLastNameYomiError extends PatientError:
     def message: String = "名のよみが入力されていません。"
-  case class SexError(error: NonEmptyChain[SexValidator.SexError]) extends PatientError:
+  case class SexError(error: NonEmptyChain[SexValidator.SexError])
+      extends PatientError:
     def message: String = error.toList.map(_.message).mkString("\n")
-  case class BirthdayError(error: NonEmptyChain[DateValidator.DateError]) extends PatientError:
-    def message: String = error.toList.map("（生年月日）" + _.message).mkString("\n")
+  case class BirthdayError[E](error: NonEmptyChain[E], messageOf: E => String)
+      extends PatientError:
+    def message: String = error.toList.map("（生年月日）" + messageOf(_)).mkString("\n")
 
   type Result[T] = ValidatedNec[PatientError, T]
 
@@ -49,14 +51,22 @@ object PatientValidator:
     nonEmpty(input, EmptyFirstNameYomiError)
   def validateSex(result: SexValidator.Result[Sex]): Result[Sex] =
     result match {
-      case Valid(sex) => validNec(sex)
+      case Valid(sex)   => validNec(sex)
       case Invalid(err) => invalidNec(SexError(err))
     }
-  def validateBirthday(result: DateValidator.Result[LocalDate]): Result[LocalDate] =
+  def validateBirthday[E](
+      result: ValidatedNec[E, LocalDate],
+      messageOf: E => String
+  ): Result[LocalDate] =
     result match {
-      case Valid(sex) => validNec(sex)
-      case Invalid(err) => invalidNec(BirthdayError(err))
+      case Valid(sex)   => validNec(sex)
+      case Invalid(err) => invalidNec(BirthdayError(err, messageOf))
     }
+  // def validateBirthday(result: DateValidator.Result[LocalDate]): Result[LocalDate] =
+  //   result match {
+  //     case Valid(sex) => validNec(sex)
+  //     case Invalid(err) => invalidNec(BirthdayError(err))
+  //   }
   def validateAddress(input: String): Result[String] =
     validNec(if input == null then "" else input)
   def validatePhone(input: String): Result[String] =

@@ -7,12 +7,10 @@ import cats.data.Validated.*
 import cats.implicits.*
 import dev.myclinic.scala.model.{Koukikourei, ValidUpto}
 import dev.myclinic.scala.validator.Validators.*
-import dev.myclinic.scala.validator.{SexValidator, DateValidator}
+import dev.myclinic.scala.validator.SexValidator
 import java.time.LocalDate
 import cats.data.Validated.Valid
 import cats.data.Validated.Invalid
-import dev.fujiwara.domq.DateInput
-import dev.fujiwara.domq.DateInput.DateInputError
 import scala.util.{Try, Success, Failure}
 import scala.runtime.IntRef
 
@@ -35,12 +33,12 @@ object KoukikoureiValidator:
     def message: String = "Invalid futan-wari value (should be 1, 2, or 3"
   object HihokenshaKigouBangouError extends KoukikoureiError:
     def message: String = "被保険者記号と番号がどちらも空白です。"
-  case class InvalidValidFrom(err: NonEmptyChain[DateInputError])
+  case class InvalidValidFrom[E](err: NonEmptyChain[E], messageOf: E => String)
       extends KoukikoureiError:
-    def message: String = err.toList.map("（期限開始）" + _.message).mkString("\n")
-  case class InvalidValidUpto(err: NonEmptyChain[DateInputError])
+    def message: String = err.toList.map("（期限開始）" + messageOf(_)).mkString("\n")
+  case class InvalidValidUpto[E](err: NonEmptyChain[E], messageOf: E => String)
       extends KoukikoureiError:
-    def message: String = err.toList.map("（期限終了）" + _.message).mkString("\n")
+    def message: String = err.toList.map("（期限終了）" + messageOf(_)).mkString("\n")
 
   type Result[T] = ValidatedNec[KoukikoureiError, T]
 
