@@ -11,6 +11,8 @@ import org.scalajs.dom.raw.{HTMLElement, HTMLInputElement}
 import dev.myclinic.scala.util.DateUtil
 import dev.myclinic.scala.model.*
 import java.time.LocalDate
+import dev.myclinic.scala.web.appbase.validator.KoukikoureiValidator
+import dev.myclinic.scala.web.appbase.validator.KoukikoureiValidator.*
 
 class KoukikoureiForm:
   val eHokenshaBangou = inputText()

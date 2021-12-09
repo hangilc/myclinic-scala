@@ -24,26 +24,24 @@ class NewKouhiSubblock(patientId: Int):
   val block: Subblock = Subblock(
     "新規後期高齢",
     div(
-        errBox.ele,
-        form.ele,
+      errBox.ele,
+      form.ele
     ),
     div(
-        button("入力", onclick := (onEnter _)),
-        button("閉じる", onclick := (close _))
+      button("入力", onclick := (onEnter _)),
+      button("閉じる", onclick := (close _))
     )
   )
 
   def close(): Unit = block.ele.remove()
 
   private def onEnter(): Unit =
-      form.validateForEnter(patientId).asEither match {
-          case Right(h) => {
-              Api.enterKouhi(h).onComplete {
-                  case Success(_) => close()
-                  case Failure(ex) => errBox.show(ex.getMessage)
-              }
-          }
-          case Left(msg) => errBox.show(msg)
+    form.validateForEnter(patientId).asEither match {
+      case Right(h) => {
+        Api.enterKouhi(h).onComplete {
+          case Success(_)  => close()
+          case Failure(ex) => errBox.show(ex.getMessage)
+        }
       }
-
-
+      case Left(msg) => errBox.show(msg)
+    }

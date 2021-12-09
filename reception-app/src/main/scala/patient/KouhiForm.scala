@@ -43,7 +43,6 @@ class KouhiForm:
       validatePatientId(patientId),
       validateFutanshaBangou(eFutanshaBangou.value),
       validateJukyuushaBangou(eJukyuushaBangou.value),
-      validateFutanWari(eFutanWariForm.getCheckedRadioValue),
       validateValidFrom(eValidFrom.validate(), _.message),
       validateValidUpto(
         eValidUpto.validateOption().map(ValidUpto(_)),
@@ -60,7 +59,6 @@ class KouhiForm:
       validatePatientId(patientId),
       validateFutanshaBangou(eFutanshaBangou.value),
       validateJukyuushaBangou(eJukyuushaBangou.value),
-      validateFutanWari(eFutanWariForm.getCheckedRadioValue),
       validateValidFrom(eValidFrom.validate(), _.message),
       validateValidUpto(
         eValidUpto.validateOption().map(ValidUpto(_)),

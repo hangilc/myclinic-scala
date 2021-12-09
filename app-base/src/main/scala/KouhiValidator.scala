@@ -35,12 +35,11 @@ object KouhiValidator:
 
   type Result[T] = ValidatedNec[KouhiError, T]
 
-  extension [T](r: Result[T])
+  extension [T] (r: Result[T])
     def asEither: Either[String, T] =
       r match {
         case Valid(t) => Right(t)
-        case Invalid(err) =>
-          Left(err.toList.map(_.message).mkString("\n"))
+        case Invalid(err) => Left(err.toList.map(_.message).mkString("\n"))
       }
 
   def validateKouhiIdForUpdate(value: Int): Result[Int] =
@@ -104,7 +103,6 @@ object KouhiValidator:
       patientIdResult: Result[Int],
       futanshaBangouResult: Result[Int],
       jukyuushaBangouResult: Result[Int],
-      futanWariResult: Result[Int],
       validFromResult: Result[LocalDate],
       validUptoResult: Result[ValidUpto]
   ): Result[Kouhi] =
