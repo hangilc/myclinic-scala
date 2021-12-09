@@ -6,13 +6,10 @@ import cats.data.{ValidatedNec, NonEmptyChain}
 import cats.data.Validated.*
 import cats.implicits.*
 import dev.myclinic.scala.model.{Koukikourei, ValidUpto}
-import dev.myclinic.scala.validator.Validators.*
-import dev.myclinic.scala.validator.SexValidator
 import java.time.LocalDate
 import cats.data.Validated.Valid
 import cats.data.Validated.Invalid
 import scala.util.{Try, Success, Failure}
-import scala.runtime.IntRef
 
 object KoukikoureiValidator:
   sealed trait KoukikoureiError:
@@ -52,22 +49,26 @@ object KoukikoureiValidator:
 
   def validateKoukikoureiIdForUpdate(value: Int): Result[Int] =
     condNec(value > 0, value, NonPositiveKoukikoureiId)
+
   def validatePatientId(patientId: Int): Result[Int] =
     condNec(patientId > 0, patientId, NonPositivePatientId)
+
   def validateHokenshaBangou(src: String): Result[String] =
     Try(src.toInt) match {
-      case Success(i) => 
+      case Success(i) =>
         if i > 0 then validNec(src)
         else invalidNec(NonPositiveHokenshaBangou)
       case Failure(_) => invalidNec(NonIntegerHokenshaBangou)
     }
+
   def validateHihokenshaBangou(src: String): Result[String] =
     Try(src.toInt) match {
-      case Success(i) => 
+      case Success(i) =>
         if i > 0 then validNec(src)
         else invalidNec(NonPositiveHihokenshaBangou)
       case Failure(_) => invalidNec(NonIntegerHihokenshaBangou)
     }
+
   def validateFutanWari(srcOpt: Option[String]): Result[Int] =
     val src = srcOpt.getOrElse("")
     condNec(!(src == null || src.isEmpty), src, InvalidFutanWari)
@@ -81,19 +82,24 @@ object KoukikoureiValidator:
         case i @ (1 | 2 | 3) => validNec(i)
         case _               => invalidNec(InvalidFutanWari)
       }
-  def validateValidFrom(src: String): Result[LocalDate] =
-    DateInput.validateDateInput(src) match {
-      case Valid(d)     => validNec(d)
-      case Invalid(err) => invalidNec(InvalidValidFrom(err))
-    }
-  def validateValidUpto(src: String): Result[ValidUpto] =
-    if src == null || src.isEmpty || src == "0000-00-00" then
-      validNec(ValidUpto(None))
-    else
-      DateInput.validateDateInput(src) match {
-        case Valid(d)     => validNec(ValidUpto(Some(d)))
-        case Invalid(err) => invalidNec(InvalidValidUpto(err))
-      }
+
+  def validateValidFrom[E](
+      result: ValidatedNec[E, LocalDate],
+      messageOf: E => String
+  ): Result[LocalDate] =
+    result.fold(
+      err => invalidNec(InvalidValidFrom(err, messageOf)),
+      validNec(_)
+    )
+
+  def validateValidUpto[E](
+      result: ValidatedNec[E, ValidUpto],
+      messageOf: E => String
+  ): Result[ValidUpto] =
+    result.fold(
+      err => invalidNec(InvalidValidUpto(err, messageOf)),
+      validNec(_)
+    )
 
   def validateKoukikourei(
       koukikoureiIdResult: Result[Int],

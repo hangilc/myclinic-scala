@@ -6,15 +6,10 @@ import cats.data.{ValidatedNec, NonEmptyChain}
 import cats.data.Validated.*
 import cats.implicits.*
 import dev.myclinic.scala.model.{Shahokokuho, ValidUpto}
-import dev.myclinic.scala.validator.Validators.*
-import dev.myclinic.scala.validator.{SexValidator, DateValidator}
 import java.time.LocalDate
 import cats.data.Validated.Valid
 import cats.data.Validated.Invalid
-import dev.fujiwara.domq.DateInput
-import dev.fujiwara.domq.DateInput.DateInputError
 import scala.util.{Try, Success, Failure}
-import scala.runtime.IntRef
 
 object ShahokokuhoValidator:
   sealed trait ShahokokuhoError:
@@ -29,12 +24,12 @@ object ShahokokuhoValidator:
     def message: String = "保険者番号が正の整数でありません。"
   object InvalidHonnin extends ShahokokuhoError:
     def message: String = "Invalid honnin value (should be 0 or 1)"
-  case class InvalidValidFrom(err: NonEmptyChain[DateInputError])
+  case class InvalidValidFrom[E](err: NonEmptyChain[E], messageOf: E => String)
       extends ShahokokuhoError:
-    def message: String = err.toList.map("（期限開始）" + _.message).mkString("\n")
-  case class InvalidValidUpto(err: NonEmptyChain[DateInputError])
+    def message: String = err.toList.map("（期限開始）" + messageOf(_)).mkString("\n")
+  case class InvalidValidUpto[E](err: NonEmptyChain[E], messageOf: E => String)
       extends ShahokokuhoError:
-    def message: String = err.toList.map("（期限終了）" + _.message).mkString("\n")
+    def message: String = err.toList.map("（期限終了）" + messageOf(_)).mkString("\n")
   object InvalidKourei extends ShahokokuhoError:
     def message: String = "Invalid kourei value (should be 0, 2, or 3"
   object HihokenshaKigouBangouError extends ShahokokuhoError:
@@ -78,19 +73,19 @@ object ShahokokuhoValidator:
         case i @ (0 | 1) => validNec(i)
         case _           => invalidNec(InvalidHonnin)
       }
-  def validateValidFrom(src: String): Result[LocalDate] =
-    DateInput.validateDateInput(src) match {
-      case Valid(d)     => validNec(d)
-      case Invalid(err) => invalidNec(InvalidValidFrom(err))
-    }
-  def validateValidUpto(src: String): Result[ValidUpto] =
-    if src == null || src.isEmpty || src == "0000-00-00" then
-      validNec(ValidUpto(None))
-    else
-      DateInput.validateDateInput(src) match {
-        case Valid(d)     => validNec(ValidUpto(Some(d)))
-        case Invalid(err) => invalidNec(InvalidValidUpto(err))
-      }
+  def validateValidFrom[E](
+      result: ValidatedNec[E, LocalDate],
+      messageOf: E => String
+  ): Result[LocalDate] =
+    result.fold(
+      err => invalidNec(InvalidValidFrom(err, messageOf)),
+      validNec(_)
+    )
+  def validateValidUpto[E](result: ValidatedNec[E, ValidUpto], messageOf: E => String): Result[ValidUpto] =
+    result.fold(
+      err => invalidNec(InvalidValidUpto(err, messageOf)),
+      validNec(_)
+    )
   def validateKourei(srcOpt: Option[String]): Result[Int] =
     val src = srcOpt.getOrElse("")
     condNec(!(src == null || src.isEmpty), src, InvalidKourei)

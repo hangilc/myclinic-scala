@@ -62,11 +62,6 @@ object PatientValidator:
       case Valid(sex)   => validNec(sex)
       case Invalid(err) => invalidNec(BirthdayError(err, messageOf))
     }
-  // def validateBirthday(result: DateValidator.Result[LocalDate]): Result[LocalDate] =
-  //   result match {
-  //     case Valid(sex) => validNec(sex)
-  //     case Invalid(err) => invalidNec(BirthdayError(err))
-  //   }
   def validateAddress(input: String): Result[String] =
     validNec(if input == null then "" else input)
   def validatePhone(input: String): Result[String] =

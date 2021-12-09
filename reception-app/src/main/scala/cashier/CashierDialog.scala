@@ -14,7 +14,7 @@ import java.time.{LocalDateTime, LocalDate}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Success
 import scala.util.Failure
-import dev.myclinic.scala.util.KanjiDate
+import dev.fujiwara.kanjidate.KanjiDate
 
 class CashierDialog(meisai: Meisai, visit: VisitEx):
   val patient: Patient = visit.patient

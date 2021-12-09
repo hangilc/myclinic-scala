@@ -7,7 +7,8 @@ import dev.fujiwara.domq.{Icons, Form, ErrorBox, Modifier, CustomEvent}
 import scala.language.implicitConversions
 import org.scalajs.dom.raw.{HTMLElement, HTMLInputElement}
 import scala.scalajs.js
-import dev.myclinic.scala.util.{KanjiDate, DateUtil, HokenRep}
+import dev.myclinic.scala.util.{DateUtil, HokenRep}
+import dev.fujiwara.kanjidate.KanjiDate
 import dev.myclinic.scala.model.*
 import java.time.LocalDate
 import dev.myclinic.scala.webclient.Api

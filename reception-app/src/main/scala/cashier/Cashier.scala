@@ -7,7 +7,8 @@ import dev.fujiwara.domq.{ShowMessage, Icons, Colors, ContextMenu, Table}
 import scala.language.implicitConversions
 import dev.myclinic.scala.web.appbase.{SideMenu, EventPublishers, PrintDialog}
 import dev.myclinic.scala.model.*
-import dev.myclinic.scala.util.{KanjiDate, DateUtil}
+import dev.fujiwara.kanjidate.KanjiDate
+import dev.myclinic.scala.util.DateUtil
 import dev.myclinic.scala.webclient.Api
 import org.scalajs.dom.raw.{HTMLElement, MouseEvent}
 import scala.concurrent.ExecutionContext.Implicits.global

@@ -3,7 +3,7 @@ package dev.myclinic.scala.web.reception.patient
 import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
-import dev.fujiwara.domq.{Icons, Form, ErrorBox, DateInput}
+import dev.fujiwara.domq.{Icons, Form, ErrorBox}
 import scala.language.implicitConversions
 import scala.util.{Success, Failure}
 import org.scalajs.dom.raw.{HTMLElement, HTMLInputElement}
@@ -14,7 +14,8 @@ import dev.myclinic.scala.webclient.Api
 import scala.concurrent.ExecutionContext.Implicits.global
 import dev.myclinic.scala.validator.{PatientValidator, SexValidator}
 import dev.myclinic.scala.model.{Sex, Patient}
-import dev.myclinic.scala.util.KanjiDate.Gengou
+import dev.fujiwara.kanjidate.KanjiDate.Gengou
+import dev.fujiwara.dateinput.DateInput
 
 class NewPatientBlock(onClose: (NewPatientBlock => Unit)):
   val eErrorBox = ErrorBox()
@@ -81,7 +82,7 @@ class NewPatientBlock(onClose: (NewPatientBlock => Unit)):
       PatientValidator.validateSex(
         SexValidator.validateSexInput(eSexInput.getCheckedRadioValue)
       ),
-      PatientValidator.validateBirthday(eBirthdayInput.validate()),
+      PatientValidator.validateBirthday(eBirthdayInput.validate(), _.message),
       PatientValidator.validateAddress(eAddressInput.value),
       PatientValidator.validatePhone(ePhoneInput.value)
     )

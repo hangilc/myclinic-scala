@@ -48,11 +48,11 @@ lazy val root = project
     utilJVM,
     validatorJS,
     validatorJVM,
-    webclient,
+    webclient
   )
   .settings(
     publish := {},
-    publishLocal := {},
+    publishLocal := {}
   )
 
 lazy val model = crossProject(JSPlatform, JVMPlatform)
@@ -81,7 +81,6 @@ lazy val model = crossProject(JSPlatform, JVMPlatform)
     )
   )
 
-
 val modelJS = model.js
 val modelJVM = model.jvm
 
@@ -95,8 +94,8 @@ lazy val db = project
       "org.tpolecat" %% "doobie-core" % doobieVersion,
       "org.tpolecat" %% "doobie-hikari" % doobieVersion,
       "org.http4s" %% "http4s-circe" % http4sVersion,
-      "io.circe" %%% "circe-core" % circeVersion,
-    ),
+      "io.circe" %%% "circe-core" % circeVersion
+    )
   )
 
 lazy val util = crossProject(JSPlatform, JVMPlatform)
@@ -116,7 +115,17 @@ val utilJVM = util.jvm
 
 lazy val server = project
   .in(file("server"))
-  .dependsOn(db, modelJVM, utilJVM, appointAdmin, clinicopJVM, rcpt, javalib, config, drawerJVM)
+  .dependsOn(
+    db,
+    modelJVM,
+    utilJVM,
+    appointAdmin,
+    clinicopJVM,
+    rcpt,
+    javalib,
+    config,
+    drawerJVM
+  )
   .settings(
     name := "server",
     resolvers += Resolver.mavenLocal,
@@ -125,8 +134,8 @@ lazy val server = project
       "org.http4s" %% "http4s-blaze-server" % http4sVersion,
       "org.http4s" %% "http4s-dsl" % http4sVersion,
       "org.http4s" %% "http4s-circe" % http4sVersion,
-      "dev.fujiwara" % "drawer" % "1.0.0-SNAPSHOT",
-    ),
+      "dev.fujiwara" % "drawer" % "1.0.0-SNAPSHOT"
+    )
   )
 
 lazy val webclient = project
@@ -152,7 +161,7 @@ lazy val domq = project
     name := "domq",
     libraryDependencies ++= Seq(
       ("org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion)
-        .cross(CrossVersion.for3Use2_13),
+        .cross(CrossVersion.for3Use2_13)
     )
   )
 
@@ -183,14 +192,26 @@ lazy val appointApp = project
     )
   )
 
-lazy val appointAdmin = project.in(file("appoint-admin"))
+lazy val appointAdmin = project
+  .in(file("appoint-admin"))
   .dependsOn(modelJVM, db, utilJVM, clinicopJVM)
   .settings()
 
 lazy val receptionApp = project
   .in(file("reception-app"))
   .enablePlugins(ScalaJSPlugin)
-  .dependsOn(domq, modelJS, utilJS, webclient, validatorJS, appbase, appUtilJS, drawerJS)
+  .dependsOn(
+    domq,
+    modelJS,
+    utilJS,
+    webclient,
+    validatorJS,
+    appbase,
+    appUtilJS,
+    drawerJS,
+    kanjidateJS,
+    dateinput
+  )
   .settings(
     name := "myclinic-reception",
     Compile / fastLinkJS / scalaJSLinkerOutputDirectory :=
@@ -232,7 +253,7 @@ val holidayjpJVM = holidayjp.jvm
 val holidayjpJS = holidayjp.js
 
 lazy val clinicop = crossProject(JVMPlatform, JSPlatform)
-  .crossType(CrossType.Pure)  
+  .crossType(CrossType.Pure)
   .in(file("clinicop"))
   .dependsOn(util, holidayjp)
   .jsConfigure(_ enablePlugins TzdbPlugin)
@@ -263,7 +284,7 @@ lazy val javalib = project
       "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion,
       "com.fasterxml.jackson.core" % "jackson-annotations" % jacksonVersion,
       "com.fasterxml.jackson.dataformat" % "jackson-dataformat-yaml" % jacksonVersion,
-      "com.fasterxml.jackson.dataformat" % "jackson-dataformat-xml" % jacksonVersion,
+      "com.fasterxml.jackson.dataformat" % "jackson-dataformat-xml" % jacksonVersion
     )
   )
 
@@ -271,11 +292,11 @@ lazy val config = project
   .in(file("config"))
   .dependsOn(javalib, modelJVM)
   .settings(
-    name := "config",
+    name := "config"
   )
 
 lazy val appUtil = crossProject(JVMPlatform, JSPlatform)
-  .crossType(CrossType.Pure)  
+  .crossType(CrossType.Pure)
   .in(file("app-util"))
   .dependsOn(util, model)
   .jsConfigure(_ enablePlugins TzdbPlugin)
@@ -346,6 +367,3 @@ lazy val kanjidate = crossProject(JSPlatform, JVMPlatform)
 
 val kanjidateJVM = kanjidate.jvm
 val kanjidateJS = kanjidate.js
-
-
-

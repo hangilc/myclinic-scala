@@ -45,3 +45,7 @@ class DateInput(gengouList: List[Gengou] = Gengou.list):
   def validate(): DateInputValidator.Result[LocalDate] =
     DateInputValidator.validateDateInput(eInput.value)
 
+  def validateOption(): DateInputValidator.Result[Option[LocalDate]] =
+    if eInput.value.isEmpty then validNec(None)
+    else DateInputValidator.validateDateInput(eInput.value).map(Some(_))
+
