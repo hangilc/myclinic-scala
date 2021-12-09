@@ -123,7 +123,7 @@ class HokenList(patientId: Int, subblocks: HTMLElement):
       val item = HokenItem(updated)
       val newEle = createDisp(item)
       cur match {
-        case Some(c) => c.replaceBy(HokenItem(updated).createSubblock().ele)
+        case Some(c) => c.replaceBy(newEle)
         case None =>
           eDisp.insertInOrderDesc(
             newEle,
@@ -146,7 +146,7 @@ class HokenList(patientId: Int, subblocks: HTMLElement):
       val item = HokenItem(updated)
       val newEle = createDisp(item)
       cur match {
-        case Some(c) => c.replaceBy(HokenItem(updated).createSubblock().ele)
+        case Some(c) => c.replaceBy(newEle)
         case None =>
           eDisp.insertInOrderDesc(
             newEle,
@@ -169,7 +169,7 @@ class HokenList(patientId: Int, subblocks: HTMLElement):
       val item = HokenItem(updated)
       val newEle = createDisp(item)
       cur match {
-        case Some(c) => c.replaceBy(HokenItem(updated).createSubblock().ele)
+        case Some(c) => c.replaceBy(newEle)
         case None =>
           eDisp.insertInOrderDesc(
             newEle,
@@ -197,37 +197,16 @@ class HokenList(patientId: Int, subblocks: HTMLElement):
           e.target.asInstanceOf[HTMLElement].remove()
         }
       ),
-      // oncustomevent[ShahokokuhoUpdated]("shahokokuho-updated") := (
-      //   (e: CustomEvent[ShahokokuhoUpdated]) => {
-      //     val updated = e.detail.updated
-      //     val item = HokenItem(updated)
-      //     e.target.asInstanceOf[HTMLElement].replaceBy(createSubblock(item))
-      //   }
-      // ),
       oncustomevent[KoukikoureiDeleted]("koukikourei-deleted") := (
         (e: CustomEvent[KoukikoureiDeleted]) => {
           e.target.asInstanceOf[HTMLElement].remove()
         }
       ),
-      // oncustomevent[KoukikoureiUpdated]("koukikourei-updated") := (
-      //   (e: CustomEvent[KoukikoureiUpdated]) => {
-      //     val updated = e.detail.updated
-      //     val item = HokenItem(updated)
-      //     e.target.asInstanceOf[HTMLElement].replaceBy(createSubblock(item))
-      //   }
-      // ),
       oncustomevent[KouhiDeleted]("kouhi-deleted") := (
         (e: CustomEvent[KouhiDeleted]) => {
           e.target.asInstanceOf[HTMLElement].remove()
         }
       )
-      // oncustomevent[KouhiUpdated]("kouhi-updated") := (
-      //   (e: CustomEvent[KouhiUpdated]) => {
-      //     val updated = e.detail.updated
-      //     val item = HokenItem(updated)
-      //     e.target.asInstanceOf[HTMLElement].replaceBy(createSubblock(item))
-      //   }
-      // ),
     )(
       Icons.zoomIn(color = "gray", size = "1.2rem")(
         Icons.defaultStyle,

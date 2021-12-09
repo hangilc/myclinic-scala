@@ -3,7 +3,14 @@ package dev.myclinic.scala.web.reception.patient
 import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
-import dev.fujiwara.domq.{Icons, Form, ErrorBox, Modifier, ShowMessage, CustomEvent}
+import dev.fujiwara.domq.{
+  Icons,
+  Form,
+  ErrorBox,
+  Modifier,
+  ShowMessage,
+  CustomEvent
+}
 import scala.language.implicitConversions
 import scala.util.{Success, Failure}
 import org.scalajs.dom.raw.{HTMLElement, HTMLInputElement}
@@ -12,7 +19,6 @@ import dev.myclinic.scala.web.appbase.{EventSubscriber, Selection}
 import org.scalajs.dom.raw.MouseEvent
 import dev.myclinic.scala.webclient.Api
 import scala.concurrent.ExecutionContext.Implicits.global
-import dev.myclinic.scala.web.appbase.DateInput
 import dev.myclinic.scala.model.*
 import java.time.LocalDateTime
 import java.time.LocalDate
@@ -29,7 +35,9 @@ class ShahokokuhoSubblock(shahokokuho: Shahokokuho):
   )
   block.ele(
     cls := s"shahokokuho-${shahokokuho.shahokokuhoId}",
-    oncustomevent[ShahokokuhoUpdated]("shahokokuho-updated") := (onUpdated _),
+    oncustomevent[ShahokokuhoUpdated](
+      "shahokokuho-updated"
+    ) := (onUpdated _)
   )
   disp()
 
@@ -79,7 +87,7 @@ class ShahokokuhoSubblock(shahokokuho: Shahokokuho):
 
   private def doDelete(shahokokuhoId: Int): Unit =
     Api.deleteShahokokuho(shahokokuhoId).onComplete {
-      case Success(_) => block.close()
+      case Success(_)  => block.close()
       case Failure(ex) => ShowMessage.showError(ex.getMessage)
     }
 
@@ -87,4 +95,3 @@ class ShahokokuhoSubblock(shahokokuho: Shahokokuho):
     val updated = event.detail.updated
     val newSub = ShahokokuhoSubblock(updated)
     block.ele.replaceBy(newSub.block.ele)
-

@@ -3,7 +3,7 @@ package dev.myclinic.scala.web.reception.patient
 import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
-import dev.fujiwara.domq.{Icons, Form, ErrorBox, Modifier, ShowMessage}
+import dev.fujiwara.domq.{Icons, Form, ErrorBox, Modifier, ShowMessage, CustomEvent}
 import scala.language.implicitConversions
 import scala.util.{Success, Failure}
 import org.scalajs.dom.raw.{HTMLElement, HTMLInputElement}
@@ -12,7 +12,6 @@ import dev.myclinic.scala.web.appbase.{EventSubscriber, Selection}
 import org.scalajs.dom.raw.MouseEvent
 import dev.myclinic.scala.webclient.Api
 import scala.concurrent.ExecutionContext.Implicits.global
-import dev.myclinic.scala.web.appbase.DateInput
 import dev.myclinic.scala.model.*
 import java.time.LocalDateTime
 import java.time.LocalDate
@@ -26,6 +25,12 @@ class KoukikoureiSubblock(koukikourei: Koukikourei):
     "後期高齢",
     eContent,
     eCommands
+  )
+  block.ele(
+    cls := s"koukikourei-${koukikourei.koukikoureiId}",
+    oncustomevent[KoukikoureiUpdated](
+      "koukikourei-updated"
+    ) := (onUpdated _)
   )
   disp()
 
@@ -78,3 +83,8 @@ class KoukikoureiSubblock(koukikourei: Koukikourei):
       case Success(_) => block.close()
       case Failure(ex) => ShowMessage.showError(ex.getMessage)
     }
+
+  private def onUpdated(event: CustomEvent[KoukikoureiUpdated]): Unit =
+    val updated = event.detail.updated
+    val newSub = KoukikoureiSubblock(updated)
+    block.ele.replaceBy(newSub.block.ele)

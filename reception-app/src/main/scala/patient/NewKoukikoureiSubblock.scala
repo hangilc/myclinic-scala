@@ -12,7 +12,6 @@ import dev.myclinic.scala.web.appbase.{EventSubscriber, Selection}
 import org.scalajs.dom.raw.MouseEvent
 import dev.myclinic.scala.webclient.Api
 import scala.concurrent.ExecutionContext.Implicits.global
-import dev.myclinic.scala.web.appbase.DateInput
 import dev.myclinic.scala.model.*
 import java.time.LocalDateTime
 import java.time.LocalDate

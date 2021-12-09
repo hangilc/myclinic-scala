@@ -3,14 +3,16 @@ package dev.myclinic.scala.web.reception.patient
 import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
-import dev.fujiwara.domq.{Icons, Form, ErrorBox, Modifier, DateInput}
+import dev.fujiwara.domq.{Icons, Form, ErrorBox, Modifier}
 import scala.language.implicitConversions
 import org.scalajs.dom.raw.{HTMLElement, HTMLInputElement}
-import dev.myclinic.scala.util.{KanjiDate, DateUtil}
+import dev.myclinic.scala.util.DateUtil
 import dev.myclinic.scala.model.*
 import dev.myclinic.scala.web.appbase.validator.ShahokokuhoValidator
 import dev.myclinic.scala.web.appbase.validator.ShahokokuhoValidator.*
 import java.time.LocalDate
+import dev.fujiwara.dateinput.DateInput
+import dev.fujiwara.kanjidate.KanjiDate
 
 class ShahokokuhoForm:
   val eHokenshaBangou = inputText()
@@ -61,8 +63,8 @@ class ShahokokuhoForm:
       validateHihokenshaKigou(eHihokenshaKigou.value),
       validateHihokenshaBangou(eHihokenshaBangou.value),
       validateHonnin(eHonninForm.getCheckedRadioValue),
-      validateValidFrom(eValidFrom.eInput.value),
-      validateValidUpto(eValidUpto.eInput.value),
+      validateValidFrom(eValidFrom.validate(), _.message),
+      validateValidUpto(eValidUpto.validateOption().map(ValidUpto(_)), _.message),
       validateKourei(eKoureiForm.getCheckedRadioValue),
       validateEdaban(eEdaban.value)
     )
@@ -75,8 +77,8 @@ class ShahokokuhoForm:
       validateHihokenshaKigou(eHihokenshaKigou.value),
       validateHihokenshaBangou(eHihokenshaBangou.value),
       validateHonnin(eHonninForm.getCheckedRadioValue),
-      validateValidFrom(eValidFrom.eInput.value),
-      validateValidUpto(eValidUpto.eInput.value),
+      validateValidFrom(eValidFrom.validate(), _.message),
+      validateValidUpto(eValidUpto.validateOption().map(ValidUpto(_)), _.message),
       validateKourei(eKoureiForm.getCheckedRadioValue),
       validateEdaban(eEdaban.value)
     )

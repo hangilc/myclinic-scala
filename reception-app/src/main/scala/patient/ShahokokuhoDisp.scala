@@ -6,9 +6,10 @@ import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.{Icons, Form, ErrorBox, Modifier}
 import scala.language.implicitConversions
 import org.scalajs.dom.raw.{HTMLElement, HTMLInputElement}
-import dev.myclinic.scala.util.{KanjiDate, DateUtil}
+import dev.myclinic.scala.util.DateUtil
 import dev.myclinic.scala.model.*
 import java.time.LocalDate
+import dev.fujiwara.kanjidate.KanjiDate
 
 class ShahokokuhoDisp(shahokokuho: Shahokokuho):
   val ele = Form.rows(
