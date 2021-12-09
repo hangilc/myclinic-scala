@@ -35,7 +35,7 @@ class DatePicker(
       a("年", cls := "domq-nen-label", onclick := (advanceYear _)),
       eMonthSelect(
         cls := "domq-month-select",
-        onclick := (onNenOrMonthChange _)
+        onchange := (onNenOrMonthChange _)
       ).setChildren(
         (1 to 12).toList.map(i => option(i.toString, value := i.toString))
       ),
@@ -59,7 +59,6 @@ class DatePicker(
           eGengouSelect.setSelectValue(w.gengou.name)
           setupNenSelect(w.gengou)
         ensureNen(w.nen)
-        println(("set", w))
         eNenSelect.setSelectValue(w.nen.toString)
         eMonthSelect.setSelectValue(month.toString)
         stuffDates(year, month)
