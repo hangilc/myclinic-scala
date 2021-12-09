@@ -49,35 +49,21 @@ object KouhiValidator:
   def validatePatientId(patientId: Int): Result[Int] =
     condNec(patientId > 0, patientId, NonPositivePatientId)
 
-  def validateFutanshaBangou(src: String): Result[String] =
+  def validateFutanshaBangou(src: String): Result[Int] =
     Try(src.toInt) match {
       case Success(i) =>
-        if i > 0 then validNec(src)
+        if i > 0 then validNec(i)
         else invalidNec(NonPositiveFutanshaBangou)
       case Failure(_) => invalidNec(NonIntegerFutanshaBangou)
     }
 
-  def validateJukyuushaBangou(src: String): Result[String] =
+  def validateJukyuushaBangou(src: String): Result[Int] =
     Try(src.toInt) match {
       case Success(i) =>
-        if i > 0 then validNec(src)
+        if i > 0 then validNec(i)
         else invalidNec(NonPositiveJukyuushaBangou)
       case Failure(_) => invalidNec(NonIntegerJukyuushaBangou)
     }
-
-  def validateFutanWari(srcOpt: Option[String]): Result[Int] =
-    val src = srcOpt.getOrElse("")
-    condNec(!(src == null || src.isEmpty), src, InvalidFutanWari)
-      .andThen(str => {
-        Try(str.toInt) match {
-          case Success(i) => validNec(i)
-          case Failure(_) => invalidNec(InvalidFutanWari)
-        }
-      })
-      .andThen {
-        case i @ (1 | 2 | 3) => validNec(i)
-        case _               => invalidNec(InvalidFutanWari)
-      }
 
   def validateValidFrom[E](
       result: ValidatedNec[E, LocalDate],
@@ -100,26 +86,24 @@ object KouhiValidator:
   def validateKouhi(
       kouhiIdResult: Result[Int],
       patientIdResult: Result[Int],
-      futanshaBangouResult: Result[String],
-      jukyuushaBangouResult: Result[String],
-      futanWariResult: Result[Int],
+      futanshaBangouResult: Result[Int],
+      jukyuushaBangouResult: Result[Int],
       validFromResult: Result[LocalDate],
       validUptoResult: Result[ValidUpto]
   ): Result[Kouhi] =
     (
       kouhiIdResult,
-      patientIdResult,
       futanshaBangouResult,
       jukyuushaBangouResult,
-      futanWariResult,
       validFromResult,
-      validUptoResult
+      validUptoResult,
+      patientIdResult
     ).mapN(Kouhi.apply)
 
   def validateKouhiForEnter(
       patientIdResult: Result[Int],
-      futanshaBangouResult: Result[String],
-      jukyuushaBangouResult: Result[String],
+      futanshaBangouResult: Result[Int],
+      jukyuushaBangouResult: Result[Int],
       futanWariResult: Result[Int],
       validFromResult: Result[LocalDate],
       validUptoResult: Result[ValidUpto]
@@ -129,7 +113,6 @@ object KouhiValidator:
       patientIdResult,
       futanshaBangouResult,
       jukyuushaBangouResult,
-      futanWariResult,
       validFromResult,
       validUptoResult
     )
@@ -137,9 +120,8 @@ object KouhiValidator:
   def validateKouhiForUpdate(
       kouhiId: Int,
       patientIdResult: Result[Int],
-      futanshaBangouResult: Result[String],
-      jukyuushaBangouResult: Result[String],
-      futanWariResult: Result[Int],
+      futanshaBangouResult: Result[Int],
+      jukyuushaBangouResult: Result[Int],
       validFromResult: Result[LocalDate],
       validUptoResult: Result[ValidUpto]
   ): Result[Kouhi] =
@@ -148,7 +130,6 @@ object KouhiValidator:
       patientIdResult,
       futanshaBangouResult,
       jukyuushaBangouResult,
-      futanWariResult,
       validFromResult,
       validUptoResult
     )

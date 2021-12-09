@@ -10,8 +10,8 @@ import dev.fujiwara.dateinput.DateInput
 import org.scalajs.dom.raw.{HTMLElement, HTMLInputElement}
 import dev.myclinic.scala.util.DateUtil
 import dev.myclinic.scala.model.*
-import dev.myclinic.scala.appbase.KouhiValidator
-import dev.myclinic.scala.appbase.KouhiValidator.*
+import dev.myclinic.scala.web.appbase.validator.KouhiValidator
+import dev.myclinic.scala.web.appbase.validator.KouhiValidator.*
 import java.time.LocalDate
 
 class KouhiForm:
