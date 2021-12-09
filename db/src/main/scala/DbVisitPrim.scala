@@ -58,6 +58,9 @@ object DbVisitPrim:
 
   def countByKouhi(kouhiId: Int): ConnectionIO[Int] =
     sql"""
-      select count(*) from visit where kouhi_id = ${kouhiId}
+      select count(*) from visit where 
+        kouhi_1_id = ${kouhiId} or
+        kouhi_2_id = ${kouhiId} or
+        kouhi_3_id = ${kouhiId}
     """.query[Int].unique
      

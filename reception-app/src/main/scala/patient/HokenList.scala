@@ -320,8 +320,4 @@ class KouhiHokenItem(kouhi: Kouhi) extends HokenItem:
   def validFrom: LocalDate = kouhi.validFrom
   def validUpto: Option[LocalDate] = kouhi.validUptoOption
   def key: String = s"kouhi-${kouhi.kouhiId}"
-  def createSubblock(): Subblock = Subblock(
-    "公費",
-    div(),
-    div()
-  )
+  def createSubblock(): Subblock = KouhiSubblock(kouhi).block
