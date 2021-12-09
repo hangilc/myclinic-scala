@@ -28,8 +28,6 @@ object KoukikoureiValidator:
     def message: String = "被保険者番号が正の整数でありません。"
   object InvalidFutanWari extends KoukikoureiError:
     def message: String = "Invalid futan-wari value (should be 1, 2, or 3"
-  object HihokenshaKigouBangouError extends KoukikoureiError:
-    def message: String = "被保険者記号と番号がどちらも空白です。"
   case class InvalidValidFrom[E](err: NonEmptyChain[E], messageOf: E => String)
       extends KoukikoureiError:
     def message: String = err.toList.map("（期限開始）" + messageOf(_)).mkString("\n")

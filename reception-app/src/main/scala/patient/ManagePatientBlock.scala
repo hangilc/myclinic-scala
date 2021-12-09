@@ -54,6 +54,5 @@ class ManagePatientBlock(patient: Patient, onClose: ManagePatientBlock => Unit):
     eSubblocks.prepend(b.block.ele)
 
   private def onNewKouhi(): Unit =
-    ???
-    // val b = new NewKouhiSubblock(patient.patientId)
-    // eSubblocks.prepend(b.block.ele)
+    val b = new NewKouhiSubblock(patient.patientId)
+    eSubblocks.prepend(b.block.ele)

@@ -10,47 +10,39 @@ import dev.fujiwara.dateinput.DateInput
 import org.scalajs.dom.raw.{HTMLElement, HTMLInputElement}
 import dev.myclinic.scala.util.DateUtil
 import dev.myclinic.scala.model.*
+import dev.myclinic.scala.appbase.KouhiValidator
+import dev.myclinic.scala.appbase.KouhiValidator.*
 import java.time.LocalDate
 
-class KoukikoureiForm:
-  val eHokenshaBangou = inputText()
-  val eHihokenshaBangou = inputText()
-  val eFutanWariForm = form()
+class KouhiForm:
+  val eFutanshaBangou = inputText()
+  val eJukyuushaBangou = inputText()
   val eValidFrom = DateInput()
   val eValidUpto = DateInput()
   val ele = Form.rows(
-    span("保険者番号") -> eHokenshaBangou(
-      cls := "hokensha-bangou-input"
+    span("負担者番号") -> eFutanshaBangou(
+      cls := "futansha-bangou-input"
     ),
-    span("被保険者番号") -> eHihokenshaBangou,
-    span("負担割") -> eFutanWariForm(
-      radio("futanwari", "1")(checked := true),
-      "１割",
-      radio("futanwari", "2"),
-      "２割",
-      radio("futanwari", "3"),
-      "３割"
-    ),
+    span("受給者番号") -> eJukyuushaBangou,
     span("期限開始") -> eValidFrom.ele,
     span("期限終了") -> eValidUpto.ele
   )
-  ele(cls := "koukikourei-form")
+  ele(cls := "kouhi-form")
 
-  def setData(data: Koukikourei): Unit =
-    eHokenshaBangou.value = data.hokenshaBangou.toString
-    eHihokenshaBangou.value = data.hihokenshaBangou
-    eFutanWariForm.setRadioGroupValue(data.futanWari.toString)
+  def setData(data: Kouhi): Unit =
+    eFutanshaBangou.value = data.futansha.toString
+    eJukyuushaBangou.value = data.jukyuusha.toString
     eValidFrom.eInput.value = KanjiDate.dateToKanji(data.validFrom)
     eValidUpto.eInput.value =
       data.validUpto.value.fold("")(KanjiDate.dateToKanji(_))
 
   def validateForEnter(
       patientId: Int
-  ): KoukikoureiValidator.Result[Koukikourei] =
-    KoukikoureiValidator.validateKoukikoureiForEnter(
+  ): KouhiValidator.Result[Kouhi] =
+    KouhiValidator.validateKouhiForEnter(
       validatePatientId(patientId),
-      validateHokenshaBangou(eHokenshaBangou.value),
-      validateHihokenshaBangou(eHihokenshaBangou.value),
+      validateFutanshaBangou(eFutanshaBangou.value),
+      validateJukyuushaBangou(eJukyuushaBangou.value),
       validateFutanWari(eFutanWariForm.getCheckedRadioValue),
       validateValidFrom(eValidFrom.validate(), _.message),
       validateValidUpto(
@@ -60,14 +52,14 @@ class KoukikoureiForm:
     )
 
   def validateForUpdate(
-      koukikoureiId: Int,
+      kouhiId: Int,
       patientId: Int
-  ): KoukikoureiValidator.Result[Koukikourei] =
-    KoukikoureiValidator.validateKoukikoureiForUpdate(
-      koukikoureiId,
+  ): KouhiValidator.Result[Kouhi] =
+    KouhiValidator.validateKouhiForUpdate(
+      kouhiId,
       validatePatientId(patientId),
-      validateHokenshaBangou(eHokenshaBangou.value),
-      validateHihokenshaBangou(eHihokenshaBangou.value),
+      validateFutanshaBangou(eFutanshaBangou.value),
+      validateJukyuushaBangou(eJukyuushaBangou.value),
       validateFutanWari(eFutanWariForm.getCheckedRadioValue),
       validateValidFrom(eValidFrom.validate(), _.message),
       validateValidUpto(
