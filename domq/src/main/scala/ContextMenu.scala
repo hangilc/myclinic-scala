@@ -10,7 +10,7 @@ import org.scalajs.dom.{document, window}
 import org.scalajs.dom.raw.ClientRect
 import org.scalajs.dom.raw.Event
 
-class ContextMenu(zIndex: Int):
+class ContextMenu(zIndex: Int = Modal.zIndexDefault):
   val menu: HTMLElement = makeEmptyMenu()
   val screen: HTMLElement = makeScreen()
 
@@ -38,6 +38,20 @@ class ContextMenu(zIndex: Int):
       style.zIndex = (zIndex - 1).toString
     }))
 
+  def calcPlacement(
+      clickX: Double,
+      clickY: Double,
+      rect: ClientRect,
+      windowWidth: Double,
+      windowHeight: Double
+  ): (Double, Double) = ContextMenu.calcPlacement(
+    clickX,
+    clickY,
+    rect,
+    windowWidth,
+    windowHeight
+  )
+
   def open(event: MouseEvent): Unit =
     document.body(
       screen(onclick := ((e: MouseEvent) => {
@@ -47,13 +61,20 @@ class ContextMenu(zIndex: Int):
       })),
       menu
     )
-    val (x, y) = ContextMenu.calcPlacement(
+    val (x, y) = calcPlacement(
       event.clientX,
       event.clientY,
       menu.getClientRects()(0),
       window.innerWidth,
       window.innerHeight
     )
+    // val (x, y) = ContextMenu.calcPlacement(
+    //   event.clientX,
+    //   event.clientY,
+    //   menu.getClientRects()(0),
+    //   window.innerWidth,
+    //   window.innerHeight
+    // )
     val xx = (x + window.scrollX).toInt
     val yy = (y + window.scrollY).toInt
     menu(css(style => {
