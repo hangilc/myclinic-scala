@@ -33,6 +33,13 @@ object JsMain:
       case Failure(ex) => ShowMessage.showError(ex.getMessage)
     }
     ui.invoke("メイン")
+    {
+      import dev.fujiwara.domq.FloatingElement
+      val f = FloatingElement(div("hello"))
+      f.left = "0"
+      f.bottom = "0"
+      document.body(f.ele)
+    }
 
   def createUI(): MainUI =
     new MainUI:
