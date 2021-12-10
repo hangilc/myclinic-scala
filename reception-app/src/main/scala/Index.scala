@@ -34,11 +34,15 @@ object JsMain:
     }
     ui.invoke("メイン")
     {
-      import dev.fujiwara.domq.FloatingElement
+      import dev.fujiwara.domq.{FloatingElement, Geometry}
+      import dev.fujiwara.domq.Geometry.*
+      import org.scalajs.dom.raw.{HTMLElement, MouseEvent}
+      val btn: HTMLElement = button("BUTTON")
+      document.body(div(btn))
       val f = FloatingElement(div("hello"))
-      f.left = "0"
-      f.bottom = "0"
-      document.body(f.ele)
+      f.left = Geometry.getDocCoordX(btn, HPos.Left)
+      f.top = Geometry.getDocCoordY(btn, VPos.Bottom)
+      btn(onclick := ((e: MouseEvent) => f.toggle()))
     }
 
   def createUI(): MainUI =
