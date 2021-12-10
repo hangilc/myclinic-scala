@@ -356,12 +356,13 @@ object Icons:
     )
 
   private def makeIcon(
-      size: String,
+      width: String,
+      height: String,
       strokeColor: String,
       ds: List[String],
-      viewBox: String = "0 0 24 24",
-      strokeWidth: String = "2",
-      fillColor: String = "none"
+      viewBox: String,
+      strokeWidth: String,
+      fillColor: String
   ): HTMLElement =
     val ns = "http://www.w3.org/2000/svg"
     val svg = document.createElementNS(ns, "svg").asInstanceOf[HTMLElement]
@@ -377,7 +378,16 @@ object Icons:
       )
     svg(
       attr("viewBox") := viewBox,
-      css(style => { style.height = size; style.width = size }),
+      css(style => { style.height = height; style.width = width }),
       attr("fill") := fillColor,
       attr("stroke") := strokeColor
     )(paths: _*)
+
+  private def makeIcon(
+      size: String,
+      strokeColor: String,
+      ds: List[String],
+      viewBox: String = "0 0 24 24",
+      strokeWidth: String = "2",
+      fillColor: String = "none"
+  ): HTMLElement = makeIcon(size, size, strokeColor, ds, viewBox, strokeWidth, fillColor)
