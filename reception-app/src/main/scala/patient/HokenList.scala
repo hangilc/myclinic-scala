@@ -208,7 +208,7 @@ class HokenList(patientId: Int, subblocks: HTMLElement):
         }
       )
     )(
-      Icons.zoomIn(color = "gray", size = "1.2rem")(
+      Icons.zoomIn(
         Icons.defaultStyle,
         cls := "zoom-in-icon",
         onclick := (() => {

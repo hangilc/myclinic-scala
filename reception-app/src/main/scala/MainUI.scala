@@ -81,10 +81,14 @@ abstract class MainUI(using publishers: EventPublishers):
       lastHotlineAppEventId = id
 
   private def downTriangle(): HTMLElement =
-    Icons.downTriangleFlat(size = "0.6rem", color = Colors.primary)(
+    Icons.downTriangleFlat(
       Icons.defaultStaticStyle,
       ml := "0.2rem"
     )
+    // Icons.downTriangleFlat(size = "0.6rem", color = Colors.primary)(
+    //   Icons.defaultStaticStyle,
+    //   ml := "0.2rem"
+    // )
 
   private def insertIntoHotlineInput(s: String): Unit =
     val start = hotlineInput.selectionStart

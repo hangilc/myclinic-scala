@@ -10,7 +10,7 @@ import scala.language.implicitConversions
 class Modal(title: String, content: HTMLElement, val zIndex: Int = Modal.zIndexDefault):
   val backdrop = div(Modal.modalBackdrop(zIndex - 1))
   val auxMenu: HTMLElement = span()
-  val closeIcon = Icons.x(color = "gray")
+  val closeIcon = Icons.x
   val workarea = content
   var onCloseCallbacks: List[Boolean => Unit] = List.empty
   val dialog = div(Modal.modalContent(zIndex), cls := "domq-modal")(

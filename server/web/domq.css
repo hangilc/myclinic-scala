@@ -54,3 +54,34 @@
   background-color: #ffa700;
 }
 
+/* Icons *****************************************************************/
+
+.domq-icon {
+  width: 1.2rem;
+  height: 1.2rem;
+  stroke: gray;
+  stroke-width: 2;
+  fill: none;
+  vertical-align: middle;
+}
+
+/* Pull Down *************************************************************/
+
+.domq-pull-down-arrow {
+  width: 0.7rem;
+  height: 0.7rem;
+  margin-left: 0.2rem;
+  position: relative;
+  top: 0.08rem;
+  fill: #989898;
+}
+
+.domq-icon-circle {
+  stroke-width: 20;
+}
+
+.domq-icon-filled {
+  fill: gray;
+  stroke: none;
+}
+

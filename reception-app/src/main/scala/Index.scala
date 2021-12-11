@@ -26,24 +26,45 @@ object JsMain:
 
   @JSExport
   def main(isAdmin: Boolean): Unit =
-    document.body(ui.ele)
-    setupHotline()
-    ReceptionEventFetcher.start().onComplete {
-      case Success(_)  => ()
-      case Failure(ex) => ShowMessage.showError(ex.getMessage)
-    }
-    ui.invoke("メイン")
+    // document.body(ui.ele)
+    // setupHotline()
+    // ReceptionEventFetcher.start().onComplete {
+    //   case Success(_)  => ()
+    //   case Failure(ex) => ShowMessage.showError(ex.getMessage)
+    // }
+//    ui.invoke("メイン")
     {
-      import dev.fujiwara.domq.{FloatingElement, Geometry}
+      import dev.fujiwara.domq.{FloatingElement, Geometry, PullDown, Icons}
       import dev.fujiwara.domq.Geometry.*
       import org.scalajs.dom.raw.{HTMLElement, MouseEvent}
-      val btn: HTMLElement = button("BUTTON")
-      document.body(div(btn))
-      val f = FloatingElement(div("hello", border := "1px solid orange"))
-      val btnRect = Geometry.getRect(btn)
-      val p = btnRect.leftBottom.shiftY(4)
-      f.leftTop = p
-      btn(onclick := ((e: MouseEvent) => f.toggle()))
+      val btn: HTMLElement = PullDown("患者設定", div("CONTENT")).ele
+      document.body(
+        div(
+          btn,
+          Icons.calendar,
+          Icons.cog,
+          Icons.check,
+          Icons.checkCircle,
+          Icons.circle,
+          Icons.circleFilled,
+          Icons.dotsHorizontal,
+          Icons.dotsVertical,
+          Icons.downTriangle,
+          Icons.downTriangleFlat,
+          Icons.menu,
+          Icons.menuAlt4,
+          Icons.pencil,
+          Icons.pencilAlt,
+          Icons.plusCircle,
+          Icons.refresh,
+          Icons.search,
+          Icons.trash,
+          Icons.x,
+          Icons.xCircle,
+          Icons.zoomIn,
+          Icons.zoomOut,
+        )
+      )
     }
 
   def createUI(): MainUI =

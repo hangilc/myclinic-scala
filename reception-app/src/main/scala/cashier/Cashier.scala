@@ -26,7 +26,7 @@ class Cashier(using publishers: EventPublishers) extends SideMenuService:
   val ele: HTMLElement = div(
     div(
       h1("受付患者", display := "inline-block"),
-      Icons.menu(size = "1.2rem", color = "gray")(
+      Icons.menu(
         cssFloat := "right",
         onclick := (onMenu _),
         cursor := "pointer"

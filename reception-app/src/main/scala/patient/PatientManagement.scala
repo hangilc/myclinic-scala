@@ -20,7 +20,7 @@ class PatientManagement() extends SideMenuService:
   val ele: HTMLElement = div(cls := "patient-management")(
     div(
       h1("受付管理", display := "inline-block"),
-      Icons.menu(size = "1.2rem", color = "gray")(
+      Icons.menu(
         cssFloat := "right",
         onclick := (onMenu _),
         ml := "0.5rem",

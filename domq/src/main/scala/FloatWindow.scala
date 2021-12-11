@@ -39,7 +39,7 @@ case class FloatWindow(
         style.setProperty("justify-content", "space-between")
       }))(
         title,
-        Icons.x(size = "1rem")(
+        Icons.x(
           css(style => style.cssFloat = "right"),
           Icons.defaultStyle
         )(

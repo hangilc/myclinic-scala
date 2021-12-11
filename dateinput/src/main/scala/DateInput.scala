@@ -26,7 +26,7 @@ class DateInput(gengouList: List[Gengou] = Gengou.list):
   val eInput: HTMLInputElement = inputText(placeholder := "平成３０年１２月２３日")
   val ele: HTMLElement = div(cls := "domq-date-input-wrapper")(
     eInput(cls := "domq-date-input"),
-    Icons.calendar(color = "gray")(
+    Icons.calendar(
       Icons.defaultStyle,
       onclick := (openPicker _)
     )

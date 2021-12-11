@@ -15,7 +15,7 @@ case class ErrorBox():
   }))(
     eMessage,
     div(
-      Icons.xCircle(size = "1.2rem", color = "red")(
+      Icons.xCircle(
         css(style => style.cssFloat = "right"),
         onclick := (hide _)
       )
