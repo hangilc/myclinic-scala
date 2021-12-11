@@ -39,9 +39,10 @@ object JsMain:
       import org.scalajs.dom.raw.{HTMLElement, MouseEvent}
       val btn: HTMLElement = button("BUTTON")
       document.body(div(btn))
-      val f = FloatingElement(div("hello"))
-      f.left = Geometry.getDocCoordX(btn, HPos.Left)
-      f.top = Geometry.getDocCoordY(btn, VPos.Bottom)
+      val f = FloatingElement(div("hello", border := "1px solid orange"))
+      val btnRect = Geometry.getRect(btn)
+      val p = btnRect.leftBottom.shiftY(4)
+      f.leftTop = p
       btn(onclick := ((e: MouseEvent) => f.toggle()))
     }
 

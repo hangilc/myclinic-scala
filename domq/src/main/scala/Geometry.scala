@@ -54,3 +54,15 @@ object Geometry:
 
   def getRect(ele: HTMLElement): DocRect =
     DocRect.fromElement(ele)
+
+  def setElementLeft(ele: HTMLElement, value: DocCoord): Unit =
+    ele.style.left = s"${value}px"
+
+  def setElementTop(ele: HTMLElement, value: DocCoord): Unit =
+    ele.style.top = s"${value}px"
+
+  def setElementRight(ele: HTMLElement, value: DocCoord): Unit =
+    ele.style.right = s"${value}px"
+
+  def setElementBottom(ele: HTMLElement, value: DocCoord): Unit =
+    ele.style.bottom = s"${value}px"
