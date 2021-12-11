@@ -4,6 +4,7 @@ import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.{ShowMessage, Icons, Colors, ContextMenu}
+import dev.fujiwara.domq.PullDown.pullDownLink
 import scala.language.implicitConversions
 import dev.myclinic.scala.web.appbase.{SideMenu, EventPublishers}
 import dev.myclinic.scala.model.{HotlineCreated, Patient}
@@ -56,11 +57,13 @@ abstract class MainUI(using publishers: EventPublishers):
               })
             ),
             button("Beep", onclick := (() => { Api.beep(); () })),
-            a(
-              span("常用", downTriangle()),
-              onclick := (doRegular _)
-            ),
-            a("患者", downTriangle(), onclick := (doPatients _))
+            pullDownLink("常用", div("MENU")),
+            // a(
+            //   span("常用", downTriangle()),
+            //   onclick := (doRegular _)
+            // ),
+            pullDownLink("患者", div("MENU"))
+            // a("患者", downTriangle(), onclick := (doPatients _))
           ),
           hotlineMessages(
             id := "hotline-messages",
@@ -85,10 +88,6 @@ abstract class MainUI(using publishers: EventPublishers):
       Icons.defaultStaticStyle,
       ml := "0.2rem"
     )
-    // Icons.downTriangleFlat(size = "0.6rem", color = Colors.primary)(
-    //   Icons.defaultStaticStyle,
-    //   ml := "0.2rem"
-    // )
 
   private def insertIntoHotlineInput(s: String): Unit =
     val start = hotlineInput.selectionStart

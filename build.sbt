@@ -39,6 +39,8 @@ lazy val root = project
     holidayjpJS,
     holidayjpJVM,
     javalib,
+    kanjidateJS,
+    kanjidateJVM,
     modelJS,
     modelJVM,
     rcpt,
@@ -67,12 +69,12 @@ lazy val model = crossProject(JSPlatform, JVMPlatform)
       "io.circe" %%% "circe-parser" % circeVersion
     )
   )
-  .jsConfigure(_ enablePlugins TzdbPlugin)
+//  .jsConfigure(_ enablePlugins TzdbPlugin)
   .jsSettings(
     scalaJSUseMainModuleInitializer := false,
     zonesFilter := { (z: String) => z == "Asia/Tokyo" },
     libraryDependencies ++= Seq(
-      "io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion
+//      "io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion
     )
   )
   .jvmSettings(
@@ -226,7 +228,7 @@ lazy val validator = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Pure)
   .in(file("validator"))
   .dependsOn(util, model)
-  .jsConfigure(_ enablePlugins TzdbPlugin)
+//  .jsConfigure(_ enablePlugins TzdbPlugin)
   .settings(
     libraryDependencies ++= Seq(
       "org.typelevel" %%% "cats-core" % catsVersion
@@ -240,12 +242,12 @@ lazy val holidayjp = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Pure)
   .in(file("holidayjp"))
   .dependsOn(util)
-  .jsConfigure(_ enablePlugins TzdbPlugin)
+//  .jsConfigure(_ enablePlugins TzdbPlugin)
   .jsSettings(
     scalaJSUseMainModuleInitializer := false,
     zonesFilter := { (z: String) => z == "Asia/Tokyo" },
     libraryDependencies ++= Seq(
-      "io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion
+//      "io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion
     )
   )
 
@@ -256,12 +258,12 @@ lazy val clinicop = crossProject(JVMPlatform, JSPlatform)
   .crossType(CrossType.Pure)
   .in(file("clinicop"))
   .dependsOn(util, holidayjp)
-  .jsConfigure(_ enablePlugins TzdbPlugin)
+//  .jsConfigure(_ enablePlugins TzdbPlugin)
   .jsSettings(
     scalaJSUseMainModuleInitializer := false,
     zonesFilter := { (z: String) => z == "Asia/Tokyo" },
     libraryDependencies ++= Seq(
-      "io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion
+//      "io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion
     )
   )
 
@@ -299,12 +301,12 @@ lazy val appUtil = crossProject(JVMPlatform, JSPlatform)
   .crossType(CrossType.Pure)
   .in(file("app-util"))
   .dependsOn(util, model)
-  .jsConfigure(_ enablePlugins TzdbPlugin)
+//  .jsConfigure(_ enablePlugins TzdbPlugin)
   .jsSettings(
     scalaJSUseMainModuleInitializer := false,
     zonesFilter := { (z: String) => z == "Asia/Tokyo" },
     libraryDependencies ++= Seq(
-      "io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion
+//      "io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion
     )
   )
 
