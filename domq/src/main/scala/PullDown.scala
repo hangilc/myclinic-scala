@@ -4,7 +4,7 @@ import org.scalajs.dom.raw.{HTMLElement}
 import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
-import dev.fujiwara.domq.{Geometry, Icons, FloatingElement}
+import dev.fujiwara.domq.{Geometry, Icons, FloatingElement, Screen}
 import scala.language.implicitConversions
 
 object PullDown:
@@ -28,6 +28,10 @@ object PullDown:
     val p = aRect.leftBottom.shiftY(4)
     f.leftTop = p
     f
+
+  private def makeScreen(): HTMLElement =
+    val zIndex = ZIndexManager.alloc()
+    Screen.create(zIndex)
 
 // val btn: HTMLElement = button(cls := "domq-pull-down-button")(
 //   label,

@@ -74,6 +74,20 @@
   stroke: none;
 }
 
+/* Screen ****************************************************************/
+
+.domq-screen {      
+  display: "block";
+  position: "fixed";
+  left: "0";
+  top: "0";
+  right: "0";
+  bottom: "0";
+  background-color: "#5a6268";
+  opacity: "0";
+  overflow-y: "auto";
+}
+
 /* Pull Down *************************************************************/
 
 .domq-pull-down.link {
@@ -94,10 +108,7 @@
   fill: #989898;
 }
 
-/* .domq-pull-down svg {
-  width: 0.8rem;
-  height: 0.8rem;
-  margin-left: 0.2rem;
-  position: relative;
-  top: 0;
-} */
+.domq-screen .domq-pull-down-screen {
+  background-color: transparent;
+  opacity: 1;
+}

@@ -7,7 +7,10 @@ import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
 import scala.language.implicitConversions
 
-class Screen:
-  val ele: HTMLElement = div(
-    cls := "domq-screen"
+object Screen:
+  def create(zIndex: Int) = div(
+    cls := "domq-screen",
+    css(style => {
+      style.zIndex = zIndex.toString
+    })
   )
