@@ -21,18 +21,28 @@ import cats.data.Validated.Valid
 import cats.data.Validated.Invalid
 import org.scalajs.dom.raw.MouseEvent
 import org.scalajs.dom.raw.KeyboardEvent
+import org.scalajs.dom.raw.Event
 
-class DateInput(gengouList: List[Gengou] = Gengou.list):
+class DateInput(gengouList: List[Gengou] = Gengou.list,
+    onEnter: LocalDate => Unit = _ => (),
+    onChange: LocalDate => Unit = _ => ()):
   val eInput: HTMLInputElement = inputText(placeholder := "平成３０年１２月２３日")
   val ele: HTMLElement = div(cls := "domq-date-input-wrapper")(
-    eInput(cls := "domq-date-input"),
+    form(eInput(cls := "domq-date-input"), onsubmit := (onSubmit _)),
     Icons.calendar(
       Icons.defaultStyle,
       onclick := (openPicker _)
     )
   )
+
+  private def onSubmit(): Unit = {
+    validate() match {
+      case Valid(d) => onEnter(d)
+      case Invalid(_) => ()
+    }
+  }
+
   def setDate(date: LocalDate): Unit =
-    println(("date", date, KanjiDate.dateToKanji(date)))
     eInput(value := KanjiDate.dateToKanji(date))
 
   def openPicker(event: MouseEvent): Unit =
@@ -40,7 +50,10 @@ class DateInput(gengouList: List[Gengou] = Gengou.list):
       case Right(d) => d
       case Left(_) => LocalDate.now()
     }
-    new DatePicker(setDate).open(event, a.getYear, a.getMonthValue)
+    new DatePicker(d => {
+      setDate(d)
+      onChange(d)
+    }).open(event, a.getYear, a.getMonthValue)
 
   def validate(): DateInputValidator.Result[LocalDate] =
     DateInputValidator.validateDateInput(eInput.value)

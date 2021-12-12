@@ -68,3 +68,8 @@ object DbVisitPrim:
     sql"""
     select * from visit order by visit_id desc limit ${offset}, ${count}
     """.query[Visit].to[List]
+
+  def listVisitByDate(at: LocalDate): ConnectionIO[List[Visit]] =
+    sql"""
+      select * from visit where date(v_datetime) = ${at} order by visit_id
+    """.query[Visit].to[List]

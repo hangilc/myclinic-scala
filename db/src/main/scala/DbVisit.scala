@@ -30,3 +30,6 @@ trait DbVisit extends Mysql:
 
   def listRecentVisit(offset: Int, count: Int): IO[List[Visit]] =
     mysql(Prim.listRecentVisit(offset, count))
+
+  def listVisitByDate(at: LocalDate): IO[List[Visit]] =
+    mysql(Prim.listVisitByDate(at))

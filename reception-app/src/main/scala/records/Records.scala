@@ -15,6 +15,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import dev.myclinic.scala.model.Patient
 import scala.util.Success
 import scala.util.Failure
+import java.time.LocalDate
 
 class Records() extends SideMenuService:
   val selectPatientButton = PullDown.createButtonAnchor("患者選択")
@@ -34,7 +35,7 @@ class Records() extends SideMenuService:
         "受付患者" -> (onSelectFromWqueue _),
         "患者検索" -> (onSelectFromSearch _),
         "最近の診察" -> (onSelectFromRecent _),
-        "日付別" -> (() =>())
+        "日付別" -> (onSelectByDate _)
       )
     )
     m.open(c, f => PullDown.locatePullDownMenu(selectPatientButton, f))
@@ -78,6 +79,19 @@ class Records() extends SideMenuService:
     }).onComplete {
       case Success(_) => ()
       case Failure(ex) => System.err.println(ex.getMessage)
+    }
+
+  def onSelectByDate(): Unit =
+    val m = new PullDownMenu()
+    val box = new SelectByDateBox(patient => {
+      m.close()
+      start(patient)
+    })
+    box.ele(cls := "domq-context-menu")
+    for
+      _ <- box.init()
+    yield {
+      m.open(box.ele, f => PullDown.locatePullDownMenu(selectPatientButton, f))
     }
 
   def start(patient: Patient): Unit =

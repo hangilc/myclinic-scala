@@ -14,7 +14,7 @@ import org.scalajs.dom.raw.KeyboardEvent
 import org.scalajs.dom.raw.HTMLInputElement
 
 class DatePicker(
-    cb: LocalDate => Unit = _ => (),
+    cb: LocalDate => Any = _ => (),
     gengouList: List[Gengou] = Gengou.list,
     zIndex: Int = Modal.zIndexDefault
 ):

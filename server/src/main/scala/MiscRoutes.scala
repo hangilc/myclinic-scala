@@ -301,4 +301,7 @@ object MiscService extends DateTimeQueryParam with Publisher:
         Db.listRecentVisit(offset, count)
       )
 
+    case GET -> Root / "list-visit-by-date" :? atDate(at) =>
+      Ok(Db.listVisitByDate(at))
+
   }
