@@ -87,8 +87,20 @@ object PullDown:
       yield createContent(close, c)
     })
 
+  def pullDownButton(
+      label: String,
+      commands: List[(String, () => Unit)]
+  ): HTMLElement =
+    pullDown(createButtonAnchor(label), close => createContent(close, commands))
+
   def createLinkAnchor(label: String): HTMLElement =
     a(cls := "domq-pull-down link")(
+      label,
+      Icons.downTriangleFlat
+    )
+
+  def createButtonAnchor(label: String): HTMLElement =
+    button(cls := "domq-pull-down button")(
       label,
       Icons.downTriangleFlat
     )

@@ -16,10 +16,14 @@ import dev.myclinic.scala.model.Patient
 
 class Records() extends SideMenuService:
   def getElement: HTMLElement =
-    div(display := "flex", alignItems := "center")(
-      h1("診療記録")(margin := "0", padding := "0"),
-      //PullDown.pullDownLink("患者選択", _ => div("MENUMENU"))
-      // pullDown("患者選択", List(
-      //   "受付患者" -> (() => ()),
-      // ))(ml := "1rem")
+    div(cls := "records")(
+      div(cls := "header")(
+        h1("診療記録"),
+        PullDown.pullDownButton("患者選択", List(
+          "受付患者" -> (() => ()),
+          "患者検索" -> (() => ()),
+          "最近の診察" -> (() => ()),
+          "日付別" -> (() => ()),
+        ))
+      )
     )
