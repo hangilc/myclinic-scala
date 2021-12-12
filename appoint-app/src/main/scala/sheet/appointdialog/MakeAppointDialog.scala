@@ -6,7 +6,6 @@ import dev.fujiwara.domq.Html._
 import dev.fujiwara.domq.Modal
 import dev.fujiwara.domq.{Icons, Colors, LocalModal, ErrorBox, Modal}
 import dev.myclinic.scala.model.{AppointTime, Appoint, Patient}
-import dev.myclinic.scala.util.KanjiDate
 import dev.fujiwara.domq.Form
 import scala.language.implicitConversions
 import org.scalajs.dom.raw.HTMLElement

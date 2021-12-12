@@ -9,7 +9,7 @@ import dev.myclinic.scala.webclient.Api
 import java.time.LocalDateTime
 import cats._
 import cats.syntax.all._
-import dev.myclinic.scala.util.KanjiDate
+import dev.fujiwara.kanjidate.KanjiDate
 
 trait History:
   def description: String

@@ -13,7 +13,7 @@ import dev.myclinic.scala.web.appbase.EventPublishers
 import java.time.LocalDate
 
 class AdminAppointSheet(using EventPublishers) extends AppointSheet:
-  val cog = Icons.cog(color = "gray")(Icons.defaultStyle)
+  val cog = Icons.cog(Icons.defaultStyle)
   TopMenu.topMenuBox(cog)
   cog(onclick := onCogClick)
 

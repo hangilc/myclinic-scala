@@ -33,7 +33,7 @@ class PatientIdPart(var appoint: Appoint):
     manager.changeValuePartTo(part)
 
   class Disp() extends ValuePart:
-    val editIcon = Icons.pencilAlt(color = "gray", size = "1.2rem")
+    val editIcon = Icons.pencilAlt
     val main = div(
       span(label),
       editIcon(
@@ -62,9 +62,20 @@ class PatientIdPart(var appoint: Appoint):
   class Edit() extends ValuePart with SearchResult:
     def patientId: Int = appoint.patientId
     val input = Form.input(value := initialValue)
-    val enterIcon = Icons.checkCircle(color = Colors.primary, size = "1.2rem")
-    val discardIcon = Icons.xCircle(color = Colors.danger, size = "1.2rem")
-    val searchIcon = Icons.search(color = "gray", size = "1.2rem")
+    //val enterIcon = Icons.checkCircle(color = Colors.primary, size = "1.2rem")
+    val enterIcon = Icons.checkCircle(
+      css(style => {
+        style.stroke = Colors.primary
+      })
+    )
+    //val discardIcon = Icons.xCircle(color = Colors.danger, size = "1.2rem")
+    val discardIcon = Icons.xCircle(
+      css(style => {
+        style.color = Colors.danger
+      })
+    )
+    //val searchIcon = Icons.search(color = "gray", size = "1.2rem")
+    val searchIcon = Icons.search
     enterIcon(onclick := (() => onEnter()))
     discardIcon(onclick := (() => changeValuePartTo(Disp())))
     searchIcon(onclick := (() => onSearchClick()))

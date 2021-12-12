@@ -7,7 +7,6 @@ import dev.fujiwara.domq.{Modal, LocalModal, Icons, ContextMenu, ShowMessage}
 import dev.myclinic.scala.model.{Appoint, AppointTime}
 import scala.language.implicitConversions
 import dev.myclinic.scala.web.appoint.Misc
-import dev.myclinic.scala.util.KanjiDate
 import org.scalajs.dom.raw.HTMLElement
 import dev.myclinic.scala.webclient.Api
 import org.scalajs.dom.raw.MouseEvent
@@ -24,7 +23,7 @@ class EditAppointDialog(val appoint: Appoint, appointTime: AppointTime):
     ui.commands
   )
   dlog.auxMenu(
-    Icons.menu(color = "gray")(Icons.defaultStyle, onclick := (onMenuClick _))
+    Icons.menu(Icons.defaultStyle, onclick := (onMenuClick _))
   )
   ui.execCancelButton(onclick := (() => doExecCancel()))
   ui.closeButton(onclick := (() => dlog.close()))

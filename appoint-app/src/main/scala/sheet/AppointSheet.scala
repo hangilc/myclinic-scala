@@ -121,8 +121,7 @@ class AppointSheet(using eventPublishers: EventPublishers):
       button("次の週", leftGap, onclick := (() => advanceDays(7))),
       button("次の月", leftGap, onclick := (() => advanceDays(28))),
       topMenuBox(attr("id") := "top-menu-box")(
-        Icons
-          .menu(color = "gray")(Icons.defaultStyle, onclick := (onMenuClick _))
+        Icons.menu(Icons.defaultStyle, onclick := (onMenuClick _))
       )
     )
 

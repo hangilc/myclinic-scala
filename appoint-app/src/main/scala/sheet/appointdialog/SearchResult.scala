@@ -30,7 +30,7 @@ trait SearchResult extends ValuePart:
     })
     addToWorkarea(
       div(
-        Icons.xCircle(size = "1.2rem", color = "gray")(
+        Icons.xCircle(
           Icons.defaultStyle,
           floatRight,
           onclick := (initWorkarea _)

@@ -32,7 +32,7 @@ class MemoPart(var appoint: Appoint):
     manager.changeValuePartTo(part)
 
   class Disp() extends ValuePart:
-    val editIcon = Icons.pencilAlt(color = "gray", size = "1.2rem")
+    val editIcon = Icons.pencilAlt
     val main = div(
       onmouseenter := (() => {
         editIcon(displayDefault)
@@ -61,8 +61,18 @@ class MemoPart(var appoint: Appoint):
 
   class Edit() extends ValuePart:
     val input = inputText(value := appoint.memo)
-    val enterIcon = Icons.checkCircle(color = Colors.primary, size = "1.2rem")
-    val discardIcon = Icons.xCircle(color = Colors.danger, size = "1.2rem")
+    //val enterIcon = Icons.checkCircle(color = Colors.primary, size = "1.2rem")
+    val enterIcon = Icons.checkCircle(
+      css(style => {
+        style.stroke = Colors.primary
+      })
+    )
+    //val discardIcon = Icons.xCircle(color = Colors.danger, size = "1.2rem")
+    val discardIcon = Icons.xCircle(
+      css(style => {
+        style.stroke = Colors.danger
+      })
+    )
     discardIcon(onclick := (() => {
       changeValuePartTo(Disp())
     }))

@@ -139,7 +139,7 @@ object MakeAppointUI:
         onsubmit := (() => doSearch()),
         flex := "1 1 auto"
       ),
-      Icons.search(color = "gray", size = "1.2rem")(
+      Icons.search(
         Icons.defaultStyle,
         ml := "0.5rem",
         onclick := (() => doSearch())
@@ -169,7 +169,7 @@ object MakeAppointUI:
         input,
         onsubmit := (() => doSearch())
       ),
-      Icons.search(color = "gray", size = "1.2rem")(
+      Icons.search(
         Icons.defaultStyle,
         ml := "0.5rem",
         onclick := (() => doSearch())

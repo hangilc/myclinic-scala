@@ -1,7 +1,7 @@
 package dev.myclinic.scala.web.appoint
 
 import java.time.LocalDate
-import dev.myclinic.scala.util.KanjiDate
+import dev.fujiwara.kanjidate.KanjiDate
 import java.time.LocalTime
 import dev.myclinic.scala.model.{AppointTime}
 

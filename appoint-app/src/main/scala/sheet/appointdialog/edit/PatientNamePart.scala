@@ -31,8 +31,8 @@ class PatientNamePart(var appoint: Appoint):
     manager.changeValuePartTo(valuePart)
 
   class Disp() extends ValuePart with SearchResult:
-    val searchIcon = Icons.search(color = "gray", size = "1.2rem")
-    val editIcon = Icons.pencilAlt(color = "gray", size = "1.2rem")
+    val searchIcon = Icons.search
+    val editIcon = Icons.pencilAlt
     val main = div(
       appoint.patientName,
       searchIcon(displayNone, ml := "0.5rem")(
@@ -73,9 +73,19 @@ class PatientNamePart(var appoint: Appoint):
 
   class Edit() extends ValuePart with SearchResult:
     val input = Form.input(value := appoint.patientName)
-    val enterIcon = Icons.checkCircle(color = Colors.primary, size = "1.2rem")
-    val discardIcon = Icons.xCircle(color = Colors.danger, size = "1.2rem")
-    val searchIcon = Icons.search(color = "gray", size = "1.2rem")
+    //val enterIcon = Icons.checkCircle(color = Colors.primary, size = "1.2rem")
+    val enterIcon = Icons.checkCircle(
+      css(style => {
+        style.stroke = Colors.primary
+      })
+    )
+    //val discardIcon = Icons.xCircle(color = Colors.danger, size = "1.2rem")
+    val discardIcon = Icons.xCircle(
+      css(style => {
+        style.stroke = Colors.danger
+      })
+    )
+    val searchIcon = Icons.search
     val main = form(onsubmit := (onSearchClick _), Form.inputGroup)(
       input,
       enterIcon(

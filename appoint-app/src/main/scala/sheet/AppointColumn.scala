@@ -74,7 +74,12 @@ case class AppointColumn(
       dateElement(cls := "vacant")
       kinds.foreach(k => {
         val icon =
-          Icons.circleFilled(color = k.iconColor)(Icons.defaultStaticStyle)
+          Icons.circleFilled(
+            Icons.defaultStaticStyle,
+            css(style => {
+              style.fill = k.iconColor
+            })
+          )
         wrapper(icon)
       })
 
