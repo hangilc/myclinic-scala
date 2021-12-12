@@ -262,6 +262,7 @@ button {
 }
 
 /* Records *****************************************************************/
+
 #main .records .header {
   display: flex;
   align-items: flex-start;
@@ -270,4 +271,9 @@ button {
 #main .records .header h1 {
   display: inline-block;
   margin-right: 4rem;
+}
+
+.records-search-patient-box .domq-selection {
+  max-height: 200px;
+  overflow-y: auto;
 }

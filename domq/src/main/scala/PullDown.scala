@@ -20,7 +20,6 @@ class PullDownMenu:
 
   def open(content: HTMLElement, locate: FloatingElement => Unit): Unit =
     wrapper(content)
-    locate(menu)
     screen(zIndex := zIndexScreen)(
       onclick := ((e: MouseEvent) => {
         e.preventDefault()
@@ -30,6 +29,7 @@ class PullDownMenu:
     )
     menu.ele(zIndex := zIndexMenu)
     document.body(screen)
+    locate(menu)
     menu.show()
 
   def close(): Unit =

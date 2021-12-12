@@ -12,7 +12,8 @@
 }
 
 a, a:link, a:visited, a:hover, a:active {
-  text-decoration: none
+  text-decoration: none;
+  padding: 2px;
 }
 
 a:hover {

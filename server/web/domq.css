@@ -124,3 +124,15 @@
   background-color: transparent;
   opacity: 1;
 }
+
+/* Selection **************************************************************/
+
+.domq-selection {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.domq-selection-item:hover {
+  background-color: #eee;
+  cursor: pointer;
+}
