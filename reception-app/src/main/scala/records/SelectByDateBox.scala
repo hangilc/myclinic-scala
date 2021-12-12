@@ -18,6 +18,8 @@ import dev.fujiwara.kanjidate.KanjiDate
 import scala.util.Success
 import scala.util.Failure
 import java.time.LocalDate
+import cats.data.Validated.Valid
+import cats.data.Validated.Invalid
 
 class SelectByDateBox(cb: Patient => Unit):
   val selection = Selection(cb)
@@ -25,11 +27,27 @@ class SelectByDateBox(cb: Patient => Unit):
   val ele = div(cls := "records-select-by-date-box")(
     div("日付別", cls := "title"),
     dateInput.ele,
+    div(
+      a("今日", onclick := (() => advance(_ => LocalDate.now()))),
+      a("前へ", onclick := (() => advance(_.plusDays(1)))),
+      a("次へ", onclick := (() => advance(_.plusDays(-1))))
+    ),
     selection.ele
   )
 
   def init(): Future[Unit] =
-    listDate(LocalDate.now())
+    val today = LocalDate.now()
+    dateInput.setDate(today)
+    listDate(today)
+
+  def advance(f: LocalDate => LocalDate): Unit =
+    dateInput.validate() match {
+      case Valid(d) => 
+        val dd = f(d)
+        dateInput.setDate(dd)
+        listDate(dd)
+      case Invalid(_) => ()
+    }
 
   def listDate(at: LocalDate): Future[Unit] =
     println(("list-date", at))

@@ -28,7 +28,7 @@ class DatePicker(
   val eNenSelect = select()
   val eMonthSelect = select()
   val eDatesTab = div()
-  val content: HTMLElement = div(
+  val content: HTMLElement = div(cls := "domq-date-picker")(
     div(cls := "domq-date-picker-month-block")(
       eGengouSelect(
         cls := "domq-gengou-select",
