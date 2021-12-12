@@ -27,3 +27,6 @@ trait DbVisit extends Mysql:
         items = visits.map(visit => (visit.visitId, visit))
       yield Map(items: _*)
     mysql(op)
+
+  def listRecentVisit(offset: Int, count: Int): IO[List[Visit]] =
+    mysql(Prim.listRecentVisit(offset, count))

@@ -133,4 +133,7 @@ object MiscApi extends ApiBase:
 
     def deleteKouhi(kouhiId: Int): Future[Boolean] =
       get("delete-kouhi", Params("kouhi-id" -> kouhiId))
+
+    def listRecentVisit(offset: Int, count: Int): Future[List[Visit]] = 
+      get("list-recent-visit", Params("offset" -> offset, "count" -> count))
       

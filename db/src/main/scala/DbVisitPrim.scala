@@ -64,3 +64,7 @@ object DbVisitPrim:
         kouhi_3_id = ${kouhiId}
     """.query[Int].unique
      
+  def listRecentVisit(offset: Int, count: Int): ConnectionIO[List[Visit]] =
+    sql"""
+    select * from visit order by visit_id desc limit ${offset}, ${count}
+    """.query[Visit].to[List]

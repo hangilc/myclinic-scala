@@ -276,4 +276,13 @@ button {
 .records-search-patient-box .domq-selection {
   max-height: 200px;
   overflow-y: auto;
+  max-width: 400px;
+  overflow-x: auto;
+}
+
+.records-recent-visit-box .domq-selection {
+  max-height: 500px;
+  overflow-y: auto;
+  max-width: 400px;
+  overflow-x: auto;
 }

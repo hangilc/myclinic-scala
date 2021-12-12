@@ -13,6 +13,8 @@ import org.scalajs.dom.raw.MouseEvent
 import dev.myclinic.scala.webclient.Api
 import scala.concurrent.ExecutionContext.Implicits.global
 import dev.myclinic.scala.model.Patient
+import scala.util.Success
+import scala.util.Failure
 
 class Records() extends SideMenuService:
   val selectPatientButton = PullDown.createButtonAnchor("患者選択")
@@ -31,8 +33,8 @@ class Records() extends SideMenuService:
       List(
         "受付患者" -> (onSelectFromWqueue _),
         "患者検索" -> (onSelectFromSearch _),
-        "最近の診察" -> (() => ()),
-        "日付別" -> (() => ())
+        "最近の診察" -> (onSelectFromRecent _),
+        "日付別" -> (() =>())
       )
     )
     m.open(c, f => PullDown.locatePullDownMenu(selectPatientButton, f))
@@ -62,6 +64,21 @@ class Records() extends SideMenuService:
     box.ele(cls := "domq-context-menu")
     m.open(box.ele, f => PullDown.locatePullDownMenu(selectPatientButton, f))
     
+  def onSelectFromRecent(): Unit =
+    val m = new PullDownMenu()
+    val box = new RecentVisitBox(patient => {
+      m.close()
+      start(patient)
+    })
+    box.ele(cls := "domq-context-menu")
+    (for
+      _ <- box.init()
+    yield {
+      m.open(box.ele, f => PullDown.locatePullDownMenu(selectPatientButton, f))
+    }).onComplete {
+      case Success(_) => ()
+      case Failure(ex) => System.err.println(ex.getMessage)
+    }
 
   def start(patient: Patient): Unit =
     println(("start", patient))

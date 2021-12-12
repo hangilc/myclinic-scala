@@ -29,6 +29,8 @@ object MiscService extends DateTimeQueryParam with Publisher:
   object atDate extends QueryParamDecoderMatcher[LocalDate]("at")
   object atDateTime extends QueryParamDecoderMatcher[LocalDateTime]("at")
   object intVisitId extends QueryParamDecoderMatcher[Int]("visit-id")
+  object intOffset extends QueryParamDecoderMatcher[Int]("offset")
+  object intCount extends QueryParamDecoderMatcher[Int]("count")
   object intPatientId extends QueryParamDecoderMatcher[Int]("patient-id")
   object intShahokokuhoId extends QueryParamDecoderMatcher[Int]("shahokokuho-id")
   object intRoujinId extends QueryParamDecoderMatcher[Int]("roujin-id")
@@ -292,6 +294,11 @@ object MiscService extends DateTimeQueryParam with Publisher:
           event <- Db.deleteKouhi(kouhiId)
           _ <- publish(event)
         yield true
+      )
+
+    case GET -> Root / "list-recent-visit" :? intOffset(offset) +& intCount(count) =>
+      Ok(
+        Db.listRecentVisit(offset, count)
       )
 
   }
