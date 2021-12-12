@@ -10,7 +10,7 @@ import scala.language.implicitConversions
 import org.scalajs.dom.document
 
 class FloatingElement(content: HTMLElement):
-  private val ele: HTMLElement = div(css(style => {
+  val ele: HTMLElement = div(css(style => {
     style.position = "absolute"
   }))(content)
 

@@ -130,6 +130,7 @@ object Modifiers:
   val cssFloat = styleSetter((s, v) => s.cssFloat = v)
   val floatRight = cssFloat := "right"
   val textAlign = styleSetter((s, v) => s.textAlign = v)
+  val zIndex = Creator[Int]((e, v) => e.style.zIndex = v.toString)
 
   val showHide = Creator[Boolean]((e, show: Boolean) => {
     val q = ElementQ(e)
@@ -166,11 +167,11 @@ object Modifiers:
   })
 
   object onclick:
-    def :=(f: MouseEvent => Unit) = Modifier(e => {
+    def :=(f: MouseEvent => Any) = Modifier(e => {
       e.addEventListener("click", f)
     })
 
-    def :=(f: () => Unit) = Modifier(e => {
+    def :=(f: () => Any) = Modifier(e => {
       e.addEventListener("click", (_: MouseEvent) => f())
     })
 

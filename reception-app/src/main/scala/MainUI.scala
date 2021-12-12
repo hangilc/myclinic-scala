@@ -27,7 +27,8 @@ abstract class MainUI(using publishers: EventPublishers):
   private val hotlineInput = textarea()
   private val hotlineMessages = textarea()
   private val eMain: HTMLElement = div()
-  private val sideMenu = SideMenu(eMain,
+  private val sideMenu = SideMenu(
+    eMain,
     List(
       "メイン" -> (() => Cashier()),
       "患者管理" -> (() => PatientManagement()),
@@ -57,13 +58,8 @@ abstract class MainUI(using publishers: EventPublishers):
               })
             ),
             button("Beep", onclick := (() => { Api.beep(); () })),
-            pullDownLink("常用", div("MENU")),
-            // a(
-            //   span("常用", downTriangle()),
-            //   onclick := (doRegular _)
-            // ),
-            pullDownLink("患者", div("MENU"))
-            // a("患者", downTriangle(), onclick := (doPatients _))
+            pullDownLink("常用", regularMenuItems),
+            pullDownLink("患者", patientMenuItems)
           ),
           hotlineMessages(
             id := "hotline-messages",
@@ -103,33 +99,25 @@ abstract class MainUI(using publishers: EventPublishers):
     hotlineInput.selectionStart = pos
     hotlineInput.selectionEnd = pos
 
-  private def doRegular(event: MouseEvent): Unit =
+  private def regularMenuItems: List[(String, () => Unit)] =
     val items: List[String] = Setting.regularHotlineMessages
-    val menu = ContextMenu(
-      items.map(msg => msg -> (() => insertIntoHotlineInput(msg)))
-    )
-    menu.open(event)
+    items.map(msg => msg -> (() => insertIntoHotlineInput(msg)))
 
-  private def doPatients(event: MouseEvent): Unit =
+  private def patientMenuItems: Future[List[(String, () => Unit)]] =
     def exec(patient: Patient): Unit =
-      insertIntoHotlineInput(patient.fullName(""))
-    val f =
-      for
-        wqueue <- Api.listWqueue()
-        visitIds = wqueue.map(_.visitId)
-        visitMap <- Api.batchGetVisit(visitIds)
-        patientMap <- Api.batchGetPatient(
-          visitMap.values.map(_.patientId).toList
-        )
-      yield {
-        val patients = patientMap.values.toList
-        val menu = ContextMenu(patients.map(patient => {
-          patient.fullName("") -> (() => exec(patient))
-        }))
-        menu.open(event)
-      }
-    f.onComplete {
-      case Success(_)  => ()
-      case Failure(ex) => System.err.println(ex.getMessage)
+      val txt = s"""(${patient.patientId}) ${patient.fullName("")}様、"""
+      insertIntoHotlineInput(txt)
+    for
+      wqueue <- Api.listWqueue()
+      visitIds = wqueue.map(_.visitId)
+      visitMap <- Api.batchGetVisit(visitIds)
+      patientMap <- Api.batchGetPatient(
+        visitMap.values.map(_.patientId).toList
+      )
+    yield {
+      val patients = patientMap.values.toList
+      patients.map(patient => {
+        patient.fullName("") -> (() => exec(patient))
+      })
     }
 

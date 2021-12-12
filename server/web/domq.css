@@ -77,15 +77,23 @@
 /* Screen ****************************************************************/
 
 .domq-screen {      
-  display: "block";
-  position: "fixed";
-  left: "0";
-  top: "0";
-  right: "0";
-  bottom: "0";
-  background-color: "#5a6268";
-  opacity: "0";
-  overflow-y: "auto";
+  display: block;
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #5a6268;
+  opacity: 0;
+  overflow-y: auto;
+}
+
+/* Context Menu **********************************************************/
+
+.domq-context-menu {
+  background: rgba(255, 255, 255, 1);
+  border: 1px solid gray;
+  padding: 6px;
 }
 
 /* Pull Down *************************************************************/
@@ -100,7 +108,7 @@
   height: 0.8rem;
   margin-left: 0.15rem;
   position: relative;
-  top: 0;
+  top: -0.08rem;
   fill: var(--primary-color)
 }
 
