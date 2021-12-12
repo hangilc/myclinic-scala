@@ -9,7 +9,7 @@ import dev.fujiwara.domq.Geometry.{DocCoord, DocRect, DocPoint}
 import scala.language.implicitConversions
 import org.scalajs.dom.document
 
-class FloatingElement(content: HTMLElement):
+class FloatingElement(content: HTMLElement, onHide: () => Unit = () => ()):
   val ele: HTMLElement = div(css(style => {
     style.position = "absolute"
   }))(content)
@@ -21,7 +21,9 @@ class FloatingElement(content: HTMLElement):
     Geometry.setElementTop(ele, p.y)
 
   def show(): Unit = document.body(ele)
-  def hide(): Unit = ele.remove()
+  def hide(): Unit = 
+    ele.remove()
+    onHide()
   def isShown: Boolean = ele.parentElement != null
   def toggle(): Unit = if isShown then hide() else show()
   

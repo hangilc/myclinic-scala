@@ -3,7 +3,7 @@ package dev.fujiwara.dateinput
 import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
-import dev.fujiwara.domq.{Icons}
+import dev.fujiwara.domq.{Icons, FloatingElement, Geometry}
 import dev.fujiwara.kanjidate.KanjiDate
 import dev.fujiwara.kanjidate.KanjiDate.Gengou
 import org.scalajs.dom.raw.{HTMLElement, HTMLInputElement}
@@ -27,9 +27,10 @@ class DateInput(gengouList: List[Gengou] = Gengou.list,
     onEnter: LocalDate => Unit = _ => (),
     onChange: LocalDate => Unit = _ => ()):
   val eInput: HTMLInputElement = inputText(placeholder := "平成３０年１２月２３日")
+  val eCalendar = Icons.calendar
   val ele: HTMLElement = div(cls := "domq-date-input-wrapper")(
     form(eInput(cls := "domq-date-input"), onsubmit := (onSubmit _)),
-    Icons.calendar(
+    eCalendar(
       Icons.defaultStyle,
       onclick := (openPicker _)
     )
@@ -45,6 +46,11 @@ class DateInput(gengouList: List[Gengou] = Gengou.list,
   def setDate(date: LocalDate): Unit =
     eInput(value := KanjiDate.dateToKanji(date))
 
+  def locatePicker(f: FloatingElement): Unit =
+    val r = Geometry.getRect(eCalendar)
+    val p = r.leftTop
+    f.leftTop = p
+
   def openPicker(event: MouseEvent): Unit =
     val a = validate().asEither match {
       case Right(d) => d
@@ -53,7 +59,7 @@ class DateInput(gengouList: List[Gengou] = Gengou.list,
     new DatePicker(d => {
       setDate(d)
       onChange(d)
-    }).open(event, a.getYear, a.getMonthValue)
+    }, (locatePicker _)).open(event, a.getYear, a.getMonthValue)
 
   def validate(): DateInputValidator.Result[LocalDate] =
     DateInputValidator.validateDateInput(eInput.value)

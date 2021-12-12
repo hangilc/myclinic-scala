@@ -3,7 +3,13 @@ package dev.fujiwara.dateinput
 import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
-import dev.fujiwara.domq.{ContextMenu, Modal, Modifier}
+import dev.fujiwara.domq.{
+  ContextMenu,
+  Modal,
+  Modifier,
+  FloatingElement,
+  Screened
+}
 import dev.fujiwara.kanjidate.KanjiDate.{Gengou, Wareki}
 import scala.language.implicitConversions
 import scala.scalajs.js
@@ -15,15 +21,14 @@ import org.scalajs.dom.raw.HTMLInputElement
 
 class DatePicker(
     cb: LocalDate => Any = _ => (),
-    gengouList: List[Gengou] = Gengou.list,
-    zIndex: Int = Modal.zIndexDefault
+    locator: FloatingElement => Unit,
+    gengouList: List[Gengou] = Gengou.list
 ):
-  val menu = new ContextMenu(zIndex)
   val eGengouSelect = select()
   val eNenSelect = select()
   val eMonthSelect = select()
   val eDatesTab = div()
-  menu.menu(
+  val content: HTMLElement = div(
     div(cls := "domq-date-picker-month-block")(
       eGengouSelect(
         cls := "domq-gengou-select",
@@ -43,10 +48,11 @@ class DatePicker(
     ),
     eDatesTab(cls := "domq-date-picker-dates-tab")
   )
+  val screened = Screened(content, locator)
 
   def open(event: MouseEvent, year: Int, month: Int) =
     set(year, month)
-    menu.open(event)
+    screened.open()
 
   private def init(): Unit =
     val g = eGengouSelect
@@ -151,5 +157,5 @@ class DatePicker(
     })
 
   private def onDayClick(d: LocalDate): Unit =
-    menu.close()
+    screened.close()
     cb(d)
