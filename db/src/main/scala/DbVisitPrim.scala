@@ -64,6 +64,11 @@ object DbVisitPrim:
         kouhi_3_id = ${kouhiId}
     """.query[Int].unique
      
+  def countByPatient(patientId: Int): ConnectionIO[Int] =
+    sql"""
+      select count(*) from visit where patient_id = ${patientId}
+    """.query[Int].unique
+
   def listRecentVisit(offset: Int, count: Int): ConnectionIO[List[Visit]] =
     sql"""
     select * from visit order by visit_id desc limit ${offset}, ${count}
@@ -73,3 +78,9 @@ object DbVisitPrim:
     sql"""
       select * from visit where date(v_datetime) = ${at} order by visit_id
     """.query[Visit].to[List]
+
+  def listByPatient(patientId: Int, offset: Int, count: Int): ConnectionIO[List[Visit]] =
+    sql"""
+      select * from visit where patient_id = ${patientId} limit ${offset}, ${count}
+    """.query[Visit].to[List]
+
