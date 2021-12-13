@@ -168,6 +168,11 @@ case class Text(
     content: String
 )
 
+enum TouyakuCategory(code: Int):
+  case Naifuku extends TouyakuCategory(0)
+  case Tonpuku extends TouyakuCategory(1)
+  case Gaiyou extends TouyakuCategory(2)
+
 case class Drug(
     drugId: Int,
     visitId: Int,
