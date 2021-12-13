@@ -37,13 +37,13 @@ class RecordUI(patient: Patient):
 
   def updateUI(): Future[Unit] =
     for
-      visitIds <- Api.listVisitIdByPatient(patient.patientId, page * itemsPerPage, itemsPerPage)
+      visitIds <- Api.listVisitIdByPatientReverse(patient.patientId, page * itemsPerPage, itemsPerPage)
       visits <- Api.batchGetVisitEx(visitIds)
     yield {
-      println(("records", visits))
+      setVisits(visits)
     }
 
 
-  def setVisits(visits: List[Visit]): Unit =
-    ???
+  def setVisits(visits: List[VisitEx]): Unit =
+    eRecords.setChildren(visits.map(VisitBlock(_).ele))
 

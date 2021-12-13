@@ -89,3 +89,8 @@ object DbVisitPrim:
       select visit_id from visit where patient_id = ${patientId} limit ${offset}, ${count}
     """.query[Int].to[List]
 
+  def listVisitIdByPatientReverse(patientId: Int, offset: Int, count: Int): ConnectionIO[List[Int]] =
+    sql"""
+      select visit_id from visit where patient_id = ${patientId} order by visit_id desc limit ${offset}, ${count}
+    """.query[Int].to[List]
+

@@ -201,6 +201,16 @@ object MiscApi extends ApiBase:
         Params("patient-id" -> patientId, "offset" -> offset, "count" -> count)
       )
     
+    def listVisitIdByPatientReverse(
+        patientId: Int,
+        offset: Int,
+        count: Int
+    ): Future[List[Int]] =
+      get(
+        "list-visit-id-by-patient-reverse",
+        Params("patient-id" -> patientId, "offset" -> offset, "count" -> count)
+      )
+    
     def batchGetText(visitIds: List[Int]): Future[Map[Int, List[Text]]] =
       post("batch-get-text", Params(), visitIds)
 

@@ -27,10 +27,17 @@ object KanjiDate:
     val youbi = formatYoubi(i)
     s"${year}${month}${day}${youbi}"
 
-  def timeToKanji(t: LocalTime): String =
-    val hour = t.getHour
-    val minute = t.getMinute
-    s"${hour}時${minute}分"
+  def timeToKanji(
+      t: LocalTime,
+      formatHour: Int => String = hour => s"${hour}時",
+      formatMinute: Int => String = minute => s"${minute}分",
+      formatSecond: Int => String = second => ""
+  ): String =
+    val info = TimeInfo(t)
+    val hour = formatHour(info.hour)
+    val minute = formatMinute(info.minute)
+    val second = formatSecond(info.second)
+    s"${hour}${minute}${second}"
 
   enum Gengou(val name: String, val alpha: String, val startDate: LocalDate):
     case Meiji extends Gengou("明治", "Meiji", LocalDate.of(1873, 1, 1))
@@ -49,7 +56,8 @@ object KanjiDate:
 
     def listNen: Range =
       val firstYear = startDate.getYear
-      val lastYear: Int = lastDay.map(_.getYear).getOrElse(LocalDate.now().getYear)
+      val lastYear: Int =
+        lastDay.map(_.getYear).getOrElse(LocalDate.now().getYear)
       1 to (lastYear - firstYear + 1)
 
   object Gengou:
@@ -83,5 +91,12 @@ object KanjiDate:
     def dayOfWeek: DayOfWeek = date.getDayOfWeek
     def dayOfWeekValue: Int = dayOfWeek.getValue() % 7
     def youbi: String = youbiList(dayOfWeekValue)
-    def gengouAlpha: String = warekiOption.map(w => w.gengou.alpha).getOrElse("")
-    def gengouAlphaChar: String = if gengouAlpha.isEmpty then "" else gengouAlpha.substring(0, 1)
+    def gengouAlpha: String =
+      warekiOption.map(w => w.gengou.alpha).getOrElse("")
+    def gengouAlphaChar: String =
+      if gengouAlpha.isEmpty then "" else gengouAlpha.substring(0, 1)
+
+  class TimeInfo(time: LocalTime):
+    def hour: Int = time.getHour
+    def minute: Int = time.getMinute
+    def second: Int = time.getSecond

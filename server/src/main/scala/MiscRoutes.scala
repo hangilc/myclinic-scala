@@ -325,6 +325,11 @@ object MiscService extends DateTimeQueryParam with Publisher:
         ) +& intOffset(offset) +& intCount(count) =>
       Ok(Db.listVisitIdByPatient(patientId, offset, count))
 
+    case GET -> Root / "list-visit-id-by-patient-reverse" :? intPatientId(
+          patientId
+        ) +& intOffset(offset) +& intCount(count) =>
+      Ok(Db.listVisitIdByPatientReverse(patientId, offset, count))
+
     case req @ POST -> Root / "batch-get-text" =>
       Ok(for
         visitIds <- req.as[List[Int]]
