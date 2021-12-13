@@ -43,3 +43,6 @@ trait DbVisitEx extends Mysql:
     
   def getVisitEx(visitId: Int): IO[VisitEx] =
     mysql(DbVisitExPrim.getVisitEx(visitId))
+
+  def batchGetVisitEx(visitIds: List[Int]): IO[List[VisitEx]] =
+    mysql(visitIds.map(visitId => DbVisitExPrim.getVisitEx(visitId)).sequence)

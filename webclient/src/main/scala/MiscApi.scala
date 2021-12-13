@@ -44,7 +44,9 @@ object MiscApi extends ApiBase:
     def listConductDrugForVisit(conductId: Int): Future[List[ConductDrug]] =
       get("list-conduct-drug-for-visit", Params("visit-id" -> conductId))
 
-    def listConductShinryouForVisit(conductId: Int): Future[List[ConductShinryou]] =
+    def listConductShinryouForVisit(
+        conductId: Int
+    ): Future[List[ConductShinryou]] =
       get("list-conduct-shinryou-for-visit", Params("visit-id" -> conductId))
 
     def listConductKizaiForVisit(conductId: Int): Future[List[ConductKizai]] =
@@ -65,23 +67,59 @@ object MiscApi extends ApiBase:
     def startVisit(patientId: Int, at: LocalDateTime): Future[Boolean] =
       get("start-visit", Params("patient-id" -> patientId, "at" -> at))
 
-    def findAvailableShahokokuho(patientId: Int, at: LocalDate): Future[Option[Shahokokuho]] =
-      get("find-available-shahokokuho", Params("patient-id" -> patientId, "at" -> at))
+    def findAvailableShahokokuho(
+        patientId: Int,
+        at: LocalDate
+    ): Future[Option[Shahokokuho]] =
+      get(
+        "find-available-shahokokuho",
+        Params("patient-id" -> patientId, "at" -> at)
+      )
 
-    def findAvailableRoujin(patientId: Int, at: LocalDate): Future[Option[Roujin]] =
-      get("find-available-roujin", Params("patient-id" -> patientId, "at" -> at))
+    def findAvailableRoujin(
+        patientId: Int,
+        at: LocalDate
+    ): Future[Option[Roujin]] =
+      get(
+        "find-available-roujin",
+        Params("patient-id" -> patientId, "at" -> at)
+      )
 
-    def findAvailableKoukikourei(patientId: Int, at: LocalDate): Future[Option[Koukikourei]] =
-      get("find-available-koukikourei", Params("patient-id" -> patientId, "at" -> at))
+    def findAvailableKoukikourei(
+        patientId: Int,
+        at: LocalDate
+    ): Future[Option[Koukikourei]] =
+      get(
+        "find-available-koukikourei",
+        Params("patient-id" -> patientId, "at" -> at)
+      )
 
-    def listAvailableShahokokuho(patientId: Int, at: LocalDate): Future[List[Shahokokuho]] =
-      get("list-available-shahokokuho", Params("patient-id" -> patientId, "at" -> at))
+    def listAvailableShahokokuho(
+        patientId: Int,
+        at: LocalDate
+    ): Future[List[Shahokokuho]] =
+      get(
+        "list-available-shahokokuho",
+        Params("patient-id" -> patientId, "at" -> at)
+      )
 
-    def listAvailableRoujin(patientId: Int, at: LocalDate): Future[List[Roujin]] =
-      get("list-available-roujin", Params("patient-id" -> patientId, "at" -> at))
+    def listAvailableRoujin(
+        patientId: Int,
+        at: LocalDate
+    ): Future[List[Roujin]] =
+      get(
+        "list-available-roujin",
+        Params("patient-id" -> patientId, "at" -> at)
+      )
 
-    def listAvailableKoukikourei(patientId: Int, at: LocalDate): Future[List[Koukikourei]] =
-      get("list-available-koukikourei", Params("patient-id" -> patientId, "at" -> at))
+    def listAvailableKoukikourei(
+        patientId: Int,
+        at: LocalDate
+    ): Future[List[Koukikourei]] =
+      get(
+        "list-available-koukikourei",
+        Params("patient-id" -> patientId, "at" -> at)
+      )
 
     def listAvailableKouhi(patientId: Int, at: LocalDate): Future[List[Kouhi]] =
       get("list-available-kouhi", Params("patient-id" -> patientId, "at" -> at))
@@ -134,9 +172,37 @@ object MiscApi extends ApiBase:
     def deleteKouhi(kouhiId: Int): Future[Boolean] =
       get("delete-kouhi", Params("kouhi-id" -> kouhiId))
 
-    def listRecentVisit(offset: Int, count: Int): Future[List[Visit]] = 
+    def listRecentVisit(offset: Int, count: Int): Future[List[Visit]] =
       get("list-recent-visit", Params("offset" -> offset, "count" -> count))
 
     def listVisitByDate(at: LocalDate): Future[List[Visit]] =
       get("list-visit-by-date", Params("at" -> at))
-      
+
+    def countVisitByPatient(patientId: Int): Future[Int] =
+      get("count-visit-by-patient", Params("patient-id" -> patientId))
+
+    def listVisitByPatient(
+        patientId: Int,
+        offset: Int,
+        count: Int
+    ): Future[List[Visit]] =
+      get(
+        "list-visit-by-patient",
+        Params("patient-id" -> patientId, "offset" -> offset, "count" -> count)
+      )
+    
+    def listVisitIdByPatient(
+        patientId: Int,
+        offset: Int,
+        count: Int
+    ): Future[List[Int]] =
+      get(
+        "list-visit-id-by-patient",
+        Params("patient-id" -> patientId, "offset" -> offset, "count" -> count)
+      )
+    
+    def batchGetText(visitIds: List[Int]): Future[Map[Int, List[Text]]] =
+      post("batch-get-text", Params(), visitIds)
+
+    def batchGetVisitEx(visitIds: List[Int]): Future[List[VisitEx]] =
+      post("batch-get-visit-ex", Params(), visitIds)

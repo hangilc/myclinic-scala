@@ -36,3 +36,9 @@ trait DbVisit extends Mysql:
 
   def countVisitByPatient(patientId: Int): IO[Int] =
     mysql(Prim.countByPatient(patientId))
+
+  def listVisitByPatient(patientId: Int, offset: Int, count: Int): IO[List[Visit]] =
+    mysql(Prim.listByPatient(patientId, offset, count))
+
+  def listVisitIdByPatient(patientId: Int, offset: Int, count: Int): IO[List[Int]] =
+    mysql(Prim.listVisitIdByPatient(patientId, offset, count))

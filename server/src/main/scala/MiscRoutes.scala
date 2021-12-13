@@ -32,9 +32,11 @@ object MiscService extends DateTimeQueryParam with Publisher:
   object intOffset extends QueryParamDecoderMatcher[Int]("offset")
   object intCount extends QueryParamDecoderMatcher[Int]("count")
   object intPatientId extends QueryParamDecoderMatcher[Int]("patient-id")
-  object intShahokokuhoId extends QueryParamDecoderMatcher[Int]("shahokokuho-id")
+  object intShahokokuhoId
+      extends QueryParamDecoderMatcher[Int]("shahokokuho-id")
   object intRoujinId extends QueryParamDecoderMatcher[Int]("roujin-id")
-  object intKoukikoureiId extends QueryParamDecoderMatcher[Int]("koukikourei-id")
+  object intKoukikoureiId
+      extends QueryParamDecoderMatcher[Int]("koukikourei-id")
   object intKouhiId extends QueryParamDecoderMatcher[Int]("kouhi-id")
 
   given houkatsuKensa: HoukatsuKensa = (new ConfigJava).getHoukatsuKensa
@@ -210,9 +212,11 @@ object MiscService extends DateTimeQueryParam with Publisher:
         yield true
       )
 
-    case GET -> Root / "delete-shahokokuho" :? intShahokokuhoId(shahokokuhoId) =>
+    case GET -> Root / "delete-shahokokuho" :? intShahokokuhoId(
+          shahokokuhoId
+        ) =>
       Ok(
-        for 
+        for
           event <- Db.deleteShahokokuho(shahokokuhoId)
           _ <- publish(event)
         yield true
@@ -238,7 +242,7 @@ object MiscService extends DateTimeQueryParam with Publisher:
 
     case GET -> Root / "delete-roujin" :? intRoujinId(roujinId) =>
       Ok(
-        for 
+        for
           event <- Db.deleteRoujin(roujinId)
           _ <- publish(event)
         yield true
@@ -262,9 +266,11 @@ object MiscService extends DateTimeQueryParam with Publisher:
         yield true
       )
 
-    case GET -> Root / "delete-koukikourei" :? intKoukikoureiId(koukikoureiId) =>
+    case GET -> Root / "delete-koukikourei" :? intKoukikoureiId(
+          koukikoureiId
+        ) =>
       Ok(
-        for 
+        for
           event <- Db.deleteKoukikourei(koukikoureiId)
           _ <- publish(event)
         yield true
@@ -290,18 +296,45 @@ object MiscService extends DateTimeQueryParam with Publisher:
 
     case GET -> Root / "delete-kouhi" :? intKouhiId(kouhiId) =>
       Ok(
-        for 
+        for
           event <- Db.deleteKouhi(kouhiId)
           _ <- publish(event)
         yield true
       )
 
-    case GET -> Root / "list-recent-visit" :? intOffset(offset) +& intCount(count) =>
+    case GET -> Root / "list-recent-visit" :? intOffset(offset) +& intCount(
+          count
+        ) =>
       Ok(
         Db.listRecentVisit(offset, count)
       )
 
     case GET -> Root / "list-visit-by-date" :? atDate(at) =>
       Ok(Db.listVisitByDate(at))
+
+    case GET -> Root / "count-visit-by-patient" :? intPatientId(patientId) =>
+      Ok(Db.countVisitByPatient(patientId))
+
+    case GET -> Root / "list-visit-by-patient" :? intPatientId(
+          patientId
+        ) +& intOffset(offset) +& intCount(count) =>
+      Ok(Db.listVisitByPatient(patientId, offset, count))
+
+    case GET -> Root / "list-visit-id-by-patient" :? intPatientId(
+          patientId
+        ) +& intOffset(offset) +& intCount(count) =>
+      Ok(Db.listVisitIdByPatient(patientId, offset, count))
+
+    case req @ POST -> Root / "batch-get-text" =>
+      Ok(for
+        visitIds <- req.as[List[Int]]
+        map <- Db.batchGetText(visitIds)
+      yield map)
+
+    case req @ POST -> Root / "batch-get-visit-ex" =>
+      Ok(for
+        visitIds <- req.as[List[Int]]
+        result <- Db.batchGetVisitEx(visitIds)
+      yield result)
 
   }

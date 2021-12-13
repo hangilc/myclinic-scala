@@ -84,3 +84,8 @@ object DbVisitPrim:
       select * from visit where patient_id = ${patientId} limit ${offset}, ${count}
     """.query[Visit].to[List]
 
+  def listVisitIdByPatient(patientId: Int, offset: Int, count: Int): ConnectionIO[List[Int]] =
+    sql"""
+      select visit_id from visit where patient_id = ${patientId} limit ${offset}, ${count}
+    """.query[Int].to[List]
+

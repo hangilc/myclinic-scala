@@ -40,18 +40,6 @@ trait Model extends DateTime with WaitStateCodec:
   given Encoder[Option[Patient]] = Encoder.encodeOption[Patient]
   given Decoder[Option[Patient]] = Decoder.decodeOption[Patient]
 
-  // given Encoder[Option[Shahokokuho]] = Encoder.encodeOption[Shahokokuho]
-  // given Decoder[Option[Shahokokuho]] = Decoder.decodeOption[Shahokokuho]
-
-  // given Encoder[Option[Roujin]] = Encoder.encodeOption[Roujin]
-  // given Decoder[Option[Roujin]] = Decoder.decodeOption[Roujin]
-
-  // given Encoder[Option[Koukikourei]] = Encoder.encodeOption[Koukikourei]
-  // given Decoder[Option[Koukikourei]] = Decoder.decodeOption[Koukikourei]
-
-  // given Encoder[Option[Kouhi]] = Encoder.encodeOption[Kouhi]
-  // given Decoder[Option[Kouhi]] = Decoder.decodeOption[Kouhi]
-
   given Encoder[Hotline] = deriveEncoder[Hotline]
   given Decoder[Hotline] = deriveDecoder[Hotline]
 
