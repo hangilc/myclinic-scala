@@ -1,7 +1,7 @@
 package dev.myclinic.scala.util
 
 object ZenkakuUtil:
-  val zenkakuDigitToDigit: Char => Char = c =>
+  val toZenkakuDigits: Char => Char = c =>
     c match {
       case '０' => '0'
       case '１' => '1'
@@ -16,6 +16,12 @@ object ZenkakuUtil:
       case _   => c
     }
 
+  val toZenkakuPeriod: Char => Char = c =>
+    if c == '.' then '．' else c
+
+  def convertZenkakuDigits(src: String): String =
+    convertChars(src, toZenkakuDigits)
+    
   extension (f: Char => Char)
     def <+>(g: Char => Char): Char => Char = (c: Char) =>
       val d = f(c)
@@ -25,5 +31,3 @@ object ZenkakuUtil:
   def convertChars(src: String, f: Char => Char): String =
     src.toList.map(f).mkString("")
 
-  def convertZenkakuDigits(src: String): String =
-    convertChars(src, zenkakuDigitToDigit)

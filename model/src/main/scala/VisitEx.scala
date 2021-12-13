@@ -21,7 +21,8 @@ case class VisitEx(
     texts: List[Text] = List.empty,
     drugs: List[DrugEx] = List.empty,
     shinryouList: List[ShinryouEx] = List.empty,
-    conducts: List[ConductEx] = List.empty
+    conducts: List[ConductEx] = List.empty,
+    chargeOption: Option[Charge] = None
 ):
   def toVisit: Visit =
     Visit(
@@ -48,7 +49,8 @@ object VisitEx:
       texts: List[Text],
       drugs: List[DrugEx],
       shinryouList: List[ShinryouEx],
-      conducts: List[ConductEx]
+      conducts: List[ConductEx],
+      chargeOption: Option[Charge]
   ): VisitEx =
     VisitEx(
       visit.visitId,
@@ -69,7 +71,8 @@ object VisitEx:
       texts,
       drugs,
       shinryouList,
-      conducts
+      conducts,
+      chargeOption
     )
 
 case class DrugEx(
@@ -79,10 +82,12 @@ case class DrugEx(
     amount: Double,
     usage: String,
     days: Int,
-    category: Int,
+    categoryStore: Int,
     prescribed: Boolean,
     master: IyakuhinMaster
-)
+):
+  lazy val category: DrugCategory =
+    DrugCategory.fromCode(categoryStore)
 
 object DrugEx:
   def apply(drug: Drug, master: IyakuhinMaster): DrugEx =
@@ -93,7 +98,7 @@ object DrugEx:
       drug.amount,
       drug.usage,
       drug.days,
-      drug.category,
+      drug.categoryStore,
       drug.prescribed,
       master
     )

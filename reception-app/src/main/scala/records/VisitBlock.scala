@@ -10,6 +10,9 @@ import dev.myclinic.scala.util.DateUtil
 import java.time.{LocalDate, LocalDateTime}
 import org.scalajs.dom.raw.{HTMLElement}
 import dev.myclinic.scala.apputil.HokenUtil
+import dev.myclinic.scala.apputil.DrugUtil
+import dev.fujiwara.dateinput.ZenkakuUtil
+import dev.myclinic.scala.{util => ju}
 
 class VisitBlock(visit: VisitEx):
   val eText: HTMLElement = div()
@@ -32,13 +35,33 @@ class VisitBlock(visit: VisitEx):
         eShinryou.setChildren(
           visit.shinryouList.map(shinryou => div(shinryou.master.name))
         ),
-        eDrug,
-        eCashier
+        eDrug.setChildren(drugElements(visit.drugs)),
+        eCashier(chargeElement(visit.chargeOption))
       )
     )
   )
 
+  def chargeElement(chargeOption: Option[Charge]): HTMLElement =
+    chargeOption match {
+      case None => div("（未請求）")
+      case Some(charge) => div(s"請求額：${charge.charge}円")
+    }
+
+  def drugElements(drugs: List[DrugEx]): List[HTMLElement] =
+    if drugs.isEmpty then List.empty
+    else
+      val reps: List[String] = visit.drugs.map(drug => DrugUtil.drugRep(drug))
+      val ords: List[Int] = (1 to reps.size).toList
+      div("Ｒｐ）").ele ::
+        ords.zip(reps).map { case (i, s) =>
+          val ii = ZenkakuUtil.convertToZenkakuDigits(i.toString)
+          div(s"${ii}）${s}").ele
+        }
+
   def formatVisitTime(at: LocalDateTime): String =
-    val p1 = KanjiDate.dateToKanji(at.toLocalDate, formatYoubi = info => s"（${info.youbi}）")
+    val p1 = KanjiDate.dateToKanji(
+      at.toLocalDate,
+      formatYoubi = info => s"（${info.youbi}）"
+    )
     val p2 = KanjiDate.timeToKanji(at.toLocalTime)
-    p1+p2
+    p1 + p2

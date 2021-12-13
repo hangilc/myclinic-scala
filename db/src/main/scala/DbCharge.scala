@@ -4,7 +4,7 @@ import cats.*
 import cats.implicits.*
 import cats.effect.IO
 import dev.myclinic.scala.model.*
-import dev.myclinic.scala.db.{DbPatientPrim => Prim}
+import dev.myclinic.scala.db.{DbChargePrim => Prim}
 import doobie.*
 import doobie.implicits.*
 
@@ -18,3 +18,6 @@ trait DbCharge extends Mysql:
     mysql(sql"""
       select count(*) from visit_charge where visit_id = ${visitId}
     """.query[Int].unique)
+
+  def findCharge(visitId: Int): IO[Option[Charge]] =
+    mysql(Prim.getCharge(visitId).option)

@@ -168,10 +168,14 @@ case class Text(
     content: String
 )
 
-enum TouyakuCategory(code: Int):
-  case Naifuku extends TouyakuCategory(0)
-  case Tonpuku extends TouyakuCategory(1)
-  case Gaiyou extends TouyakuCategory(2)
+enum DrugCategory(val code: Int):
+  case Naifuku extends DrugCategory(0)
+  case Tonpuku extends DrugCategory(1)
+  case Gaiyou extends DrugCategory(2)
+
+object DrugCategory:
+  def fromCode(code: Int): DrugCategory =
+    DrugCategory.values.find(_.code == code).get
 
 case class Drug(
     drugId: Int,
@@ -180,9 +184,11 @@ case class Drug(
     amount: Double,
     usage: String,
     days: Int,
-    category: Int,
+    categoryStore: Int,
     prescribed: Boolean
-)
+):
+  lazy val category: DrugCategory = DrugCategory.fromCode(categoryStore)
+    
 
 case class Shinryou(
     shinryouId: Int,

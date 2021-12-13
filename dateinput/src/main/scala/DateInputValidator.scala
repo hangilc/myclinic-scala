@@ -103,7 +103,7 @@ object DateInputValidator:
       }
 
   def validateDateInput(src: String): Result[LocalDate] =
-    val input = ZenkakuUtil.convertZenkakuDigits(src.trim)
+    val input = ZenkakuUtil.convertToZenkakuDigits(src.trim)
     input match {
       case pat(gengou, nen, month, day) => {
         (
@@ -150,5 +150,5 @@ object ZenkakuUtil:
   def convertChars(src: String, f: Char => Char): String =
     src.toList.map(f).mkString("")
 
-  def convertZenkakuDigits(src: String): String =
+  def convertToZenkakuDigits(src: String): String =
     convertChars(src, zenkakuDigitToDigit)

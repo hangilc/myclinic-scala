@@ -163,5 +163,6 @@ object DbVisitExPrim:
       shinryouList <- listShinryouEx(shinryouIds)
       conductIds <- DbConductPrim.listConductIdForVisit(visitId)
       conducts <- listConductEx(conductIds)
+      charge <- DbChargePrim.getCharge(visitId).option
     yield VisitEx(visit, patient, shahokokuho, roujin, koukikourei, kouhiList,
-    texts, drugs, shinryouList, conducts)
+    texts, drugs, shinryouList, conducts, charge)
