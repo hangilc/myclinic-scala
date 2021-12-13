@@ -12,7 +12,7 @@ import cats.data.Validated.Valid
 import cats.data.Validated.Invalid
 
 object DateInputValidator:
-  val pat: Regex = raw"(\D*)\s*(\d+)\s*年\s*(\d+)\s*月\s*(\d+)日".r
+  val pat: Regex = raw"(\D*)\s*(\d+)\s*年\s*(\d+)\s*月\s*(\d+)日.*".r
 
   sealed trait DateInputError:
     def message: String

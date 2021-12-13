@@ -25,8 +25,9 @@ import org.scalajs.dom.raw.Event
 
 class DateInput(gengouList: List[Gengou] = Gengou.list,
     onEnter: LocalDate => Unit = _ => (),
-    onChange: LocalDate => Unit = _ => ()):
-  val eInput: HTMLInputElement = inputText(placeholder := "平成３０年１２月２３日")
+    onChange: LocalDate => Unit = _ => (),
+    showYoubi: Boolean = false):
+  val eInput: HTMLInputElement = inputText(placeholder := "例:平成30年12月23日")
   val eCalendar = Icons.calendar
   val ele: HTMLElement = div(cls := "domq-date-input-wrapper")(
     form(eInput(cls := "domq-date-input"), onsubmit := (onSubmit _)),
@@ -44,7 +45,11 @@ class DateInput(gengouList: List[Gengou] = Gengou.list,
   }
 
   def setDate(date: LocalDate): Unit =
-    eInput(value := KanjiDate.dateToKanji(date))
+    val t = KanjiDate.dateToKanji(date, formatYoubi = info => {
+      if showYoubi then s"（${info.youbi}）"
+      else ""
+    })
+    eInput(value := t)
 
   def locatePicker(f: FloatingElement): Unit =
     val r = Geometry.getRect(eCalendar)

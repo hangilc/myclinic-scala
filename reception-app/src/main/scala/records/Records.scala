@@ -19,12 +19,14 @@ import java.time.LocalDate
 
 class Records() extends SideMenuService:
   val selectPatientButton = PullDown.createButtonAnchor("患者選択")
+  val eRecord = div()
   def getElement: HTMLElement =
     div(cls := "records")(
       div(cls := "header")(
         h1("診療記録"),
         selectPatientButton(onclick := (onSelectPatient _))
-      )
+      ),
+      eRecord
     )
 
   def onSelectPatient(event: MouseEvent): Unit =
@@ -95,4 +97,5 @@ class Records() extends SideMenuService:
     }
 
   def start(patient: Patient): Unit =
-    println(("start", patient))
+    val r = RecordUI(patient)
+    eRecord.setChildren(List(r.ele))

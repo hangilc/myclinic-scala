@@ -152,7 +152,6 @@ case class AppointColumn(
     appoints.foreach(addAppoint(_))
 
   def updateAppoint(appoint: Appoint): Unit =
-    println(("updateAppoint", appoint))
     findBoxByAppoint(appoint).foreach(b => b.updateAppoint(appoint))
     markKenshin()
 

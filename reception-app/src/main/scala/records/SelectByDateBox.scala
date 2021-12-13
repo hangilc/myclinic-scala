@@ -23,7 +23,7 @@ import cats.data.Validated.Invalid
 
 class SelectByDateBox(cb: Patient => Unit):
   val selection = Selection(cb)
-  val dateInput = DateInput(onEnter = (listDate _), onChange = (listDate _))
+  val dateInput = DateInput(onEnter = (listDate _), onChange = (listDate _), showYoubi = true)
   val ele = div(cls := "records-select-by-date-box")(
     div("日付別", cls := "title"),
     dateInput.ele,
@@ -50,13 +50,11 @@ class SelectByDateBox(cb: Patient => Unit):
     }
 
   def listDate(at: LocalDate): Future[Unit] =
-    println(("list-date", at))
     for
       visits <- Api.listVisitByDate(at)
       patientMap <- Api.batchGetPatient(visits.map(_.patientId))
     yield {
       val items = visits.map(visit => (visit, patientMap(visit.patientId)))
-      println(("items", items))
       setItems(items)
     }
 

@@ -131,6 +131,10 @@ case class ElementQ(ele: HTMLElement):
       case None => ele.appendChild(e)
     }
 
+  def toggle(): Unit =
+    if ele.style.display == "none" then ele.style.display = ""
+    else ele.style.display = "none"
+
 object ElementQ {
   
   given Conversion[HTMLElement, ElementQ] = ElementQ(_)
