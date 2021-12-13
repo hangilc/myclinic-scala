@@ -13,6 +13,7 @@ import dev.myclinic.scala.apputil.HokenUtil
 import dev.myclinic.scala.apputil.DrugUtil
 import dev.fujiwara.dateinput.ZenkakuUtil
 import dev.myclinic.scala.{util => ju}
+import dev.myclinic.scala.util.NumberUtil
 
 class VisitBlock(visit: VisitEx):
   val eText: HTMLElement = div()
@@ -44,7 +45,9 @@ class VisitBlock(visit: VisitEx):
   def chargeElement(chargeOption: Option[Charge]): HTMLElement =
     chargeOption match {
       case None => div("（未請求）")
-      case Some(charge) => div(s"請求額：${charge.charge}円")
+      case Some(charge) => 
+        val txt = NumberUtil.withComma(charge.charge)
+        div(s"請求額：${txt}円")
     }
 
   def drugElements(drugs: List[DrugEx]): List[HTMLElement] =
