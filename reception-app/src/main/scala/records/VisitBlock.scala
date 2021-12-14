@@ -22,23 +22,23 @@ class VisitBlock(visit: VisitEx):
   val eDrug: HTMLElement = div()
   val eCashier: HTMLElement = div()
   val ele: HTMLElement = div(cls := "visit-block")(
-    div(formatVisitTime(visit.visitedAt)),
-    div(cls := "two-columns")(
+    div(cls := "visit-title")(formatVisitTime(visit.visitedAt)),
+    div(cls := "visit-record")(
       div(cls := "left")(
         eText.setChildren(
           visit.texts.map(text => TextBlock(text).ele)
         )
       ),
-      div(cls := "right")(
-        eHoken(
-          HokenUtil.hokenRep(visit)
-        ),
-        eShinryou.setChildren(
-          visit.shinryouList.map(shinryou => div(shinryou.master.name))
-        ),
-        eDrug.setChildren(drugElements(visit.drugs)),
-        eCashier(chargeElement(visit.chargeOption))
-      )
+    //   div(cls := "right")(
+    //     eHoken(
+    //       HokenUtil.hokenRep(visit)
+    //     ),
+    //     eShinryou.setChildren(
+    //       visit.shinryouList.map(shinryou => div(shinryou.master.name))
+    //     ),
+    //     eDrug.setChildren(drugElements(visit.drugs)),
+    //     eCashier(chargeElement(visit.chargeOption))
+    //   )
     )
   )
 

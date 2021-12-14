@@ -1,6 +1,6 @@
 body {
-  display: flex;
-  justify-content: center;
+  width: 860px;
+  margin: 0 auto;
 }
 
 a {
@@ -17,8 +17,7 @@ button {
 }
 
 #content {
-  margin: 10px auto;
-  width: 860px;
+  margin: 10px 0;
 }
 
 #banner {
@@ -26,16 +25,14 @@ button {
   color: white;
   font-size: 40px;
   padding: 16px;
-  width: 100%;
 }
 
 #workarea {
-  display: flex;
-  width: 100%;
+  display: grid;
+  grid-template-columns: 180px auto;
 }
 
 #side-bar {
-  width: 180px;
   margin-top: 10px;
 }
 
@@ -286,3 +283,29 @@ button {
   max-width: 400px;
   overflow-x: auto;
 }
+
+/* VisitBlock *****************************************************************/
+
+.visit-block {
+  margin-bottom: 10px;
+  /* width: 100%; */
+}
+
+.visit-block .visit-title {
+  background-color: #eee;
+  font-weight: bold;
+  /* padding: 3px 6px; */
+}
+
+/* .visit-block .visit-record {
+  display: grid;
+  grid-template-columns: 50% 50%;
+} */
+
+/* .visit-block .visit-record .left {
+  padding-right: 10px;
+}
+
+.visit-block .visit-record .right {
+  padding-left: 10px;
+} */
