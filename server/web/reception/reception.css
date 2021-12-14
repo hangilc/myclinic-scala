@@ -294,18 +294,18 @@ button {
 .visit-block .visit-title {
   background-color: #eee;
   font-weight: bold;
-  /* padding: 3px 6px; */
+  padding: 3px 6px;
 }
 
-/* .visit-block .visit-record {
+.visit-block .visit-record {
   display: grid;
   grid-template-columns: 50% 50%;
 } */
 
-/* .visit-block .visit-record .left {
+.visit-block .visit-record .left {
   padding-right: 10px;
 }
 
 .visit-block .visit-record .right {
   padding-left: 10px;
-} */
+}

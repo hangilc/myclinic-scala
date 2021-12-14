@@ -29,16 +29,16 @@ class VisitBlock(visit: VisitEx):
           visit.texts.map(text => TextBlock(text).ele)
         )
       ),
-    //   div(cls := "right")(
-    //     eHoken(
-    //       HokenUtil.hokenRep(visit)
-    //     ),
-    //     eShinryou.setChildren(
-    //       visit.shinryouList.map(shinryou => div(shinryou.master.name))
-    //     ),
-    //     eDrug.setChildren(drugElements(visit.drugs)),
-    //     eCashier(chargeElement(visit.chargeOption))
-    //   )
+      div(cls := "right")(
+        eHoken(
+          HokenUtil.hokenRep(visit)
+        ),
+        eShinryou.setChildren(
+          visit.shinryouList.map(shinryou => div(shinryou.master.name))
+        ),
+        eDrug.setChildren(drugElements(visit.drugs)),
+        eCashier(chargeElement(visit.chargeOption))
+      )
     )
   )
 
