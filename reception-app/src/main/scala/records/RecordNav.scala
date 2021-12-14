@@ -15,7 +15,8 @@ import dev.fujiwara.dateinput.ZenkakuUtil
 import dev.myclinic.scala.{util => ju}
 import dev.myclinic.scala.util.NumberUtil
 
-class RecordNav(total: Int, onChange: Int => Unit = _ => ()):
+class RecordNav(onChange: Int => Unit = _ => ()):
+  var total = 0
   var page = 0
   val eDisp = span()
   val ele = div(
@@ -26,6 +27,13 @@ class RecordNav(total: Int, onChange: Int => Unit = _ => ()):
     eDisp,
   )
   updateDisp()
+
+  def setTotal(value: Int): Unit =
+    total = value
+
+  def setPage(value: Int): Unit = 
+    page = value
+    updateDisp()
 
   private def gotoPage(p: Int): Unit =
     if p >= 0 && p < total && p != page then

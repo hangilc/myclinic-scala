@@ -16,6 +16,7 @@ import dev.myclinic.scala.model.*
 import scala.util.Success
 import scala.util.Failure
 import java.time.LocalDate
+import dev.myclinic.scala.util.Misc.countPages
 
 class RecordUI(patient: Patient):
   val patientBlock = PatientBlock(patient)
@@ -23,6 +24,7 @@ class RecordUI(patient: Patient):
   var totalVisits: Int = 0
   var itemsPerPage = 10
   var page = 0
+  val navs: List[RecordNav] = List(new RecordNav(gotoPage _), new RecordNav(gotoPage _))
   val ele = div(cls := "record")(
     patientBlock.ele,
     eRecords
@@ -31,9 +33,16 @@ class RecordUI(patient: Patient):
   def init(): Future[Unit] = 
     for
       count <- Api.countVisitByPatient(patient.patientId)
+      totalPages = countPages(count, itemsPerPage)
     yield {
+      navs.foreach(_.setTotal(totalPages))
       updateUI()
     }
+
+  private def gotoPage(p: Int): Unit =
+    page = p
+    navs.foreach(_.setPage(p))
+    updateUI()
 
   def updateUI(): Future[Unit] =
     for
