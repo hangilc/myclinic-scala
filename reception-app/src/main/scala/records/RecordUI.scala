@@ -24,35 +24,45 @@ class RecordUI(patient: Patient):
   var totalVisits: Int = 0
   var itemsPerPage = 10
   var page = 0
-  val navs: List[RecordNav] = List(new RecordNav(gotoPage _), new RecordNav(gotoPage _))
+  val navs: List[RecordNav] =
+    List(new RecordNav(gotoPage _), new RecordNav(gotoPage _))
   val ele = div(cls := "record")(
     patientBlock.ele,
-    eRecords
+    navs(0).ele,
+    eRecords,
+    navs(1).ele
   )
 
-  def init(): Future[Unit] = 
+  def init(): Future[Unit] =
     for
       count <- Api.countVisitByPatient(patient.patientId)
       totalPages = countPages(count, itemsPerPage)
     yield {
-      navs.foreach(_.setTotal(totalPages))
+      navs.foreach(nav => {
+        nav.setTotal(totalPages)
+        nav.setPage(0)
+      })
       updateUI()
     }
 
   private def gotoPage(p: Int): Unit =
     page = p
-    navs.foreach(_.setPage(p))
-    updateUI()
+    for _ <- updateUI()
+    yield {
+      navs.foreach(_.setPage(p))
+    }
 
   def updateUI(): Future[Unit] =
     for
-      visitIds <- Api.listVisitIdByPatientReverse(patient.patientId, page * itemsPerPage, itemsPerPage)
+      visitIds <- Api.listVisitIdByPatientReverse(
+        patient.patientId,
+        page * itemsPerPage,
+        itemsPerPage
+      )
       visits <- Api.batchGetVisitEx(visitIds)
     yield {
       setVisits(visits)
     }
 
-
   def setVisits(visits: List[VisitEx]): Unit =
     eRecords.setChildren(visits.map(VisitBlock(_).ele))
-
