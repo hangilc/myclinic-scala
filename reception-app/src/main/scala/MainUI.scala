@@ -17,6 +17,7 @@ import scala.concurrent.Future
 import dev.myclinic.scala.web.reception.cashier.Cashier
 import dev.myclinic.scala.web.reception.patient.PatientManagement
 import dev.myclinic.scala.web.reception.records.Records
+import dev.myclinic.scala.web.reception.scan.Scan
 
 abstract class MainUI(using publishers: EventPublishers):
   def postHotline(msg: String): Unit
@@ -33,7 +34,7 @@ abstract class MainUI(using publishers: EventPublishers):
       "メイン" -> (() => Cashier()),
       "患者管理" -> (() => PatientManagement()),
       "診療記録" -> (() => Records()),
-      "スキャン" -> (() => ???)
+      "スキャン" -> (() => Scan())
     )
   )
   val ele =

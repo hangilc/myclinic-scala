@@ -263,11 +263,12 @@ button {
 #main .records .header {
   display: flex;
   align-items: flex-start;
+  margin-bottom: 10px;
 }
 
 #main .records .header h1 {
   display: inline-block;
-  margin-right: 4rem;
+  margin: 0 4rem 0 0;
 }
 
 .records-search-patient-box .domq-selection {
@@ -308,4 +309,29 @@ button {
 
 .visit-block .visit-record .right {
   padding-left: 10px;
+}
+
+/* Scan ***********************************************************************/
+
+#main .scan .header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+#main .scan .header h1 {
+  display: inline-block;
+  margin: 0 4rem 0 0; 
+}
+
+#main .scan .header button {
+  border: 1px solid gray;
+  display: block;
+}
+
+
+#main .scan h2 {
+  font-size: 1.2rem;
+  font-weight: normal;
+  margin: 0;
 }
