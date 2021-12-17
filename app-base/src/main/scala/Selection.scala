@@ -8,19 +8,23 @@ import org.scalajs.dom.raw.{HTMLElement}
 import scala.language.implicitConversions
 
 class Selection[T](
-    items: List[(String, T)],
     onSelect: T => Unit = ((_: T) => ())
 ):
-  val ele = div(cls := "appbase-selection")(
-    (items.map { case (label, value) =>
+  val ele = div(cls := "appbase-selection")
+
+  def addAll(items: List[(String, T)]): Unit =
+    ele.addChildren((items.map { case (label, value) =>
       SelectionItem(label, value).ele
-    }: List[Modifier]): _*
-  )
+    }))
 
   private def clearSelected(): Unit =
     val nodes = ele.querySelectorAll(".appbase-selection-item-selected")
     for i <- 0 until nodes.length do
-      nodes.item(i).asInstanceOf[HTMLElement].classList.remove("appbase-selection-item-selected")
+      nodes
+        .item(i)
+        .asInstanceOf[HTMLElement]
+        .classList
+        .remove("appbase-selection-item-selected")
 
   class SelectionItem(label: String, value: T):
     val ele: HTMLElement = div(cls := "appbase-selection-item")(
@@ -36,5 +40,11 @@ class Selection[T](
     def addSelected(): Unit =
       ele(cls := "appbase-selection-item-selected")
 
-    
-
+object Selection:
+  def apply[T](
+      items: List[(String, T)] = List.empty,
+      onSelect: T => Unit = ((_: T) => ())
+  ): Selection[T] =
+    val sel = new Selection(onSelect)
+    sel.addAll(items)
+    sel

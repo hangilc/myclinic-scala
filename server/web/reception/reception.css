@@ -329,9 +329,32 @@ button {
   display: block;
 }
 
+#main .scan .scan-box {
+  border: 1px solid var(--info-color);
+  padding: 10px;
+  border-radius: 4px; 
+}
 
-#main .scan h2 {
+#main .scan .scan-box .search-area {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+
+#main .scan .scan-box h2 {
+  display: inline-block;
   font-size: 1.2rem;
   font-weight: normal;
   margin: 0;
 }
+
+#main .scan .scan-box .search-area form {
+  display: inline-box;
+  margin: 0 0 0 0.5rem;
+}
+
+#main .scan .scan-box .search-area form button {
+  margin: 0 0 0 0.2rem;
+}
+
+
