@@ -147,3 +147,7 @@
   background-color: #eee;
   cursor: pointer;
 }
+
+.domq-selection-item.selected {
+  background-color: #ccc;
+}

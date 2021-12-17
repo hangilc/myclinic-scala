@@ -3,12 +3,12 @@ package dev.myclinic.scala.web.reception.patient
 import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
-import dev.fujiwara.domq.{Icons, Form, ErrorBox, Modifier}
+import dev.fujiwara.domq.{Icons, Form, ErrorBox, Modifier, Selection}
 import scala.language.implicitConversions
 import scala.util.{Success, Failure}
 import org.scalajs.dom.raw.{HTMLElement, HTMLInputElement}
 import scala.concurrent.Future
-import dev.myclinic.scala.web.appbase.{EventSubscriber, Selection}
+import dev.myclinic.scala.web.appbase.{EventSubscriber}
 import org.scalajs.dom.raw.MouseEvent
 import dev.myclinic.scala.webclient.Api
 import scala.concurrent.ExecutionContext.Implicits.global

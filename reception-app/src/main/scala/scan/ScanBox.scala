@@ -7,7 +7,8 @@ import dev.fujiwara.domq.Modifiers.{*, given}
 import scala.language.implicitConversions
 import org.scalajs.dom.raw.{HTMLElement}
 import dev.fujiwara.domq.Selection
-import dev.myclinic.scala.model.Patient
+import dev.myclinic.scala.model.{Patient, Sex}
+import java.time.LocalDate
 
 class ScanBox:
   val eSearchResult: Selection[Patient] = Selection[Patient]()
@@ -21,7 +22,7 @@ class ScanBox:
         button(attr("type") := "default")("検索")
       )
     ),
-    eSearchResult(cls := "search-result", displayNone),
+    eSearchResult.ele(cls := "search-result", displayNone),
     eSelectedPatient,
     h2("文書の種類"),
     select(),
@@ -30,5 +31,26 @@ class ScanBox:
       button("更新")
     ),
     eScanned
+  ) 
+  {
+    for i <- 1 to 10 do addSearchResult(mockPatient)
+    eSearchResult.ele(displayDefault)
+  }
+
+  def mockPatient: Patient = Patient(
+    1234,
+    "田中",
+    "孝志",
+    "たなか",
+    "たかし",
+    Sex.Male,
+    LocalDate.of(2002, 3, 12),
+    "東京",
+    "03"
   )
 
+  def addSearchResult(patient: Patient): Unit =
+    eSearchResult.add(
+      String.format("(%04d) %s", patient.patientId, patient.fullName()),
+      patient
+    )

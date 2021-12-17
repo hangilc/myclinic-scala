@@ -9,13 +9,14 @@ import dev.fujiwara.domq.{
   ErrorBox,
   Modifier,
   ShowMessage,
-  CustomEvent
+  CustomEvent,
+  Selection
 }
 import scala.language.implicitConversions
 import scala.util.{Success, Failure}
 import org.scalajs.dom.raw.{HTMLElement, HTMLInputElement}
 import scala.concurrent.Future
-import dev.myclinic.scala.web.appbase.{EventSubscriber, Selection}
+import dev.myclinic.scala.web.appbase.{EventSubscriber}
 import org.scalajs.dom.raw.MouseEvent
 import dev.myclinic.scala.webclient.Api
 import scala.concurrent.ExecutionContext.Implicits.global

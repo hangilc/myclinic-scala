@@ -18,7 +18,7 @@ import scala.util.Success
 import scala.util.Failure
 
 class RecentVisitBox(cb: Patient => Unit):
-  val selection = Selection(cb)
+  val selection = Selection(onSelect = cb)
   val pageDisp: HTMLElement = span()
   val ele: HTMLElement = div(cls := "records-recent-visit-box")(
     div("最近の診察", cls := "title"),

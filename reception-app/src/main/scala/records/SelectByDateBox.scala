@@ -22,7 +22,7 @@ import cats.data.Validated.Valid
 import cats.data.Validated.Invalid
 
 class SelectByDateBox(cb: Patient => Unit):
-  val selection = Selection(cb)
+  val selection = Selection[Patient](onSelect = cb)
   val dateInput = DateInput(onEnter = (listDate _), onChange = (listDate _), showYoubi = true)
   val ele = div(cls := "records-select-by-date-box")(
     div("日付別", cls := "title"),
