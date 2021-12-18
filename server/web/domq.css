@@ -141,6 +141,8 @@
 .domq-selection {
   max-height: 200px;
   overflow-y: auto;
+  border: 1px solid gray;
+  padding: 10px;
 }
 
 .domq-selection-item:hover {

@@ -357,4 +357,60 @@ button {
   margin: 0 0 0 0.2rem;
 }
 
+#main .scan .scan-box .search-result {
+  max-width: 16rem;
+  overflow-x: auto;
+  border-radius: 4px;
+  margin: 10px 0;
+}
 
+#main .scan .scan-box .selected-patient {
+  margin: 10px 0;
+}
+
+#main .scan .scan-box .scan-type-area,
+#main .scan .scan-box .scanner-selection-area,
+#main .scan .scan-box .scan-progress-area {
+  display: flex;
+  align-items: center;
+  margin: 10px 0;
+}
+
+#main .scan .scan-box .scan-type-area select,
+#main .scan .scan-box .scanner-selection-area select {
+  margin-left: 10px;
+}
+
+#main .scan .scan-box .scanner-selection-area button,
+#main .scan .scan-box .scanner-selection-area a {
+  margin-left: 10px;
+}
+
+#main .scan .scan-box .command-box {
+  display: flex;
+  justify-content: flex-end;
+}
+
+#main .scan .scan-box .scan-progress-area span {
+  margin-left: 10px;
+}
+
+#main .scan .scan-box .scanned {
+  border: 1px solid gray;
+  padding: 10px;
+  border-radius: 4px;
+  margin: 10px 0;
+}
+
+#main .scan .scan-box .scanned .scanned-item {
+  display: flex;
+  align-items: center;
+}
+
+#main .scan .scan-box .scanned .scanned-item a {
+  margin-left: 10px;
+}
+
+#main .scan .scan-box .scanned .upload-button {
+  margin-top: 10px;
+}

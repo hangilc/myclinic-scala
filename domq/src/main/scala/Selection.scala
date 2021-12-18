@@ -10,7 +10,7 @@ import scala.language.implicitConversions
 class Selection[T](
     onSelect: T => Unit = ((_: T) => ())
 ):
-  val ele = div(cls := "appbase-selection")
+  val ele = div(cls := "domq-selection")
 
   def addAll(items: List[(String, T)]): Unit =
     ele.addChildren((items.map { case (label, value) =>
@@ -24,6 +24,9 @@ class Selection[T](
 
   def clear(): Unit =
     ele.clear()
+
+  def show(): Unit = ele(displayDefault)
+  def hide(): Unit = ele(displayNone)
 
   private def clearSelected(): Unit =
     val nodes = ele.querySelectorAll(".domq-selection-item.selected")
