@@ -15,7 +15,6 @@ import scala.concurrent.Future
 import java.time.LocalDateTime
 
 class ScanBox:
-  var patientOption: Option[Patient] = None
   val eSearchInput: HTMLInputElement = inputText()
   val eSearchResult: Selection[Patient] =
     Selection[Patient](onSelect = patient => {
@@ -27,6 +26,7 @@ class ScanBox:
   val eScanTypeSelect: HTMLElement = select()
   val eScanProgress: HTMLElement = span(displayNone)
   val eScanned: HTMLElement = div()
+  val scannedItems = new ScannedItems()
   val ele = div(cls := "scan-box")(
     div(cls := "search-area")(
       h2("患者選択"),
@@ -39,7 +39,7 @@ class ScanBox:
     eSelectedPatient(cls := "selected-patient"),
     div(cls := "scan-type-area")(
       h2("文書の種類"),
-      eScanTypeSelect
+      eScanTypeSelect(onchange := (onScanTypeChange _))
     ),
     div(cls := "scanner-selection-area")(
       h2("スキャナ選択"),
@@ -50,7 +50,8 @@ class ScanBox:
       button("スキャン開始", onclick := (onStartScan _)),
       eScanProgress
     ),
-    eScanned(cls := "scanned")(
+    eScanned.ele(cls := "scanned")(
+      scannedItems.ele,
       div(cls := "scanned-item")(
         "????-image-20211219162626.jpg",
         a("表示"),
@@ -70,27 +71,9 @@ class ScanBox:
     for _ <- refreshScannerSelect()
     yield ()
 
-  private def uploadFileName(index: Option[Int]): String =
-    val pat = patientOption match {
-      case Some(p) => p.patientId.toString
-      case None    => "????"
-    }
-    val kind = eScanTypeSelect.getSelectValue()
-    val at = LocalDateTime.now()
-    val stamp = String.format(
-      "%d%02d%02d%02d%02d%02d",
-      at.getYear,
-      at.getMonthValue,
-      at.getDayOfMonth,
-      at.getHour,
-      at.getMinute,
-      at.getSecond
-    )
-    val ser = index match {
-      case Some(i) => s"(${i})"
-      case None => ""
-    }
-    s"${pat}-${kind}-${stamp}${ser}.jpg"
+  private def onScanTypeChange(): Unit = 
+    val value = eScanTypeSelect.getSelectValue()
+    scannedItems.setKind(value)
 
   private def reportProgress(loaded: Double, total: Double): Unit =
     val pct = loaded / total * 100
@@ -105,7 +88,7 @@ class ScanBox:
     yield
       eScanProgress.innerText = ""
       eScanProgress(displayNone)
-      
+      scannedItems.add(file)
 
   private def setScannerSelect(devices: List[ScannerDevice]): Unit =
     eScannerSelect.setChildren(
@@ -157,10 +140,59 @@ class ScanBox:
     )
 
   private def setSelectedPatient(patient: Patient): Unit =
-    patientOption = Some(patient)
     eSelectedPatient(innerText := formatPatient(patient))
+    scannedItems.setPatient(patient)
 
   private def formatPatient(patient: Patient): String =
     String.format("(%04d) %s", patient.patientId, patient.fullName())
 
-case class ScannedItem(savedFile: String, uploadFile: String)
+case class ScannedItem(var savedFile: String, var uploadFile: String):
+  val ele = div(cls := "scanned-item")(
+      uploadFile,
+      a("表示"),
+      a("再スキャン"),
+      a("削除")
+    )
+
+class ScannedItems:
+  val ele = div(
+  )
+  var items: List[ScannedItem] = List.empty
+  var patientOpt: Option[Patient] = None
+  var kind: String = "image"
+  val stamp: String = makeStamp
+
+  def setPatient(patient: Patient): Unit =
+    patientOpt = Some(patient)
+
+  def setKind(value: String): Unit =
+    kind = value
+
+  private def makeStamp: String = 
+      val at = LocalDateTime.now()
+      String.format(
+      "%d%02d%02d%02d%02d%02d",
+      at.getYear,
+      at.getMonthValue,
+      at.getDayOfMonth,
+      at.getHour,
+      at.getMinute,
+      at.getSecond
+    )
+
+  private def uploadFileName(index: Option[Int]): String =
+    val pat = patientOpt match {
+      case Some(p) => p.patientId.toString
+      case None    => "????"
+    }
+    val ser = index match {
+      case Some(i) => s"(${i})"
+      case None    => ""
+    }
+    s"${pat}-${kind}-${stamp}${ser}.jpg"
+
+  def add(savedFile: String): Unit =
+    val index = if items.size == 0 then None else Some(items.size + 1)
+    val item = new ScannedItem(savedFile, uploadFileName(index))
+    items = items :+ item
+    ele(item.ele)
