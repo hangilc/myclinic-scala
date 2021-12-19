@@ -172,7 +172,7 @@ case class ScannedItem(var savedFile: String, var uploadFile: String):
           new Blob(js.Array(data), BlobPropertyBag("image/jpeg"))
         )
         println(("oURL", oURL))
-        val image = new HTMLImageElement{}
+        val image = org.scalajs.dom.document.createElement("img").asInstanceOf[HTMLImageElement]
         image.onload = (e: Event) => {
           URL.revokeObjectURL(oURL)
         }
