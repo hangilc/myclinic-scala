@@ -19,6 +19,8 @@ import scala.scalajs.js
 import org.scalajs.dom.ext.Image
 import org.scalajs.dom.raw.HTMLImageElement
 import org.scalajs.dom.raw.Event
+import scala.util.Success
+import scala.util.Failure
 
 class ScanBox:
   val eSearchInput: HTMLInputElement = inputText()
@@ -161,18 +163,26 @@ case class ScannedItem(var savedFile: String, var uploadFile: String):
     )
 
   private def onShow(): Unit =
-    for
-      data <- Api.getScannedFile(savedFile)
-    yield
-      val oURL = URL.createObjectURL(
-        new Blob(js.Array(data), BlobPropertyBag("image/jpg"))
-      )
-      val image = new HTMLImageElement{}
-      image.onload = (e: Event) => {
-        URL.revokeObjectURL(oURL)
-      }
-      image.src = oURL
-      ele(image)
+    val f = 
+      for
+        data <- Api.getScannedFile(savedFile)
+      yield
+        println(("data", data))
+        val oURL = URL.createObjectURL(
+          new Blob(js.Array(data), BlobPropertyBag("image/jpeg"))
+        )
+        println(("oURL", oURL))
+        val image = new HTMLImageElement{}
+        image.onload = (e: Event) => {
+          URL.revokeObjectURL(oURL)
+        }
+        image.src = oURL
+        println(("image", image))
+        org.scalajs.dom.document.body.appendChild(image)
+    f.onComplete {
+      case Success(_) => ()
+      case Failure(ex) => System.err.println(ex.getMessage)
+    }
 
 
 class ScannedItems:
