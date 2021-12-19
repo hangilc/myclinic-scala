@@ -6,6 +6,8 @@ import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
 import scala.language.implicitConversions
 import org.scalajs.dom.raw.{HTMLElement}
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class Scan extends SideMenuService:
   val newScanButton: HTMLElement = button("新規スキャン")
@@ -20,7 +22,10 @@ class Scan extends SideMenuService:
     )
   addBox()
 
-  def addBox(): Unit =
+  def addBox(): Future[Unit] =
     val box = new ScanBox()
-    scannedBoxes.prepend(box.ele)
+    for
+      _ <- box.init()
+    yield
+      scannedBoxes.prepend(box.ele)
 

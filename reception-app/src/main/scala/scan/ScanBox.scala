@@ -5,26 +5,32 @@ import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
 import scala.language.implicitConversions
-import org.scalajs.dom.raw.{HTMLElement}
+import org.scalajs.dom.raw.{HTMLElement, HTMLInputElement}
 import dev.fujiwara.domq.Selection
-import dev.myclinic.scala.model.{Patient, Sex}
+import dev.myclinic.scala.model.{Patient, Sex, ScannerDevice}
 import java.time.LocalDate
+import dev.myclinic.scala.webclient.Api
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class ScanBox:
   var patientOption: Option[Patient] = None
+  val eSearchInput: HTMLInputElement = inputText()
   val eSearchResult: Selection[Patient] =
     Selection[Patient](onSelect = patient => {
       eSearchResult.hide()
       setSelectedPatient(patient)
     })
   val eSelectedPatient: HTMLElement = div()
+  val eScannerSelect: HTMLElement = select()
   val eScanTypeSelect: HTMLElement = select()
+  val eScanProgress: HTMLElement = span(displayNone)
   val eScanned: HTMLElement = div()
   val ele = div(cls := "scan-box")(
     div(cls := "search-area")(
       h2("患者選択"),
-      form(
-        inputText(),
+      form(onsubmit := (onSearch _))(
+        eSearchInput,
         button(attr("type") := "default")("検索")
       )
     ),
@@ -36,14 +42,12 @@ class ScanBox:
     ),
     div(cls := "scanner-selection-area")(
       h2("スキャナ選択"),
-      select(
-        option("Brother DCP-J577N")
-      ),
-      button("更新")
+      eScannerSelect,
+      button("更新", onclick := (refreshScannerSelect _))
     ),
     div(cls := "scan-progress-area")(
-      button("スキャン開始"),
-      span("スキャンの準備中")
+      button("スキャン開始", onclick := (onStartScan _)),
+      eScanProgress
     ),
     eScanned(cls := "scanned")(
       div(cls := "scanned-item")(
@@ -60,22 +64,50 @@ class ScanBox:
   )
   addDefaultScanTypes()
   eScanTypeSelect.setSelectValue("image")
-  if true then {
-    for i <- 1 to 10 do addSearchResult(mockPatient)
-    eSearchResult.ele(displayDefault)
-  }
 
-  def mockPatient: Patient = Patient(
-    1234,
-    "田中",
-    "孝志",
-    "たなか",
-    "たかし",
-    Sex.Male,
-    LocalDate.of(2002, 3, 12),
-    "東京",
-    "03"
-  )
+  def init(): Future[Unit] =
+    for
+      _ <- refreshScannerSelect()
+    yield ()
+
+  private def reportProgress(loaded: Double, total: Double): Unit =
+    val pct = loaded / total * 100
+    eScanProgress.innerText = s"${pct}%"
+
+  private def onStartScan(): Unit = 
+    val deviceId: String = eScannerSelect.getSelectValue()
+    val resolution = 100
+    eScanProgress.innerText = "スキャンの準備中"
+    eScanProgress(displayDefault)
+    for
+      file <- Api.scan(deviceId, (reportProgress _), 100)
+    yield 
+      eScanProgress.innerText = ""
+      eScanProgress(displayNone)
+
+  private def setScannerSelect(devices: List[ScannerDevice]): Unit =
+    eScannerSelect.setChildren(
+      devices.map(device => {
+        option(device.name, value := device.deviceId)
+      })
+    )
+
+  private def refreshScannerSelect(): Future[Unit] =
+    for
+      devices <- Api.listScannerDevices()
+    yield 
+      setScannerSelect(devices)
+
+  private def onSearch(): Unit = 
+    val txt = eSearchInput.value.trim
+    if !txt.isEmpty then
+      for
+        patients <- Api.searchPatient(txt)
+      yield 
+        eSearchResult.clear()
+        patients.foreach(addSearchResult(_))
+        eSearchResult.show()
+        eSearchResult.ele.scrollTop = 0
 
   private def addDefaultScanTypes(): Unit =
     val items = List(

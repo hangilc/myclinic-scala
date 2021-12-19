@@ -178,3 +178,7 @@ trait Model extends DateTime with WaitStateCodec:
   given Encoder[ClinicInfo] = deriveEncoder[ClinicInfo]
   given Decoder[ClinicInfo] = deriveDecoder[ClinicInfo]
 
+  given Encoder[ScannerDevice] = deriveEncoder[ScannerDevice]
+  given Decoder[ScannerDevice] = deriveDecoder[ScannerDevice]
+
+

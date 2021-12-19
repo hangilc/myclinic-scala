@@ -7,13 +7,16 @@ import org.scalajs.dom.raw.Event
 import io.circe._
 import io.circe.syntax._
 import io.circe.parser.*
+import org.scalajs.dom.raw.ProgressEvent
 
 object Ajax:
   def request[T](
       method: String,
       url: String,
       params: Params,
-      body: String
+      body: String,
+      progress: Option[(Double, Double) => Unit] = None,
+      resultHandler: Option[XMLHttpRequest => T] = None
   )(using Decoder[T]): Future[T] =
     val urlWithQuery =
       if params.isEmpty then url
@@ -24,12 +27,18 @@ object Ajax:
       if xhr.readyState == XMLHttpRequest.DONE then
         val status = xhr.status
         if status == 200 then
-          val src = xhr.responseText
-          decode[T](src) match
-            case Right(value) => promise.success(value)
-            case Left(ex) => {
-              System.err.println(("decode-error", src, ex.getMessage)); promise.failure(ex)
+          resultHandler match {
+            case Some(handler) => promise.success(handler(xhr))
+            case None => {
+              val src = xhr.responseText
+              decode[T](src) match
+                case Right(value) => promise.success(value)
+                case Left(ex) => {
+                  System.err.println(("decode-error", src, ex.getMessage));
+                  promise.failure(ex)
+                }
             }
+          }
         else if status == 400 then
           if xhr.getResponseHeader("X-User-Error") == "true" then
             val message: String = decode[String](xhr.responseText) match
@@ -40,6 +49,11 @@ object Ajax:
         else
           System.err.println(xhr.responseText)
           promise.failure(new RuntimeException(xhr.responseText))
+    }
+    progress match {
+      case Some(prog) =>
+        xhr.onprogress = (evt: ProgressEvent) => prog(evt.loaded, evt.total)
+      case None => ()
     }
     xhr.open(method, urlWithQuery)
     xhr.send(body)

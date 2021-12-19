@@ -98,16 +98,16 @@ class DatePicker(
     set(d.getYear, d.getMonthValue)
 
   private def currentGengou: Gengou =
-    Gengou.findByName(eGengouSelect.getSelectValue).get
+    Gengou.findByName(eGengouSelect.getSelectValue()).get
 
   private def currentNen: Int =
-    eNenSelect.getSelectValue.toInt
+    eNenSelect.getSelectValue().toInt
 
   private def currentYear: Int =
     Gengou.gengouToYear(currentGengou, currentNen)
 
   private def currentMonth: Int =
-    eMonthSelect.getSelectValue.toInt
+    eMonthSelect.getSelectValue().toInt
 
   private def onGengouChange(): Unit =
     val g = currentGengou

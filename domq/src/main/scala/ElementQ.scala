@@ -84,7 +84,7 @@ case class ElementQ(ele: HTMLElement):
   def setSelectValue(value: String): Unit =
     ele.asInstanceOf[HTMLSelectElement].value = value
 
-  def getSelectValue: String =
+  def getSelectValue(): String =
     ele.asInstanceOf[HTMLSelectElement].value
 
   def getCheckedRadioValue: Option[String] = 

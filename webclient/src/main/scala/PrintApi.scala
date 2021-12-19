@@ -7,6 +7,8 @@ import dev.fujiwara.scala.drawer.PrintRequest
 import io.circe.*
 import io.circe.syntax.*
 import io.circe.Decoder
+import dev.myclinic.scala.model.ScannerDevice
+import dev.myclinic.scala.model.jsoncodec.Implicits.given
 
 object PrintApi extends ApiBase:
   def baseUrl: String = "http://localhost:48080/"
@@ -29,6 +31,26 @@ object PrintApi extends ApiBase:
     def deletePrintPref(kind: String): Future[Option[String]] =
       delete("pref/" + kind, Params())
 
-    def printDrawer(req: PrintRequest, setting: Option[String]): Future[Boolean] =
+    def printDrawer(
+        req: PrintRequest,
+        setting: Option[String]
+    ): Future[Boolean] =
       val sub: String = setting.getOrElse("")
       post("print/" + sub, Params(), req)
+
+    def listScannerDevices(): Future[List[ScannerDevice]] =
+      get("scanner/device/", Params())
+
+    def scan(
+        deviceId: String,
+        progress: (Double, Double) => Unit,
+        resolution: Int = 100
+    ): Future[String] =
+      get(
+        "scanner/scan",
+        Params("device-id" -> deviceId, "resolution" -> resolution),
+        progress = Some(progress),
+        resultHandler = Some(xhr => {
+          xhr.getResponseHeader("x-saved-image")
+        })
+      )

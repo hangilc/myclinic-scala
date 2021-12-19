@@ -360,3 +360,9 @@ case class ClinicInfo(
     homepage: String,
     doctorName: String
 )
+
+case class ScannerDevice(
+  deviceId: String,
+  name: String,
+  description: String
+)
