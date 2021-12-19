@@ -7,6 +7,7 @@ import dev.myclinic.scala.webclient.ParamsImplicits.{given}
 import scala.language.implicitConversions
 import scala.concurrent.Future
 import org.scalajs.dom.raw.XMLHttpRequest
+import scala.scalajs.js.typedarray.ArrayBuffer
 
 trait ApiBase:
   def baseUrl: String
@@ -22,6 +23,17 @@ trait ApiBase:
       Decoder[T]
   ): Future[T] =
     Ajax.request("GET", url(service), params, "", progress, resultHandler)
+
+  def getBinary(
+    service: String,
+    params: Params
+  ): Future[ArrayBuffer] =
+    val req = new BinaryRequest
+    val reqUrl = url(service) + (
+      if params.isEmpty then ""
+      else "?" + params.encode()
+    )
+    req.send("GET", reqUrl)
 
   def post[B, T](service: String, params: Params, body: B)(using
       Encoder[B],

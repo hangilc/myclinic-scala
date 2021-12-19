@@ -58,3 +58,5 @@ object Ajax:
     xhr.open(method, urlWithQuery)
     xhr.send(body)
     promise.future
+
+

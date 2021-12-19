@@ -13,6 +13,12 @@ import dev.myclinic.scala.webclient.Api
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import java.time.LocalDateTime
+import org.scalajs.dom.raw.URL
+import org.scalajs.dom.{Blob, BlobPropertyBag}
+import scala.scalajs.js
+import org.scalajs.dom.ext.Image
+import org.scalajs.dom.raw.HTMLImageElement
+import org.scalajs.dom.raw.Event
 
 class ScanBox:
   val eSearchInput: HTMLInputElement = inputText()
@@ -149,10 +155,25 @@ class ScanBox:
 case class ScannedItem(var savedFile: String, var uploadFile: String):
   val ele = div(cls := "scanned-item")(
       uploadFile,
-      a("表示"),
+      a("表示", onclick := (onShow _)),
       a("再スキャン"),
       a("削除")
     )
+
+  private def onShow(): Unit =
+    for
+      data <- Api.getScannedFile(savedFile)
+    yield
+      val oURL = URL.createObjectURL(
+        new Blob(js.Array(data), BlobPropertyBag("image/jpg"))
+      )
+      val image = new HTMLImageElement{}
+      image.onload = (e: Event) => {
+        URL.revokeObjectURL(oURL)
+      }
+      image.src = oURL
+      ele(image)
+
 
 class ScannedItems:
   val ele = div(

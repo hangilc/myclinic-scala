@@ -9,6 +9,7 @@ import io.circe.syntax.*
 import io.circe.Decoder
 import dev.myclinic.scala.model.ScannerDevice
 import dev.myclinic.scala.model.jsoncodec.Implicits.given
+import scala.scalajs.js.typedarray.ArrayBuffer
 
 object PrintApi extends ApiBase:
   def baseUrl: String = "http://localhost:48080/"
@@ -54,3 +55,8 @@ object PrintApi extends ApiBase:
           xhr.getResponseHeader("x-saved-image")
         })
       )
+
+    def getScannedFile(savedFile: String): Future[ArrayBuffer] =
+      val req = new BinaryRequest
+      val url = s"${baseUrl}${savedFile}"
+      req.send("GET", url)
