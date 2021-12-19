@@ -12,6 +12,7 @@ import java.time.LocalDate
 import dev.myclinic.scala.webclient.Api
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import java.time.LocalDateTime
 
 class ScanBox:
   var patientOption: Option[Patient] = None
@@ -66,24 +67,45 @@ class ScanBox:
   eScanTypeSelect.setSelectValue("image")
 
   def init(): Future[Unit] =
-    for
-      _ <- refreshScannerSelect()
+    for _ <- refreshScannerSelect()
     yield ()
+
+  private def uploadFileName(index: Option[Int]): String =
+    val pat = patientOption match {
+      case Some(p) => p.patientId.toString
+      case None    => "????"
+    }
+    val kind = eScanTypeSelect.getSelectValue()
+    val at = LocalDateTime.now()
+    val stamp = String.format(
+      "%d%02d%02d%02d%02d%02d",
+      at.getYear,
+      at.getMonthValue,
+      at.getDayOfMonth,
+      at.getHour,
+      at.getMinute,
+      at.getSecond
+    )
+    val ser = index match {
+      case Some(i) => s"(${i})"
+      case None => ""
+    }
+    s"${pat}-${kind}-${stamp}${ser}.jpg"
 
   private def reportProgress(loaded: Double, total: Double): Unit =
     val pct = loaded / total * 100
     eScanProgress.innerText = s"${pct}%"
 
-  private def onStartScan(): Unit = 
+  private def onStartScan(): Unit =
     val deviceId: String = eScannerSelect.getSelectValue()
     val resolution = 100
     eScanProgress.innerText = "スキャンの準備中"
     eScanProgress(displayDefault)
-    for
-      file <- Api.scan(deviceId, (reportProgress _), 100)
-    yield 
+    for file <- Api.scan(deviceId, (reportProgress _), 100)
+    yield
       eScanProgress.innerText = ""
       eScanProgress(displayNone)
+      
 
   private def setScannerSelect(devices: List[ScannerDevice]): Unit =
     eScannerSelect.setChildren(
@@ -93,17 +115,14 @@ class ScanBox:
     )
 
   private def refreshScannerSelect(): Future[Unit] =
-    for
-      devices <- Api.listScannerDevices()
-    yield 
-      setScannerSelect(devices)
+    for devices <- Api.listScannerDevices()
+    yield setScannerSelect(devices)
 
-  private def onSearch(): Unit = 
+  private def onSearch(): Unit =
     val txt = eSearchInput.value.trim
     if !txt.isEmpty then
-      for
-        patients <- Api.searchPatient(txt)
-      yield 
+      for patients <- Api.searchPatient(txt)
+      yield
         eSearchResult.clear()
         patients.foreach(addSearchResult(_))
         eSearchResult.show()
@@ -143,3 +162,5 @@ class ScanBox:
 
   private def formatPatient(patient: Patient): String =
     String.format("(%04d) %s", patient.patientId, patient.fullName())
+
+case class ScannedItem(savedFile: String, uploadFile: String)
