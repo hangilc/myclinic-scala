@@ -200,4 +200,4 @@ object RestService extends DateTimeQueryParam:
     }
 
   } <+> PatientService.routes <+> VisitService.routes <+> MiscService.routes
-    <+> ConfigService.routes
+    <+> ConfigService.routes <+> FileService.routes

@@ -10,6 +10,7 @@ import dev.myclinic.scala.model.jsoncodec.Implicits.{given}
 import dev.myclinic.scala.webclient.ParamsImplicits.{given}
 import scala.language.implicitConversions
 import dev.fujiwara.scala.drawer.Op
+import scala.scalajs.js.typedarray.ArrayBuffer
 
 object MiscApi extends ApiBase:
   def baseUrl: String = "/api/"
@@ -216,3 +217,6 @@ object MiscApi extends ApiBase:
 
     def batchGetVisitEx(visitIds: List[Int]): Future[List[VisitEx]] =
       post("batch-get-visit-ex", Params(), visitIds)
+
+    def savePatientImage(patientId: Int, fileName: String, data: ArrayBuffer): Future[Boolean] =
+      postBinary("save-patient-image", Params("patient-id" -> patientId, "file-name" -> fileName), data)

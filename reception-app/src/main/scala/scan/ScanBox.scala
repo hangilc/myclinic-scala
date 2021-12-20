@@ -79,7 +79,7 @@ class ScanBox:
     for _ <- refreshScannerSelect()
     yield ()
 
-  private def onScanTypeChange(): Unit = 
+  private def onScanTypeChange(): Unit =
     val value = eScanTypeSelect.getSelectValue()
     scannedItems.setKind(value)
 
@@ -155,35 +155,46 @@ class ScanBox:
     String.format("(%04d) %s", patient.patientId, patient.fullName())
 
 case class ScannedItem(var savedFile: String, var uploadFile: String):
-  val ele = div(cls := "scanned-item")(
+  val ePreview: HTMLElement = div()
+  val ele = div(
+    div(cls := "scanned-item")(
       uploadFile,
       a("表示", onclick := (onShow _)),
       a("再スキャン"),
       a("削除")
+    ),
+    ePreview(displayNone)(
+      div(button("閉じる", onclick := (onClosePreview _)))
     )
+  )
+
+  private def onClosePreview(): Unit =
+    ePreview.qSelectorAll("img").foreach(_.remove())
+    ePreview(displayNone)
 
   private def onShow(): Unit =
-    val f = 
-      for
-        data <- Api.getScannedFile(savedFile)
+    val f =
+      for data <- Api.getScannedFile(savedFile)
       yield
-        println(("data", data))
         val oURL = URL.createObjectURL(
           new Blob(js.Array(data), BlobPropertyBag("image/jpeg"))
         )
-        println(("oURL", oURL))
-        val image = org.scalajs.dom.document.createElement("img").asInstanceOf[HTMLImageElement]
+        val image = org.scalajs.dom.document
+          .createElement("img")
+          .asInstanceOf[HTMLImageElement]
         image.onload = (e: Event) => {
           URL.revokeObjectURL(oURL)
         }
         image.src = oURL
-        println(("image", image))
-        org.scalajs.dom.document.body.appendChild(image)
+        val scale = 1.5
+        image.width = (210 * 1.5).toInt
+        image.height = (297 * 1.5).toInt
+        ePreview.prepend(image)
+        ePreview(displayDefault)
     f.onComplete {
-      case Success(_) => ()
+      case Success(_)  => ()
       case Failure(ex) => System.err.println(ex.getMessage)
     }
-
 
 class ScannedItems:
   val ele = div(
@@ -199,9 +210,9 @@ class ScannedItems:
   def setKind(value: String): Unit =
     kind = value
 
-  private def makeStamp: String = 
-      val at = LocalDateTime.now()
-      String.format(
+  private def makeStamp: String =
+    val at = LocalDateTime.now()
+    String.format(
       "%d%02d%02d%02d%02d%02d",
       at.getYear,
       at.getMonthValue,

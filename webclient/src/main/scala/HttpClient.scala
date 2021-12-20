@@ -8,13 +8,14 @@ import io.circe._
 import io.circe.syntax._
 import io.circe.parser.*
 import org.scalajs.dom.raw.ProgressEvent
+import scala.scalajs.js.typedarray.ArrayBuffer
 
 object Ajax:
   def request[T](
       method: String,
       url: String,
       params: Params,
-      body: String,
+      body: String | ArrayBuffer,
       progress: Option[(Double, Double) => Unit] = None,
       resultHandler: Option[XMLHttpRequest => T] = None
   )(using Decoder[T]): Future[T] =
@@ -56,7 +57,10 @@ object Ajax:
       case None => ()
     }
     xhr.open(method, urlWithQuery)
-    xhr.send(body)
+    body match {
+      case b: String => xhr.send(b)
+      case b: ArrayBuffer => xhr.send(b)
+    }
     promise.future
 
 

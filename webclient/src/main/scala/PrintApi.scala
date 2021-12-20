@@ -57,6 +57,6 @@ object PrintApi extends ApiBase:
       )
 
     def getScannedFile(savedFile: String): Future[ArrayBuffer] =
-      val req = new BinaryRequest
+      val req = new BinaryDownloadRequest
       val url = s"${baseUrl}scanner/image/${savedFile}"
       req.send("GET", url)

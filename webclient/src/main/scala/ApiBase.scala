@@ -28,7 +28,7 @@ trait ApiBase:
     service: String,
     params: Params
   ): Future[ArrayBuffer] =
-    val req = new BinaryRequest
+    val req = new BinaryDownloadRequest
     val reqUrl = url(service) + (
       if params.isEmpty then ""
       else "?" + params.encode()
@@ -40,6 +40,11 @@ trait ApiBase:
       Decoder[T]
   ): Future[T] =
     Ajax.request("POST", url(service), params, body.asJson.toString())
+
+  def postBinary[T](service: String, params: Params, body: ArrayBuffer)(using
+      Decoder[T]
+  ): Future[T] =
+    Ajax.request("POST", url(service), params, body)
 
   def post[T](service: String, params: Params)(using Decoder[T]): Future[T] =
     Ajax.request("POST", url(service), params, "{}")

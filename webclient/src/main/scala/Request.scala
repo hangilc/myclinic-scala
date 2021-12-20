@@ -25,7 +25,7 @@ abstract class Request[T]:
     xhr.send(data)
     promise.future
 
-class BinaryRequest extends Request[ArrayBuffer]:
+class BinaryDownloadRequest extends Request[ArrayBuffer]:
   override def responseType = "arraybuffer"
   def onload(event: ProgressEvent): ArrayBuffer =
     xhr.response.asInstanceOf[ArrayBuffer]
