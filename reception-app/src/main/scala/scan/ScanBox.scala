@@ -66,7 +66,7 @@ class ScanBox:
         a("再スキャン"),
         a("削除")
       ),
-      button(cls := "upload-button")("アップロード")
+      button("アップロード")(cls := "upload-button", onclick := (onItemsUpload _))
     ),
     div(cls := "command-box")(
       button("キャンセル")
@@ -78,6 +78,9 @@ class ScanBox:
   def init(): Future[Unit] =
     for _ <- refreshScannerSelect()
     yield ()
+
+  private def onItemsUpload(): Unit =
+    scannedItems.upload()
 
   private def onScanTypeChange(): Unit =
     val value = eScanTypeSelect.getSelectValue()
@@ -196,6 +199,12 @@ case class ScannedItem(var savedFile: String, var uploadFile: String):
       case Failure(ex) => System.err.println(ex.getMessage)
     }
 
+  def upload(patientId: Int): Future[Unit] =
+    for
+      data <- Api.getScannedFile(savedFile)
+      ok <- Api.savePatientImage(patientId, uploadFile, data)
+    yield ()
+
 class ScannedItems:
   val ele = div(
   )
@@ -238,3 +247,13 @@ class ScannedItems:
     val item = new ScannedItem(savedFile, uploadFileName(index))
     items = items :+ item
     ele(item.ele)
+
+  def upload(): Unit =
+    patientOpt.foreach(patient => {
+      items.headOption.foreach(item => {
+        item.upload(patient.patientId).onComplete {
+          case Success(_) => ()
+          case Failure(ex) => System.err.println(ex.getMessage)
+        }
+      })
+    })

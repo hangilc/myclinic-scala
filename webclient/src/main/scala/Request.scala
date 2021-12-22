@@ -19,7 +19,7 @@ abstract class Request[T]:
       promise.success(t)
     }
     xhr.onerror = (event: ProgressEvent) => {
-      promise.failure(new RuntimeException(xhr.responseText))
+      promise.failure(new RuntimeException(xhr.statusText))
     }
     xhr.open(method, url, true)
     xhr.send(data)

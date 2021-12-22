@@ -59,7 +59,10 @@ object Ajax:
     xhr.open(method, urlWithQuery)
     body match {
       case b: String => xhr.send(b)
-      case b: ArrayBuffer => xhr.send(b)
+      case b: ArrayBuffer => {
+        xhr.setRequestHeader("content-type", "application/octet-sream")
+        xhr.send(b)
+      }
     }
     promise.future
 
