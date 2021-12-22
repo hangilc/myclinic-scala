@@ -6,6 +6,7 @@ import cats.effect.*
 import org.http4s._
 import org.http4s.dsl.io._
 import org.http4s.implicits._
+import org.http4s.headers._
 import org.http4s.circe._
 import org.http4s.circe.CirceEntityEncoder._
 import org.http4s.circe.CirceEntityDecoder._
@@ -14,6 +15,8 @@ import io.circe.syntax._
 import fs2.concurrent.Topic
 import org.http4s.websocket.WebSocketFrame
 import fs2.Chunk
+import scodec.bits.ByteVector
+import java.nio.file.Paths
 
 object FileService extends DateTimeQueryParam with Publisher:
   object intPatientId extends QueryParamDecoderMatcher[Int]("patient-id")
@@ -23,8 +26,14 @@ object FileService extends DateTimeQueryParam with Publisher:
     case req @ POST -> Root / "save-patient-image" :? intPatientId(
           patientId
         ) +& strFileName(fileName) =>
-      for data <- req.body.compile.to(Chunk).map(d => d.toByteBuffer.array())
-      yield 
-        java.nio.file.Files.write(java.nio.file.Paths.get("../image.jpg"), data)
-        Response().withStatus(Status.Ok)
+      req.body
+        .through(fs2.io.file.writeAll(Paths.get("../image.jpg")))
+        .compile
+        .drain
+        .map(_ =>
+          Response[IO]()
+            .withStatus(Status.Ok)
+            .withEntity[Boolean](true)
+            .withContentType(`Content-Type`(MediaType.application.json))
+        )
   }
