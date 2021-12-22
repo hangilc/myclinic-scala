@@ -17,26 +17,23 @@ import org.http4s.websocket.WebSocketFrame
 import fs2.Chunk
 import scodec.bits.ByteVector
 import fs2.io.file.Path
+import dev.myclinic.scala.config.Config
 
 object FileService extends DateTimeQueryParam with Publisher:
   object intPatientId extends QueryParamDecoderMatcher[Int]("patient-id")
   object strFileName extends QueryParamDecoderMatcher[String]("file-name")
 
   private def saveToFile(req: Request[IO], path: Path): IO[Response[IO]] =
-    req.body
+    Ok(req.body
       .through(fs2.io.file.Files[IO].writeAll(path))
       .compile
       .drain
-      .map(_ =>
-        Response[IO]()
-          .withStatus(Status.Ok)
-          .withEntity[Boolean](true)
-          .withContentType(`Content-Type`(MediaType.application.json))
-      )
+      .map(_ => true))
 
   def routes(using topic: Topic[IO, WebSocketFrame]) = HttpRoutes.of[IO] {
     case req @ POST -> Root / "save-patient-image" :? intPatientId(
           patientId
         ) +& strFileName(fileName) =>
-      saveToFile(req, Path("../image.jpg"))
+      val loc = new java.io.File(Config.paperScanDir(patientId), fileName).getPath
+      saveToFile(req, Path(loc))
   }
