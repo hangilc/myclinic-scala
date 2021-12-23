@@ -63,7 +63,6 @@ class ScanBox:
     ),
     eScanned.ele(cls := "scanned")(
       scannedItems.ele,
-      Icons.x(css(style => style.stroke = "green")), Icons.check(color := "red"),
       button("アップロード")(cls := "upload-button", onclick := (onItemsUpload _))
     ),
     div(cls := "command-box")(
@@ -156,9 +155,12 @@ class ScanBox:
     String.format("(%04d) %s", patient.patientId, patient.fullName())
 
 case class ScannedItem(var savedFile: String, var uploadFile: String):
+  var isUploaded: Boolean = false
+  val eIconWrapper: HTMLElement = div()
   val ePreview: HTMLElement = div()
   val ele = div(
     div(cls := "scanned-item")(
+      eIconWrapper(display := "inline-block"),
       uploadFile,
       a("表示", onclick := (onShow _)),
       a("再スキャン"),
@@ -168,6 +170,16 @@ case class ScannedItem(var savedFile: String, var uploadFile: String):
       div(button("閉じる", onclick := (onClosePreview _)))
     )
   )
+
+  private def showSuccessIcon(): Unit =
+    eIconWrapper.setChildren(
+      List(Icons.check(stroke := "green"))
+    )
+
+  private def showFailureIcon(): Unit =
+    eIconWrapper.setChildren(
+      List(Icons.x(stroke := "red"))
+    )
 
   private def onClosePreview(): Unit =
     ePreview.qSelectorAll("img").foreach(_.remove())
@@ -198,10 +210,24 @@ case class ScannedItem(var savedFile: String, var uploadFile: String):
     }
 
   def upload(patientId: Int): Future[Unit] =
-    for
-      data <- Api.getScannedFile(savedFile)
-      ok <- Api.savePatientImage(patientId, uploadFile, data)
-    yield ()
+    val f =
+      for
+        data <- Api.getScannedFile(savedFile)
+        ok <- Api.savePatientImage(patientId, uploadFile, data)
+      yield ()
+    f.transform[Unit] {
+      case Success(_) =>
+        isUploaded = true
+        showSuccessIcon()
+        Success(())
+      case Failure(ex) =>
+        showFailureIcon()
+        Failure(ex)
+    }
+
+  def ensureUploaded(patientId: Int): Future[Unit] =
+    if isUploaded then Future.successful(())
+    else upload(patientId)
 
 class ScannedItems:
   val ele = div(
@@ -246,10 +272,18 @@ class ScannedItems:
     items = items :+ item
     ele(item.ele)
 
+  def uploadItems(patientId: Int, items: List[ScannedItem]): Future[Unit] =
+    items match {
+      case Nil => Future.successful(())
+      case h :: t =>
+        h.ensureUploaded(patientId).flatMap(_ => uploadItems(patientId, t))
+    }
+
   def upload(): Unit =
     patientOpt.foreach(patient => {
-      items.map(item => item.upload(patient.patientId)).sequence.onComplete {
-        case Success(_)  => ()
-        case Failure(ex) => System.err.println(ex.getMessage)
-      }
+      uploadItems(patient.patientId, items)
+        .onComplete {
+          case Success(_)  => ()
+          case Failure(ex) => System.err.println(ex.getMessage)
+        }
     })

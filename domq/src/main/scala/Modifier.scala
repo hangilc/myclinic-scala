@@ -130,6 +130,7 @@ object Modifiers:
   val cssFloat = styleSetter((s, v) => s.cssFloat = v)
   val floatRight = cssFloat := "right"
   val textAlign = styleSetter((s, v) => s.textAlign = v)
+  val stroke = styleSetter((s, v) => s.stroke = v)
   val zIndex = Creator[Int]((e, v) => e.style.zIndex = v.toString)
 
   val showHide = Creator[Boolean]((e, show: Boolean) => {
