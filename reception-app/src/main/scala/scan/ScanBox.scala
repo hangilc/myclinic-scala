@@ -21,6 +21,9 @@ import org.scalajs.dom.raw.HTMLImageElement
 import org.scalajs.dom.raw.Event
 import scala.util.Success
 import scala.util.Failure
+import cats.*
+import cats.syntax.all.*
+import dev.fujiwara.domq.Icons
 
 class ScanBox:
   val eSearchInput: HTMLInputElement = inputText()
@@ -60,12 +63,7 @@ class ScanBox:
     ),
     eScanned.ele(cls := "scanned")(
       scannedItems.ele,
-      div(cls := "scanned-item")(
-        "????-image-20211219162626.jpg",
-        a("表示"),
-        a("再スキャン"),
-        a("削除")
-      ),
+      Icons.x(css(style => style.stroke = "green")), Icons.check(color := "red"),
       button("アップロード")(cls := "upload-button", onclick := (onItemsUpload _))
     ),
     div(cls := "command-box")(
@@ -250,10 +248,8 @@ class ScannedItems:
 
   def upload(): Unit =
     patientOpt.foreach(patient => {
-      items.headOption.foreach(item => {
-        item.upload(patient.patientId).onComplete {
-          case Success(_) => ()
-          case Failure(ex) => System.err.println(ex.getMessage)
-        }
-      })
+      items.map(item => item.upload(patient.patientId)).sequence.onComplete {
+        case Success(_)  => ()
+        case Failure(ex) => System.err.println(ex.getMessage)
+      }
     })
