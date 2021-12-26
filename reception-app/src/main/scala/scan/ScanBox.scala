@@ -167,88 +167,12 @@ class ScanBox:
   private def formatPatient(patient: Patient): String =
     String.format("(%04d) %s", patient.patientId, patient.fullName())
 
-case class ScannedItem(var savedFile: String, var uploadFile: String):
-  var isUploaded: Boolean = false
-  val eIconWrapper: HTMLElement = div()
-  val ePreview: HTMLElement = div()
-  val ele = div(
-    div(cls := "scanned-item")(
-      eIconWrapper(display := "inline-block"),
-      uploadFile,
-      a("表示", onclick := (onShow _)),
-      a("再スキャン"),
-      a("削除")
-    ),
-    ePreview(displayNone)(
-      div(button("閉じる", onclick := (onClosePreview _)))
-    )
-  )
-
-  private def showSuccessIcon(): Unit =
-    eIconWrapper.setChildren(
-      List(Icons.check(stroke := "green"))
-    )
-
-  private def showFailureIcon(): Unit =
-    eIconWrapper.setChildren(
-      List(Icons.x(stroke := "red"))
-    )
-
-  private def onClosePreview(): Unit =
-    ePreview.qSelectorAll("img").foreach(_.remove())
-    ePreview(displayNone)
-
-  private def onShow(): Unit =
-    val f =
-      for data <- Api.getScannedFile(savedFile)
-      yield
-        val oURL = URL.createObjectURL(
-          new Blob(js.Array(data), BlobPropertyBag("image/jpeg"))
-        )
-        val image = org.scalajs.dom.document
-          .createElement("img")
-          .asInstanceOf[HTMLImageElement]
-        image.onload = (e: Event) => {
-          URL.revokeObjectURL(oURL)
-        }
-        image.src = oURL
-        val scale = 1.5
-        image.width = (210 * 1.5).toInt
-        image.height = (297 * 1.5).toInt
-        ePreview.prepend(image)
-        ePreview(displayDefault)
-    f.onComplete {
-      case Success(_)  => ()
-      case Failure(ex) => System.err.println(ex.getMessage)
-    }
-
-  def upload(patientId: Int): Future[Unit] =
-    val f =
-      for
-        data <- Api.getScannedFile(savedFile)
-        ok <- Api.savePatientImage(patientId, uploadFile, data)
-      yield ()
-    f.transform[Unit] {
-      case Success(_) =>
-        isUploaded = true
-        showSuccessIcon()
-        Success(())
-      case Failure(ex) =>
-        showFailureIcon()
-        Failure(ex)
-    }
-
-  def ensureUploaded(patientId: Int): Future[Unit] =
-    if isUploaded then Future.successful(())
-    else upload(patientId)
-
 class ScannedItems:
   val ele = div(
   )
   var items: List[ScannedItem] = List.empty
   var patientOpt: Option[Patient] = None
   var kind: String = "image"
-  val stamp: String = makeStamp
 
   def setPatient(patient: Patient): Unit =
     patientOpt = Some(patient)
