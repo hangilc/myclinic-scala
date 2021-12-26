@@ -26,7 +26,6 @@ import cats.syntax.all.*
 import dev.fujiwara.domq.Icons
 
 class ScanBox:
-  val timestamp: String = makeTimeStamp()
   val eSearchInput: HTMLInputElement = inputText()
   val eSearchResult: Selection[Patient] =
     Selection[Patient](onSelect = patient => {
@@ -76,18 +75,6 @@ class ScanBox:
   def init(): Future[Unit] =
     for _ <- refreshScannerSelect()
     yield ()
-
-  private def makeTimeStamp(): String =
-    val at = LocalDateTime.now()
-    String.format(
-      "%d%02d%02d%02d%02d%02d",
-      at.getYear,
-      at.getMonthValue,
-      at.getDayOfMonth,
-      at.getHour,
-      at.getMinute,
-      at.getSecond
-    )
 
   private def onItemsUpload(): Unit =
     scannedItems.upload()
@@ -167,7 +154,8 @@ class ScanBox:
   private def formatPatient(patient: Patient): String =
     String.format("(%04d) %s", patient.patientId, patient.fullName())
 
-class ScannedItems:
+class ScannedItems(val patient: => Option[Patient]):
+  val timestamp: String = makeTimeStamp()
   val ele = div(
   )
   var items: List[ScannedItem] = List.empty
@@ -179,6 +167,18 @@ class ScannedItems:
 
   def setKind(value: String): Unit =
     kind = value
+
+  private def makeTimeStamp(): String =
+    val at = LocalDateTime.now()
+    String.format(
+      "%d%02d%02d%02d%02d%02d",
+      at.getYear,
+      at.getMonthValue,
+      at.getDayOfMonth,
+      at.getHour,
+      at.getMinute,
+      at.getSecond
+    )
 
   private def uploadFileName(index: Option[Int]): String =
     val pat = patientOpt match {
