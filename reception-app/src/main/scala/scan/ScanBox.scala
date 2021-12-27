@@ -159,12 +159,16 @@ class ScanBox(onClose: () => Unit):
     String.format("(%04d) %s", patient.patientId, patient.fullName())
 
   private def onCloseClick(): Unit =
-    var ok: Boolean = false
+    def doClose(): Unit =
+      ele.remove()
+      onClose()
     if scannedItems.hasUnUploadedImage then
+      ShowMessage.confirm("アップロードされていない画像がありますが、このまま閉じますか？", yes => {
+        if yes then doClose()
+      })
+    else doClose()
       
 
-    ele.remove()
-    onClose()
 
   private def onUpload(done: Boolean): Unit =
       if done then eCloseButton.innerText = "閉じる"
