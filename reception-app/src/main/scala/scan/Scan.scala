@@ -11,21 +11,28 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class Scan extends SideMenuService:
   val newScanButton: HTMLElement = button("新規スキャン")
-  val scannedBoxes: HTMLElement = div()
+  val eScannedBoxes: HTMLElement = div()
   def getElement: HTMLElement =
     div(cls := "scan")(
       div(cls := "header")(
         h1("スキャン"),
         newScanButton
       ),
-      scannedBoxes
+      eScannedBoxes
     )
   addBox()
 
   def addBox(): Future[Unit] =
-    val box = new ScanBox()
+    val box = new ScanBox((onBoxClose _))
     for
       _ <- box.init()
     yield
-      scannedBoxes.prepend(box.ele)
+      eScannedBoxes.prepend(box.ele)
+
+  private def countBoxes: Int =
+    eScannedBoxes.qSelectorAll(s".${ScanBox.cssClassName}").size
+
+  private def onBoxClose(): Unit =
+    if countBoxes == 0 then addBox()
+    
 

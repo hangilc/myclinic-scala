@@ -6,7 +6,7 @@ import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
 import scala.language.implicitConversions
 import org.scalajs.dom.raw.{HTMLElement, HTMLInputElement}
-import dev.fujiwara.domq.Selection
+import dev.fujiwara.domq.{Selection, ErrorBox}
 import dev.myclinic.scala.model.{Patient, Sex, ScannerDevice}
 import java.time.LocalDate
 import dev.myclinic.scala.webclient.Api
@@ -25,7 +25,9 @@ import cats.*
 import cats.syntax.all.*
 import dev.fujiwara.domq.Icons
 
-class ScanBox:
+class ScanBox(onClose: () => Unit):
+  var patientOpt: Option[Patient] = None
+  var kind: String = "image"
   val eSearchInput: HTMLInputElement = inputText()
   val eSearchResult: Selection[Patient] =
     Selection[Patient](onSelect = patient => {
@@ -37,8 +39,9 @@ class ScanBox:
   val eScanTypeSelect: HTMLElement = select()
   val eScanProgress: HTMLElement = span(displayNone)
   val eScanned: HTMLElement = div()
-  val scannedItems = new ScannedItems()
-  val ele = div(cls := "scan-box")(
+  val eCloseButton: HTMLElement = button()
+  val scannedItems = new ScannedItems(() => patientOpt, () => kind, onUpload _)
+  val ele = div(cls := ScanBox.cssClassName)(
     div(cls := "search-area")(
       h2("患者選択"),
       form(onsubmit := (onSearch _))(
@@ -66,7 +69,7 @@ class ScanBox:
       button("アップロード")(cls := "upload-button", onclick := (onItemsUpload _))
     ),
     div(cls := "command-box")(
-      button("キャンセル")
+      eCloseButton("キャンセル", onclick := (onCloseClick _))
     )
   )
   addDefaultScanTypes()
@@ -80,8 +83,8 @@ class ScanBox:
     scannedItems.upload()
 
   private def onScanTypeChange(): Unit =
-    val value = eScanTypeSelect.getSelectValue()
-    scannedItems.setKind(value)
+    kind = eScanTypeSelect.getSelectValue()
+    scannedItems.updateUI()
 
   private def reportProgress(loaded: Double, total: Double): Unit =
     val pct = loaded / total * 100
@@ -149,24 +152,30 @@ class ScanBox:
 
   private def setSelectedPatient(patient: Patient): Unit =
     eSelectedPatient(innerText := formatPatient(patient))
-    scannedItems.setPatient(patient)
+    patientOpt = Some(patient)
+    scannedItems.updateUI()
 
   private def formatPatient(patient: Patient): String =
     String.format("(%04d) %s", patient.patientId, patient.fullName())
 
-class ScannedItems(val patient: => Option[Patient]):
+  private def onCloseClick(): Unit =
+    ele.remove()
+    onClose()
+
+  private def onUpload(done: Boolean): Unit =
+      if done then eCloseButton.innerText = "閉じる"
+      else eCloseButton.innerText = "キャンセル"
+
+class ScannedItems(
+    patientRef: () => Option[Patient],
+    kindRef: () => String,
+    onUpload: Boolean => Unit
+):
   val timestamp: String = makeTimeStamp()
-  val ele = div(
-  )
+  val eItemsWrapper: HTMLElement = div()
+  val errBox = ErrorBox()
+  val ele = div(eItemsWrapper, errBox.ele)
   var items: List[ScannedItem] = List.empty
-  var patientOpt: Option[Patient] = None
-  var kind: String = "image"
-
-  def setPatient(patient: Patient): Unit =
-    patientOpt = Some(patient)
-
-  def setKind(value: String): Unit =
-    kind = value
 
   private def makeTimeStamp(): String =
     val at = LocalDateTime.now()
@@ -180,35 +189,41 @@ class ScannedItems(val patient: => Option[Patient]):
       at.getSecond
     )
 
-  private def uploadFileName(index: Option[Int]): String =
-    val pat = patientOpt match {
-      case Some(p) => p.patientId.toString
-      case None    => "????"
-    }
-    val ser = index match {
-      case Some(i) => s"(${i})"
-      case None    => ""
-    }
-    s"${pat}-${kind}-${stamp}${ser}.jpg"
-
   def add(savedFile: String): Unit =
-    val index = if items.size == 0 then None else Some(items.size + 1)
-    val item = new ScannedItem(savedFile, uploadFileName(index))
+    val index: () => Option[Int] = () =>
+      if items.size == 0 then None else Some(items.size + 1)
+    val item = new ScannedItem(
+      savedFile,
+      timestamp,
+      items.size + 1,
+      () => items.size,
+      () => patientRef().map(_.patientId),
+      kindRef
+    )
     items = items :+ item
-    ele(item.ele)
+    if items.size == 2 then items.foreach(_.updateUI())
+    eItemsWrapper(item.ele)
 
-  def uploadItems(patientId: Int, items: List[ScannedItem]): Future[Unit] =
+  def updateUI(): Unit = items.foreach(_.updateUI())
+
+  def uploadItems(items: List[ScannedItem]): Future[Unit] =
     items match {
       case Nil => Future.successful(())
       case h :: t =>
-        h.ensureUploaded(patientId).flatMap(_ => uploadItems(patientId, t))
+        h.ensureUploaded().flatMap(_ => uploadItems(t))
     }
 
   def upload(): Unit =
-    patientOpt.foreach(patient => {
-      uploadItems(patient.patientId, items)
-        .onComplete {
-          case Success(_)  => ()
-          case Failure(ex) => System.err.println(ex.getMessage)
-        }
-    })
+    errBox.hide()
+    patientRef() match {
+      case None => errBox.show("患者が選択されていません。")
+      case Some(patient) =>
+        uploadItems(items)
+          .onComplete {
+            case Success(_)  => onUpload(true)
+            case Failure(ex) => System.err.println(ex.getMessage)
+          }
+    }
+
+object ScanBox:
+  val cssClassName: String = "scan-box"

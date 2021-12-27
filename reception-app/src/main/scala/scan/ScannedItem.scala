@@ -15,9 +15,10 @@ import scala.scalajs.js
 class ScannedItem(
     var savedFile: String,
     timestamp: String,
-    index: => Option[Int],
-    patientId: => Option[Int],
-    kind: => String
+    index: Int,
+    totalRef: () => Int,
+    patientIdRef: () => Option[Int],
+    kindRef: () => String
 ):
   var isUploaded: Boolean = false
   val eUploadFile: HTMLElement = span()
@@ -40,15 +41,12 @@ class ScannedItem(
     eUploadFile.innerText = uploadFileName
 
   private def uploadFileName: String =
-    val pat = patientId match {
+    val pat = patientIdRef() match {
       case Some(id) => id.toString
-      case None    => "????"
+      case None     => "????"
     }
-    val ser = index match {
-      case Some(i) => s"(${i})"
-      case None    => ""
-    }
-    s"${pat}-${kind}-${timestamp}${ser}.jpg"
+    val ser: String = if totalRef() <= 1 then "" else s"(${index})"
+    s"${pat}-${kindRef()}-${timestamp}${ser}.jpg"
 
   private def showSuccessIcon(): Unit =
     eIconWrapper.setChildren(
@@ -88,22 +86,26 @@ class ScannedItem(
       case Failure(ex) => System.err.println(ex.getMessage)
     }
 
-  def upload(patientId: Int): Future[Unit] =
-    val f =
-      for
-        data <- Api.getScannedFile(savedFile)
-        ok <- Api.savePatientImage(patientId, uploadFileName, data)
-      yield ()
-    f.transform[Unit] {
-      case Success(_) =>
-        isUploaded = true
-        showSuccessIcon()
-        Success(())
-      case Failure(ex) =>
-        showFailureIcon()
-        Failure(ex)
+  private def upload(): Future[Unit] =
+    patientIdRef().fold(
+      Future.failed(new RuntimeException("Patient not specified."))
+    ) { patientId =>
+      val f =
+        for
+          data <- Api.getScannedFile(savedFile)
+          ok <- Api.savePatientImage(patientId, uploadFileName, data)
+        yield ()
+      f.transform[Unit] {
+        case Success(_) =>
+          isUploaded = true
+          showSuccessIcon()
+          Success(())
+        case Failure(ex) =>
+          showFailureIcon()
+          Failure(ex)
+      }
     }
 
-  def ensureUploaded(patientId: Int): Future[Unit] =
+  def ensureUploaded(): Future[Unit] =
     if isUploaded then Future.successful(())
-    else upload(patientId)
+    else upload()
