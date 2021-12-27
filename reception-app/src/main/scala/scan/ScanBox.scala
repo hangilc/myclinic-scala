@@ -6,7 +6,7 @@ import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
 import scala.language.implicitConversions
 import org.scalajs.dom.raw.{HTMLElement, HTMLInputElement}
-import dev.fujiwara.domq.{Selection, ErrorBox}
+import dev.fujiwara.domq.{Selection, ErrorBox, ShowMessage}
 import dev.myclinic.scala.model.{Patient, Sex, ScannerDevice}
 import java.time.LocalDate
 import dev.myclinic.scala.webclient.Api
@@ -159,6 +159,10 @@ class ScanBox(onClose: () => Unit):
     String.format("(%04d) %s", patient.patientId, patient.fullName())
 
   private def onCloseClick(): Unit =
+    var ok: Boolean = false
+    if scannedItems.hasUnUploadedImage then
+      
+
     ele.remove()
     onClose()
 
@@ -224,6 +228,9 @@ class ScannedItems(
             case Failure(ex) => System.err.println(ex.getMessage)
           }
     }
+
+  def hasUnUploadedImage: Boolean =
+    items.find(! _.isUploaded).isDefined
 
 object ScanBox:
   val cssClassName: String = "scan-box"
