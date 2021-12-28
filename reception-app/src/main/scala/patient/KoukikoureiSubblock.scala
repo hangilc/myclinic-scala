@@ -73,10 +73,7 @@ class KoukikoureiSubblock(koukikourei: Koukikourei):
     }
 
   private def onDelete(): Unit =
-    ShowMessage.confirm(
-      "この保険を削除していいですか？",
-      ok => if ok then doDelete(koukikourei.koukikoureiId)
-    )
+    ShowMessage.confirm("この保険を削除していいですか？")(() => doDelete(koukikourei.koukikoureiId))
 
   private def doDelete(koukikoureiId: Int): Unit =
     Api.deleteKoukikourei(koukikoureiId).onComplete {

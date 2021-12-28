@@ -163,9 +163,7 @@ class ScanBox(onClose: () => Unit):
       ele.remove()
       onClose()
     if scannedItems.hasUnUploadedImage then
-      ShowMessage.confirm("アップロードされていない画像がありますが、このまま閉じますか？", yes => {
-        if yes then doClose()
-      })
+      ShowMessage.confirm("アップロードされていない画像がありますが、このまま閉じますか？")(doClose _)
     else doClose()
       
 

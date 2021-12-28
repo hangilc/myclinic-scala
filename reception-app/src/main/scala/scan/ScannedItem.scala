@@ -5,7 +5,7 @@ import org.scalajs.dom.{Blob, BlobPropertyBag}
 import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
-import dev.fujiwara.domq.{Icons}
+import dev.fujiwara.domq.{Icons, ShowMessage}
 import dev.myclinic.scala.webclient.Api
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -30,7 +30,7 @@ class ScannedItem(
       eUploadFile(innerText := uploadFileName),
       a("表示", onclick := (onShow _)),
       a("再スキャン"),
-      a("削除")
+      a("削除", onclick := (onDeleteClick _))
     ),
     ePreview(displayNone)(
       div(button("閉じる", onclick := (onClosePreview _)))
@@ -85,6 +85,19 @@ class ScannedItem(
       case Success(_)  => ()
       case Failure(ex) => System.err.println(ex.getMessage)
     }
+
+  private def doDelete(): Unit =
+    val f =
+      for 
+        _ <- Api.deleteScannedFile(savedFile)
+      yield ()
+    f.onComplete {
+      case Success(_) => ()
+      case Failure(ex) => System.err.println(ex.getMessage)
+    }
+
+  private def onDeleteClick(): Unit =
+    ShowMessage.confirm("この画像を削除していいですか？")(doDelete _)
 
   private def upload(): Future[Unit] =
     patientIdRef().fold(

@@ -60,3 +60,8 @@ object PrintApi extends ApiBase:
       val req = new BinaryDownloadRequest
       val url = s"${baseUrl}scanner/image/${savedFile}"
       req.send("GET", url)
+
+    def deleteScannedFile(savedFile: String): Future[ArrayBuffer] =
+      val req = new BinaryDownloadRequest
+      val url = s"${baseUrl}scanner/image/${savedFile}"
+      req.send("DELETE", url)

@@ -81,10 +81,7 @@ class ShahokokuhoSubblock(shahokokuho: Shahokokuho):
     }
 
   private def onDelete(): Unit =
-    ShowMessage.confirm(
-      "この保険を削除していいですか？",
-      ok => if ok then doDelete(shahokokuho.shahokokuhoId)
-    )
+    ShowMessage.confirm("この保険を削除していいですか？")(() => doDelete(shahokokuho.shahokokuhoId))
 
   private def doDelete(shahokokuhoId: Int): Unit =
     Api.deleteShahokokuho(shahokokuhoId).onComplete {

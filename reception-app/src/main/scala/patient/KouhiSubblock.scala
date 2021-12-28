@@ -73,10 +73,7 @@ class KouhiSubblock(kouhi: Kouhi):
     }
 
   private def onDelete(): Unit =
-    ShowMessage.confirm(
-      "この保険を削除していいですか？",
-      ok => if ok then doDelete(kouhi.kouhiId)
-    )
+    ShowMessage.confirm("この保険を削除していいですか？")(() => doDelete(kouhi.kouhiId))
 
   private def doDelete(kouhiId: Int): Unit =
     Api.deleteKouhi(kouhiId).onComplete {

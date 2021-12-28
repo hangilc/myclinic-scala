@@ -58,7 +58,10 @@ object ShowMessage:
     populateCommandBox(commandBox, commands, cmd => m.close())
     m.open()
 
-  def confirm(message: String, cb: Boolean => Unit): Unit =
+  def confirm(message: String)(okCallback: () => Unit): Unit =
+    confirm(message)(okCallback)(() => ())
+
+  def confirm(message: String)(okCallback: () => Unit)(noCallback: () => Unit): Unit =
     val yesButton = button("はい")
     val noButton = button("いいえ")
     val m = Modal(
@@ -69,7 +72,7 @@ object ShowMessage:
     m.dialog(css(style => {
       style.maxWidth = "400px"
     }))
-    m.onClose(cb)
+    m.onClose(yes => if yes then okCallback() else noCallback())
     yesButton(onclick := (() => m.close(true)))
     noButton(onclick := (() => m.close(false)))
     m.open()

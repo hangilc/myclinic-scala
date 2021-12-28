@@ -43,7 +43,7 @@ class Cashier(using publishers: EventPublishers) extends SideMenuService:
           }
         }),
         mt := "10px"
-      ),
+      )
     )
   )
   val rowMap: mutable.Map[Int, HTMLElement] = mutable.Map.empty
@@ -63,18 +63,19 @@ class Cashier(using publishers: EventPublishers) extends SideMenuService:
     )
 
   private def onMenu(event: MouseEvent): Unit =
-    val m = ContextMenu(List(
-      "手書き領収書印刷" -> printBlankReceipt
-    ))
+    val m = ContextMenu(
+      List(
+        "手書き領収書印刷" -> printBlankReceipt
+      )
+    )
     m.open(event)
 
-  private def printBlankReceipt(): Unit = 
-    val f = 
-      for
-        ops <- Api.drawBlankReceipt()
+  private def printBlankReceipt(): Unit =
+    val f =
+      for ops <- Api.drawBlankReceipt()
       yield CashierLib.openPrintDialog("手書き領収書", ops)
     f.onComplete {
-      case Success(_) => ()
+      case Success(_)  => ()
       case Failure(ex) => ShowMessage.showError(ex.getMessage)
     }
 
@@ -118,7 +119,9 @@ class Cashier(using publishers: EventPublishers) extends SideMenuService:
           if wq.waitState == WaitState.WaitCashier then
             e(
               button("会計")(
-                onclick := (() => doCashier(wq.visitId, patient, visit.visitedAt.toLocalDate))
+                onclick := (() =>
+                  doCashier(wq.visitId, patient, visit.visitedAt.toLocalDate)
+                )
               )
             )
           if wq.waitState == WaitState.WaitExam then
@@ -155,19 +158,15 @@ class Cashier(using publishers: EventPublishers) extends SideMenuService:
 
   private def doDelete(visit: Visit, patient: Patient): Unit =
     val msg = s"${patient.fullName()}\n削除していいですか？"
-    ShowMessage.confirm(
-      msg,
-      ok => {
-        if ok then
-          Api.deleteVisit(visit.visitId).onComplete {
-            case Success(_)  => ()
-            case Failure(ex) => ShowMessage.showError("doDelete: " + ex.getMessage)
-          }
+    ShowMessage.confirm(msg)(() =>
+      Api.deleteVisit(visit.visitId).onComplete {
+        case Success(_)  => ()
+        case Failure(ex) => ShowMessage.showError("doDelete: " + ex.getMessage)
       }
     )
 
   private def doCashier(visitId: Int, patient: Patient, at: LocalDate): Unit =
-    for 
+    for
       meisai <- Api.getMeisai(visitId)
       visit <- Api.getVisitEx(visitId)
     yield {
