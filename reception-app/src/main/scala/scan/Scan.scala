@@ -23,7 +23,8 @@ class Scan extends SideMenuService:
   addBox()
 
   def addBox(): Future[Unit] =
-    val box = new ScanBox((onBoxClose _))
+    val box = new ScanBox((onBoxClose _), (onScanStart _), (onScanEnd _))
+    box.enableScan(false)
     for
       _ <- box.init()
     yield
@@ -34,5 +35,11 @@ class Scan extends SideMenuService:
 
   private def onBoxClose(): Unit =
     if countBoxes == 0 then addBox()
+
+  private def onScanStart(): Unit =
+    ???
+
+  private def onScanEnd(): Unit = 
+    ???
     
 

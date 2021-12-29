@@ -25,7 +25,7 @@ import cats.*
 import cats.syntax.all.*
 import dev.fujiwara.domq.Icons
 
-class ScanBox(onClose: () => Unit):
+class ScanBox(onClose: () => Unit, onScanStart: () => Unit, onScanEnd: () => Unit):
   var patientOpt: Option[Patient] = None
   var kind: String = "image"
   val eSearchInput: HTMLInputElement = inputText()
@@ -37,6 +37,7 @@ class ScanBox(onClose: () => Unit):
   val eSelectedPatient: HTMLElement = div()
   val eScannerSelect: HTMLElement = select()
   val eScanTypeSelect: HTMLElement = select()
+  val eScanButton: HTMLElement = button()
   val eScanProgress: HTMLElement = span(displayNone)
   val eScanned: HTMLElement = div()
   val eCloseButton: HTMLElement = button()
@@ -61,7 +62,7 @@ class ScanBox(onClose: () => Unit):
       button("更新", onclick := (refreshScannerSelect _))
     ),
     div(cls := "scan-progress-area")(
-      button("スキャン開始", onclick := (onStartScan _)),
+      eScanButton("スキャン開始", onclick := (startScan _)),
       eScanProgress
     ),
     eScanned.ele(cls := "scanned")(
@@ -79,6 +80,9 @@ class ScanBox(onClose: () => Unit):
     for _ <- refreshScannerSelect()
     yield ()
 
+  def enableScan(enable: Boolean): Unit =
+    eScanButton.enable(enable)
+
   private def onItemsUpload(): Unit =
     scannedItems.upload()
 
@@ -90,7 +94,8 @@ class ScanBox(onClose: () => Unit):
     val pct = loaded / total * 100
     eScanProgress.innerText = s"${pct}%"
 
-  private def onStartScan(): Unit =
+  private def startScan(): Unit =
+    onScanStart()
     val deviceId: String = eScannerSelect.getSelectValue()
     val resolution = 100
     eScanProgress.innerText = "スキャンの準備中"
@@ -100,6 +105,7 @@ class ScanBox(onClose: () => Unit):
       eScanProgress.innerText = ""
       eScanProgress(displayNone)
       scannedItems.add(file)
+      onScanEnd()
 
   private def setScannerSelect(devices: List[ScannerDevice]): Unit =
     eScannerSelect.setChildren(

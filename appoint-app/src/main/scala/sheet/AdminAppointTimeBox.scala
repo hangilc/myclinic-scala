@@ -54,9 +54,7 @@ class AdminAppointTimeBox(
 
   def doDelete(): Unit =
     val msg = "本当に削除しますか？"
-    ShowMessage.confirm(
-      msg,
-      yes => {
-        if yes then Api.deleteAppointTime(appointTime.appointTimeId)
-      }
-    )
+    ShowMessage.confirm(msg)(() => {
+      Api.deleteAppointTime(appointTime.appointTimeId)
+      ()
+    })

@@ -135,6 +135,10 @@ case class ElementQ(ele: HTMLElement):
     if ele.style.display == "none" then ele.style.display = ""
     else ele.style.display = "none"
 
+  def enable(yes: Boolean): Unit =
+    if yes then ele.removeAttribute("disabled")
+    else ele.setAttribute("disabled", "disabled")
+
 object ElementQ {
   
   given Conversion[HTMLElement, ElementQ] = ElementQ(_)

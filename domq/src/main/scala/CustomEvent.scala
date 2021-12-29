@@ -4,6 +4,7 @@ import scala.scalajs.js
 import scala.scalajs.js.annotation._
 import org.scalajs.dom.raw.Event
 import org.scalajs.dom.raw.EventInit
+import org.scalajs.dom.raw.HTMLElement
 
 @js.native
 @JSGlobal
@@ -24,3 +25,11 @@ object CustomEventInit:
     val init = new CustomEventInit[T](detailValue)
     init.bubbles = bubbles
     init
+
+  def dispatch[T](targets: List[HTMLElement], eventType: String, detail: T): Unit =
+    import dev.fujiwara.domq.{CustomEvent, CustomEventInit}
+    val evt: CustomEvent[T] = CustomEvent(eventType, detail, false)
+    targets
+      .foreach(e => {
+        e.dispatchEvent(evt)
+      })

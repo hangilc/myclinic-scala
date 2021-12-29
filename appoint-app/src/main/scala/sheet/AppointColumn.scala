@@ -15,6 +15,8 @@ import cats.syntax.all.*
 import dev.myclinic.scala.webclient.Api
 import concurrent.ExecutionContext.Implicits.global
 import dev.myclinic.scala.clinicop.*
+import scala.util.Success
+import scala.util.Failure
 
 given Ordering[AppointColumn] with
   def compare(a: AppointColumn, b: AppointColumn): Int =
@@ -96,28 +98,37 @@ case class AppointColumn(
   def doDeleteAllAppointTimes(): Unit =
     val dateRep = Misc.formatAppointDate(date)
     ShowMessage.confirm(
-      s"${dateRep}の予約枠を全部削除していいですか？",
-      yes => {
-        if yes then
-          val ids: List[Int] = boxes.map(_.appointTimeId).toList
-          for _ <- ids.map(id => Api.deleteAppointTime(id)).sequence.void
-          yield ()
+      s"${dateRep}の予約枠を全部削除していいですか？"
+    )(() => {
+      val ids: List[Int] = boxes.map(_.appointTimeId).toList
+      (for _ <- ids.map(id => Api.deleteAppointTime(id)).sequence.void
+      yield ()).onComplete {
+        case Success(_) => ()
+        case Failure(ex) => System.err.println(ex.getMessage)
       }
-    )
+    })
 
-  def findFollowingVacantRegular(appointTime: AppointTime): Option[AppointTime] =
-    val idx = boxes.indexWhere(b => b.appointTime.appointTimeId == appointTime.appointTimeId)
+  def findFollowingVacantRegular(
+      appointTime: AppointTime
+  ): Option[AppointTime] =
+    val idx = boxes.indexWhere(b =>
+      b.appointTime.appointTimeId == appointTime.appointTimeId
+    )
     if idx < 0 || (idx + 1) >= boxes.size then None
     else
       val f = boxes(idx + 1)
-      if f.appointTime.kind == "regular" && f.hasVacancy then Some(f.appointTime)
+      if f.appointTime.kind == "regular" && f.hasVacancy then
+        Some(f.appointTime)
       else None
 
   def hasAppointTimeId(appointTimeId: Int): Boolean =
     boxes.find(b => b.appointTime.appointTimeId == appointTimeId).isDefined
 
   def addAppointTime(appointTime: AppointTime): Unit =
-    val box = appointTimeBoxMaker(appointTime, () => findFollowingVacantRegular(appointTime))
+    val box = appointTimeBoxMaker(
+      appointTime,
+      () => findFollowingVacantRegular(appointTime)
+    )
     boxes = sortedAppointTimeBox.insert(box, boxes, boxWrapper)
     adjustVacantClass()
 
@@ -127,7 +138,8 @@ case class AppointColumn(
     adjustVacantClass()
 
   def updateAppointTime(updated: AppointTime): Unit =
-    val box = appointTimeBoxMaker(updated, () => findFollowingVacantRegular(updated))
+    val box =
+      appointTimeBoxMaker(updated, () => findFollowingVacantRegular(updated))
     boxes = sortedAppointTimeBox.update(
       b => {
         if b.appointTimeId == updated.appointTimeId then
