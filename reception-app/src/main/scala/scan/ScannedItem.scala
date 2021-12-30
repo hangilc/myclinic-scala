@@ -11,16 +11,17 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Success, Failure}
 import scala.scalajs.js
+import dev.myclinic.scala.model.Patient
 
 class ScannedItem(
     var savedFile: String,
-    timestamp: String,
-    index: Int,
-    totalRef: () => Int,
-    patientIdRef: () => Option[Int],
-    kindRef: () => String
+    timestamp: String
 ):
   var isUploaded: Boolean = false
+  var patient: Option[Patient] = None
+  var index: Int = 1
+  var total: Int = 1
+  var kind: String = "image"
   val eUploadFile: HTMLElement = span()
   val eIconWrapper: HTMLElement = div()
   val ePreview: HTMLElement = div()
@@ -37,16 +38,18 @@ class ScannedItem(
     )
   )
 
-  def updateUI(): Unit =
+  def updateUI(state: ScanBoxState, sIndex: Int, sTotal: Int): Unit =
+    val sPatient = state.patient
+    val skind = state.kind
     eUploadFile.innerText = uploadFileName
 
   private def uploadFileName: String =
-    val pat = patientIdRef() match {
-      case Some(id) => id.toString
+    val pat = patient match {
+      case Some(p) => p.patientId.toString
       case None     => "????"
     }
-    val ser: String = if totalRef() <= 1 then "" else s"(${index})"
-    s"${pat}-${kindRef()}-${timestamp}${ser}.jpg"
+    val ser: String = if total <= 1 then "" else s"(${index})"
+    s"${pat}-${kind}-${timestamp}${ser}.jpg"
 
   private def showSuccessIcon(): Unit =
     eIconWrapper.setChildren(

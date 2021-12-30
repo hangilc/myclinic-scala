@@ -6,6 +6,7 @@ import scala.language.implicitConversions
 import org.scalajs.dom.raw.{HTMLDocument, HTMLInputElement, Node, HTMLSelectElement}
 import scala.concurrent.Future
 import scala.collection.mutable.ListBuffer
+import scala.scalajs.js
 import math.Ordering.Implicits.infixOrderingOps
 
 case class ElementQ(ele: HTMLElement):
@@ -84,8 +85,13 @@ case class ElementQ(ele: HTMLElement):
   def setSelectValue(value: String): Unit =
     ele.asInstanceOf[HTMLSelectElement].value = value
 
+  def getOptionalSelectValue(): Option[String] =
+    val value = ele.asInstanceOf[HTMLSelectElement].value
+    if value == null || js.isUndefined(value) || value.isEmpty then None
+    else Some(value)
+
   def getSelectValue(): String =
-    ele.asInstanceOf[HTMLSelectElement].value
+    getOptionalSelectValue().get
 
   def getCheckedRadioValue: Option[String] = 
     val n = ele.querySelector("input[type=radio]:checked")

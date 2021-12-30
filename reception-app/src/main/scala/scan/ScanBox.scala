@@ -6,7 +6,7 @@ import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
 import scala.language.implicitConversions
 import org.scalajs.dom.raw.{HTMLElement, HTMLInputElement}
-import dev.fujiwara.domq.{Selection, ErrorBox, ShowMessage}
+import dev.fujiwara.domq.{Selection, ErrorBox, ShowMessage, CustomEvent}
 import dev.myclinic.scala.model.{Patient, Sex, ScannerDevice}
 import java.time.LocalDate
 import dev.myclinic.scala.webclient.Api
@@ -25,23 +25,39 @@ import cats.*
 import cats.syntax.all.*
 import dev.fujiwara.domq.Icons
 
-class ScanBox(onClose: () => Unit, onScanStart: () => Unit, onScanEnd: () => Unit):
+class ScanBox():
   var patientOpt: Option[Patient] = None
   var kind: String = "image"
+  var scanAllowedGlobally = true
+  var isUploading: Boolean = false
   val eSearchInput: HTMLInputElement = inputText()
-  val eSearchResult: Selection[Patient] =
+  val searchResult: Selection[Patient] =
     Selection[Patient](onSelect = patient => {
-      eSearchResult.hide()
-      setSelectedPatient(patient)
+      searchResult.hide()
+      patientOpt = Some(patient)
+      updateUI()
     })
-  val eSelectedPatient: HTMLElement = div()
+  val patientDisp = new SelectedPatientDisp()
   val eScannerSelect: HTMLElement = select()
   val eScanTypeSelect: HTMLElement = select()
   val eScanButton: HTMLElement = button()
   val eScanProgress: HTMLElement = span(displayNone)
   val eScanned: HTMLElement = div()
+  val eUploadButton: HTMLElement = button()
   val eCloseButton: HTMLElement = button()
-  val scannedItems = new ScannedItems(() => patientOpt, () => kind, onUpload _)
+  val scannedItems = new ScannedItems(onUpload _)
+  val components: List[ScanBoxUIComponent] = List(
+    patientDisp,
+    new ScanBoxUIComponent:
+      def updateUI(state: ScanBoxState): Unit =
+        val enabled: Boolean = scanAllowedGlobally && selectedDevice.isDefined
+        eScanButton(disabled := !enabled),
+    scannedItems,
+    new ScanBoxUIComponent:
+      def updateUI(state: ScanBoxState): Unit =
+        val enabled = !isUploading && scannedItems.hasUnUploadedImage
+        eUploadButton(disabled := !enabled)
+  )
   val ele = div(cls := ScanBox.cssClassName)(
     div(cls := "search-area")(
       h2("患者選択"),
@@ -50,8 +66,8 @@ class ScanBox(onClose: () => Unit, onScanStart: () => Unit, onScanEnd: () => Uni
         button(attr("type") := "default")("検索")
       )
     ),
-    eSearchResult.ele(cls := "search-result", displayNone),
-    eSelectedPatient(cls := "selected-patient"),
+    searchResult.ele(cls := "search-result", displayNone),
+    patientDisp.ele(cls := "selected-patient"),
     div(cls := "scan-type-area")(
       h2("文書の種類"),
       eScanTypeSelect(onchange := (onScanTypeChange _))
@@ -59,29 +75,57 @@ class ScanBox(onClose: () => Unit, onScanStart: () => Unit, onScanEnd: () => Uni
     div(cls := "scanner-selection-area")(
       h2("スキャナ選択"),
       eScannerSelect,
-      button("更新", onclick := (refreshScannerSelect _))
+      button("更新", onclick := (() => {
+        (for
+          _ <- refreshScannerSelect()
+        yield updateUI()).onComplete {
+          case Success(_) => ()
+          case Failure(ex) => System.err.println(ex.getMessage)
+        }
+      }))
     ),
     div(cls := "scan-progress-area")(
-      eScanButton("スキャン開始", onclick := (startScan _)),
+      eScanButton(
+        "スキャン開始",
+        onclick := (startScan _),
+        cls := ScanBox.cssScanButtonClass
+      ),
       eScanProgress
     ),
     eScanned.ele(cls := "scanned")(
       scannedItems.ele,
-      button("アップロード")(cls := "upload-button", onclick := (onItemsUpload _))
+      eUploadButton("アップロード")(
+        cls := "upload-button",
+        onclick := (onItemsUpload _),
+        disabled := true
+      )
     ),
     div(cls := "command-box")(
       eCloseButton("キャンセル", onclick := (onCloseClick _))
     )
   )
+  ele.listenToCustomEvent[Boolean]("globally-enable-scan", enable => {
+    scanAllowedGlobally = enable
+    updateUI()
+  })
   addDefaultScanTypes()
   eScanTypeSelect.setSelectValue("image")
+  updateUI()
 
   def init(): Future[Unit] =
     for _ <- refreshScannerSelect()
-    yield ()
+    yield updateUI()
 
-  def enableScan(enable: Boolean): Unit =
-    eScanButton.enable(enable)
+  private def currentState: ScanBoxState =
+    ScanBoxState(patientOpt, kind, selectedDevice)
+
+  private def selectedDevice: Option[String] =
+    eScannerSelect.getOptionalSelectValue()
+
+  def updateUI(): Unit =
+    val state: ScanBoxState = currentState
+    println(("state", state))
+    components.foreach(_.updateUI(state))
 
   private def onItemsUpload(): Unit =
     scannedItems.upload()
@@ -95,17 +139,23 @@ class ScanBox(onClose: () => Unit, onScanStart: () => Unit, onScanEnd: () => Uni
     eScanProgress.innerText = s"${pct}%"
 
   private def startScan(): Unit =
-    onScanStart()
-    val deviceId: String = eScannerSelect.getSelectValue()
+    ele.dispatchEvent(CustomEvent("scan-started", (), true))
+    val deviceId: String = selectedDevice.get
     val resolution = 100
     eScanProgress.innerText = "スキャンの準備中"
     eScanProgress(displayDefault)
-    for file <- Api.scan(deviceId, (reportProgress _), 100)
+    (for file <- Api.scan(deviceId, (reportProgress _), 100)
     yield
       eScanProgress.innerText = ""
       eScanProgress(displayNone)
       scannedItems.add(file)
-      onScanEnd()
+    ).transform(r => {
+      ele.dispatchEvent(CustomEvent("scan-ended", (), true))
+      r
+    }).onComplete {
+      case Success(_)  => ()
+      case Failure(ex) => System.err.println(ex.getMessage)
+    }
 
   private def setScannerSelect(devices: List[ScannerDevice]): Unit =
     eScannerSelect.setChildren(
@@ -121,12 +171,19 @@ class ScanBox(onClose: () => Unit, onScanStart: () => Unit, onScanEnd: () => Uni
   private def onSearch(): Unit =
     val txt = eSearchInput.value.trim
     if !txt.isEmpty then
+      eSearchInput.value = ""
       for patients <- Api.searchPatient(txt)
       yield
-        eSearchResult.clear()
-        patients.foreach(addSearchResult(_))
-        eSearchResult.show()
-        eSearchResult.ele.scrollTop = 0
+        if patients.size == 1 then
+          patientOpt = Some(patients.head)
+          searchResult.clear()
+          searchResult.hide()
+          updateUI()
+        else
+          searchResult.clear()
+          patients.foreach(addSearchResult(_))
+          searchResult.show()
+          searchResult.ele.scrollTop = 0
 
   private def addDefaultScanTypes(): Unit =
     val items = List(
@@ -147,47 +204,46 @@ class ScanBox(onClose: () => Unit, onScanStart: () => Unit, onScanEnd: () => Uni
       })
     )
 
-  private def showSearchResult(): Unit = eSearchResult.show()
-  private def hideSearchResult(): Unit = eSearchResult.hide()
+  private def showSearchResult(): Unit = searchResult.show()
+  private def hideSearchResult(): Unit = searchResult.hide()
 
   def addSearchResult(patient: Patient): Unit =
-    eSearchResult.add(
+    searchResult.add(
       formatPatient(patient),
       patient
     )
-
-  private def setSelectedPatient(patient: Patient): Unit =
-    eSelectedPatient(innerText := formatPatient(patient))
-    patientOpt = Some(patient)
-    scannedItems.updateUI()
 
   private def formatPatient(patient: Patient): String =
     String.format("(%04d) %s", patient.patientId, patient.fullName())
 
   private def onCloseClick(): Unit =
     def doClose(): Unit =
+      val parent = ele.parentNode
       ele.remove()
-      onClose()
+      parent.dispatchEvent(CustomEvent("scan-box-close", (), true))
     if scannedItems.hasUnUploadedImage then
       ShowMessage.confirm("アップロードされていない画像がありますが、このまま閉じますか？")(doClose _)
     else doClose()
-      
-
 
   private def onUpload(done: Boolean): Unit =
-      if done then eCloseButton.innerText = "閉じる"
-      else eCloseButton.innerText = "キャンセル"
+    if done then eCloseButton.innerText = "閉じる"
+    else eCloseButton.innerText = "キャンセル"
+
+object ScanBox:
+  val cssClassName: String = "scan-box"
+  val cssScanButtonClass: String = "scan-button"
 
 class ScannedItems(
-    patientRef: () => Option[Patient],
-    kindRef: () => String,
     onUpload: Boolean => Unit
-):
+) extends ScanBoxUIComponent:
   val timestamp: String = makeTimeStamp()
   val eItemsWrapper: HTMLElement = div()
   val errBox = ErrorBox()
   val ele = div(eItemsWrapper, errBox.ele)
   var items: List[ScannedItem] = List.empty
+
+  def updateUI(state: ScanBoxState): Unit =
+    ???
 
   private def makeTimeStamp(): String =
     val at = LocalDateTime.now()
@@ -238,7 +294,4 @@ class ScannedItems(
     }
 
   def hasUnUploadedImage: Boolean =
-    items.find(! _.isUploaded).isDefined
-
-object ScanBox:
-  val cssClassName: String = "scan-box"
+    items.find(!_.isUploaded).isDefined
