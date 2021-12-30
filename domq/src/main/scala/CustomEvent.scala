@@ -18,6 +18,10 @@ object CustomEvent:
   def apply[T](typeArg: String, detail: T, bubbles: Boolean = false): CustomEvent[T] =
     new CustomEvent(typeArg, CustomEventInit(detail, bubbles))
 
+  def dispatchTo[T](typeArg: String, detail: T, eles: List[HTMLElement]): Unit =
+    val evt = CustomEvent(typeArg, detail)
+    eles.foreach(_.dispatchEvent(evt))
+
 class CustomEventInit[T](val detail: js.UndefOr[T] = js.undefined) extends EventInit 
 
 object CustomEventInit:
@@ -26,10 +30,10 @@ object CustomEventInit:
     init.bubbles = bubbles
     init
 
-  def dispatch[T](targets: List[HTMLElement], eventType: String, detail: T): Unit =
-    import dev.fujiwara.domq.{CustomEvent, CustomEventInit}
-    val evt: CustomEvent[T] = CustomEvent(eventType, detail, false)
-    targets
-      .foreach(e => {
-        e.dispatchEvent(evt)
-      })
+def dispatchTo[T](targets: List[HTMLElement], eventType: String, detail: T): Unit =
+  import dev.fujiwara.domq.{CustomEvent, CustomEventInit}
+  val evt: CustomEvent[T] = CustomEvent(eventType, detail, false)
+  targets
+    .foreach(e => {
+      e.dispatchEvent(evt)
+    })

@@ -139,6 +139,9 @@ case class ElementQ(ele: HTMLElement):
     if yes then ele.removeAttribute("disabled")
     else ele.setAttribute("disabled", "disabled")
 
+  def listenToCustomEvent[T](typeArg: String, handler: T => Unit): Unit =
+    ele.addEventListener(typeArg, (e: CustomEvent[T]) => handler(e.detail))
+
 object ElementQ {
   
   given Conversion[HTMLElement, ElementQ] = ElementQ(_)
