@@ -9,9 +9,10 @@ import dev.myclinic.scala.model.Patient
 import org.scalajs.dom.raw.{HTMLInputElement, HTMLOptionElement}
 import dev.myclinic.scala.webclient.Api
 import scala.concurrent.ExecutionContext.Implicits.global
+import dev.myclinic.scala.web.reception.scan.variable.*
 
-abstract class ScanTypeSelect(defaultScanType: String):
-  val eScanTypeSelect = select()
+class ScanTypeSelect(defaultScanType: String):
+  val eScanTypeSelect = select
   val ele = div(cls := "scan-type-area")(
     h2("文書の種類"),
     eScanTypeSelect(onchange := (onSelectChange _))
@@ -23,9 +24,7 @@ abstract class ScanTypeSelect(defaultScanType: String):
   def selected: String =
     eScanTypeSelect.getSelectValue()
 
-  private def onSelectChange(): Unit =
-    val scanType = eScanTypeSelect.getSelectValue()
-    onChange(scanType)
+  def variable: Variable[String] = new SelectVariable(eScanTypeSelect) with Callbacks[String]
 
   private def addDefaultScanTypes(): Unit =
     populateScanTypes(ScanTypeSelect.defaultItems)

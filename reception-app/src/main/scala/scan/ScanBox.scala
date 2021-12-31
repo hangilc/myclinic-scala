@@ -28,7 +28,7 @@ import dev.myclinic.scala.web.reception.scan.variable.*
 
 class ScanBox():
   val timestamp: String = ScanBox.makeTimeStamp()
-  val varPatient: Variable[Option[Patient]] = new CachedVariable(None) extends Callbacks
+  val varPatient = new CachedVariableWithCallbacks[Option[Patient]](None)
   def patient: Option[Patient] = varPatient.get
 
   val patientSearch = new PatientSearch():
@@ -39,10 +39,8 @@ class ScanBox():
     case Some(patient) => patientDisp.setPatient(patient)
     case None => ()
   }
-  val scanTypeSelect = new ScanTypeSelect(ScanBox.defaultScanType):
-    def onChange(scanType: String): Unit =
-      ()
-  val varScanType = new Variable[String](scanTypeSelect.selected)
+  val scanTypeSelect = new ScanTypeSelect(ScanBox.defaultScanType)
+  val varScanType: Variable[String] = scanTypeSelect.variable
   val scannerSelect = new ScannerSelect()
   val scanProgress = new ScanProgress(this):
     def onScan(savedFile: String): Unit = onScanFileAdd(savedFile)

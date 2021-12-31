@@ -4,6 +4,8 @@ import org.scalajs.dom.document
 import org.scalajs.dom.raw.HTMLElement
 import org.scalajs.dom.raw.HTMLImageElement
 import org.scalajs.dom.raw.HTMLInputElement
+import org.scalajs.dom.raw.HTMLOptionElement
+import org.scalajs.dom.raw.HTMLSelectElement
 import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
 import scala.language.implicitConversions
@@ -41,8 +43,8 @@ object Html:
   val ul = Tag("ul")
   val li = Tag("li")
   val span = Tag("span")
-  def select: HTMLElement = element("select")
-  def option: HTMLElement = element("option").asInstanceOf[HTMLInputElement]
+  def select: HTMLSelectElement = element("select").asInstanceOf[HTMLSelectElement]
+  def option: HTMLOptionElement = element("option").asInstanceOf[HTMLOptionElement]
   def textarea: HTMLInputElement = element("textarea").asInstanceOf[HTMLInputElement]
   def inputText = input(attr("type") := "text")
   def checkbox: HTMLElement = 
@@ -56,4 +58,3 @@ object Html:
     e.asInstanceOf[HTMLInputElement].value = value
     e
   def img: HTMLImageElement = element("img").asInstanceOf[HTMLImageElement]
-  

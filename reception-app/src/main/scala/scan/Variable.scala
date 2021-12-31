@@ -17,12 +17,15 @@ class SelectVariable(select: HTMLSelectElement) extends Variable[String]:
   def get: String = select.getSelectValue()
   def set(value: String): Unit = select.setSelectValue(value)
 
-trait Callbacks[T]:
+trait Callbacks[T] extends Variable[T]:
   private var callbacks: List[T => Unit] = List.empty
   def addCallback(cb: T => Unit): Unit =
     callbacks = callbacks :+ cb
   def invokeCallbacks(value: T): Unit = 
     callbacks.foreach(cb => cb(value))
+  override def set(value: T): Unit =
+    super.set(value)
+    invokeCallbacks(value)
 
 trait FutureCallbacks[T]:
   private var callbacks: List[T => Future[Unit]] = List.empty
@@ -34,5 +37,7 @@ trait FutureCallbacks[T]:
       case h :: t => h(value).flatMap(_ => invoke(value, t))
     }
   def invokeCallbacks(value: T): Future[Unit] = invoke(value, callbacks)
+
+class CachedVariableWithCallbacks[T](init: T) extends CachedVariable[T](init) with Callbacks[T]
 
     
