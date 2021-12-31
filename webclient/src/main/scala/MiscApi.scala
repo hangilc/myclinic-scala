@@ -220,3 +220,6 @@ object MiscApi extends ApiBase:
 
     def savePatientImage(patientId: Int, fileName: String, data: ArrayBuffer): Future[Boolean] =
       postBinary("save-patient-image", Params("patient-id" -> patientId, "file-name" -> fileName), data)
+
+    def renamePatientImage(patientId: Int, src: String, dst: String): Future[Boolean] =
+      get("rename-patient-image", Params("patient-id" -> patientId, "src" -> src, "dst" -> dst))

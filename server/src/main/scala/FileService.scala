@@ -17,23 +17,42 @@ import org.http4s.websocket.WebSocketFrame
 import fs2.Chunk
 import scodec.bits.ByteVector
 import fs2.io.file.Path
+import fs2.io.file.CopyFlags
+import fs2.io.file.CopyFlag
 import dev.myclinic.scala.config.Config
 
 object FileService extends DateTimeQueryParam with Publisher:
   object intPatientId extends QueryParamDecoderMatcher[Int]("patient-id")
   object strFileName extends QueryParamDecoderMatcher[String]("file-name")
+  object strSrc extends QueryParamDecoderMatcher[String]("src")
+  object strDst extends QueryParamDecoderMatcher[String]("dst")
 
   private def saveToFile(req: Request[IO], path: Path): IO[Response[IO]] =
-    Ok(req.body
-      .through(fs2.io.file.Files[IO].writeAll(path))
-      .compile
-      .drain
-      .map(_ => true))
+    Ok(
+      req.body
+        .through(fs2.io.file.Files[IO].writeAll(path))
+        .compile
+        .drain
+        .map(_ => true)
+    )
 
   def routes(using topic: Topic[IO, WebSocketFrame]) = HttpRoutes.of[IO] {
     case req @ POST -> Root / "save-patient-image" :? intPatientId(
           patientId
         ) +& strFileName(fileName) =>
-      val loc = new java.io.File(Config.paperScanDir(patientId), fileName).getPath
+      val loc =
+        new java.io.File(Config.paperScanDir(patientId), fileName).getPath
       saveToFile(req, Path(loc))
+
+    case GET -> Root / "rename-patient-image" :? intPatientId(patientId)
+        +& strSrc(src) +& strDst(dst) =>
+      val dir = Config.paperScanDir(patientId)
+      val srcLoc = Path(new java.io.File(dir, src).getPath)
+      val dstLoc = Path(new java.io.File(dir, dst).getPath)
+      val op =
+        fs2.io.file
+          .Files[IO]
+          .move(srcLoc, dstLoc)
+          .map(_ => true)
+      Ok(op)
   }

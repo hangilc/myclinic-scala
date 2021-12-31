@@ -46,6 +46,23 @@ class ScannedItem(
     if isUploaded then Future.successful(())
     else upload()
 
+  def deleteSavedFile(): Future[Unit] =
+    Api.deleteScannedFile(savedFile).map(_ => ())
+
+  def adaptToTotalChanged(newTotal: Int): Future[Unit] =
+    if index == 1 && total == 1 then
+      val src = eUploadFile.innerText
+      total = newTotal
+      val dst = uploadFileName
+      for 
+        _ <- 
+          if isUploaded then
+            Api.renamePatientImage(patient.get.patientId, src, dst)
+          else Future.successful(())
+      yield eUploadFile.innerText = dst
+    else
+      Future.successful(())
+
   private def timestamp: String = scanBox.timestamp
 
   private def uploadFileName: String =

@@ -58,7 +58,7 @@ class ScanBox():
       )
     ),
     div(cls := "command-box")(
-      eCloseButton("キャンセル", onclick := (onCloseClick _))
+      eCloseButton("閉じる", onclick := (onCloseClick _))
     )
   )
   ele.listenToCustomEvent[Boolean](
@@ -115,6 +115,10 @@ class ScanBox():
       val parent = ele.parentNode
       ele.remove()
       parent.dispatchEvent(CustomEvent("scan-box-close", (), true))
+      scannedItems.deleteSavedFiles().onComplete {
+        case Success(_) => ()
+        case Failure(ex) => System.err.println(ex.getMessage)
+      }
     if scannedItems.hasUnUploadedImage then
       ShowMessage.confirm("アップロードされていない画像がありますが、このまま閉じますか？")(doClose _)
     else doClose()
@@ -140,7 +144,7 @@ object ScanBox:
 class ScannedItems(scanBox: ScanBox):
   var items: List[ScannedItem] = List.empty
   val ele = div()
-  def add(savedFile: String): Unit =
+  def add(savedFile: String): Future[Unit] =
     val item = new ScannedItem(
       scanBox,
       savedFile,
@@ -149,14 +153,22 @@ class ScannedItems(scanBox: ScanBox):
       items.size + 1,
       items.size + 1
     )
-    items = items :+ item
-    ele(item.ele)
-    scanBox.updateUploadButton()
+    for
+      _ <- 
+        if items.size == 1 then
+          items(0).adaptToTotalChanged(2)
+        else Future.successful(())
+    yield 
+      items = items :+ item
+      ele(item.ele)
+      scanBox.updateUploadButton()
   def isUploading: Boolean =
     items.find(_.isUploading).isDefined
   def hasUnUploadedImage: Boolean = 
     items.find(!_.isUploaded).isDefined
   def upload(): Future[Unit] = uploadItems(items)
+  def deleteSavedFiles(): Future[Unit] =
+    Future.sequence(items.map(_.deleteSavedFile())).map(_ => ())
   private def uploadItems(items: List[ScannedItem]): Future[Unit] =
     items match {
       case Nil => Future.successful(())
