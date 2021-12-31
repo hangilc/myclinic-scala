@@ -3,7 +3,13 @@ package dev.fujiwara.domq
 import org.scalajs.dom.raw.HTMLElement
 import org.scalajs.dom.raw.MouseEvent
 import scala.language.implicitConversions
-import org.scalajs.dom.raw.{HTMLDocument, HTMLInputElement, Node, HTMLSelectElement}
+import org.scalajs.dom.raw.{
+  HTMLDocument,
+  HTMLInputElement,
+  Node,
+  HTMLSelectElement,
+  HTMLOptionElement
+}
 import scala.concurrent.Future
 import scala.collection.mutable.ListBuffer
 import scala.scalajs.js
@@ -70,7 +76,10 @@ case class ElementQ(ele: HTMLElement):
       buf.addOne(nodes.item(i).asInstanceOf[HTMLElement])
     buf.toList
 
-  def qSelectorAllFind(querySelector: String, f: HTMLElement => Boolean): Option[HTMLElement] =
+  def qSelectorAllFind(
+      querySelector: String,
+      f: HTMLElement => Boolean
+  ): Option[HTMLElement] =
     val nodes = ele.querySelectorAll(querySelector)
     var result: Option[HTMLElement] = None
     var i = 0
@@ -82,8 +91,13 @@ case class ElementQ(ele: HTMLElement):
       i += 1
     result
 
-  def setSelectValue(value: String): Unit =
-    ele.asInstanceOf[HTMLSelectElement].value = value
+  def setSelectValue(value: String): Boolean =
+    qSelectorAllFind("option", e => e.asInstanceOf[HTMLOptionElement].value == value) match {
+      case Some(e) => 
+        e.asInstanceOf[HTMLOptionElement].selected = true
+        true
+      case None => false
+    }
 
   def getOptionalSelectValue(): Option[String] =
     val value = ele.asInstanceOf[HTMLSelectElement].value
@@ -93,37 +107,40 @@ case class ElementQ(ele: HTMLElement):
   def getSelectValue(): String =
     getOptionalSelectValue().get
 
-  def getCheckedRadioValue: Option[String] = 
+  def getCheckedRadioValue: Option[String] =
     val n = ele.querySelector("input[type=radio]:checked")
     if n == null then None
     else Some(n.asInstanceOf[HTMLInputElement].value)
 
   def setRadioGroupValue(value: String): Boolean =
-    qSelectorAllFind("input[type=radio]", e => {
-      e.asInstanceOf[HTMLInputElement].value == value
-    })
-    .map(e => {
-      e.asInstanceOf[HTMLInputElement].checked = true
-      true
-    })
-    .getOrElse(false)
+    qSelectorAllFind(
+      "input[type=radio]",
+      e => {
+        e.asInstanceOf[HTMLInputElement].value == value
+      }
+    )
+      .map(e => {
+        e.asInstanceOf[HTMLInputElement].checked = true
+        true
+      })
+      .getOrElse(false)
 
   def check(bool: Boolean = true): Unit =
-    if bool then  ele.setAttribute("checked", "checked")
+    if bool then ele.setAttribute("checked", "checked")
     else ele.removeAttribute("checked")
 
   def isChecked: Boolean =
     ele match {
       case e: HTMLInputElement => e.checked
-      case _ => false
+      case _                   => false
     }
 
   def asInputElement: HTMLInputElement = ele.asInstanceOf[HTMLInputElement]
 
   def selector(query: String): Option[HTMLElement] =
     val result = ele.querySelector(query)
-    if result == null then None else Some(result.asInstanceOf[HTMLElement]) 
-   
+    if result == null then None else Some(result.asInstanceOf[HTMLElement])
+
   def insertInOrderDesc[T](
       e: HTMLElement,
       selector: String,
@@ -134,7 +151,7 @@ case class ElementQ(ele: HTMLElement):
     val fOpt = eles.find(ele => extract(ele) < o)
     fOpt match {
       case Some(f) => f.parentElement.insertBefore(e, f)
-      case None => ele.appendChild(e)
+      case None    => ele.appendChild(e)
     }
 
   def toggle(): Unit =
@@ -152,12 +169,13 @@ case class ElementQ(ele: HTMLElement):
     ele.addEventListener(typeArg, (e: CustomEvent[T]) => handler(e.detail))
 
 object ElementQ {
-  
+
   given Conversion[HTMLElement, ElementQ] = ElementQ(_)
   given Conversion[HTMLInputElement, ElementQ] = ElementQ(_)
 
   given Conversion[ElementQ, HTMLElement] = _.ele
-  given Conversion[ElementQ, HTMLInputElement] = _.ele.asInstanceOf[HTMLInputElement]
+  given Conversion[ElementQ, HTMLInputElement] =
+    _.ele.asInstanceOf[HTMLInputElement]
   given Conversion[(ElementQ, ElementQ), (HTMLElement, HTMLElement)] = {
     case (a: ElementQ, b: ElementQ) => (a.ele, b.ele)
   }

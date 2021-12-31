@@ -29,7 +29,7 @@ abstract class ScanProgress(scanBox: ScanBox):
 
   private def startScan(): Unit =
     scanBox.selectedScanner.foreach(deviceId => {
-      ele.dispatchEvent(CustomEvent("scan-started", (), true))
+      scanBox.isScanning = true
       val resolution = 100
       eScanProgress.innerText = "スキャンの準備中"
       eScanProgress(displayDefault)
@@ -39,7 +39,7 @@ abstract class ScanProgress(scanBox: ScanBox):
         eScanProgress(displayNone)
         file
       ).onComplete(r => {
-        ele.dispatchEvent(CustomEvent("scan-ended", (), true))
+        scanBox.isScanning = false
         r match {
           case Success(file) => onScan(file)
           case Failure(ex) => System.err.println(ex.getMessage)

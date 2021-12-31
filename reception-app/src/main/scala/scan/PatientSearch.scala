@@ -6,12 +6,13 @@ import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.{Selection}
 import scala.language.implicitConversions
 import dev.myclinic.scala.model.Patient
-import org.scalajs.dom.raw.HTMLInputElement
+import org.scalajs.dom.raw.{HTMLInputElement, HTMLElement}
 import dev.myclinic.scala.webclient.Api
 import scala.concurrent.ExecutionContext.Implicits.global
 
 abstract class PatientSearch:
   val eSearchInput: HTMLInputElement = inputText()
+  val eSearchButton: HTMLElement = button()
   val searchResult: Selection[Patient] =
     Selection[Patient](onSelect = patient => {
       searchResult.clear()
@@ -22,13 +23,20 @@ abstract class PatientSearch:
     h2("患者選択"),
     form(onsubmit := (onSearch _))(
       eSearchInput,
-      button(attr("type") := "default")("検索")
+      eSearchButton(attr("type") := "default")("検索")
     )
   )
 
   def onPatientSelect(patient: Patient): Unit
 
   def initFocus(): Unit = eSearchInput.focus()
+
+  def disable(): Unit = enable(false)
+  def enable(): Unit = enable(true)
+
+  def enable(flag: Boolean): Unit = 
+    eSearchInput.enable(flag)
+    eSearchButton.enable(flag)
 
   private def onSearch(): Unit =
     val txt = eSearchInput.value.trim

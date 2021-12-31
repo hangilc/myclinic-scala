@@ -6,18 +6,17 @@ import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.{Selection}
 import scala.language.implicitConversions
 import dev.myclinic.scala.model.Patient
-import org.scalajs.dom.raw.HTMLInputElement
+import org.scalajs.dom.raw.{HTMLInputElement, HTMLOptionElement}
 import dev.myclinic.scala.webclient.Api
 import scala.concurrent.ExecutionContext.Implicits.global
 
-abstract class ScanTypeSelect:
+abstract class ScanTypeSelect(defaultScanType: String):
   val eScanTypeSelect = select()
   val ele = div(cls := "scan-type-area")(
     h2("文書の種類"),
     eScanTypeSelect(onchange := (onSelectChange _))
   )
   addDefaultScanTypes()
-  eScanTypeSelect.setSelectValue("image")
 
   def onChange(scanType: String): Unit
 
@@ -34,7 +33,10 @@ abstract class ScanTypeSelect:
   private def populateScanTypes(items: List[(String, String)]): Unit =
     eScanTypeSelect.addChildren(
       items.map({ case (name, optValue) =>
-        option(name, value := optValue).ele
+        val opt = option(name, value := optValue)
+        if optValue == defaultScanType then
+          opt.asInstanceOf[HTMLOptionElement].selected = true
+        opt.ele
       })
     )
 

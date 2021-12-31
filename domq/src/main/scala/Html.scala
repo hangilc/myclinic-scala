@@ -2,6 +2,7 @@ package dev.fujiwara.domq
 
 import org.scalajs.dom.document
 import org.scalajs.dom.raw.HTMLElement
+import org.scalajs.dom.raw.HTMLImageElement
 import org.scalajs.dom.raw.HTMLInputElement
 import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
@@ -54,3 +55,5 @@ object Html:
     e.setAttribute("name", name)
     e.asInstanceOf[HTMLInputElement].value = value
     e
+  def img: HTMLImageElement = element("img").asInstanceOf[HTMLImageElement]
+  

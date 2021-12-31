@@ -99,7 +99,7 @@ class ScannedItem(
     )
 
   private def upload(): Future[Unit] =
-    scanBox.patientOpt.map(_.patientId).fold(
+    scanBox.patient.map(_.patientId).fold(
       Future.failed(new RuntimeException("Patient not specified."))
     ) { patientId =>
       val f =
