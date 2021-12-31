@@ -145,6 +145,9 @@ case class ElementQ(ele: HTMLElement):
     if yes then ele.removeAttribute("disabled")
     else ele.setAttribute("disabled", "disabled")
 
+  def enable(): Unit = enable(true)
+  def disable(): Unit = enable(false)
+
   def listenToCustomEvent[T](typeArg: String, handler: T => Unit): Unit =
     ele.addEventListener(typeArg, (e: CustomEvent[T]) => handler(e.detail))
 

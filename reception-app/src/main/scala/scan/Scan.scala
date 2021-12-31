@@ -36,6 +36,7 @@ class Scan extends SideMenuService:
       _ <- box.init()
     yield
       eScannedBoxes.prepend(box.ele)
+      box.initFocus()
 
   private def newScan(): Unit =
     addBox().onComplete {
