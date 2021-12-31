@@ -24,13 +24,15 @@ class ScannedItem(
   val eIconWrapper: HTMLElement = div()
   val eUploadFile: HTMLElement = span()
   val ePreview: HTMLElement = div()
+  val eRescanLink: HTMLElement = a()
+  val eDeleteLink: HTMLElement = a()
   val ele = div(
     div(cls := "scanned-item")(
       eIconWrapper(display := "inline-block"),
       eUploadFile(innerText := uploadFileName),
       a("表示", onclick := (onShow _)),
-      a("再スキャン"),
-      a("削除", onclick := (onDeleteClick _))
+      eRescanLink("再スキャン"),
+      eDeleteLink("削除", onclick := (onDeleteClick _))
     ),
     ePreview(displayNone)(
       div(button("閉じる", onclick := (onClosePreview _)))
@@ -62,6 +64,10 @@ class ScannedItem(
       yield eUploadFile.innerText = dst
     else
       Future.successful(())
+
+  def disableEdit(): Unit =
+    eRescanLink(displayNone)
+    eDeleteLink(displayNone)
 
   private def timestamp: String = scanBox.timestamp
 

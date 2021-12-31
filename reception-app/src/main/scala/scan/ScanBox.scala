@@ -166,7 +166,10 @@ class ScannedItems(scanBox: ScanBox):
     items.find(_.isUploading).isDefined
   def hasUnUploadedImage: Boolean = 
     items.find(!_.isUploaded).isDefined
-  def upload(): Future[Unit] = uploadItems(items)
+  def upload(): Future[Unit] = 
+    scanBox.patientSearch.ele(displayNone)
+    items.foreach(_.disableEdit())
+    uploadItems(items)
   def deleteSavedFiles(): Future[Unit] =
     Future.sequence(items.map(_.deleteSavedFile())).map(_ => ())
   private def uploadItems(items: List[ScannedItem]): Future[Unit] =
