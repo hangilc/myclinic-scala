@@ -9,7 +9,7 @@ import scala.language.implicitConversions
 import dev.myclinic.scala.web.appbase.{SideMenu, EventPublishers}
 import dev.myclinic.scala.model.{HotlineCreated, Patient}
 import dev.myclinic.scala.webclient.Api
-import org.scalajs.dom.raw.{HTMLElement, MouseEvent}
+import org.scalajs.dom.{HTMLElement, MouseEvent}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Success
 import scala.util.Failure

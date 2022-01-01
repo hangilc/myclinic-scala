@@ -8,10 +8,10 @@ import dev.fujiwara.domq.Html.{given, *}
 import dev.fujiwara.domq.Modifiers.{given, *}
 import dev.fujiwara.domq.{ContextMenu}
 import scala.language.implicitConversions
-import org.scalajs.dom.raw.HTMLElement
+import org.scalajs.dom.HTMLElement
 import dev.myclinic.scala.webclient.Api
-import org.scalajs.dom.raw.MouseEvent
-import org.scalajs.dom.raw.EventTarget
+import org.scalajs.dom.MouseEvent
+import org.scalajs.dom.EventTarget
 import org.scalajs.dom.document
 import dev.myclinic.scala.util.DateTimeOrdering.given
 import scala.math.Ordered.orderingToOrdered

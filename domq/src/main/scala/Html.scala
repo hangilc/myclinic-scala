@@ -1,11 +1,11 @@
 package dev.fujiwara.domq
 
 import org.scalajs.dom.document
-import org.scalajs.dom.raw.HTMLElement
-import org.scalajs.dom.raw.HTMLImageElement
-import org.scalajs.dom.raw.HTMLInputElement
-import org.scalajs.dom.raw.HTMLOptionElement
-import org.scalajs.dom.raw.HTMLSelectElement
+import org.scalajs.dom.HTMLElement
+import org.scalajs.dom.HTMLImageElement
+import org.scalajs.dom.HTMLInputElement
+import org.scalajs.dom.HTMLOptionElement
+import org.scalajs.dom.HTMLSelectElement
 import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
 import scala.language.implicitConversions

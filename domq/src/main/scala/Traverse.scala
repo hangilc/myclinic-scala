@@ -1,6 +1,6 @@
 package dev.fujiwara.domq
 
-import org.scalajs.dom.raw.Element
+import org.scalajs.dom.Element
 
 object Traverse {
 

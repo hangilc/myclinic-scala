@@ -1,6 +1,6 @@
 package dev.myclinic.scala.web.appoint.sheet.appointdialog
 
-import org.scalajs.dom.raw.{HTMLElement, HTMLInputElement}
+import org.scalajs.dom.{HTMLElement, HTMLInputElement}
 import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
@@ -17,7 +17,7 @@ import cats.data.Validated.Invalid
 import scala.concurrent.Future
 import scala.util.Success
 import scala.util.Failure
-import org.scalajs.dom.raw.Event
+import org.scalajs.dom.Event
 
 trait MakeAppointUI:
   val body: HTMLElement

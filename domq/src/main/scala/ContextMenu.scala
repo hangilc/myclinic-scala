@@ -1,14 +1,14 @@
 package dev.fujiwara.domq
 
-import org.scalajs.dom.raw.HTMLElement
+import org.scalajs.dom.HTMLElement
 import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
 import scala.language.implicitConversions
-import org.scalajs.dom.raw.MouseEvent
+import org.scalajs.dom.MouseEvent
 import org.scalajs.dom.{document, window}
-import org.scalajs.dom.raw.ClientRect
-import org.scalajs.dom.raw.Event
+import org.scalajs.dom.ClientRect
+import org.scalajs.dom.Event
 
 class ContextMenu(zIndex: Int = Modal.zIndexDefault):
   val menu: HTMLElement = makeEmptyMenu()

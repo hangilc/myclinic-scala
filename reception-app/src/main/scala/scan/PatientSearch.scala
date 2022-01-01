@@ -6,7 +6,7 @@ import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.{Selection}
 import scala.language.implicitConversions
 import dev.myclinic.scala.model.Patient
-import org.scalajs.dom.raw.{HTMLInputElement, HTMLElement}
+import org.scalajs.dom.{HTMLInputElement, HTMLElement}
 import dev.myclinic.scala.webclient.Api
 import scala.concurrent.ExecutionContext.Implicits.global
 

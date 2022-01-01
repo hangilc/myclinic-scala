@@ -8,7 +8,7 @@ import scala.language.implicitConversions
 import dev.fujiwara.kanjidate.KanjiDate
 import dev.myclinic.scala.util.DateUtil
 import java.time.{LocalDate, LocalDateTime}
-import org.scalajs.dom.raw.{HTMLElement}
+import org.scalajs.dom.{HTMLElement}
 import dev.myclinic.scala.apputil.HokenUtil
 import dev.myclinic.scala.apputil.DrugUtil
 import dev.fujiwara.dateinput.ZenkakuUtil

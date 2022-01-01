@@ -8,8 +8,8 @@ import dev.fujiwara.domq.{Icons, Colors, LocalModal, ErrorBox, Modal}
 import dev.myclinic.scala.model.{AppointTime, Appoint, Patient}
 import dev.fujiwara.domq.Form
 import scala.language.implicitConversions
-import org.scalajs.dom.raw.HTMLElement
-import org.scalajs.dom.raw.HTMLInputElement
+import org.scalajs.dom.HTMLElement
+import org.scalajs.dom.HTMLInputElement
 import dev.myclinic.scala.web.appoint.Misc
 import dev.myclinic.scala.webclient.Api
 import dev.myclinic.scala.validator.AppointValidator
@@ -17,7 +17,7 @@ import dev.myclinic.scala.validator.AppointValidator.given
 import cats.data.Validated.Valid
 import cats.data.Validated.Invalid
 import concurrent.ExecutionContext.Implicits.global
-import org.scalajs.dom.raw.MouseEvent
+import org.scalajs.dom.MouseEvent
 import scala.concurrent.Future
 import scala.util.Success
 import scala.util.Failure

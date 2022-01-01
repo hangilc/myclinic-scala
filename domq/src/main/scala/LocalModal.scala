@@ -1,8 +1,8 @@
 package dev.fujiwara.domq
 
-import org.scalajs.dom.raw.HTMLElement
+import org.scalajs.dom.HTMLElement
 import scala.collection.mutable.ListBuffer
-import org.scalajs.dom.raw.Node
+import org.scalajs.dom.Node
 
 class LocalModal(wrapper: HTMLElement, content: HTMLElement):
   var saved: List[Node] = List.empty

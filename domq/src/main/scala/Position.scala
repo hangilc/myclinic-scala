@@ -1,6 +1,6 @@
 package dev.fujiwara.domq
 
-import org.scalajs.dom.raw.{MouseEvent, HTMLElement}
+import org.scalajs.dom.{MouseEvent, HTMLElement}
 import org.scalajs.dom.{document, window}
 import java.util.Random
 

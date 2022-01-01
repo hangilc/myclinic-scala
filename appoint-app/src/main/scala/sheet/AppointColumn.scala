@@ -10,7 +10,7 @@ import dev.myclinic.scala.web.appoint.Misc
 import dev.myclinic.scala.web.appoint
 import scala.language.implicitConversions
 import dev.myclinic.scala.web.appoint.sheet.Types.SortedElement
-import org.scalajs.dom.raw.{HTMLElement, MouseEvent}
+import org.scalajs.dom.{HTMLElement, MouseEvent}
 import cats.syntax.all.*
 import dev.myclinic.scala.webclient.Api
 import concurrent.ExecutionContext.Implicits.global

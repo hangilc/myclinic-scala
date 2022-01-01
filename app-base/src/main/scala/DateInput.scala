@@ -16,7 +16,7 @@
 // import scala.util.Success
 // import scala.util.Try
 // import scala.util.Failure
-// import org.scalajs.dom.raw.{HTMLElement}
+// import org.scalajs.dom.{HTMLElement}
 
 // class DateInput(gengouList: List[KanjiDate.Gengou] = KanjiDate.Gengou.list):
 //   val eGengouSelect: HTMLElement = select(

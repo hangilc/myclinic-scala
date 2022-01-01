@@ -8,7 +8,7 @@ import scala.language.implicitConversions
 import dev.fujiwara.kanjidate.KanjiDate
 import dev.myclinic.scala.util.DateUtil
 import java.time.LocalDate
-import org.scalajs.dom.raw.{HTMLElement}
+import org.scalajs.dom.{HTMLElement}
 
 class PatientBlock(patient: Patient):
   val eDetail: HTMLElement = div(displayNone)

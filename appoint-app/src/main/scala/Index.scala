@@ -23,7 +23,7 @@ import dev.myclinic.scala.web.appoint.sheet.{AppointSheet, AdminAppointSheet}
 //import dev.myclinic.scala.event.ModelEventPublishers
 import scala.scalajs.js.annotation.JSExportTopLevel
 import scala.scalajs.js.annotation.JSExport
-import org.scalajs.dom.raw.HTMLElement
+import org.scalajs.dom.HTMLElement
 import dev.myclinic.scala.web.appbase.{
   EventFetcher,
   EventPublishers,

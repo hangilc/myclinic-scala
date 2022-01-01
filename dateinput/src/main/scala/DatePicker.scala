@@ -13,11 +13,11 @@ import dev.fujiwara.domq.{
 import dev.fujiwara.kanjidate.KanjiDate.{Gengou, Wareki}
 import scala.language.implicitConversions
 import scala.scalajs.js
-import org.scalajs.dom.raw.{MouseEvent, HTMLElement, Event}
+import org.scalajs.dom.{MouseEvent, HTMLElement, Event}
 import java.time.LocalDate
 import scala.collection.mutable.ListBuffer
-import org.scalajs.dom.raw.KeyboardEvent
-import org.scalajs.dom.raw.HTMLInputElement
+import org.scalajs.dom.KeyboardEvent
+import org.scalajs.dom.HTMLInputElement
 
 class DatePicker(
     cb: LocalDate => Any = _ => (),

@@ -1,13 +1,13 @@
 // package dev.fujiwara.domq
 
-// import org.scalajs.dom.raw.{HTMLElement}
+// import org.scalajs.dom.{HTMLElement}
 // import dev.fujiwara.domq.ElementQ.{*, given}
 // import dev.fujiwara.domq.Html.{*, given}
 // import dev.fujiwara.domq.Modifiers.{*, given}
 // import dev.fujiwara.domq.{ContextMenu}
 // import scala.language.implicitConversions
-// import org.scalajs.dom.raw.ClientRect
-// import org.scalajs.dom.raw.MouseEvent
+// import org.scalajs.dom.ClientRect
+// import org.scalajs.dom.MouseEvent
 
 // object Gadgets:
 //   def pullDown(

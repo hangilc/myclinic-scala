@@ -2,12 +2,12 @@ package dev.myclinic.scala.webclient
 
 import scala.concurrent.Future
 import scala.concurrent.Promise
-import org.scalajs.dom.raw.XMLHttpRequest
-import org.scalajs.dom.raw.Event
+import org.scalajs.dom.XMLHttpRequest
+import org.scalajs.dom.Event
 import io.circe._
 import io.circe.syntax._
 import io.circe.parser.*
-import org.scalajs.dom.raw.ProgressEvent
+import org.scalajs.dom.ProgressEvent
 import scala.scalajs.js.typedarray.ArrayBuffer
 
 object Ajax:

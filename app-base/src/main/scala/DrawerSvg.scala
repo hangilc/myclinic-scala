@@ -2,7 +2,7 @@ package dev.myclinic.scala.web.appbase
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation.*
-import org.scalajs.dom.raw.HTMLElement
+import org.scalajs.dom.HTMLElement
 
 @js.native
 @JSGlobalScope

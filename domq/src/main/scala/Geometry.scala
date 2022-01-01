@@ -1,8 +1,8 @@
 package dev.fujiwara.domq
 
-import org.scalajs.dom.raw.HTMLElement
+import org.scalajs.dom.HTMLElement
 import org.scalajs.dom.{document, window}
-import org.scalajs.dom.raw.ClientRect
+import org.scalajs.dom.ClientRect
 
 object Geometry:
   opaque type DocCoord = Double

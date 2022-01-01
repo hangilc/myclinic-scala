@@ -6,7 +6,7 @@ import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.CustomEvent
 import scala.language.implicitConversions
-import org.scalajs.dom.raw.{HTMLElement}
+import org.scalajs.dom.{HTMLElement}
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Success

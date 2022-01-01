@@ -1,6 +1,6 @@
 package dev.myclinic.scala.web.reception.scan
 
-import org.scalajs.dom.raw.{HTMLElement, URL, HTMLImageElement, Event}
+import org.scalajs.dom.{HTMLElement, URL, HTMLImageElement, Event}
 import org.scalajs.dom.{Blob, BlobPropertyBag}
 import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Html.{*, given}

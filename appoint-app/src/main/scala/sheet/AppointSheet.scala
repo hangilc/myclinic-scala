@@ -8,7 +8,7 @@ import dev.myclinic.scala.model.*
 import dev.myclinic.scala.clinicop.*
 import dev.myclinic.scala.util.DateUtil
 import math.Ordered.orderingToOrdered
-import org.scalajs.dom.raw.HTMLElement
+import org.scalajs.dom.HTMLElement
 import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Failure
@@ -21,7 +21,7 @@ import dev.myclinic.scala.web.appbase.{
   EventSubscriberController
 }
 import scala.language.implicitConversions
-import org.scalajs.dom.raw.MouseEvent
+import org.scalajs.dom.MouseEvent
 import dev.myclinic.scala.web.appoint.{Misc, GlobalEvents}
 import dev.myclinic.scala.web.appoint.history.History
 import cats.syntax.all._

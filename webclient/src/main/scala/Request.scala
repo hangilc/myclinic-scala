@@ -1,7 +1,7 @@
 package dev.myclinic.scala.webclient
 
 import scala.concurrent.Future
-import org.scalajs.dom.raw.{XMLHttpRequest, ProgressEvent}
+import org.scalajs.dom.{XMLHttpRequest, ProgressEvent}
 import scala.concurrent.Promise
 import scala.scalajs.js
 import scala.scalajs.js.typedarray.ArrayBuffer

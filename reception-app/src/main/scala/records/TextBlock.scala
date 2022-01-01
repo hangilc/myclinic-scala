@@ -8,7 +8,7 @@ import scala.language.implicitConversions
 import dev.fujiwara.kanjidate.KanjiDate
 import dev.myclinic.scala.util.DateUtil
 import java.time.{LocalDate, LocalDateTime}
-import org.scalajs.dom.raw.{HTMLElement}
+import org.scalajs.dom.{HTMLElement}
 
 class TextBlock(text: Text):
   val ele = div(innerText := text.content)

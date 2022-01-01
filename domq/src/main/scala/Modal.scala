@@ -1,6 +1,6 @@
 package dev.fujiwara.domq
 
-import org.scalajs.dom.raw.{Element, HTMLElement}
+import org.scalajs.dom.{Element, HTMLElement}
 import org.scalajs.dom.{document, window}
 import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}

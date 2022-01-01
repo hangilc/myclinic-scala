@@ -6,7 +6,7 @@ import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.{Selection, CustomEvent}
 import scala.language.implicitConversions
 import dev.myclinic.scala.model.ScannerDevice
-import org.scalajs.dom.raw.HTMLInputElement
+import org.scalajs.dom.HTMLInputElement
 import dev.myclinic.scala.webclient.Api
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

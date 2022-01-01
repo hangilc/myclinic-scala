@@ -11,7 +11,8 @@ val http4sVersion = "0.23.3"
 val doobieVersion = "1.0.0-M5"
 val circeVersion = "0.14.1"
 val scalaJavaTimeVersion = "2.3.0"
-val scalaJSDomVersion = "1.2.0"
+val scalaJSDomVersion = "2.1.0"
+//val scalaJSDomVersion = "1.2.0"
 val catsVersion = "2.6.1"
 
 val jacksonVersion = "2.12.5"
@@ -145,7 +146,7 @@ lazy val webclient = project
     name := "webclient",
     scalaJSUseMainModuleInitializer := false,
     libraryDependencies ++= Seq(
-      ("org.scala-js" %%% "scalajs-dom" % "1.2.0")
+      ("org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion)
         .cross(CrossVersion.for3Use2_13),
       "io.circe" %%% "circe-core" % circeVersion,
       "io.circe" %%% "circe-generic" % circeVersion,

@@ -2,9 +2,9 @@ package dev.fujiwara.domq
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation._
-import org.scalajs.dom.raw.Event
-import org.scalajs.dom.raw.EventInit
-import org.scalajs.dom.raw.HTMLElement
+import org.scalajs.dom.Event
+import org.scalajs.dom.EventInit
+import org.scalajs.dom.HTMLElement
 
 @js.native
 @JSGlobal

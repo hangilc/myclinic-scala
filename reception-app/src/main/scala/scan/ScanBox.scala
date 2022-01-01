@@ -5,7 +5,7 @@ import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
 import scala.language.implicitConversions
-import org.scalajs.dom.raw.{HTMLElement, HTMLInputElement}
+import org.scalajs.dom.{HTMLElement, HTMLInputElement}
 import dev.fujiwara.domq.{Selection, ErrorBox, ShowMessage, CustomEvent}
 import dev.myclinic.scala.model.{Patient, Sex, ScannerDevice}
 import java.time.LocalDate
@@ -13,12 +13,12 @@ import dev.myclinic.scala.webclient.Api
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import java.time.LocalDateTime
-import org.scalajs.dom.raw.URL
+import org.scalajs.dom.URL
 import org.scalajs.dom.{Blob, BlobPropertyBag}
 import scala.scalajs.js
-import org.scalajs.dom.ext.Image
-import org.scalajs.dom.raw.HTMLImageElement
-import org.scalajs.dom.raw.Event
+//import org.scalajs.dom.ext.Image
+import org.scalajs.dom.HTMLImageElement
+import org.scalajs.dom.Event
 import scala.util.Success
 import scala.util.Failure
 import cats.*
@@ -39,7 +39,8 @@ class ScanBox():
     case Some(patient) => patientDisp.setPatient(patient)
     case None => ()
   }
-  val scanTypeSelect = new ScanTypeSelect(ScanBox.defaultScanType)
+  val scanTypeSelect = new ScanTypeSelect(ScanBox.defaultScanType):
+    def onChange(scanType: String): Unit = ()
   val varScanType: Variable[String] = scanTypeSelect.variable
   val scannerSelect = new ScannerSelect()
   val scanProgress = new ScanProgress(this):
@@ -83,7 +84,7 @@ class ScanBox():
   def selectedScanner: Option[String] =
     scannerSelect.selected
 
-  val varGloballyScanEnabled = new Variable[Boolean](true)
+  val varGloballyScanEnabled = new CachedVariable[Boolean](true)
   def globallyScanEnabled: Boolean = varGloballyScanEnabled.get
 
 
@@ -106,7 +107,7 @@ class ScanBox():
   def adaptPatientSearch(): Unit =
     patientSearch.enable(!(isScanning || isUploading))
 
-  varGloballyScanEnabled.addCallback(_ => adaptScanButton())
+  //varGloballyScanEnabled.addCallback(_ => adaptScanButton())
   varPatient.addCallback(_ => adaptScanButton())
   def adaptScanButton(): Unit =
     val enable =

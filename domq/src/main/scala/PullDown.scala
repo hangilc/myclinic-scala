@@ -1,13 +1,13 @@
 package dev.fujiwara.domq
 
-import org.scalajs.dom.raw.{HTMLElement}
+import org.scalajs.dom.{HTMLElement}
 import org.scalajs.dom.{document}
 import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.{Geometry, Icons, FloatingElement, Screen}
 import scala.language.implicitConversions
-import org.scalajs.dom.raw.MouseEvent
+import org.scalajs.dom.MouseEvent
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 

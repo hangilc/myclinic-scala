@@ -1,18 +1,19 @@
 package dev.fujiwara.domq
 
 import org.scalajs.dom.document
-import org.scalajs.dom.raw.HTMLElement
-import org.scalajs.dom.raw.MouseEvent
+import org.scalajs.dom.HTMLElement
+import org.scalajs.dom.MouseEvent
 import scala.language.implicitConversions
-import org.scalajs.dom.raw.CSSStyleDeclaration
+import org.scalajs.dom.CSSStyleDeclaration
 import scala.scalajs.js
-import org.scalajs.dom.raw.Event
-import org.scalajs.dom.raw.HTMLInputElement
-import org.scalajs.dom.raw.KeyboardEvent
+import org.scalajs.dom.Event
+import org.scalajs.dom.HTMLInputElement
+import org.scalajs.dom.KeyboardEvent
 
-case class Modifier(modifier: HTMLElement => Unit)
+trait Modifier[+E]:
+  def modify[E2 >: E <: HTMLElement](e: E2): Unit
 
-object Modifier:
+object ModifierOrig:
 
   given toTextModifier: scala.Conversion[String, Modifier] = data =>
     Modifier(e => {

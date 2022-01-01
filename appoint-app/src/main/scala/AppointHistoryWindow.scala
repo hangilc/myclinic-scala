@@ -8,7 +8,7 @@ import dev.fujiwara.domq.{ShowMessage}
 import scala.language.implicitConversions
 import dev.myclinic.scala.model.{AppEvent, AppModelEvent}
 import dev.myclinic.scala.web.appoint.history.History
-import org.scalajs.dom.raw.HTMLElement
+import org.scalajs.dom.HTMLElement
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 

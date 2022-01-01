@@ -7,9 +7,9 @@ import dev.fujiwara.domq.{Modal, LocalModal, Icons, ContextMenu, ShowMessage}
 import dev.myclinic.scala.model.{Appoint, AppointTime}
 import scala.language.implicitConversions
 import dev.myclinic.scala.web.appoint.Misc
-import org.scalajs.dom.raw.HTMLElement
+import org.scalajs.dom.HTMLElement
 import dev.myclinic.scala.webclient.Api
-import org.scalajs.dom.raw.MouseEvent
+import org.scalajs.dom.MouseEvent
 import scala.util.Success
 import scala.util.Failure
 import scala.concurrent.ExecutionContext.Implicits.global

@@ -1,12 +1,12 @@
 package dev.fujiwara.domq
 
-import org.scalajs.dom.raw.HTMLElement
+import org.scalajs.dom.HTMLElement
 import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Html
 import dev.fujiwara.domq.Modifiers.{*, given}
 import scala.language.implicitConversions
-import org.scalajs.dom.raw.HTMLInputElement
+import org.scalajs.dom.HTMLInputElement
 
 object Form:
   def rows(spec: (HTMLElement, HTMLElement)*): HTMLElement =

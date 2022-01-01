@@ -6,7 +6,7 @@ import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.{Icons}
 import scala.language.implicitConversions
 import org.scalajs.dom.{document, window}
-import org.scalajs.dom.raw.{HTMLElement, MouseEvent}
+import org.scalajs.dom.{HTMLElement, MouseEvent}
 import scala.scalajs.js
 
 case class FloatWindow(

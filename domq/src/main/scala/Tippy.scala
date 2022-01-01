@@ -1,7 +1,7 @@
 package dev.fujiwara.domq
 
 import scala.scalajs.js
-import org.scalajs.dom.raw.{Element}
+import org.scalajs.dom.{Element}
 import scalajs.js.annotation.{JSGlobal, JSGlobalScope}
 import scala.collection.mutable.ListBuffer
 

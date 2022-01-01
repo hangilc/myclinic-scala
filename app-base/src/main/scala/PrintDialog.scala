@@ -6,7 +6,7 @@ import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.Modifier
 import dev.fujiwara.domq.{Modal, ShowMessage}
 import scala.language.implicitConversions
-import org.scalajs.dom.raw.{HTMLElement, HTMLInputElement}
+import org.scalajs.dom.{HTMLElement, HTMLInputElement}
 import dev.fujiwara.scala.drawer.{Op, PrintRequest}
 import io.circe.*
 import io.circe.syntax.*

@@ -1,6 +1,6 @@
 package dev.myclinic.scala.web.reception.scan.variable
 
-import org.scalajs.dom.raw.{HTMLSelectElement}
+import org.scalajs.dom.{HTMLSelectElement}
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import dev.fujiwara.domq.ElementQ.{*, given}
@@ -24,7 +24,7 @@ trait Callbacks[T] extends Variable[T]:
   def invokeCallbacks(value: T): Unit = 
     callbacks.foreach(cb => cb(value))
   override def set(value: T): Unit =
-    super.set(value)
+    //super.set(value)
     invokeCallbacks(value)
 
 trait FutureCallbacks[T]:

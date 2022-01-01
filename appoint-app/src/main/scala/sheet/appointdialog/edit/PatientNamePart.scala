@@ -5,7 +5,7 @@ import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.{Icons, Colors, ErrorBox, Form}
 import scala.language.implicitConversions
-import org.scalajs.dom.raw.HTMLElement
+import org.scalajs.dom.HTMLElement
 import dev.myclinic.scala.webclient.Api
 import concurrent.ExecutionContext.Implicits.global
 import dev.myclinic.scala.model.{Patient, Appoint}

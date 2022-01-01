@@ -8,8 +8,8 @@ import scala.language.implicitConversions
 import dev.myclinic.scala.model.{Appoint, AppointTime}
 import dev.myclinic.scala.web.appoint
 import appoint.Misc
-import org.scalajs.dom.raw.HTMLElement
-import org.scalajs.dom.raw.MouseEvent
+import org.scalajs.dom.HTMLElement
+import org.scalajs.dom.MouseEvent
 import dev.myclinic.scala.web.appoint.sheet.appointdialog.edit.{
   PatientNamePart,
   PatientIdPart,

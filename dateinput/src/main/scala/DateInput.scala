@@ -6,7 +6,7 @@ import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.{Icons, FloatingElement, Geometry}
 import dev.fujiwara.kanjidate.KanjiDate
 import dev.fujiwara.kanjidate.KanjiDate.Gengou
-import org.scalajs.dom.raw.{HTMLElement, HTMLInputElement}
+import org.scalajs.dom.{HTMLElement, HTMLInputElement}
 import scala.language.implicitConversions
 import cats.*
 import cats.syntax.*
@@ -19,9 +19,9 @@ import scala.util.Failure
 import scala.util.Success
 import cats.data.Validated.Valid
 import cats.data.Validated.Invalid
-import org.scalajs.dom.raw.MouseEvent
-import org.scalajs.dom.raw.KeyboardEvent
-import org.scalajs.dom.raw.Event
+import org.scalajs.dom.MouseEvent
+import org.scalajs.dom.KeyboardEvent
+import org.scalajs.dom.Event
 
 class DateInput(gengouList: List[Gengou] = Gengou.list,
     onEnter: LocalDate => Unit = _ => (),

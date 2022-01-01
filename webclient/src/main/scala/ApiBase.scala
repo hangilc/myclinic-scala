@@ -6,7 +6,7 @@ import dev.myclinic.scala.model.jsoncodec.Implicits.{given}
 import dev.myclinic.scala.webclient.ParamsImplicits.{given}
 import scala.language.implicitConversions
 import scala.concurrent.Future
-import org.scalajs.dom.raw.XMLHttpRequest
+import org.scalajs.dom.XMLHttpRequest
 import scala.scalajs.js.typedarray.ArrayBuffer
 
 trait ApiBase:

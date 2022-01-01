@@ -10,7 +10,7 @@ import dev.myclinic.scala.model.*
 import dev.fujiwara.kanjidate.KanjiDate
 import dev.myclinic.scala.util.DateUtil
 import dev.myclinic.scala.webclient.Api
-import org.scalajs.dom.raw.{HTMLElement, MouseEvent}
+import org.scalajs.dom.{HTMLElement, MouseEvent}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Success
 import scala.util.Failure

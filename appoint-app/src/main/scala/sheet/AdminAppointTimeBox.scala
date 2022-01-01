@@ -8,9 +8,9 @@ import dev.fujiwara.domq.ContextMenu
 import dev.fujiwara.domq.Modal
 import dev.fujiwara.domq.Form
 import dev.fujiwara.domq.ShowMessage
-import org.scalajs.dom.raw.MouseEvent
+import org.scalajs.dom.MouseEvent
 import scala.language.implicitConversions
-import org.scalajs.dom.raw.HTMLElement
+import org.scalajs.dom.HTMLElement
 import org.scalajs.dom.{document, window}
 import dev.myclinic.scala.webclient.Api
 import scala.concurrent.ExecutionContext.Implicits.global

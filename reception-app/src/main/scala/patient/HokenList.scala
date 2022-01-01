@@ -5,7 +5,7 @@ import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.{Icons, Form, ErrorBox, Modifier, CustomEvent}
 import scala.language.implicitConversions
-import org.scalajs.dom.raw.{HTMLElement, HTMLInputElement}
+import org.scalajs.dom.{HTMLElement, HTMLInputElement}
 import scala.scalajs.js
 import dev.myclinic.scala.util.{DateUtil, HokenRep}
 import dev.fujiwara.kanjidate.KanjiDate
@@ -15,7 +15,7 @@ import dev.myclinic.scala.webclient.Api
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Success, Failure}
 import scala.concurrent.Future
-import org.scalajs.dom.raw.Event
+import org.scalajs.dom.Event
 import dev.myclinic.scala.util.DateTimeOrdering
 import scala.math.Ordered.orderingToOrdered
 import dev.fujiwara.domq.DomqUtil

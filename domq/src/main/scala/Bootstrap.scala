@@ -3,7 +3,7 @@ package dev.fujiwara.domq
 import dev.fujiwara.domq.Modifiers.Creator
 import scalajs.js
 import scalajs.js.annotation.JSGlobal
-import org.scalajs.dom.raw.Element
+import org.scalajs.dom.Element
 
 object Bootstrap:
   val ml = Creator[Int]((e, a) => {

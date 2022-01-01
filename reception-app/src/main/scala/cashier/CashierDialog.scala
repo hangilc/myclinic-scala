@@ -9,7 +9,7 @@ import dev.myclinic.scala.model.*
 import dev.myclinic.scala.web.appbase.{PrintDialog}
 import dev.myclinic.scala.webclient.Api
 import dev.myclinic.scala.apputil.HokenUtil
-import org.scalajs.dom.raw.{HTMLElement}
+import org.scalajs.dom.{HTMLElement}
 import java.time.{LocalDateTime, LocalDate}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Success
