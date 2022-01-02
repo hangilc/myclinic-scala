@@ -1,8 +1,8 @@
 package dev.myclinic.scala.web.appoint
 
-import dev.fujiwara.domq.ElementQ.{given, *}
-import dev.fujiwara.domq.Html._
-import dev.fujiwara.domq.Modifiers._
+import dev.fujiwara.domq.ElementQ.* 
+import dev.fujiwara.domq.Html.*
+import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.myclinic.scala.model._
 import dev.myclinic.scala.util.DateUtil
 import org.scalajs.dom

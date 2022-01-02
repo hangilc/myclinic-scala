@@ -12,7 +12,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 abstract class PatientSearch:
   val eSearchInput: HTMLInputElement = inputText()
-  val eSearchButton: HTMLElement = button()
+  val eSearchButton = button()
   val searchResult: Selection[Patient] =
     Selection[Patient](onSelect = patient => {
       searchResult.clear()

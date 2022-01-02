@@ -55,10 +55,10 @@ class VisitBlock(visit: VisitEx):
     else
       val reps: List[String] = visit.drugs.map(drug => DrugUtil.drugRep(drug))
       val ords: List[Int] = (1 to reps.size).toList
-      div("Ｒｐ）").ele ::
+      div("Ｒｐ）") ::
         ords.zip(reps).map { case (i, s) =>
           val ii = ZenkakuUtil.convertToZenkakuDigits(i.toString)
-          div(s"${ii}）${s}").ele
+          div(s"${ii}）${s}")
         }
 
   def formatVisitTime(at: LocalDateTime): String =

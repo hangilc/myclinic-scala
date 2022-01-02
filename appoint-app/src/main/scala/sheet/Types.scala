@@ -3,7 +3,8 @@ package dev.myclinic.scala.web.appoint.sheet
 import org.scalajs.dom.HTMLElement
 import scala.math.Ordered
 import scala.math.Ordered.orderingToOrdered
-import dev.fujiwara.domq.ElementQ.{*, given}
+import dev.fujiwara.domq.ElementQ.*
+import dev.fujiwara.domq.Modifiers.{*, given}
 import scala.language.implicitConversions
 
 object Types:

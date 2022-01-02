@@ -5,6 +5,7 @@ import scala.collection.mutable.ListBuffer
 import org.scalajs.dom.HTMLOptionElement
 import org.scalajs.dom.HTMLInputElement
 import math.Ordered.orderingToOrdered
+import org.scalajs.dom.HTMLButtonElement
 
 object ElementQ:
   extension [E <: HTMLElement](ele: E)
@@ -137,6 +138,13 @@ object ElementQ:
       else Some(value)
 
   extension (i: HTMLInputElement)
+    def enable(flag: Boolean): Unit =
+      i.disabled = !flag
+
+    def enable(): Unit = enable(true)
+    def disable(): Unit = enable(false)
+
+  extension (i: HTMLButtonElement)
     def enable(flag: Boolean): Unit =
       i.disabled = !flag
 

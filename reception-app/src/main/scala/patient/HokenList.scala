@@ -23,7 +23,7 @@ import dev.fujiwara.domq.DomqUtil
 class HokenList(patientId: Int, subblocks: HTMLElement):
   val errorBox = ErrorBox()
   val eDisp = div()
-  val eListAll: HTMLElement = checkbox()
+  val eListAll: HTMLInputElement = checkbox()
   val ele = div(
     cls := """shahokokuho-created koukikourei-created kouhi-created
       shahokokuho-updated koukikourei-updated kouhi-updated
@@ -62,7 +62,7 @@ class HokenList(patientId: Int, subblocks: HTMLElement):
       event: CustomEvent[ShahokokuhoCreated]
   ): Unit =
     val created = event.detail.created
-    if eListAll.isChecked || created.isValidAt(LocalDate.now()) then
+    if eListAll.checked || created.isValidAt(LocalDate.now()) then
       eDisp.qSelector(s".shahokokuho-${created.shahokokuhoId}").match {
         case Some(_) => ()
         case None => {
@@ -81,7 +81,7 @@ class HokenList(patientId: Int, subblocks: HTMLElement):
       event: CustomEvent[KoukikoureiCreated]
   ): Unit =
     val created = event.detail.created
-    if eListAll.isChecked || created.isValidAt(LocalDate.now()) then
+    if eListAll.checked || created.isValidAt(LocalDate.now()) then
       eDisp.qSelector(s".koukikourei-${created.koukikoureiId}").match {
         case Some(_) => ()
         case None => {
@@ -99,7 +99,7 @@ class HokenList(patientId: Int, subblocks: HTMLElement):
       event: CustomEvent[KouhiCreated]
   ): Unit =
     val created = event.detail.created
-    if eListAll.isChecked || created.isValidAt(LocalDate.now()) then
+    if eListAll.checked || created.isValidAt(LocalDate.now()) then
       eDisp.qSelector(s".kouhi-${created.kouhiId}").match {
         case Some(_) => ()
         case None => {
@@ -119,7 +119,7 @@ class HokenList(patientId: Int, subblocks: HTMLElement):
     val updated = event.detail.updated
     val cur = eDisp.qSelector(s".shahokokuho-${updated.shahokokuhoId}")
     println(("isValidAt", updated.isValidAt(LocalDate.now())))
-    if eListAll.isChecked || updated.isValidAt(LocalDate.now()) then
+    if eListAll.checked || updated.isValidAt(LocalDate.now()) then
       val item = HokenItem(updated)
       val newEle = createDisp(item)
       cur match {
@@ -142,7 +142,7 @@ class HokenList(patientId: Int, subblocks: HTMLElement):
   ): Unit =
     val updated = event.detail.updated
     val cur = eDisp.qSelector(s".koukikourei-${updated.koukikoureiId}")
-    if eListAll.isChecked || updated.isValidAt(LocalDate.now()) then
+    if eListAll.checked || updated.isValidAt(LocalDate.now()) then
       val item = HokenItem(updated)
       val newEle = createDisp(item)
       cur match {
@@ -165,7 +165,7 @@ class HokenList(patientId: Int, subblocks: HTMLElement):
   ): Unit =
     val updated = event.detail.updated
     val cur = eDisp.qSelector(s".kouhi-${updated.kouhiId}")
-    if eListAll.isChecked || updated.isValidAt(LocalDate.now()) then
+    if eListAll.checked || updated.isValidAt(LocalDate.now()) then
       val item = HokenItem(updated)
       val newEle = createDisp(item)
       cur match {
@@ -186,7 +186,7 @@ class HokenList(patientId: Int, subblocks: HTMLElement):
   private def setHokenList(list: List[HokenItem]): Unit =
     val listSorted = list.sortBy(list => list.validFrom).reverse
     eDisp.clear()
-    eDisp((listSorted.map(createDisp(_)): List[Modifier]): _*)
+    eDisp((listSorted.map(createDisp(_)): List[Modifier[HTMLElement]]): _*)
 
   private def createDisp(item: HokenItem): HTMLElement =
     div(
@@ -260,7 +260,7 @@ class HokenList(patientId: Int, subblocks: HTMLElement):
 
   private lazy val onListAllChange: js.Function1[Event, Unit] =
     (event: Event) => {
-      if eListAll.isChecked then loadAll()
+      if eListAll.checked then loadAll()
       else loadAvailable()
     }
 

@@ -1,6 +1,6 @@
 package dev.myclinic.scala.web.reception.scan
 
-import dev.fujiwara.domq.ElementQ.{*, given}
+import dev.fujiwara.domq.ElementQ.*
 import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.{Selection}
@@ -26,7 +26,7 @@ class ScannerSelect:
   def init(): Future[Unit] = refreshScannerSelect()
 
   def selected: Option[String] =
-    eScannerSelect.getOptionalSelectValue()
+    eScannerSelect.getValueOption
 
   private def doRefresh(): Unit =
     refreshScannerSelect().onComplete {

@@ -22,7 +22,7 @@ abstract class ScanTypeSelect(defaultScanType: String):
   def onChange(scanType: String): Unit
 
   def selected: String =
-    eScanTypeSelect.getSelectValue()
+    eScanTypeSelect.getValue
 
   def variable: Variable[String] = new SelectVariable(eScanTypeSelect) with Callbacks[String]
 
@@ -35,7 +35,7 @@ abstract class ScanTypeSelect(defaultScanType: String):
         val opt = option(name, value := optValue)
         if optValue == defaultScanType then
           opt.asInstanceOf[HTMLOptionElement].selected = true
-        opt.ele
+        opt
       })
     )
 

@@ -117,9 +117,9 @@ class AppointSheet(using eventPublishers: EventPublishers):
     )(
       button("前の月", onclick := (() => advanceDays(-28))),
       button("前の週", onclick := (() => advanceDays(-7))),
-      a("今週", href := "", leftGap, onclick := (onThisWeekClick _)),
-      button("次の週", leftGap, onclick := (() => advanceDays(7))),
-      button("次の月", leftGap, onclick := (() => advanceDays(28))),
+      a("今週", href := "", ml := "0.5rem", onclick := (onThisWeekClick _)),
+      button("次の週", ml := "0.5rem", onclick := (() => advanceDays(7))),
+      button("次の月", ml := "0.5rem", onclick := (() => advanceDays(28))),
       topMenuBox(attr("id") := "top-menu-box")(
         Icons.menu(Icons.defaultStyle, onclick := (onMenuClick _))
       )

@@ -41,7 +41,7 @@ class KoukikoureiForm:
   def setData(data: Koukikourei): Unit =
     eHokenshaBangou.value = data.hokenshaBangou.toString
     eHihokenshaBangou.value = data.hihokenshaBangou
-    eFutanWariForm.setRadioGroupValue(data.futanWari.toString)
+    eFutanWariForm.setRadioGroupValue("futanwari", data.futanWari.toString)
     eValidFrom.eInput.value = KanjiDate.dateToKanji(data.validFrom)
     eValidUpto.eInput.value =
       data.validUpto.value.fold("")(KanjiDate.dateToKanji(_))
@@ -53,7 +53,7 @@ class KoukikoureiForm:
       validatePatientId(patientId),
       validateHokenshaBangou(eHokenshaBangou.value),
       validateHihokenshaBangou(eHihokenshaBangou.value),
-      validateFutanWari(eFutanWariForm.getCheckedRadioValue),
+      validateFutanWari(eFutanWariForm.getCheckedRadioValue("futanwari")),
       validateValidFrom(eValidFrom.validate(), _.message),
       validateValidUpto(
         eValidUpto.validateOption().map(ValidUpto(_)),
@@ -70,7 +70,7 @@ class KoukikoureiForm:
       validatePatientId(patientId),
       validateHokenshaBangou(eHokenshaBangou.value),
       validateHihokenshaBangou(eHihokenshaBangou.value),
-      validateFutanWari(eFutanWariForm.getCheckedRadioValue),
+      validateFutanWari(eFutanWariForm.getCheckedRadioValue("futanwari")),
       validateValidFrom(eValidFrom.validate(), _.message),
       validateValidUpto(
         eValidUpto.validateOption().map(ValidUpto(_)),

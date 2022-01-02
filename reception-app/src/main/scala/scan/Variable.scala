@@ -14,8 +14,8 @@ class CachedVariable[T](private var cache: T) extends Variable[T]:
   override def set(value: T): Unit = cache = value
 
 class SelectVariable(select: HTMLSelectElement) extends Variable[String]:
-  def get: String = select.getSelectValue()
-  def set(value: String): Unit = select.setSelectValue(value)
+  def get: String = select.getValue
+  def set(value: String): Unit = select.setValue(value)
 
 trait Callbacks[T] extends Variable[T]:
   private var callbacks: List[T => Unit] = List.empty

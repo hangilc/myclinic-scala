@@ -51,8 +51,8 @@ class ShahokokuhoForm:
     eHihokenshaKigou.value = data.hihokenshaKigou
     eHihokenshaBangou.value = data.hihokenshaBangou
     eEdaban.value = data.edaban
-    eHonninForm.setRadioGroupValue(data.honninStore.toString)
-    eKoureiForm.setRadioGroupValue(data.koureiStore.toString)
+    eHonninForm.setRadioGroupValue("honnin", data.honninStore.toString)
+    eKoureiForm.setRadioGroupValue("kourei", data.koureiStore.toString)
     eValidFrom.eInput.value = KanjiDate.dateToKanji(data.validFrom)
     eValidUpto.eInput.value = data.validUpto.value.fold("")(KanjiDate.dateToKanji(_))
 
@@ -62,10 +62,10 @@ class ShahokokuhoForm:
       validateHokenshaBangouInput(eHokenshaBangou.value),
       validateHihokenshaKigou(eHihokenshaKigou.value),
       validateHihokenshaBangou(eHihokenshaBangou.value),
-      validateHonnin(eHonninForm.getCheckedRadioValue),
+      validateHonnin(eHonninForm.getCheckedRadioValue("honnin")),
       validateValidFrom(eValidFrom.validate(), _.message),
       validateValidUpto(eValidUpto.validateOption().map(ValidUpto(_)), _.message),
-      validateKourei(eKoureiForm.getCheckedRadioValue),
+      validateKourei(eKoureiForm.getCheckedRadioValue("kourei")),
       validateEdaban(eEdaban.value)
     )
 
@@ -76,10 +76,10 @@ class ShahokokuhoForm:
       validateHokenshaBangouInput(eHokenshaBangou.value),
       validateHihokenshaKigou(eHihokenshaKigou.value),
       validateHihokenshaBangou(eHihokenshaBangou.value),
-      validateHonnin(eHonninForm.getCheckedRadioValue),
+      validateHonnin(eHonninForm.getCheckedRadioValue("honnin")),
       validateValidFrom(eValidFrom.validate(), _.message),
       validateValidUpto(eValidUpto.validateOption().map(ValidUpto(_)), _.message),
-      validateKourei(eKoureiForm.getCheckedRadioValue),
+      validateKourei(eKoureiForm.getCheckedRadioValue("kourei")),
       validateEdaban(eEdaban.value)
     )
 

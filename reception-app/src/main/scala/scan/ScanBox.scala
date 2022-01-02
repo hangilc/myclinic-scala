@@ -16,7 +16,6 @@ import java.time.LocalDateTime
 import org.scalajs.dom.URL
 import org.scalajs.dom.{Blob, BlobPropertyBag}
 import scala.scalajs.js
-//import org.scalajs.dom.ext.Image
 import org.scalajs.dom.HTMLImageElement
 import org.scalajs.dom.Event
 import scala.util.Success
@@ -47,8 +46,8 @@ class ScanBox():
     def onScan(savedFile: String): Unit = onScanFileAdd(savedFile)
 
   val scannedItems = new ScannedItems(this)
-  val eUploadButton: HTMLElement = button()
-  val eCloseButton: HTMLElement = button()
+  val eUploadButton = button()
+  val eCloseButton = button()
   val ele = div(cls := ScanBox.cssClassName)(
     patientSearch.ele(cls := "search-area"),
     patientDisp.ele(cls := "selected-patient"),

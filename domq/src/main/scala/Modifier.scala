@@ -15,6 +15,7 @@ import org.scalajs.dom.HTMLFormElement
 import org.scalajs.dom.Event
 import org.scalajs.dom.HTMLAnchorElement
 import org.scalajs.dom.KeyboardEvent
+import org.scalajs.dom.HTMLButtonElement
 
 trait Modifier[-E]:
   def modify(e: E): Unit
@@ -74,9 +75,14 @@ object Modifiers:
 
   def placeholder: Attr = attr("placeholder")
 
-  val disabled = Assign[HTMLInputElement, Boolean](
-    (e, b) => e.disabled = b
-  )
+  object disabled:
+    def :=(arg: Boolean): Modifier[HTMLInputElement | HTMLButtonElement] =
+      Modifier[HTMLInputElement | HTMLButtonElement]((e: HTMLInputElement | HTMLButtonElement) =>
+        e match {
+          case i: HTMLInputElement => i.disabled = arg
+          case b: HTMLButtonElement => b.disabled = arg
+        }
+      )
 
   val checked = Assign[HTMLInputElement, Boolean](
     (e, b) => e.checked = b
@@ -188,6 +194,20 @@ object Modifiers:
         textAreaWorkarea.innerHTML = text
         val decoded = textAreaWorkarea.innerText
         e.appendChild(document.createTextNode(decoded))
+
+  def hoverBackground(bg: String): Modifier[HTMLElement] =
+    var save: String = ""
+    Modifier(e => {
+      ElementQ(e)(
+        onmouseenter := (() => {
+          save = e.style.background
+          e.style.background = bg
+        }),
+        onmouseleave := (() => {
+          e.style.background = save
+        })
+      )
+    })
 
 
 
