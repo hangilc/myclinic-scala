@@ -15,6 +15,7 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Success
 import scala.util.Failure
+import org.scalajs.dom.HTMLSelectElement
 
 class PrintDialog(
     title: String,
@@ -29,8 +30,8 @@ class PrintDialog(
     DrawerSvg.drawerJsonToSvg(ops.asJson.toString, width, height, viewBox)
   val eDisplay: HTMLElement = div()
   val eSetting: HTMLElement = div()
-  val eSelect: HTMLElement = select()
-  val eDefaultCheck: HTMLElement = checkbox()
+  val eSelect: HTMLSelectElement = select()
+  val eDefaultCheck: HTMLInputElement = checkbox()
   val dlog: Modal = Modal(
     title,
     div(
@@ -60,10 +61,10 @@ class PrintDialog(
       settings <- Api.listPrintSetting()
       pref <- Api.getPrintPref(prefKind)
     yield {
-      val settingOptions: List[Modifier] =
+      val settingOptions: List[Modifier[HTMLElement]] =
         ("手動" :: settings).map(name => option(name, value := name))
       eSelect(settingOptions: _*)
-      eSelect.setSelectValue(pref.getOrElse("手動"))
+      eSelect.setValue(pref.getOrElse("手動"))
     }
 
   def open(): Unit = 
@@ -77,7 +78,7 @@ class PrintDialog(
   def doPrint(): Unit =
     val req = PrintRequest(List.empty, List(ops))
     val setting: Option[String] = 
-      val s = eSelect.getSelectValue()
+      val s = eSelect.getValue
       if s == null || s == "" || s == "手動" then None
       else Some(s)
     val f = 
@@ -91,9 +92,9 @@ class PrintDialog(
     }
 
   def handlePrefUpdate(setting: Option[String]): Future[Boolean] = 
-    val asDefaultChecked = eDefaultCheck.asInputElement.checked
+    val asDefaultChecked = eDefaultCheck.checked
     if asDefaultChecked then
-      val currentDefaultOpt = eSelect.selector("option[selected]").map(_.getAttribute("value"))
+      val currentDefaultOpt = eSelect.qSelector("option[selected]").map(_.getAttribute("value"))
       if currentDefaultOpt != setting then
         Api.setPrintPref(prefKind, setting.getOrElse("手動")).map(_ => true)
       else

@@ -38,7 +38,7 @@ object ShowMessage:
       commands: List[AskCommand],
       cb: AskCommand => Unit
   ): Unit =
-    val items: List[Modifier] =
+    val items: List[Modifier[HTMLElement]] =
       commands.map(cmd => button(cmd.label)(onclick := (() => cb(cmd))))
     box(items: _*)
 

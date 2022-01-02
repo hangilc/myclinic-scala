@@ -41,7 +41,7 @@ object Form:
     }
     tab
 
-  def inputGroup: Modifier =
+  def inputGroup: Modifier[HTMLElement] =
     css(style => {
       style.display = "flex"
       style.width = "100%"

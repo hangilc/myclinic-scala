@@ -10,6 +10,9 @@ import scala.language.implicitConversions
 import org.scalajs.dom.MouseEvent
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.Failure
+import scala.{util => ju}
+import scala.util.Success
 
 class PullDownMenu:
   val screen: HTMLElement = Screen.screen
@@ -63,10 +66,13 @@ object PullDown:
     anchor(
       onclick := (() => {
         val m = new PullDownMenu()
-        for
+        (for
           c <- content(() => m.close())
         yield {
           m.open(c, f => locatePullDownMenu(anchor, f))
+        }).onComplete {
+          case Success(_) => ()
+          case Failure(ex) => System.err.println(ex.getMessage)
         }
       })
     )

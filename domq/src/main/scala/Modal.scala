@@ -44,7 +44,7 @@ class Modal(title: String, content: HTMLElement, val zIndex: Int = Modal.zIndexD
     onCloseCallbacks = onCloseCallbacks :+ cb
 
 class ModalModifiers:
-  def modalBackdrop(zIndex: Int) = Modifier(e => {
+  def modalBackdrop(zIndex: Int) = Modifier[HTMLElement](e => {
     val style = e.style
     style.display = "block"
     style.position = "fixed"
@@ -58,14 +58,14 @@ class ModalModifiers:
     style.zIndex = zIndex.toString
   })
 
-  val modalTitle = Modifier(e => {
+  val modalTitle = Modifier[HTMLElement](e => {
     val style = e.style
     style.verticalAlign = "middle"
     style.fontSize = "1.2rem"
     style.fontWeight = "bold"
   })
 
-  def modalContent(zIndex: Int) = Modifier(e => {
+  def modalContent(zIndex: Int) = Modifier[HTMLElement](e => {
     val style = e.style
     style.position = "fixed"
     style.top = "20px"
@@ -80,12 +80,12 @@ class ModalModifiers:
     style.maxHeight = (window.innerHeight - 60).toString + "px"
   })
 
-  val modalBody = Modifier(e => {
+  val modalBody = Modifier[HTMLElement](e => {
     val style = e.style
     style.padding = "0.5em 0"
   })
 
-  val modalCommands = Modifier(e => {
+  val modalCommands = Modifier[HTMLElement](e => {
     val style = e.style
     e.style.textAlign = "end"
     e(cls := "modal-commands")

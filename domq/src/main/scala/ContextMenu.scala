@@ -106,7 +106,7 @@ object ContextMenu:
         )
       )
     val items = commands.map((name, f) => {
-      Modifier(e => e.appendChild(makeItem(name, f)))
+      Modifier[HTMLElement](e => e.appendChild(makeItem(name, f)))
     })
     m.menu(items: _*)
     m

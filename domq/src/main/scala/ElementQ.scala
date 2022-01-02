@@ -12,15 +12,18 @@ object ElementQ:
       ms.foreach(m => m.modify(ele))
       ele
 
-    def clear(): Unit =
+    def clear(): E =
       ele.innerHTML = ""
+      ele
 
-    def addChildren(elements: List[HTMLElement]): Unit =
+    def addChildren(elements: List[HTMLElement]): E =
       elements.foreach(e => ele.appendChild(e))
+      ele
 
-    def setChildren(elements: List[HTMLElement]): Unit =
+    def setChildren(elements: List[HTMLElement]): E =
       clear()
       addChildren(elements)
+      ele
 
     def getParent: Option[HTMLElement] =
       val parent = ele.parentElement

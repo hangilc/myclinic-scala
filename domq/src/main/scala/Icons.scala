@@ -9,12 +9,12 @@ import org.scalajs.dom.document
 
 object Icons:
 
-  val defaultStyle: Modifier = css(style => {
+  val defaultStyle: Modifier[HTMLElement] = css(style => {
     style.verticalAlign = "middle"
     style.cursor = "pointer"
   })
 
-  val defaultStaticStyle: Modifier = css(style => {
+  val defaultStaticStyle: Modifier[HTMLElement] = css(style => {
     style.verticalAlign = "middle"
   })
 
@@ -285,69 +285,6 @@ object Icons:
       )
     )
 
-  // private def makeIcon(
-  //     width: String,
-  //     height: String,
-  //     strokeColor: String,
-  //     ds: List[String],
-  //     viewBox: String,
-  //     strokeWidth: String,
-  //     fillColor: String
-  // ): HTMLElement =
-  //   val ns = "http://www.w3.org/2000/svg"
-  //   val svg = document.createElementNS(ns, "svg").asInstanceOf[HTMLElement]
-  //   def path = document.createElementNS(ns, "path").asInstanceOf[HTMLElement]
-  //   val paths: List[Modifier] =
-  //     ds.map(d =>
-  //       path(
-  //         attr("stroke-linecap") := "round",
-  //         attr("stroke-linejoin") := "round",
-  //         attr("stroke-width") := strokeWidth,
-  //         attr("d") := d
-  //       )
-  //     )
-  //   svg(
-  //     attr("viewBox") := viewBox,
-  //     css(style => { style.height = height; style.width = width }),
-  //     attr("fill") := fillColor,
-  //     attr("stroke") := strokeColor
-  //   )(paths: _*)
-
-  // private def makeIcon(
-  //     size: String,
-  //     strokeColor: String,
-  //     ds: List[String],
-  //     viewBox: String = "0 0 24 24",
-  //     strokeWidth: String = "2",
-  //     fillColor: String = "none"
-  // ): HTMLElement = makeIcon(size, size, strokeColor, ds, viewBox, strokeWidth, fillColor)
-
-  // private def makeIcon2(
-  //     strokeColor: String,
-  //     ds: List[String],
-  //     viewBox: String,
-  //     strokeWidth: String,
-  //     fillColor: String
-  // ): HTMLElement =
-  //   val ns = "http://www.w3.org/2000/svg"
-  //   val svg = document.createElementNS(ns, "svg").asInstanceOf[HTMLElement]
-  //   def path = document.createElementNS(ns, "path").asInstanceOf[HTMLElement]
-  //   val paths: List[Modifier] =
-  //     ds.map(d =>
-  //       path(
-  //         attr("stroke-linecap") := "round",
-  //         attr("stroke-linejoin") := "round",
-  //         attr("stroke-width") := strokeWidth,
-  //         attr("d") := d
-  //       )
-  //     )
-  //   svg(
-  //     attr("viewBox") := viewBox,
-  //     //css(style => { style.height = height; style.width = width }),
-  //     //attr("fill") := fillColor,
-  //     attr("stroke") := strokeColor
-  //   )(paths: _*)
-
   private def makeIcon(
       ds: List[String],
       viewBox: String = "0 0 24 24"
@@ -355,7 +292,7 @@ object Icons:
     val ns = "http://www.w3.org/2000/svg"
     val svg = document.createElementNS(ns, "svg").asInstanceOf[HTMLElement]
     def path = document.createElementNS(ns, "path").asInstanceOf[HTMLElement]
-    val paths: List[Modifier] =
+    val paths: List[Modifier[HTMLElement]] =
       ds.map(d =>
         path(
           attr("stroke-linecap") := "round",
