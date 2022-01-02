@@ -2,8 +2,8 @@ package dev.myclinic.scala.web.reception
 
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 import org.scalajs.dom.document
-import dev.fujiwara.domq.ElementQ.{*, given}
-import dev.fujiwara.domq.Html.{*, given}
+import dev.fujiwara.domq.ElementQ.*
+import dev.fujiwara.domq.Html.*
 import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.{ShowMessage}
 import scala.language.implicitConversions

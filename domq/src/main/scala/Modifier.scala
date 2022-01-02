@@ -16,6 +16,7 @@ import org.scalajs.dom.Event
 import org.scalajs.dom.HTMLAnchorElement
 import org.scalajs.dom.KeyboardEvent
 import org.scalajs.dom.HTMLButtonElement
+import org.scalajs.dom.SVGElement
 
 trait Modifier[-E]:
   def modify(e: E): Unit
@@ -36,6 +37,10 @@ object Modifiers:
   given Conversion[HTMLElement, Modifier[HTMLElement]] with
     def apply(e: HTMLElement): Modifier[HTMLElement] =
       Modifier[HTMLElement](ele => ele.appendChild(e))
+  given Conversion[SVGElement, Modifier[HTMLElement]] with
+    def apply(e: SVGElement): Modifier[HTMLElement] =
+      Modifier[HTMLElement](ele => ele.appendChild(e))
+
   
   abstract class Assign[E, A]:
     def :=(a: A): Modifier[E]
@@ -44,8 +49,12 @@ object Modifiers:
       def :=(a: A): Modifier[E] = Modifier[E](e => m(e, a))
 
   object cls:
-    def :=(a: String): Modifier[HTMLElement] = (e => e.className = a)
-    def :-(a: String): Modifier[HTMLElement] = (e => e.classList.remove(a))
+    def :=(a: String): Modifier[HTMLElement] = (e => 
+      a.trim.split("\\s+").foreach(c => e.classList.add(c))
+    )
+    def :-(a: String): Modifier[HTMLElement] = (e => 
+      a.trim.split("\\s+").foreach(c => e.classList.remove(c))
+    )
 
   val cb = Assign[HTMLElement, HTMLElement => Unit](
     (e, handler) => handler(e)
