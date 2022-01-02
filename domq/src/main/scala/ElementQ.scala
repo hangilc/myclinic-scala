@@ -6,13 +6,15 @@ import org.scalajs.dom.HTMLOptionElement
 import org.scalajs.dom.HTMLInputElement
 import math.Ordered.orderingToOrdered
 import org.scalajs.dom.HTMLButtonElement
+import org.scalajs.dom.Element
 
 object ElementQ:
-  extension [E <: HTMLElement](ele: E)
+  extension [E <: Element](ele: E)
     def apply(ms: Modifier[E]*): E =
       ms.foreach(m => m.modify(ele))
       ele
 
+  extension [E <: HTMLElement](ele: E)
     def clear(): E =
       ele.innerHTML = ""
       ele
