@@ -12,13 +12,13 @@ val doobieVersion = "1.0.0-M5"
 val circeVersion = "0.14.1"
 val scalaJavaTimeVersion = "2.3.0"
 val scalaJSDomVersion = "2.1.0"
-//val scalaJSDomVersion = "1.2.0"
 val catsVersion = "2.6.1"
 
 val jacksonVersion = "2.12.5"
 val slf4jVersion = "1.7.25"
 
 ThisBuild / scalacOptions ++= Seq("-deprecation", "-encoding", "UTF-8")
+ThisBuild / javacOptions ++= Seq("-encoding", "UTF-8")
 
 val rootDir = ThisBuild / baseDirectory
 
