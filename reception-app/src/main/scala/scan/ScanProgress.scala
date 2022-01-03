@@ -12,7 +12,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Success, Failure}
 
-abstract class ScanProgress(scanBox: ScanBox):
+abstract class ScanProgress(using context: ScanContext):
   val eScanButton = button()
   val eScanProgress = span()
   val ele = div(
@@ -28,8 +28,9 @@ abstract class ScanProgress(scanBox: ScanBox):
   def enableScan(flag: Boolean): Unit = eScanButton.enable(flag)
 
   private def startScan(): Unit =
-    scanBox.selectedScanner.foreach(deviceId => {
-      scanBox.isScanning = true
+    context.scannerDeviceId.foreach(deviceId => {
+      context.isScanning = true
+      context.isScanningCallbacks.invoke()
       val resolution = 100
       eScanProgress.innerText = "スキャンの準備中"
       eScanProgress(displayDefault)
@@ -39,7 +40,8 @@ abstract class ScanProgress(scanBox: ScanBox):
         eScanProgress(displayNone)
         file
       ).onComplete(r => {
-        scanBox.isScanning = false
+        context.isScanning = false
+        context.isScanningCallbacks.invoke()
         r match {
           case Success(file) => onScan(file)
           case Failure(ex) => System.err.println(ex.getMessage)

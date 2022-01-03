@@ -14,13 +14,10 @@ import scala.scalajs.js
 import dev.myclinic.scala.model.Patient
 
 class ScannedItem(
-  scanBox: ScanBox,
   private var savedFile: String,
-  private var patient: Option[Patient],
-  private var scanType: String,
   private var index: Int,
   private var total: Int
-):
+)(using context: ScanContext):
   val eIconWrapper: HTMLElement = div()
   val eUploadFile: HTMLElement = span()
   val ePreview: HTMLElement = div()
@@ -59,7 +56,7 @@ class ScannedItem(
       for 
         _ <- 
           if isUploaded then
-            Api.renamePatientImage(patient.get.patientId, src, dst)
+            Api.renamePatientImage(context.patient.get.patientId, src, dst)
           else Future.successful(())
       yield eUploadFile.innerText = dst
     else
@@ -69,15 +66,15 @@ class ScannedItem(
     eRescanLink(displayNone)
     eDeleteLink(displayNone)
 
-  private def timestamp: String = scanBox.timestamp
+  private def timestamp: String = context.timestamp
 
   private def uploadFileName: String =
-    val pat = patient match {
+    val pat = context.patient match {
       case Some(p) => p.patientId.toString
       case None     => "????"
     }
     val ser: String = if total <= 1 then "" else s"(${index})"
-    s"${pat}-${scanType}-${timestamp}${ser}.jpg"
+    s"${pat}-${context.scanType}-${timestamp}${ser}.jpg"
 
   private def onShow(): Unit = 
     ???
@@ -99,7 +96,7 @@ class ScannedItem(
     )
 
   private def upload(): Future[Unit] =
-    scanBox.patient.map(_.patientId).fold(
+    context.patient.map(_.patientId).fold(
       Future.failed(new RuntimeException("Patient not specified."))
     ) { patientId =>
       val f =

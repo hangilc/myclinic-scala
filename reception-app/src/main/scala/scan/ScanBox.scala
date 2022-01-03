@@ -23,29 +23,29 @@ import scala.util.Failure
 import cats.*
 import cats.syntax.all.*
 import dev.fujiwara.domq.Icons
-import dev.myclinic.scala.web.reception.scan.variable.*
 
 class ScanBox():
-  val timestamp: String = ScanBox.makeTimeStamp()
-  val varPatient = new CachedVariableWithCallbacks[Option[Patient]](None)
-  def patient: Option[Patient] = varPatient.get
+  given context: ScanContext = new ScanContext()
 
   val patientSearch = new PatientSearch():
-    def onPatientSelect(newPatient: Patient): Unit = varPatient.set(Some(newPatient))
+    def onPatientSelect(newPatient: Patient): Unit = 
+      context.patient = Some(newPatient)
+      context.patientCallbacks.invoke()
 
   val patientDisp = new PatientDisp()
-  varPatient.addCallback { 
+  context.patientCallbacks.add { () => context.patient match
     case Some(patient) => patientDisp.setPatient(patient)
     case None => ()
   }
   val scanTypeSelect = new ScanTypeSelect(ScanBox.defaultScanType):
-    def onChange(scanType: String): Unit = ()
-  val varScanType: Variable[String] = scanTypeSelect.variable
+    def onChange(scanType: String): Unit = 
+      context.scanType = scanType
+      context.scanTypeCallbacks.invoke()
   val scannerSelect = new ScannerSelect()
-  val scanProgress = new ScanProgress(this):
+  val scanProgress = new ScanProgress:
     def onScan(savedFile: String): Unit = onScanFileAdd(savedFile)
 
-  val scannedItems = new ScannedItems(this)
+  val scannedItems = new ScannedItems
   val eUploadButton = button()
   val eCloseButton = button()
   val ele = div(cls := ScanBox.cssClassName)(
@@ -68,24 +68,16 @@ class ScanBox():
   )
   ele.listenToCustomEvent[Boolean](
     "globally-enable-scan",
-    enable => varGloballyScanEnabled.set(enable)
+    enable => 
+      context.globallyScanEnabled = enable
+      context.globallyScanEnabledCallbacks.invoke()
   )
 
   def init(): Future[Unit] =
     for _ <- scannerSelect.init()
-    yield ()
+    yield context.scannerDeviceId = scannerSelect.selected
 
   def initFocus(): Unit = patientSearch.initFocus()
-
-  def selectedScanType: String =
-    scanTypeSelect.selected
-
-  def selectedScanner: Option[String] =
-    scannerSelect.selected
-
-  val varGloballyScanEnabled = new CachedVariable[Boolean](true)
-  def globallyScanEnabled: Boolean = varGloballyScanEnabled.get
-
 
   private var isScanningFlag = false
   def isScanning: Boolean = isScanningFlag
@@ -106,19 +98,15 @@ class ScanBox():
   def adaptPatientSearch(): Unit =
     patientSearch.enable(!(isScanning || isUploading))
 
-  //varGloballyScanEnabled.addCallback(_ => adaptScanButton())
-  varPatient.addCallback(_ => adaptScanButton())
+  context.patientCallbacks.add(() => adaptScanButton())
   def adaptScanButton(): Unit =
     val enable =
-      globallyScanEnabled && selectedScanner.isDefined && patient.isDefined
+      context.globallyScanEnabled && context.scannerDeviceId.isDefined && context.patient.isDefined
     scanProgress.enableScan(enable)
 
   def updateUploadButton(): Unit =
     val enable = scannedItems.hasUnUploadedImage && !scannedItems.isUploading
     eUploadButton.enable(enable)
-
-  private def canStartScan: Boolean =
-    selectedScanner.isDefined && patient.isDefined
 
   private def onScanFileAdd(savedFile: String): Unit =
     scannedItems.add(savedFile)
@@ -155,27 +143,13 @@ class ScanBox():
 object ScanBox:
   val cssClassName: String = "scan-box"
   val defaultScanType: String = "image"
-  def makeTimeStamp(): String =
-    val at = LocalDateTime.now()
-    String.format(
-      "%d%02d%02d%02d%02d%02d",
-      at.getYear,
-      at.getMonthValue,
-      at.getDayOfMonth,
-      at.getHour,
-      at.getMinute,
-      at.getSecond
-    )
 
-class ScannedItems(scanBox: ScanBox):
+class ScannedItems(using context: ScanContext):
   var items: List[ScannedItem] = List.empty
   val ele = div()
   def add(savedFile: String): Future[Unit] =
     val item = new ScannedItem(
-      scanBox,
       savedFile,
-      scanBox.patient,
-      scanBox.selectedScanType,
       items.size + 1,
       items.size + 1
     )
@@ -186,13 +160,13 @@ class ScannedItems(scanBox: ScanBox):
     yield
       items = items :+ item
       ele(item.ele)
-      scanBox.updateUploadButton()
+      context.numScanned = items.size
+      context.numScannedCallbacks.invoke()
   def isUploading: Boolean =
     items.find(_.isUploading).isDefined
   def hasUnUploadedImage: Boolean =
     items.find(!_.isUploaded).isDefined
   def upload(): Future[Unit] =
-    scanBox.patientSearch.ele(displayNone)
     items.foreach(_.disableEdit())
     uploadItems(items)
   def deleteSavedFiles(): Future[Unit] =
