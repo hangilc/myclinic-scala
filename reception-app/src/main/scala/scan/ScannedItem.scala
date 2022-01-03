@@ -56,7 +56,7 @@ class ScannedItem(
       for 
         _ <- 
           if isUploaded then
-            Api.renamePatientImage(context.patient.get.patientId, src, dst)
+            Api.renamePatientImage(context.patient.value.get.patientId, src, dst)
           else Future.successful(())
       yield eUploadFile.innerText = dst
     else
@@ -69,12 +69,12 @@ class ScannedItem(
   private def timestamp: String = context.timestamp
 
   private def uploadFileName: String =
-    val pat = context.patient match {
+    val pat = context.patient.value match {
       case Some(p) => p.patientId.toString
       case None     => "????"
     }
     val ser: String = if total <= 1 then "" else s"(${index})"
-    s"${pat}-${context.scanType}-${timestamp}${ser}.jpg"
+    s"${pat}-${context.scanType.value}-${timestamp}${ser}.jpg"
 
   private def onShow(): Unit = 
     ???
@@ -96,7 +96,7 @@ class ScannedItem(
     )
 
   private def upload(): Future[Unit] =
-    context.patient.map(_.patientId).fold(
+    context.patient.value.map(_.patientId).fold(
       Future.failed(new RuntimeException("Patient not specified."))
     ) { patientId =>
       val f =

@@ -23,14 +23,19 @@ abstract class ScanProgress(using context: ScanContext):
     ),
     eScanProgress(displayNone)
   )
+
   def onScan(savedFile: String): Unit
 
   def enableScan(flag: Boolean): Unit = eScanButton.enable(flag)
 
+  context.globallyScanEnabled.addCallback(adaptScanButton _)
+  context.isScanning.addCallback(adaptScanButton _)
+  private def adaptScanButton(): Unit =
+    eScanButton.enable(context.canScan)
+
   private def startScan(): Unit =
-    context.scannerDeviceId.foreach(deviceId => {
-      context.isScanning = true
-      context.isScanningCallbacks.invoke()
+    context.scannerDeviceId.value.foreach(deviceId => {
+      context.isScanning.update(true)
       val resolution = 100
       eScanProgress.innerText = "スキャンの準備中"
       eScanProgress(displayDefault)
@@ -40,8 +45,7 @@ abstract class ScanProgress(using context: ScanContext):
         eScanProgress(displayNone)
         file
       ).onComplete(r => {
-        context.isScanning = false
-        context.isScanningCallbacks.invoke()
+        context.isScanning.update(false)
         r match {
           case Success(file) => onScan(file)
           case Failure(ex) => System.err.println(ex.getMessage)

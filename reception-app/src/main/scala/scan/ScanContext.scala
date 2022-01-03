@@ -6,17 +6,15 @@ import dev.myclinic.scala.model.ScannerDevice
 
 class ScanContext:
   val timestamp: String = ScanContext.makeTimeStamp()
-  var globallyScanEnabled: Boolean = true
-  val globallyScanEnabledCallbacks = new Callbacks
-  var patient: Option[Patient] = None
-  val patientCallbacks = new Callbacks
-  var scanType: String = "image"
-  val scanTypeCallbacks = new Callbacks
-  var scannerDeviceId: Option[String] = None
-  var isScanning: Boolean = false
-  val isScanningCallbacks = new Callbacks
-  var numScanned: Int = 0
-  val numScannedCallbacks = new Callbacks
+  val globallyScanEnabled = Variable[Boolean](true)
+  val patient = Variable[Option[Patient]](None)
+  val scanType = Variable[String]("image")
+  val scannerDeviceId = Variable[Option[String]](None)
+  val isScanning = Variable[Boolean](false)
+  val isUploading = Variable[Boolean](false)
+  val numScanned = Variable[Int](0)
+
+  def canScan: Boolean = globallyScanEnabled.value && !isScanning.value
 
 object ScanContext:
   def makeTimeStamp(): String =

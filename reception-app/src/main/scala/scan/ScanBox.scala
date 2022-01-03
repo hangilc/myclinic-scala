@@ -25,22 +25,23 @@ import cats.syntax.all.*
 import dev.fujiwara.domq.Icons
 
 class ScanBox():
-  given context: ScanContext = new ScanContext()
+  given context: ScanContext = new ScanContext
 
   val patientSearch = new PatientSearch():
-    def onPatientSelect(newPatient: Patient): Unit = 
-      context.patient = Some(newPatient)
-      context.patientCallbacks.invoke()
+    def onPatientSelect(newPatient: Patient): Unit =
+      context.patient.update(Some(newPatient))
+
+  val scanTypeSelect = new ScanTypeSelect(using context)
+  scanTypeSelect.select(ScanBox.defaultScanType)
+  context.scanType.set(scanTypeSelect.selected)
+  scanTypeSelect.addCallback(scanType => context.scanType.update(scanType))
 
   val patientDisp = new PatientDisp()
-  context.patientCallbacks.add { () => context.patient match
-    case Some(patient) => patientDisp.setPatient(patient)
-    case None => ()
+  context.patient.addCallback { () =>
+    context.patient.value match
+      case Some(patient) => patientDisp.setPatient(patient)
+      case None          => ()
   }
-  val scanTypeSelect = new ScanTypeSelect(ScanBox.defaultScanType):
-    def onChange(scanType: String): Unit = 
-      context.scanType = scanType
-      context.scanTypeCallbacks.invoke()
   val scannerSelect = new ScannerSelect()
   val scanProgress = new ScanProgress:
     def onScan(savedFile: String): Unit = onScanFileAdd(savedFile)
@@ -66,45 +67,46 @@ class ScanBox():
       eCloseButton("閉じる", onclick := (onCloseClick _))
     )
   )
+  context.isScanning.addCallback(() => 
+    val isScanning: Boolean = context.isScanning.value
+    if isScanning then
+      ele.dispatchEvent(CustomEvent[Unit]("scan-started", (), true))
+    else
+      ele.dispatchEvent(CustomEvent[Unit]("scan-ended", (), true))
+    adaptPatientSearch()
+    adaptCloseButton()
+  )
+  context.isUploading.addCallback(() => {
+    adaptPatientSearch()
+    adaptCloseButton()
+  })
   ele.listenToCustomEvent[Boolean](
     "globally-enable-scan",
-    enable => 
-      context.globallyScanEnabled = enable
-      context.globallyScanEnabledCallbacks.invoke()
+    enable => context.globallyScanEnabled.update(enable)
   )
 
   def init(): Future[Unit] =
     for _ <- scannerSelect.init()
-    yield context.scannerDeviceId = scannerSelect.selected
+    yield context.scannerDeviceId.update(scannerSelect.selected)
 
   def initFocus(): Unit = patientSearch.initFocus()
 
-  private var isScanningFlag = false
-  def isScanning: Boolean = isScanningFlag
-  def isScanning_=(value: Boolean) =
-    isScanningFlag = value
-    if value then ele.dispatchEvent(CustomEvent("scan-started", (), true))
-    else ele.dispatchEvent(CustomEvent("scan-ended", (), true))
-    adaptPatientSearch()
-    eCloseButton.enable(!isScanning)
-
-  private var isUploadingFlag = false
-  def isUploading: Boolean = isUploadingFlag
-  def isUploading_=(value: Boolean): Unit =
-    isUploadingFlag = value
-    adaptPatientSearch()
-    eCloseButton.enable(!isUploading)
-
   def adaptPatientSearch(): Unit =
-    patientSearch.enable(!(isScanning || isUploading))
+    patientSearch.enable(!(context.isScanning.value || context.isUploading.value))
 
-  context.patientCallbacks.add(() => adaptScanButton())
+  context.patient.addCallback(() => adaptScanButton())
   def adaptScanButton(): Unit =
     val enable =
-      context.globallyScanEnabled && context.scannerDeviceId.isDefined && context.patient.isDefined
+      context.globallyScanEnabled.value &&
+        context.scannerDeviceId.value.isDefined &&
+        context.patient.value.isDefined
     scanProgress.enableScan(enable)
 
-  def updateUploadButton(): Unit =
+  private def adaptCloseButton(): Unit =
+    val disable = context.isScanning.value || context.isUploading.value
+    eCloseButton.enable(!disable)
+
+  private def adaptUploadButton(): Unit =
     val enable = scannedItems.hasUnUploadedImage && !scannedItems.isUploading
     eUploadButton.enable(enable)
 
@@ -112,7 +114,7 @@ class ScanBox():
     scannedItems.add(savedFile)
 
   private def onUploadClick(): Unit =
-    eUploadButton.enable(false)
+    context.isUploading.update(true)
     scannedItems
       .upload()
       .onComplete(r => {
@@ -120,7 +122,7 @@ class ScanBox():
           case Success(_)  => ()
           case Failure(ex) => System.err.println(ex.getMessage)
         }
-        updateUploadButton()
+        context.isUploading.update(false)
       })
 
   private def onCloseClick(): Unit =
@@ -160,8 +162,7 @@ class ScannedItems(using context: ScanContext):
     yield
       items = items :+ item
       ele(item.ele)
-      context.numScanned = items.size
-      context.numScannedCallbacks.invoke()
+      context.numScanned.update(items.size)
   def isUploading: Boolean =
     items.find(_.isUploading).isDefined
   def hasUnUploadedImage: Boolean =
