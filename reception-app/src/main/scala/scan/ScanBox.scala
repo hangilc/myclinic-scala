@@ -37,7 +37,7 @@ class ScanBox():
   scanTypeSelect.addCallback(scanType => context.scanType.update(scanType))
 
   val patientDisp = new PatientDisp()
-  context.patient.addCallback { () =>
+  context.patient.callbacks.add { () =>
     context.patient.value match
       case Some(patient) => patientDisp.setPatient(patient)
       case None          => ()
@@ -67,7 +67,7 @@ class ScanBox():
       eCloseButton("閉じる", onclick := (onCloseClick _))
     )
   )
-  context.isScanning.addCallback(() => 
+  context.isScanning.callbacks.add(() => 
     val isScanning: Boolean = context.isScanning.value
     if isScanning then
       ele.dispatchEvent(CustomEvent[Unit]("scan-started", (), true))
@@ -76,7 +76,7 @@ class ScanBox():
     adaptPatientSearch()
     adaptCloseButton()
   )
-  context.isUploading.addCallback(() => {
+  context.isUploading.callbacks.add(() => {
     adaptPatientSearch()
     adaptCloseButton()
   })
@@ -94,7 +94,7 @@ class ScanBox():
   def adaptPatientSearch(): Unit =
     patientSearch.enable(!(context.isScanning.value || context.isUploading.value))
 
-  context.patient.addCallback(() => adaptScanButton())
+  context.patient.callbacks.add(() => adaptScanButton())
   def adaptScanButton(): Unit =
     val enable =
       context.globallyScanEnabled.value &&
@@ -163,12 +163,9 @@ class ScannedItems(using context: ScanContext):
       items = items :+ item
       ele(item.ele)
       context.numScanned.update(items.size)
-  def isUploading: Boolean =
-    items.find(_.isUploading).isDefined
   def hasUnUploadedImage: Boolean =
     items.find(!_.isUploaded).isDefined
   def upload(): Future[Unit] =
-    items.foreach(_.disableEdit())
     uploadItems(items)
   def deleteSavedFiles(): Future[Unit] =
     Future.sequence(items.map(_.deleteSavedFile())).map(_ => ())

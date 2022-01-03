@@ -1,15 +1,19 @@
 package dev.myclinic.scala.web.reception.scan
 
+import scala.concurrent.Future
+
 class Variable[T](private var store: T):
   def value: T = store
-  private var callbacks: List[() => Unit] = List.empty
-  def addCallback(f: () => Unit): Unit = callbacks = callbacks :+ f
-  def removeCallback(f: () => Unit): Unit = callbacks = callbacks.filterNot(_ == f)
-  def invoke(): Unit = callbacks.foreach(_())
+  val callbacks = new Callbacks()
   def set(newValue: T): Unit = store = newValue
   def update(newValue: T): Unit = 
     set(newValue)
-    invoke()
+    callbacks.invoke()
 
-object Variable:
-  def apply[T](init: T): Variable[T] = new Variable(init)
+class FutureVariable[T](private var store: T):
+  def value: T = store
+  val callbacks = new FutureCallbacks()
+  def set(newValue: T): Unit = store = newValue
+  def update(newValue: T): Future[Unit] = 
+    set(newValue)
+    callbacks.invoke()

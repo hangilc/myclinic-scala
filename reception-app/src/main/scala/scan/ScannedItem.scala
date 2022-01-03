@@ -36,8 +36,6 @@ class ScannedItem(
     )
   )
 
-  def isUploading: Boolean = false
-
   private var isUploadedFlag: Boolean = false
   def isUploaded: Boolean = isUploadedFlag
 
