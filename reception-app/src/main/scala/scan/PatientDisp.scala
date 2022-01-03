@@ -16,4 +16,8 @@ class PatientDisp:
   private def formatPatient(patient: Patient): String =
     String.format("(%04d) %s", patient.patientId, patient.fullName())
 
+object PatientDisp:
+  class UI:
+    val ele = div(displayNone)
+
 

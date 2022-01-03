@@ -12,7 +12,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Success, Failure}
 
-abstract class ScanProgress(using context: ScanContext):
+class ScanProgress(using context: ScanContext):
   val eScanButton = button()
   val eScanProgress = span()
   val ele = div(
@@ -24,12 +24,12 @@ abstract class ScanProgress(using context: ScanContext):
     eScanProgress(displayNone)
   )
 
-  def onScan(savedFile: String): Unit
+  def onScan(savedFile: String): Unit = ()
 
   def enableScan(flag: Boolean): Unit = eScanButton.enable(flag)
 
-  context.globallyScanEnabled.addCallback(adaptScanButton _)
-  context.isScanning.addCallback(adaptScanButton _)
+  // context.globallyScanEnabled.addCallback(adaptScanButton _)
+  // context.isScanning.addCallback(adaptScanButton _)
   private def adaptScanButton(): Unit =
     eScanButton.enable(context.canScan)
 

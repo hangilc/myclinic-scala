@@ -33,10 +33,10 @@ class Scan extends SideMenuService:
   def addBox(): Future[Unit] =
     val box = new ScanBox()
     for
-      _ <- box.init()
+      _ <- box.init
     yield
-      eScannedBoxes.prepend(box.ele)
-      box.initFocus()
+      eScannedBoxes.prepend(box.ui.ele)
+      box.initFocus
 
   private def newScan(): Unit =
     addBox().onComplete {

@@ -24,12 +24,31 @@ import cats.*
 import cats.syntax.all.*
 import dev.fujiwara.domq.Icons
 
-class ScanBox():
+class ScanBox:
+  val ui = new ScanBox.UI()
+  def init: Future[Unit] = Future.successful(())
+  def initFocus: Unit = ()
+
+object ScanBox:
+  val cssClassName: String = "scan-box"
+  val defaultScanType: String = "image"
+
+  class UI:
+    val patientSearchUI = new PatientSearch.UI
+    val patientDispUI = new PatientDisp.UI
+    val scanTypeSelectUI = new ScanTypeSelect.UI
+    val ele = div(cls := cssClassName)(
+      patientSearchUI.ele,
+      patientDispUI.ele,
+      scanTypeSelectUI.ele
+    )
+
+class ScanBoxPrev():
   given context: ScanContext = new ScanContext
 
-  val patientSearch = new PatientSearch():
-    def onPatientSelect(newPatient: Patient): Unit =
-      context.patient.update(Some(newPatient))
+  val patientSearch = new PatientSearch()
+    // def onPatientSelect(newPatient: Patient): Unit =
+    //   context.patient.update(Some(newPatient))
 
   val scanTypeSelect = new ScanTypeSelect(using context)
   scanTypeSelect.select(ScanBox.defaultScanType)
@@ -43,8 +62,8 @@ class ScanBox():
       case None          => ()
   }
   val scannerSelect = new ScannerSelect()
-  val scanProgress = new ScanProgress:
-    def onScan(savedFile: String): Unit = onScanFileAdd(savedFile)
+  val scanProgress = new ScanProgress
+  //  def onScan(savedFile: String): Unit = onScanFileAdd(savedFile)
 
   val scannedItems = new ScannedItems
   val eUploadButton = button()
@@ -106,9 +125,9 @@ class ScanBox():
     val disable = context.isScanning.value || context.isUploading.value
     eCloseButton.enable(!disable)
 
-  private def adaptUploadButton(): Unit =
-    val enable = scannedItems.hasUnUploadedImage && !scannedItems.isUploading
-    eUploadButton.enable(enable)
+  // private def adaptUploadButton(): Unit =
+  //   val enable = scannedItems.hasUnUploadedImage && !scannedItems.isUploading
+  //   eUploadButton.enable(enable)
 
   private def onScanFileAdd(savedFile: String): Unit =
     scannedItems.add(savedFile)
@@ -142,9 +161,9 @@ class ScanBox():
     if done then eCloseButton.innerText = "閉じる"
     else eCloseButton.innerText = "キャンセル"
 
-object ScanBox:
-  val cssClassName: String = "scan-box"
-  val defaultScanType: String = "image"
+// object ScanBox:
+//   val cssClassName: String = "scan-box"
+//   val defaultScanType: String = "image"
 
 class ScannedItems(using context: ScanContext):
   var items: List[ScannedItem] = List.empty

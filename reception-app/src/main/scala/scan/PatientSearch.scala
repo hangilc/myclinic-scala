@@ -10,7 +10,21 @@ import org.scalajs.dom.{HTMLInputElement, HTMLElement}
 import dev.myclinic.scala.webclient.Api
 import scala.concurrent.ExecutionContext.Implicits.global
 
-abstract class PatientSearch:
+object PatientSearch:
+  class UI:
+    val eSearchInput = inputText
+    val eSearchForm = form
+    val eSearchButton = button
+    val eSearchResult = select
+    val ele = div(cls := "search-area")(
+      h2("患者選択"),
+      eSearchForm(
+        eSearchInput,
+        eSearchButton(attr("type") := "submit")("検索")
+      )
+    )
+
+class PatientSearch:
   val eSearchInput: HTMLInputElement = inputText()
   val eSearchButton = button()
   val searchResult: Selection[Patient] =
@@ -27,14 +41,14 @@ abstract class PatientSearch:
     )
   )
 
-  def onPatientSelect(patient: Patient): Unit
+  def onPatientSelect(patient: Patient): Unit = ()
 
   def initFocus(): Unit = eSearchInput.focus()
 
   def disable(): Unit = enable(false)
   def enable(): Unit = enable(true)
 
-  def enable(flag: Boolean): Unit = 
+  def enable(flag: Boolean): Unit =
     eSearchInput.enable(flag)
     eSearchButton.enable(flag)
 
@@ -63,5 +77,3 @@ abstract class PatientSearch:
 
   private def formatPatient(patient: Patient): String =
     String.format("(%04d) %s", patient.patientId, patient.fullName())
-
-
