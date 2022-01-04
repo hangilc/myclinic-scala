@@ -9,8 +9,7 @@ import dev.fujiwara.domq.{
   ErrorBox,
   Modifier,
   ShowMessage,
-  CustomEvent,
-  Selection
+  CustomEvent
 }
 import scala.language.implicitConversions
 import scala.util.{Success, Failure}

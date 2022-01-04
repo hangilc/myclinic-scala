@@ -16,7 +16,7 @@ import dev.myclinic.scala.model.Patient
 
 class SearchPatientBox(cb: Patient => Unit):
   val searchText = inputText()
-  val selection = new Selection[Patient](cb)
+  val selection = Selection[Patient](onSelect = cb)
   val ele = div(cls := "records-search-patient-box")(
     div("患者検索", cls := "title"),
     form(onsubmit := (onSearch _))(

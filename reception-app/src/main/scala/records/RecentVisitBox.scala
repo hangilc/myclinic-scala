@@ -28,7 +28,7 @@ class RecentVisitBox(cb: Patient => Unit):
       a("次へ", onclick := (onNext _)),
       pageDisp
     ),
-    selection.ele
+    selection.ui.ele
   )
   val itemsPerPage = 10
   var page = 0

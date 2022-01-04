@@ -12,21 +12,12 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Success, Failure}
 
-class ScannerSelect:
-  val eScannerSelect = select()
-  val ele = div(
-    h2("スキャナ選択"),
-    eScannerSelect,
-    button(
-      "更新",
-      onclick := (doRefresh _)
-    )
-  )
-
-  def init(): Future[Unit] = refreshScannerSelect()
+class ScannerSelect(ui: ScannerSelect.UI):
+  ui.eRefreshButton(onclick := (() => { refreshScannerSelect(); () }))
+  def init: Future[Unit] = refreshScannerSelect()
 
   def selected: Option[String] =
-    eScannerSelect.getValueOption
+    ui.eScannerSelect.getValueOption
 
   private def doRefresh(): Unit =
     refreshScannerSelect().onComplete {
@@ -39,8 +30,21 @@ class ScannerSelect:
     yield setSelectOptions(devices)
 
   private def setSelectOptions(devices: List[ScannerDevice]): Unit =
-    eScannerSelect.setChildren(
+    ui.eScannerSelect.setChildren(
       devices.map(device => {
         option(device.name, value := device.deviceId)
       })
     )
+
+object ScannerSelect:
+  class UI:
+    val eScannerSelect = select
+    val eRefreshButton = button
+    val ele = div(
+      h2("スキャナ選択"),
+      eScannerSelect,
+      eRefreshButton(
+        "更新"
+      )
+    )
+

@@ -3,19 +3,21 @@ package dev.myclinic.scala.web.reception.scan
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class Callbacks:
-  private var callbacks: List[() => Unit] = List.empty
-  def add(f: () => Unit): Unit = callbacks = callbacks :+ f
-  def remove(f: () => Unit): Unit = callbacks = callbacks.filterNot(_ == f)
-  def invoke(): Unit = callbacks.foreach(_())
+class Callbacks[T]:
+  type F = T => Unit
+  private var callbacks: List[F] = List.empty
+  def add(f: F): Unit = callbacks = callbacks :+ f
+  def remove(f: F): Unit = callbacks = callbacks.filterNot(_ == f)
+  def invoke(t: T): Unit = callbacks.foreach(_(t))
 
-class FutureCallbacks:
-  private var callbacks: List[() => Future[Unit]] = List.empty
-  def add(f: () => Future[Unit]): Unit = callbacks = callbacks :+ f
-  def remove(f: () => Future[Unit]): Unit = callbacks = callbacks.filterNot(_ == f)
-  def invoke(): Future[Unit] = invokeIter(callbacks)
-  private def invokeIter(cbs: List[() => Future[Unit]]): Future[Unit] =
+class FutureCallbacks[T]:
+  type F = T => Future[Unit]
+  private var callbacks: List[F] = List.empty
+  def add(f: F): Unit = callbacks = callbacks :+ f
+  def remove(f: F): Unit = callbacks = callbacks.filterNot(_ == f)
+  def invoke(t: T): Future[Unit] = invokeIter(t, callbacks)
+  private def invokeIter(t: T, cbs: List[F]): Future[Unit] =
     cbs match {
       case Nil => Future.successful(())
-      case h :: t => h().flatMap(_ => invokeIter(t))
+      case hd :: tl => hd(t).flatMap(_ => invokeIter(t, tl))
     }

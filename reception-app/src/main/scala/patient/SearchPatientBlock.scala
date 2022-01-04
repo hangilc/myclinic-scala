@@ -22,7 +22,7 @@ class SearchPatientBlock(
 ):
   val errorBox = ErrorBox()
   var disp: Option[PatientDisp] = None
-  val eResult =
+  val result =
     Selection[Patient](
       patients.map(patient => itemRep(patient) -> patient),
       onSelect(_)
@@ -32,7 +32,7 @@ class SearchPatientBlock(
     "患者検索結果",
     div(cls := "content")(
       div(cls := "left-pane")(
-        eResult.ele
+        result.ui.ele
       ),
       div(cls := "right-pane")(
         errorBox.ele,

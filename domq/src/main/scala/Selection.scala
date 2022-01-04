@@ -8,28 +8,30 @@ import org.scalajs.dom.{HTMLElement}
 import scala.language.implicitConversions
 
 class Selection[T](
+    val ui: Selection.UI,
     onSelect: T => Unit = ((_: T) => ())
 ):
-  val ele = div(cls := "domq-selection")
-
+  val ele = ui.ele
   def addAll(items: List[(String, T)]): Unit =
-    ele.addChildren((items.map { case (label, value) =>
+    ui.ele.addChildren((items.map { case (label, value) =>
       SelectionItem(label, value).ele
     }))
 
   def add(item: (String, T)): Unit =
     item match {
-      case (label, value) => ele(SelectionItem(label, value).ele)
+      case (label, value) => ui.ele(SelectionItem(label, value).ele)
     }
 
   def clear(): Unit =
-    ele.clear()
+    ui.ele.clear()
 
-  def show(): Unit = ele(displayDefault)
-  def hide(): Unit = ele(displayNone)
+  def show(): Unit = ui.ele(displayDefault)
+  def hide(): Unit = ui.ele(displayNone)
+
+  def scrollToTop: Unit = ui.ele.scrollTop = 0
 
   private def clearSelected(): Unit =
-    val nodes = ele.querySelectorAll(".domq-selection-item.selected")
+    val nodes = ui.ele.querySelectorAll(".domq-selection-item.selected")
     for i <- 0 until nodes.length do
       nodes
         .item(i)
@@ -56,6 +58,16 @@ object Selection:
       items: List[(String, T)] = List.empty,
       onSelect: T => Unit = ((_: T) => ())
   ): Selection[T] =
-    val sel = new Selection(onSelect)
+    val ui = new UI
+    val sel = new Selection(ui, onSelect)
     sel.addAll(items)
     sel
+
+  class UI:
+    val ele = div(cls := "domq-selection")
+    def hide: UI = 
+      ele(displayNone)
+      this
+    def show: UI =
+      ele(displayDefault)
+      this

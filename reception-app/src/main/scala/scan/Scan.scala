@@ -30,19 +30,16 @@ class Scan extends SideMenuService:
 
   def getElement = ele
 
-  def addBox(): Future[Unit] =
-    val box = new ScanBox()
-    for
-      _ <- box.init
-    yield
-      eScannedBoxes.prepend(box.ui.ele)
-      box.initFocus
-
-  private def newScan(): Unit =
-    addBox().onComplete {
-      case Success(_) => ()
+  def addBox(): Unit =
+    val box = ScanBox()
+    box.init.onComplete {
+      case Success(_) =>
+        eScannedBoxes.prepend(box.ui.ele)
+        box.initFocus
       case Failure(ex) => System.err.println(ex.getMessage)
     }
+
+  private def newScan(): Unit = addBox()
 
   private def countBoxes: Int =
     eScannedBoxes.qSelectorAll(s".${ScanBox.cssClassName}").size
