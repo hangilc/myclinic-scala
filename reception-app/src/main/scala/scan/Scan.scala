@@ -24,14 +24,14 @@ class Scan extends SideMenuService:
       eScannedBoxes
     )
   addBox()
-  ele.listenToCustomEvent[Unit]("scan-box-close", _ => onBoxClose())
-  ele.listenToCustomEvent[Unit]("scan-started", _ => enableScanButtons(false))
-  ele.listenToCustomEvent[Unit]("scan-ended", _ => enableScanButtons(true))
+  ele.listenToCustomEvent[String]("scan-started", deviceId => broadcastScanStarted(deviceId))
+  ele.listenToCustomEvent[String]("scan-ended", deviceId => broadcastScanEnded(deviceId))
 
   def getElement = ele
 
   def addBox(): Unit =
     val box = ScanBox()
+    box.onClosedCallbacks.add(_ => onBoxClose())
     box.init.onComplete {
       case Success(_) =>
         eScannedBoxes.prepend(box.ui.ele)
@@ -50,8 +50,11 @@ class Scan extends SideMenuService:
   private def scanBoxes: List[HTMLElement] =
     ele.qSelectorAll(s".${ScanBox.cssClassName}")
 
-  private def enableScanButtons(enable: Boolean): Unit =
-    CustomEvent.dispatchTo[Boolean]("globally-enable-scan", enable, scanBoxes)
+  private def broadcastScanStarted(deviceId: String): Unit =
+    CustomEvent.dispatchTo[String]("scan-started", deviceId, scanBoxes)
+
+  private def broadcastScanEnded(deviceId: String): Unit =
+    CustomEvent.dispatchTo[String]("scan-ended", deviceId, scanBoxes)
 
     
 

@@ -25,20 +25,22 @@ object ScanProgress:
     )
 
 class ScanProgress(ui: ScanProgress.UI, deviceRef: () => Option[String]):
-  val onScanCallbacks = new Callbacks[String]
+  val onScannedCallbacks = new Callbacks[String]
   val resolution = 100
-
+  val ele = ui.ele
   ui.eScanButton(onclick := (onScanClick _))
 
   def enableScan(flag: Boolean): Unit = ui.eScanButton.enable(flag)
 
   private def onScanClick(): Unit =
     deviceRef().foreach(deviceId =>
+      ele.dispatchEvent(CustomEvent("scan-started", deviceId, true))
       scan(deviceId).onComplete(result => 
         result match {
-          case Success(savedFile) => onScanCallbacks.invoke(savedFile)
+          case Success(savedFile) => onScannedCallbacks.invoke(savedFile)
           case Failure(ex) => System.err.println(ex.getMessage)
         }
+        ele.dispatchEvent(CustomEvent("scan-ended", deviceId, true))
       )
     )
 

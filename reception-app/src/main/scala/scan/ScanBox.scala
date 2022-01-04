@@ -25,6 +25,7 @@ import cats.syntax.all.*
 import dev.fujiwara.domq.Icons
 
 class ScanBox(val ui: ScanBox.UI):
+  val onClosedCallbacks = new Callbacks[Unit]
   val timestamp = ScanBox.makeTimeStamp
   val patientSearch = new PatientSearch(ui.patientSearchUI)
   val patientDisp = new PatientDisp(ui.patientDispUI)
@@ -43,7 +44,7 @@ class ScanBox(val ui: ScanBox.UI):
   def initFocus: Unit = ()
 
   patientSearch.onSelectCallbacks.add(_ => patientSearch.hideResult)
-  scanProgress.onScanCallbacks.add(savedFile => 
+  scanProgress.onScannedCallbacks.add(savedFile => 
     createUploadFileName match {
       case Some((uploadFile, patientId)) => 
         (for
@@ -59,9 +60,6 @@ class ScanBox(val ui: ScanBox.UI):
   def selectedScanType: String = scanTypeSelect.getValue
   def selectedScanner: Option[String] = scannerSelect.selected
 
-  var globallyScanAllowed: Boolean = true
-  ui.ele(oncustomevent[Boolean]("globally-enable-scan") := (ev => globallyScanAllowed = ev.detail))
-
   var patient: Option[Patient] = None
   patientSearch.onSelectCallbacks.add(newPatient => 
     patient = Some(newPatient)
@@ -70,9 +68,6 @@ class ScanBox(val ui: ScanBox.UI):
   patientSearch.onSelectCallbacks.add(patientDisp.setPatient(_))
 
   patientSearch.onSelectCallbacks.add(_ => adaptScan)
-  private def adaptScan: Unit =
-    val enable = patient.isDefined
-    scanProgress.enableScan(enable)
 
   def adaptUploadButton: Unit =
     val enable = scannedItems.hasUnUploadedImage
@@ -92,6 +87,23 @@ class ScanBox(val ui: ScanBox.UI):
       val total = scannedItems.numItems + 1
       (ScannedItems.createUploadFileName(patientId, selectedScanType, timestamp, index, total), patientId)
     )
+  
+  val onScanningDevicesChangedCallbacks = new Callbacks[Unit]
+  var scanningDevices: Set[String] = Set.empty
+  ui.ele(oncustomevent[String]("scan-started") := (ev => 
+    scanningDevices = scanningDevices + ev.detail
+    onScanningDevicesChangedCallbacks.invoke(())
+  ))
+  ui.ele(oncustomevent[String]("scan-ended") := (ev => 
+    scanningDevices = scanningDevices - ev.detail
+    onScanningDevicesChangedCallbacks.invoke(())
+  ))
+
+  onScanningDevicesChangedCallbacks.add(_ => adaptScan)
+
+  private def adaptScan: Unit =
+    val enable = patient.isDefined && scannerSelect.selected.map(!scanningDevices.contains(_)).getOrElse(false)
+    scanProgress.enableScan(enable)
 
 object ScanBox:
   val cssClassName: String = "scan-box"
