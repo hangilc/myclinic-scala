@@ -47,6 +47,9 @@ class ScannedItems(ui: ScannedItems.UI, timestamp: String)(using ScanWorkQueue):
   def deleteSavedFiles: Future[Unit] =
     items.map(_.deleteSavedFile).sequence_
 
+  def adapt(patientId: Option[Int], deviceId: Option[String]): Unit =
+    items.foreach(_.adapt(patientId, deviceId))
+
 object ScannedItems:
   class UI:
     val ele = div

@@ -151,6 +151,13 @@ class ScannedItem(
     )
   )
 
+  def adapt(patientId: Option[Int], deviceId: Option[String]): Unit =
+    val queueIsEmpty = queue.isEmpty
+    val canScan = ScanBox.canScan(patientId, deviceId)
+    ui.ePreviewLink.show(queueIsEmpty)
+    ui.eRescanLink.show(queueIsEmpty && canScan)
+    ui.eDeleteLink.show(queueIsEmpty)
+
 //   def deleteSavedFile(): Future[Unit] =
 //     Api.deleteScannedFile(savedFile).map(_ => ())
 

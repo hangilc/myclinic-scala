@@ -100,14 +100,13 @@ class ScanBox(val ui: ScanBox.UI)(using queue: ScanWorkQueue):
   ))
 
   private def adaptScan: Unit =
-    val enable = patient.isDefined && scannerSelect.selected
-      .map(!ScanWorkQueue.isScannerBusy(_))
-      .getOrElse(false)
+    val enable = ScanBox.canScan(patient.map(_.patientId), scannerSelect.selected)
     scanProgress.enableScan(enable)
 
   def adapt(): Unit =
     adaptScan
     adaptUploadButton
+    scannedItems.adapt(patient.map(_.patientId), selectedScanner)
 
   adapt()
 
@@ -159,6 +158,14 @@ object ScanBox:
       at.getMinute,
       at.getSecond
     )
+
+  def canScan(
+      patientIdOption: Option[Int],
+      deviceIdOption: Option[String]
+  ): Boolean =
+    patientIdOption.isDefined && deviceIdOption
+      .map(!ScanWorkQueue.isScannerBusy(_))
+      .getOrElse(false)
 
 // class ScanBoxPrev():
 //   given context: ScanContext = new ScanContext

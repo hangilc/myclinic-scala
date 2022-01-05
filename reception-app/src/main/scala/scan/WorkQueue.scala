@@ -23,6 +23,8 @@ class WorkQueue[T <: WorkQueueTask]:
 
   def find(pred: T => Boolean): Option[T] = list.find(pred)
 
+  def isEmpty: Boolean = current.isEmpty && queue.isEmpty
+
   private def tryRun: Unit =
     if current.isEmpty then
       queue match
