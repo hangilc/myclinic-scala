@@ -27,7 +27,7 @@ object ScannedItem:
     val ele = div(
       div(cls := "scanned-item")(
         eIconWrapper(display := "inline-block"),
-        eUploadFile,
+        eUploadFile(cls := "upload-file-disp"),
         ePreviewLink("表示"),
         eScanProgress(displayNone),
         eRescanLink("再スキャン"),
@@ -179,7 +179,8 @@ class ScannedItem(
           _ <-
             if isUploaded then cancelUpload
             else Future.successful(())
-        yield ()
+        yield 
+          ui.eScanProgress.clear().hide
       ,
       isScanning = Some(deviceId)
     )

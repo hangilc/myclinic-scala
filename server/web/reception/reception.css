@@ -412,6 +412,10 @@ button {
   margin-left: 10px;
 }
 
+#main .scan .scan-box .scanned .scanned-item .upload-file-disp {
+  margin-right: 10px;
+}
+
 #main .scan .scan-box .scanned .upload-button {
   margin-top: 10px;
 }
