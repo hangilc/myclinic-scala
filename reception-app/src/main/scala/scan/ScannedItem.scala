@@ -63,11 +63,15 @@ class ScannedItem(
     scanType: String,
     timestamp: String,
     index: Int,
-    total: Int
+    var total: Int
 )(using queue: ScanWorkQueue):
   val ele = ui.ele
   var uploadFile: String = createUploadFile
   ui.eUploadFile.innerText = uploadFile
+
+  private def updateUploadFile: Unit =
+    uploadFile = createUploadFile
+    ui.eUploadFile.innerText = uploadFile
 
   private def createUploadFile: String =
     ScannedItems.createUploadFileName(
@@ -150,6 +154,20 @@ class ScannedItem(
       ui.ePreview(displayNone)
     )
   )
+
+  def adjustToTotalChanged(newTotal: Int): Future[Unit] =
+    val prevTotal = total
+    total = newTotal
+    (index, prevTotal, newTotal) match {
+      case (1, 1, 2) | (1, 2, 1) => 
+        val prevUploadFile = uploadFile
+        updateUploadFile
+        if isUploaded then
+          Api.renamePatientImage(patientId.get, prevUploadFile, uploadFile).map(_ => ())
+        else
+          Future.successful(())
+      case _ => Future.successful(())
+    }
 
   def adapt(patientId: Option[Int], deviceId: Option[String]): Unit =
     val queueIsEmpty = queue.isEmpty

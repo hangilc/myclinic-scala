@@ -64,7 +64,7 @@ class ScanBox(val ui: ScanBox.UI)(using queue: ScanWorkQueue):
   patientSearch.onSelectCallbacks.add(_ => adaptScan)
 
   def adaptUploadButton: Unit =
-    val enable = scannedItems.hasUnUploadedImage
+    val enable = scannedItems.hasUnUploadedImage && queue.isEmpty
     ui.eUploadButton.enable(enable)
 
   def uploadTask: ScanTask = ScanTask(() => scannedItems.upload)

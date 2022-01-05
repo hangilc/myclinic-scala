@@ -27,9 +27,11 @@ class ScannedItems(ui: ScannedItems.UI, timestamp: String)(using ScanWorkQueue):
       items.size + 1,
       items.size + 1
     )
-    items = items :+ item
-    ele(item.ele)
-    Future.successful(())
+    for
+      _ <- items.map(_.adjustToTotalChanged(items.size + 1)).sequence_
+    yield 
+      items = items :+ item
+      ele(item.ele)
 
   def numItems: Int = items.size
 

@@ -51,6 +51,8 @@ class PatientSearch(ui: PatientSearch.UI):
           searchResult.clear()
           searchResult.hide()
           onSelect(patients.head)
+        else if patients.size == 0 then
+          ()
         else
           searchResult.clear()
           patients.foreach(addSearchResult(_))
