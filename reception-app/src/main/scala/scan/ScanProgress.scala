@@ -25,11 +25,11 @@ object ScanProgress:
     )
 
 class ScanProgress(ui: ScanProgress.UI, deviceRef: () => Option[String])(using
-    queue: ScanWorkQueue
+    queue: ScanWorkQueue,
+    scope: ScanBox.Scope
 ):
   var onScannedCallback: String => Future[Unit] = _ => Future.successful(())
   val onScannedCallbacks = new FutureCallbacks[String]
-  val resolution = 100
   val ele = ui.ele
   ui.eScanButton(onclick := (onScanClick _))
 
@@ -41,13 +41,16 @@ class ScanProgress(ui: ScanProgress.UI, deviceRef: () => Option[String])(using
   private def scan(deviceId: String): ScanTask =
     ScanTask(
       () => {
-        ui.eScanProgress.innerText = "スキャンの準備中"
-        ui.eScanProgress(displayDefault)
-        for 
-          file <- Api.scan(deviceId, (reportProgress _), 100)
+        ui.eScanProgress.clear().show
+        for
+          file <- Api.scan(
+            deviceId,
+            ScanBox.reportProgress(ui.eScanProgress),
+            scope.resolution
+          )
           _ = {
-          ui.eScanProgress.innerText = ""
-          ui.eScanProgress(displayNone)
+            ui.eScanProgress.innerText = ""
+            ui.eScanProgress(displayNone)
           }
           _ <- onScannedCallback(file)
         yield ()
@@ -55,9 +58,9 @@ class ScanProgress(ui: ScanProgress.UI, deviceRef: () => Option[String])(using
       isScanning = Some(deviceId)
     )
 
-  private def reportProgress(loaded: Double, total: Double): Unit =
-    val pct = loaded / total * 100
-    ui.eScanProgress.innerText = s"${pct}%"
+// private def reportProgress(loaded: Double, total: Double): Unit =
+//   val pct = loaded / total * 100
+//   ui.eScanProgress.innerText = s"${pct}%"
 
 // context.globallyScanEnabled.addCallback(adaptScanButton _)
 // context.isScanning.addCallback(adaptScanButton _)

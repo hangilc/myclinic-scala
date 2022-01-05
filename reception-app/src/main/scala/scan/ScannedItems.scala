@@ -18,7 +18,7 @@ class ScannedItems(
     ui: ScannedItems.UI,
     timestamp: String,
     scannerRef: () => Option[String]
-)(using ScanWorkQueue):
+)(using ScanWorkQueue, ScanBox.Scope):
   val ele = ui.ele
   var items: List[ScannedItem] = List.empty
 

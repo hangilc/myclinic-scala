@@ -24,7 +24,8 @@ import cats.*
 import cats.syntax.all.*
 import dev.fujiwara.domq.Icons
 
-class ScanBox(val ui: ScanBox.UI)(using queue: ScanWorkQueue):
+class ScanBox(val ui: ScanBox.UI)(using queue: ScanWorkQueue) extends ScanBox.Scope:
+  given ScanBox.Scope = this
   val onClosedCallbacks = new Callbacks[Unit]
   val timestamp = ScanBox.makeTimeStamp
   val patientSearch = new PatientSearch(ui.patientSearchUI)
@@ -37,6 +38,9 @@ class ScanBox(val ui: ScanBox.UI)(using queue: ScanWorkQueue):
     ScanBox.makeTimeStamp,
     () => selectedScanner
   )
+
+  var resolutionStore: Int = 100
+  def resolution: Int = resolutionStore
 
   queue.pinCallbacks.add(_ => adapt())
 
@@ -152,6 +156,10 @@ object ScanBox:
       )
     )
 
+  trait Scope:
+    def selectedScanner: Option[String]
+    def resolution: Int
+
   def makeTimeStamp: String =
     val at = LocalDateTime.now()
     String.format(
@@ -171,6 +179,13 @@ object ScanBox:
     patientIdOption.isDefined && deviceIdOption
       .map(!ScanWorkQueue.isScannerBusy(_))
       .getOrElse(false)
+
+  def reportProgress(e: HTMLElement): (Double, Double) => Unit =
+    e.innerText = "スキャンの準備中"
+    (loaded, total) =>
+      val pct = loaded / total * 100
+      e.innerText = s"${pct}%"
+
 
 // class ScanBoxPrev():
 //   given context: ScanContext = new ScanContext

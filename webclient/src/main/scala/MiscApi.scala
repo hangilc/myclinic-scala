@@ -191,7 +191,7 @@ object MiscApi extends ApiBase:
         "list-visit-by-patient",
         Params("patient-id" -> patientId, "offset" -> offset, "count" -> count)
       )
-    
+
     def listVisitIdByPatient(
         patientId: Int,
         offset: Int,
@@ -201,7 +201,7 @@ object MiscApi extends ApiBase:
         "list-visit-id-by-patient",
         Params("patient-id" -> patientId, "offset" -> offset, "count" -> count)
       )
-    
+
     def listVisitIdByPatientReverse(
         patientId: Int,
         offset: Int,
@@ -211,15 +211,36 @@ object MiscApi extends ApiBase:
         "list-visit-id-by-patient-reverse",
         Params("patient-id" -> patientId, "offset" -> offset, "count" -> count)
       )
-    
+
     def batchGetText(visitIds: List[Int]): Future[Map[Int, List[Text]]] =
       post("batch-get-text", Params(), visitIds)
 
     def batchGetVisitEx(visitIds: List[Int]): Future[List[VisitEx]] =
       post("batch-get-visit-ex", Params(), visitIds)
 
-    def savePatientImage(patientId: Int, fileName: String, data: ArrayBuffer): Future[Boolean] =
-      postBinary("save-patient-image", Params("patient-id" -> patientId, "file-name" -> fileName), data)
+    def savePatientImage(
+        patientId: Int,
+        fileName: String,
+        data: ArrayBuffer
+    ): Future[Boolean] =
+      postBinary(
+        "save-patient-image",
+        Params("patient-id" -> patientId, "file-name" -> fileName),
+        data
+      )
 
-    def renamePatientImage(patientId: Int, src: String, dst: String): Future[Boolean] =
-      get("rename-patient-image", Params("patient-id" -> patientId, "src" -> src, "dst" -> dst))
+    def renamePatientImage(
+        patientId: Int,
+        src: String,
+        dst: String
+    ): Future[Boolean] =
+      get(
+        "rename-patient-image",
+        Params("patient-id" -> patientId, "src" -> src, "dst" -> dst)
+      )
+
+    def deletePatientImage(patientId: Int, fileName: String): Future[Boolean] =
+      get(
+        "delete-patient-image",
+        Params("patient-id" -> patientId, "file-name" -> fileName)
+      )

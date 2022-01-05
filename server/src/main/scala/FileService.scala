@@ -55,4 +55,13 @@ object FileService extends DateTimeQueryParam with Publisher:
           .move(srcLoc, dstLoc)
           .map(_ => true)
       Ok(op)
+
+    case GET -> Root / "delete-patient-image" :? intPatientId(patientId)
+        +& strFileName(fileName) =>
+      val dir = Config.paperScanDir(patientId)
+      val loc = Path(new java.io.File(dir, fileName).getPath)
+      val op =
+        fs2.io.file.Files[IO].delete(loc).map(_ => true)
+      Ok(op)
+      
   }

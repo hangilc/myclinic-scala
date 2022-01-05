@@ -23,11 +23,13 @@ object ScannedItem:
     val eDeleteLink: HTMLElement = a
     val ePreviewImageWrapper = div
     val eClosePreviewButton = button
+    val eScanProgress = span
     val ele = div(
       div(cls := "scanned-item")(
         eIconWrapper(display := "inline-block"),
         eUploadFile,
         ePreviewLink("表示"),
+        eScanProgress(displayNone),
         eRescanLink("再スキャン"),
         eDeleteLink("削除")
       ),
@@ -44,7 +46,7 @@ object ScannedItem:
       timestamp: String,
       index: Int,
       total: Int
-  )(using ScanWorkQueue): ScannedItem =
+  )(using ScanWorkQueue, ScanBox.Scope): ScannedItem =
     val ui = new UI
     new ScannedItem(
       ui,
@@ -63,9 +65,8 @@ class ScannedItem(
     scanType: String,
     timestamp: String,
     index: Int,
-    var total: Int,
-    scannerRef: () => Option[String]
-)(using queue: ScanWorkQueue):
+    var total: Int
+)(using queue: ScanWorkQueue, scope: ScanBox.Scope):
   val ele = ui.ele
   var uploadFile: String = createUploadFile
   ui.eUploadFile.innerText = uploadFile
@@ -150,33 +151,60 @@ class ScannedItem(
   )
 
   ui.eClosePreviewButton(
-    onclick := (_ => 
+    onclick := (_ =>
       ui.ePreviewImageWrapper.clear()
       ui.ePreview(displayNone)
     )
   )
 
+  private def cancelUpload: Future[Unit] =
+    for _ <- Api.deletePatientImage(patientId.get, uploadFile)
+    yield
+      uploadedFlag = false
+      ui.eIconWrapper.clear()
+
   def rescanTask(deviceId: String): ScanTask =
-    ScanTask(() =>
-      ???,
-      isScanning = Some()
+    ScanTask(
+      () =>
+        ui.eRescanLink.hide
+        ui.eScanProgress.clear().show
+        for
+          saved <- Api.scan(
+            deviceId,
+            ScanBox.reportProgress(ui.eScanProgress),
+            scope.resolution
+          )
+          _ <- Api.deleteScannedFile(savedFile)
+          _ = savedFile = saved
+          _ <-
+            if isUploaded then cancelUpload
+            else Future.successful(())
+        yield ()
+      ,
+      isScanning = Some(deviceId)
     )
 
   ui.eRescanLink(
-    onclick := (_ => queue.append(rescanTask))
+    onclick := (_ =>
+      scope.selectedScanner match {
+        case Some(deviceId) => queue.append(rescanTask(deviceId))
+        case None           => ()
+      }
+    )
   )
 
   def adjustToTotalChanged(newTotal: Int): Future[Unit] =
     val prevTotal = total
     total = newTotal
     (index, prevTotal, newTotal) match {
-      case (1, 1, 2) | (1, 2, 1) => 
+      case (1, 1, 2) | (1, 2, 1) =>
         val prevUploadFile = uploadFile
         updateUploadFile
         if isUploaded then
-          Api.renamePatientImage(patientId.get, prevUploadFile, uploadFile).map(_ => ())
-        else
-          Future.successful(())
+          Api
+            .renamePatientImage(patientId.get, prevUploadFile, uploadFile)
+            .map(_ => ())
+        else Future.successful(())
       case _ => Future.successful(())
     }
 
