@@ -21,6 +21,7 @@ object ScannedItem:
     val ePreviewLink: HTMLElement = a
     val eRescanLink: HTMLElement = a
     val eDeleteLink: HTMLElement = a
+    val ePreviewImageWrapper = div
     val eClosePreviewButton = button
     val ele = div(
       div(cls := "scanned-item")(
@@ -31,6 +32,7 @@ object ScannedItem:
         eDeleteLink("削除")
       ),
       ePreview(displayNone)(
+        ePreviewImageWrapper,
         div(eClosePreviewButton("閉じる"))
       )
     )
@@ -42,7 +44,7 @@ object ScannedItem:
       timestamp: String,
       index: Int,
       total: Int
-  ): ScannedItem =
+  )(using ScanWorkQueue): ScannedItem =
     val ui = new UI
     new ScannedItem(
       ui,
@@ -62,13 +64,19 @@ class ScannedItem(
     timestamp: String,
     index: Int,
     total: Int
-):
+)(using queue: ScanWorkQueue):
   val ele = ui.ele
   var uploadFile: String = createUploadFile
   ui.eUploadFile.innerText = uploadFile
 
   private def createUploadFile: String =
-    ScannedItems.createUploadFileName(patientId, scanType, timestamp, index, total)
+    ScannedItems.createUploadFileName(
+      patientId,
+      scanType,
+      timestamp,
+      index,
+      total
+    )
 
   private var uploadedFlag: Boolean = false
   def isUploaded: Boolean = uploadedFlag
@@ -106,6 +114,43 @@ class ScannedItem(
   def deleteSavedFile: Future[Unit] =
     Api.deleteScannedFile(savedFile).map(_ => ())
 
+  def previewTask: ScanTask =
+    ScanTask(() =>
+      for data <- Api.getScannedFile(savedFile)
+      yield
+        val oURL = URL.createObjectURL(
+          new Blob(
+            js.Array(data),
+            new BlobPropertyBag {
+              override var `type`: js.UndefOr[String] = "image/jpeg"
+            }
+          )
+        )
+        val image = org.scalajs.dom.document
+          .createElement("img")
+          .asInstanceOf[HTMLImageElement]
+        image.onload = (e: Event) => {
+          URL.revokeObjectURL(oURL)
+        }
+        image.src = oURL
+        val scale = 1.5
+        image.width = (210 * 1.5).toInt
+        image.height = (297 * 1.5).toInt
+        ui.ePreviewImageWrapper.setChildren(image)
+        ui.ePreview(displayDefault)
+    )
+
+  ui.ePreviewLink(
+    onclick := (_ => queue.append(previewTask))
+  )
+
+  ui.eClosePreviewButton(
+    onclick := (_ => 
+      ui.ePreviewImageWrapper.clear()
+      ui.ePreview(displayNone)
+    )
+  )
+
 //   def deleteSavedFile(): Future[Unit] =
 //     Api.deleteScannedFile(savedFile).map(_ => ())
 
@@ -126,8 +171,6 @@ class ScannedItem(
 //   def disableEdit(): Unit =
 //     eRescanLink(displayNone)
 //     eDeleteLink(displayNone)
-
-
 
 //   private def showSuccessIcon(): Unit =
 //     eIconWrapper.setChildren(

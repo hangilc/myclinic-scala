@@ -42,7 +42,7 @@ class ScanBox(val ui: ScanBox.UI)(using queue: ScanWorkQueue):
     yield ()
     Future.successful(())
 
-  def initFocus: Unit = ()
+  def initFocus: Unit = patientSearch.focus()
 
   patientSearch.onSelectCallbacks.add(_ => patientSearch.hideResult)
 
@@ -106,7 +106,6 @@ class ScanBox(val ui: ScanBox.UI)(using queue: ScanWorkQueue):
     scanProgress.enableScan(enable)
 
   def adapt(): Unit =
-    println("adapt")
     adaptScan
     adaptUploadButton
 

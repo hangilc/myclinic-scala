@@ -14,7 +14,7 @@ import scala.util.{Success, Failure}
 import cats.*
 import cats.implicits.*
 
-class ScannedItems(ui: ScannedItems.UI, timestamp: String):
+class ScannedItems(ui: ScannedItems.UI, timestamp: String)(using ScanWorkQueue):
   val ele = ui.ele
   var items: List[ScannedItem] = List.empty
 

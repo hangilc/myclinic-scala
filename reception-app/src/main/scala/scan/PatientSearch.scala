@@ -32,6 +32,8 @@ class PatientSearch(ui: PatientSearch.UI):
   private val searchResult = new Selection(ui.eSearchResult, onSelect)
   ui.eSearchForm(onsubmit := (onSearch _))
 
+  def focus(): Unit = ui.eSearchInput.focus()
+
   def hideResult: Unit =
     searchResult.hide()
 
