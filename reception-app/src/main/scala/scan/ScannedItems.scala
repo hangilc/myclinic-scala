@@ -11,16 +11,25 @@ import dev.myclinic.scala.webclient.Api
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Success, Failure}
+import cats.*
+import cats.implicits.*
 
 class ScannedItems(ui: ScannedItems.UI, timestamp: String):
   val ele = ui.ele
   var items: List[ScannedItem] = List.empty
 
-  def add(savedFile: String, patientIdRef: () => Option[Int], scanTypeRef: () => String): Unit =
-    val patientId = 
-    val item = ScannedItem(savedFile, patientId, uploadFile)
+  def add(savedFile: String, patientId: Option[Int], scanType: String): Future[Unit] =
+    val item = ScannedItem(
+      savedFile,
+      patientId,
+      scanType,
+      timestamp,
+      items.size + 1,
+      items.size + 1
+    )
     items = items :+ item
     ele(item.ele)
+    Future.successful(())
 
   def numItems: Int = items.size
 
@@ -31,9 +40,12 @@ class ScannedItems(ui: ScannedItems.UI, timestamp: String):
 
   private def uploadAll(items: List[ScannedItem]): Future[Unit] =
     items match {
-      case Nil => Future.successful(())
+      case Nil      => Future.successful(())
       case hd :: tl => hd.ensureUpload.flatMap(_ => uploadAll(tl))
     }
+
+  def deleteSavedFiles: Future[Unit] =
+    items.map(_.deleteSavedFile).sequence_
 
 object ScannedItems:
   class UI:
@@ -48,9 +60,7 @@ object ScannedItems:
   ): String =
     val pat = patientIdOption match {
       case Some(patientId) => patientId.toString
-      case None => "????"
+      case None            => "????"
     }
     val ser: String = if total <= 1 then "" else s"(${index})"
     s"${pat}-${scanType}-${timestamp}${ser}.jpg"
-
-

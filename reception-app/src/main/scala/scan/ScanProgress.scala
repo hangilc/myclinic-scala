@@ -27,7 +27,8 @@ object ScanProgress:
 class ScanProgress(ui: ScanProgress.UI, deviceRef: () => Option[String])(using
     queue: ScanWorkQueue
 ):
-  val onScannedCallbacks = new Callbacks[String]
+  var onScannedCallback: String => Future[Unit] = _ => Future.successful(())
+  val onScannedCallbacks = new FutureCallbacks[String]
   val resolution = 100
   val ele = ui.ele
   ui.eScanButton(onclick := (onScanClick _))
@@ -35,25 +36,24 @@ class ScanProgress(ui: ScanProgress.UI, deviceRef: () => Option[String])(using
   def enableScan(flag: Boolean): Unit = ui.eScanButton.enable(flag)
 
   private def onScanClick(): Unit =
-    deviceRef().foreach(deviceId =>
-      scan(deviceId)
-    )
+    deviceRef().foreach(deviceId => queue.append(scan(deviceId)))
 
-  private def scan(deviceId: String): Unit =
-    val task = ScanTask(
+  private def scan(deviceId: String): ScanTask =
+    ScanTask(
       () => {
         ui.eScanProgress.innerText = "スキャンの準備中"
         ui.eScanProgress(displayDefault)
-        (for file <- Api.scan(deviceId, (reportProgress _), 100)
-        yield
+        for 
+          file <- Api.scan(deviceId, (reportProgress _), 100)
+          _ = {
           ui.eScanProgress.innerText = ""
           ui.eScanProgress(displayNone)
-          onScannedCallbacks.invoke(file)
-        )
+          }
+          _ <- onScannedCallback(file)
+        yield ()
       },
       isScanning = Some(deviceId)
     )
-    queue.append(task)
 
   private def reportProgress(loaded: Double, total: Double): Unit =
     val pct = loaded / total * 100

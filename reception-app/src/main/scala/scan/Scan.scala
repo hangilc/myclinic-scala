@@ -24,8 +24,6 @@ class Scan extends SideMenuService:
       eScannedBoxes
     )
   addBox()
-  ele.listenToCustomEvent[String]("scan-started", deviceId => broadcastScanStarted(deviceId))
-  ele.listenToCustomEvent[String]("scan-ended", deviceId => broadcastScanEnded(deviceId))
 
   def getElement = ele
 

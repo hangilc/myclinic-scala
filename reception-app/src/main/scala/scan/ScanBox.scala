@@ -34,6 +34,8 @@ class ScanBox(val ui: ScanBox.UI)(using queue: ScanWorkQueue):
   val scanProgress = new ScanProgress(ui.scanProgressUI, () => selectedScanner)
   val scannedItems = new ScannedItems(ui.scannedItemsUI, ScanBox.makeTimeStamp)
 
+  queue.onEndCallbacks.add(_ => adapt())
+
   def init: Future[Unit] =
     scanTypeSelect.setValue(ScanBox.defaultScanType)
     for _ <- scannerSelect.init
@@ -43,23 +45,19 @@ class ScanBox(val ui: ScanBox.UI)(using queue: ScanWorkQueue):
   def initFocus: Unit = ()
 
   patientSearch.onSelectCallbacks.add(_ => patientSearch.hideResult)
-  scanProgress.onScannedCallbacks.add(savedFile =>
-    createUploadFileName match {
-      case Some((uploadFile, patientId)) =>
-        (for _ <- scannedItems.add(savedFile, patientId, uploadFile)
-        yield ()).onComplete {
-          case Success(_)  => adaptUploadButton
-          case Failure(ex) => System.err.println(ex.getMessage)
-        }
-      case None => System.err.println("Patient is not specified.")
-    }
-  )
 
   def selectedScanType: String = scanTypeSelect.getValue
   def selectedScanner: Option[String] = scannerSelect.selected
 
   var patient: Option[Patient] = None
   patientSearch.onSelectCallbacks.add(newPatient => patient = Some(newPatient))
+
+  scanProgress.onScannedCallback = savedFile =>
+    scannedItems
+      .add(savedFile, patient.map(_.patientId), selectedScanType)
+      .andThen { case Failure(_) =>
+        Api.deleteScannedFile(savedFile)
+      }
 
   patientSearch.onSelectCallbacks.add(patientDisp.setPatient(_))
 
@@ -69,31 +67,11 @@ class ScanBox(val ui: ScanBox.UI)(using queue: ScanWorkQueue):
     val enable = scannedItems.hasUnUploadedImage
     ui.eUploadButton.enable(enable)
 
-  ui.eUploadButton(
-    onclick := (() =>
-      scannedItems.upload.onComplete {
-        case Success(_)  => ()
-        case Failure(ex) => System.err.println(ex.getMessage)
-      }
-    )
-  )
+  def uploadTask: ScanTask = ScanTask(() => scannedItems.upload)
 
-  def createUploadFileName: Option[(String, Int)] =
-    patient.map(patient =>
-      val patientId = patient.patientId
-      val index = scannedItems.numItems + 1
-      val total = scannedItems.numItems + 1
-      (
-        ScannedItems.createUploadFileName(
-          patientId,
-          selectedScanType,
-          timestamp,
-          index,
-          total
-        ),
-        patientId
-      )
-    )
+  ui.eUploadButton(
+    onclick := (() => queue.append(uploadTask))
+  )
 
   val onScanningDevicesChangedCallbacks = new Callbacks[Unit]
   var scanningDevices: Set[String] = Set.empty
@@ -108,11 +86,30 @@ class ScanBox(val ui: ScanBox.UI)(using queue: ScanWorkQueue):
 
   onScanningDevicesChangedCallbacks.add(_ => adaptScan)
 
+  ui.eCloseButton(onclick := (() =>
+    def doClose(): Unit =
+      ui.ele.remove()
+      onClosedCallbacks.invoke(())
+      scannedItems.deleteSavedFiles.onComplete {
+        case Success(_)  => ()
+        case Failure(ex) => System.err.println(ex.getMessage)
+      }
+    if scannedItems.hasUnUploadedImage then
+      ShowMessage.confirm("アップロードされていない画像がありますが、このまま閉じますか？")(doClose _)
+    else doClose()
+  ))
+
   private def adaptScan: Unit =
     val enable = patient.isDefined && scannerSelect.selected
-      .map(!scanningDevices.contains(_))
-      .getOrElse(false)
+      .map(!ScanWorkQueue.isScannerBusy(_))
+      .getOrElse(true)
     scanProgress.enableScan(enable)
+
+  def adapt(): Unit =
+    adaptScan
+    adaptUploadButton
+
+  adapt()
 
 object ScanBox:
   val cssClassName: String = "scan-box"

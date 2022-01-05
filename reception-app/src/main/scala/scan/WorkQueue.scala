@@ -11,6 +11,8 @@ trait WorkQueueTask:
 class WorkQueue[T <: WorkQueueTask]:
   private var current: Option[T] = None
   private var queue: List[T] = List.empty
+  val onStartCallbacks = new Callbacks[Unit]
+  val onEndCallbacks = new Callbacks[Boolean]
 
   def append(task: T): Unit =
     queue = queue :+ task
@@ -27,12 +29,15 @@ class WorkQueue[T <: WorkQueueTask]:
         case hd :: tl =>
           current = Some(hd)
           queue = tl
+          onStartCallbacks.invoke(())
           hd.run().onComplete {
             case Success(_) =>
               current = None
+              onEndCallbacks.invoke(true)
               tryRun
             case Failure(ex) =>
               current = None
               queue = Nil
               hd.onError(ex)
+              onEndCallbacks.invoke(false)
           }

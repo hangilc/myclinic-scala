@@ -37,31 +37,51 @@ object ScannedItem:
 
   def apply(
       savedFile: String,
-      patientIdRef: () => Option[Int],
-      scanTypeRef: () => String,
-      timestamp: String
+      patientId: Option[Int],
+      scanType: String,
+      timestamp: String,
+      index: Int,
+      total: Int
   ): ScannedItem =
     val ui = new UI
-    new ScannedItem(ui, savedFile, patientIdRef, scanTypeRef, timestamp)
+    new ScannedItem(
+      ui,
+      savedFile,
+      patientId,
+      scanType,
+      timestamp,
+      index,
+      total
+    )
 
 class ScannedItem(
     val ui: ScannedItem.UI,
     var savedFile: String,
-    patientIdRef: () => Option[Int],
-    scanTypeRef: () => String,
-    timestamp: String
+    patientId: Option[Int],
+    scanType: String,
+    timestamp: String,
+    index: Int,
+    total: Int
 ):
   val ele = ui.ele
-  ui.eUploadFile.innerText = ScannedItems.createUploadFileName(
-    patientIdRef(),
-    scanTypeRef(),
-    timestamp,
-    items.size + 1,
-    items.size + 1
-  )
+  var uploadFile: String = createUploadFile
+  ui.eUploadFile.innerText = uploadFile
+
+  private def createUploadFile: String =
+    ScannedItems.createUploadFileName(patientId, scanType, timestamp, index, total)
 
   private var uploadedFlag: Boolean = false
   def isUploaded: Boolean = uploadedFlag
+
+  private def showSuccessIcon(): Unit =
+    ui.eIconWrapper.setChildren(
+      List(Icons.check(stroke := "green"))
+    )
+
+  private def showFailureIcon(): Unit =
+    ui.eIconWrapper.setChildren(
+      List(Icons.x(stroke := "red"))
+    )
 
   def upload: Future[Unit] =
     patientId match {
@@ -71,43 +91,20 @@ class ScannedItem(
           data <- Api.getScannedFile(savedFile)
           ok <- Api.savePatientImage(patientId, uploadFile, data)
         yield ()
+    } andThen {
+      case Success(_) =>
+        uploadedFlag = true
+        showSuccessIcon()
+      case Failure(ex) =>
+        showFailureIcon()
     }
 
   def ensureUpload: Future[Unit] =
     if isUploaded then Future.successful(())
-    else
-      for _ <- upload
-      yield uploadedFlag = true
+    else upload
 
-// class ScannedItem(
-//   private var savedFile: String,
-//   private var index: Int,
-//   private var total: Int
-// )(using context: ScanContext):
-//   val eIconWrapper: HTMLElement = div()
-//   val eUploadFile: HTMLElement = span()
-//   val ePreview: HTMLElement = div()
-//   val eRescanLink: HTMLElement = a()
-//   val eDeleteLink: HTMLElement = a()
-//   val ele = div(
-//     div(cls := "scanned-item")(
-//       eIconWrapper(display := "inline-block"),
-//       eUploadFile(innerText := uploadFileName),
-//       a("表示", onclick := (onShow _)),
-//       eRescanLink("再スキャン"),
-//       eDeleteLink("削除", onclick := (onDeleteClick _))
-//     ),
-//     ePreview(displayNone)(
-//       div(button("閉じる", onclick := (onClosePreview _)))
-//     )
-//   )
-
-//   private var isUploadedFlag: Boolean = false
-//   def isUploaded: Boolean = isUploadedFlag
-
-//   def ensureUploaded(): Future[Unit] =
-//     if isUploaded then Future.successful(())
-//     else upload()
+  def deleteSavedFile: Future[Unit] =
+    Api.deleteScannedFile(savedFile).map(_ => ())
 
 //   def deleteSavedFile(): Future[Unit] =
 //     Api.deleteScannedFile(savedFile).map(_ => ())
@@ -130,24 +127,7 @@ class ScannedItem(
 //     eRescanLink(displayNone)
 //     eDeleteLink(displayNone)
 
-//   private def timestamp: String = context.timestamp
 
-//   private def uploadFileName: String =
-//     val pat = context.patient.value match {
-//       case Some(p) => p.patientId.toString
-//       case None     => "????"
-//     }
-//     val ser: String = if total <= 1 then "" else s"(${index})"
-//     s"${pat}-${context.scanType.value}-${timestamp}${ser}.jpg"
-
-//   private def onShow(): Unit =
-//     ???
-
-//   private def onDeleteClick(): Unit =
-//     ???
-
-//   private def onClosePreview(): Unit =
-//     ???
 
 //   private def showSuccessIcon(): Unit =
 //     eIconWrapper.setChildren(
