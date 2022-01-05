@@ -32,7 +32,11 @@ class ScanBox(val ui: ScanBox.UI)(using queue: ScanWorkQueue):
   val scanTypeSelect = new ScanTypeSelect(ui.scanTypeSelectUI)
   val scannerSelect = new ScannerSelect(ui.scannerSelectUI)
   val scanProgress = new ScanProgress(ui.scanProgressUI, () => selectedScanner)
-  val scannedItems = new ScannedItems(ui.scannedItemsUI, ScanBox.makeTimeStamp)
+  val scannedItems = new ScannedItems(
+    ui.scannedItemsUI,
+    ScanBox.makeTimeStamp,
+    () => selectedScanner
+  )
 
   queue.pinCallbacks.add(_ => adapt())
 
@@ -100,7 +104,8 @@ class ScanBox(val ui: ScanBox.UI)(using queue: ScanWorkQueue):
   ))
 
   private def adaptScan: Unit =
-    val enable = ScanBox.canScan(patient.map(_.patientId), scannerSelect.selected)
+    val enable =
+      ScanBox.canScan(patient.map(_.patientId), scannerSelect.selected)
     scanProgress.enableScan(enable)
 
   def adapt(): Unit =

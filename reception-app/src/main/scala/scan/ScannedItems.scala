@@ -14,11 +14,19 @@ import scala.util.{Success, Failure}
 import cats.*
 import cats.implicits.*
 
-class ScannedItems(ui: ScannedItems.UI, timestamp: String)(using ScanWorkQueue):
+class ScannedItems(
+    ui: ScannedItems.UI,
+    timestamp: String,
+    scannerRef: () => Option[String]
+)(using ScanWorkQueue):
   val ele = ui.ele
   var items: List[ScannedItem] = List.empty
 
-  def add(savedFile: String, patientId: Option[Int], scanType: String): Future[Unit] =
+  def add(
+      savedFile: String,
+      patientId: Option[Int],
+      scanType: String
+  ): Future[Unit] =
     val item = ScannedItem(
       savedFile,
       patientId,
@@ -27,9 +35,8 @@ class ScannedItems(ui: ScannedItems.UI, timestamp: String)(using ScanWorkQueue):
       items.size + 1,
       items.size + 1
     )
-    for
-      _ <- items.map(_.adjustToTotalChanged(items.size + 1)).sequence_
-    yield 
+    for _ <- items.map(_.adjustToTotalChanged(items.size + 1)).sequence_
+    yield
       items = items :+ item
       ele(item.ele)
 

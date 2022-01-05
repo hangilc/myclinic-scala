@@ -63,7 +63,8 @@ class ScannedItem(
     scanType: String,
     timestamp: String,
     index: Int,
-    var total: Int
+    var total: Int,
+    scannerRef: () => Option[String]
 )(using queue: ScanWorkQueue):
   val ele = ui.ele
   var uploadFile: String = createUploadFile
@@ -153,6 +154,16 @@ class ScannedItem(
       ui.ePreviewImageWrapper.clear()
       ui.ePreview(displayNone)
     )
+  )
+
+  def rescanTask(deviceId: String): ScanTask =
+    ScanTask(() =>
+      ???,
+      isScanning = Some()
+    )
+
+  ui.eRescanLink(
+    onclick := (_ => queue.append(rescanTask))
   )
 
   def adjustToTotalChanged(newTotal: Int): Future[Unit] =
