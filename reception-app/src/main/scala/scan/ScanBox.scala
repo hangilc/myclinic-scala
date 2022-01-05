@@ -24,7 +24,7 @@ import cats.*
 import cats.syntax.all.*
 import dev.fujiwara.domq.Icons
 
-class ScanBox(val ui: ScanBox.UI):
+class ScanBox(val ui: ScanBox.UI)(using queue: ScanWorkQueue):
   val onClosedCallbacks = new Callbacks[Unit]
   val timestamp = ScanBox.makeTimeStamp
   val patientSearch = new PatientSearch(ui.patientSearchUI)
@@ -32,25 +32,23 @@ class ScanBox(val ui: ScanBox.UI):
   val scanTypeSelect = new ScanTypeSelect(ui.scanTypeSelectUI)
   val scannerSelect = new ScannerSelect(ui.scannerSelectUI)
   val scanProgress = new ScanProgress(ui.scanProgressUI, () => selectedScanner)
-  val scannedItems = new ScannedItems(ui.scannedItemsUI)
+  val scannedItems = new ScannedItems(ui.scannedItemsUI, ScanBox.makeTimeStamp)
 
   def init: Future[Unit] =
     scanTypeSelect.setValue(ScanBox.defaultScanType)
-    for
-      _ <- scannerSelect.init
+    for _ <- scannerSelect.init
     yield ()
     Future.successful(())
 
   def initFocus: Unit = ()
 
   patientSearch.onSelectCallbacks.add(_ => patientSearch.hideResult)
-  scanProgress.onScannedCallbacks.add(savedFile => 
+  scanProgress.onScannedCallbacks.add(savedFile =>
     createUploadFileName match {
-      case Some((uploadFile, patientId)) => 
-        (for
-          _ <- scannedItems.add(savedFile, patientId, uploadFile)
+      case Some((uploadFile, patientId)) =>
+        (for _ <- scannedItems.add(savedFile, patientId, uploadFile)
         yield ()).onComplete {
-          case Success(_) => adaptUploadButton
+          case Success(_)  => adaptUploadButton
           case Failure(ex) => System.err.println(ex.getMessage)
         }
       case None => System.err.println("Patient is not specified.")
@@ -61,9 +59,7 @@ class ScanBox(val ui: ScanBox.UI):
   def selectedScanner: Option[String] = scannerSelect.selected
 
   var patient: Option[Patient] = None
-  patientSearch.onSelectCallbacks.add(newPatient => 
-    patient = Some(newPatient)
-  )
+  patientSearch.onSelectCallbacks.add(newPatient => patient = Some(newPatient))
 
   patientSearch.onSelectCallbacks.add(patientDisp.setPatient(_))
 
@@ -73,28 +69,39 @@ class ScanBox(val ui: ScanBox.UI):
     val enable = scannedItems.hasUnUploadedImage
     ui.eUploadButton.enable(enable)
 
-  ui.eUploadButton(onclick := (() =>
-    scannedItems.upload.onComplete {
-      case Success(_) => ()
-      case Failure(ex) => System.err.println(ex.getMessage)
-    }
-  ))
-  
+  ui.eUploadButton(
+    onclick := (() =>
+      scannedItems.upload.onComplete {
+        case Success(_)  => ()
+        case Failure(ex) => System.err.println(ex.getMessage)
+      }
+    )
+  )
+
   def createUploadFileName: Option[(String, Int)] =
     patient.map(patient =>
       val patientId = patient.patientId
       val index = scannedItems.numItems + 1
       val total = scannedItems.numItems + 1
-      (ScannedItems.createUploadFileName(patientId, selectedScanType, timestamp, index, total), patientId)
+      (
+        ScannedItems.createUploadFileName(
+          patientId,
+          selectedScanType,
+          timestamp,
+          index,
+          total
+        ),
+        patientId
+      )
     )
-  
+
   val onScanningDevicesChangedCallbacks = new Callbacks[Unit]
   var scanningDevices: Set[String] = Set.empty
-  ui.ele(oncustomevent[String]("scan-started") := (ev => 
+  ui.ele(oncustomevent[String]("scan-started") := (ev =>
     scanningDevices = scanningDevices + ev.detail
     onScanningDevicesChangedCallbacks.invoke(())
   ))
-  ui.ele(oncustomevent[String]("scan-ended") := (ev => 
+  ui.ele(oncustomevent[String]("scan-ended") := (ev =>
     scanningDevices = scanningDevices - ev.detail
     onScanningDevicesChangedCallbacks.invoke(())
   ))
@@ -102,14 +109,18 @@ class ScanBox(val ui: ScanBox.UI):
   onScanningDevicesChangedCallbacks.add(_ => adaptScan)
 
   private def adaptScan: Unit =
-    val enable = patient.isDefined && scannerSelect.selected.map(!scanningDevices.contains(_)).getOrElse(false)
+    val enable = patient.isDefined && scannerSelect.selected
+      .map(!scanningDevices.contains(_))
+      .getOrElse(false)
     scanProgress.enableScan(enable)
 
 object ScanBox:
   val cssClassName: String = "scan-box"
   val defaultScanType: String = "image"
 
-  def apply(): ScanBox = new ScanBox(new UI)
+  def apply(): ScanBox =
+    given queue: ScanWorkQueue = ScanWorkQueue()
+    new ScanBox(new UI)
 
   class UI:
     val patientSearchUI = new PatientSearch.UI

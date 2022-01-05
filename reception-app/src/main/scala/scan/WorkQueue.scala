@@ -4,31 +4,30 @@ import scala.concurrent.Future
 import scala.util.{Success, Failure}
 import scala.concurrent.ExecutionContext.Implicits.global
 
-case class Task[T](
-    tag: T,
-    run: () => Future[Unit],
-    onError: Throwable => Unit = ex => System.err.println(ex.getMessage)
-)
+trait WorkQueueTask:
+  val run: () => Future[Unit]
+  val onError: Throwable => Unit = ex => System.err.println(ex.getMessage)
 
-class WorkQueue[T]:
-  private var current: Option[Task[T]] = None
-  private var queue: List[Task[T]] = List.empty
+class WorkQueue[T <: WorkQueueTask]:
+  private var current: Option[T] = None
+  private var queue: List[T] = List.empty
 
-  def append(task: Task[T]): Unit =
+  def append(task: T): Unit =
     queue = queue :+ task
     tryRun
 
-  def scan(filter: Task[T] => Boolean): List[Task[T]] =
-    (current.map(List(_)).getOrElse(List.empty) ++ queue).filter(filter)
+  def scan(filter: T => Boolean): List[T] =
+    val list = (current.map(List(_)).getOrElse(List.empty) ++ queue)
+    list.filter(filter)
 
   private def tryRun: Unit =
     if current.isEmpty then
-      queue match 
+      queue match
         case Nil => ()
         case hd :: tl =>
           current = Some(hd)
           queue = tl
-          hd.run().onComplete { 
+          hd.run().onComplete {
             case Success(_) =>
               current = None
               tryRun

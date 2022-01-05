@@ -12,15 +12,15 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Success, Failure}
 
-class ScannedItems(ui: ScannedItems.UI):
+class ScannedItems(ui: ScannedItems.UI, timestamp: String):
   val ele = ui.ele
   var items: List[ScannedItem] = List.empty
 
-  def add(savedFile: String, patientId: Int, uploadFile: String): Future[Unit] =
+  def add(savedFile: String, patientIdRef: () => Option[Int], scanTypeRef: () => String): Unit =
+    val patientId = 
     val item = ScannedItem(savedFile, patientId, uploadFile)
     items = items :+ item
     ele(item.ele)
-    Future.successful(())
 
   def numItems: Int = items.size
 
@@ -40,13 +40,16 @@ object ScannedItems:
     val ele = div
 
   def createUploadFileName(
-      patientId: Int,
+      patientIdOption: Option[Int],
       scanType: String,
       timestamp: String,
       index: Int,
       total: Int
   ): String =
-    val pat = patientId.toString
+    val pat = patientIdOption match {
+      case Some(patientId) => patientId.toString
+      case None => "????"
+    }
     val ser: String = if total <= 1 then "" else s"(${index})"
     s"${pat}-${scanType}-${timestamp}${ser}.jpg"
 

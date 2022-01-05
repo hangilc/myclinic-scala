@@ -37,37 +37,47 @@ object ScannedItem:
 
   def apply(
       savedFile: String,
-      patientId: Int,
-      uploadFile: String
+      patientIdRef: () => Option[Int],
+      scanTypeRef: () => String,
+      timestamp: String
   ): ScannedItem =
     val ui = new UI
-    new ScannedItem(ui, savedFile, patientId, uploadFile)
+    new ScannedItem(ui, savedFile, patientIdRef, scanTypeRef, timestamp)
 
 class ScannedItem(
     val ui: ScannedItem.UI,
-    savedFile: String,
-    patientId: Int,
-    uploadFile: String
+    var savedFile: String,
+    patientIdRef: () => Option[Int],
+    scanTypeRef: () => String,
+    timestamp: String
 ):
   val ele = ui.ele
-  ui.eUploadFile.innerText = uploadFile
+  ui.eUploadFile.innerText = ScannedItems.createUploadFileName(
+    patientIdRef(),
+    scanTypeRef(),
+    timestamp,
+    items.size + 1,
+    items.size + 1
+  )
 
   private var uploadedFlag: Boolean = false
   def isUploaded: Boolean = uploadedFlag
 
   def upload: Future[Unit] =
-    for
-      data <- Api.getScannedFile(savedFile)
-      ok <- Api.savePatientImage(patientId, uploadFile, data)
-    yield ()
+    patientId match {
+      case None => Future.failed(new RuntimeException("患者が選択されていません。"))
+      case Some(patientId) =>
+        for
+          data <- Api.getScannedFile(savedFile)
+          ok <- Api.savePatientImage(patientId, uploadFile, data)
+        yield ()
+    }
 
   def ensureUpload: Future[Unit] =
     if isUploaded then Future.successful(())
-    else 
-      for 
-        _ <- upload
-      yield 
-        uploadedFlag = true
+    else
+      for _ <- upload
+      yield uploadedFlag = true
 
 // class ScannedItem(
 //   private var savedFile: String,

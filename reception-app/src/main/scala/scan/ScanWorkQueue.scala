@@ -2,30 +2,31 @@ package dev.myclinic.scala.web.reception.scan
 
 import dev.myclinic.scala.webclient.Api
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
-case class TaskTag(
-    isScanning: Option[String] = None,
-    isUploading: Option[Int] = None
-)
+case class ScanTask(
+    run: () => Future[Unit],
+    isScanning: Option[String] = None
+) extends WorkQueueTask
 
-class ScanWorkQueue:
-  type Tag = TaskTag
-  private val wq = new WorkQueue[Tag]
+class ScanWorkQueue extends WorkQueue[ScanTask]:
+  override def append(t: ScanTask): Unit =
+    val busy = t.isScanning.map(ScanWorkQueue.isScannerBusy(_)).getOrElse(false)
+    if !busy then super.append(t)
 
-  def scan(
-      deviceId: String,
-      progress: (Double, Double) => Unit,
-      resolution: Int,
-      onEnd: String => Unit
-  ): Boolean =
-    val isBusy = wq.scan(t => t.tag.isScanning == Some(deviceId)).size == 0
-    if isBusy then false
-    else
-      val tag = TaskTag(isScanning = Some(deviceId))
-      val task = Task(
-        tag,
-        () =>
-          for savedFile <- Api.scan(deviceId, progress, resolution)
-          yield onEnd(savedFile)
-      )
-      true
+object ScanWorkQueue:
+  private var queueList: List[ScanWorkQueue] = List.empty
+
+  def apply(): ScanWorkQueue =
+    val q = new ScanWorkQueue
+    queueList = queueList :+ q
+    q
+
+  def remove(q: ScanWorkQueue): Unit =
+    queueList = queueList.filterNot(_ == q)
+
+  private def isUsingScanner(q: ScanWorkQueue, deviceId: String): Boolean =
+    q.scan(_.isScanning == Some(deviceId)).size > 0
+
+  def isScannerBusy(deviceId: String): Boolean =
+    queueList.find(isUsingScanner(_, deviceId)).isDefined
