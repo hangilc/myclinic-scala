@@ -11,16 +11,17 @@ trait WorkQueueTask:
 class WorkQueue[T <: WorkQueueTask]:
   private var current: Option[T] = None
   private var queue: List[T] = List.empty
-  val onStartCallbacks = new Callbacks[Unit]
-  val onEndCallbacks = new Callbacks[Boolean]
+  val onStartCallbacks = new Callbacks[T]
+  val onEndCallbacks = new Callbacks[(T, Boolean)]
 
   def append(task: T): Unit =
     queue = queue :+ task
     tryRun
 
-  def scan(filter: T => Boolean): List[T] =
-    val list = (current.map(List(_)).getOrElse(List.empty) ++ queue)
-    list.filter(filter)
+  private def list: List[T] =
+    current.map(List(_)).getOrElse(List.empty) ++ queue
+
+  def find(pred: T => Boolean): Option[T] = list.find(pred)
 
   private def tryRun: Unit =
     if current.isEmpty then
@@ -29,15 +30,15 @@ class WorkQueue[T <: WorkQueueTask]:
         case hd :: tl =>
           current = Some(hd)
           queue = tl
-          onStartCallbacks.invoke(())
+          onStartCallbacks.invoke(hd)
           hd.run().onComplete {
             case Success(_) =>
               current = None
-              onEndCallbacks.invoke(true)
+              onEndCallbacks.invoke(hd, true)
               tryRun
             case Failure(ex) =>
               current = None
               queue = Nil
               hd.onError(ex)
-              onEndCallbacks.invoke(false)
+              onEndCallbacks.invoke(hd, false)
           }

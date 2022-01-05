@@ -34,7 +34,7 @@ class ScanBox(val ui: ScanBox.UI)(using queue: ScanWorkQueue):
   val scanProgress = new ScanProgress(ui.scanProgressUI, () => selectedScanner)
   val scannedItems = new ScannedItems(ui.scannedItemsUI, ScanBox.makeTimeStamp)
 
-  queue.onEndCallbacks.add(_ => adapt())
+  queue.pinCallbacks.add(_ => adapt())
 
   def init: Future[Unit] =
     scanTypeSelect.setValue(ScanBox.defaultScanType)
@@ -102,10 +102,11 @@ class ScanBox(val ui: ScanBox.UI)(using queue: ScanWorkQueue):
   private def adaptScan: Unit =
     val enable = patient.isDefined && scannerSelect.selected
       .map(!ScanWorkQueue.isScannerBusy(_))
-      .getOrElse(true)
+      .getOrElse(false)
     scanProgress.enableScan(enable)
 
   def adapt(): Unit =
+    println("adapt")
     adaptScan
     adaptUploadButton
 
@@ -117,7 +118,9 @@ object ScanBox:
 
   def apply(): ScanBox =
     given queue: ScanWorkQueue = ScanWorkQueue()
-    new ScanBox(new UI)
+    val box = new ScanBox(new UI)
+    box.onClosedCallbacks.add(_ => ScanWorkQueue.remove(queue))
+    box
 
   class UI:
     val patientSearchUI = new PatientSearch.UI

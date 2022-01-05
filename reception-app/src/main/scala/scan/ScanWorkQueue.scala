@@ -10,6 +10,7 @@ case class ScanTask(
 ) extends WorkQueueTask
 
 class ScanWorkQueue extends WorkQueue[ScanTask]:
+  val pinCallbacks = new Callbacks[Unit]
   override def append(t: ScanTask): Unit =
     val busy = t.isScanning.map(ScanWorkQueue.isScannerBusy(_)).getOrElse(false)
     if !busy then super.append(t)
@@ -19,6 +20,19 @@ object ScanWorkQueue:
 
   def apply(): ScanWorkQueue =
     val q = new ScanWorkQueue
+    q.onStartCallbacks.add(t =>
+      q.pinCallbacks.invoke(())
+      if t.isScanning.isDefined then
+        queueList.find(_ != q).foreach(_.pinCallbacks.invoke(()))
+    )
+    q.onEndCallbacks.add(tb =>
+      q.pinCallbacks.invoke(())
+      tb match {
+        case (t, _) if t.isScanning.isDefined =>
+          queueList.find(_ != q).foreach(_.pinCallbacks.invoke(()))
+        case _ => ()
+      }
+    )
     queueList = queueList :+ q
     q
 
@@ -26,7 +40,7 @@ object ScanWorkQueue:
     queueList = queueList.filterNot(_ == q)
 
   private def isUsingScanner(q: ScanWorkQueue, deviceId: String): Boolean =
-    q.scan(_.isScanning == Some(deviceId)).size > 0
+    q.find(_.isScanning == Some(deviceId)).isDefined
 
   def isScannerBusy(deviceId: String): Boolean =
     queueList.find(isUsingScanner(_, deviceId)).isDefined
