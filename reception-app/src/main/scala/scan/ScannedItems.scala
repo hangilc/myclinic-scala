@@ -63,9 +63,7 @@ class ScannedItems(
       .map(j => items(j).adjustToIndexChanged(j, total))
       .sequence_
       .map(_ => 
-        println(("before", i, items))
         items = items.patch(i, List.empty, 1)
-        println(("after", items))
         if items.size == 1 then items(0).adjustToIndexChanged(1, 1)
       )
 

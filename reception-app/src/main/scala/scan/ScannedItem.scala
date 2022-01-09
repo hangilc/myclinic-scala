@@ -91,7 +91,7 @@ class ScannedItem(
       timestamp,
       index,
       total,
-      Some(serialId)
+      None //Some(serialId)
     )
 
   private var uploadedFlag: Boolean = false
@@ -245,9 +245,8 @@ class ScannedItem(
       timestamp,
       newIndex,
       newTotal,
-      Some(serialId)
+      None //Some(serialId)
     )
-    println(("adjust", newIndex, newTotal))
     if newUploadFile != uploadFile then
       for 
          _ <- adjustToSamePatientUploadChanged(newUploadFile)
