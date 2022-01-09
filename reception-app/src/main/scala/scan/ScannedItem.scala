@@ -59,6 +59,12 @@ object ScannedItem:
       total
     )
 
+  var serialStore = 1
+  def serial: Int = 
+    val ser = serialStore
+    serialStore += 1
+    ser
+
 class ScannedItem(
     val ui: ScannedItem.UI,
     var savedFile: String,
@@ -68,7 +74,8 @@ class ScannedItem(
     var index: Int,
     var total: Int
 )(using queue: ScanWorkQueue, scope: ScanBox.Scope):
-  val onDeletedCallbacks = new FutureCallbacks[Unit]
+  val onDeletedCallbacks = new FutureCallbacks[Int]
+  val serialId = ScannedItem.serial
   val ele = ui.ele
   var uploadFile: String = createUploadFile
   ui.eUploadFile.innerText = uploadFile
@@ -83,7 +90,8 @@ class ScannedItem(
       scanType,
       timestamp,
       index,
-      total
+      total,
+      Some(serialId)
     )
 
   private var uploadedFlag: Boolean = false
@@ -210,7 +218,7 @@ class ScannedItem(
     ScanTask(() =>
       for
         _ <- deleteItem()
-        _ <- onDeletedCallbacks.invoke(())
+        _ <- onDeletedCallbacks.invoke(index)
       yield ()
     )
 
@@ -236,8 +244,10 @@ class ScannedItem(
       scanType,
       timestamp,
       newIndex,
-      newTotal
+      newTotal,
+      Some(serialId)
     )
+    println(("adjust", newIndex, newTotal))
     if newUploadFile != uploadFile then
       for 
          _ <- adjustToSamePatientUploadChanged(newUploadFile)

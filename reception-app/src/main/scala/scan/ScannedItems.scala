@@ -27,16 +27,15 @@ class ScannedItems(
       patientId: Option[Int],
       scanType: String
   ): Future[Unit] =
-    val index = items.size + 1
     val item = ScannedItem(
       savedFile,
       patientId,
       scanType,
       timestamp,
-      index,
+      items.size + 1,
       items.size + 1
     )
-    item.onDeletedCallbacks.add(_ => onItemDeleted(index - 1))
+    item.onDeletedCallbacks.add(index => onItemDeleted(index - 1))
     for _ <- items.map(_.adjustToTotalChanged(items.size + 1)).sequence_
     yield
       items = items :+ item
@@ -46,12 +45,12 @@ class ScannedItems(
 
   def hasUnUploadedImage: Boolean =
     items.find(!_.isUploaded).isDefined
-
+  
   def upload: Future[Unit] = uploadAll(items)
 
   private def uploadAll(items: List[ScannedItem]): Future[Unit] =
     items match {
-      case Nil      => Future.successful(())
+      case Nil      => Future.successful(())                          
       case hd :: tl => hd.ensureUpload.flatMap(_ => uploadAll(tl))
     }
 
@@ -64,7 +63,9 @@ class ScannedItems(
       .map(j => items(j).adjustToIndexChanged(j, total))
       .sequence_
       .map(_ => 
+        println(("before", i, items))
         items = items.patch(i, List.empty, 1)
+        println(("after", items))
         if items.size == 1 then items(0).adjustToIndexChanged(1, 1)
       )
 
@@ -80,11 +81,18 @@ object ScannedItems:
       scanType: String,
       timestamp: String,
       index: Int,
-      total: Int
+      total: Int,
+      serialId: Option[Int]
   ): String =
     val pat = patientIdOption match {
       case Some(patientId) => patientId.toString
       case None            => "????"
     }
     val ser: String = if total <= 1 then "" else s"(${index})"
-    s"${pat}-${scanType}-${timestamp}${ser}.jpg"
+    val base = s"${pat}-${scanType}-${timestamp}${ser}" +
+      (serialId match {
+        case None => ""
+        case Some(id) => s"-${id}"
+      })
+    val ext = ".jpg"
+    base + ext
