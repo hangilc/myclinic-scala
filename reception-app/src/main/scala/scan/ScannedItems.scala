@@ -27,14 +27,16 @@ class ScannedItems(
       patientId: Option[Int],
       scanType: String
   ): Future[Unit] =
+    val index = items.size + 1
     val item = ScannedItem(
       savedFile,
       patientId,
       scanType,
       timestamp,
-      items.size + 1,
+      index,
       items.size + 1
     )
+    item.onDeletedCallbacks.add(_ => onItemDeleted(index - 1))
     for _ <- items.map(_.adjustToTotalChanged(items.size + 1)).sequence_
     yield
       items = items :+ item
@@ -55,6 +57,16 @@ class ScannedItems(
 
   def deleteSavedFiles: Future[Unit] =
     items.map(_.deleteSavedFile).sequence_
+
+  private def onItemDeleted(i: Int): Future[Unit] =
+    val total = items.size - 1
+    List.from(items.size - 1 until i by -1)
+      .map(j => items(j).adjustToIndexChanged(j, total))
+      .sequence_
+      .map(_ => 
+        items = items.patch(i, List.empty, 1)
+        if items.size == 1 then items(0).adjustToIndexChanged(1, 1)
+      )
 
   def adapt(patientId: Option[Int], deviceId: Option[String]): Unit =
     items.foreach(_.adapt(patientId, deviceId))
