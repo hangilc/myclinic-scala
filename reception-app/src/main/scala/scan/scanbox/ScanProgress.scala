@@ -1,4 +1,4 @@
-package dev.myclinic.scala.web.reception.scan
+package dev.myclinic.scala.web.reception.scan.scanbox
 
 import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
@@ -11,6 +11,8 @@ import dev.myclinic.scala.webclient.Api
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Success, Failure}
+import dev.myclinic.scala.web.reception.scan.FutureCallbacks
+
 
 object ScanProgress:
   class UI:

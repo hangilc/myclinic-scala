@@ -1,4 +1,4 @@
-package dev.myclinic.scala.web.reception.scan
+package dev.myclinic.scala.web.reception.scan.scanbox
 
 import dev.myclinic.scala.web.appbase.SideMenuService
 import dev.fujiwara.domq.ElementQ.{*, given}
@@ -23,6 +23,7 @@ import scala.util.Failure
 import cats.*
 import cats.syntax.all.*
 import dev.fujiwara.domq.Icons
+import dev.myclinic.scala.web.reception.scan.{Callbacks, PatientSearch}
 
 class ScanBox(val ui: ScanBox.UI)(using queue: ScanWorkQueue)
     extends ScanBox.Scope:

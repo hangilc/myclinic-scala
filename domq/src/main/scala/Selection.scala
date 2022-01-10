@@ -71,3 +71,6 @@ object Selection:
     def show: UI =
       ele(displayDefault)
       this
+
+  def create[T](ui: UI, onSelect: T => Unit): Selection[T] =
+    new Selection[T](ui, onSelect)

@@ -88,7 +88,7 @@ class ModalModifiers:
   val modalCommands = Modifier[HTMLElement](e => {
     val style = e.style
     e.style.textAlign = "end"
-    e(cls := "modal-commands")
+    // e(cls := "modal-commands")
   })
 
 object Modal extends ModalModifiers:
@@ -97,6 +97,7 @@ object Modal extends ModalModifiers:
   def ok = button("ＯＫ")
   def execute = button("実行")
   def yes = button("はい")
+  def select = button{"選択"}
   val zIndexDefault = 2002
 
   def apply(title: String, content: HTMLElement): Modal =

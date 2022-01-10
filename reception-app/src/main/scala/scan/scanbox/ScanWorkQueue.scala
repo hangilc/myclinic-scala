@@ -1,8 +1,9 @@
-package dev.myclinic.scala.web.reception.scan
+package dev.myclinic.scala.web.reception.scan.scanbox
 
 import dev.myclinic.scala.webclient.Api
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import dev.myclinic.scala.web.reception.scan.{WorkQueue, WorkQueueTask, Callbacks}
 
 case class ScanTask(
     run: () => Future[Unit],

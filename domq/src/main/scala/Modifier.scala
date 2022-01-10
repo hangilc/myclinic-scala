@@ -131,8 +131,11 @@ object Modifiers:
     AssignCss((style, value) => style.setProperty("align-items", value))
   val maxHeight = AssignCss((s, v) => s.maxHeight = v)
   val minHeight = AssignCss((s, v) => s.minHeight = v)
+  val maxWidth = AssignCss((s, v) => s.maxWidth = v)
+  val minWidth = AssignCss((s, v) => s.minWidth = v)
   val width = AssignCss((s, v) => if !v.isEmpty then s.width = v)
   val height = AssignCss((s, v) => s.height = v)
+  val overflowX = AssignCss((s, v) => s.overflowX = v)
   val overflowY = AssignCss((s, v) => s.overflowY = v)
   val overflowYAuto = overflowY := "auto"
   val cssFloat = AssignCss((s, v) => s.cssFloat = v)

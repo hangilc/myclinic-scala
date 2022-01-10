@@ -1,4 +1,4 @@
-package dev.myclinic.scala.web.reception.scan
+package dev.myclinic.scala.web.reception.scan.scanbox
 
 import org.scalajs.dom.{HTMLElement, URL, HTMLImageElement, Event}
 import org.scalajs.dom.{Blob, BlobPropertyBag}
@@ -13,6 +13,7 @@ import scala.util.{Success, Failure}
 import scala.scalajs.js
 import dev.myclinic.scala.model.Patient
 import org.scalajs.dom.MouseEvent
+import dev.myclinic.scala.web.reception.scan.FutureCallbacks
 
 object ScannedItem:
   class UI:
