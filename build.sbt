@@ -295,7 +295,7 @@ lazy val config = project
 lazy val appUtil = crossProject(JVMPlatform, JSPlatform)
   .crossType(CrossType.Pure)
   .in(file("app-util"))
-  .dependsOn(util, model)
+  .dependsOn(util, model, kanjidate)
   .jsSettings(
     scalaJSUseMainModuleInitializer := false,
     libraryDependencies ++= Seq(

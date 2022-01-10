@@ -4,16 +4,24 @@ import dev.fujiwara.domq.all.{*, given}
 import dev.myclinic.scala.model.{Patient}
 import dev.myclinic.scala.webclient.Api
 import scala.concurrent.ExecutionContext.Implicits.global
+import dev.myclinic.scala.apputil.ModelExt.*
 
 class PatientSelect(ui: PatientSelect.UI, onSelectCallback: Patient => Unit):
   val m = Modal("患者選択", ui.body, ui.commands)
 
-  val result = Selection.create[Patient](ui.selectionUI, onSelectCallback)
+  val result = Selection.create[Patient](ui.selectionUI, patient =>
+    m.close()
+    onSelectCallback(patient)
+  )
   ui.eCancelButton(onclick := (() => m.close()))
   ui.eSearchForm(onsubmit := (onSearch _))
 
-  def open(): Unit =
-    m.open()
+  def open(): Unit = m.open()
+
+  def close(): Unit = m.close()
+
+
+  def initFocus(): Unit = ui.initFocus()
 
   private def onSearch(): Unit =
     val text = ui.eInputText.value.trim
@@ -30,7 +38,7 @@ class PatientSelect(ui: PatientSelect.UI, onSelectCallback: Patient => Unit):
   private def formatPatient(patient: Patient): String =
     val id = String.format("%04d", patient.patientId)
     val name = patient.fullName()
-    s"(${id}) ${name}"
+    s"(${id}) ${name} ${patient.birthdayRep}生 ${patient.age}才 ${patient.sex.rep}性"
 
 object PatientSelect:
   class UI:
@@ -59,9 +67,12 @@ object PatientSelect:
       eCancelButton("キャンセル")
     )
 
+    def initFocus(): Unit = eInputText.focus()
+
   def open(onSelectCallback: Patient => Unit): Unit =
     val selector = new PatientSelect(new PatientSelect.UI(), onSelectCallback)
     selector.open()
+    selector.initFocus()
     
 
 
