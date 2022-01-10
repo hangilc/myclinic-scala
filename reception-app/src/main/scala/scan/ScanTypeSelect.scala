@@ -8,10 +8,10 @@ import dev.fujiwara.domq.{Selection}
 import scala.language.implicitConversions
 
 class ScanTypeSelect(ui: ScanTypeSelect.UI):
-  val onChangeCallbacks = new Callbacks[String]
+  var onChangeCallback: String => Unit = _ => ()
   ui.eScanTypeSelect(onchange := (() => 
     val t = ui.eScanTypeSelect.getValue
-    onChangeCallbacks.invoke(t)
+    onChangeCallback(t)
   ))
   def getValue: String = ui.eScanTypeSelect.getValue
   def setValue(value: String): Boolean = ui.eScanTypeSelect.setValue(value)

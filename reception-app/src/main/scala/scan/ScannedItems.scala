@@ -72,6 +72,9 @@ class ScannedItems(
   def adjustToPatientChanged(newPatientId: Option[Int]): Future[Unit] =
     items.map(_.adjust(newPatientId = newPatientId)).sequence_
 
+  def adjustToScanTypeChanged(newScanType: String): Future[Unit] =
+    items.map(_.adjust(newScanType = newScanType)).sequence_
+
   def adapt(patientId: Option[Int], deviceId: Option[String]): Unit =
     items.foreach(_.adapt(patientId, deviceId))
 

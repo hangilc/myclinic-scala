@@ -45,8 +45,10 @@ class ScanBox(val ui: ScanBox.UI)(using queue: ScanWorkQueue)
 
   queue.pinCallbacks.add(_ => adapt())
 
+  var scanType: String = scanTypeSelect.getValue
   def init: Future[Unit] =
     scanTypeSelect.setValue(ScanBox.defaultScanType)
+    scanType = scanTypeSelect.getValue
     for _ <- scannerSelect.init
     yield ()
     Future.successful(())
@@ -54,6 +56,7 @@ class ScanBox(val ui: ScanBox.UI)(using queue: ScanWorkQueue)
   def initFocus: Unit = patientSearch.focus()
 
   patientSearch.onSelectCallback = onPatientSelected
+  scanTypeSelect.onChangeCallback = onScanTypeSelected
 
   def selectedScanType: String = scanTypeSelect.getValue
   def selectedScanner: Option[String] = scannerSelect.selected
@@ -78,6 +81,20 @@ class ScanBox(val ui: ScanBox.UI)(using queue: ScanWorkQueue)
     ShowMessage.confirmIf(needConfirm, s"患者を${selected.fullName("")}に変更しますか？")(
       changePatient _
     )
+
+  private def onScanTypeSelected(selected: String): Unit =
+    def changeScanType(): Unit =
+      val task = ScanTask(() => 
+        for _ <- scannedItems.adjustToScanTypeChanged(selected)
+        yield scanType = selected
+      )
+      queue.append(task)
+    if scannedItems.size == 0 then
+      scanType = selected
+    else 
+      ShowMessage.confirm("文書の種類を変更しますか？")(changeScanType _)(
+        () => scanTypeSelect.setValue(scanType)
+      )
 
   def adaptUploadButton: Unit =
     val enable = scannedItems.hasUnUploadedImage && queue.isEmpty
