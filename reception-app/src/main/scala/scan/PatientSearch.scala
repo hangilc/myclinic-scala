@@ -28,7 +28,7 @@ object PatientSearch:
     )
 
 class PatientSearch(ui: PatientSearch.UI):
-  val onSelectCallbacks = new Callbacks[Patient]
+  var onSelectCallback: Patient => Unit = _ => ()
   private val searchResult = new Selection(ui.eSearchResult, onSelect)
   ui.eSearchForm(onsubmit := (onSearch _))
 
@@ -38,7 +38,7 @@ class PatientSearch(ui: PatientSearch.UI):
     searchResult.hide()
 
   private def onSelect(patient: Patient): Unit =
-    onSelectCallbacks.invoke(patient)
+    onSelectCallback(patient)
 
   private def onSearch(): Unit =
     val txt = ui.eSearchInput.value.trim

@@ -24,7 +24,8 @@ import cats.*
 import cats.syntax.all.*
 import dev.fujiwara.domq.Icons
 
-class ScanBox(val ui: ScanBox.UI)(using queue: ScanWorkQueue) extends ScanBox.Scope:
+class ScanBox(val ui: ScanBox.UI)(using queue: ScanWorkQueue)
+    extends ScanBox.Scope:
   given ScanBox.Scope = this
   val onClosedCallbacks = new Callbacks[Unit]
   val timestamp = ScanBox.makeTimeStamp
@@ -52,13 +53,12 @@ class ScanBox(val ui: ScanBox.UI)(using queue: ScanWorkQueue) extends ScanBox.Sc
 
   def initFocus: Unit = patientSearch.focus()
 
-  patientSearch.onSelectCallbacks.add(_ => patientSearch.hideResult)
+  patientSearch.onSelectCallback = onPatientSelected
 
   def selectedScanType: String = scanTypeSelect.getValue
   def selectedScanner: Option[String] = scannerSelect.selected
 
   var patient: Option[Patient] = None
-  patientSearch.onSelectCallbacks.add(newPatient => patient = Some(newPatient))
 
   scanProgress.onScannedCallback = savedFile =>
     scannedItems
@@ -67,9 +67,17 @@ class ScanBox(val ui: ScanBox.UI)(using queue: ScanWorkQueue) extends ScanBox.Sc
         Api.deleteScannedFile(savedFile)
       }
 
-  patientSearch.onSelectCallbacks.add(patientDisp.setPatient(_))
-
-  patientSearch.onSelectCallbacks.add(_ => adaptScan)
+  private def onPatientSelected(selected: Patient): Unit =
+    def changePatient(): Unit =
+      patientSearch.hideResult
+      patient = Some(selected)
+      patientDisp.setPatient(selected)
+      val task = ScanTask(() => scannedItems.adjustToPatientChanged(Some(selected.patientId)))
+      queue.append(task)
+    def needConfirm: Boolean = patient.isDefined && scannedItems.size > 0
+    ShowMessage.confirmIf(needConfirm, s"患者を${selected.fullName("")}に変更しますか？")(
+      changePatient _
+    )
 
   def adaptUploadButton: Unit =
     val enable = scannedItems.hasUnUploadedImage && queue.isEmpty
@@ -114,8 +122,8 @@ class ScanBox(val ui: ScanBox.UI)(using queue: ScanWorkQueue) extends ScanBox.Sc
 
   def adapt(): Unit =
     adaptScan
-    adaptUploadButton
     scannedItems.adapt(patient.map(_.patientId), selectedScanner)
+    adaptUploadButton
 
   adapt()
 

@@ -60,7 +60,7 @@ object ScannedItem:
     )
 
   var serialStore = 1
-  def serial: Int = 
+  def serial: Int =
     val ser = serialStore
     serialStore += 1
     ser
@@ -68,8 +68,8 @@ object ScannedItem:
 class ScannedItem(
     val ui: ScannedItem.UI,
     var savedFile: String,
-    patientId: Option[Int],
-    scanType: String,
+    var patientId: Option[Int],
+    var scanType: String,
     timestamp: String,
     var index: Int,
     var total: Int
@@ -205,7 +205,10 @@ class ScannedItem(
 
   private def ensureRemoteDeleted(): Future[Unit] =
     if isUploaded then
-      Api.deletePatientImage(patientId.get, uploadFile).map(_ => ())
+      for _ <- Api.deletePatientImage(patientId.get, uploadFile).map(_ => ())
+      yield
+        ui.eIconWrapper.clear()
+        uploadedFlag = false
     else Future.successful(())
 
   private def deleteItem(): Future[Unit] =
@@ -229,30 +232,61 @@ class ScannedItem(
     onclick := (onDeleteClick _)
   )
 
-  def adjustToTotalChanged(newTotal: Int): Future[Unit] =
-    adjustToIndexChanged(index, newTotal)
+  // def adjustToTotalChanged(newTotal: Int): Future[Unit] =
+  //   adjustToIndexChanged(index, newTotal)
 
-  def adjustToSamePatientUploadChanged(newUploadFile: String): Future[Unit] =
-    if isUploaded then
-      Api.renamePatientImage(patientId.get, uploadFile, newUploadFile).map(_ => ())
-    else 
-      Future.successful(())
+  // def adjustToSamePatientUploadChanged(newUploadFile: String): Future[Unit] =
+  //   if isUploaded then
+  //     Api
+  //       .renamePatientImage(patientId.get, uploadFile, newUploadFile)
+  //       .map(_ => ())
+  //   else Future.successful(())
 
-  def adjustToIndexChanged(newIndex: Int, newTotal: Int): Future[Unit] =
+  // def adjustToIndexChanged(newIndex: Int, newTotal: Int): Future[Unit] =
+  //   val newUploadFile: String = ScannedItems.createUploadFileName(
+  //     patientId,
+  //     scanType,
+  //     timestamp,
+  //     newIndex,
+  //     newTotal,
+  //     None //Some(serialId)
+  //   )
+  //   if newUploadFile != uploadFile then
+  //     for _ <- adjustToSamePatientUploadChanged(newUploadFile)
+  //     yield
+  //       uploadFile = newUploadFile
+  //       ui.eUploadFile.innerText = newUploadFile
+  //       index = newIndex
+  //       total = newTotal
+  //   else Future.successful(())
+
+  def adjust(
+      newPatientId: Option[Int] = patientId,
+      newScanType: String = scanType,
+      newIndex: Int = index,
+      newTotal: Int = total
+  ): Future[Unit] =
     val newUploadFile: String = ScannedItems.createUploadFileName(
-      patientId,
-      scanType,
+      newPatientId,
+      newScanType,
       timestamp,
       newIndex,
       newTotal,
       None //Some(serialId)
     )
     if newUploadFile != uploadFile then
-      for 
-         _ <- adjustToSamePatientUploadChanged(newUploadFile)
+      for
+        _ <-
+          if (newPatientId != patientId) then ensureRemoteDeleted()
+          else Future.successful(())
+        _ <- if isUploaded then
+          Api.renamePatientImage(patientId.get, uploadFile, newUploadFile)
+          else Future.successful(())
       yield
         uploadFile = newUploadFile
         ui.eUploadFile.innerText = newUploadFile
+        patientId = newPatientId
+        scanType = newScanType
         index = newIndex
         total = newTotal
     else Future.successful(())
@@ -263,4 +297,3 @@ class ScannedItem(
     ui.ePreviewLink.show(queueIsEmpty)
     ui.eRescanLink.show(queueIsEmpty && canScan)
     ui.eDeleteLink.show(queueIsEmpty)
-

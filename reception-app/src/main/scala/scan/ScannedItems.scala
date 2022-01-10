@@ -21,6 +21,7 @@ class ScannedItems(
 )(using ScanWorkQueue, ScanBox.Scope):
   val ele = ui.ele
   var items: List[ScannedItem] = List.empty
+  def size: Int = items.size
 
   def add(
       savedFile: String,
@@ -36,7 +37,8 @@ class ScannedItems(
       items.size + 1
     )
     item.onDeletedCallbacks.add(index => onItemDeleted(index - 1))
-    for _ <- items.map(_.adjustToTotalChanged(items.size + 1)).sequence_
+    for 
+      _ <- if items.size == 1 then items(0).adjust(newTotal = 2) else Future.successful(())
     yield
       items = items :+ item
       ele(item.ele)
@@ -60,12 +62,15 @@ class ScannedItems(
   private def onItemDeleted(i: Int): Future[Unit] =
     val total = items.size - 1
     List.from(items.size - 1 until i by -1)
-      .map(j => items(j).adjustToIndexChanged(j, total))
+      .map(j => items(j).adjust(newIndex = j, newTotal = total))
       .sequence_
       .map(_ => 
         items = items.patch(i, List.empty, 1)
-        if items.size == 1 then items(0).adjustToIndexChanged(1, 1)
+        if items.size == 1 then items(0).adjust(newIndex = 1, newTotal = 1)
       )
+
+  def adjustToPatientChanged(newPatientId: Option[Int]): Future[Unit] =
+    items.map(_.adjust(newPatientId = newPatientId)).sequence_
 
   def adapt(patientId: Option[Int], deviceId: Option[String]): Unit =
     items.foreach(_.adapt(patientId, deviceId))

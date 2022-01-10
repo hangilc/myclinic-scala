@@ -77,6 +77,9 @@ object ShowMessage:
     noButton(onclick := (() => m.close(false)))
     m.open()
 
+  def confirmIf(pred: Boolean, message: String)(f: () => Unit): Unit =
+    if pred then confirm(message)(f) else f()
+
   def getString(
       title: String,
       message: String,
