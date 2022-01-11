@@ -336,6 +336,13 @@ button {
   margin-bottom: 10px;
 }
 
+#main .scan .patient-images {
+  border: 1px solid var(--success-color);
+  padding: 10px;
+  border-radius: 4px; 
+  margin-bottom: 10px;
+}
+
 #main .scan .scan-box .search-area {
   display: flex;
   align-items: center;

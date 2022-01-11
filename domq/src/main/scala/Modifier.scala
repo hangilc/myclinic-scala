@@ -146,6 +146,7 @@ object Modifiers:
   val showHide = Assign[HTMLElement, Boolean]((e, b) => 
     if b then e(displayDefault) else e(displayNone)  
   )
+  val fontWeight = AssignCss((s, v) => s.fontWeight = v)
 
   val adjustForFlex = Modifier[HTMLElement](e => {
     e.setAttribute("size", "1")

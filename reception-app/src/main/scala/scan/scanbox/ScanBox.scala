@@ -23,7 +23,7 @@ import scala.util.Failure
 import cats.*
 import cats.syntax.all.*
 import dev.fujiwara.domq.Icons
-import dev.myclinic.scala.web.reception.scan.{Callbacks, PatientSearch}
+import dev.myclinic.scala.web.reception.scan.{Callbacks, PatientSearch, PatientDisp}
 
 class ScanBox(val ui: ScanBox.UI)(using queue: ScanWorkQueue)
     extends ScanBox.Scope:

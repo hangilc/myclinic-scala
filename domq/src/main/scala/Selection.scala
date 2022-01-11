@@ -22,6 +22,13 @@ class Selection[T](
       case (label, value) => ui.ele(SelectionItem(label, value).ele)
     }
 
+  def addItems(items: List[T], format: T => String): Unit =
+    addAll(items.map(t => (format(t), t)))
+
+  def setItems(items: List[T], format: T => String): Unit =
+    clear()
+    addItems(items, format)
+
   def clear(): Unit =
     ui.ele.clear()
 

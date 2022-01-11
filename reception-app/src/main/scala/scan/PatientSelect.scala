@@ -5,16 +5,20 @@ import dev.myclinic.scala.model.{Patient}
 import dev.myclinic.scala.webclient.Api
 import scala.concurrent.ExecutionContext.Implicits.global
 import dev.myclinic.scala.apputil.ModelExt.*
+import java.time.LocalDate
 
 class PatientSelect(ui: PatientSelect.UI, onSelectCallback: Patient => Unit):
   val m = Modal("患者選択", ui.body, ui.commands)
 
+  var selected: Option[Patient] = None
   val result = Selection.create[Patient](ui.selectionUI, patient =>
-    m.close()
-    onSelectCallback(patient)
+    selected = Some(patient)
+    ui.eSelectButton.enable()
   )
+  ui.eSelectButton(onclick := (onSelectClick _))
   ui.eCancelButton(onclick := (() => m.close()))
   ui.eSearchForm(onsubmit := (onSearch _))
+  ui.eTodaysPatientsLink(onclick := (onTodaysPatients _))
 
   def open(): Unit = m.open()
 
@@ -23,17 +27,31 @@ class PatientSelect(ui: PatientSelect.UI, onSelectCallback: Patient => Unit):
 
   def initFocus(): Unit = ui.initFocus()
 
+  private def onSelectClick(): Unit =
+    m.close()
+    onSelectCallback(selected.get)
+
   private def onSearch(): Unit =
     val text = ui.eInputText.value.trim
     if !text.isEmpty then
       for
         patients <- Api.searchPatient(text)
       yield 
-        result.clear()
-        patients.foreach(patient =>
-          val label = formatPatient(patient)
-          result.add(label, patient)
-        )
+        result.setItems(patients, formatPatient _)
+        // result.clear()
+        // patients.foreach(patient =>
+        //   val label = formatPatient(patient)
+        //   result.add(label, patient)
+        // )
+
+  private def onTodaysPatients(): Unit =
+    for
+      visits <- Api.listVisitByDate(LocalDate.now())
+      patientMap <- Api.batchGetPatient(visits.map(_.patientId))
+    yield
+      val patients = visits.map(visit => patientMap(visit.patientId))
+      result.setItems(patients, formatPatient _)
+
 
   private def formatPatient(patient: Patient): String =
     val id = String.format("%04d", patient.patientId)
@@ -63,7 +81,7 @@ object PatientSelect:
       )
     )
     val commands = div(
-      eSelectButton("選択"),
+      eSelectButton("選択", disabled := true),
       eCancelButton("キャンセル")
     )
 

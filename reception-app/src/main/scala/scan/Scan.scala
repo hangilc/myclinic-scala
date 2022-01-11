@@ -12,6 +12,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Success
 import scala.util.Failure
 import dev.myclinic.scala.web.reception.scan.scanbox.ScanBox
+import dev.myclinic.scala.web.reception.scan.patientimages.PatientImages
 
 class Scan(ui: Scan.UI) extends SideMenuService:
   ui.eNewScanButton(onclick := (newScan _))
@@ -33,7 +34,10 @@ class Scan(ui: Scan.UI) extends SideMenuService:
   private def newScan(): Unit = addBox()
 
   private def patientImages(): Unit = 
-    PatientSelect.open(patient => println(("patient", patient)))
+    PatientSelect.open(patient => 
+      val pi = PatientImages(patient)
+      ui.eScannedBoxes.prepend(pi.ele)
+    )
 
   private def countBoxes: Int =
     ui.eScannedBoxes.qSelectorAll(s".${ScanBox.cssClassName}").size
