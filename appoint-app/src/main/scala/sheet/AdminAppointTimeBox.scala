@@ -31,7 +31,7 @@ class AdminAppointTimeBox(
   ele(oncontextmenu := (onContextMenu _))
 
   def onContextMenu(event: MouseEvent): Unit =
-    event.preventDefault
+    event.preventDefault()
     var menu: List[(String, () => Unit)] = List(
       "編集" -> doConvert,
       "結合" -> doCombine,

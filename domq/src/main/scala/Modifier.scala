@@ -179,8 +179,8 @@ object Modifiers:
     override def :=(h: Event => Unit)= Modifier[HTMLFormElement](
       e => e.addEventListener("submit",
         (ev: Event) => {
-          ev.preventDefault
-          ev.stopPropagation
+          ev.preventDefault()
+          ev.stopPropagation()
           h(ev)
         }
       )

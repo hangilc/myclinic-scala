@@ -146,8 +146,7 @@ lazy val webclient = project
     name := "webclient",
     scalaJSUseMainModuleInitializer := false,
     libraryDependencies ++= Seq(
-      ("org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion)
-        .cross(CrossVersion.for3Use2_13),
+      "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion,
       "io.circe" %%% "circe-core" % circeVersion,
       "io.circe" %%% "circe-generic" % circeVersion,
       "io.circe" %%% "circe-parser" % circeVersion
@@ -160,8 +159,7 @@ lazy val domq = project
   .settings(
     name := "domq",
     libraryDependencies ++= Seq(
-      ("org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion)
-        .cross(CrossVersion.for3Use2_13)
+      "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion,
     )
   )
 
@@ -172,8 +170,7 @@ lazy val appbase = project
   .settings(
     name := "myclinic-appbase",
     libraryDependencies ++= Seq(
-      ("org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion)
-        .cross(CrossVersion.for3Use2_13),
+      "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion,
       "org.typelevel" %%% "cats-core" % catsVersion
     )
   )
@@ -189,8 +186,7 @@ lazy val appointApp = project
     Compile / fullLinkJS / scalaJSLinkerOutputDirectory :=
       (rootDir.value / "server" / "web" / "appoint" / "scalajs"),
     libraryDependencies ++= Seq(
-      ("org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion)
-        .cross(CrossVersion.for3Use2_13)
+      "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion,
     )
   )
 
@@ -221,8 +217,7 @@ lazy val receptionApp = project
     Compile / fullLinkJS / scalaJSLinkerOutputDirectory :=
       (rootDir.value / "server" / "web" / "reception" / "scalajs"),
     libraryDependencies ++= Seq(
-      ("org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion)
-        .cross(CrossVersion.for3Use2_13)
+      "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion,
     )
   )
 
@@ -341,8 +336,7 @@ lazy val dateinput = project
     name := "dateinput",
     scalaJSUseMainModuleInitializer := false,
     libraryDependencies ++= Seq(
-      ("org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion)
-        .cross(CrossVersion.for3Use2_13),
+      "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion,
       "org.typelevel" %%% "cats-core" % catsVersion
     )
   )

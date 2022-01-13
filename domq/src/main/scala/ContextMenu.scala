@@ -55,8 +55,8 @@ class ContextMenu(zIndex: Int = Modal.zIndexDefault):
   def open(event: MouseEvent): Unit =
     document.body(
       screen(onclick := ((e: MouseEvent) => {
-        e.preventDefault
-        e.stopPropagation
+        e.preventDefault()
+        e.stopPropagation()
         close()
       })),
       menu
@@ -99,7 +99,7 @@ object ContextMenu:
           label,
           href := "",
           onclick := ((e: Event) => {
-            e.preventDefault
+            e.preventDefault()
             m.close()
             f()
           })

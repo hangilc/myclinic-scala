@@ -89,7 +89,7 @@ case class AppointColumn(
     boxes.foldLeft(0)((acc, ele) => acc + ele.slots.size)
 
   def onContextMenu(event: MouseEvent): Unit =
-    event.preventDefault
+    event.preventDefault()
     var menu: List[(String, () => Unit)] = List.empty
     if totalAppoints == 0 then
       menu = menu :+ ("予約枠全削除" -> (doDeleteAllAppointTimes _))

@@ -139,7 +139,7 @@ class ScannedItem(
           new Blob(
             js.Array(data),
             new BlobPropertyBag {
-              override var `type`: js.UndefOr[String] = "image/jpeg"
+              override val `type`: js.UndefOr[String] = "image/jpeg"
             }
           )
         )

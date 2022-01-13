@@ -50,8 +50,8 @@ class PatientManagement() extends SideMenuService:
   private var newPatientBlock: Option[NewPatientBlock] = None
 
   private def onNewPatient(event: MouseEvent): Unit =
-    event.stopPropagation
-    event.preventDefault
+    event.stopPropagation()
+    event.preventDefault()
     val block: NewPatientBlock = newPatientBlock.getOrElse({
       val b = NewPatientBlock(bb => {
         bb.ele.remove()
