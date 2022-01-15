@@ -36,7 +36,9 @@ class Scan(ui: Scan.UI) extends SideMenuService:
   private def patientImages(): Unit = 
     PatientSelect.open(patient => 
       val pi = PatientImages(patient)
-      ui.eScannedBoxes.prepend(pi.ele)
+      for 
+        _ <- pi.init()
+      yield ui.eScannedBoxes.prepend(pi.ele)
     )
 
   private def countBoxes: Int =
