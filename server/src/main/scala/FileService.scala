@@ -20,8 +20,7 @@ import fs2.io.file.Path
 import fs2.io.file.CopyFlags
 import fs2.io.file.CopyFlag
 import dev.myclinic.scala.config.Config
-import org.http4s.Header.Raw
-import org.typelevel.ci.CIString
+import org.http4s.headers.*
 
 object FileService extends DateTimeQueryParam with Publisher:
   object intPatientId extends QueryParamDecoderMatcher[Int]("patient-id")
@@ -76,9 +75,11 @@ object FileService extends DateTimeQueryParam with Publisher:
     case GET -> Root / "get-patient-image" :? intPatientId(patientId) +& strFileName(fileName) =>
       val dir = Config.paperScanDir(patientId)
       val loc = Path(new java.io.File(dir, fileName).getPath)
+      val mediaType: MediaType = 
+        if fileName.endsWith(".pdf") then MediaType.application.pdf
+        else MediaType.image.jpeg
       val op =
         fs2.io.file.Files[IO].readAll(loc)
-      Ok(op, Headers(Raw(CIString("content-type"), "image/jpeg")))
-      
+      Ok(op, `Content-Type`(mediaType))
 
   }

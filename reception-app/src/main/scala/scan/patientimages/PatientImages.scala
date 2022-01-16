@@ -5,8 +5,6 @@ import dev.myclinic.scala.model.{Patient}
 import dev.myclinic.scala.web.reception.scan.{PatientDisp}
 import scala.concurrent.Future
 import dev.myclinic.scala.webclient.Api
-//import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
-
 import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
 
 class PatientImages(ui: PatientImages.UI, patient: Patient):
@@ -25,7 +23,12 @@ class PatientImages(ui: PatientImages.UI, patient: Patient):
       files.foreach(imageList.add(_))
 
   def onSelect(file: String): Unit =
-    ???
+    val url = s"/api/get-patient-image?patient-id=${patient.patientId}&file-name=${file}"
+    if file.endsWith(".pdf") then
+      org.scalajs.dom.window.open(url, "_blank")
+    else
+      val img = dev.fujiwara.domq.all.img(attr("src") := url)
+      ui.eImageDisp.setChildren(img)
 
 object PatientImages:
   class ImageItemUI:
