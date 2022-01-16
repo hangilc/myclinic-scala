@@ -245,5 +245,5 @@ object MiscApi extends ApiBase:
         Params("patient-id" -> patientId, "file-name" -> fileName)
       )
 
-    def listPatientImage(patientId: Int): Future[List[String]] =
+    def listPatientImage(patientId: Int): Future[List[FileInfo]] =
       get("list-patient-image", Params("patient-id" -> patientId))

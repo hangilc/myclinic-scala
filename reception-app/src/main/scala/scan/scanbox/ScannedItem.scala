@@ -152,8 +152,8 @@ class ScannedItem(
         }
         image.src = oURL
         val scale = 1.5
-        image.width = (210 * 1.5).toInt
-        image.height = (297 * 1.5).toInt
+        image.width = (210 * scale).toInt
+        image.height = (297 * scale).toInt
         ui.ePreviewImageWrapper.setChildren(image)
         ui.ePreview(displayDefault)
     )

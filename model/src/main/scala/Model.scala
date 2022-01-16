@@ -10,6 +10,7 @@ import io.circe.*
 import io.circe.syntax.*
 import io.circe.parser.decode
 import io.circe.generic.semiauto._
+import scala.concurrent.duration.FiniteDuration
 
 case class ValidUpto(value: Option[LocalDate])
 
@@ -366,3 +367,14 @@ case class ScannerDevice(
   name: String,
   description: String
 )
+
+case class FileInfo(
+  name: String,
+  createdAt: LocalDateTime,
+  size: Long
+)
+
+object FileInfo:
+  val epoch: LocalDateTime = LocalDateTime.of(1970, 1, 1, 0, 0, 0)
+  def fromTimestamp(ts: FiniteDuration): LocalDateTime =
+    epoch.plusSeconds(ts.toSeconds)

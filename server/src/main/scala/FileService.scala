@@ -21,6 +21,8 @@ import fs2.io.file.CopyFlags
 import fs2.io.file.CopyFlag
 import dev.myclinic.scala.config.Config
 import org.http4s.headers.*
+import dev.myclinic.scala.model.FileInfo
+import dev.myclinic.scala.model.jsoncodec.Implicits.{given}
 
 object FileService extends DateTimeQueryParam with Publisher:
   object intPatientId extends QueryParamDecoderMatcher[Int]("patient-id")
@@ -69,7 +71,12 @@ object FileService extends DateTimeQueryParam with Publisher:
       val dir = Config.paperScanDir(patientId)
       val loc = Path(new java.io.File(dir).getPath)
       val op =
-        fs2.io.file.Files[IO].list(loc).map(_.fileName.toString).compile.toList
+        fs2.io.file.Files[IO].list(loc).evalMap(path => 
+          fs2.io.file.Files[IO].getBasicFileAttributes(path).map(attr => 
+            val ctime = FileInfo.fromTimestamp(attr.creationTime)
+            FileInfo(path.fileName.toString, ctime, attr.size)
+          )
+        ).compile.toList
       Ok(op)
       
     case GET -> Root / "get-patient-image" :? intPatientId(patientId) +& strFileName(fileName) =>

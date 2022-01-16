@@ -336,7 +336,7 @@ button {
   margin-bottom: 10px;
 }
 
-#main .scan .patient-images {
+#main .scan .scan-patient-images {
   border: 1px solid var(--success-color);
   padding: 10px;
   border-radius: 4px; 
@@ -425,4 +425,22 @@ button {
 
 #main .scan .scan-box .scanned .upload-button {
   margin-top: 10px;
+}
+
+.scan-patient-images-list {
+  max-height: 400px;
+  overflow: auto;
+}
+
+.scan-patient-images img {
+  width: 315px;
+  height: 446px;
+}
+
+.scan-patient-images-item {
+  cursor: pointer;
+}
+
+.scan-patient-images-item.selected {
+  font-weight: bold;
 }

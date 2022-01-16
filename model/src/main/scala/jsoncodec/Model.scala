@@ -181,4 +181,7 @@ trait Model extends DateTime with WaitStateCodec:
   given Encoder[ScannerDevice] = deriveEncoder[ScannerDevice]
   given Decoder[ScannerDevice] = deriveDecoder[ScannerDevice]
 
+  given Encoder[FileInfo] = deriveEncoder[FileInfo]
+  given Decoder[FileInfo] = deriveDecoder[FileInfo]
+
 
