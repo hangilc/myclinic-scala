@@ -1,7 +1,8 @@
 package dev.myclinic.scala.web.reception.scan
 
 import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
+import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
+
 
 class Callbacks[T]:
   type F = T => Unit

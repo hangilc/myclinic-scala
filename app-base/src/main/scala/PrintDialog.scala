@@ -12,7 +12,8 @@ import io.circe.*
 import io.circe.syntax.*
 import dev.myclinic.scala.webclient.Api
 import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
+import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
+
 import scala.util.Success
 import scala.util.Failure
 import org.scalajs.dom.HTMLSelectElement

@@ -10,7 +10,8 @@ import dev.fujiwara.domq.{Selection, ErrorBox, ShowMessage, CustomEvent}
 import dev.myclinic.scala.model.{Patient, Sex, ScannerDevice}
 import java.time.LocalDate
 import dev.myclinic.scala.webclient.Api
-import scala.concurrent.ExecutionContext.Implicits.global
+import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
+
 import scala.concurrent.Future
 import java.time.LocalDateTime
 import org.scalajs.dom.URL

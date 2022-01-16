@@ -9,7 +9,8 @@ import dev.fujiwara.domq.{Geometry, Icons, FloatingElement, Screen}
 import scala.language.implicitConversions
 import org.scalajs.dom.MouseEvent
 import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
+import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
+
 import scala.util.Failure
 import scala.{util => ju}
 import scala.util.Success

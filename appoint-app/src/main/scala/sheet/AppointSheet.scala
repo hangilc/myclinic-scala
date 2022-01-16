@@ -10,7 +10,8 @@ import dev.myclinic.scala.util.DateUtil
 import math.Ordered.orderingToOrdered
 import org.scalajs.dom.HTMLElement
 import java.time.LocalDate
-import scala.concurrent.ExecutionContext.Implicits.global
+import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
+
 import scala.util.Failure
 import scala.util.Success
 import scala.concurrent.Future

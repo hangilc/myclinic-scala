@@ -8,7 +8,8 @@ import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.{Icons, ShowMessage}
 import dev.myclinic.scala.webclient.Api
 import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
+import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
+
 import scala.util.{Success, Failure}
 import scala.scalajs.js
 import dev.myclinic.scala.model.Patient

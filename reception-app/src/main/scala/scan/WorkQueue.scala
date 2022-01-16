@@ -2,7 +2,8 @@ package dev.myclinic.scala.web.reception.scan
 
 import scala.concurrent.Future
 import scala.util.{Success, Failure}
-import scala.concurrent.ExecutionContext.Implicits.global
+import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
+
 
 trait WorkQueueTask:
   val run: () => Future[Unit]

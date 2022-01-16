@@ -13,7 +13,8 @@ import scala.language.implicitConversions
 import org.scalajs.dom.HTMLElement
 import org.scalajs.dom.{document, window}
 import dev.myclinic.scala.webclient.Api
-import scala.concurrent.ExecutionContext.Implicits.global
+import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
+
 import scala.concurrent.Future
 import dev.myclinic.scala.validator.AppointTimeValidator
 import dev.myclinic.scala.web.appoint.Misc

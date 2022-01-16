@@ -4,7 +4,8 @@ import dev.myclinic.scala.model.*
 import dev.myclinic.scala.model.jsoncodec.given
 import scala.concurrent.Future
 import dev.myclinic.scala.web.appoint.Misc
-import concurrent.ExecutionContext.Implicits.global
+import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
+
 import dev.myclinic.scala.webclient.Api
 import java.time.LocalDateTime
 import cats._

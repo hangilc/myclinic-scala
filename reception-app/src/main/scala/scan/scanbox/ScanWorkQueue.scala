@@ -1,7 +1,8 @@
 package dev.myclinic.scala.web.reception.scan.scanbox
 
 import dev.myclinic.scala.webclient.Api
-import scala.concurrent.ExecutionContext.Implicits.global
+import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
+
 import scala.concurrent.Future
 import dev.myclinic.scala.web.reception.scan.{WorkQueue, WorkQueueTask, Callbacks}
 

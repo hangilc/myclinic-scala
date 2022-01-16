@@ -10,7 +10,8 @@ import dev.myclinic.scala.web.appbase.{SideMenu, EventPublishers}
 import dev.myclinic.scala.model.{HotlineCreated, Patient}
 import dev.myclinic.scala.webclient.Api
 import org.scalajs.dom.{HTMLElement, MouseEvent}
-import scala.concurrent.ExecutionContext.Implicits.global
+import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
+
 import scala.util.Success
 import scala.util.Failure
 import scala.concurrent.Future

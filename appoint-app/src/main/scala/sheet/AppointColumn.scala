@@ -13,7 +13,8 @@ import dev.myclinic.scala.web.appoint.sheet.Types.SortedElement
 import org.scalajs.dom.{HTMLElement, MouseEvent}
 import cats.syntax.all.*
 import dev.myclinic.scala.webclient.Api
-import concurrent.ExecutionContext.Implicits.global
+import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
+
 import dev.myclinic.scala.clinicop.*
 import scala.util.Success
 import scala.util.Failure

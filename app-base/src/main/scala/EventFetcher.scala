@@ -2,7 +2,8 @@ package dev.myclinic.scala.web.appbase
 
 import dev.myclinic.scala.model.{AppEvent, AppModelEvent}
 import org.scalajs.dom
-import concurrent.ExecutionContext.Implicits.global
+import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
+
 import scala.concurrent.Future
 import scala.util.Success
 import scala.util.Failure

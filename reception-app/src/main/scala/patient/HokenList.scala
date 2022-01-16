@@ -12,7 +12,8 @@ import dev.fujiwara.kanjidate.KanjiDate
 import dev.myclinic.scala.model.*
 import java.time.LocalDate
 import dev.myclinic.scala.webclient.Api
-import scala.concurrent.ExecutionContext.Implicits.global
+import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
+
 import scala.util.{Success, Failure}
 import scala.concurrent.Future
 import org.scalajs.dom.Event

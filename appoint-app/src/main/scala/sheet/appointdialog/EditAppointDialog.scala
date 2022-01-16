@@ -12,7 +12,8 @@ import dev.myclinic.scala.webclient.Api
 import org.scalajs.dom.MouseEvent
 import scala.util.Success
 import scala.util.Failure
-import scala.concurrent.ExecutionContext.Implicits.global
+import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
+
 import dev.myclinic.scala.web.appoint.AppointHistoryWindow
 
 class EditAppointDialog(val appoint: Appoint, appointTime: AppointTime):

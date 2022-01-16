@@ -8,11 +8,12 @@ ThisBuild / resolvers += Resolver.mavenLocal
 
 val mysqlVersion = "6.0.6"
 val http4sVersion = "0.23.3"
-val doobieVersion = "1.0.0-M5"
+val doobieVersion = "1.0.0-RC2"
 val circeVersion = "0.14.1"
 val scalaJavaTimeVersion = "2.3.0"
 val scalaJSDomVersion = "2.1.0"
-val catsVersion = "2.6.1"
+val catsVersion = "2.7.0"
+val macrotaskExecutorVersion = "1.0.0"
 
 val jacksonVersion = "2.12.5"
 val slf4jVersion = "1.7.25"
@@ -160,6 +161,7 @@ lazy val domq = project
     name := "domq",
     libraryDependencies ++= Seq(
       "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion,
+      "org.scala-js" %%% "scala-js-macrotask-executor" % macrotaskExecutorVersion,
     )
   )
 
@@ -171,7 +173,8 @@ lazy val appbase = project
     name := "myclinic-appbase",
     libraryDependencies ++= Seq(
       "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion,
-      "org.typelevel" %%% "cats-core" % catsVersion
+      "org.typelevel" %%% "cats-core" % catsVersion,
+      "org.scala-js" %%% "scala-js-macrotask-executor" % macrotaskExecutorVersion,
     )
   )
 
@@ -187,6 +190,7 @@ lazy val appointApp = project
       (rootDir.value / "server" / "web" / "appoint" / "scalajs"),
     libraryDependencies ++= Seq(
       "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion,
+      "org.scala-js" %%% "scala-js-macrotask-executor" % macrotaskExecutorVersion,
     )
   )
 
@@ -218,6 +222,7 @@ lazy val receptionApp = project
       (rootDir.value / "server" / "web" / "reception" / "scalajs"),
     libraryDependencies ++= Seq(
       "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion,
+      "org.scala-js" %%% "scala-js-macrotask-executor" % macrotaskExecutorVersion,
     )
   )
 

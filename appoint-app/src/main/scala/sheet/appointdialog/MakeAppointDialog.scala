@@ -16,7 +16,8 @@ import dev.myclinic.scala.validator.AppointValidator
 import dev.myclinic.scala.validator.AppointValidator.given
 import cats.data.Validated.Valid
 import cats.data.Validated.Invalid
-import concurrent.ExecutionContext.Implicits.global
+import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
+
 import org.scalajs.dom.MouseEvent
 import scala.concurrent.Future
 import scala.util.Success

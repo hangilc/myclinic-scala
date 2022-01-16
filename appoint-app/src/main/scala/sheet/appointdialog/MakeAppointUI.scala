@@ -9,7 +9,8 @@ import scala.language.implicitConversions
 import dev.myclinic.scala.model.{AppointTime, Patient, Appoint}
 import dev.myclinic.scala.web.appoint.Misc
 import dev.myclinic.scala.webclient.Api
-import scala.concurrent.ExecutionContext.Implicits.global
+import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
+
 import dev.myclinic.scala.validator.AppointValidator
 import dev.myclinic.scala.validator.AppointValidator.given
 import cats.data.Validated.Valid

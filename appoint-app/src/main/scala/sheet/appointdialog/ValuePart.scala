@@ -8,7 +8,8 @@ import dev.fujiwara.domq.{ErrorBox}
 import scala.language.implicitConversions
 import scala.util.{Success, Failure}
 import scala.concurrent.Future
-import concurrent.ExecutionContext.Implicits.global
+import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
+
 
 abstract class ValuePart:
   val main: HTMLElement

@@ -8,7 +8,8 @@ import scala.language.implicitConversions
 import dev.myclinic.scala.model.Patient
 import org.scalajs.dom.{HTMLInputElement, HTMLElement}
 import dev.myclinic.scala.webclient.Api
-import scala.concurrent.ExecutionContext.Implicits.global
+import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
+
 
 object PatientSearch:
   class UI:

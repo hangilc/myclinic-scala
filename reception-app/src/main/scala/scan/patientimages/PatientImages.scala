@@ -5,7 +5,9 @@ import dev.myclinic.scala.model.{Patient}
 import dev.myclinic.scala.web.reception.scan.{PatientDisp}
 import scala.concurrent.Future
 import dev.myclinic.scala.webclient.Api
-import scala.concurrent.ExecutionContext.Implicits.global
+//import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
+
+import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
 
 class PatientImages(ui: PatientImages.UI, patient: Patient):
   import PatientImages.ImageList
@@ -23,9 +25,7 @@ class PatientImages(ui: PatientImages.UI, patient: Patient):
       files.foreach(imageList.add(_))
 
   def onSelect(file: String): Unit =
-    for
-      data <- Api.patientIma
-
+    ???
 
 object PatientImages:
   class ImageItemUI:

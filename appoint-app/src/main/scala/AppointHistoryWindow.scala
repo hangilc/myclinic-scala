@@ -10,7 +10,8 @@ import dev.myclinic.scala.model.{AppEvent, AppModelEvent}
 import dev.myclinic.scala.web.appoint.history.History
 import org.scalajs.dom.HTMLElement
 import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
+import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
+
 
 object AppointHistoryWindow:
   def open(events: List[AppEvent], zIndex: Option[Int] = None): Future[Unit] =

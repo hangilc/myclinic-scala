@@ -3,7 +3,8 @@ package dev.myclinic.scala.web.reception.scan
 import dev.fujiwara.domq.all.{*, given}
 import dev.myclinic.scala.model.{Patient}
 import dev.myclinic.scala.webclient.Api
-import scala.concurrent.ExecutionContext.Implicits.global
+import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
+
 import dev.myclinic.scala.apputil.ModelExt.*
 import java.time.LocalDate
 

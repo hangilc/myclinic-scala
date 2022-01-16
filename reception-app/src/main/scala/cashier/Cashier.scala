@@ -11,7 +11,8 @@ import dev.fujiwara.kanjidate.KanjiDate
 import dev.myclinic.scala.util.DateUtil
 import dev.myclinic.scala.webclient.Api
 import org.scalajs.dom.{HTMLElement, MouseEvent}
-import scala.concurrent.ExecutionContext.Implicits.global
+import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
+
 import scala.util.Success
 import scala.util.Failure
 import scala.concurrent.Future

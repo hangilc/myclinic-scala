@@ -8,7 +8,8 @@ import dev.myclinic.scala.util.DateUtil
 import org.scalajs.dom
 import org.scalajs.dom.document
 import java.time.LocalDate
-import concurrent.ExecutionContext.Implicits.global
+import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
+
 import scala.concurrent.Future
 import scala.scalajs.js
 import scala.util.Success

@@ -16,7 +16,8 @@ import org.http4s.websocket.WebSocketFrame
 import org.http4s.websocket.WebSocketFrame.Text
 import javax.net.ssl.SSLContext
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
+
 import java.nio.file.Files
 import cats.data.OptionT
 object Main extends IOApp:

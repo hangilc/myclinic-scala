@@ -8,7 +8,8 @@ import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.{ShowMessage}
 import scala.language.implicitConversions
 import dev.myclinic.scala.webclient.Api
-import scala.concurrent.ExecutionContext.Implicits.global
+import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
+
 import scala.util.Success
 import scala.util.Failure
 import dev.myclinic.scala.model.{Hotline, AppModelEvent}

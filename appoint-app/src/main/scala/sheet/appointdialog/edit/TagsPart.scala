@@ -7,7 +7,8 @@ import dev.fujiwara.domq.{Icons, Colors, ErrorBox}
 import scala.language.implicitConversions
 import org.scalajs.dom.{HTMLElement, HTMLInputElement}
 import dev.myclinic.scala.webclient.Api
-import concurrent.ExecutionContext.Implicits.global
+import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
+
 import dev.myclinic.scala.model.{Patient, Appoint}
 import scala.util.Success
 import scala.util.Failure

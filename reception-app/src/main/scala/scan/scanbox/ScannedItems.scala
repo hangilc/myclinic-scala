@@ -8,7 +8,8 @@ import scala.language.implicitConversions
 import dev.myclinic.scala.model.ScannerDevice
 import org.scalajs.dom.HTMLInputElement
 import dev.myclinic.scala.webclient.Api
-import scala.concurrent.ExecutionContext.Implicits.global
+import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
+
 import scala.concurrent.Future
 import scala.util.{Success, Failure}
 import cats.*

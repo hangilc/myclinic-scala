@@ -9,7 +9,8 @@ import dev.myclinic.scala.validator.AppointTimeValidator
 import dev.myclinic.scala.validator.AppointTimeValidator.{given}
 import java.time.LocalDate
 import dev.myclinic.scala.webclient.Api
-import scala.concurrent.ExecutionContext.Implicits.global
+import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
+
 import scala.util.Failure
 import scala.util.Success
 import scala.concurrent.Future
