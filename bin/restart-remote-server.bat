@@ -1,0 +1,1 @@
+ssh -t changclinic-server "sudo systemctl restart myclinic-scala"

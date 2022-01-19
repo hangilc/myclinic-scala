@@ -1,0 +1,1 @@
+ssh -t changclinic-server "sudo systemctl stop myclinic-scala"

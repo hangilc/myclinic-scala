@@ -14,8 +14,7 @@ val scalaJavaTimeVersion = "2.3.0"
 val scalaJSDomVersion = "2.1.0"
 val catsVersion = "2.7.0"
 val macrotaskExecutorVersion = "1.0.0"
-
-val jacksonVersion = "2.12.5"
+val jacksonVersion = "2.13.1"
 val slf4jVersion = "1.7.25"
 
 ThisBuild / scalacOptions ++= Seq("-deprecation", "-encoding", "UTF-8")
@@ -116,6 +115,7 @@ val utilJVM = util.jvm
 
 lazy val server = project
   .in(file("server"))
+  .enablePlugins(PackPlugin)
   .dependsOn(
     db,
     modelJVM,
@@ -136,7 +136,7 @@ lazy val server = project
       "org.http4s" %% "http4s-dsl" % http4sVersion,
       "org.http4s" %% "http4s-circe" % http4sVersion,
       "dev.fujiwara" % "drawer" % "1.0.0-SNAPSHOT"
-    )
+    ),
   )
 
 lazy val webclient = project
