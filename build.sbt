@@ -101,7 +101,7 @@ lazy val db = project
 
 lazy val client = project
     .in(file("client"))
-    .dependsOn(modelJVM)
+    .dependsOn(modelJVM, utilJVM)
     .settings(
       name := "client",
       libraryDependencies ++= Seq(
