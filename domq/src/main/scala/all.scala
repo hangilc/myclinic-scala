@@ -8,4 +8,5 @@ object all:
   export Modifiers.{*, given}
   val Modal = dev.fujiwara.domq.Modal
   val Selection = domq.Selection
+  val ErrorBox = domq.ErrorBox
 

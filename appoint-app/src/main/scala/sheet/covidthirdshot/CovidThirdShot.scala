@@ -5,6 +5,8 @@ import dev.myclinic.scala.webclient.Api
 import scala.concurrent.ExecutionContext.Implicits.global
 import dev.myclinic.scala.model.Patient
 import java.time.LocalDate
+import dev.fujiwara.kanjidate.KanjiDate
+import dev.myclinic.scala.util.DateUtil
 
 class CovidThirdShot(val ui: CovidThirdShot.UI):
   ui.eSearchFrom(onsubmit := (onSearchSubmit _))
@@ -34,7 +36,9 @@ class CovidThirdShot(val ui: CovidThirdShot.UI):
       case Some(age, secondShotAt, thirdShotDue) =>
         val disp = CovidThirdShot.Disp(patient, age, secondShotAt, thirdShotDue)
         ui.eDisp.setChildren(disp.ui.ele)
-      case None => ui.eDisp.innerText = s"${patient.fullName()} -- No Data"
+      case None =>
+        val query = CovidThirdShot.Query(patient)
+        ui.eDisp.setChildren(query.ui.ele)
     }
 
 object CovidThirdShot:
@@ -83,5 +87,33 @@ object CovidThirdShot:
     val ele = div(
       eName(fontWeight := "bold"),
       eSecondShot,
+      eThirdShot(fontWeight := "bold")
+    )
+
+  class Query(val ui: QueryUI, patient: Patient):
+    val age = DateUtil.calcAge(patient.birthday, LocalDate.of(2022, 3, 31))
+    ui.eName.innerText = s"(${patient.patientId}) ${patient.fullName()} ${age}才"
+    ui.eSecondShotForm(onsubmit := (onSubmit _))
+
+    def onSubmit(): Unit =
+
+
+  object Query:
+    def apply(patient: Patient): Query =
+      new Query(new QueryUI, patient)
+
+  class QueryUI:
+    val eName = div
+    val eSecondShotForm = form
+    val eSecondShotInput = inputText
+    val eThirdShot = div
+    val errorBox = new ErrorBox()
+    val ele = div(
+      eName(fontWeight := "bold"),
+      eSecondShotForm(
+        "２回目接種日：2021-",
+        eSecondShotInput(placeholder := "MM-DD"),
+        button(attr("type") := "default", "入力", ml := "6px")
+      ),
       eThirdShot(fontWeight := "bold")
     )
