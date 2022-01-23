@@ -29,6 +29,7 @@ import cats.syntax.all._
 import cats.implicits._
 import cats.Monoid
 import dev.myclinic.scala.web.appoint.AppointHistoryWindow
+import dev.myclinic.scala.web.appoint.sheet.covidthirdshot.CovidThirdShot
 
 class AppointSheet(using eventPublishers: EventPublishers):
   val daySpanDisp: HTMLElement = div(css(style => {
@@ -122,9 +123,17 @@ class AppointSheet(using eventPublishers: EventPublishers):
       button("次の週", ml := "0.5rem", onclick := (() => advanceDays(7))),
       button("次の月", ml := "0.5rem", onclick := (() => advanceDays(28))),
       topMenuBox(attr("id") := "top-menu-box")(
+        a("追加接種", mr := "14px", onclick := (onThirdShotClick _)),
         Icons.menu(Icons.defaultStyle, onclick := (onMenuClick _))
       )
     )
+
+    def onThirdShotClick(): Unit =
+      val content = CovidThirdShot()
+      val w = FloatWindow("追加接種",
+        content.ui.ele(padding := "10px"),
+        width = "300px")
+      w.open()
 
     def onMenuClick(event: MouseEvent): Unit =
       ContextMenu(List("変更履歴" -> (showHistory _))).open(event)

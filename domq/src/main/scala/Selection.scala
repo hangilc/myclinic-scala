@@ -9,7 +9,7 @@ import scala.language.implicitConversions
 
 class Selection[T](
     val ui: Selection.UI,
-    onSelect: T => Unit = ((_: T) => ())
+    var onSelect: T => Unit = ((_: T) => ())
 ):
   val ele = ui.ele
   def addAll(items: List[(String, T)]): Unit =

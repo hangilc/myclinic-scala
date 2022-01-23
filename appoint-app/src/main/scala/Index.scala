@@ -53,15 +53,15 @@ object JsMain:
       case Success(_) => ()
       case Failure(e) => System.err.println(e)
     }
-    //
-    Api.getCovid2ndShotData(3835).onComplete {
-      case Success(data) => println(data)
-      case Failure(ex) => System.err.println(ex.getMessage)
-    }
-    Api.getCovid2ndShotData(3836).onComplete {
-      case Success(data) => println(data)
-      case Failure(ex) => System.err.println(ex.getMessage)
-    }
+    // //
+    // Api.getCovid2ndShotData(3835).onComplete {
+    //   case Success(data) => println(data)
+    //   case Failure(ex) => System.err.println(ex.getMessage)
+    // }
+    // Api.getCovid2ndShotData(3836).onComplete {
+    //   case Success(data) => println(data)
+    //   case Failure(ex) => System.err.println(ex.getMessage)
+    // }
 
   def banner(isAdmin: Boolean): HTMLElement =
     val text = "診察予約" + (if isAdmin then "（管理）" else "")
