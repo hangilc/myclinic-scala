@@ -30,6 +30,7 @@ lazy val root = project
     appbase,
     appointAdmin,
     appointApp,
+    client,
     clinicopJS,
     clinicopJVM,
     config,
@@ -97,6 +98,19 @@ lazy val db = project
       "io.circe" %%% "circe-core" % circeVersion
     )
   )
+
+lazy val client = project
+    .in(file("client"))
+    .dependsOn(modelJVM, utilJVM)
+    .settings(
+      name := "client",
+      libraryDependencies ++= Seq(
+        "org.http4s" %% "http4s-dsl" % http4sVersion,
+        "org.http4s" %% "http4s-blaze-client" % http4sVersion,
+        "org.http4s" %% "http4s-circe" % http4sVersion,
+        "io.circe" %%% "circe-core" % circeVersion,
+      )
+    )
 
 lazy val util = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Pure)
