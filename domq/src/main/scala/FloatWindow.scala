@@ -54,11 +54,13 @@ case class FloatWindow(
   )
   var prevClickX: Double = 0
   var prevClickY: Double = 0
+  var onOpen: FloatWindow => Unit = _ => ()
 
   def open(): Unit =
     val body: HTMLElement = document.body
     body(ele)
     Position.placeAtWindowCenter(ele)
+    onOpen(this)
 
   def close(): Unit =
     ele.remove()

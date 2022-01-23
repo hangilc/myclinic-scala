@@ -134,6 +134,7 @@ class AppointSheet(using eventPublishers: EventPublishers):
         content.ui.ele(padding := "10px"),
         width = "300px")
       w.open()
+      content.initFocus()
 
     def onMenuClick(event: MouseEvent): Unit =
       ContextMenu(List("変更履歴" -> (showHistory _))).open(event)

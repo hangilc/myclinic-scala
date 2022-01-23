@@ -10,14 +10,19 @@ class CovidThirdShot(val ui: CovidThirdShot.UI):
   ui.eSearchFrom(onsubmit := (onSearchSubmit _))
   ui.searchResult.onSelect = onSelect _
 
+  def initFocus(): Unit = ui.eSearchInput.focus()
+
   def onSearchSubmit(): Unit =
     val text = ui.eSearchInput.value.trim
     if !text.isEmpty then
       ui.eDisp.clear()
       for patients <- Api.searchPatient(text)
       yield
-        ui.searchResult.setItems(patients, formatOption _)
-        ui.eSearchInput.value = ""
+        if patients.size == 1 then
+          onSelect(patients.head)
+        else
+          ui.searchResult.setItems(patients, formatOption _)
+          ui.eSearchInput.value = ""
 
   def formatOption(patient: Patient): String =
     String.format("(%04d) %s", patient.patientId, patient.fullName())
