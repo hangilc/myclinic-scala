@@ -7,6 +7,7 @@ import dev.myclinic.scala.model.Patient
 import java.time.LocalDate
 import dev.fujiwara.kanjidate.KanjiDate
 import dev.myclinic.scala.util.DateUtil
+import scala.util.{Try, Success, Failure}
 
 class CovidThirdShot(val ui: CovidThirdShot.UI):
   ui.eSearchFrom(onsubmit := (onSearchSubmit _))
@@ -90,12 +91,31 @@ object CovidThirdShot:
       eThirdShot(fontWeight := "bold")
     )
 
+  def thirdShotDue(age: Int, secondShot: LocalDate): LocalDate =
+    if age >= 65 then
+      val d: LocalDate = secondShot.plusMonths(7)
+      if d.getMonthValue <= 2 then d
+      else secondShot.plusMonths(6)
+    else
+      val d: LocalDate = secondShot.plusMonths(8)
+      if d.getMonthValue <= 2 then d
+      else secondShot.plusMonths(7)
+
+
   class Query(val ui: QueryUI, patient: Patient):
     val age = DateUtil.calcAge(patient.birthday, LocalDate.of(2022, 3, 31))
     ui.eName.innerText = s"(${patient.patientId}) ${patient.fullName()} ${age}才"
     ui.eSecondShotForm(onsubmit := (onSubmit _))
 
     def onSubmit(): Unit =
+      ui.errorBox.hide()
+      ui.eThirdShot.innerText = ""
+      Try(LocalDate.parse("2021-" + ui.eSecondShotInput.value)) match {
+        case Success(date) =>
+          val due = thirdShotDue(age, date)
+          ui.eThirdShot.innerText = s"３回目接種：${due} より"
+        case Failure(_) => ui.errorBox.show("日付の入力が不適切です。\n02-18 のように入力してください。")
+      }
 
 
   object Query:
@@ -107,7 +127,7 @@ object CovidThirdShot:
     val eSecondShotForm = form
     val eSecondShotInput = inputText
     val eThirdShot = div
-    val errorBox = new ErrorBox()
+    val errorBox = ErrorBox()
     val ele = div(
       eName(fontWeight := "bold"),
       eSecondShotForm(
@@ -115,5 +135,6 @@ object CovidThirdShot:
         eSecondShotInput(placeholder := "MM-DD"),
         button(attr("type") := "default", "入力", ml := "6px")
       ),
+      errorBox.ele,
       eThirdShot(fontWeight := "bold")
     )
