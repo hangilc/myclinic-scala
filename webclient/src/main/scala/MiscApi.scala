@@ -247,3 +247,6 @@ object MiscApi extends ApiBase:
 
     def listPatientImage(patientId: Int): Future[List[FileInfo]] =
       get("list-patient-image", Params("patient-id" -> patientId))
+
+    def getCovid2ndShotData(patientId: Int): Future[Option[(Int, LocalDate, LocalDate)]] =
+      get("get-covid-2nd-shot-data", Params("patient-id" -> patientId))

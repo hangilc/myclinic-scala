@@ -21,7 +21,6 @@ import io.circe.syntax._
 import io.circe.parser.decode
 import dev.myclinic.scala.model.jsoncodec.Implicits.{given}
 import dev.myclinic.scala.web.appoint.sheet.{AppointSheet, AdminAppointSheet}
-//import dev.myclinic.scala.event.ModelEventPublishers
 import scala.scalajs.js.annotation.JSExportTopLevel
 import scala.scalajs.js.annotation.JSExport
 import org.scalajs.dom.HTMLElement
@@ -53,6 +52,15 @@ object JsMain:
     sheet.setupDateRange(startDate, endDate).onComplete {
       case Success(_) => ()
       case Failure(e) => System.err.println(e)
+    }
+    //
+    Api.getCovid2ndShotData(3835).onComplete {
+      case Success(data) => println(data)
+      case Failure(ex) => System.err.println(ex.getMessage)
+    }
+    Api.getCovid2ndShotData(3836).onComplete {
+      case Success(data) => println(data)
+      case Failure(ex) => System.err.println(ex.getMessage)
     }
 
   def banner(isAdmin: Boolean): HTMLElement =
