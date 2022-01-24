@@ -89,12 +89,19 @@ case class AppointColumn(
   def totalAppoints: Int =
     boxes.foldLeft(0)((acc, ele) => acc + ele.slots.size)
 
+  var contextMenu: List[(String, () => Unit)] = List.empty
+
+  def prependContextMenu(label: String, proc: () => Unit): Unit =
+    contextMenu = (label, proc) :: contextMenu
+
+  def appendContextMenu(label: String, proc: () => Unit): Unit =
+    contextMenu = contextMenu :+ (label, proc)
+
   def onContextMenu(event: MouseEvent): Unit =
     event.preventDefault()
-    var menu: List[(String, () => Unit)] = List.empty
     if totalAppoints == 0 then
-      menu = menu :+ ("予約枠全削除" -> (doDeleteAllAppointTimes _))
-    if !menu.isEmpty then ContextMenu(menu).open(event)
+      contextMenu = contextMenu :+ ("予約枠全削除" -> (doDeleteAllAppointTimes _))
+    if !contextMenu.isEmpty then ContextMenu(contextMenu).open(event)
 
   def doDeleteAllAppointTimes(): Unit =
     val dateRep = Misc.formatAppointDate(date)
