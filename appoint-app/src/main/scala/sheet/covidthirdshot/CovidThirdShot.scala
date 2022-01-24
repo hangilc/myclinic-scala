@@ -92,15 +92,19 @@ object CovidThirdShot:
     )
 
   def thirdShotDue(age: Int, secondShot: LocalDate): LocalDate =
+    val march = LocalDate.of(2022, 3, 1)
     if age >= 65 then
       val d: LocalDate = secondShot.plusMonths(7)
       if d.getMonthValue <= 2 then d
-      else secondShot.plusMonths(6)
+      else 
+        val dd = secondShot.plusMonths(6)
+        if dd.isBefore(march) then march else dd
     else
       val d: LocalDate = secondShot.plusMonths(8)
       if d.getMonthValue <= 2 then d
-      else secondShot.plusMonths(7)
-
+      else 
+        val dd = secondShot.plusMonths(7)
+        if dd.isBefore(march) then march else dd
 
   class Query(val ui: QueryUI, patient: Patient):
     val age = DateUtil.calcAge(patient.birthday, LocalDate.of(2022, 3, 31))
