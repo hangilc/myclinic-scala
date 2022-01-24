@@ -36,7 +36,8 @@ class AdminAppointTimeBox(
     var menu: List[(String, () => Unit)] = List(
       "編集" -> doConvert,
       "結合" -> doCombine,
-      "分割" -> doSplit
+      "分割" -> doSplit,
+      "延長" -> doExtend,
     )
     if slots.isEmpty then menu = menu :+ ("削除" -> doDelete)
     ContextMenu(menu).open(event)
@@ -59,3 +60,7 @@ class AdminAppointTimeBox(
       Api.deleteAppointTime(appointTime.appointTimeId)
       ()
     })
+
+  def doExtend(): Unit =
+    val dlog = ExtendAppointTimeDialog(appointTime)
+    dlog.open()
