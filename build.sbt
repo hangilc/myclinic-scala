@@ -45,6 +45,7 @@ lazy val root = project
     kanjidateJVM,
     modelJS,
     modelJVM,
+    practiceApp,
     rcpt,
     receptionApp,
     server,
@@ -234,6 +235,33 @@ lazy val receptionApp = project
       (rootDir.value / "server" / "web" / "reception" / "scalajs"),
     Compile / fullLinkJS / scalaJSLinkerOutputDirectory :=
       (rootDir.value / "server" / "web" / "reception" / "scalajs"),
+    libraryDependencies ++= Seq(
+      "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion,
+      "org.scala-js" %%% "scala-js-macrotask-executor" % macrotaskExecutorVersion,
+    )
+  )
+
+lazy val practiceApp = project
+  .in(file("practice-app"))
+  .enablePlugins(ScalaJSPlugin)
+  .dependsOn(
+    domq,
+    modelJS,
+    utilJS,
+    webclient,
+    validatorJS,
+    appbase,
+    appUtilJS,
+    drawerJS,
+    kanjidateJS,
+    dateinput
+  )
+  .settings(
+    name := "myclinic-practice",
+    Compile / fastLinkJS / scalaJSLinkerOutputDirectory :=
+      (rootDir.value / "server" / "web" / "practice" / "scalajs"),
+    Compile / fullLinkJS / scalaJSLinkerOutputDirectory :=
+      (rootDir.value / "server" / "web" / "practice" / "scalajs"),
     libraryDependencies ++= Seq(
       "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion,
       "org.scala-js" %%% "scala-js-macrotask-executor" % macrotaskExecutorVersion,
