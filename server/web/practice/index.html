@@ -2,19 +2,19 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>受付</title>
-    <!-- <link rel="icon" href="data:,"> -->
+    <title>診察</title>
+    <link rel="icon" href="data:,">
     <link rel="stylesheet" href="../default.css">
     <link rel="stylesheet" href="../domq.css">
     <link rel="stylesheet" href="../appbase.css">
-    <link rel="stylesheet" href="./reception.css">
+    <link rel="stylesheet" href="./practice.css">
   </head>
   <body>
     <script type="text/javascript" src="../drawer-svg.js"></script>
     <script type="text/javascript" src="./scalajs/main.js"></script>
     <script type="text/javascript">
       let url = new URL(document.location)
-      JsMain.main(url.searchParams.get("admin") === "true")
+      JsMain.main()
     </script>
   </body>
 </html>
