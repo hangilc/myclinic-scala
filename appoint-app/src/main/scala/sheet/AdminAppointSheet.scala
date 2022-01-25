@@ -36,13 +36,7 @@ class AdminAppointSheet(using EventPublishers) extends AppointSheet:
     col.appendContextMenu("予約枠追加", () => {
       doAddAppointTime(col.date)
     })
-    //modified.dateElement(oncontextmenu := (event => onDateContextMenu(event, modified.date)))
     modified
-
-  // def onDateContextMenu(event: MouseEvent, date: LocalDate): Unit =
-  //   ContextMenu(List(
-  //     "予約枠追加" -> (() => doAddAppointTime(date))
-  //   )).open(event)
 
   def doAddAppointTime(date: LocalDate): Unit =
     AddAppointTimeDialog(date).open()
