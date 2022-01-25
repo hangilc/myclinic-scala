@@ -7,6 +7,8 @@ import scala.util.{Try, Success, Failure}
 import dev.myclinic.scala.util.DateUtil
 import dev.myclinic.scala.validator.AppointTimeValidator
 import dev.myclinic.scala.validator.AppointTimeValidator.{*, given}
+import dev.myclinic.scala.webclient.Api
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class ExtendAppointTimeDialog(
     ui: ExtendAppointTimeDialog.UI,
@@ -23,15 +25,22 @@ class ExtendAppointTimeDialog(
     dialog.open()
 
   def doEnter(): Unit =
-    DateUtil.stringToTime(ui.eFromTime.value + ":00")
-    ???
+    ui.errBox.hide()
+    validate().asEither match {
+      case Right(at) => 
+        Api.updateAppointTime(at).onComplete {
+          case Success(_) => dialog.close()
+          case Failure(ex) => ui.errBox.show(ex.getMessage)
+        }
+      case Left(msg) => ui.errBox.show(msg)
+    }
 
   def validate(): Result[AppointTime] =
     AppointTimeValidator.validateForUpdate(
       orig.appointTimeId,
       validateDateValue(orig.date),
-      validateFromTimeInput(ui.eFromTime.value),
-      validateUntilTimeInput(ui.eUntilTime.value),
+      validateFromTimeInput(ui.eFromTime.value + ":00"),
+      validateUntilTimeInput(ui.eUntilTime.value + ":00"),
       validateKindInput(orig.kind),
       validateCapacityValue(orig.capacity)
     )
