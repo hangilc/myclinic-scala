@@ -5,6 +5,8 @@ import dev.myclinic.scala.model.AppointTime
 import java.time.LocalTime
 import scala.util.{Try, Success, Failure}
 import dev.myclinic.scala.util.DateUtil
+import dev.myclinic.scala.validator.AppointTimeValidator
+import dev.myclinic.scala.validator.AppointTimeValidator.{*, given}
 
 class ExtendAppointTimeDialog(
     ui: ExtendAppointTimeDialog.UI,
@@ -23,6 +25,16 @@ class ExtendAppointTimeDialog(
   def doEnter(): Unit =
     DateUtil.stringToTime(ui.eFromTime.value + ":00")
     ???
+
+  def validate(): Result[AppointTime] =
+    AppointTimeValidator.validateForUpdate(
+      orig.appointTimeId,
+      validateDateValue(orig.date),
+      validateFromTimeInput(ui.eFromTime.value),
+      validateUntilTimeInput(ui.eUntilTime.value),
+      validateKindInput(orig.kind),
+      validateCapacityValue(orig.capacity)
+    )
 
   def timeToText(time: LocalTime): String =
     String.format("%02d:%02d", time.getHour, time.getMinute)
