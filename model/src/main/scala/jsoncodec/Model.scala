@@ -26,8 +26,8 @@ trait Model extends DateTime with WaitStateCodec:
   given appEventEncoder: Encoder[AppEvent] = deriveEncoder[AppEvent]
   given appEventDecoder: Decoder[AppEvent] = deriveDecoder[AppEvent]
 
-  given Encoder[HotlineBeep] = deriveEncoder[HotlineBeep]
-  given Decoder[HotlineBeep] = deriveDecoder[HotlineBeep]
+  private[jsoncodec] given Encoder[HotlineBeep] = deriveEncoder[HotlineBeep]
+  private[jsoncodec] given Decoder[HotlineBeep] = deriveDecoder[HotlineBeep]
 
   given appointTimeEncoder: Encoder[AppointTime] =
     deriveEncoder[AppointTime]

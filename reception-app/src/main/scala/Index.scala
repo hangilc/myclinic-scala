@@ -69,19 +69,30 @@ object JsMain:
 
 object ReceptionEventFetcher extends EventFetcher:
   val publishers = EventDispatcher()
+  publishers.shahokokuhoCreated.subscribe(e =>
+    dispatch(".shahokokuho-created", "shahokokuho-created", e)
+  )
+  publishers.shahokokuhoUpdated.subscribe(e =>
+    dispatch(".shahokokuho-updated", "shahokokuho-updated", e)
+    dispatch(
+      s".shahokokuho-${e.updated.shahokokuhoId}",
+      "shahokokuho-updated",
+      e
+    )
+  )
   override def publish(event: AppModelEvent, raw: AppEvent): Unit =
     import dev.myclinic.scala.model.*
     publishers.publish(event, raw)
     event match {
-      case e: ShahokokuhoCreated =>
-        dispatch(".shahokokuho-created", "shahokokuho-created", e)
-      case e: ShahokokuhoUpdated =>
-        dispatch(".shahokokuho-updated", "shahokokuho-updated", e)
-        dispatch(
-          s".shahokokuho-${e.updated.shahokokuhoId}",
-          "shahokokuho-updated",
-          e
-        )
+      // case e: ShahokokuhoCreated =>
+      //   dispatch(".shahokokuho-created", "shahokokuho-created", e)
+      // case e: ShahokokuhoUpdated =>
+      //   dispatch(".shahokokuho-updated", "shahokokuho-updated", e)
+      //   dispatch(
+      //     s".shahokokuho-${e.updated.shahokokuhoId}",
+      //     "shahokokuho-updated",
+      //     e
+      //   )
       case e: ShahokokuhoDeleted =>
         dispatch(".shahokokuho-deleted", "shahokokuho-deleted", e)
         dispatch(

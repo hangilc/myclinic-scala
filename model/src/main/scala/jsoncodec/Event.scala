@@ -6,13 +6,14 @@ import io.circe.syntax.*
 
 type EventType = AppEvent | HotlineBeep
 
-trait Event extends AppEventCodec:
+trait Event extends AppEventCodec with Model:
   given Decoder[EventType] with
     def apply(c: HCursor): Decoder.Result[EventType] =
       for
         format <- c.downField("format").as[String]
         event <- format match {
           case "appevent" => c.downField("data").as[AppEvent]
+          case "hotline-beep" => c.downField("data").as[HotlineBeep]
         }
       yield event.asInstanceOf[EventType]
 

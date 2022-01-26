@@ -14,9 +14,11 @@ import io.circe.syntax.*
 import io.circe.parser.decode
 import dev.myclinic.scala.model.jsoncodec.Implicits.{given}
 import dev.myclinic.scala.model.jsoncodec.EventType
+import dev.myclinic.scala.model.HotlineBeep
 
 abstract class EventFetcher:
   def publish(event: AppModelEvent, raw: AppEvent): Unit
+  def publish(event: HotlineBeep): Unit = ()
 
   var nextEventId: Int = 0
   def start(): Future[Unit] =
@@ -47,6 +49,7 @@ abstract class EventFetcher:
       case Right(event) => 
         event match {
           case appEvent @ _: AppEvent => handleAppEvent(appEvent)
+          case hotlineBeep @ _: HotlineBeep => publish(hotlineBeep)
           case _ => ()
         }
         

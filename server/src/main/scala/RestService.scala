@@ -180,7 +180,9 @@ object RestService extends DateTimeQueryParam with Publisher:
         yield true
       Ok(op)
 
-//    case GET -> Root / "hotline-beep" :? strRecipient(recipient) =>
+   case GET -> Root / "hotline-beep" :? strRecipient(recipient) =>
+
+      Ok(for _ <- publish(HotlineBeep(recipient)) yield true)
 
     case GET -> Root / "list-todays-hotline" =>
       Ok(Db.listTodaysHotline())
