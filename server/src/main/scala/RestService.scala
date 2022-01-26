@@ -20,6 +20,7 @@ import dev.myclinic.scala.model.*
 import dev.myclinic.scala.model.jsoncodec.Implicits.given
 import org.http4s.websocket.WebSocketFrame.Text
 import dev.myclinic.scala.appoint.admin.AppointAdmin
+import java.time.LocalDateTime
 
 object RestService extends DateTimeQueryParam:
 
@@ -28,7 +29,8 @@ object RestService extends DateTimeQueryParam:
   object dateUpto extends QueryParamDecoderMatcher[LocalDate]("upto")
   object timeTime extends QueryParamDecoderMatcher[LocalTime]("time")
   object timeAt extends QueryParamDecoderMatcher[LocalTime]("at")
-  object nameString extends QueryParamDecoderMatcher[String]("name")
+  object strName extends QueryParamDecoderMatcher[String]("name")
+  object strRecipient extends QueryParamDecoderMatcher[String]("recipient")
   object intFrom extends QueryParamDecoderMatcher[Int]("from")
   object intUntil extends QueryParamDecoderMatcher[Int]("until")
   object intAppointTimeId
@@ -174,30 +176,35 @@ object RestService extends DateTimeQueryParam:
         ) =>
       Ok(Db.listAppointEvents(limit, offset))
 
-    case GET -> Root / "appoint-history-at" :? intAppointTimeId(appointTimeId) =>
+    case GET -> Root / "appoint-history-at" :? intAppointTimeId(
+          appointTimeId
+        ) =>
       Ok(Db.appointHistoryAt(appointTimeId))
 
     case req @ POST -> Root / "post-hotline" =>
-      val op = 
-        for 
+      val op =
+        for
           hotline <- req.as[Hotline]
           event <- Db.postHotline(hotline)
           _ <- publish(event)
         yield true
       Ok(op)
 
+//    case GET -> Root / "hotline-beep" :? strRecipient(recipient) =>
+
     case GET -> Root / "list-todays-hotline" =>
       Ok(Db.listTodaysHotline())
 
     case GET -> Root / "list-wqueue" => Ok(Db.listWqueue())
 
-    case req @ POST -> Root / "enter-patient" => Ok {
-      for
-        patient <- req.as[Patient]
-        event <- Db.enterPatient(patient)
-        _ <- publish(event)
-      yield true
-    }
+    case req @ POST -> Root / "enter-patient" =>
+      Ok {
+        for
+          patient <- req.as[Patient]
+          event <- Db.enterPatient(patient)
+          _ <- publish(event)
+        yield true
+      }
 
   } <+> PatientService.routes <+> VisitService.routes <+> MiscService.routes
     <+> ConfigService.routes <+> FileService.routes
