@@ -39,16 +39,6 @@ object RestService extends DateTimeQueryParam with Publisher:
 
   case class UserError(message: String) extends Exception
 
-  // private def publish(event: AppEvent)(using
-  //     topic: Topic[IO, WebSocketFrame]
-  // ): IO[Unit] =
-  //   topic.publish1(Text(event.asJson.toString)).void
-
-  // private def publishAll(events: List[AppEvent])(using
-  //     topic: Topic[IO, WebSocketFrame]
-  // ): IO[Unit] =
-  //   events.map(publish(_)).sequence_
-
   def routes(using topic: Topic[IO, WebSocketFrame]) = HttpRoutes.of[IO] {
 
     case GET -> Root / "list-appoint-times" :? dateFrom(from) +& dateUpto(
@@ -123,7 +113,7 @@ object RestService extends DateTimeQueryParam with Publisher:
         appoint <- req.as[Appoint]
         result <- Db.addAppoint(appoint)
         (entered, appEvent) = result
-        _ <- topic.publish1(Text(appEvent.asJson.toString()))
+        _ <- publish(appEvent)
       yield entered
       Ok(op)
     }
