@@ -7,17 +7,15 @@ trait EventSubscriberController:
   def start(): Unit
   def stop(): Unit
 
-case class EventSubscriber[T <: AppModelEvent](private val handler: T => Unit,
+case class EventSubscriber[T <: AppModelEvent](private val handler: (T, AppEvent) => Unit,
   publisher: EventPublisher[T])
     extends EventSubscriberController:
   var isStopped: Boolean = true
-  val queue = mutable.Queue[T]()
+  val queue = mutable.Queue[(T, AppEvent)]()
 
-  def handle(event: T): Unit =
-    if isStopped then queue.append(event)
-    else
-      queue.append(event)
-      handleQueue()
+  def handle(event: T, appEvent: AppEvent): Unit =
+    queue.append((event, appEvent))
+    if !isStopped then handleQueue()
 
   def start(): Unit =
     isStopped = false
@@ -31,11 +29,11 @@ case class EventSubscriber[T <: AppModelEvent](private val handler: T => Unit,
 
   private def handleQueue(): Unit =
     while !queue.isEmpty do
-      val event = queue.dequeue()
-      handleOne(event)
+      val (event, appEvent) = queue.dequeue()
+      handleOne(event, appEvent)
 
-  private def handleOne(event: T): Unit =
-    try handler(event)
+  private def handleOne(event: T, appEvent: AppEvent): Unit =
+    try handler(event, appEvent)
     catch {
       case e: Throwable => System.err.println(e.toString)
     }
@@ -44,13 +42,16 @@ case class EventPublisher[T <: AppModelEvent](
     var subscribers: Set[EventSubscriber[T]] =
       Set.empty[EventSubscriber[T]]
 ):
-  def subscribe(handler: T => Unit): EventSubscriber[T] =
+  def subscribe(handler: (T, AppEvent) => Unit): EventSubscriber[T] =
     val sub = EventSubscriber(handler, this)
     subscribers = subscribers + sub
     sub
 
-  def publish(event: T): Unit =
-    subscribers.foreach(_.handle(event))
+  def subscribe(handler: T => Unit): EventSubscriber[T] =
+    subscribe((t, _) => handler(t))
+
+  def publish(event: T, appEvent: AppEvent): Unit =
+    subscribers.foreach(_.handle(event, appEvent))
 
   def unsubscribe(subscriber: EventSubscriber[T]): Unit =
     subscribers = subscribers - subscriber
@@ -63,24 +64,22 @@ class EventPublishers:
   val appointTimeUpdated = EventPublisher[AppointTimeUpdated]()
   val appointTimeDeleted = EventPublisher[AppointTimeDeleted]()
   val hotlineCreated = EventPublisher[HotlineCreated]()
-  val hotlineBeep = EventPublisher[HotlineBeep]()
   val wqueueCreated = EventPublisher[WqueueCreated]()
   val wqueueUpdated = EventPublisher[WqueueUpdated]()
   val wqueueDeleted = EventPublisher[WqueueDeleted]()
 
 class EventDispatcher extends EventPublishers:
-  def publish(event: AppModelEvent): Unit =
+  def publish(event: AppModelEvent, raw: AppEvent): Unit =
     event match {
-      case e: AppointCreated     => appointCreated.publish(e)
-      case e: AppointUpdated     => appointUpdated.publish(e)
-      case e: AppointDeleted     => appointDeleted.publish(e)
-      case e: AppointTimeCreated => appointTimeCreated.publish(e)
-      case e: AppointTimeUpdated => appointTimeUpdated.publish(e)
-      case e: AppointTimeDeleted => appointTimeDeleted.publish(e)
-      case e: HotlineCreated => hotlineCreated.publish(e)
-      case e: HotlineBeep => hotlineBeep.publish(e)
-      case e: WqueueCreated => wqueueCreated.publish(e)
-      case e: WqueueUpdated => wqueueUpdated.publish(e)
-      case e: WqueueDeleted => wqueueDeleted.publish(e)
+      case e: AppointCreated     => appointCreated.publish(e, raw)
+      case e: AppointUpdated     => appointUpdated.publish(e, raw)
+      case e: AppointDeleted     => appointDeleted.publish(e, raw)
+      case e: AppointTimeCreated => appointTimeCreated.publish(e, raw)
+      case e: AppointTimeUpdated => appointTimeUpdated.publish(e, raw)
+      case e: AppointTimeDeleted => appointTimeDeleted.publish(e, raw)
+      case e: HotlineCreated => hotlineCreated.publish(e, raw)
+      case e: WqueueCreated => wqueueCreated.publish(e, raw)
+      case e: WqueueUpdated => wqueueUpdated.publish(e, raw)
+      case e: WqueueDeleted => wqueueDeleted.publish(e, raw)
       case _                     => ()
     }

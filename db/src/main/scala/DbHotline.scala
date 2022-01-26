@@ -14,10 +14,10 @@ trait DbHotline extends Mysql:
   def postHotline(hotline: Hotline): IO[AppEvent] =
     mysql(DbEventPrim.logHotlineCreated(hotline))
 
-  def listTodaysHotline(): IO[List[HotlineCreated]] =
+  def listTodaysHotline(): IO[List[(Int, HotlineCreated)]] =
     mysql(
       DbEventPrim
         .listHotlineByDate(LocalDate.now())
-        .map(evt => AppModelEvent.from(evt).asInstanceOf[HotlineCreated])
+        .map(evt => (evt.appEventId, AppModelEvent.from(evt).asInstanceOf[HotlineCreated]))
         .to[List]
     )

@@ -40,11 +40,11 @@ case class AppointTimeDeleted(createdAt: LocalDateTime, deleted: AppointTime)
 
 case class HotlineCreated(
     createdAt: LocalDateTime,
-    appEventId: Int,
+    //appEventId: Int,
     created: Hotline
 ) extends AppModelEvent
-case class HotlineBeep(createdAt: LocalDateTime, recipient: String)
-    extends AppModelEvent
+// case class HotlineBeep(createdAt: LocalDateTime, recipient: String)
+//     extends AppModelEvent
 
 case class VisitCreated(createdAt: LocalDateTime, created: Visit)
     extends AppModelEvent
@@ -107,8 +107,10 @@ object AppModelEvent:
       case ("appoint-time", "deleted") =>
         AppointTimeDeleted(at, as[AppointTime])
       case ("hotline", "created") =>
-        HotlineCreated(at, event.appEventId, as[Hotline])
-      case ("hotline", "beep") => HotlineBeep(at, as[String])
+        HotlineCreated(at, as[Hotline])
+    //   case ("hotline", "created") =>
+    //     HotlineCreated(at, event.appEventId, as[Hotline])
+    //   case ("hotline", "beep") => HotlineBeep(at, as[String])
       case ("visit", "created") => VisitCreated(at, as[Visit])
       case ("visit", "updated") => VisitUpdated(at, as[Visit])
       case ("visit", "deleted") => VisitDeleted(at, as[Visit])

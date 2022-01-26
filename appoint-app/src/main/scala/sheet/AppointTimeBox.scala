@@ -54,7 +54,8 @@ case class AppointTimeBox(
       patientId + name + memo
     def tagsRep: String =
       appoint.tags.mkString("、")
-    def onClick(): Unit =
+    def onClick(event: MouseEvent): Unit =
+      event.stopPropagation()
       val m = EditAppointDialog(appoint, appointTime)
       m.onClose(() => { dialog = None })
       dialog = Some(m)

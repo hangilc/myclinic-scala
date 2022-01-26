@@ -73,8 +73,8 @@ abstract class MainUI(using publishers: EventPublishers):
       )
     )
 
-  def appendHotline(evt: HotlineCreated): Unit =
-    val id = evt.appEventId
+  def appendHotline(appEventId: Int, evt: HotlineCreated): Unit =
+    val id = appEventId
     if id > lastHotlineAppEventId then
       val rep = Setting.hotlineNameRep(evt.created.sender)
       val msg = evt.created.message
