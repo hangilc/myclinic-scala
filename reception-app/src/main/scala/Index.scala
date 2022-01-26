@@ -9,13 +9,13 @@ import dev.fujiwara.domq.{ShowMessage}
 import scala.language.implicitConversions
 import dev.myclinic.scala.webclient.Api
 import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
+import dev.myclinic.scala.web.appbase.ElementDispatcher.*
 
 import scala.util.Success
 import scala.util.Failure
 import dev.myclinic.scala.model.{Hotline, AppModelEvent}
 import dev.myclinic.scala.web.appbase.{
   EventFetcher,
-  EventDispatcher,
   EventPublishers
 }
 import scala.concurrent.Future
@@ -68,69 +68,10 @@ object JsMain:
     subscriber.start()
 
 object ReceptionEventFetcher extends EventFetcher:
-  val publishers = EventDispatcher()
-  publishers.shahokokuhoCreated.subscribe(e =>
-    dispatch(".shahokokuho-created", "shahokokuho-created", e)
-  )
-  publishers.shahokokuhoUpdated.subscribe(e =>
-    dispatch(".shahokokuho-updated", "shahokokuho-updated", e)
-    dispatch(
-      s".shahokokuho-${e.updated.shahokokuhoId}",
-      "shahokokuho-updated",
-      e
-    )
-  )
+  val publishers = EventPublishers()
+  publishers.shahokokuho.addDispatchers()
+  publishers.koukikourei.addDispatchers()
+  publishers.roujin.addDispatchers()
   override def publish(event: AppModelEvent, raw: AppEvent): Unit =
     import dev.myclinic.scala.model.*
     publishers.publish(event, raw)
-    event match {
-      // case e: ShahokokuhoCreated =>
-      //   dispatch(".shahokokuho-created", "shahokokuho-created", e)
-      // case e: ShahokokuhoUpdated =>
-      //   dispatch(".shahokokuho-updated", "shahokokuho-updated", e)
-      //   dispatch(
-      //     s".shahokokuho-${e.updated.shahokokuhoId}",
-      //     "shahokokuho-updated",
-      //     e
-      //   )
-      case e: ShahokokuhoDeleted =>
-        dispatch(".shahokokuho-deleted", "shahokokuho-deleted", e)
-        dispatch(
-          s".shahokokuho-${e.deleted.shahokokuhoId}",
-          "shahokokuho-deleted",
-          e
-        )
-      case e: KoukikoureiCreated =>
-        dispatch(".koukikourei-created", "koukikourei-created", e)
-      case e: KoukikoureiUpdated =>
-        dispatch(".koukikourei-updated", "koukikourei-updated", e)
-        dispatch(
-          s".koukikourei-${e.updated.koukikoureiId}",
-          "koukikourei-updated",
-          e
-        )
-      case e: KoukikoureiDeleted =>
-        dispatch(".koukikourei-deleted", "koukikourei-deleted", e)
-        dispatch(
-          s".koukikourei-${e.deleted.koukikoureiId}",
-          "koukikourei-deleted",
-          e
-        )
-      case e: KouhiCreated => dispatch(".kouhi-created", "kouhi-created", e)
-      case e: KouhiUpdated =>
-        dispatch(".kouhi-updated", "kouhi-updated", e)
-        dispatch(s".kouhi-${e.updated.kouhiId}", "kouhi-updated", e)
-      case e: KouhiDeleted =>
-        dispatch(".kouhi-deleted", "kouhi-deleted", e)
-        dispatch(s".kouhi-${e.deleted.kouhiId}", "kouhi-deleted", e)
-      case _ => ()
-    }
-
-  def dispatch[T](selector: String, eventType: String, detail: T): Unit =
-    import dev.fujiwara.domq.{CustomEvent, CustomEventInit}
-    val evt: CustomEvent[T] = CustomEvent(eventType, detail, false)
-    document.body
-      .qSelectorAll(selector)
-      .foreach(e => {
-        e.dispatchEvent(evt)
-      })

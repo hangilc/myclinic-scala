@@ -26,8 +26,7 @@ import scala.scalajs.js.annotation.JSExport
 import org.scalajs.dom.HTMLElement
 import dev.myclinic.scala.web.appbase.{
   EventFetcher,
-  EventPublishers,
-  EventDispatcher
+  EventPublishers
 }
 
 @JSExportTopLevel("JsMain")
@@ -59,6 +58,6 @@ object JsMain:
     div(text)(cls := "banner")
 
 object AppEvents extends EventFetcher:
-  val publishers = EventDispatcher()
+  val publishers = EventPublishers()
   override def publish(event: AppModelEvent, raw: AppEvent): Unit =
     publishers.publish(event, raw)

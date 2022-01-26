@@ -50,7 +50,6 @@ abstract class EventFetcher:
         event match {
           case appEvent @ _: AppEvent => handleAppEvent(appEvent)
           case hotlineBeep @ _: HotlineBeep => publish(hotlineBeep)
-          case _ => ()
         }
         
       case Left(ex)        => System.err.println(ex.getMessage)

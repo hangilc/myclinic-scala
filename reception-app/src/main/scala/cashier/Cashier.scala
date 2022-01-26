@@ -58,7 +58,7 @@ class Cashier(using publishers: EventPublishers) extends SideMenuService:
   val subscribers: List[EventSubscriber[_]] =
     val publishers = ReceptionEventFetcher.publishers
     List(
-      publishers.wqueueDeleted.subscribe(event => {
+      publishers.wqueue.deleted.subscribe(event => {
         removeRow(event.deleted.visitId)
       })
     )
