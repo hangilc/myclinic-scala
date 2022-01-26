@@ -19,6 +19,7 @@ import dev.myclinic.scala.web.appbase.{
   EventPublishers
 }
 import scala.concurrent.Future
+import dev.myclinic.scala.model.AppEvent
 
 @JSExportTopLevel("JsMain")
 object JsMain:
@@ -53,21 +54,24 @@ object JsMain:
 
   def loadHotlines(): Future[Unit] =
     for hotlines <- Api.listTodaysHotline()
-    yield hotlines.foreach(ui.appendHotline(_))
+    yield hotlines.foreach((appEventId, hotlineCreated) =>
+      ui.appendHotline(appEventId, hotlineCreated)
+    )
 
   def setupHotlineSubscriber()(using eventPublishers: EventPublishers): Unit =
-    val subscriber = eventPublishers.hotlineCreated.subscribe(event => {
+    val subscriber = eventPublishers.hotlineCreated.subscribe((event, raw) => {
+      val appEventId = raw.appEventId
       val hotline = event.created
       if hotline.sender == "reception" || hotline.recipient == "reception" then
-        ui.appendHotline(event)
+        ui.appendHotline(appEventId, event)
     })
     subscriber.start()
 
 object ReceptionEventFetcher extends EventFetcher:
   val publishers = EventDispatcher()
-  override def publish(event: AppModelEvent): Unit =
+  override def publish(event: AppModelEvent, raw: AppEvent): Unit =
     import dev.myclinic.scala.model.*
-    publishers.publish(event)
+    publishers.publish(event, raw)
     event match {
       case e: ShahokokuhoCreated =>
         dispatch(".shahokokuho-created", "shahokokuho-created", e)

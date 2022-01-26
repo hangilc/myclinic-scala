@@ -9,8 +9,8 @@ import java.time.LocalDateTime
 
 trait AppEventCodec extends Model with DateTime:
 
-  given Encoder[AppEvent] = deriveEncoder[AppEvent]
-  given Decoder[AppEvent] = deriveDecoder[AppEvent]
+  private[jsoncodec] given Encoder[AppEvent] = deriveEncoder[AppEvent]
+  private[jsoncodec] given Decoder[AppEvent] = deriveDecoder[AppEvent]
 
   given Encoder[HotlineCreated] with
     def apply(e: HotlineCreated): Json = appModelEventEncoder(e)
@@ -60,21 +60,28 @@ trait AppEventCodec extends Model with DateTime:
             "createdAt" -> at.asJson,
             "deleted" -> deleted.asJson
           )
-        case HotlineCreated(at, appEventId, created) =>
+        case HotlineCreated(at, created) =>
           Json.obj(
             "model" -> Json.fromString("hotline"),
             "kind" -> Json.fromString("created"),
             "createdAt" -> at.asJson,
-            "appEventId" -> Json.fromInt(appEventId),
             "created" -> created.asJson
           )
-        case HotlineBeep(at, recipient) =>
-          Json.obj(
-            "model" -> Json.fromString("hotline"),
-            "kind" -> Json.fromString("beep"),
-            "createdAt" -> at.asJson,
-            "recipient" -> recipient.asJson
-          )
+        // case HotlineCreated(at, appEventId, created) =>
+        //   Json.obj(
+        //     "model" -> Json.fromString("hotline"),
+        //     "kind" -> Json.fromString("created"),
+        //     "createdAt" -> at.asJson,
+        //     "appEventId" -> Json.fromInt(appEventId),
+        //     "created" -> created.asJson
+        //   )
+        // case HotlineBeep(at, recipient) =>
+        //   Json.obj(
+        //     "model" -> Json.fromString("hotline"),
+        //     "kind" -> Json.fromString("beep"),
+        //     "createdAt" -> at.asJson,
+        //     "recipient" -> recipient.asJson
+        //   )
         case VisitCreated(at, created) =>
           Json.obj(
             "model" -> Json.fromString("visit"),
@@ -246,11 +253,15 @@ trait AppEventCodec extends Model with DateTime:
           case ("hotline", "created", at) =>
             for 
               created <- c.downField("created").as[Hotline]
-              appEventId <- c.downField("appEventId").as[Int]
-            yield HotlineCreated(at, appEventId, created)
-          case ("hotline", "beep", at) =>
-            for recipient <- c.downField("recipient").as[String]
-            yield HotlineBeep(at, recipient)
+            yield HotlineCreated(at, created)
+          // case ("hotline", "created", at) =>
+          //   for 
+          //     created <- c.downField("created").as[Hotline]
+          //     appEventId <- c.downField("appEventId").as[Int]
+          //   yield HotlineCreated(at, appEventId, created)
+          // case ("hotline", "beep", at) =>
+          //   for recipient <- c.downField("recipient").as[String]
+          //   yield HotlineBeep(at, recipient)
           case ("visit", "created", at) =>
             for created <- c.downField("created").as[Visit]
             yield VisitCreated(at, created)

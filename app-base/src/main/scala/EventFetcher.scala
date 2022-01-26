@@ -13,9 +13,10 @@ import io.circe.*
 import io.circe.syntax.*
 import io.circe.parser.decode
 import dev.myclinic.scala.model.jsoncodec.Implicits.{given}
+import dev.myclinic.scala.model.jsoncodec.EventType
 
 abstract class EventFetcher:
-  def publish(event: AppModelEvent): Unit
+  def publish(event: AppModelEvent, raw: AppEvent): Unit
 
   var nextEventId: Int = 0
   def start(): Future[Unit] =
@@ -42,24 +43,29 @@ abstract class EventFetcher:
 
   private def handleMessage(msg: String): Unit =
     println(("message", msg))
-    decode[AppEvent](msg) match {
-      case Right(appEvent) => handleAppEvent(appEvent)
+    decode[EventType](msg) match {
+      case Right(event) => 
+        event match {
+          case appEvent @ _: AppEvent => handleAppEvent(appEvent)
+          case _ => ()
+        }
+        
       case Left(ex)        => System.err.println(ex.getMessage)
     }
 
   private def handleAppEvent(appEvent: AppEvent): Unit =
     val modelEvent = AppModelEvent.from(appEvent)
     if appEvent.appEventId == nextEventId then
-      publish(modelEvent)
+      publish(modelEvent, appEvent)
       nextEventId += 1
     else if appEvent.appEventId > nextEventId then
       Api
         .listAppEventInRange(nextEventId, appEvent.appEventId)
         .onComplete({
           case Success(events) =>
-            val modelEvents = events.map(AppModelEvent.from(_))
-            modelEvents.foreach(event => publish(event))
-            publish(modelEvent)
+            val modelEvents = events.map(raw => (AppModelEvent.from(raw), raw))
+            modelEvents.foreach((event, raw) => publish(event, raw))
+            publish(modelEvent, appEvent)
             nextEventId = appEvent.appEventId + 1
           case Failure(ex) => System.err.println(ex.getMessage)
         })

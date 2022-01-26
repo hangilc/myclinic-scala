@@ -21,7 +21,7 @@ import dev.myclinic.scala.model.jsoncodec.Implicits.given
 import org.http4s.websocket.WebSocketFrame.Text
 import dev.myclinic.scala.appoint.admin.AppointAdmin
 
-object RestService extends DateTimeQueryParam:
+object RestService extends DateTimeQueryParam with Publisher:
 
   object dateFrom extends QueryParamDecoderMatcher[LocalDate]("from")
   object dateDate extends QueryParamDecoderMatcher[LocalDate]("date")
@@ -39,15 +39,15 @@ object RestService extends DateTimeQueryParam:
 
   case class UserError(message: String) extends Exception
 
-  private def publish(event: AppEvent)(using
-      topic: Topic[IO, WebSocketFrame]
-  ): IO[Unit] =
-    topic.publish1(Text(event.asJson.toString)).void
+  // private def publish(event: AppEvent)(using
+  //     topic: Topic[IO, WebSocketFrame]
+  // ): IO[Unit] =
+  //   topic.publish1(Text(event.asJson.toString)).void
 
-  private def publishAll(events: List[AppEvent])(using
-      topic: Topic[IO, WebSocketFrame]
-  ): IO[Unit] =
-    events.map(publish(_)).sequence_
+  // private def publishAll(events: List[AppEvent])(using
+  //     topic: Topic[IO, WebSocketFrame]
+  // ): IO[Unit] =
+  //   events.map(publish(_)).sequence_
 
   def routes(using topic: Topic[IO, WebSocketFrame]) = HttpRoutes.of[IO] {
 
