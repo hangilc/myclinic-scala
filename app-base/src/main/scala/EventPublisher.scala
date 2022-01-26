@@ -7,9 +7,10 @@ trait EventSubscriberController:
   def start(): Unit
   def stop(): Unit
 
-case class EventSubscriber[T <: AppModelEvent](private val handler: (T, AppEvent) => Unit,
-  publisher: EventPublisher[T])
-    extends EventSubscriberController:
+case class EventSubscriber[T <: AppModelEvent](
+    private val handler: (T, AppEvent) => Unit,
+    publisher: EventPublisher[T]
+) extends EventSubscriberController:
   var isStopped: Boolean = true
   val queue = mutable.Queue[(T, AppEvent)]()
 
@@ -56,43 +57,44 @@ case class EventPublisher[T <: AppModelEvent](
     subscribers = subscribers - subscriber
 
 case class RealTimeEventPublisher[T](
-  var handlers: Set[T => Unit] = Set.empty[T => Unit]
+    var handlers: Set[T => Unit] = Set.empty[T => Unit]
 ):
-  def addHandler(handler: T => Unit): Unit = 
+  def addHandler(handler: T => Unit): Unit =
     handlers = handlers + handler
 
   def publish(event: T): Unit = handlers.foreach(_(event))
 
+class ModelPublishers[
+    C <: AppModelEvent,
+    U <: AppModelEvent,
+    D <: AppModelEvent
+]:
+  val created = EventPublisher[C]()
+  val updated = EventPublisher[U]()
+  val deleted = EventPublisher[D]()
+
 class EventPublishers:
-  val appointCreated = EventPublisher[AppointCreated]()
-  val appointUpdated = EventPublisher[AppointUpdated]()
-  val appointDeleted = EventPublisher[AppointDeleted]()
-  val appointTimeCreated = EventPublisher[AppointTimeCreated]()
-  val appointTimeUpdated = EventPublisher[AppointTimeUpdated]()
-  val appointTimeDeleted = EventPublisher[AppointTimeDeleted]()
+  val appoint = ModelPublishers[AppointCreated, AppointUpdated, AppointDeleted]
+  val appointTime =
+    ModelPublishers[AppointTimeCreated, AppointTimeUpdated, AppointTimeDeleted]
+  val wqueue = ModelPublishers[WqueueCreated, WqueueUpdated, WqueueDeleted]
+  val shahokokuho = ModelPublishers[ShahokokuhoCreated, ShahokokuhoUpdated, ShahokokuhoDeleted]
   val hotlineCreated = EventPublisher[HotlineCreated]()
-  val wqueueCreated = EventPublisher[WqueueCreated]()
-  val wqueueUpdated = EventPublisher[WqueueUpdated]()
-  val wqueueDeleted = EventPublisher[WqueueDeleted]()
-  val shahokokuhoCreated = EventPublisher[ShahokokuhoCreated]()
-  val shahokokuhoUpdated = EventPublisher[ShahokokuhoUpdated]()
-  val shahokokuhoDeleted = EventPublisher[ShahokokuhoDeleted]()
   val hotlineBeep = RealTimeEventPublisher[HotlineBeep]()
 
 class EventDispatcher extends EventPublishers:
   def publish(event: AppModelEvent, raw: AppEvent): Unit =
     event match {
-      case e: AppointCreated     => appointCreated.publish(e, raw)
-      case e: AppointUpdated     => appointUpdated.publish(e, raw)
-      case e: AppointDeleted     => appointDeleted.publish(e, raw)
-      case e: AppointTimeCreated => appointTimeCreated.publish(e, raw)
-      case e: AppointTimeUpdated => appointTimeUpdated.publish(e, raw)
-      case e: AppointTimeDeleted => appointTimeDeleted.publish(e, raw)
-      case e: HotlineCreated => hotlineCreated.publish(e, raw)
-      case e: WqueueCreated => wqueueCreated.publish(e, raw)
-      case e: WqueueUpdated => wqueueUpdated.publish(e, raw)
-      case e: WqueueDeleted => wqueueDeleted.publish(e, raw)
+      case e: AppointCreated     => appoint.created.publish(e, raw)
+      case e: AppointUpdated     => appoint.updated.publish(e, raw)
+      case e: AppointDeleted     => appoint.deleted.publish(e, raw)
+      case e: AppointTimeCreated     => appointTime.created.publish(e, raw)
+      case e: AppointTimeUpdated     => appointTime.updated.publish(e, raw)
+      case e: AppointTimeDeleted     => appointTime.deleted.publish(e, raw)
+      case e: WqueueCreated     => wqueue.created.publish(e, raw)
+      case e: WqueueUpdated     => wqueue.updated.publish(e, raw)
+      case e: WqueueDeleted     => wqueue.deleted.publish(e, raw)
+      case e: HotlineCreated     => hotlineCreated.publish(e, raw)
       case _                     => ()
     }
   def publish(event: HotlineBeep): Unit = hotlineBeep.publish(event)
-

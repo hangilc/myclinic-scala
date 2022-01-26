@@ -175,12 +175,12 @@ class AppointSheet(using eventPublishers: EventPublishers):
     )
 
     val subscribers: List[EventSubscriberController] = List(
-      eventPublishers.appointCreated.subscribe(onAppointCreated),
-      eventPublishers.appointUpdated.subscribe(onAppointUpdated),
-      eventPublishers.appointDeleted.subscribe(onAppointDeleted),
-      eventPublishers.appointTimeCreated.subscribe(onAppointTimeCreated),
-      eventPublishers.appointTimeUpdated.subscribe(onAppointTimeUpdated),
-      eventPublishers.appointTimeDeleted.subscribe(onAppointTimeDeleted)
+      eventPublishers.appoint.created.subscribe(onAppointCreated),
+      eventPublishers.appoint.updated.subscribe(onAppointUpdated),
+      eventPublishers.appoint.deleted.subscribe(onAppointDeleted),
+      eventPublishers.appointTime.created.subscribe(onAppointTimeCreated),
+      eventPublishers.appointTime.updated.subscribe(onAppointTimeUpdated),
+      eventPublishers.appointTime.deleted.subscribe(onAppointTimeDeleted)
     )
 
     def init(
