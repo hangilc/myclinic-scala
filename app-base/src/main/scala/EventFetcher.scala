@@ -17,8 +17,18 @@ import dev.myclinic.scala.model.jsoncodec.EventType
 import dev.myclinic.scala.model.HotlineBeep
 
 abstract class EventFetcher:
-  def publish(event: AppModelEvent, raw: AppEvent): Unit
+  def publish(event: AppModelEvent, appEventId: Int): Unit = ()
   def publish(event: HotlineBeep): Unit = ()
+
+  private var events: Vector[(Int, AppModelEvent)] = Vector.empty
+
+  def catchup(baseEventId: Int, f: (Int, AppModelEvent) => Unit): Unit =
+    val i = events.lastIndexWhere(_._1 < baseEventId)
+    events.slice(i+1, events.size).foreach((gen, m) => f(gen, m))
+
+  private def onNewAppEvent(event: AppModelEvent, eventId: Int): Unit =
+    events = events :+ (eventId, event)
+    publish(event, eventId)
 
   var nextEventId: Int = 0
   def start(): Future[Unit] =
@@ -51,14 +61,13 @@ abstract class EventFetcher:
           case appEvent @ _: AppEvent => handleAppEvent(appEvent)
           case hotlineBeep @ _: HotlineBeep => publish(hotlineBeep)
         }
-        
       case Left(ex)        => System.err.println(ex.getMessage)
     }
 
   private def handleAppEvent(appEvent: AppEvent): Unit =
     val modelEvent = AppModelEvent.from(appEvent)
     if appEvent.appEventId == nextEventId then
-      publish(modelEvent, appEvent)
+      onNewAppEvent(modelEvent, appEvent.appEventId)
       nextEventId += 1
     else if appEvent.appEventId > nextEventId then
       Api
@@ -66,8 +75,8 @@ abstract class EventFetcher:
         .onComplete({
           case Success(events) =>
             val modelEvents = events.map(raw => (AppModelEvent.from(raw), raw))
-            modelEvents.foreach((event, raw) => publish(event, raw))
-            publish(modelEvent, appEvent)
+            modelEvents.foreach((event, raw) => onNewAppEvent(event, raw.appEventId))
+            onNewAppEvent(modelEvent, appEvent.appEventId)
             nextEventId = appEvent.appEventId + 1
           case Failure(ex) => System.err.println(ex.getMessage)
         })

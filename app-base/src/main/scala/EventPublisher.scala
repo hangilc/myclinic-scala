@@ -8,7 +8,7 @@ trait EventSubscriberController:
   def stop(): Unit
 
 case class EventSubscriber[T <: AppModelEvent](
-    private val handler: (T, AppEvent) => Unit,
+    private val handler: (T, Int) => Unit,
     publisher: EventPublisher[T]
 ) extends EventSubscriberController:
   var isStopped: Boolean = true

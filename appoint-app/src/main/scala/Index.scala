@@ -59,5 +59,5 @@ object JsMain:
 
 object AppEvents extends EventFetcher:
   val publishers = EventPublishers()
-  override def publish(event: AppModelEvent, raw: AppEvent): Unit =
-    publishers.publish(event, raw)
+  override def publish(event: AppModelEvent, gen: Int): Unit =
+    publishers.publish(event, gen)
