@@ -42,15 +42,15 @@ object JsMain:
         workarea
       )
     )
-    AppEvents.start()
-    given EventPublishers = AppEvents.publishers
-    val sheet = if isAdmin then AdminAppointSheet() else AppointSheet()
-    val startDate = DateUtil.startDayOfWeek(LocalDate.now())
-    val endDate = startDate.plusDays(6)
-    sheet.setupTo(workarea)
-    sheet.setupDateRange(startDate, endDate).onComplete {
-      case Success(_) => ()
-      case Failure(e) => System.err.println(e)
+    AppEvents.start().onComplete {
+      case Failure(ex) => System.err.println(ex.getMessage)
+      case Success(_) =>
+        given EventPublishers = AppEvents.publishers
+        val sheet = if isAdmin then AdminAppointSheet() else AppointSheet()
+        val startDate = DateUtil.startDayOfWeek(LocalDate.now())
+        val endDate = startDate.plusDays(6)
+        sheet.setupTo(workarea)
+        sheet.setupDateRange(startDate, endDate)
     }
 
   def banner(isAdmin: Boolean): HTMLElement =

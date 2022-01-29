@@ -13,10 +13,15 @@ object AppointApi extends ApiBase:
   def baseUrl: String = "/api/"
 
   trait Api:
+    def listAppointTimeFilled(
+        date: LocalDate
+    ): Future[(Int, List[(AppointTime, List[Appoint])])] =
+      get("list-appoint-time-filled", Params("date" -> date))
+
     def listAppointTimes(
         from: LocalDate,
         upto: LocalDate
-    ): Future[(Int, List[AppointTime])] =
+    ): Future[List[AppointTime]] =
       get("list-appoint-times", Params("from" -> from, "upto" -> upto))
 
     def getAppointTime(appointTimeId: Int): Future[AppointTime] =
@@ -46,7 +51,7 @@ object AppointApi extends ApiBase:
         Params("appoint-time-id" -> appointTimeId)
       )
 
-    def listAppointsForDate(date: LocalDate): Future[(Int, List[Appoint])] =
+    def listAppointsForDate(date: LocalDate): Future[List[Appoint]] =
       get("list-appoints-for-date", Params("date" -> date))
 
     def getNextAppEventId(): Future[Int] =

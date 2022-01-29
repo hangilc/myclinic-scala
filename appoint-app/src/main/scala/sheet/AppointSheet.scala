@@ -17,10 +17,7 @@ import scala.util.Success
 import scala.concurrent.Future
 import scala.collection.mutable
 import dev.myclinic.scala.webclient.Api
-import dev.myclinic.scala.web.appbase.{
-  EventPublishers,
-  EventSubscriberController
-}
+import dev.myclinic.scala.web.appbase.EventPublishers
 import scala.language.implicitConversions
 import org.scalajs.dom.MouseEvent
 import dev.myclinic.scala.web.appoint.{Misc, GlobalEvents}
@@ -30,6 +27,7 @@ import cats.implicits._
 import cats.Monoid
 import dev.myclinic.scala.web.appoint.AppointHistoryWindow
 import dev.myclinic.scala.web.appoint.sheet.covidthirdshot.CovidThirdShot
+import dev.myclinic.scala.clinicop.{NationalHoliday, RegularHoliday}
 
 class AppointSheet(using eventPublishers: EventPublishers):
   val daySpanDisp: HTMLElement = div(css(style => {
@@ -41,39 +39,76 @@ class AppointSheet(using eventPublishers: EventPublishers):
   var dateRange: Option[(LocalDate, LocalDate)] = None
   type AppointTimeId = Int
 
-  def setupDateRange(from: LocalDate, upto: LocalDate): Future[Unit] =
+  def setupDateRange(from: LocalDate, upto: LocalDate): Unit =
     val dates = DateUtil.enumDates(from, upto)
-    //var appointList: List[List[Appoint]] = List.empty
-    val f = for
-      (gen1, appointTimes) <- Api.listAppointTimes(from, upto)
-      _ <- dates
-        .map(d => {
-          for
-            (gen2, appoints) <- Api.listAppointsForDate(d)
-            _ = appointList = appoints :: appointList
-          yield ()
-        })
-        .sequence
-        .void
+    for
       clinicOpMap <- Api.batchResolveClinicOperations(dates)
-    yield
-      AppointRow.init(
-        dates,
-        appointTimes,
-        makeAppointMap(appointList.flatten),
-        clinicOpMap
+      cols = filterDates(dates, clinicOpMap).map((date, op) =>
+        AppointColumn(date, op, makeAppointTimeBox)
       )
+      _ = AppointRow.init(cols)
+    yield 
       dateRange = Some(from, upto)
-      GlobalEvents.AppointColumnChanged.publish(AppointRow.columns)
-    f transform (identity, ex => {
-      System.err.println(ex)
-      ex
-    })
+      cols.foreach(setupCol(_))
 
-  GlobalEvents.AppointColumnChanged.subscribe(cols => {
-    if cols.size > 0 then hideDaySpanDisp()
-    else showDaySpanDisp()
-  })
+  def filterDates(
+      dates: List[LocalDate],
+      opMap: Map[LocalDate, ClinicOperation]
+  ): List[(LocalDate, ClinicOperation)] =
+    dates
+      .map(date => (date, opMap(date)))
+      .filter((_, op) =>
+        op match {
+          case _: RegularHoliday => false
+          case _                 => true
+        }
+      )
+
+  def setupCol(col: AppointColumn): Unit =
+    for
+      (gen, appointTimesFilled) <- Api.listAppointTimeFilled(col.date)
+    yield
+      print(("data", (gen, appointTimesFilled)))
+
+
+  // dates.foreach(date => {
+  //   for
+  //     (gen, appointTimesFilled) <- Api.listAppointTimeFilled(date)
+
+  //   yield
+  //     val col = new AppointColumn(date, clinicOpMap(date), makeAppointTimeBox)
+  // })
+
+  // val f = for
+  //   (gen1, appointTimes) <- Api.listAppointTimes(from, upto)
+  //   _ <- dates
+  //     .map(d => {
+  //       for
+  //         (gen2, appoints) <- Api.listAppointsForDate(d)
+  //         _ = appointList = appoints :: appointList
+  //       yield ()
+  //     })
+  //     .sequence
+  //     .void
+  //   clinicOpMap <- Api.batchResolveClinicOperations(dates)
+  // yield
+  //   AppointRow.init(
+  //     dates,
+  //     appointTimes,
+  //     makeAppointMap(appointList.flatten),
+  //     clinicOpMap
+  //   )
+  //   dateRange = Some(from, upto)
+  //   GlobalEvents.AppointColumnChanged.publish(AppointRow.columns)
+  // f transform (identity, ex => {
+  //   System.err.println(ex)
+  //   ex
+  // })
+
+  // GlobalEvents.AppointColumnChanged.subscribe(cols => {
+  //   if cols.size > 0 then hideDaySpanDisp()
+  //   else showDaySpanDisp()
+  // })
 
   def showDaySpanDisp(): Unit =
     dateRange match {
@@ -130,9 +165,8 @@ class AppointSheet(using eventPublishers: EventPublishers):
 
     def onThirdShotClick(): Unit =
       val content = CovidThirdShot()
-      val w = FloatWindow("追加接種",
-        content.ui.ele(padding := "10px"),
-        width = "300px")
+      val w =
+        FloatWindow("追加接種", content.ui.ele(padding := "10px"), width = "300px")
       w.open()
       content.initFocus()
 
@@ -174,22 +208,16 @@ class AppointSheet(using eventPublishers: EventPublishers):
       justifyContent := "center"
     )
 
-    val subscribers: List[EventSubscriberController] = List(
-      eventPublishers.appoint.created.subscribe(onAppointCreated),
-      eventPublishers.appoint.updated.subscribe(onAppointUpdated),
-      eventPublishers.appoint.deleted.subscribe(onAppointDeleted),
-      eventPublishers.appointTime.created.subscribe(onAppointTimeCreated),
-      eventPublishers.appointTime.updated.subscribe(onAppointTimeUpdated),
-      eventPublishers.appointTime.deleted.subscribe(onAppointTimeDeleted)
-    )
+    def init(cols: List[AppointColumn]): Unit =
+      columnWrapper.setChildren(cols.map(_.ele))
 
-    def init(
+    def initOrig(
         dates: List[LocalDate],
         appointTimes: List[AppointTime],
         appointMap: Map[AppointTimeId, List[Appoint]],
         clinicOpMap: Map[LocalDate, ClinicOperation]
     ): Unit =
-      subscribers.foreach(_.stop())
+      // subscribers.foreach(_.stop())
       clear()
       val appointDates: List[AppointDate] =
         AppointDate.classify(dates, clinicOpMap, appointTimes, appointMap)
@@ -206,7 +234,7 @@ class AppointSheet(using eventPublishers: EventPublishers):
             AppointColumn.create(date.date, date.op, list, makeAppointTimeBox)
           )
         })
-      subscribers.foreach(_.start())
+    // subscribers.foreach(_.start())
 
     def clear(): Unit =
       columnWrapper.clear()

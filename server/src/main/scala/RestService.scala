@@ -43,6 +43,9 @@ object RestService extends DateTimeQueryParam with Publisher:
 
   def routes(using topic: Topic[IO, WebSocketFrame]) = HttpRoutes.of[IO] {
 
+    case GET -> Root / "list-appoint-time-filled" :? dateDate(date) =>
+      Ok(Db.listAppointTimeFilled(date))
+
     case GET -> Root / "list-appoint-times" :? dateFrom(from) +& dateUpto(
           upto
         ) =>

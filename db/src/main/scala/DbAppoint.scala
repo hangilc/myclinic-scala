@@ -172,16 +172,24 @@ trait DbAppoint extends Mysql:
   def listAppointTimes(
       from: LocalDate,
       upto: LocalDate
-  ): IO[(Int, List[AppointTime])] =
-    val op: ConnectionIO[(Int, List[AppointTime])] = 
-      for 
-        result <- Prim.listAppointTimes(from, upto).to[List]
-        gen <- DbEventPrim.currentEventId()
-      yield (gen, result)
-    mysql(op)
+  ): IO[List[AppointTime]] =
+    mysql(Prim.listAppointTimes(from, upto).to[List])
 
   def listAppointTimesForDate(date: LocalDate): IO[List[AppointTime]] =
     mysql(Prim.listAppointTimesForDate(date).to[List])
+
+  def listAppointTimeFilled(date: LocalDate): IO[(Int, List[(AppointTime, List[Appoint])])] =
+    val op =
+      for
+        appointTimes <- Prim.listAppointTimesForDate(date).to[List]
+        result <- appointTimes.map(appointTime =>
+          for
+            appoints <- Prim.listAppointsForAppointTime(appointTime.appointTimeId).to[List]
+          yield (appointTime, appoints)
+        ).sequence
+        gen <- DbEventPrim.currentEventId()
+      yield (gen, result)
+    mysql(op)
 
   def getAppointTimeById(appointTimeId: Int): IO[AppointTime] =
     mysql(Prim.getAppointTime(appointTimeId).unique)
@@ -236,13 +244,8 @@ trait DbAppoint extends Mysql:
   def listAppointsForAppointTime(appointTimeId: Int): IO[List[Appoint]] =
     mysql(Prim.listAppointsForAppointTime(appointTimeId).to[List])
 
-  def listAppointsForDate(date: LocalDate): IO[(Int, List[Appoint])] =
-    val op =
-      for
-        result <- Prim.listAppointsForDate(date).to[List]
-        gen <- DbEventPrim.currentEventId()
-      yield (gen, result)
-    mysql(op)
+  def listAppointsForDate(date: LocalDate): IO[List[Appoint]] =
+    mysql(Prim.listAppointsForDate(date).to[List])
 
   def appointHistoryAt(appointTimeId: Int): IO[List[AppEvent]] =
     mysql(

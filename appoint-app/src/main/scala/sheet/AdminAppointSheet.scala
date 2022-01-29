@@ -27,6 +27,7 @@ class AdminAppointSheet(using EventPublishers) extends AppointSheet:
     ContextMenu(List("予約枠わりあて" -> doFillAppointTimes)).open(event)
 
   def doFillAppointTimes(): Unit =
+    println(("date-range", dateRange))
     dateRange.map {
       case (from, upto) => Api.fillAppointTimes(from, upto)
     }
