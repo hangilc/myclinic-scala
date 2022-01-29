@@ -18,9 +18,9 @@ object ElementDispatcher:
       )
 
     def addCreatedDispatcher(): EventSubscriber[C] =
-      p.created.subscribe(created => {
-        val evt: CustomEvent[C] =
-          CustomEvent(p.createdEventType, created, false)
+      p.created.subscribe((created, gen) => {
+        val evt: CustomEvent[(C, Int)] =
+          CustomEvent(p.createdEventType, (created, gen), false)
         document.body
           .qSelectorAll(p.createdSelector)
           .foreach(e => {
@@ -29,9 +29,9 @@ object ElementDispatcher:
       })
 
     def addUpdatedDispatcher(): EventSubscriber[U] =
-      p.updated.subscribe(updated => {
-        val evt: CustomEvent[U] =
-          CustomEvent(p.updatedEventType, updated, false)
+      p.updated.subscribe((updated, gen) => {
+        val evt: CustomEvent[(U, Int)] =
+          CustomEvent(p.updatedEventType, (updated, gen), false)
         document.body
           .qSelectorAll(p.updatedSelector)
           .foreach(e => {
@@ -45,9 +45,9 @@ object ElementDispatcher:
       })
 
     def addDeletedDispatcher(): EventSubscriber[D] =
-      p.deleted.subscribe(deleted => {
-        val evt: CustomEvent[D] =
-          CustomEvent(p.deletedEventType, deleted, false)
+      p.deleted.subscribe((deleted, gen) => {
+        val evt: CustomEvent[(D, Int)] =
+          CustomEvent(p.deletedEventType, (deleted, gen), false)
         document.body
           .qSelectorAll(p.deletedSelector)
           .foreach(e => {
@@ -68,10 +68,10 @@ object ElementDispatcher:
         D <: AppModelEvent
     ](
         publisher: ModelPublishers[T, C, U, D],
-        handler: C => Unit
+        handler: (C, Int) => Unit
     ): Unit =
       ele(cls := publisher.createdSelector)
-      ele(oncustomevent[C](publisher.createdEventType) := (ev => handler(ev.detail)))
+      ele(oncustomevent[(C, Int)](publisher.createdEventType) := (ev => handler.tupled(ev.detail)))
 
     def addUpdatedListener[
         T,
@@ -80,10 +80,10 @@ object ElementDispatcher:
         D <: AppModelEvent
     ](
         publisher: ModelPublishers[T, C, U, D],
-        handler: U => Unit
+        handler: (U, Int) => Unit
     ): Unit =
       ele(cls := publisher.updatedSelector)
-      ele(oncustomevent[U](publisher.updatedEventType) := (ev => handler(ev.detail)))
+      ele(oncustomevent[(U, Int)](publisher.updatedEventType) := (ev => handler.tupled(ev.detail)))
 
     def addUpdatedWithIdListener[
         T,
@@ -93,10 +93,10 @@ object ElementDispatcher:
     ](
         publisher: ModelPublishers[T, C, U, D],
         id: Int,
-        handler: U => Unit
+        handler: (U, Int) => Unit
     ): Unit =
       ele(cls := publisher.updatedSelectorWithId(id))
-      ele(oncustomevent[U](publisher.updatedEventType) := (ev => handler(ev.detail)))
+      ele(oncustomevent[(U, Int)](publisher.updatedEventType) := (ev => handler.tupled(ev.detail)))
 
     def addDeletedListener[
         T,
@@ -105,10 +105,10 @@ object ElementDispatcher:
         D <: AppModelEvent
     ](
         publisher: ModelPublishers[T, C, U, D],
-        handler: D => Unit
+        handler: (D, Int) => Unit
     ): Unit =
       ele(cls := publisher.deletedSelector)
-      ele(oncustomevent[D](publisher.deletedEventType) := (ev => handler(ev.detail)))
+      ele(oncustomevent[(D, Int)](publisher.deletedEventType) := (ev => handler.tupled(ev.detail)))
 
     def addDeletedWithIdListener[
         T,
@@ -118,7 +118,7 @@ object ElementDispatcher:
     ](
         publisher: ModelPublishers[T, C, U, D],
         id: Int,
-        handler: D => Unit
+        handler: (D, Int) => Unit
     ): Unit =
       ele(cls := publisher.deletedSelectorWithId(id))
-      ele(oncustomevent[D](publisher.deletedEventType) := (ev => handler(ev.detail)))
+      ele(oncustomevent[(D, Int)](publisher.deletedEventType) := (ev => handler.tupled(ev.detail)))

@@ -44,6 +44,8 @@ abstract class EventFetcher:
       }
     }
 
+  def isRelevant(appEvent: AppEvent): Boolean = true
+
   private def url: String =
     val location = dom.window.location
     val origProtocol = location.protocol
@@ -65,20 +67,21 @@ abstract class EventFetcher:
     }
 
   private def handleAppEvent(appEvent: AppEvent): Unit =
-    val modelEvent = AppModelEvent.from(appEvent)
-    if appEvent.appEventId == nextEventId then
-      onNewAppEvent(modelEvent, appEvent.appEventId)
-      nextEventId += 1
-    else if appEvent.appEventId > nextEventId then
-      Api
-        .listAppEventInRange(nextEventId, appEvent.appEventId)
-        .onComplete({
-          case Success(events) =>
-            val modelEvents = events.map(raw => (AppModelEvent.from(raw), raw))
-            modelEvents.foreach((event, raw) => onNewAppEvent(event, raw.appEventId))
-            onNewAppEvent(modelEvent, appEvent.appEventId)
-            nextEventId = appEvent.appEventId + 1
-          case Failure(ex) => System.err.println(ex.getMessage)
-        })
+    if isRelevant(appEvent) then
+      val modelEvent = AppModelEvent.from(appEvent)
+      if appEvent.appEventId == nextEventId then
+        onNewAppEvent(modelEvent, appEvent.appEventId)
+        nextEventId += 1
+      else if appEvent.appEventId > nextEventId then
+        Api
+          .listAppEventInRange(nextEventId, appEvent.appEventId)
+          .onComplete({
+            case Success(events) =>
+              val modelEvents = events.map(raw => (AppModelEvent.from(raw), raw))
+              modelEvents.foreach((event, raw) => onNewAppEvent(event, raw.appEventId))
+              onNewAppEvent(modelEvent, appEvent.appEventId)
+              nextEventId = appEvent.appEventId + 1
+            case Failure(ex) => System.err.println(ex.getMessage)
+          })
 
 

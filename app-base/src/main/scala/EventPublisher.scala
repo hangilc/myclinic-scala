@@ -3,58 +3,54 @@ package dev.myclinic.scala.web.appbase
 import dev.myclinic.scala.model.*
 import scala.collection.mutable
 
-trait EventSubscriberController:
-  def start(): Unit
-  def stop(): Unit
+// trait EventSubscriberController:
+//   def start(): Unit
+//   def stop(): Unit
 
-case class EventSubscriber[T <: AppModelEvent](
-    private val handler: (T, Int) => Unit,
-    publisher: EventPublisher[T]
-) extends EventSubscriberController:
-  var isStopped: Boolean = true
-  val queue = mutable.Queue[(T, AppEvent)]()
+// case class EventSubscriber[T <: AppModelEvent](
+//     private val handler: (T, Int) => Unit,
+//     publisher: EventPublisher[T]
+// ) extends EventSubscriberController:
+//   var isStopped: Boolean = true
+//   val queue = mutable.Queue[(T, AppEvent)]()
 
-  def handle(event: T, appEvent: AppEvent): Unit =
-    queue.append((event, appEvent))
-    if !isStopped then handleQueue()
+//   def handle(event: T, appEvent: AppEvent): Unit =
+//     queue.append((event, appEvent))
+//     if !isStopped then handleQueue()
 
-  def start(): Unit =
-    isStopped = false
-    handleQueue()
+//   def start(): Unit =
+//     isStopped = false
+//     handleQueue()
 
-  def stop(): Unit =
-    isStopped = true
+//   def stop(): Unit =
+//     isStopped = true
 
-  def unsubscribe(): Unit =
-    publisher.unsubscribe(this)
+//   def unsubscribe(): Unit =
+//     publisher.unsubscribe(this)
 
-  private def handleQueue(): Unit =
-    while !queue.isEmpty do
-      val (event, appEvent) = queue.dequeue()
-      handleOne(event, appEvent)
+//   private def handleQueue(): Unit =
+//     while !queue.isEmpty do
+//       val (event, appEvent) = queue.dequeue()
+//       handleOne(event, appEvent)
 
-  private def handleOne(event: T, appEvent: AppEvent): Unit =
-    try handler(event, appEvent)
-    catch {
-      case e: Throwable => System.err.println(e.toString)
-    }
+//   private def handleOne(event: T, appEvent: AppEvent): Unit =
+//     try handler(event, appEvent)
+//     catch {
+//       case e: Throwable => System.err.println(e.toString)
+//     }
+
+case class EventSubscriber[T](handler: (T, Int) => Unit)
 
 case class EventPublisher[T <: AppModelEvent](
     var subscribers: Set[EventSubscriber[T]] = Set.empty[EventSubscriber[T]]
 ):
-  def subscribe(handler: (T, AppEvent) => Unit): EventSubscriber[T] =
-    val sub = EventSubscriber(handler, this)
+  def subscribe(handler: (T, Int) => Unit): EventSubscriber[T] =
+    val sub = EventSubscriber(handler)
     subscribers = subscribers + sub
     sub
 
-  def subscribe(handler: T => Unit): EventSubscriber[T] =
-    subscribe((t, _) => handler(t))
-
-  def publish(event: T, appEvent: AppEvent): Unit =
-    subscribers.foreach(_.handle(event, appEvent))
-
-  def unsubscribe(subscriber: EventSubscriber[T]): Unit =
-    subscribers = subscribers - subscriber
+  def publish(event: T, gen: Int): Unit =
+    subscribers.foreach(_.handler(event, gen))
 
 case class RealTimeEventPublisher[T](
     var handlers: Set[T => Unit] = Set.empty[T => Unit]
@@ -126,27 +122,27 @@ class EventPublishers:
   val hotlineCreated = EventPublisher[HotlineCreated]()
   val hotlineBeep = RealTimeEventPublisher[HotlineBeep]()
 
-  def publish(event: AppModelEvent, raw: AppEvent): Unit =
+  def publish(event: AppModelEvent, gen: Int): Unit =
     event match {
-      case e: AppointCreated     => appoint.created.publish(e, raw)
-      case e: AppointUpdated     => appoint.updated.publish(e, raw)
-      case e: AppointDeleted     => appoint.deleted.publish(e, raw)
-      case e: AppointTimeCreated => appointTime.created.publish(e, raw)
-      case e: AppointTimeUpdated => appointTime.updated.publish(e, raw)
-      case e: AppointTimeDeleted => appointTime.deleted.publish(e, raw)
-      case e: WqueueCreated      => wqueue.created.publish(e, raw)
-      case e: WqueueUpdated      => wqueue.updated.publish(e, raw)
-      case e: WqueueDeleted      => wqueue.deleted.publish(e, raw)
-      case e: ShahokokuhoCreated => shahokokuho.created.publish(e, raw)
-      case e: ShahokokuhoUpdated => shahokokuho.updated.publish(e, raw)
-      case e: ShahokokuhoDeleted => shahokokuho.deleted.publish(e, raw)
-      case e: KoukikoureiCreated => koukikourei.created.publish(e, raw)
-      case e: KoukikoureiUpdated => koukikourei.updated.publish(e, raw)
-      case e: KoukikoureiDeleted => koukikourei.deleted.publish(e, raw)
-      case e: RoujinCreated      => roujin.created.publish(e, raw)
-      case e: RoujinUpdated      => roujin.updated.publish(e, raw)
-      case e: RoujinDeleted      => roujin.deleted.publish(e, raw)
-      case e: HotlineCreated     => hotlineCreated.publish(e, raw)
+      case e: AppointCreated     => appoint.created.publish(e, gen)
+      case e: AppointUpdated     => appoint.updated.publish(e, gen)
+      case e: AppointDeleted     => appoint.deleted.publish(e, gen)
+      case e: AppointTimeCreated => appointTime.created.publish(e, gen)
+      case e: AppointTimeUpdated => appointTime.updated.publish(e, gen)
+      case e: AppointTimeDeleted => appointTime.deleted.publish(e, gen)
+      case e: WqueueCreated      => wqueue.created.publish(e, gen)
+      case e: WqueueUpdated      => wqueue.updated.publish(e, gen)
+      case e: WqueueDeleted      => wqueue.deleted.publish(e, gen)
+      case e: ShahokokuhoCreated => shahokokuho.created.publish(e, gen)
+      case e: ShahokokuhoUpdated => shahokokuho.updated.publish(e, gen)
+      case e: ShahokokuhoDeleted => shahokokuho.deleted.publish(e, gen)
+      case e: KoukikoureiCreated => koukikourei.created.publish(e, gen)
+      case e: KoukikoureiUpdated => koukikourei.updated.publish(e, gen)
+      case e: KoukikoureiDeleted => koukikourei.deleted.publish(e, gen)
+      case e: RoujinCreated      => roujin.created.publish(e, gen)
+      case e: RoujinUpdated      => roujin.updated.publish(e, gen)
+      case e: RoujinDeleted      => roujin.deleted.publish(e, gen)
+      case e: HotlineCreated     => hotlineCreated.publish(e, gen)
       case _                     => ()
     }
   def publish(event: HotlineBeep): Unit = hotlineBeep.publish(event)
