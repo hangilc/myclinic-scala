@@ -43,13 +43,13 @@ class AppointSheet(using eventPublishers: EventPublishers):
 
   def setupDateRange(from: LocalDate, upto: LocalDate): Future[Unit] =
     val dates = DateUtil.enumDates(from, upto)
-    var appointList: List[List[Appoint]] = List.empty
+    //var appointList: List[List[Appoint]] = List.empty
     val f = for
-      appointTimes <- Api.listAppointTimes(from, upto)
+      (gen1, appointTimes) <- Api.listAppointTimes(from, upto)
       _ <- dates
         .map(d => {
           for
-            appoints <- Api.listAppointsForDate(d)
+            (gen2, appoints) <- Api.listAppointsForDate(d)
             _ = appointList = appoints :: appointList
           yield ()
         })

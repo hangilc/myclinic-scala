@@ -51,11 +51,14 @@ object DbEventPrim:
     sql.query[AppEvent]
 
   def nextGlobalEventId(): ConnectionIO[Int] =
+    currentEventId().map(_ + 1)
+
+  def currentEventId(): ConnectionIO[Int] =
     sql"""
       select app_event_id from app_event order by app_event_id desc limit 1
     """.query[Int].option.map(intOpt => intOpt match {
-      case Some(id) => id + 1
-      case None => 1
+      case Some(id) => id
+      case None => 0
     })
 
   def listHotlineByDate(date: LocalDate): Query0[AppEvent] =

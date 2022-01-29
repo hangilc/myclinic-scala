@@ -172,8 +172,13 @@ trait DbAppoint extends Mysql:
   def listAppointTimes(
       from: LocalDate,
       upto: LocalDate
-  ): IO[List[AppointTime]] =
-    mysql(Prim.listAppointTimes(from, upto).to[List])
+  ): IO[(Int, List[AppointTime])] =
+    val op: ConnectionIO[(Int, List[AppointTime])] = 
+      for 
+        result <- Prim.listAppointTimes(from, upto).to[List]
+        gen <- DbEventPrim.currentEventId()
+      yield (gen, result)
+    mysql(op)
 
   def listAppointTimesForDate(date: LocalDate): IO[List[AppointTime]] =
     mysql(Prim.listAppointTimesForDate(date).to[List])
@@ -231,8 +236,13 @@ trait DbAppoint extends Mysql:
   def listAppointsForAppointTime(appointTimeId: Int): IO[List[Appoint]] =
     mysql(Prim.listAppointsForAppointTime(appointTimeId).to[List])
 
-  def listAppointsForDate(date: LocalDate): IO[List[Appoint]] =
-    mysql(Prim.listAppointsForDate(date).to[List])
+  def listAppointsForDate(date: LocalDate): IO[(Int, List[Appoint])] =
+    val op =
+      for
+        result <- Prim.listAppointsForDate(date).to[List]
+        gen <- DbEventPrim.currentEventId()
+      yield (gen, result)
+    mysql(op)
 
   def appointHistoryAt(appointTimeId: Int): IO[List[AppEvent]] =
     mysql(

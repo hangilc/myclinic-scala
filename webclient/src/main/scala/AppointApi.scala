@@ -16,7 +16,7 @@ object AppointApi extends ApiBase:
     def listAppointTimes(
         from: LocalDate,
         upto: LocalDate
-    ): Future[List[AppointTime]] =
+    ): Future[(Int, List[AppointTime])] =
       get("list-appoint-times", Params("from" -> from, "upto" -> upto))
 
     def getAppointTime(appointTimeId: Int): Future[AppointTime] =
@@ -46,7 +46,7 @@ object AppointApi extends ApiBase:
         Params("appoint-time-id" -> appointTimeId)
       )
 
-    def listAppointsForDate(date: LocalDate): Future[List[Appoint]] =
+    def listAppointsForDate(date: LocalDate): Future[(Int, List[Appoint])] =
       get("list-appoints-for-date", Params("date" -> date))
 
     def getNextAppEventId(): Future[Int] =
