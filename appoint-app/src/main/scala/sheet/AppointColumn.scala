@@ -46,8 +46,14 @@ case class AppointColumn(
     AppEvents.publishers.appointTime,
     (event, gen) => {
       val created = event.created
-      if created.date == date then
-        addAppointTime(created, gen)
+      if created.date == date then addAppointTime(created, gen)
+    }
+  )
+  ele.addDeletedListener(
+    AppEvents.publishers.appointTime,
+    (event, gen) => {
+      val deleted = event.deleted
+      if deleted.date == date then removeAppointTime(deleted, gen)
     }
   )
 
@@ -87,7 +93,9 @@ case class AppointColumn(
   def totalAppoints: Int =
     boxWrapper.qSelectorAllCount(".appoint-slot")
 
-  def composeContextMenu(prev: List[(String, () => Unit)]): List[(String, () => Unit)] =
+  def composeContextMenu(
+      prev: List[(String, () => Unit)]
+  ): List[(String, () => Unit)] =
     prev
 
   def onContextMenu(event: MouseEvent): Unit =
@@ -141,11 +149,22 @@ case class AppointColumn(
     boxes = Types.insert(box, _.ele, boxes, boxWrapper)
     adjustVacantClass()
 
+  def removeAppointTime(appointTime: AppointTime, gen: Int): Unit =
+    boxes = Types.delete(
+      _.appointTimeId == appointTime.appointTimeId,
+      _.ele,
+      boxes,
+      boxWrapper
+    )
+    adjustVacantClass()
+
   def deleteAppointTime(appointTimeId: Int): Unit =
-    boxes.find(_.appointTime.appointTimeId == appointTimeId).foreach(box => {
-      box.ele.remove()
-      boxes = boxes.filterNot(_ == box)
-    })
+    boxes
+      .find(_.appointTime.appointTimeId == appointTimeId)
+      .foreach(box => {
+        box.ele.remove()
+        boxes = boxes.filterNot(_ == box)
+      })
     adjustVacantClass()
 
   // def updateAppointTime(updated: AppointTime): Unit =
