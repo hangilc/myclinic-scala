@@ -28,6 +28,7 @@ import dev.myclinic.scala.web.appbase.{
   EventFetcher,
   EventPublishers
 }
+import dev.myclinic.scala.web.appbase.ElementDispatcher.*
 
 @JSExportTopLevel("JsMain")
 object JsMain:
@@ -59,5 +60,7 @@ object JsMain:
 
 object AppEvents extends EventFetcher:
   val publishers = EventPublishers()
+  publishers.appoint.addDispatchers()
+  publishers.appointTime.addDispatchers()
   override def publish(event: AppModelEvent, gen: Int): Unit =
     publishers.publish(event, gen)

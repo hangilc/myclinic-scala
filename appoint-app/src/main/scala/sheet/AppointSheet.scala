@@ -3,7 +3,13 @@ package dev.myclinic.scala.web.appoint.sheet
 import dev.fujiwara.domq.ElementQ.{given, *}
 import dev.fujiwara.domq.Html.{given, *}
 import dev.fujiwara.domq.Modifiers.{given, *}
-import dev.fujiwara.domq.{Icons, ContextMenu, FloatWindow, ShowMessage}
+import dev.fujiwara.domq.{
+  Icons,
+  ContextMenu,
+  FloatWindow,
+  ShowMessage,
+  CustomEvent
+}
 import dev.myclinic.scala.model.*
 import dev.myclinic.scala.clinicop.*
 import dev.myclinic.scala.util.DateUtil
@@ -28,6 +34,8 @@ import cats.Monoid
 import dev.myclinic.scala.web.appoint.AppointHistoryWindow
 import dev.myclinic.scala.web.appoint.sheet.covidthirdshot.CovidThirdShot
 import dev.myclinic.scala.clinicop.{NationalHoliday, RegularHoliday}
+import dev.myclinic.scala.web.appoint.AppEvents
+import dev.myclinic.scala.web.appbase.ElementDispatcher.*
 
 class AppointSheet(using eventPublishers: EventPublishers):
   val daySpanDisp: HTMLElement = div(css(style => {
@@ -36,6 +44,35 @@ class AppointSheet(using eventPublishers: EventPublishers):
     style.padding = "1rem 0"
   }))
   val eles = div(TopMenu.ele, daySpanDisp, AppointRow.ele)
+  eles.addCreatedListener(
+    AppEvents.publishers.appoint,
+    (event, gen) => {
+      val appoint: Appoint = event.created
+      val selector =
+        s".appoint-time-box.appoint-time-id-${appoint.appointTimeId}"
+      val targets = eles.qSelectorAll(selector)
+      CustomEvent.dispatchTo(
+        AppEvents.publishers.appoint.createdEventType,
+        (event, gen),
+        targets
+      )
+    }
+  )
+  eles.addDeletedListener(
+    AppEvents.publishers.appoint,
+    (event, gen) => {
+      val appoint: Appoint = event.deleted
+      val selector =
+        s".appoint-time-box.appoint-time-id-${appoint.appointTimeId}"
+      val targets = eles.qSelectorAll(selector)
+      CustomEvent.dispatchTo(
+        AppEvents.publishers.appoint.deletedEventType,
+        (event, gen),
+        targets
+      )
+    }
+  )
+
   var dateRange: Option[(LocalDate, LocalDate)] = None
   type AppointTimeId = Int
 
@@ -47,9 +84,12 @@ class AppointSheet(using eventPublishers: EventPublishers):
         AppointColumn(date, op, makeAppointTimeBox)
       )
       _ = AppointRow.init(cols)
-    yield 
+    yield
       dateRange = Some(from, upto)
-      cols.foreach(setupCol(_))
+      cols.foreach(col => {
+        for (gen, appointTimesFilled) <- Api.listAppointTimeFilled(col.date)
+        yield col.setAppointTimes(gen, appointTimesFilled)
+      })
 
   def filterDates(
       dates: List[LocalDate],
@@ -63,13 +103,6 @@ class AppointSheet(using eventPublishers: EventPublishers):
           case _                 => true
         }
       )
-
-  def setupCol(col: AppointColumn): Unit =
-    for
-      (gen, appointTimesFilled) <- Api.listAppointTimeFilled(col.date)
-    yield
-      print(("data", (gen, appointTimesFilled)))
-
 
   // dates.foreach(date => {
   //   for

@@ -51,7 +51,6 @@ case class AppointColumn(
     ),
     boxWrapper
   )
-  adjustVacantClass()
 
   def dateRep: String = Misc.formatAppointDate(date)
 
@@ -111,7 +110,7 @@ case class AppointColumn(
       val ids: List[Int] = boxes.map(_.appointTimeId).toList
       (for _ <- ids.map(id => Api.deleteAppointTime(id)).sequence.void
       yield ()).onComplete {
-        case Success(_) => ()
+        case Success(_)  => ()
         case Failure(ex) => System.err.println(ex.getMessage)
       }
     })
@@ -131,6 +130,20 @@ case class AppointColumn(
 
   def hasAppointTimeId(appointTimeId: Int): Boolean =
     boxes.find(b => b.appointTime.appointTimeId == appointTimeId).isDefined
+
+  def setAppointTimes(
+      gen: Int,
+      appointTimesFilled: List[(AppointTime, List[Appoint])]
+  ): Unit =
+    appointTimesFilled.foreach((appointTime, appoints) => {
+      val box = appointTimeBoxMaker(
+        appointTime,
+        () => findFollowingVacantRegular(appointTime)
+      )
+      box.setAppoints(gen, appoints)
+      boxWrapper(box.ele)
+    })
+    adjustVacantClass()
 
   def addAppointTime(appointTime: AppointTime): Unit =
     val box = appointTimeBoxMaker(

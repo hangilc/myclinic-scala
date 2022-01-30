@@ -52,6 +52,12 @@ object Modifiers:
     def :=(a: String): Modifier[HTMLElement] = (e => 
       a.trim.split("\\s+").foreach(c => e.classList.add(c))
     )
+    def :=(opt: Option[String]): Modifier[HTMLElement] = (e =>{
+      opt match {
+        case Some(s) => :=(s)
+        case None => ()
+      }
+    })
     def :-(a: String): Modifier[HTMLElement] = (e => 
       a.trim.split("\\s+").foreach(c => e.classList.remove(c))
     )

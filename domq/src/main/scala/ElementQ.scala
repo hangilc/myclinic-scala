@@ -87,6 +87,11 @@ object ElementQ:
         i += 1
       result
 
+    def qSelectorAllCount(
+      querySelector: String
+    ): Int =
+      ele.querySelectorAll(querySelector).length
+
     def getCheckedRadioValue(name: String): Option[String] =
       val n = ele.querySelector(s"input[type=radio][name=${name}]:checked")
       if n == null then None

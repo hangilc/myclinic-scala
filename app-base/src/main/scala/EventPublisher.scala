@@ -73,11 +73,18 @@ class ModelPublishers[
   val createdEventType = code + "-created"
   val updatedEventType = code + "-updated"
   val deletedEventType = code + "-deleted"
-  val createdSelector = "." + createdEventType
-  val updatedSelector = "." + updatedEventType
-  def updatedSelectorWithId(id: Int) = updatedSelector + "-" + id.toString
-  def deletedSelector = "." + deletedEventType
-  def deletedSelectorWithId(id: Int) = deletedSelector + "-" + id.toString
+  val createdListenerClass = createdEventType
+  val updatedListenerClass = updatedEventType
+  def updatedWithIdListenerClass(id: Int) =
+    updatedListenerClass + "-" + id.toString
+  val deletedListenerClass = deletedEventType
+  def deletedWithIdListenerClass(id: Int) =
+    deletedListenerClass + "-" + id.toString
+  val createdSelector = "." + createdListenerClass
+  val updatedSelector = "." + updatedListenerClass
+  def updatedWithIdSelector(id: Int) = "." + updatedWithIdListenerClass(id)
+  def deletedSelector = "." + deletedListenerClass
+  def deletedWithIdSelector(id: Int) = "." + deletedWithIdListenerClass(id)
 
 class EventPublishers:
   val appoint =
