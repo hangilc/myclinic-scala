@@ -31,7 +31,7 @@ val sortedAppointTimeBox: SortedElement[AppointTimeBox] =
     def element(a: AppointTimeBox): HTMLElement = a.ele
 
 case class AppointTimeBox(
-    appointTime: AppointTime,
+    var appointTime: AppointTime,
     followingVacantRegular: () => Option[AppointTime]
 ):
   case class Slot(var appoint: Appoint):
@@ -40,7 +40,7 @@ case class AppointTimeBox(
     val ele = div(
       cls := "appoint-slot",
       cls := s"appoint-id-${appoint.appointId}"
-      )(onclick := (onClick _))(eLabel, eTags)
+    )(onclick := (onClick _))(eLabel, eTags)
     var dialog: Option[EditAppointDialog] = None
     updateUI()
 
@@ -71,26 +71,46 @@ case class AppointTimeBox(
       dialog.foreach(d => d.onAppointUpdated(updated))
 
   var slots: List[Slot] = List.empty
-  val slotsElement = div()
+  val eTimeRep = div
+  val eKindRep = div
+  val slotsElement = div
   val ele =
     div(
       cls := "appoint-time-box vacant",
       cls := s"appoint-time-id-${appointTime.appointTimeId}",
-      cls := appointKindToCssClass(appointTime.kind),
-      cls := (if appointTime.capacity > 0 then Some("vacant") else None),
       css(style => style.cursor = "pointer"),
       onclick := (onElementClick)
-    )(
-      div(appointTimeSpanRep),
-      div(appointTimeKindRep),
-      slotsElement
+    )(eTimeRep, eKindRep, slotsElement)
+  updateUI()
+
+  def updateUI(): Unit =
+    ele(
+      cls := appointKindToCssClass(appointTime.kind),
+      cls := (if appointTime.capacity > 0 then Some("vacant") else None)
     )
-  ele.addCreatedHandler(AppEvents.publishers.appoint, (evt, gen) => {
-    addAppoint(evt.created, gen)
-  })
-  ele.addDeletedHandler(AppEvents.publishers.appoint, (evt, gen) => {
-    deleteAppoint(evt.deleted, gen)
-  })
+    eTimeRep(appointTimeSpanRep)
+    eKindRep(appointTimeKindRep)
+
+  ele.addCreatedHandler(
+    AppEvents.publishers.appoint,
+    (evt, gen) => {
+      addAppoint(evt.created, gen)
+    }
+  )
+  ele.addDeletedHandler(
+    AppEvents.publishers.appoint,
+    (evt, gen) => {
+      deleteAppoint(evt.deleted, gen)
+    }
+  )
+  ele.addUpdatedWithIdListener(
+    AppEvents.publishers.appointTime,
+    appointTime.appointTimeId,
+    (evt, gen) => {
+      appointTime = evt.updated
+      updateUI()
+    }
+  )
 
   def appointKindToCssClass(kind: String): String = {
     AppointKind(kind).cssClass
@@ -126,18 +146,20 @@ case class AppointTimeBox(
     adjustVacantClass()
 
   def deleteAppoint(appoint: Appoint, gen: Int): Unit =
-    ele.qSelector(s".appoint-slot.appoint-id-${appoint.appointId}").foreach(_.remove())
+    ele
+      .qSelector(s".appoint-slot.appoint-id-${appoint.appointId}")
+      .foreach(_.remove())
     adjustVacantClass()
 
   def addAppoint(appoint: Appoint): Unit =
     val slot = Slot(appoint)
     slotsElement(slot.ele)
     if numSlots >= appointTime.capacity then ele(cls :- "vacant")
-    // if slots.find(s => s.appoint.appointId == appoint.appointId).isEmpty then
-    //   val slot = Slot(appoint)
-    //   slots = slots ++ List(slot)
-    //   slotsElement(slot.ele)
-    //   adjustVacantClass()
+  // if slots.find(s => s.appoint.appointId == appoint.appointId).isEmpty then
+  //   val slot = Slot(appoint)
+  //   slots = slots ++ List(slot)
+  //   slotsElement(slot.ele)
+  //   adjustVacantClass()
 
   def updateAppoint(appoint: Appoint): Unit =
     slots

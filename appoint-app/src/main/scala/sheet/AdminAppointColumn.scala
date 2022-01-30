@@ -8,6 +8,7 @@ import dev.myclinic.scala.webclient.{Api, global}
 import cats.*
 import cats.syntax.all.*
 import scala.util.{Success, Failure}
+import dev.myclinic.scala.model.AppointTime
 
 class AdminAppointColumn(date: LocalDate, op: ClinicOperation)
     extends AppointColumn(date: LocalDate, op: ClinicOperation):
@@ -36,3 +37,9 @@ class AdminAppointColumn(date: LocalDate, op: ClinicOperation)
       }
     })
 
+  override def makeAppointTimeBox(
+      appointTime: AppointTime,
+      gen: Int,
+      findVacantRegular: () => Option[AppointTime]
+  ): AppointTimeBox =
+    new AdminAppointTimeBox(appointTime, gen, findVacantRegular)

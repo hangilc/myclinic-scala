@@ -121,6 +121,7 @@ case class AppointColumn(
 
   def makeAppointTimeBox(
       appointTime: AppointTime,
+      gen: Int,
       findVacantRegular: () => Option[AppointTime]
   ): AppointTimeBox =
     new AppointTimeBox(appointTime, findVacantRegular)
@@ -132,6 +133,7 @@ case class AppointColumn(
     boxes = appointTimesFilled.map((appointTime, appoints) => {
       val box = makeAppointTimeBox(
         appointTime,
+        gen,
         () => findFollowingVacantRegular(appointTime)
       )
       box.setAppoints(gen, appoints)
@@ -143,6 +145,7 @@ case class AppointColumn(
   def addAppointTime(appointTime: AppointTime, gen: Int): Unit =
     val box = makeAppointTimeBox(
       appointTime,
+      gen,
       () => findFollowingVacantRegular(appointTime)
     )
     boxWrapper(box.ele)

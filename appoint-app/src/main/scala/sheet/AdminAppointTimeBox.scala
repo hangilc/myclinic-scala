@@ -27,6 +27,7 @@ import scala.math.Ordered.orderingToOrdered
 
 class AdminAppointTimeBox(
     appointTime: AppointTime,
+    gen: Int,
     followingVacantRegular: () => Option[AppointTime]
 ) extends AppointTimeBox(appointTime, followingVacantRegular):
   ele(oncontextmenu := (onContextMenu _))
