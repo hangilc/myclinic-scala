@@ -20,7 +20,7 @@ body {
   float: right;
 }
 
-.date-column {
+.appoint-column {
   width: 160px;
   margin: 0 0.5rem;
 }
@@ -34,13 +34,13 @@ body {
   margin-bottom: 10px;
 }
 
-.date-column.national-holiday .date-label, 
-.date-column.ad-hoc-holiday .date-label {
+.appoint-column.national-holiday .date-label, 
+.appoint-column.ad-hoc-holiday .date-label {
   color: red;
 }
 
-.date-column.national-holiday .date, 
-.date-column.ad-hoc-holiday .date {
+.appoint-column.national-holiday .date, 
+.appoint-column.ad-hoc-holiday .date {
   border-color: red;
 }
 

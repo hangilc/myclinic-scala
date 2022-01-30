@@ -81,7 +81,7 @@ class AppointSheet(using eventPublishers: EventPublishers):
     for
       clinicOpMap <- Api.batchResolveClinicOperations(dates)
       cols = filterDates(dates, clinicOpMap).map((date, op) =>
-        AppointColumn(date, op, makeAppointTimeBox)
+        makeAppointColumn(date, op)
       )
       _ = AppointRow.init(cols)
     yield
@@ -103,6 +103,9 @@ class AppointSheet(using eventPublishers: EventPublishers):
           case _                 => true
         }
       )
+
+  def makeAppointColumn(date: LocalDate, op: ClinicOperation): AppointColumn =
+    new AppointColumn(date, op)
 
   // dates.foreach(date => {
   //   for
@@ -244,29 +247,29 @@ class AppointSheet(using eventPublishers: EventPublishers):
     def init(cols: List[AppointColumn]): Unit =
       columnWrapper.setChildren(cols.map(_.ele))
 
-    def initOrig(
-        dates: List[LocalDate],
-        appointTimes: List[AppointTime],
-        appointMap: Map[AppointTimeId, List[Appoint]],
-        clinicOpMap: Map[LocalDate, ClinicOperation]
-    ): Unit =
-      // subscribers.foreach(_.stop())
-      clear()
-      val appointDates: List[AppointDate] =
-        AppointDate.classify(dates, clinicOpMap, appointTimes, appointMap)
-      appointDates
-        .foreach((date: AppointDate) => {
-          val list: List[(AppointTime, List[Appoint])] =
-            date.appointTimes.map(appointTime =>
-              (
-                appointTime,
-                appointMap.get(appointTime.appointTimeId).getOrElse(List.empty)
-              )
-            )
-          addColumn(
-            AppointColumn.create(date.date, date.op, list, makeAppointTimeBox)
-          )
-        })
+    // def initOrig(
+    //     dates: List[LocalDate],
+    //     appointTimes: List[AppointTime],
+    //     appointMap: Map[AppointTimeId, List[Appoint]],
+    //     clinicOpMap: Map[LocalDate, ClinicOperation]
+    // ): Unit =
+    //   // subscribers.foreach(_.stop())
+    //   clear()
+    //   val appointDates: List[AppointDate] =
+    //     AppointDate.classify(dates, clinicOpMap, appointTimes, appointMap)
+    //   appointDates
+    //     .foreach((date: AppointDate) => {
+    //       val list: List[(AppointTime, List[Appoint])] =
+    //         date.appointTimes.map(appointTime =>
+    //           (
+    //             appointTime,
+    //             appointMap.get(appointTime.appointTimeId).getOrElse(List.empty)
+    //           )
+    //         )
+    //       addColumn(
+    //         AppointColumn.create(date.date, date.op, list, makeAppointTimeBox)
+    //       )
+    //     })
     // subscribers.foreach(_.start())
 
     def clear(): Unit =
@@ -279,46 +282,47 @@ class AppointSheet(using eventPublishers: EventPublishers):
       val modified = modifyColumn(col)
       columns = sortedAppointColumn.insert(modified, columns, columnWrapper)
 
-    private def propagateToColumn(
-        appoint: Appoint,
-        f: (AppointColumn, Appoint) => Unit
-    ): Unit =
-      columns
-        .find(c => c.hasAppointTimeId(appoint.appointTimeId))
-        .foreach(c => f(c, appoint))
+    // private def propagateToColumn(
+    //     appoint: Appoint,
+    //     f: (AppointColumn, Appoint) => Unit
+    // ): Unit =
+    //   columns
+    //     .find(c => c.hasAppointTimeId(appoint.appointTimeId))
+    //     .foreach(c => f(c, appoint))
 
-    private def findColumnByDate(date: LocalDate): Option[AppointColumn] =
-      columns.find(c => c.date == date)
+    // private def findColumnByDate(date: LocalDate): Option[AppointColumn] =
+    //   columns.find(c => c.date == date)
 
-    def onAppointCreated(event: AppointCreated): Unit =
-      propagateToColumn(event.created, _.addAppoint(_))
+    // def onAppointCreated(event: AppointCreated): Unit =
+    //   propagateToColumn(event.created, _.addAppoint(_))
 
-    def onAppointUpdated(event: AppointUpdated): Unit =
-      propagateToColumn(
-        event.updated,
-        (c, a) => c.updateAppoint(a)
-      )
+    // def onAppointUpdated(event: AppointUpdated): Unit =
+    //   propagateToColumn(
+    //     event.updated,
+    //     (c, a) => c.updateAppoint(a)
+    //   )
 
-    def onAppointDeleted(event: AppointDeleted): Unit =
-      propagateToColumn(event.deleted, _.deleteAppoint(_))
+    // def onAppointDeleted(event: AppointDeleted): Unit =
+    //   propagateToColumn(event.deleted, _.deleteAppoint(_))
 
-    def onAppointTimeUpdated(event: AppointTimeUpdated): Unit =
-      findColumnByDate(event.updated.date).map(col =>
-        col.updateAppointTime(event.updated)
-      )
+    // def onAppointTimeUpdated(event: AppointTimeUpdated): Unit =
+    //   ???
+    //   // findColumnByDate(event.updated.date).map(col =>
+    //   //   col.updateAppointTime(event.updated)
+    //   // )
 
-    def onAppointTimeCreated(event: AppointTimeCreated): Unit =
-      val date = event.created.date
-      findColumnByDate(date)
-        .foreach(c => {
-          c.addAppointTime(event.created)
-        })
+    // def onAppointTimeCreated(event: AppointTimeCreated): Unit =
+    //   val date = event.created.date
+    //   findColumnByDate(date)
+    //     .foreach(c => {
+    //       c.addAppointTime(event.created)
+    //     })
 
-    def onAppointTimeDeleted(event: AppointTimeDeleted): Unit =
-      findColumnByDate(event.deleted.date).map(col =>
-        col.deleteAppointTime(event.deleted.appointTimeId)
-        GlobalEvents.AppointColumnChanged.publish(columns)
-      )
+    // def onAppointTimeDeleted(event: AppointTimeDeleted): Unit =
+    //   findColumnByDate(event.deleted.date).map(col =>
+    //     col.deleteAppointTime(event.deleted.appointTimeId)
+    //     GlobalEvents.AppointColumnChanged.publish(columns)
+    //   )
 
   def makeAppointTimeBox(
       appointTime: AppointTime,
@@ -326,36 +330,36 @@ class AppointSheet(using eventPublishers: EventPublishers):
   ): AppointTimeBox =
     AppointTimeBox(appointTime, followingVacantRegular)
 
-case class AppointDate(
-    date: LocalDate,
-    op: ClinicOperation,
-    appointTimes: List[AppointTime]
-)
+// case class AppointDate(
+//     date: LocalDate,
+//     op: ClinicOperation,
+//     appointTimes: List[AppointTime]
+// )
 
-object AppointDate:
-  type AppointTimeId = Int
-  def classify(
-      dates: List[LocalDate],
-      clinicOpMap: Map[LocalDate, ClinicOperation],
-      appList: List[AppointTime],
-      appointMap: Map[AppointTimeId, List[Appoint]]
-  ): List[AppointDate] =
-    val clinicDates: List[(LocalDate, ClinicOperation)] =
-      dates
-        .map(date => (date, clinicOpMap(date)))
-        .filter(item =>
-          item match {
-            case (_, RegularHoliday()) => false
-            case _                     => true
-          }
-        )
-    val map = appList.groupBy(_.date)
-    val result =
-      for (date, op) <- clinicDates yield {
-        AppointDate(
-          date,
-          op,
-          map.getOrElse(date, List.empty).sortBy(_.fromTime)
-        )
-      }
-    result.toList.sortBy(_.date)
+// object AppointDate:
+//   type AppointTimeId = Int
+//   def classify(
+//       dates: List[LocalDate],
+//       clinicOpMap: Map[LocalDate, ClinicOperation],
+//       appList: List[AppointTime],
+//       appointMap: Map[AppointTimeId, List[Appoint]]
+//   ): List[AppointDate] =
+//     val clinicDates: List[(LocalDate, ClinicOperation)] =
+//       dates
+//         .map(date => (date, clinicOpMap(date)))
+//         .filter(item =>
+//           item match {
+//             case (_, RegularHoliday()) => false
+//             case _                     => true
+//           }
+//         )
+//     val map = appList.groupBy(_.date)
+//     val result =
+//       for (date, op) <- clinicDates yield {
+//         AppointDate(
+//           date,
+//           op,
+//           map.getOrElse(date, List.empty).sortBy(_.fromTime)
+//         )
+//       }
+//     result.toList.sortBy(_.date)

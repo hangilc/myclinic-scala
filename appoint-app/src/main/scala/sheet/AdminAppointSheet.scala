@@ -11,12 +11,15 @@ import org.scalajs.dom.MouseEvent
 import dev.myclinic.scala.webclient.Api
 import dev.myclinic.scala.web.appbase.EventPublishers
 import java.time.LocalDate
+import dev.myclinic.scala.clinicop.ClinicOperation
 
 class AdminAppointSheet(using EventPublishers) extends AppointSheet:
   val cog = Icons.cog(Icons.defaultStyle)
   TopMenu.topMenuBox(cog)
   cog(onclick := onCogClick)
 
+  override def makeAppointColumn(date: LocalDate, op: ClinicOperation): AppointColumn =
+    new AdminAppointColumn(date, op)
   override def makeAppointTimeBox(
       appointTime: AppointTime,
       followingVacantRegular: () => Option[AppointTime]
@@ -32,13 +35,12 @@ class AdminAppointSheet(using EventPublishers) extends AppointSheet:
       case (from, upto) => Api.fillAppointTimes(from, upto)
     }
 
-  override def modifyColumn(col: AppointColumn): AppointColumn =
-    val modified = super.modifyColumn(col)
-    col.appendContextMenu("予約枠追加", () => {
-      doAddAppointTime(col.date)
-    })
-    modified
+  // override def composeContextMenu(prev: List[(String, () => Unit)]): List[(String, () => Unit)] =
 
-  def doAddAppointTime(date: LocalDate): Unit =
-    AddAppointTimeDialog(date).open()
-    
+  // override def modifyColumn(col: AppointColumn): AppointColumn =
+  //   val modified = super.modifyColumn(col)
+  //   col.appendContextMenu("予約枠追加", () => {
+  //     doAddAppointTime(col.date)
+  //   })
+  //   modified
+

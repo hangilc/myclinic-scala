@@ -85,7 +85,6 @@ case class AppointTimeBox(
       div(appointTimeKindRep),
       slotsElement
     )
-  //adjustVacantClass()
   ele.addCreatedHandler(AppEvents.publishers.appoint, (evt, gen) => {
     addAppoint(evt.created, gen)
   })
@@ -172,7 +171,7 @@ case class AppointTimeBox(
     if label.isEmpty then "" else s"[${label}]"
 
   def onElementClick(event: MouseEvent): Unit =
-    if slots.size < appointTime.capacity then openAppointDialog()
+    if numSlots < appointTime.capacity then openAppointDialog()
 
   def openAppointDialog(): Unit =
     MakeAppointDialog(appointTime, followingVacantRegular).open()

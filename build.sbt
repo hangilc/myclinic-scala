@@ -165,7 +165,8 @@ lazy val webclient = project
       "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion,
       "io.circe" %%% "circe-core" % circeVersion,
       "io.circe" %%% "circe-generic" % circeVersion,
-      "io.circe" %%% "circe-parser" % circeVersion
+      "io.circe" %%% "circe-parser" % circeVersion,
+      "org.scala-js" %%% "scala-js-macrotask-executor" % macrotaskExecutorVersion,
     )
   )
 

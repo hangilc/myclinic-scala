@@ -59,9 +59,9 @@ object ShowMessage:
     m.open()
 
   def confirm(message: String)(okCallback: () => Unit): Unit =
-    confirm(message)(okCallback)(() => ())
+    confirm(message)(okCallback, () => ())
 
-  def confirm(message: String)(okCallback: () => Unit)(noCallback: () => Unit): Unit =
+  def confirm(message: String)(okCallback: () => Unit, noCallback: () => Unit): Unit =
     val yesButton = button("はい")
     val noButton = button("いいえ")
     val m = Modal(
