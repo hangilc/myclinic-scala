@@ -32,31 +32,24 @@ object ElementDispatcher:
       p.updated.subscribe((updated, gen) => {
         val evt: CustomEvent[(U, Int)] =
           CustomEvent(p.updatedEventType, (updated, gen), false)
-        val targets: Set[HTMLElement] =
-          document.body.qSelectorAll(p.updatedSelector).toSet ++
-            document.body
-              .qSelectorAll(
-                p.updatedWithIdSelector(p.updateId(updated))
-              )
-              .toSet
-        targets.foreach(e => {
-          e.dispatchEvent(evt)
-        })
+        document.body
+          .qSelectorAll(p.updatedWithIdSelector(p.updateId(updated)))
+          .foreach(e => e.dispatchEvent(evt))
+        document.body
+          .qSelectorAll(p.updatedSelector)
+          .foreach(e => e.dispatchEvent(evt))
       })
 
     def addDeletedDispatcher(): EventSubscriber[D] =
       p.deleted.subscribe((deleted, gen) => {
         val evt: CustomEvent[(D, Int)] =
           CustomEvent(p.deletedEventType, (deleted, gen), false)
-        val targets: Set[HTMLElement] =
-          document.body.qSelectorAll(p.deletedSelector).toSet ++
-            document.body
-              .qSelectorAll(p.deletedWithIdSelector(p.deleteId(deleted)))
-              .toSet
-
-        targets.foreach(e => {
-          e.dispatchEvent(evt)
-        })
+        document.body
+          .qSelectorAll(p.deletedWithIdSelector(p.deleteId(deleted)))
+          .foreach(e => e.dispatchEvent(evt))
+        document.body
+          .qSelectorAll(p.deletedSelector)
+          .foreach(e => e.dispatchEvent(evt))
       })
 
   extension (ele: HTMLElement)

@@ -18,19 +18,18 @@ import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
 import dev.myclinic.scala.clinicop.*
 import scala.util.Success
 import scala.util.Failure
+import dev.myclinic.scala.web.appbase.ElementDispatcher.*
+import dev.myclinic.scala.web.appoint.AppEvents
 
-given Ordering[AppointColumn] with
-  def compare(a: AppointColumn, b: AppointColumn): Int =
-    summon[Ordering[LocalDate]].compare(a.date, b.date)
 
-val sortedAppointColumn = new SortedElement[AppointColumn]:
-  def element(a: AppointColumn): HTMLElement = a.ele
+// val sortedAppointColumn = new SortedElement[AppointColumn]:
+//   def element(a: AppointColumn): HTMLElement = a.ele
 
 case class AppointColumn(
     date: LocalDate,
     op: ClinicOperation
 ):
-  //var boxes: Seq[AppointTimeBox] = Vector.empty
+  var boxes: List[AppointTimeBox] = List.empty
   val dateElement = div()
   val vacantKindsArea = span()
   val kenshinArea = span()
@@ -46,6 +45,14 @@ case class AppointColumn(
       oncontextmenu := (onContextMenu _)
     ),
     boxWrapper
+  )
+  ele.addCreatedListener(
+    AppEvents.publishers.appointTime,
+    (event, gen) => {
+      val created = event.created
+      if created.date == date then
+        ???
+    }
   )
 
   def dateRep: String = Misc.formatAppointDate(date)
@@ -118,13 +125,14 @@ case class AppointColumn(
       gen: Int,
       appointTimesFilled: List[(AppointTime, List[Appoint])]
   ): Unit =
-    appointTimesFilled.foreach((appointTime, appoints) => {
+    boxes = appointTimesFilled.map((appointTime, appoints) => {
       val box = makeAppointTimeBox(
         appointTime,
         () => findFollowingVacantRegular(appointTime)
       )
       box.setAppoints(gen, appoints)
       boxWrapper(box.ele)
+      box
     })
     adjustVacantClass()
 
@@ -133,12 +141,15 @@ case class AppointColumn(
       appointTime,
       () => findFollowingVacantRegular(appointTime)
     )
-    boxes = sortedAppointTimeBox.insert(box, boxes, boxWrapper)
+    boxWrapper(box.ele)
+    boxes = boxes :+ box
     adjustVacantClass()
 
   def deleteAppointTime(appointTimeId: Int): Unit =
-    boxes =
-      sortedAppointTimeBox.remove(b => b.appointTimeId == appointTimeId, boxes)
+    boxes.find(_.appointTime.appointTimeId == appointTimeId).foreach(box => {
+      box.ele.remove()
+      boxes = boxes.filterNot(_ == box)
+    })
     adjustVacantClass()
 
   // def updateAppointTime(updated: AppointTime): Unit =
@@ -205,3 +216,8 @@ case class AppointColumn(
 //     }
 //     c.markKenshin()
 //     c
+
+object AppointColumn:
+  given Ordering[AppointColumn] with
+    def compare(a: AppointColumn, b: AppointColumn): Int =
+      summon[Ordering[LocalDate]].compare(a.date, b.date)

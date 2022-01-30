@@ -16,13 +16,12 @@ import dev.myclinic.scala.util.DateUtil
 import math.Ordered.orderingToOrdered
 import org.scalajs.dom.HTMLElement
 import java.time.LocalDate
-import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
 
 import scala.util.Failure
 import scala.util.Success
 import scala.concurrent.Future
 import scala.collection.mutable
-import dev.myclinic.scala.webclient.Api
+import dev.myclinic.scala.webclient.{Api, global}
 import dev.myclinic.scala.web.appbase.EventPublishers
 import scala.language.implicitConversions
 import org.scalajs.dom.MouseEvent
@@ -178,7 +177,7 @@ class AppointSheet(using eventPublishers: EventPublishers):
       case None             => false
     }
 
-  def modifyColumn(col: AppointColumn): AppointColumn = col
+  // def modifyColumn(col: AppointColumn): AppointColumn = col
 
   object TopMenu:
     val topMenuBox: HTMLElement = span()
@@ -237,7 +236,7 @@ class AppointSheet(using eventPublishers: EventPublishers):
   object AppointRow:
 
     var columnWrapper: HTMLElement = div()
-    var columns: Seq[AppointColumn] = List.empty
+    // var columns: Seq[AppointColumn] = List.empty
 
     val ele = columnWrapper(
       display := "flex",
@@ -272,15 +271,15 @@ class AppointSheet(using eventPublishers: EventPublishers):
     //     })
     // subscribers.foreach(_.start())
 
-    def clear(): Unit =
-      columnWrapper.clear()
-      columns.foreach(_.ele.remove())
-      columns = List.empty
+    // def clear(): Unit =
+    //   columnWrapper.clear()
+    //   columns.foreach(_.ele.remove())
+    //   columns = List.empty
 
-    def addColumn(col: AppointColumn): Unit =
-      col.ele(margin := "0 0.5rem")
-      val modified = modifyColumn(col)
-      columns = sortedAppointColumn.insert(modified, columns, columnWrapper)
+    // def addColumn(col: AppointColumn): Unit =
+    //   col.ele(margin := "0 0.5rem")
+    //   val modified = modifyColumn(col)
+    //   columns = sortedAppointColumn.insert(modified, columns, columnWrapper)
 
     // private def propagateToColumn(
     //     appoint: Appoint,

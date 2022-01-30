@@ -7,6 +7,7 @@ import dev.fujiwara.domq.ShowMessage
 import dev.myclinic.scala.webclient.{Api, global}
 import cats.*
 import cats.syntax.all.*
+import scala.util.{Success, Failure}
 
 class AdminAppointColumn(date: LocalDate, op: ClinicOperation)
     extends AppointColumn(date: LocalDate, op: ClinicOperation):
