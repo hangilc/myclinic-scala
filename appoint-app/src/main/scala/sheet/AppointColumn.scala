@@ -21,10 +21,6 @@ import scala.util.Failure
 import dev.myclinic.scala.web.appbase.ElementDispatcher.*
 import dev.myclinic.scala.web.appoint.AppEvents
 
-
-// val sortedAppointColumn = new SortedElement[AppointColumn]:
-//   def element(a: AppointColumn): HTMLElement = a.ele
-
 case class AppointColumn(
     date: LocalDate,
     op: ClinicOperation
@@ -51,7 +47,7 @@ case class AppointColumn(
     (event, gen) => {
       val created = event.created
       if created.date == date then
-        ???
+        addAppointTime(created, gen)
     }
   )
 
@@ -136,13 +132,13 @@ case class AppointColumn(
     })
     adjustVacantClass()
 
-  def addAppointTime(appointTime: AppointTime): Unit =
+  def addAppointTime(appointTime: AppointTime, gen: Int): Unit =
     val box = makeAppointTimeBox(
       appointTime,
       () => findFollowingVacantRegular(appointTime)
     )
     boxWrapper(box.ele)
-    boxes = boxes :+ box
+    boxes = Types.insert(box, _.ele, boxes, boxWrapper)
     adjustVacantClass()
 
   def deleteAppointTime(appointTimeId: Int): Unit =

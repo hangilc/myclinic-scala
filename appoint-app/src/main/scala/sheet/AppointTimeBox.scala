@@ -74,7 +74,7 @@ case class AppointTimeBox(
   val slotsElement = div()
   val ele =
     div(
-      cls := "appoint-time-box",
+      cls := "appoint-time-box vacant",
       cls := s"appoint-time-id-${appointTime.appointTimeId}",
       cls := appointKindToCssClass(appointTime.kind),
       cls := (if appointTime.capacity > 0 then Some("vacant") else None),
@@ -115,8 +115,7 @@ case class AppointTimeBox(
       val slot = Slot(appoint)
       slotsElement(slot.ele)
     })
-    if appoints.size < appointTime.capacity then
-      ele(cls := "vacant")
+    adjustVacantClass()
 
   def numSlots: Int =
     ele.qSelectorAllCount(".appoint-slot")
