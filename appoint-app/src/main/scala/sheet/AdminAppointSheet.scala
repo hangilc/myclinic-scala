@@ -20,11 +20,6 @@ class AdminAppointSheet(using EventPublishers) extends AppointSheet:
 
   override def makeAppointColumn(date: LocalDate, op: ClinicOperation): AppointColumn =
     new AdminAppointColumn(date, op)
-  override def makeAppointTimeBox(
-      appointTime: AppointTime,
-      followingVacantRegular: () => Option[AppointTime]
-  ): AppointTimeBox =
-    AdminAppointTimeBox(appointTime, followingVacantRegular)
 
   def onCogClick(event: MouseEvent): Unit =
     ContextMenu(List("予約枠わりあて" -> doFillAppointTimes)).open(event)

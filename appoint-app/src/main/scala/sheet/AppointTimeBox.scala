@@ -30,9 +30,10 @@ val sortedAppointTimeBox: SortedElement[AppointTimeBox] =
   new SortedElement[AppointTimeBox]:
     def element(a: AppointTimeBox): HTMLElement = a.ele
 
-case class AppointTimeBox(
+class AppointTimeBox(
     var appointTime: AppointTime,
-    followingVacantRegular: () => Option[AppointTime]
+    gen: Int,
+    findVacantFollower: () => Option[AppointTime]
 ):
   case class Slot(var appoint: Appoint):
     val eLabel = div()
@@ -74,22 +75,15 @@ case class AppointTimeBox(
   val eTimeRep = div
   val eKindRep = div
   val slotsElement = div
+  var kindCssClass = ""
   val ele =
     div(
-      cls := "appoint-time-box vacant",
+      cls := "appoint-time-box",
       cls := s"appoint-time-id-${appointTime.appointTimeId}",
       css(style => style.cursor = "pointer"),
       onclick := (onElementClick)
     )(eTimeRep, eKindRep, slotsElement)
   updateUI()
-
-  def updateUI(): Unit =
-    ele(
-      cls := appointKindToCssClass(appointTime.kind),
-      cls := (if appointTime.capacity > 0 then Some("vacant") else None)
-    )
-    eTimeRep(appointTimeSpanRep)
-    eKindRep(appointTimeKindRep)
 
   ele.addCreatedHandler(
     AppEvents.publishers.appoint,
@@ -111,6 +105,17 @@ case class AppointTimeBox(
       updateUI()
     }
   )
+
+  def updateUI(): Unit =
+    if !kindCssClass.isEmpty then ele(cls :- kindCssClass)
+    kindCssClass = appointKindToCssClass(appointTime.kind)
+    ele(
+      cls := (if !kindCssClass.isEmpty then Some(kindCssClass) else None),
+      cls := (if appointTime.capacity > 0 then Some("vacant") else None)
+    )
+    eTimeRep(innerText := appointTimeSpanRep)
+    eKindRep(innerText := appointTimeKindRep)
+    adjustVacantClass()
 
   def appointKindToCssClass(kind: String): String = {
     AppointKind(kind).cssClass
@@ -155,11 +160,6 @@ case class AppointTimeBox(
     val slot = Slot(appoint)
     slotsElement(slot.ele)
     if numSlots >= appointTime.capacity then ele(cls :- "vacant")
-  // if slots.find(s => s.appoint.appointId == appoint.appointId).isEmpty then
-  //   val slot = Slot(appoint)
-  //   slots = slots ++ List(slot)
-  //   slotsElement(slot.ele)
-  //   adjustVacantClass()
 
   def updateAppoint(appoint: Appoint): Unit =
     slots
@@ -195,7 +195,7 @@ case class AppointTimeBox(
     if numSlots < appointTime.capacity then openAppointDialog()
 
   def openAppointDialog(): Unit =
-    MakeAppointDialog(appointTime, followingVacantRegular).open()
+    MakeAppointDialog(appointTime, findVacantFollower).open()
 
   def doDeleteAppointTime(): Unit =
     System.err.println("doDeleteAppointTime not implemented.")
@@ -205,12 +205,13 @@ case class AppointTimeBox(
       if ele.appoint.hasTag("健診") then acc + 1 else acc
     })
 
-object AppointTimeBox:
-  def apply(
-      appointTime: AppointTime,
-      appoints: List[Appoint],
-      followingVacantRegular: () => Option[AppointTime]
-  ): AppointTimeBox =
-    val box = AppointTimeBox(appointTime, followingVacantRegular)
-    appoints.foreach(box.addAppoint(_))
-    box
+// object AppointTimeBox:
+//   def apply(
+//       appointTime: AppointTime,
+//       appoints: List[Appoint],
+//       gen: Int,
+//       followingVacantRegular: () => Option[AppointTime]
+//   ): AppointTimeBox =
+//     val box = AppointTimeBox(appointTime, followingVacantRegular)
+//     appoints.foreach(box.addAppoint(_))
+//     box

@@ -106,15 +106,23 @@ case class AppointColumn(
   def findFollowingVacantRegular(
       appointTime: AppointTime
   ): Option[AppointTime] =
-    val idx = boxes.indexWhere(b =>
-      b.appointTime.appointTimeId == appointTime.appointTimeId
-    )
-    if idx < 0 || (idx + 1) >= boxes.size then None
-    else
-      val f = boxes(idx + 1)
-      if f.appointTime.kind == "regular" && f.hasVacancy then
-        Some(f.appointTime)
-      else None
+    boxes.dropWhile(b =>
+      b.appointTime.appointTimeId != appointTime.appointTimeId
+    ) match {
+      case _ :: f :: t if f.numSlots == 0 => Some(f.appointTime)
+      case _ => None
+    }
+
+
+  // val idx = boxes.indexWhere(b =>
+  //   b.appointTime.appointTimeId == appointTime.appointTimeId
+  // )
+  // if idx < 0 || (idx + 1) >= boxes.size then None
+  // else
+  //   val f = boxes(idx + 1)
+  //   if f.appointTime.kind == "regular" && f.hasVacancy then
+  //     Some(f.appointTime)
+  //   else None
 
   def hasAppointTimeId(appointTimeId: Int): Boolean =
     boxes.find(b => b.appointTime.appointTimeId == appointTimeId).isDefined
@@ -124,22 +132,25 @@ case class AppointColumn(
       gen: Int,
       findVacantRegular: () => Option[AppointTime]
   ): AppointTimeBox =
-    new AppointTimeBox(appointTime, findVacantRegular)
+    new AppointTimeBox(appointTime, gen, findVacantRegular)
 
   def setAppointTimes(
       gen: Int,
       appointTimesFilled: List[(AppointTime, List[Appoint])]
   ): Unit =
-    boxes = appointTimesFilled.map((appointTime, appoints) => {
-      val box = makeAppointTimeBox(
-        appointTime,
-        gen,
-        () => findFollowingVacantRegular(appointTime)
-      )
-      box.setAppoints(gen, appoints)
-      boxWrapper(box.ele)
-      box
-    })
+    boxes = appointTimesFilled.map(item =>
+      item match {
+        case (appointTime, appoints) =>
+          val box = makeAppointTimeBox(
+            appointTime,
+            gen,
+            () => findFollowingVacantRegular(appointTime)
+          )
+          box.setAppoints(gen, appoints)
+          boxWrapper(box.ele)
+          box
+      }
+    )
     adjustVacantClass()
 
   def addAppointTime(appointTime: AppointTime, gen: Int): Unit =

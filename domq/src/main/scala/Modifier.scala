@@ -49,12 +49,12 @@ object Modifiers:
       def :=(a: A): Modifier[E] = Modifier[E](e => m(e, a))
 
   object cls:
-    def :=(a: String): Modifier[HTMLElement] = (e => 
-      a.trim.split("\\s+").foreach(c => e.classList.add(c))
+    def :=(s: String): Modifier[HTMLElement] = (e => 
+      s.trim.split("\\s+").foreach(c => e.classList.add(c))
     )
     def :=(opt: Option[String]): Modifier[HTMLElement] = (e =>{
       opt match {
-        case Some(s) => :=(s)
+        case Some(s) => :=(s).modify(e)
         case None => ()
       }
     })

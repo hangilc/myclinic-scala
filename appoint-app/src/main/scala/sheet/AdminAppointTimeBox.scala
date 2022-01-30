@@ -26,10 +26,10 @@ import dev.myclinic.scala.util.DateTimeOrdering.{*, given}
 import scala.math.Ordered.orderingToOrdered
 
 class AdminAppointTimeBox(
-    appointTime: AppointTime,
-    gen: Int,
-    followingVacantRegular: () => Option[AppointTime]
-) extends AppointTimeBox(appointTime, followingVacantRegular):
+    _appointTime: AppointTime,
+    _gen: Int,
+    _findVacantFollower: () => Option[AppointTime]
+) extends AppointTimeBox(_appointTime, _gen, _findVacantFollower):
   ele(oncontextmenu := (onContextMenu _))
 
   def onContextMenu(event: MouseEvent): Unit =

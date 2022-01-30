@@ -11,7 +11,7 @@ import scala.util.{Success, Failure}
 import dev.myclinic.scala.model.AppointTime
 
 class AdminAppointColumn(date: LocalDate, op: ClinicOperation)
-    extends AppointColumn(date: LocalDate, op: ClinicOperation):
+    extends AppointColumn(date, op):
 
   override def composeContextMenu(
       prev: List[(String, () => Unit)]
@@ -40,6 +40,6 @@ class AdminAppointColumn(date: LocalDate, op: ClinicOperation)
   override def makeAppointTimeBox(
       appointTime: AppointTime,
       gen: Int,
-      findVacantRegular: () => Option[AppointTime]
+      findVacantFollower: () => Option[AppointTime]
   ): AppointTimeBox =
-    new AdminAppointTimeBox(appointTime, gen, findVacantRegular)
+    new AdminAppointTimeBox(appointTime, gen, findVacantFollower)

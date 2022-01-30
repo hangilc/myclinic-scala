@@ -177,8 +177,6 @@ class AppointSheet(using eventPublishers: EventPublishers):
       case None             => false
     }
 
-  // def modifyColumn(col: AppointColumn): AppointColumn = col
-
   object TopMenu:
     val topMenuBox: HTMLElement = span()
     val ele = div(
@@ -323,11 +321,12 @@ class AppointSheet(using eventPublishers: EventPublishers):
     //     GlobalEvents.AppointColumnChanged.publish(columns)
     //   )
 
-  def makeAppointTimeBox(
-      appointTime: AppointTime,
-      followingVacantRegular: () => Option[AppointTime]
-  ): AppointTimeBox =
-    AppointTimeBox(appointTime, followingVacantRegular)
+  // def makeAppointTimeBox(
+  //     appointTime: AppointTime,
+  //     gen: Int,
+  //     followingVacantRegular: () => Option[AppointTime]
+  // ): AppointTimeBox =
+  //   AppointTimeBox(appointTime, gen, followingVacantRegular)
 
 // case class AppointDate(
 //     date: LocalDate,
