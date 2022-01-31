@@ -25,6 +25,7 @@ class CovidThirdShot(val ui: CovidThirdShot.UI):
           onSelect(patients.head)
         else
           ui.searchResult.setItems(patients, formatOption _)
+          ui.searchResult.show()
           ui.eSearchInput.value = ""
 
   def formatOption(patient: Patient): String =
