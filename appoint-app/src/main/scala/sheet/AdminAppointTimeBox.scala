@@ -28,8 +28,8 @@ import scala.math.Ordered.orderingToOrdered
 class AdminAppointTimeBox(
     _appointTime: AppointTime,
     _gen: Int,
-    _findVacantFollower: () => Option[AppointTime]
-) extends AppointTimeBox(_appointTime, _gen, _findVacantFollower):
+    _findVacantFollowers: () => List[AppointTime]
+) extends AppointTimeBox(_appointTime, _gen, _findVacantFollowers):
   ele(oncontextmenu := (onContextMenu _))
 
   def onContextMenu(event: MouseEvent): Unit =
@@ -47,10 +47,7 @@ class AdminAppointTimeBox(
     ConvertAppointTimeDialog(appointTime).open()
 
   def doCombine(): Unit =
-    for appointTimes <- Api.listAppointTimesForDate(appointTime.date)
-    yield {
-      CombineAppointTimesDialog(appointTime, appointTimes).open()
-    }
+    CombineAppointTimesDialog(appointTime, findVacantFollowers()).open()
 
   def doSplit(): Unit =
     SplitAppointTimeDialog(appointTime).open()

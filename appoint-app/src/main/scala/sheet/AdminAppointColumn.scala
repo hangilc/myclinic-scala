@@ -40,6 +40,6 @@ class AdminAppointColumn(date: LocalDate, op: ClinicOperation)
   override def makeAppointTimeBox(
       appointTime: AppointTime,
       gen: Int,
-      findVacantFollower: () => Option[AppointTime]
+      findVacantFollower: () => List[AppointTime]
   ): AppointTimeBox =
     new AdminAppointTimeBox(appointTime, gen, findVacantFollower)

@@ -61,8 +61,12 @@ class AppointTimeTest extends AnyFunSuite:
     val a = AppointTime(0, date(10, 1), time(10, 0), time(10, 20), "regular", 1)
     val b = AppointTime(0, date(10, 1), time(10, 40), time(11, 0), "regular", 1)
     assert(!a.isAdjacentTo(b))
+  }
 
-    val c = AppointTime(0, date(10, 2), time(10, 20), time(10, 40), "regular", 1)
+  test("AppointTime.isAdjacentTo detects different date."){
+    val a = AppointTime(0, date(10, 1), time(10, 0), time(10, 20), "regular", 1)
+    val b = AppointTime(0, date(10, 2), time(10, 20), time(10, 40), "regular", 1)
+    assert(!a.isAdjacentTo(b))
   }
 
   test("AppointTime.isAdjacentRun detects adjacent run."){
@@ -89,6 +93,35 @@ class AppointTimeTest extends AnyFunSuite:
       appointTime(d, time(10, 20), time(10, 40)),
       appointTime(d, time(11, 0), time(11, 20)),
     )))
+  }
+
+  test("AppointTime.extractAdjacentRun extracts one element."){
+    val a = AppointTime(0, date(10, 1), time(10, 0), time(10, 20), "regular", 1)
+    val b = AppointTime(0, date(10, 1), time(10, 40), time(10, 45), "regular", 1)
+    val c = AppointTime(0, date(10, 1), time(10, 45), time(11, 50), "regular", 1)
+    val list = List(a, b, c)
+    assert(AppointTime.extractAdjacentRun(list) == (List(a), List(b, c)))
+  }
+
+  test("AppointTime.extractAdjacentRun extracts two elements."){
+    val a = AppointTime(0, date(10, 1), time(10, 0), time(10, 20), "regular", 1)
+    val b = AppointTime(0, date(10, 1), time(10, 20), time(10, 40), "regular", 1)
+    val c = AppointTime(0, date(10, 1), time(11, 0), time(11, 20), "regular", 1)
+    val list = List(a, b, c)
+    assert(AppointTime.extractAdjacentRun(list) == (List(a, b), List(c)))
+  }
+
+  test("AppointTime.extractAdjacentRun extracts three elements."){
+    val a = AppointTime(0, date(10, 1), time(10, 0), time(10, 20), "regular", 1)
+    val b = AppointTime(0, date(10, 1), time(10, 20), time(10, 40), "regular", 1)
+    val c = AppointTime(0, date(10, 1), time(10, 40), time(11, 0), "regular", 1)
+    val d = AppointTime(0, date(10, 1), time(14, 0), time(14, 20), "regular", 1)
+    val list = List(a, b, c, d)
+    assert(AppointTime.extractAdjacentRun(list) == (List(a, b, c), List(d)))
+  }
+
+  test("AppointTime.extractAdjacentRun test for empty list."){
+    assert(AppointTime.extractAdjacentRun(List.empty) == (List.empty, List.empty))
   }
 
 

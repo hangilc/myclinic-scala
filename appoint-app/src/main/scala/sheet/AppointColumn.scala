@@ -103,16 +103,14 @@ case class AppointColumn(
     val contextMenu = composeContextMenu(List.empty)
     if !contextMenu.isEmpty then ContextMenu(contextMenu).open(event)
 
-  def findFollowingVacantRegular(
+  def findVacantFollowers(
       appointTime: AppointTime
-  ): Option[AppointTime] =
-    boxes.dropWhile(b =>
-      b.appointTime.appointTimeId != appointTime.appointTimeId
-    ) match {
-      case _ :: f :: t if f.numSlots == 0 => Some(f.appointTime)
-      case _ => None
-    }
-
+  ): List[AppointTime] =
+    val list = boxes
+      .dropWhile(b => b.appointTime.appointTimeId != appointTime.appointTimeId)
+    AppointTime.extractAdjacentRunEmbedded(list, _.appointTime)._1
+      .takeWhile(a => a.numSlots == 0)
+      .map(_.appointTime)
 
   // val idx = boxes.indexWhere(b =>
   //   b.appointTime.appointTimeId == appointTime.appointTimeId
@@ -130,9 +128,9 @@ case class AppointColumn(
   def makeAppointTimeBox(
       appointTime: AppointTime,
       gen: Int,
-      findVacantRegular: () => Option[AppointTime]
+      findVacantRegular: () => List[AppointTime]
   ): AppointTimeBox =
-    new AppointTimeBox(appointTime, gen, findVacantRegular)
+    new AppointTimeBox(appointTime, gen, () => findVacantFollowers(appointTime))
 
   def setAppointTimes(
       gen: Int,
@@ -144,7 +142,7 @@ case class AppointColumn(
           val box = makeAppointTimeBox(
             appointTime,
             gen,
-            () => findFollowingVacantRegular(appointTime)
+            () => findVacantFollowers(appointTime)
           )
           box.setAppoints(gen, appoints)
           boxWrapper(box.ele)
@@ -157,7 +155,7 @@ case class AppointColumn(
     val box = makeAppointTimeBox(
       appointTime,
       gen,
-      () => findFollowingVacantRegular(appointTime)
+      () => findVacantFollowers(appointTime)
     )
     boxWrapper(box.ele)
     boxes = Types.insert(box, _.ele, boxes, boxWrapper)
@@ -180,21 +178,6 @@ case class AppointColumn(
         boxes = boxes.filterNot(_ == box)
       })
     adjustVacantClass()
-
-  // def updateAppointTime(updated: AppointTime): Unit =
-  //   val box =
-  //     appointTimeBoxMaker(updated, () => findFollowingVacantRegular(updated))
-  //   boxes = sortedAppointTimeBox.update(
-  //     b => {
-  //       if b.appointTimeId == updated.appointTimeId then
-  //         box.addAppoints(b.appoints)
-  //         true
-  //       else false
-  //     },
-  //     box,
-  //     boxes
-  //   )
-  //   adjustVacantClass()
 
   private def findBoxByAppoint(appoint: Appoint): Option[AppointTimeBox] =
     boxes.find(b => b.appointTime.appointTimeId == appoint.appointTimeId)

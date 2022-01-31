@@ -19,7 +19,7 @@ object ValidUpto:
     def apply(src: ValidUpto): LocalDate =
       src.value match {
         case Some(v) => v
-        case None => LocalDate.MAX
+        case None    => LocalDate.MAX
       }
 
 case class AppointTime(
@@ -64,12 +64,41 @@ object AppointTime:
     if as.size < 2 then true
     else as.sliding(2).forall(e => e(0).isAdjacentTo(e(1)))
 
-  given Ordering[AppointTime] with
-    def compare(a: AppointTime, b: AppointTime): Int =
-      val cmp: Int = summon[Ordering[LocalDate]].compare(a.date, b.date)
-      if cmp == 0 then
-        summon[Ordering[LocalTime]].compare(a.fromTime, b.fromTime)
-      else cmp
+  def extractAdjacentRun(
+      as: List[AppointTime]
+  ): (List[AppointTime], List[AppointTime]) =
+    extractAdjacentRunEmbedded(as, identity)
+
+  def extractAdjacentRunEmbedded[T](
+      ts: List[T],
+      acc: T => AppointTime
+  ): (List[T], List[T]) =
+    def extendOne(
+        reversedRun: List[T],
+        rest: List[T]
+    ): (List[T], List[T]) =
+      (reversedRun, rest) match {
+        case (h :: t, rh :: rt) if acc(h).isAdjacentTo(acc(rh)) => (rh :: reversedRun, rt)
+        case _ => (reversedRun, rest)
+      }
+    def loop(reversedRun: List[T], rest: List[T]): (List[T], List[T]) =
+      val (rr, r) = extendOne(reversedRun, rest)
+      if rr.head == reversedRun.head then
+        (rr.reverse, r)
+      else loop(rr, r)
+    ts match {
+      case h :: t => loop(List(h), t)
+      case _ => (List.empty, ts)
+    }
+
+  given Ordering[AppointTime] = Ordering.by(a => (a.date, a.fromTime))
+
+// given Ordering[AppointTime] with
+//   def compare(a: AppointTime, b: AppointTime): Int =
+//     val cmp: Int = summon[Ordering[LocalDate]].compare(a.date, b.date)
+//     if cmp == 0 then
+//       summon[Ordering[LocalTime]].compare(a.fromTime, b.fromTime)
+//     else cmp
 
 case class Appoint(
     appointId: Int,
@@ -189,7 +218,6 @@ case class Drug(
     prescribed: Boolean
 ):
   lazy val category: DrugCategory = DrugCategory.fromCode(categoryStore)
-    
 
 case class Shinryou(
     shinryouId: Int,
@@ -363,15 +391,15 @@ case class ClinicInfo(
 )
 
 case class ScannerDevice(
-  deviceId: String,
-  name: String,
-  description: String
+    deviceId: String,
+    name: String,
+    description: String
 )
 
 case class FileInfo(
-  name: String,
-  createdAt: LocalDateTime,
-  size: Long
+    name: String,
+    createdAt: LocalDateTime,
+    size: Long
 )
 
 object FileInfo:

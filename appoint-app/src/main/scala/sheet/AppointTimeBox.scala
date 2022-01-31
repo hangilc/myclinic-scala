@@ -33,7 +33,7 @@ val sortedAppointTimeBox: SortedElement[AppointTimeBox] =
 class AppointTimeBox(
     var appointTime: AppointTime,
     gen: Int,
-    findVacantFollower: () => Option[AppointTime]
+    val findVacantFollowers: () => List[AppointTime]
 ):
   case class Slot(var appoint: Appoint):
     val eLabel = div()
@@ -195,7 +195,7 @@ class AppointTimeBox(
     if numSlots < appointTime.capacity then openAppointDialog()
 
   def openAppointDialog(): Unit =
-    MakeAppointDialog(appointTime, findVacantFollower).open()
+    MakeAppointDialog(appointTime, () => findVacantFollowers().headOption).open()
 
   def doDeleteAppointTime(): Unit =
     System.err.println("doDeleteAppointTime not implemented.")
@@ -204,14 +204,3 @@ class AppointTimeBox(
     slots.foldLeft(0)((acc, ele) => {
       if ele.appoint.hasTag("健診") then acc + 1 else acc
     })
-
-// object AppointTimeBox:
-//   def apply(
-//       appointTime: AppointTime,
-//       appoints: List[Appoint],
-//       gen: Int,
-//       followingVacantRegular: () => Option[AppointTime]
-//   ): AppointTimeBox =
-//     val box = AppointTimeBox(appointTime, followingVacantRegular)
-//     appoints.foreach(box.addAppoint(_))
-//     box
