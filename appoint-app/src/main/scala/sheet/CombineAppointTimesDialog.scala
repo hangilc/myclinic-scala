@@ -11,14 +11,14 @@ import dev.myclinic.scala.web.appoint.Misc
 
 class CombineAppointTimesDialog(
     head: AppointTime,
-    appointTimes: List[AppointTime]
+    followers: List[AppointTime]
 ):
 
   def open(): Unit =
     val nFollows = 1
-    val followers = listFollowers(head, appointTimes).take(nFollows)
-    if followers.isEmpty then ShowMessage.showMessage("結合する予約枠がありません。")
-    else makeDialog(followers).open()
+    val f = followers.take(nFollows)
+    if f.isEmpty then ShowMessage.showMessage("結合する予約枠がありません。")
+    else makeDialog(f).open()
 
   def makeDialog(followers: List[AppointTime]): Modal =
     val execButton = Modal.execute
@@ -35,20 +35,6 @@ class CombineAppointTimesDialog(
   def onExec(followers: List[AppointTime]): Unit =
     val ids = (head :: followers).map(_.appointTimeId)
     Api.combineAppointTimes(ids)
-
-  def listFollowers(
-      head: AppointTime,
-      appointTimes: List[AppointTime]
-  ): List[AppointTime] =
-    appointTimes
-      .dropWhile(_.appointTimeId != head.appointTimeId)
-      .sliding(2)
-      .takeWhile({
-        case a :: b :: _ => a.isAdjacentTo(b)
-        case _           => false
-      })
-      .map(_(1))
-      .toList
 
   def makeText(head: AppointTime, followers: List[AppointTime]): String =
     List(

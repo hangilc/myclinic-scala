@@ -47,6 +47,7 @@ class AdminAppointTimeBox(
     ConvertAppointTimeDialog(appointTime).open()
 
   def doCombine(): Unit =
+    println(("followers", findVacantFollowers()))
     CombineAppointTimesDialog(appointTime, findVacantFollowers()).open()
 
   def doSplit(): Unit =

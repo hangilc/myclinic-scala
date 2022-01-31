@@ -109,18 +109,9 @@ case class AppointColumn(
     val list = boxes
       .dropWhile(b => b.appointTime.appointTimeId != appointTime.appointTimeId)
     AppointTime.extractAdjacentRunEmbedded(list, _.appointTime)._1
+      .tail
       .takeWhile(a => a.numSlots == 0)
       .map(_.appointTime)
-
-  // val idx = boxes.indexWhere(b =>
-  //   b.appointTime.appointTimeId == appointTime.appointTimeId
-  // )
-  // if idx < 0 || (idx + 1) >= boxes.size then None
-  // else
-  //   val f = boxes(idx + 1)
-  //   if f.appointTime.kind == "regular" && f.hasVacancy then
-  //     Some(f.appointTime)
-  //   else None
 
   def hasAppointTimeId(appointTimeId: Int): Boolean =
     boxes.find(b => b.appointTime.appointTimeId == appointTimeId).isDefined
@@ -206,28 +197,6 @@ case class AppointColumn(
     val n = countKenshin()
     kenshinArea.clear()
     if n > 0 then kenshinArea(s"健$n")
-
-// object AppointColumn:
-//   type AppointTimeId = Int
-
-//   def create(
-//       date: LocalDate,
-//       op: ClinicOperation,
-//       list: List[(AppointTime, List[Appoint])],
-//       appointTimeBoxMaker: (
-//           AppointTime,
-//           () => Option[AppointTime]
-//       ) => AppointTimeBox
-//   ): AppointColumn =
-//     val c = AppointColumn(date, op, appointTimeBoxMaker)
-//     list.foreach {
-//       case (appointTime, appoints) => {
-//         c.addAppointTime(appointTime)
-//         c.addAppoints(appoints)
-//       }
-//     }
-//     c.markKenshin()
-//     c
 
 object AppointColumn:
   given Ordering[AppointColumn] with
