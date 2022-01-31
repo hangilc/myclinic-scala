@@ -123,7 +123,6 @@ case class AppointColumn(
 
   def markKenshin(): Unit =
     val n = countKenshin()
-    println(("kenshin", n))
     kenshinArea.clear()
     if n > 0 then kenshinArea(s"健$n")
 

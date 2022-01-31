@@ -12,5 +12,6 @@ object all:
   val ShowMessage = dev.fujiwara.domq.ShowMessage
   val CustomEvent = dev.fujiwara.domq.CustomEvent
   type CustomEvent[T] = dev.fujiwara.domq.CustomEvent[T]
+  val Icons = dev.fujiwara.domq.Icons
 
 
