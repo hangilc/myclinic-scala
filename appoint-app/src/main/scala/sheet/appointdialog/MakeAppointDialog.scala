@@ -4,6 +4,8 @@ import dev.fujiwara.domq.all.{*, given}
 import dev.myclinic.scala.model.{AppointTime, Appoint, Patient}
 import dev.myclinic.scala.webclient.{Api, global}
 import dev.myclinic.scala.web.appoint.Misc
+import org.scalajs.dom.Event
+import scala.scalajs.js
 
 class MakeAppointDialog(
     ui: MakeAppointDialog.UI,
@@ -17,8 +19,12 @@ class MakeAppointDialog(
     ui.commands
   )
   ui.cancelButton(onclick := (() => dlog.close()))
+  val clearPatientId: js.Function1[Event, Unit] = _ => 
+    ui.patientIdDisp(innerText := "")
+    ui.nameValue.ui.input(oninput :- clearPatientId)
   ui.nameValue.onSelect = patient =>
     ui.patientIdDisp(innerText := patient.patientId.toString)
+    ui.nameValue.ui.input(oninput := clearPatientId)
 
   def open(): Unit =
     dlog.open()
