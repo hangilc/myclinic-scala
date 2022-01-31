@@ -93,13 +93,6 @@ object AppointTime:
 
   given Ordering[AppointTime] = Ordering.by(a => (a.date, a.fromTime))
 
-// given Ordering[AppointTime] with
-//   def compare(a: AppointTime, b: AppointTime): Int =
-//     val cmp: Int = summon[Ordering[LocalDate]].compare(a.date, b.date)
-//     if cmp == 0 then
-//       summon[Ordering[LocalTime]].compare(a.fromTime, b.fromTime)
-//     else cmp
-
 case class Appoint(
     appointId: Int,
     appointTimeId: Int,

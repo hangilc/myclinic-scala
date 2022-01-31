@@ -21,7 +21,9 @@ object AppointKind:
   def initRegistry(): Unit =
     addToRegistry(new AppointKind("regular", "", 0, "green"))
     addToRegistry(new AppointKind("covid-vac", "コロナワクチン", 1, "purple"))
-    addToRegistry(new AppointKind("flu-vac", "インフルワクチン", 2, "orange"))
+    addToRegistry(new AppointKind("flu-vac", "インフルワクチン", 2, "yellow"))
+    addToRegistry(new AppointKind("covid-vac-pfizer", "コロナワクチン（ファイザー）", 3, "lightblue"))
+    addToRegistry(new AppointKind("covid-vac-moderna", "コロナワクチン（モデルナ）", 3, "orange"))
 
   def apply(kind: String): AppointKind =
     def addNew(): AppointKind =

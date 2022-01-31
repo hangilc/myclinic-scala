@@ -22,14 +22,6 @@ import dev.myclinic.scala.web.appoint.sheet.appointdialog.MakeAppointDialog
 import dev.myclinic.scala.web.appoint.AppEvents
 import dev.myclinic.scala.web.appbase.ElementDispatcher.*
 
-given Ordering[AppointTimeBox] with
-  def compare(a: AppointTimeBox, b: AppointTimeBox): Int =
-    summon[Ordering[AppointTime]].compare(a.appointTime, b.appointTime)
-
-val sortedAppointTimeBox: SortedElement[AppointTimeBox] =
-  new SortedElement[AppointTimeBox]:
-    def element(a: AppointTimeBox): HTMLElement = a.ele
-
 class AppointTimeBox(
     var appointTime: AppointTime,
     gen: Int,
@@ -70,6 +62,9 @@ class AppointTimeBox(
       appoint = updated
       updateUI()
       dialog.foreach(d => d.onAppointUpdated(updated))
+
+  object Slot:
+    given Ordering[Slot] = Ordering.by(_.appoint.appointId)
 
   var slots: List[Slot] = List.empty
   val eTimeRep = div
@@ -135,31 +130,24 @@ class AppointTimeBox(
     if hasVacancy then ele(cls := "vacant")
     else ele(cls :- "vacant")
 
-  def setAppoints(gen: Int, appoints: List[Appoint]): Unit =
-    appoints.foreach(appoint => {
-      val slot = Slot(appoint)
-      slotsElement(slot.ele)
-    })
-    adjustVacantClass()
-
   def numSlots: Int =
     ele.qSelectorAllCount(".appoint-slot")
 
+  def setAppoints(gen: Int, appoints: List[Appoint]): Unit =
+    slots = appoints.map(appoint => {
+      val slot = Slot(appoint)
+      slotsElement(slot.ele)
+      slot
+    })
+    adjustVacantClass()
+
   def addAppoint(appoint: Appoint, gen: Int): Unit =
-    val slot = Slot(appoint)
-    slotsElement(slot.ele)
+    slots = Types.insert(Slot(appoint), _.ele, slots, slotsElement)
     adjustVacantClass()
 
   def deleteAppoint(appoint: Appoint, gen: Int): Unit =
-    ele
-      .qSelector(s".appoint-slot.appoint-id-${appoint.appointId}")
-      .foreach(_.remove())
+    slots = Types.delete(_.appoint.appointId == appoint.appointId, _.ele, slots, slotsElement)
     adjustVacantClass()
-
-  def addAppoint(appoint: Appoint): Unit =
-    val slot = Slot(appoint)
-    slotsElement(slot.ele)
-    if numSlots >= appointTime.capacity then ele(cls :- "vacant")
 
   def updateAppoint(appoint: Appoint): Unit =
     slots
@@ -167,18 +155,6 @@ class AppointTimeBox(
       .foreach(slot => {
         slot.onAppointUpdated(appoint)
       })
-
-  def addAppoints(appoints: Seq[Appoint]): Unit =
-    appoints.foreach(addAppoint(_))
-
-  def removeAppoint(appoint: Appoint): Unit =
-    slots
-      .find(s => s.appoint == appoint)
-      .map(s => {
-        slots = slots.filter(_ != s)
-        s.ele.remove()
-      })
-    adjustVacantClass()
 
   def appointTimeSpanRep: String =
     val f = Misc.formatAppointTime(appointTime.fromTime)
@@ -204,3 +180,6 @@ class AppointTimeBox(
     slots.foldLeft(0)((acc, ele) => {
       if ele.appoint.hasTag("健診") then acc + 1 else acc
     })
+
+object AppointTimeBox:
+  given Ordering[AppointTimeBox] = Ordering.by(_.appointTime)

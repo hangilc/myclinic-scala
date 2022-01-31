@@ -25,7 +25,7 @@ import dev.myclinic.scala.webclient.{Api, global}
 import dev.myclinic.scala.web.appbase.EventPublishers
 import scala.language.implicitConversions
 import org.scalajs.dom.MouseEvent
-import dev.myclinic.scala.web.appoint.{Misc, GlobalEvents}
+import dev.myclinic.scala.web.appoint.Misc
 import dev.myclinic.scala.web.appoint.history.History
 import cats.syntax.all._
 import cats.implicits._

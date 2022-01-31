@@ -42,19 +42,49 @@ case class AppointColumn(
     ),
     boxWrapper
   )
+
+  def updateUI(): Unit =
+    adjustVacantClass()
+    markKenshin()
+
   ele.addCreatedListener(
     AppEvents.publishers.appointTime,
     (event, gen) => {
       val created = event.created
-      if created.date == date then addAppointTime(created, gen)
+      if created.date == date then 
+        addAppointTime(created, gen)
+        updateUI()
+    }
+  )
+  ele.addUpdatedListener(
+    AppEvents.publishers.appointTime,
+    (event, gen) => {
+      if event.updated.date == date then updateUI()
     }
   )
   ele.addDeletedListener(
     AppEvents.publishers.appointTime,
     (event, gen) => {
       val deleted = event.deleted
-      if deleted.date == date then removeAppointTime(deleted, gen)
+      if deleted.date == date then 
+        removeAppointTime(deleted, gen)
+        updateUI()
     }
+  )
+  ele.addCreatedListener(
+    AppEvents.publishers.appoint,
+    (event, gen) => 
+      if hasAppointTimeId(event.created.appointTimeId) then updateUI()
+  )
+  ele.addUpdatedListener(
+    AppEvents.publishers.appoint,
+    (event, gen) => 
+      if hasAppointTimeId(event.updated.appointTimeId) then updateUI()
+  )
+  ele.addDeletedListener(
+    AppEvents.publishers.appoint,
+    (event, gen) => 
+      if hasAppointTimeId(event.deleted.appointTimeId) then updateUI()
   )
 
   def dateRep: String = Misc.formatAppointDate(date)
@@ -69,8 +99,6 @@ case class AppointColumn(
       .toList
       .map(AppointKind(_))
       .sortBy(_.ord)
-
-  def hasVacancy: Boolean = boxes.find(_.hasVacancy).isDefined
 
   def adjustVacantClass(): Unit =
     val kinds = probeVacantKinds()
@@ -90,8 +118,20 @@ case class AppointColumn(
         wrapper(icon)
       })
 
+  def countKenshin(): Int =
+    boxes.foldLeft(0)((acc, ele) => acc + ele.countKenshin())
+
+  def markKenshin(): Unit =
+    val n = countKenshin()
+    println(("kenshin", n))
+    kenshinArea.clear()
+    if n > 0 then kenshinArea(s"健$n")
+
   def totalAppoints: Int =
     boxWrapper.qSelectorAllCount(".appoint-slot")
+
+  def hasAppointTimeId(appointTimeId: Int): Boolean =
+    boxes.find(_.appointTime.appointTimeId == appointTimeId).isDefined
 
   def composeContextMenu(
       prev: List[(String, () => Unit)]
@@ -112,9 +152,6 @@ case class AppointColumn(
       .tail
       .takeWhile(a => a.numSlots == 0)
       .map(_.appointTime)
-
-  def hasAppointTimeId(appointTimeId: Int): Boolean =
-    boxes.find(b => b.appointTime.appointTimeId == appointTimeId).isDefined
 
   def makeAppointTimeBox(
       appointTime: AppointTime,
@@ -140,7 +177,7 @@ case class AppointColumn(
           box
       }
     )
-    adjustVacantClass()
+    updateUI()
 
   def addAppointTime(appointTime: AppointTime, gen: Int): Unit =
     val box = makeAppointTimeBox(
@@ -150,7 +187,7 @@ case class AppointColumn(
     )
     boxWrapper(box.ele)
     boxes = Types.insert(box, _.ele, boxes, boxWrapper)
-    adjustVacantClass()
+    updateUI()
 
   def removeAppointTime(appointTime: AppointTime, gen: Int): Unit =
     boxes = Types.delete(
@@ -159,46 +196,4 @@ case class AppointColumn(
       boxes,
       boxWrapper
     )
-    adjustVacantClass()
 
-  def deleteAppointTime(appointTimeId: Int): Unit =
-    boxes
-      .find(_.appointTime.appointTimeId == appointTimeId)
-      .foreach(box => {
-        box.ele.remove()
-        boxes = boxes.filterNot(_ == box)
-      })
-    adjustVacantClass()
-
-  private def findBoxByAppoint(appoint: Appoint): Option[AppointTimeBox] =
-    boxes.find(b => b.appointTime.appointTimeId == appoint.appointTimeId)
-
-  def addAppoint(appoint: Appoint): Unit =
-    findBoxByAppoint(appoint).foreach(b => b.addAppoint(appoint))
-    adjustVacantClass()
-    markKenshin()
-
-  def addAppoints(appoints: Seq[Appoint]): Unit =
-    appoints.foreach(addAppoint(_))
-
-  def updateAppoint(appoint: Appoint): Unit =
-    findBoxByAppoint(appoint).foreach(b => b.updateAppoint(appoint))
-    markKenshin()
-
-  def deleteAppoint(appoint: Appoint): Unit =
-    findBoxByAppoint(appoint).foreach(b => b.removeAppoint(appoint))
-    adjustVacantClass()
-    markKenshin()
-
-  def countKenshin(): Int =
-    boxes.foldLeft(0)((acc, ele) => acc + ele.countKenshin())
-
-  def markKenshin(): Unit =
-    val n = countKenshin()
-    kenshinArea.clear()
-    if n > 0 then kenshinArea(s"健$n")
-
-object AppointColumn:
-  given Ordering[AppointColumn] with
-    def compare(a: AppointColumn, b: AppointColumn): Int =
-      summon[Ordering[LocalDate]].compare(a.date, b.date)

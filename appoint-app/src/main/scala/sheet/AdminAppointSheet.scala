@@ -30,12 +30,3 @@ class AdminAppointSheet(using EventPublishers) extends AppointSheet:
       case (from, upto) => Api.fillAppointTimes(from, upto)
     }
 
-  // override def composeContextMenu(prev: List[(String, () => Unit)]): List[(String, () => Unit)] =
-
-  // override def modifyColumn(col: AppointColumn): AppointColumn =
-  //   val modified = super.modifyColumn(col)
-  //   col.appendContextMenu("予約枠追加", () => {
-  //     doAddAppointTime(col.date)
-  //   })
-  //   modified
-
