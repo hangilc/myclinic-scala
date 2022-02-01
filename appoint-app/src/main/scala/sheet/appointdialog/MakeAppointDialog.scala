@@ -6,6 +6,7 @@ import dev.myclinic.scala.webclient.{Api, global}
 import dev.myclinic.scala.web.appoint.Misc
 import org.scalajs.dom.Event
 import scala.scalajs.js
+import dev.myclinic.scala.validator.AppointValidator
 
 class MakeAppointDialog(
     ui: MakeAppointDialog.UI,
@@ -13,6 +14,8 @@ class MakeAppointDialog(
     followingVacantRegular: () => Option[AppointTime]
 ):
   ui.appointTimeDisp.innerText = Misc.formatAppointTimeSpan(appointTime)
+  var patientId = 0
+  var patientOption: Option[Patient] = None
   val dlog = Modal(
     "診察予約入力",
     ui.body(cls := "appoint-dialog-body"),
@@ -20,17 +23,40 @@ class MakeAppointDialog(
   )
   ui.cancelButton(onclick := (() => dlog.close()))
   val clearPatientId: js.Function1[Event, Unit] = _ => 
+    patientId = 0
+    patientOption = None
     ui.patientIdDisp(innerText := "")
     ui.nameValue.ui.input(oninput :- clearPatientId)
   ui.nameValue.onSelect = patient =>
+    patientId = patient.patientId
+    patientOption = Some(patient)
     ui.patientIdDisp(innerText := patient.patientId.toString)
     ui.nameValue.ui.input(oninput := clearPatientId)
+  ui.enterButton(onclick := (onEnter _))
 
   def open(): Unit =
     dlog.open()
     ui.initFocus()
 
   def close(): Unit = dlog.close()
+
+  def listTags(): Set[String] = 
+    Set.empty ++
+      (if ui.kenshinCheck.checked then Set("健診") else Set.empty)
+
+  def onEnter(): Unit =
+    ???
+
+  def validate(): Either[String, Appoint] =
+    AppointValidator.validateForEnter(
+      appointTime.appointTimeId,
+      ui.nameValue.value,
+      AppointValidator.validatePatientIdValue(patientId),
+      ui.memoInput.value,
+      listTags(),
+      patientOption
+    ).asEither
+    
 
 object MakeAppointDialog:
   def apply(
