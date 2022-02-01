@@ -6,6 +6,7 @@ import dev.myclinic.scala.webclient.{Api, global}
 import dev.myclinic.scala.web.appoint.Misc
 import org.scalajs.dom.Event
 import scala.scalajs.js
+import scala.util.{Success, Failure}
 import dev.myclinic.scala.validator.AppointValidator
 
 class MakeAppointDialog(
@@ -45,7 +46,15 @@ class MakeAppointDialog(
       (if ui.kenshinCheck.checked then Set("健診") else Set.empty)
 
   def onEnter(): Unit =
-    ???
+    ui.errBox.hide()
+    validate() match {
+      case Right(appoint) => 
+        Api.registerAppoint(appoint).onComplete {
+          case Success(_) => dlog.close()
+          case Failure(ex) => ui.errBox.show(ex.getMessage)
+        }
+      case Left(msg) => ui.errBox.show(msg)
+    }
 
   def validate(): Either[String, Appoint] =
     AppointValidator.validateForEnter(
@@ -73,6 +82,7 @@ object MakeAppointDialog:
     val kenshinCheck = checkbox()
     val alsoWrapper = span()
     val alsoCheck = checkbox()
+    val errBox = ErrorBox()
     val enterButton = button
     val cancelButton = button
     val body = div(
@@ -89,7 +99,8 @@ object MakeAppointDialog:
             label("診察も")
           )
         )
-      )
+      ),
+      errBox.ele
     )
     val commands = div(
       enterButton("入力"),
