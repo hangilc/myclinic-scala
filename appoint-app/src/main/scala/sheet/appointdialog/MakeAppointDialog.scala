@@ -8,6 +8,7 @@ import org.scalajs.dom.Event
 import scala.scalajs.js
 import scala.util.{Success, Failure}
 import dev.myclinic.scala.validator.AppointValidator
+import scala.concurrent.Future
 
 class MakeAppointDialog(
     ui: MakeAppointDialog.UI,
@@ -23,7 +24,7 @@ class MakeAppointDialog(
     ui.commands
   )
   ui.cancelButton(onclick := (() => dlog.close()))
-  val clearPatientId: js.Function1[Event, Unit] = _ => 
+  val clearPatientId: js.Function1[Event, Unit] = _ =>
     patientId = 0
     patientOption = None
     ui.patientIdDisp(innerText := "")
@@ -34,6 +35,13 @@ class MakeAppointDialog(
     ui.patientIdDisp(innerText := patient.patientId.toString)
     ui.nameValue.ui.input(oninput := clearPatientId)
   ui.enterButton(onclick := (onEnter _))
+  if followingVacantRegular().isDefined then
+    ui.alsoWrapper(displayDefault)
+    ui.kenshinCheck(onchange := (_ => {
+      ui.alsoCheck(disabled := !ui.kenshinCheck.checked)
+    }))
+  else
+    ui.alsoWrapper(displayNone)
 
   def open(): Unit =
     dlog.open()
@@ -41,31 +49,43 @@ class MakeAppointDialog(
 
   def close(): Unit = dlog.close()
 
-  def listTags(): Set[String] = 
+  def listTags(): Set[String] =
     Set.empty ++
       (if ui.kenshinCheck.checked then Set("健診") else Set.empty)
 
   def onEnter(): Unit =
     ui.errBox.hide()
     validate() match {
-      case Right(appoint) => 
-        Api.registerAppoint(appoint).onComplete {
-          case Success(_) => dlog.close()
-          case Failure(ex) => ui.errBox.show(ex.getMessage)
-        }
+      case Right(appoint) =>
+        for
+          _ <- Api.registerAppoint(appoint)
+          _ <-
+            if ui.alsoCheck.checked then
+              val following = followingVacantRegular().get
+              val newAppoint = Appoint(
+                0,
+                following.appointTimeId,
+                appoint.patientName,
+                appoint.patientId,
+                ""
+              )
+              Api.registerAppoint(newAppoint)
+            else Future.successful(())
+        yield dlog.close()
       case Left(msg) => ui.errBox.show(msg)
     }
 
   def validate(): Either[String, Appoint] =
-    AppointValidator.validateForEnter(
-      appointTime.appointTimeId,
-      ui.nameValue.value,
-      AppointValidator.validatePatientIdValue(patientId),
-      ui.memoInput.value,
-      listTags(),
-      patientOption
-    ).asEither
-    
+    AppointValidator
+      .validateForEnter(
+        appointTime.appointTimeId,
+        ui.nameValue.value,
+        AppointValidator.validatePatientIdValue(patientId),
+        ui.memoInput.value,
+        listTags(),
+        patientOption
+      )
+      .asEither
 
 object MakeAppointDialog:
   def apply(
