@@ -35,8 +35,9 @@ class CovidThirdShot(val ui: CovidThirdShot.UI):
     ui.searchResult.hide()
     for data <- Api.getCovid2ndShotData(patient.patientId)
     yield data match {
-      case Some(age, secondShotAt, thirdShotDue) =>
-        val disp = CovidThirdShot.Disp(patient, age, secondShotAt, thirdShotDue)
+      case Some(age, secondShotAt, _thirdShotDue) =>
+        val due = CovidThirdShot.thirdShotDue(age, secondShotAt)
+        val disp = CovidThirdShot.Disp(patient, age, secondShotAt, due)
         ui.eDisp.setChildren(disp.ui.ele)
       case None =>
         val query = CovidThirdShot.Query(patient)
@@ -92,7 +93,7 @@ object CovidThirdShot:
       eThirdShot(fontWeight := "bold")
     )
 
-  def thirdShotDue(age: Int, secondShot: LocalDate): LocalDate =
+  def thirdShotDue20220120(age: Int, secondShot: LocalDate): LocalDate =
     val march = LocalDate.of(2022, 3, 1)
     if age >= 65 then
       val d: LocalDate = secondShot.plusMonths(7)
@@ -106,6 +107,9 @@ object CovidThirdShot:
       else 
         val dd = secondShot.plusMonths(7)
         if dd.isBefore(march) then march else dd
+
+  def thirdShotDue(age: Int, secondShot: LocalDate): LocalDate =
+    secondShot.plusMonths(6)
 
   class Query(val ui: QueryUI, patient: Patient):
     val age = DateUtil.calcAge(patient.birthday, LocalDate.of(2022, 3, 31))
