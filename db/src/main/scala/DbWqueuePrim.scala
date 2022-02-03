@@ -26,17 +26,17 @@ object DbWqueuePrim:
     for
       wqueue <- getWqueue(visitId).unique
       affected <- op.update.run
-      _ = 
+      _ =
         if affected != 1 then
-        throw new RuntimeException("Failed to delete wqueue.")
+          throw new RuntimeException("Failed to delete wqueue.")
       event <- DbEventPrim.logWqueueDeleted(wqueue)
     yield event
-    
+
   def tryDeleteWqueue(visitId: Int): ConnectionIO[Option[AppEvent]] =
     getWqueue(visitId).option.flatMap(optWqueue => {
       optWqueue match {
         case Some(wqueue) => deleteWqueue(visitId).map(Some(_))
-        case None => None.pure[ConnectionIO]
+        case None         => None.pure[ConnectionIO]
       }
     })
 
@@ -44,9 +44,22 @@ object DbWqueuePrim:
     val op = sql"""
       insert into wqueue (visit_id, wait_state) values (${wq.visitId}, ${wq.waitState.code})
     """
-    for 
+    for
       _ <- op.update.run
       entered <- getWqueue(wq.visitId).unique
       event <- DbEventPrim.logWqueueCreated(entered)
     yield event
 
+  def listWqueue(): Query0[Wqueue] =
+    sql"""
+      select visit_id, wait_state from wqueue order by visit_id
+    """
+      .query[(Int, Int)]
+      .map(tuple =>
+        tuple match {
+          case (visitId, waitStateCode) => {
+            val waitState = WaitState.fromCode(waitStateCode)
+            Wqueue(visitId, waitState)
+          }
+        }
+      )

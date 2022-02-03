@@ -192,6 +192,8 @@ object RestService extends DateTimeQueryParam with Publisher:
 
     case GET -> Root / "list-wqueue" => Ok(Db.listWqueue())
 
+    case GET -> Root / "list-wqueue-full" => Ok(Db.listWqueueFull())
+
     case req @ POST -> Root / "enter-patient" =>
       Ok {
         for

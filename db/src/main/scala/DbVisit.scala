@@ -19,14 +19,7 @@ trait DbVisit extends Mysql:
     mysql(Prim.getVisit(visitId).unique)
 
   def batchGetVisit(visitIds: List[Int]): IO[Map[Int, Visit]] =
-    val op =
-      for
-        visits <- visitIds
-          .map(visitId => Prim.getVisit(visitId).unique)
-          .sequence
-        items = visits.map(visit => (visit.visitId, visit))
-      yield Map(items: _*)
-    mysql(op)
+    mysql(DbVisitPrim.batchGetVisit(visitIds))
 
   def listRecentVisit(offset: Int, count: Int): IO[List[Visit]] =
     mysql(Prim.listRecentVisit(offset, count))

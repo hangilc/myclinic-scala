@@ -46,3 +46,12 @@ object DbPatientPrim:
       entered <- getPatient(patientId).unique
       event <- DbEventPrim.logPatientCreated(entered)
     yield event
+
+  def batchGetPatient(patientIds: List[Int]): ConnectionIO[Map[Int, Patient]] =
+    for
+      patients <- patientIds
+        .map(patientId => getPatient(patientId).unique)
+        .sequence
+      items = patients.map(patient => (patient.patientId, patient))
+    yield Map(items: _*)
+

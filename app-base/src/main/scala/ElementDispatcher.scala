@@ -80,6 +80,16 @@ object ElementDispatcher:
       ele(cls := publisher.createdListenerClass)
       addCreatedHandler(publisher, handler)
 
+    def removeCreatedListener[
+        T,
+        C <: AppModelEvent,
+        U <: AppModelEvent,
+        D <: AppModelEvent
+    ](
+        publisher: ModelPublishers[T, C, U, D]
+    ): Unit =
+      ele(cls :- publisher.createdListenerClass)
+
     def addUpdatedHandler[
         T,
         C <: AppModelEvent,
@@ -107,6 +117,16 @@ object ElementDispatcher:
       ele(cls := publisher.updatedListenerClass)
       addUpdatedHandler(publisher, handler)
 
+    def removeUpdatedListener[
+        T,
+        C <: AppModelEvent,
+        U <: AppModelEvent,
+        D <: AppModelEvent
+    ](
+        publisher: ModelPublishers[T, C, U, D]
+    ): Unit =
+      ele(cls :- publisher.updatedListenerClass)
+
     def addUpdatedWithIdListener[
         T,
         C <: AppModelEvent,
@@ -119,6 +139,17 @@ object ElementDispatcher:
     ): Unit =
       ele(cls := publisher.updatedWithIdListenerClass(id))
       addUpdatedHandler(publisher, handler)
+
+    def removeUpdatedWithIdListener[
+        T,
+        C <: AppModelEvent,
+        U <: AppModelEvent,
+        D <: AppModelEvent
+    ](
+        publisher: ModelPublishers[T, C, U, D],
+        id: Int
+    ): Unit =
+      ele(cls :- publisher.updatedWithIdListenerClass(id))
 
     def addDeletedHandler[
         T,
@@ -147,6 +178,16 @@ object ElementDispatcher:
       ele(cls := publisher.deletedListenerClass)
       addDeletedHandler(publisher, handler)
 
+    def removeDeletedListener[
+        T,
+        C <: AppModelEvent,
+        U <: AppModelEvent,
+        D <: AppModelEvent
+    ](
+        publisher: ModelPublishers[T, C, U, D]
+    ): Unit =
+      ele(cls :- publisher.deletedListenerClass)
+
     def addDeletedWithIdListener[
         T,
         C <: AppModelEvent,
@@ -159,3 +200,14 @@ object ElementDispatcher:
     ): Unit =
       ele(cls := publisher.deletedWithIdListenerClass(id))
       addDeletedHandler(publisher, handler)
+
+    def removeDeletedWithIdListener[
+        T,
+        C <: AppModelEvent,
+        U <: AppModelEvent,
+        D <: AppModelEvent
+    ](
+        publisher: ModelPublishers[T, C, U, D],
+        id: Int
+    ): Unit =
+      ele(cls :- publisher.deletedWithIdListenerClass(id))

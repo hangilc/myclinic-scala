@@ -35,7 +35,7 @@ object DbVisitPrim:
         ${visit.kouhi1Id}, ${visit.kouhi2Id}, ${visit.kouhi3Id}, ${visit.koukikoureiId},
         ${visit.attributesStore})
     """
-    for 
+    for
       visitId <- op.update.withUniqueGeneratedKeys[Int]("visit_id")
       entered <- getVisit(visitId).unique
       event <- DbEventPrim.logVisitCreated(entered)
@@ -63,7 +63,7 @@ object DbVisitPrim:
         kouhi_2_id = ${kouhiId} or
         kouhi_3_id = ${kouhiId}
     """.query[Int].unique
-     
+
   def countByPatient(patientId: Int): ConnectionIO[Int] =
     sql"""
       select count(*) from visit where patient_id = ${patientId}
@@ -79,18 +79,37 @@ object DbVisitPrim:
       select * from visit where date(v_datetime) = ${at} order by visit_id
     """.query[Visit].to[List]
 
-  def listByPatient(patientId: Int, offset: Int, count: Int): ConnectionIO[List[Visit]] =
+  def listByPatient(
+      patientId: Int,
+      offset: Int,
+      count: Int
+  ): ConnectionIO[List[Visit]] =
     sql"""
       select * from visit where patient_id = ${patientId} limit ${offset}, ${count}
     """.query[Visit].to[List]
 
-  def listVisitIdByPatient(patientId: Int, offset: Int, count: Int): ConnectionIO[List[Int]] =
+  def listVisitIdByPatient(
+      patientId: Int,
+      offset: Int,
+      count: Int
+  ): ConnectionIO[List[Int]] =
     sql"""
       select visit_id from visit where patient_id = ${patientId} limit ${offset}, ${count}
     """.query[Int].to[List]
 
-  def listVisitIdByPatientReverse(patientId: Int, offset: Int, count: Int): ConnectionIO[List[Int]] =
+  def listVisitIdByPatientReverse(
+      patientId: Int,
+      offset: Int,
+      count: Int
+  ): ConnectionIO[List[Int]] =
     sql"""
       select visit_id from visit where patient_id = ${patientId} order by visit_id desc limit ${offset}, ${count}
     """.query[Int].to[List]
 
+  def batchGetVisit(visitIds: List[Int]): ConnectionIO[Map[Int, Visit]] =
+    for
+      visits <- visitIds
+        .map(visitId => getVisit(visitId).unique)
+        .sequence
+      items = visits.map(visit => (visit.visitId, visit))
+    yield Map(items: _*)

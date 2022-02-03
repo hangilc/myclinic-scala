@@ -19,6 +19,7 @@ import dev.myclinic.scala.web.reception.cashier.Cashier
 import dev.myclinic.scala.web.reception.patient.PatientManagement
 import dev.myclinic.scala.web.reception.records.Records
 import dev.myclinic.scala.web.reception.scan.Scan
+import dev.myclinic.scala.web.appbase.HotlineUI
 
 abstract class MainUI(using publishers: EventPublishers):
   def postHotline(msg: String): Unit
@@ -27,6 +28,9 @@ abstract class MainUI(using publishers: EventPublishers):
 
   private var lastHotlineAppEventId = 0
   private val hotlineInput = textarea()
+  private val hotlineSendButton = button
+  private val hotlineRogerButton = button
+  private val hotlineBeepButton = button
   private val hotlineMessages = textarea()
   private val eMain: HTMLElement = div()
   private val sideMenu = SideMenu(
@@ -38,6 +42,12 @@ abstract class MainUI(using publishers: EventPublishers):
       "スキャン" -> (() => Scan())
     )
   )
+  def hotlineUI: HotlineUI =
+    new HotlineUI:
+      def messageInput = hotlineInput
+      def sendButton = hotlineSendButton
+      def rogerButton = hotlineRogerButton
+      def beepButton = hotlineBeepButton
   val ele =
     div(id := "content")(
       div(id := "banner")("受付"),
@@ -46,20 +56,22 @@ abstract class MainUI(using publishers: EventPublishers):
           sideMenu.ele(id := "side-menu"),
           hotlineInput(id := "hotline-input"),
           div(id := "hotline-commands")(
-            button(
+            hotlineSendButton(
               "送信",
-              onclick := (() => {
-                postHotline(hotlineInput.value)
-                hotlineInput.value = ""
-              })
+              // onclick := (() => {
+              //   postHotline(hotlineInput.value)
+              //   hotlineInput.value = ""
+              // })
             ),
-            button(
+            hotlineRogerButton(
               "了解",
-              onclick := (() => {
-                postHotline("了解")
-              })
+              // onclick := (() => {
+              //   postHotline("了解")
+              // })
             ),
-            button("Beep", onclick := (() => { Api.beep(); () })),
+            hotlineBeepButton("Beep", 
+              // onclick := (() => { Api.beep(); () })
+            ),
             pullDownLink("常用", regularMenuItems),
             pullDownLink("患者", patientMenuItems)
           ),

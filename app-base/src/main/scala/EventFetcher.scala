@@ -23,7 +23,7 @@ abstract class EventFetcher:
   private var events: Vector[(Int, AppModelEvent)] = Vector.empty
 
   def catchup(baseEventId: Int, f: (Int, AppModelEvent) => Unit): Unit =
-    val i = events.lastIndexWhere(_._1 < baseEventId)
+    val i = events.lastIndexWhere(_._1 <= baseEventId)
     events.slice(i+1, events.size).foreach((gen, m) => f(gen, m))
 
   private def onNewAppEvent(event: AppModelEvent, eventId: Int): Unit =

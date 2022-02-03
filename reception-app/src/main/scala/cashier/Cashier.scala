@@ -21,8 +21,10 @@ import dev.myclinic.scala.web.appbase.SideMenuService
 import dev.myclinic.scala.web.appbase.EventSubscriber
 import dev.myclinic.scala.web.reception.ReceptionEventFetcher
 import scala.collection.mutable
+import dev.myclinic.scala.web.appbase.ElementDispatcher.*
+import dev.myclinic.scala.web.appbase.EventFetcher
 
-class Cashier(using publishers: EventPublishers) extends SideMenuService:
+class Cashier(using publishers: EventPublishers, fetcher: EventFetcher) extends SideMenuService:
   val table = makeTable()
   val ele: HTMLElement = div(
     div(
@@ -52,16 +54,12 @@ class Cashier(using publishers: EventPublishers) extends SideMenuService:
   override def getElement: HTMLElement = ele
   override def init(): Future[Unit] = refresh()
   override def onReactivate: Future[Unit] = refresh()
-  override def dispose(): Unit =
-    subscribers.foreach(sub => sub.unsubscribe())
 
-  val subscribers: List[EventSubscriber[_]] =
-    val publishers = ReceptionEventFetcher.publishers
-    List(
-      publishers.wqueue.deleted.subscribe(event => {
-        removeRow(event.deleted.visitId)
-      })
-    )
+  def registerEventListeners(): Unit =
+    ele.addDeletedListener(publishers.wqueue, (gen, event) => {})
+
+  def unregisterEventListeners(): Unit =
+    ele.removeDeletedListener(publishers.wqueue)
 
   private def onMenu(event: MouseEvent): Unit =
     val m = ContextMenu(
@@ -136,26 +134,20 @@ class Cashier(using publishers: EventPublishers) extends SideMenuService:
     rowMap.get(visitId).foreach(row => row.remove())
 
   def refresh(): Future[Unit] =
-    subscribers.foreach(_.stop())
-    val f =
-      for
-        list <- Api.listWqueue()
-        visitMap <- Api.batchGetVisit(list.map(_.visitId))
-        patientMap <- Api.batchGetPatient(
-          visitMap.values.toList.map(_.patientId)
-        )
-      yield {
-        table.clear()
-        list.foreach(wq => {
-          val visit = visitMap(wq.visitId)
-          val patient = patientMap(visit.patientId)
-          addRow(wq, visit, patient)
-        })
-      }
-    f.transform(result => {
-      subscribers.foreach(_.start())
-      result
-    })
+    unregisterEventListeners()
+    for (gen, list, visitMap, patientMap) <- Api.listWqueueFull()
+    yield {
+      table.clear()
+      list.foreach(wq => {
+        val visit = visitMap(wq.visitId)
+        val patient = patientMap(visit.patientId)
+        addRow(wq, visit, patient)
+      })
+      fetcher.catchup(gen, (_, event) => event match {
+        
+      })
+      registerEventListeners()
+    }
 
   private def doDelete(visit: Visit, patient: Patient): Unit =
     val msg = s"${patient.fullName()}\n削除していいですか？"

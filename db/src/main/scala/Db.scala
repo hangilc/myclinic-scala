@@ -158,3 +158,13 @@ object Db
         event <- DbKouhiPrim.deleteKouhi(kouhiId)
       yield event
     }
+
+  def listWqueueFull(): IO[(Int, List[Wqueue], Map[Int, Visit], Map[Int, Patient])] =
+    mysql {
+      for
+        gen <- DbEventPrim.currentEventId()
+        wqueueList <- DbWqueuePrim.listWqueue().to[List]
+        visitMap <- DbVisitPrim.batchGetVisit(wqueueList.map(_.visitId))
+        patientMap <- DbPatientPrim.batchGetPatient(visitMap.values.map(_.patientId).toList)
+      yield (gen, wqueueList, visitMap, patientMap)
+    }

@@ -28,12 +28,7 @@ trait DbPatient extends Mysql:
     else mysql(Prim.searchPatient(parts(0), parts(1)).to[List])
 
   def batchGetPatient(patientIds: List[Int]): IO[Map[Int, Patient]] =
-    mysql(for
-      patients <- patientIds
-        .map(patientId => Prim.getPatient(patientId).unique)
-        .sequence
-      items = patients.map(patient => (patient.patientId, patient))
-    yield Map(items: _*))
+    mysql(DbPatientPrim.batchGetPatient(patientIds))
 
   def enterPatient(patient: Patient): IO[AppEvent] =
     mysql(Prim.enterPatient(patient))
