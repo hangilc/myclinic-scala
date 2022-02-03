@@ -144,6 +144,9 @@ class Cashier(using publishers: EventPublishers, fetcher: EventFetcher) extends 
         addRow(wq, visit, patient)
       })
       fetcher.catchup(gen, (_, event) => event match {
+        case WqueueCreated(_, created) => 
+          for
+            ()
         
       })
       registerEventListeners()

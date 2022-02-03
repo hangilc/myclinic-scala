@@ -38,6 +38,8 @@ object RestService extends DateTimeQueryParam with Publisher:
   object intAppointId extends QueryParamDecoderMatcher[Int]("appoint-id")
   object intLimit extends QueryParamDecoderMatcher[Int]("limit")
   object intOffset extends QueryParamDecoderMatcher[Int]("offset")
+  object intVisitId extends QueryParamDecoderMatcher[Int]("visit-id")
+
 
   case class UserError(message: String) extends Exception
 
@@ -202,6 +204,9 @@ object RestService extends DateTimeQueryParam with Publisher:
           _ <- publish(event)
         yield true
       }
+
+    case GET -> Root / "get-visit-patient" :? intVisitId(visitId) => 
+      Ok(Db.getVisitPatient(visitId))
 
   } <+> PatientService.routes <+> VisitService.routes <+> MiscService.routes
     <+> ConfigService.routes <+> FileService.routes

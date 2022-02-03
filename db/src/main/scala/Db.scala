@@ -168,3 +168,10 @@ object Db
         patientMap <- DbPatientPrim.batchGetPatient(visitMap.values.map(_.patientId).toList)
       yield (gen, wqueueList, visitMap, patientMap)
     }
+
+  def getVisitPatient(visitId: Int): IO[(Int, Visit, Patient)] =
+    mysql(for
+      gen <- DbEventPrim.currentEventId()
+      visit <- DbVisitPrim.getVisit(visitId).unique
+      patient <- DbPatientPrim.getPatient(visit.patientId).unique
+    yield (gen, visit, patient))
