@@ -33,6 +33,7 @@ class MakeAppointDialog(
     patientId = patient.patientId
     patientOption = Some(patient)
     ui.patientIdDisp(innerText := patient.patientId.toString)
+    ui.nameValue.ui.input.value = patient.fullName()
     ui.nameValue.ui.input(oninput := clearPatientId)
   ui.enterButton(onclick := (onEnter _))
   if followingVacantRegular().isDefined then
@@ -142,11 +143,14 @@ object MakeAppointDialog:
       if !txt.isEmpty then
         for patients <- Api.searchPatient(txt)
         yield
-          ui.searchResult.setItems(
-            patients,
-            patient => s"(${patient.patientId}) ${patient.fullName()}"
-          )
-          ui.showSearchResult()
+          if patients.size == 1 then 
+            onSelect(patients.head)
+          else
+            ui.searchResult.setItems(
+              patients,
+              patient => s"(${patient.patientId}) ${patient.fullName()}"
+            )
+            ui.showSearchResult()
 
     def value: String = ui.input.value
     def initFocus(): Unit = ui.input.focus()
