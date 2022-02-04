@@ -6,7 +6,7 @@ import dev.fujiwara.dateinput.DateInput
 
 class PatientEdit(ui: PatientEdit.UI, patient: Patient):
   val ele = ui.ele
-  ui.patientId(innerText := patient.patientId.toString)
+  val patientForm = new PatientEdit.PatientForm(ui.formUI, patient)
 
 object PatientEdit:
   def apply(patient: Patient): PatientEdit =
@@ -24,7 +24,8 @@ object PatientEdit:
       )
     )
 
-  class PatientForm(ui: PatientFormUI, patient: Patient)
+  class PatientForm(ui: PatientFormUI, patient: Patient):
+    ui.patientId(innerText := patient.patientId.toString)
 
   class PatientFormUI:
     val patientId = span
