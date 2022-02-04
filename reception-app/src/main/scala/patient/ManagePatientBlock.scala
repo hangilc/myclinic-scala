@@ -19,15 +19,19 @@ import java.time.LocalDate
 import dev.myclinic.scala.util.{HokenRep, RcptUtil}
 import dev.myclinic.scala.apputil.FutanWari
 
-class ManagePatientBlock(patient: Patient, onClose: ManagePatientBlock => Unit):
+class ManagePatientBlock(var patient: Patient, onClose: ManagePatientBlock => Unit):
   val eDispWrapper = div(PatientDisp(patient).ele)
+  val eLeftPane = div
   val eRightPane = div()
   val eSubblocks = div()
   val hokenList = HokenList(patient.patientId, eSubblocks)
   val block = Block(
     s"${patient.fullName()} (${patient.patientId})",
     div(cls := "manage-patient-block-content")(
-      div(cls := "left")(eDispWrapper),
+      eLeftPane(cls := "left")(
+        eDispWrapper,
+        div(button("編集", onclick := (onEditPatient _)))
+      ),
       eRightPane(cls := "right")(
         hokenList.ele
       )
@@ -45,6 +49,10 @@ class ManagePatientBlock(patient: Patient, onClose: ManagePatientBlock => Unit):
 
   def init(): Unit =
     hokenList.init()
+
+  def onEditPatient(): Unit =
+    val form = PatientEdit(patient)
+    eLeftPane.setChildren(form.ele)
 
   private def onNewShahokokuho(): Unit =
     val b = new NewShahokokuhoSubblock(patient.patientId)

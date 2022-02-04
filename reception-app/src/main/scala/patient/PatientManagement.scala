@@ -38,8 +38,15 @@ class PatientManagement() extends SideMenuService:
     eWorkarea
   )
   def getElement: HTMLElement = ele
-  override def init(): Future[Unit] = Future.successful(())
-  override def onReactivate: Future[Unit] = Future.successful(())
+
+  def initFocus(): Unit =
+    eSearchText.focus()
+  override def init(): Future[Unit] = 
+    initFocus()
+    Future.successful(())
+  override def onReactivate: Future[Unit] = 
+    initFocus()
+    Future.successful(())
   override def dispose(): Unit =
     ()
 
