@@ -3,6 +3,7 @@ package dev.myclinic.scala.web.reception.patient
 import dev.fujiwara.domq.all.{*, given}
 import dev.myclinic.scala.model.Patient
 import dev.fujiwara.dateinput.DateInput
+import org.scalajs.dom.HTMLInputElement
 
 class PatientEdit(ui: PatientEdit.UI, patient: Patient):
   val ele = ui.ele
@@ -26,6 +27,16 @@ object PatientEdit:
 
   class PatientForm(ui: PatientFormUI, patient: Patient):
     ui.patientId(innerText := patient.patientId.toString)
+    ui.lastNameInput.value = patient.lastName
+    ui.firstNameInput.value = patient.firstName
+    ui.lastNameYomiInput.value = patient.lastNameYomi
+    ui.firstNameYomiInput.value = patient.firstNameYomi
+    ui.ele.qSelector(s"input[type=radio][name=sex][value=${patient.sex.code}]").foreach(
+      e => e.asInstanceOf[HTMLInputElement].checked = true
+    )
+    ui.birthdayInput.setDate(patient.birthday)
+    ui.addressInput.value = patient.address
+    ui.phoneInput.value = patient.phone
 
   class PatientFormUI:
     val patientId = span
@@ -34,8 +45,8 @@ object PatientEdit:
     val lastNameYomiInput = inputText
     val firstNameYomiInput = inputText
     val birthdayInput = new DateInput()
-    val address = inputText
-    val phone = inputText
+    val addressInput = inputText
+    val phoneInput = inputText
     val ele = form(
       Form.rows(
         span("患者番号") -> patientId,
@@ -52,7 +63,7 @@ object PatientEdit:
           radio("sex", "F"), span("女")
         ),
         span("生年月日") -> birthdayInput.ele,
-        span("住所") -> address,
-        span("電話") -> phone
+        span("住所") -> addressInput,
+        span("電話") -> phoneInput
       )
     )
