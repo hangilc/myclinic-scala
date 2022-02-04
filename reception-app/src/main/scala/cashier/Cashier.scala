@@ -19,7 +19,6 @@ import scala.concurrent.Future
 import java.time.LocalDate
 import dev.myclinic.scala.web.appbase.SideMenuService
 import dev.myclinic.scala.web.appbase.EventSubscriber
-import dev.myclinic.scala.web.reception.ReceptionEventFetcher
 import scala.collection.mutable
 import dev.myclinic.scala.web.appbase.ElementDispatcher.*
 import dev.myclinic.scala.web.appbase.EventFetcher
@@ -56,10 +55,10 @@ class Cashier(using publishers: EventPublishers, fetcher: EventFetcher) extends 
   override def onReactivate: Future[Unit] = refresh()
 
   def registerEventListeners(): Unit =
-    ele.addDeletedListener(publishers.wqueue, (gen, event) => {})
+    ele.addCreatedListener(publishers.wqueue, (gen, event) => {})
 
   def unregisterEventListeners(): Unit =
-    ele.removeDeletedListener(publishers.wqueue)
+    ele.removeCreatedListener(publishers.wqueue)
 
   private def onMenu(event: MouseEvent): Unit =
     val m = ContextMenu(
@@ -137,7 +136,6 @@ class Cashier(using publishers: EventPublishers, fetcher: EventFetcher) extends 
     ???
 
   def refresh(): Future[Unit] =
-    unregisterEventListeners()
     for (gen, list, visitMap, patientMap) <- Api.listWqueueFull()
     yield {
       table.clear()
@@ -146,13 +144,6 @@ class Cashier(using publishers: EventPublishers, fetcher: EventFetcher) extends 
         val patient = patientMap(visit.patientId)
         addRow(wq, visit, patient)
       })
-      fetcher.catchup(gen, (_, event) => event match {
-        case WqueueCreated(_, created) => 
-          for
-            ()
-        
-      })
-      registerEventListeners()
     }
 
   private def doDelete(visit: Visit, patient: Patient): Unit =

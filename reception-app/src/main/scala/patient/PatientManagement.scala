@@ -41,9 +41,7 @@ class PatientManagement() extends SideMenuService:
   override def init(): Future[Unit] = Future.successful(())
   override def onReactivate: Future[Unit] = Future.successful(())
   override def dispose(): Unit =
-    subscribers.foreach(_.unsubscribe())
-
-  private val subscribers: List[EventSubscriber[_]] = List.empty
+    ()
 
   private def onMenu(event: MouseEvent): Unit =
     ()

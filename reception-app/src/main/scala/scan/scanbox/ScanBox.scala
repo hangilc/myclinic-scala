@@ -94,7 +94,7 @@ class ScanBox(val ui: ScanBox.UI)(using queue: ScanWorkQueue)
     if scannedItems.size == 0 then
       scanType = selected
     else 
-      ShowMessage.confirm("文書の種類を変更しますか？")(changeScanType _)(
+      ShowMessage.confirm("文書の種類を変更しますか？")(changeScanType _, 
         () => scanTypeSelect.setValue(scanType)
       )
 

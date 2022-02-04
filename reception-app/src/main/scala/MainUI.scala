@@ -20,8 +20,9 @@ import dev.myclinic.scala.web.reception.patient.PatientManagement
 import dev.myclinic.scala.web.reception.records.Records
 import dev.myclinic.scala.web.reception.scan.Scan
 import dev.myclinic.scala.web.appbase.HotlineUI
+import dev.myclinic.scala.web.appbase.EventFetcher
 
-abstract class MainUI(using publishers: EventPublishers):
+abstract class MainUI(using publishers: EventPublishers, fetcher: EventFetcher):
   def postHotline(msg: String): Unit
   def invoke(label: String): Unit =
     sideMenu.invokeByLabel(label)

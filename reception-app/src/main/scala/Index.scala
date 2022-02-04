@@ -23,6 +23,8 @@ import dev.myclinic.scala.web.appbase.HotlineHandler
 @JSExportTopLevel("JsMain")
 object JsMain:
   val ui = createUI()
+  given publishers: EventPublishers = EventPublishers()
+  given fetcher: EventFetcher = ReceptionEventFetcher
 
   @JSExport
   def main(isAdmin: Boolean): Unit =
@@ -53,34 +55,12 @@ object JsMain:
       "reception",
       "practice",
       ReceptionEventFetcher,
-      ReceptionEventFetcher.publishers
+      publishers
     )
 
-  // def setupHotline(): Unit =
-  //   for _ <- loadHotlines()
-  //   yield {
-  //     setupHotlineSubscriber()
-  //   }
-
-  // def loadHotlines(): Future[Unit] =
-  //   for hotlines <- Api.listTodaysHotline()
-  //   yield hotlines.foreach((appEventId, hotlineCreated) =>
-  //     ui.appendHotline(appEventId, hotlineCreated)
-  //   )
-
-  // def setupHotlineSubscriber()(using eventPublishers: EventPublishers): Unit =
-  //   val subscriber = eventPublishers.hotlineCreated.subscribe((event, raw) => {
-  //     val appEventId = raw.appEventId
-  //     val hotline = event.created
-  //     if hotline.sender == "reception" || hotline.recipient == "reception" then
-  //       ui.appendHotline(appEventId, event)
-  //   })
-  //   subscriber.start()
-
-object ReceptionEventFetcher extends EventFetcher:
-  val publishers = EventPublishers()
-  publishers.shahokokuho.addDispatchers()
-  publishers.koukikourei.addDispatchers()
-  publishers.roujin.addDispatchers()
-  override def publish(event: AppModelEvent, appEventId: Int): Unit =
-    publishers.publish(event, appEventId)
+  object ReceptionEventFetcher extends EventFetcher:
+    publishers.shahokokuho.addDispatchers()
+    publishers.koukikourei.addDispatchers()
+    publishers.roujin.addDispatchers()
+    override def publish(event: AppModelEvent, appEventId: Int): Unit =
+      publishers.publish(event, appEventId)
