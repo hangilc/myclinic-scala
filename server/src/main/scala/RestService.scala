@@ -40,7 +40,6 @@ object RestService extends DateTimeQueryParam with Publisher:
   object intOffset extends QueryParamDecoderMatcher[Int]("offset")
   object intVisitId extends QueryParamDecoderMatcher[Int]("visit-id")
 
-
   case class UserError(message: String) extends Exception
 
   def routes(using topic: Topic[IO, WebSocketFrame]) = HttpRoutes.of[IO] {
@@ -185,8 +184,7 @@ object RestService extends DateTimeQueryParam with Publisher:
         yield true
       Ok(op)
 
-   case GET -> Root / "hotline-beep" :? strRecipient(recipient) =>
-
+    case GET -> Root / "hotline-beep" :? strRecipient(recipient) =>
       Ok(for _ <- publish(HotlineBeep(recipient)) yield true)
 
     case GET -> Root / "list-todays-hotline" =>
@@ -195,6 +193,9 @@ object RestService extends DateTimeQueryParam with Publisher:
     case GET -> Root / "list-wqueue" => Ok(Db.listWqueue())
 
     case GET -> Root / "list-wqueue-full" => Ok(Db.listWqueueFull())
+
+    case GET -> Root / "find-wqueue-full" :? intVisitId(visitId) =>
+      Ok(Db.findWqueueFull(visitId))
 
     case req @ POST -> Root / "enter-patient" =>
       Ok {
@@ -205,7 +206,7 @@ object RestService extends DateTimeQueryParam with Publisher:
         yield true
       }
 
-    case GET -> Root / "get-visit-patient" :? intVisitId(visitId) => 
+    case GET -> Root / "get-visit-patient" :? intVisitId(visitId) =>
       Ok(Db.getVisitPatient(visitId))
 
   } <+> PatientService.routes <+> VisitService.routes <+> MiscService.routes
