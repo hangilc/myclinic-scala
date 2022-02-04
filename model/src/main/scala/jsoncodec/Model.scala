@@ -134,6 +134,9 @@ trait Model extends DateTime with WaitStateCodec:
   given optKouhiEncoder: Encoder[Option[Kouhi]] = Encoder.encodeOption[Kouhi]
   given optKouhiDecoder: Decoder[Option[Kouhi]] = Decoder.decodeOption[Kouhi]
 
+  given optWqueueFullEncoder: Encoder[Option[(Int, Wqueue, Visit, Patient)]] = Encoder.encodeOption[(Int, Wqueue, Visit, Patient)]
+  given optWqueueFullDecoder: Decoder[Option[(Int, Wqueue, Visit, Patient)]] = Decoder.decodeOption[(Int, Wqueue, Visit, Patient)]
+
   given Encoder[VisitEx] = deriveEncoder[VisitEx]
   given Decoder[VisitEx] = deriveDecoder[VisitEx]
 

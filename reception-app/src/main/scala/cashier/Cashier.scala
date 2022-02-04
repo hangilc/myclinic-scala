@@ -133,6 +133,9 @@ class Cashier(using publishers: EventPublishers, fetcher: EventFetcher) extends 
   private def removeRow(visitId: Int): Unit =
     rowMap.get(visitId).foreach(row => row.remove())
 
+  private def onWqueueCreated(wqueue: Wqueue): Unit =
+    ???
+
   def refresh(): Future[Unit] =
     unregisterEventListeners()
     for (gen, list, visitMap, patientMap) <- Api.listWqueueFull()

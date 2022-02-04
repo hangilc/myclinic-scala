@@ -169,9 +169,29 @@ object Db
       yield (gen, wqueueList, visitMap, patientMap)
     }
 
+  def findWqueueFull(visitId: Int): IO[Option[(Int, Wqueue, Visit, Patient)]] =
+    val op = 
+      for
+        gen <- DbEventPrim.currentEventId()
+        wqueueOpt <- DbWqueuePrim.getWqueue(visitId).option
+        visitOpt <- wqueueOpt match {
+          case Some(wqueue) => DbVisitPrim.getVisit(wqueue.visitId).unique.map(v => Some(v))
+          case None => None.pure[ConnectionIO]
+        }
+        patientOpt <- visitOpt match {
+          case Some(visit) => DbPatientPrim.getPatient(visit.patientId).unique.map(p => Some(p))
+          case None => None.pure[ConnectionIO]
+        }
+      yield wqueueOpt match {
+        case Some(_) => Some(gen, wqueueOpt.get, visitOpt.get, patientOpt.get)
+        case None => None
+      }
+    mysql(op)
+    
   def getVisitPatient(visitId: Int): IO[(Int, Visit, Patient)] =
     mysql(for
       gen <- DbEventPrim.currentEventId()
       visit <- DbVisitPrim.getVisit(visitId).unique
       patient <- DbPatientPrim.getPatient(visit.patientId).unique
     yield (gen, visit, patient))
+
