@@ -20,7 +20,7 @@ import dev.myclinic.scala.util.{HokenRep, RcptUtil}
 import dev.myclinic.scala.apputil.FutanWari
 
 class ManagePatientBlock(var patient: Patient, onClose: ManagePatientBlock => Unit):
-  val eDispWrapper = div(PatientDisp(patient).ele)
+  import ManagePatientBlock.Disp
   val eLeftPane = div
   val eRightPane = div()
   val eSubblocks = div()
@@ -28,10 +28,7 @@ class ManagePatientBlock(var patient: Patient, onClose: ManagePatientBlock => Un
   val block = Block(
     s"${patient.fullName()} (${patient.patientId})",
     div(cls := "manage-patient-block-content")(
-      eLeftPane(cls := "left")(
-        eDispWrapper,
-        div(button("編集", onclick := (onEditPatient _)))
-      ),
+      eLeftPane(cls := "left"),
       eRightPane(cls := "right")(
         hokenList.ele
       )
@@ -43,16 +40,28 @@ class ManagePatientBlock(var patient: Patient, onClose: ManagePatientBlock => Un
       button("閉じる", onclick := (() => onClose(this)))
     )
   )
+  updateLeftPane()
   block.ele(cls := "manage-patient-block")
   block.ele(eSubblocks(cls := "subblocks"))
   val ele = block.ele
+
+  def updateLeftPane(): Unit = eLeftPane.setChild(Disp(patient, onEditPatient).ele)
 
   def init(): Unit =
     hokenList.init()
 
   def onEditPatient(): Unit =
     val form = PatientEdit(patient)
-    eLeftPane.setChildren(form.ele)
+    form.onCancel = () => 
+      println("cancel")
+      updateLeftPane()
+    form.onDone = () =>
+      for
+        updated <- Api.getPatient(patient.patientId)
+      yield
+        patient = updated
+        updateLeftPane()
+    eLeftPane.setChild(form.ele)
 
   private def onNewShahokokuho(): Unit =
     val b = new NewShahokokuhoSubblock(patient.patientId)
@@ -65,3 +74,22 @@ class ManagePatientBlock(var patient: Patient, onClose: ManagePatientBlock => Un
   private def onNewKouhi(): Unit =
     val b = new NewKouhiSubblock(patient.patientId)
     eSubblocks.prepend(b.block.ele)
+
+object ManagePatientBlock:
+  class Disp(ui: DispUI, patient: Patient):
+    ui.dispWrapper(PatientDisp(patient).ele)
+    def ele = ui.ele
+
+  object Disp:
+    def apply(patient: Patient, onEdit: () => Unit): Disp =
+      val ui = new DispUI
+      ui.editButton(onclick := onEdit)
+      new Disp(ui, patient)
+
+  class DispUI:
+    val dispWrapper = div
+    val editButton = button
+    val ele = div(
+      dispWrapper,
+      div(editButton("編集"))
+    )

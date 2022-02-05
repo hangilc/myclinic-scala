@@ -6,10 +6,29 @@ import dev.fujiwara.dateinput.DateInput
 import org.scalajs.dom.HTMLInputElement
 import org.scalajs.dom.HTMLElement
 import dev.myclinic.scala.validator.PatientValidator
+import dev.myclinic.scala.webclient.{Api, global}
+import scala.util.{Success, Failure}
 
 class PatientEdit(ui: PatientEdit.UI, patient: Patient):
   val ele = ui.ele
   val patientForm = new PatientEdit.PatientForm(ui.formUI, patient)
+  var onDone: () => Unit = () => ()
+  var onCancel: () => Unit = () => ()
+
+  ui.cancelButton(onclick := (() => onCancel()))
+  ui.enterButton(onclick := (onEnter _))
+
+  def onEnter(): Unit = 
+    ui.errBox.hide()
+    PatientFormValidator.validateForUpdate(patient.patientId, ui.formUI) match {
+      case Right(patient) => 
+        Api.updatePatient(patient).onComplete {
+          case Success(_) => onDone()
+          case Failure(ex) => ui.errBox.show(ex.getMessage)
+        }
+      case Left(msg) => ui.errBox.show(msg)
+    }
+  
 
 object PatientEdit:
   def apply(patient: Patient): PatientEdit =
@@ -17,11 +36,13 @@ object PatientEdit:
 
   class UI:
     val formUI = new PatientFormUI
+    val errBox = ErrorBox()
     val enterButton = button
     val cancelButton = button
     val ele = div(
       formUI.ele,
-      div(
+      errBox.ele,
+      div(mt := "4px")(
         enterButton("入力"),
         cancelButton("キャンセル")
       )
@@ -95,9 +116,24 @@ object PatientFormValidator:
       validateLastNameYomi(ui.lastNameYomiInput.value),
       validateFirstNameYomi(ui.firstNameYomiInput.value),
       validateSex(SexValidator.validateSexInput(ui.sexValue)),
-      validateBirthday(ui.birthdayInput.validate()),
+      validateBirthday(ui.birthdayInput.validate(), _.message),
       validateAddress(ui.addressInput.value),
       validatePhone(ui.phoneInput.value)
-    )
+    ).asEither
+
+  def validateForUpdate(patientId: Int, ui: PatientFormUI): Either[String, Patient] =
+    import PatientValidator.*
+    import dev.myclinic.scala.validator.SexValidator
+    validatePatientForUpdate(
+      validatePatientIdForUpdate(patientId),
+      validateLastName(ui.lastNameInput.value),
+      validateFirstName(ui.firstNameInput.value),
+      validateLastNameYomi(ui.lastNameYomiInput.value),
+      validateFirstNameYomi(ui.firstNameYomiInput.value),
+      validateSex(SexValidator.validateSexInput(ui.sexValue)),
+      validateBirthday(ui.birthdayInput.validate(), _.message),
+      validateAddress(ui.addressInput.value),
+      validatePhone(ui.phoneInput.value)
+    ).asEither
 
 

@@ -154,7 +154,7 @@ class ScannedItem(
         val scale = 1.5
         image.width = (210 * scale).toInt
         image.height = (297 * scale).toInt
-        ui.ePreviewImageWrapper.setChildren(image)
+        ui.ePreviewImageWrapper.setChild(image)
         ui.ePreview(displayDefault)
     )
 

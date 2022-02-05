@@ -20,7 +20,7 @@ object PatientValidator:
   object NonZeroPatientIdError extends PatientError:
     def message: String = "Non-zero patient-id"
   object ZeroPatientIdError extends PatientError:
-    def message: String = "Non-zero patient-id"
+    def message: String = "Zero patient-id"
   object EmptyFirstNameError extends PatientError:
     def message: String = "姓が入力されていません。"
   object EmptyLastNameError extends PatientError:
@@ -41,6 +41,8 @@ object PatientValidator:
   extension [T](r: Result[T])
     def asEither: Either[String, T] = Validators.toEither(r, _.message)
 
+  def validatePatientIdForUpdate(patientId: Int): Result[Int] =
+    condNec(patientId != 0, patientId, ZeroPatientIdError)
   def validateLastName(input: String): Result[String] =
     nonEmpty(input, EmptyLastNameError)
   def validateFirstName(input: String): Result[String] =
@@ -79,6 +81,30 @@ object PatientValidator:
   ): Result[Patient] =
     (
       validNec(0),
+      lastNameResult,
+      firstNameResult,
+      lastNameYomiResult,
+      firstNameYomiResult,
+      sexResult,
+      birthdayResult,
+      addressResult,
+      phoneResult
+    )
+      .mapN(Patient.apply)
+
+  def validatePatientForUpdate(
+      patientIdResult: Result[Int],
+      lastNameResult: Result[String],
+      firstNameResult: Result[String],
+      lastNameYomiResult: Result[String],
+      firstNameYomiResult: Result[String],
+      sexResult: Result[Sex],
+      birthdayResult: Result[LocalDate],
+      addressResult: Result[String],
+      phoneResult: Result[String]
+  ): Result[Patient] =
+    (
+      patientIdResult,
       lastNameResult,
       firstNameResult,
       lastNameYomiResult,

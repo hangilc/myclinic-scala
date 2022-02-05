@@ -41,10 +41,31 @@ object DbPatientPrim:
         values (${patient.lastName}, ${patient.firstName}, ${patient.lastNameYomi}, ${patient.firstNameYomi},
           ${patient.sex.code}, ${patient.birthday}, ${patient.address}, ${patient.phone})
     """
-    for 
+    for
       patientId <- op.update.withUniqueGeneratedKeys[Int]("patient_id")
       entered <- getPatient(patientId).unique
       event <- DbEventPrim.logPatientCreated(entered)
+    yield event
+
+  def updatePatient(patient: Patient): ConnectionIO[AppEvent] =
+    val op = sql"""
+      update patient set
+        last_name = ${patient.lastName},
+        first_name = ${patient.firstName},
+        last_name_yomi = ${patient.lastNameYomi},
+        first_name_yomi = ${patient.firstNameYomi},
+        sex = ${patient.sex.code},
+        birth_day = ${patient.birthday},
+        address = ${patient.address},
+        phone = ${patient.phone}
+      where patient_id = ${patient.patientId}
+    """
+    for
+      affected <- op.update.run
+      _ = if affected != 1 then
+        throw new RuntimeException("Update patient failed")
+      updated <- getPatient(patient.patientId).unique
+      event <- DbEventPrim.logPatientUpdated(updated)
     yield event
 
   def batchGetPatient(patientIds: List[Int]): ConnectionIO[Map[Int, Patient]] =
@@ -54,4 +75,3 @@ object DbPatientPrim:
         .sequence
       items = patients.map(patient => (patient.patientId, patient))
     yield Map(items: _*)
-

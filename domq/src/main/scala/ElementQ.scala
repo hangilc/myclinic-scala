@@ -28,7 +28,7 @@ object ElementQ:
       addChildren(elements)
       ele
 
-    def setChildren(element: HTMLElement): E =
+    def setChild(element: HTMLElement): E =
       setChildren(List(element))
 
     def getParent: Option[HTMLElement] =

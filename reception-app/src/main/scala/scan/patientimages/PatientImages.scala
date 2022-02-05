@@ -30,7 +30,7 @@ class PatientImages(ui: PatientImages.UI, patient: Patient):
       ui.eImageDisp.clear()
     else
       val img = dev.fujiwara.domq.all.img(attr("src") := url)
-      ui.eImageDisp.setChildren(img)
+      ui.eImageDisp.setChild(img)
 
   def onClose(): Unit =
     ui.ele.remove()

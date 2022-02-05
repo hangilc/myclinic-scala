@@ -28,3 +28,6 @@ object PatientApi extends ApiBase:
 
     def enterPatient(patient: Patient): Future[Boolean] =
       post("enter-patient", Params(), patient)
+
+    def updatePatient(patient: Patient): Future[Boolean] =
+      post("update-patient", Params(), patient)

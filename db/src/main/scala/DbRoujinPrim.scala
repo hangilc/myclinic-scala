@@ -61,7 +61,8 @@ object DbRoujinPrim:
         where roujin_id = ${d.roujinId}
     """
     for
-      _ <- op.update.run
+      affected <- op.update.run
+      _ = if affected != 1 then throw new RuntimeException("Update roujin failed.")
       updated <- getRoujin(d.roujinId).unique
       event <- DbEventPrim.logRoujinUpdated(updated)
     yield event

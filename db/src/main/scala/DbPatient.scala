@@ -32,3 +32,6 @@ trait DbPatient extends Mysql:
 
   def enterPatient(patient: Patient): IO[AppEvent] =
     mysql(Prim.enterPatient(patient))
+
+  def updatePatient(patient: Patient): IO[AppEvent] =
+    mysql(Prim.updatePatient(patient))

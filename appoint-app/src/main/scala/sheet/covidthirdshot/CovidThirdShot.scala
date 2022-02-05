@@ -38,10 +38,10 @@ class CovidThirdShot(val ui: CovidThirdShot.UI):
       case Some(age, secondShotAt, _thirdShotDue) =>
         val due = CovidThirdShot.thirdShotDue(age, secondShotAt)
         val disp = CovidThirdShot.Disp(patient, age, secondShotAt, due)
-        ui.eDisp.setChildren(disp.ui.ele)
+        ui.eDisp.setChild(disp.ui.ele)
       case None =>
         val query = CovidThirdShot.Query(patient)
-        ui.eDisp.setChildren(query.ui.ele)
+        ui.eDisp.setChild(query.ui.ele)
     }
 
 object CovidThirdShot:

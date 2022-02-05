@@ -62,7 +62,8 @@ object DbKouhiPrim:
         where kouhi_id = ${d.kouhiId}
     """
     for
-      _ <- op.update.run
+      affected <- op.update.run
+      _ = if affected != 1 then throw new RuntimeException("Update kouhi failed.")
       updated <- getKouhi(d.kouhiId).unique
       event <- DbEventPrim.logKouhiUpdated(updated)
     yield event

@@ -63,7 +63,8 @@ object DbShahokokuhoPrim:
         where shahokokuho_id = ${d.shahokokuhoId}
     """
     for
-      _ <- op.update.run
+      affected <- op.update.run
+      _ = if affected != 1 then throw new RuntimeException("Update shahokokuho failed.")
       updated <- getShahokokuho(d.shahokokuhoId).unique
       event <- DbEventPrim.logShahokokuhoUpdated(updated)
     yield event
