@@ -4,6 +4,8 @@ import dev.fujiwara.domq.all.{*, given}
 import dev.myclinic.scala.model.Patient
 import dev.fujiwara.dateinput.DateInput
 import org.scalajs.dom.HTMLInputElement
+import org.scalajs.dom.HTMLElement
+import dev.myclinic.scala.validator.PatientValidator
 
 class PatientEdit(ui: PatientEdit.UI, patient: Patient):
   val ele = ui.ele
@@ -38,16 +40,21 @@ object PatientEdit:
     ui.addressInput.value = patient.address
     ui.phoneInput.value = patient.phone
 
-  class PatientFormUI:
+  class PatientFormUI extends PatientFormValidator.PatientFormUI:
+    val patientForm = form
     val patientId = span
     val lastNameInput = Form.input
     val firstNameInput = Form.input
     val lastNameYomiInput = inputText
     val firstNameYomiInput = inputText
+    def sexValue: Option[String] =
+      patientForm.qSelector("input[name=sex]:checked").map(e => {
+        e.asInstanceOf[HTMLInputElement].value
+      })
     val birthdayInput = new DateInput()
     val addressInput = inputText
     val phoneInput = inputText
-    val ele = form(
+    val ele = patientForm(
       Form.rows(
         span("患者番号") -> patientId,
         span("氏名") -> div(Form.inputGroup)(
@@ -67,3 +74,30 @@ object PatientEdit:
         span("電話") -> phoneInput
       )
     )
+
+object PatientFormValidator:
+  trait PatientFormUI:
+    def lastNameInput: HTMLInputElement
+    def firstNameInput: HTMLInputElement
+    def lastNameYomiInput: HTMLInputElement
+    def firstNameYomiInput: HTMLInputElement
+    def sexValue: Option[String]
+    def birthdayInput: DateInput
+    def addressInput: HTMLInputElement
+    def phoneInput: HTMLInputElement
+  
+  def validateForEnter(ui: PatientFormUI): Either[String, Patient] =
+    import PatientValidator.*
+    import dev.myclinic.scala.validator.SexValidator
+    validatePatientForEnter(
+      validateLastName(ui.lastNameInput.value),
+      validateFirstName(ui.firstNameInput.value),
+      validateLastNameYomi(ui.lastNameYomiInput.value),
+      validateFirstNameYomi(ui.firstNameYomiInput.value),
+      validateSex(SexValidator.validateSexInput(ui.sexValue)),
+      validateBirthday(ui.birthdayInput.validate()),
+      validateAddress(ui.addressInput.value),
+      validatePhone(ui.phoneInput.value)
+    )
+
+
