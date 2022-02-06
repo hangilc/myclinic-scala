@@ -45,7 +45,7 @@ class PatientSearch(ui: PatientSearch.UI):
     val txt = ui.eSearchInput.value.trim
     if !txt.isEmpty then
       ui.eSearchInput.value = ""
-      for patients <- Api.searchPatient(txt)
+      for (gen, patients) <- Api.searchPatient(txt)
       yield
         if patients.size == 1 then
           val patient = patients.head

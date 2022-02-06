@@ -27,6 +27,7 @@ object RestService extends DateTimeQueryParam with Publisher:
   object dateFrom extends QueryParamDecoderMatcher[LocalDate]("from")
   object dateDate extends QueryParamDecoderMatcher[LocalDate]("date")
   object dateUpto extends QueryParamDecoderMatcher[LocalDate]("upto")
+  object dateAt extends QueryParamDecoderMatcher[LocalDate]("at")
   object timeTime extends QueryParamDecoderMatcher[LocalTime]("time")
   object timeAt extends QueryParamDecoderMatcher[LocalTime]("at")
   object strName extends QueryParamDecoderMatcher[String]("name")
@@ -39,6 +40,7 @@ object RestService extends DateTimeQueryParam with Publisher:
   object intLimit extends QueryParamDecoderMatcher[Int]("limit")
   object intOffset extends QueryParamDecoderMatcher[Int]("offset")
   object intVisitId extends QueryParamDecoderMatcher[Int]("visit-id")
+  object intPatientId extends QueryParamDecoderMatcher[Int]("patient-id")
 
   case class UserError(message: String) extends Exception
 
@@ -217,6 +219,12 @@ object RestService extends DateTimeQueryParam with Publisher:
 
     case GET -> Root / "get-visit-patient" :? intVisitId(visitId) =>
       Ok(Db.getVisitPatient(visitId))
+
+    case GET -> Root / "get-patient-hoken" :? intPatientId(patientId) +& dateAt(at) =>
+      Ok(Db.getPatientHoken(patientId, at))
+
+    case GET -> Root / "get-patient-all-hoken" :? intPatientId(patientId) =>
+      Ok(Db.getPatientAllHoken(patientId))
 
   } <+> PatientService.routes <+> VisitService.routes <+> MiscService.routes
     <+> ConfigService.routes <+> FileService.routes

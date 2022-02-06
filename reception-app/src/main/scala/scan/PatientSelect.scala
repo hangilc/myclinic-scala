@@ -36,7 +36,7 @@ class PatientSelect(ui: PatientSelect.UI, onSelectCallback: Patient => Unit):
     val text = ui.eInputText.value.trim
     if !text.isEmpty then
       for
-        patients <- Api.searchPatient(text)
+        (gen, patients) <- Api.searchPatient(text)
       yield 
         result.setItems(patients, formatPatient _)
         // result.clear()

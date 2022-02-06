@@ -19,12 +19,30 @@ import java.time.LocalDate
 import dev.myclinic.scala.util.{HokenRep, RcptUtil}
 import dev.myclinic.scala.apputil.FutanWari
 
-class ManagePatientBlock(var patient: Patient, onClose: ManagePatientBlock => Unit):
-  import ManagePatientBlock.Disp
+class ManagePatientBlock(
+    var gen: Int,
+    var patient: Patient,
+    var shahokokuhoList: List[Shahokokuho],
+    var koukikoureiList: List[Koukikourei],
+    var roujinList: List[Roujin],
+    var kouhiList: List[Kouhi]
+):
+  import ManagePatientBlock.*
+  var onShahokokuhoSelect: (Int, Shahokokuho) => Unit = (_, _) => ()
+  var onKoukikoureiSelect: (Int, Koukikourei) => Unit = (_, _) => ()
+  var onRoujinSelect: (Int, Roujin) => Unit = (_, _) => ()
+  var onKouhiSelect: (Int, Kouhi) => Unit = (_, _) => ()
   val eLeftPane = div
   val eRightPane = div()
   val eSubblocks = div()
-  val hokenList = HokenList(patient.patientId, eSubblocks)
+  val hokenList = HokenList(
+    gen,
+    patient.patientId,
+    shahokokuhoList,
+    koukikoureiList,
+    roujinList,
+    kouhiList
+  )
   val block = Block(
     s"${patient.fullName()} (${patient.patientId})",
     div(cls := "manage-patient-block-content")(
@@ -37,27 +55,30 @@ class ManagePatientBlock(var patient: Patient, onClose: ManagePatientBlock => Un
       button("新規社保国保", onclick := (onNewShahokokuho _)),
       button("新規後期高齢", onclick := (onNewKoukikourei _)),
       button("新規公費", onclick := (onNewKouhi _)),
-      button("閉じる", onclick := (() => onClose(this)))
+      button("閉じる", onclick := (onClose _))
     )
   )
   updateLeftPane()
   block.ele(cls := "manage-patient-block")
   block.ele(eSubblocks(cls := "subblocks"))
+  hokenList.onShahokokuhoSelect = onShahokokuhoSelect
+  hokenList.onKoukikoureiSelect = onKoukikoureiSelect
+  hokenList.onRoujinSelect = onRoujinSelect
+  hokenList.onKouhiSelect = onKouhiSelect
   val ele = block.ele
 
-  def updateLeftPane(): Unit = eLeftPane.setChild(Disp(patient, onEditPatient).ele)
+  def updateLeftPane(): Unit =
+    eLeftPane.setChild(PatientDispPane(patient, onEditPatient).ele)
 
-  def init(): Unit =
-    hokenList.init()
+  def onClose(): Unit = block.ele.remove()
 
   def onEditPatient(): Unit =
     val form = PatientEdit(patient)
-    form.onCancel = () => 
+    form.onCancel = () =>
       println("cancel")
       updateLeftPane()
     form.onDone = () =>
-      for
-        updated <- Api.getPatient(patient.patientId)
+      for updated <- Api.getPatient(patient.patientId)
       yield
         patient = updated
         updateLeftPane()
@@ -76,17 +97,17 @@ class ManagePatientBlock(var patient: Patient, onClose: ManagePatientBlock => Un
     eSubblocks.prepend(b.block.ele)
 
 object ManagePatientBlock:
-  class Disp(ui: DispUI, patient: Patient):
+  class PatientDispPane(ui: PatientDispPaneUI, patient: Patient):
     ui.dispWrapper(PatientDisp(patient).ele)
     def ele = ui.ele
 
-  object Disp:
-    def apply(patient: Patient, onEdit: () => Unit): Disp =
-      val ui = new DispUI
+  object PatientDispPane:
+    def apply(patient: Patient, onEdit: () => Unit): PatientDispPane =
+      val ui = new PatientDispPaneUI
       ui.editButton(onclick := onEdit)
-      new Disp(ui, patient)
+      new PatientDispPane(ui, patient)
 
-  class DispUI:
+  class PatientDispPaneUI:
     val dispWrapper = div
     val editButton = button
     val ele = div(

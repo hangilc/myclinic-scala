@@ -62,7 +62,7 @@ class PatientNamePart(var appoint: Appoint):
     def onSearchClick(): Unit =
       if workareaIsEmpty then
         initWorkarea()
-        (for patients <- Api.searchPatient(appoint.patientName)
+        (for (gen, patients) <- Api.searchPatient(appoint.patientName)
         yield populateSearchResult(
           patients,
           appoint.appointId,
@@ -125,7 +125,7 @@ class PatientNamePart(var appoint: Appoint):
     def onSearchClick(): Unit =
       if workareaIsEmpty then
         initWorkarea()
-        (for patients <- Api.searchPatient(input.value)
+        (for (gen, patients) <- Api.searchPatient(input.value)
         yield populateSearchResult(
           patients,
           appoint.appointId,

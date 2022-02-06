@@ -141,7 +141,7 @@ object MakeAppointDialog:
     def onSubmit(): Unit =
       val txt = value
       if !txt.isEmpty then
-        for patients <- Api.searchPatient(txt)
+        for (gen, patients) <- Api.searchPatient(txt)
         yield
           if patients.size == 1 then 
             onSelect(patients.head)

@@ -20,12 +20,16 @@ trait DbPatient extends Mysql:
   def findPatient(patientId: Int): IO[Option[Patient]] =
     mysql(Prim.getPatient(patientId).option)
 
-  def searchPatient(text: String): IO[List[Patient]] =
+  def searchPatient(text: String): IO[(Int, List[Patient])] =
     val pat = Pattern.compile(raw"\s+", Pattern.UNICODE_CHARACTER_CLASS)
     val parts: Array[String] = pat.split(text, 2)
-    if parts.size == 0 then IO(List.empty)
-    else if parts.size == 1 then mysql(Prim.searchPatient(text).to[List])
-    else mysql(Prim.searchPatient(parts(0), parts(1)).to[List])
+    mysql(for
+      gen <- DbEventPrim.currentEventId()
+      patients <- 
+        if parts.size == 0 then List.empty.pure[ConnectionIO]
+        else if parts.size == 1 then Prim.searchPatient(text).to[List]
+        else Prim.searchPatient(parts(0), parts(1)).to[List]
+    yield (gen, patients))
 
   def batchGetPatient(patientIds: List[Int]): IO[Map[Int, Patient]] =
     mysql(DbPatientPrim.batchGetPatient(patientIds))

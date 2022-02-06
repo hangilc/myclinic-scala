@@ -19,7 +19,7 @@ class CovidThirdShot(val ui: CovidThirdShot.UI):
     val text = ui.eSearchInput.value.trim
     if !text.isEmpty then
       ui.eDisp.clear()
-      for patients <- Api.searchPatient(text)
+      for (gen, patients) <- Api.searchPatient(text)
       yield
         if patients.size == 1 then
           onSelect(patients.head)

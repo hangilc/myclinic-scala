@@ -8,6 +8,8 @@ import dev.myclinic.scala.model.*
 import doobie.free.ConnectionIO
 import scala.util.Try
 import java.time.LocalDateTime
+import java.time.LocalDate
+import dev.myclinic.scala.db.DbKoukikoureiPrim
 
 object Db
     extends Mysql
@@ -159,35 +161,40 @@ object Db
       yield event
     }
 
-  def listWqueueFull(): IO[(Int, List[Wqueue], Map[Int, Visit], Map[Int, Patient])] =
+  def listWqueueFull()
+      : IO[(Int, List[Wqueue], Map[Int, Visit], Map[Int, Patient])] =
     mysql {
       for
         gen <- DbEventPrim.currentEventId()
         wqueueList <- DbWqueuePrim.listWqueue().to[List]
         visitMap <- DbVisitPrim.batchGetVisit(wqueueList.map(_.visitId))
-        patientMap <- DbPatientPrim.batchGetPatient(visitMap.values.map(_.patientId).toList)
+        patientMap <- DbPatientPrim.batchGetPatient(
+          visitMap.values.map(_.patientId).toList
+        )
       yield (gen, wqueueList, visitMap, patientMap)
     }
 
   def findWqueueFull(visitId: Int): IO[Option[(Int, Wqueue, Visit, Patient)]] =
-    val op = 
+    val op =
       for
         gen <- DbEventPrim.currentEventId()
         wqueueOpt <- DbWqueuePrim.getWqueue(visitId).option
         visitOpt <- wqueueOpt match {
-          case Some(wqueue) => DbVisitPrim.getVisit(wqueue.visitId).unique.map(v => Some(v))
+          case Some(wqueue) =>
+            DbVisitPrim.getVisit(wqueue.visitId).unique.map(v => Some(v))
           case None => None.pure[ConnectionIO]
         }
         patientOpt <- visitOpt match {
-          case Some(visit) => DbPatientPrim.getPatient(visit.patientId).unique.map(p => Some(p))
+          case Some(visit) =>
+            DbPatientPrim.getPatient(visit.patientId).unique.map(p => Some(p))
           case None => None.pure[ConnectionIO]
         }
       yield wqueueOpt match {
         case Some(_) => Some(gen, wqueueOpt.get, visitOpt.get, patientOpt.get)
-        case None => None
+        case None    => None
       }
     mysql(op)
-    
+
   def getVisitPatient(visitId: Int): IO[(Int, Visit, Patient)] =
     mysql(for
       gen <- DbEventPrim.currentEventId()
@@ -195,3 +202,44 @@ object Db
       patient <- DbPatientPrim.getPatient(visit.patientId).unique
     yield (gen, visit, patient))
 
+  def getPatientHoken(patientId: Int, at: LocalDate): IO[
+    (
+        Int,
+        Patient,
+        List[Shahokokuho],
+        List[Koukikourei],
+        List[Roujin],
+        List[Kouhi]
+    )
+  ] =
+    val op =
+      for
+        gen <- DbEventPrim.currentEventId()
+        patient <- DbPatientPrim.getPatient(patientId).unique
+        shahokokuho <- DbShahokokuhoPrim.listAvailableShahokokuho(patientId, at)
+        koukikourei <- DbKoukikoureiPrim.listAvailableKoukikourei(patientId, at)
+        roujin <- DbRoujinPrim.listAvailableRoujin(patientId, at)
+        kouhi <- DbKouhiPrim.listAvailableKouhi(patientId, at)
+      yield (gen, patient, shahokokuho, koukikourei, roujin, kouhi)
+    mysql(op)
+
+  def getPatientAllHoken(patientId: Int): IO[
+    (
+        Int,
+        Patient,
+        List[Shahokokuho],
+        List[Koukikourei],
+        List[Roujin],
+        List[Kouhi]
+    )
+  ] =
+    val op =
+      for
+        gen <- DbEventPrim.currentEventId()
+        patient <- DbPatientPrim.getPatient(patientId).unique
+        shahokokuho <- DbShahokokuhoPrim.listShahokokuho(patientId)
+        koukikourei <- DbKoukikoureiPrim.listKoukikourei(patientId)
+        roujin <- DbRoujinPrim.listRoujin(patientId)
+        kouhi <- DbKouhiPrim.listKouhi(patientId)
+      yield (gen, patient, shahokokuho, koukikourei, roujin, kouhi)
+    mysql(op)

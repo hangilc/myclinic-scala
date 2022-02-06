@@ -31,7 +31,7 @@ class SearchPatientBox(cb: Patient => Unit):
     val txt = searchText.value.trim
     selection.clear()
     for
-      patients <- Api.searchPatient(txt)
+      (gen, patients) <- Api.searchPatient(txt)
     yield {
       searchText.value = ""
       patients.foreach(patient => {

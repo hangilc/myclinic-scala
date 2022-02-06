@@ -30,20 +30,34 @@ object MiscApi extends ApiBase:
     def hotlineBeep(recipient: String): Future[Boolean] =
       get("hotline-beep", Params("recipient" -> recipient))
 
-    def listTodaysHotline(): Future[List[(Int, HotlineCreated)]] = // (appEventId, HotlineCreated)
+    def listTodaysHotline()
+        : Future[List[(Int, HotlineCreated)]] = // (appEventId, HotlineCreated)
       get("list-todays-hotline", Params())
 
     def listWqueue(): Future[List[Wqueue]] =
       get("list-wqueue", Params())
 
-    def listWqueueFull(): Future[(Int, List[Wqueue], Map[Int, Visit], Map[Int, Patient])] =
+    def listWqueueFull()
+        : Future[(Int, List[Wqueue], Map[Int, Visit], Map[Int, Patient])] =
       get("list-wqueue-full", Params())
 
-    def findWqueueFull(visitId: Int): Future[Option[(Int, Wqueue, Visit, Patient)]] =
+    def findWqueueFull(
+        visitId: Int
+    ): Future[Option[(Int, Wqueue, Visit, Patient)]] =
       get("find-wqueue-full", Params("visit-id" -> visitId))
 
     def getVisitPatient(visitId: Int): Future[(Int, Visit, Patient)] =
       get("get-visit-patient", Params("visit-id" -> visitId))
+
+    def getPatientHoken(patientId: Int, at: LocalDate): Future[
+      (Int, Patient, List[Shahokokuho], List[Koukikourei], List[Roujin], List[Kouhi])
+    ] =
+      get("get-patient-hoken", Params("patient-id" -> patientId, "at" -> at))
+
+    def getPatientAllHoken(patientId: Int): Future[
+      (Int, Patient, List[Shahokokuho], List[Koukikourei], List[Roujin], List[Kouhi])
+    ] =
+      get("get-patient-all-hoken", Params("patient-id" -> patientId))
 
     def listDrugForVisit(visitId: Int): Future[List[Drug]] =
       get("list-drug-for-visit", Params("visit-id" -> visitId))
@@ -260,5 +274,7 @@ object MiscApi extends ApiBase:
     def listPatientImage(patientId: Int): Future[List[FileInfo]] =
       get("list-patient-image", Params("patient-id" -> patientId))
 
-    def getCovid2ndShotData(patientId: Int): Future[Option[(Int, LocalDate, LocalDate)]] =
+    def getCovid2ndShotData(
+        patientId: Int
+    ): Future[Option[(Int, LocalDate, LocalDate)]] =
       get("get-covid-2nd-shot-data", Params("patient-id" -> patientId))

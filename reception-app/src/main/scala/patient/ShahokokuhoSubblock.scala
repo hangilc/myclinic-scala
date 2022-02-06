@@ -26,7 +26,7 @@ import java.time.LocalDate
 import dev.myclinic.scala.util.{HokenRep, RcptUtil}
 import dev.myclinic.scala.apputil.FutanWari
 
-class ShahokokuhoSubblock(shahokokuho: Shahokokuho):
+class ShahokokuhoSubblock(gen: Int, shahokokuho: Shahokokuho):
   val eContent = div()
   val eCommands = div()
   val block: Subblock = Subblock(
@@ -91,5 +91,5 @@ class ShahokokuhoSubblock(shahokokuho: Shahokokuho):
 
   private def onUpdated(event: CustomEvent[ShahokokuhoUpdated]): Unit =
     val updated = event.detail.updated
-    val newSub = ShahokokuhoSubblock(updated)
+    val newSub = ShahokokuhoSubblock(gen, updated)
     block.ele.replaceBy(newSub.block.ele)

@@ -12,8 +12,10 @@ import dev.myclinic.scala.web.appbase.EventSubscriber
 import org.scalajs.dom.MouseEvent
 import dev.myclinic.scala.webclient.Api
 import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
+import scala.util.{Success, Failure}
 
 import dev.myclinic.scala.model.Patient
+import java.time.LocalDate
 
 class PatientManagement() extends SideMenuService:
   val eSearchText: HTMLInputElement = inputText()
@@ -41,10 +43,10 @@ class PatientManagement() extends SideMenuService:
 
   def initFocus(): Unit =
     eSearchText.focus()
-  override def init(): Future[Unit] = 
+  override def init(): Future[Unit] =
     initFocus()
     Future.successful(())
-  override def onReactivate: Future[Unit] = 
+  override def onReactivate: Future[Unit] =
     initFocus()
     Future.successful(())
   override def dispose(): Unit =
@@ -72,11 +74,11 @@ class PatientManagement() extends SideMenuService:
   private def onSearch(): Unit =
     val txt = eSearchText.value.trim
     if !txt.isEmpty then
-      for patients <- Api.searchPatient(txt)
+      for (gen, patients) <- Api.searchPatient(txt)
       yield {
         if patients.size > 0 then
           val block = SearchPatientBlock(
-            patients, 
+            patients,
             _.remove(),
             addManagePatientBlock
           )
@@ -86,6 +88,21 @@ class PatientManagement() extends SideMenuService:
       }
 
   private def addManagePatientBlock(patient: Patient): Unit =
-    val manage = ManagePatientBlock(patient, _.ele.remove())
-    eWorkarea.prepend(manage.ele)
-    manage.init()
+    val f =
+      for
+        (gen, patient, shahokokuho, koukikourei, roujin, kouhi) <- Api
+          .getPatientHoken(patient.patientId, LocalDate.now())
+      yield
+        val manage = ManagePatientBlock(
+          gen,
+          patient,
+          shahokokuho,
+          koukikourei,
+          roujin,
+          kouhi
+        )
+        eWorkarea.prepend(manage.ele)
+    f.onComplete {
+      case Success(_)  => ()
+      case Failure(ex) => System.err.println(ex.getMessage)
+    }
