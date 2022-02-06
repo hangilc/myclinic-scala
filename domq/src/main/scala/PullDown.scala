@@ -121,7 +121,7 @@ object PullDown:
         close()
         f()
       }))
-    div(cls := "domq-context-menu").addChildren(
+    div(cls := "domq-context-menu")(children :=
       items.map({ case (label, f) =>
         div(anchor(label, f))
       })

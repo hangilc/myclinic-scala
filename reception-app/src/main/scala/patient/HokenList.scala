@@ -63,7 +63,7 @@ class HokenList(
 
   private def setHokenList(list: List[HokenItem]): Unit =
     val listSorted = list.sortBy(list => list.validFrom).reverse
-    eDisp.clear()
+    eDisp(clear)
     eDisp((listSorted.map(createDisp(_)): List[Modifier[HTMLElement]]): _*)
 
   private def createDisp(item: HokenItem): HTMLElement =

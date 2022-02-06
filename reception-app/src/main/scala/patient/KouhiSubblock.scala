@@ -36,9 +36,9 @@ class KouhiSubblock(kouhi: Kouhi):
   disp()
 
   def disp(): Unit =
-    eContent.clear()
+    eContent(clear)
     eContent(KouhiDisp(kouhi).ele)
-    eCommands.clear()
+    eCommands(clear)
     eCommands(
       button("削除", onclick := (onDelete _)),
       button("編集", onclick := (onEdit _)),
@@ -49,9 +49,9 @@ class KouhiSubblock(kouhi: Kouhi):
     val form = KouhiForm()
     val errBox = ErrorBox()
     form.setData(kouhi)
-    eContent.clear()
+    eContent(clear)
     eContent(errBox.ele, form.ele)
-    eCommands.clear()
+    eCommands(clear)
     eCommands(
       button("入力", onclick := (() => onEnter(form, errBox))),
       button("キャンセル", onclick := (() => disp()))

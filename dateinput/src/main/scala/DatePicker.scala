@@ -33,16 +33,18 @@ class DatePicker(
       eGengouSelect(
         cls := "domq-gengou-select",
         onchange := (onGengouChange _)
-      ).setChildren(
-        gengouList.map(g => option(g.name, value := g.name))
+      )(
+        clear,
+        children := gengouList.map(g => option(g.name, value := g.name))
       ),
       eNenSelect(cls := "domq-nen-select", onchange := (onNenOrMonthChange _)),
       a("年", cls := "domq-nen-label", onclick := (advanceYear _)),
       eMonthSelect(
         cls := "domq-month-select",
         onchange := (onNenOrMonthChange _)
-      ).setChildren(
-        (1 to 12).toList.map(i => option(i.toString, value := i.toString))
+      )(
+        clear,
+        children := (1 to 12).toList.map(i => option(i.toString, value := i.toString))
       ),
       a("月", cls := "domq-month-label", onclick := (advanceMonth _))
     ),
@@ -125,8 +127,9 @@ class DatePicker(
     stuffDates(y, currentMonth)
 
   private def setupNenSelect(g: Gengou): Unit =
-    eNenSelect.setChildren(
-      g.listNen.toList.map(n => mkNenOption(n))
+    eNenSelect(
+      clear,
+      children := g.listNen.toList.map(n => mkNenOption(n))
     )
 
   private def mkNenOption(nen: Int): HTMLElement =
@@ -134,11 +137,11 @@ class DatePicker(
     option(v, value := v)
 
   private def stuffDates(year: Int, month: Int): Unit =
-    eDatesTab.clear()
+    eDatesTab(clear)
     val d1 = LocalDate.of(year, month, 1)
     val pad = d1.getDayOfWeek.getValue % 7
     for _ <- 0 until pad do eDatesTab(div())
-    eDatesTab.addChildren(makeDates(year, month))
+    eDatesTab(children := makeDates(year, month))
 
   private def makeDates(year: Int, month: Int): List[HTMLElement] =
     val start = LocalDate.of(year, month, 1)

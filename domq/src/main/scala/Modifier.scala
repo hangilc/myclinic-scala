@@ -62,6 +62,12 @@ object Modifiers:
       a.trim.split("\\s+").foreach(c => e.classList.remove(c))
     )
 
+  val clear: Modifier[HTMLElement] = (e => e.innerHTML = "")
+
+  val children = Assign[HTMLElement, List[HTMLElement]]((e, list) => {
+    list.foreach(e.appendChild(_))
+  })
+
   val cb = Assign[HTMLElement, HTMLElement => Unit](
     (e, handler) => handler(e)
   )
@@ -167,8 +173,6 @@ object Modifiers:
     val value = if a.isEmpty then "javascript:void(0)" else a
     e.setAttribute("href", value)
   })
-
-  val children = Assign[HTMLElement, List[HTMLElement]]((e, c) => e.addChildren(c))
 
   class EventListener[Ele <: HTMLElement, Ev](name: String):
     def :=(h: Ev => Unit) = Modifier[Ele](e => e.addEventListener(name, h))

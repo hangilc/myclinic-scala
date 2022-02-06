@@ -28,7 +28,7 @@ abstract class ValuePart:
     )
 
   def initWorkarea(): Unit = 
-    workarea.clear()
+    workarea(clear)
     errBox.hide()
 
   def addToWorkarea(e: HTMLElement): Unit = workarea(e)
@@ -52,7 +52,7 @@ class ValuePartManager(var part: ValuePart):
   val ele = div(part.ele)
 
   def changeValuePartTo(nextPart: ValuePart): Unit =
-    ele.clear()
+    ele(clear)
     ele(nextPart.ele)
     part = nextPart
 

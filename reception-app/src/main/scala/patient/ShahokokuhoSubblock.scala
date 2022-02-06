@@ -26,7 +26,7 @@ import java.time.LocalDate
 import dev.myclinic.scala.util.{HokenRep, RcptUtil}
 import dev.myclinic.scala.apputil.FutanWari
 
-class ShahokokuhoSubblock(gen: Int, shahokokuho: Shahokokuho):
+class ShahokokuhoSubblock(var gen: Int, var shahokokuho: Shahokokuho):
   val eContent = div()
   val eCommands = div()
   val block: Subblock = Subblock(
@@ -45,10 +45,11 @@ class ShahokokuhoSubblock(gen: Int, shahokokuho: Shahokokuho):
   def ele = block.ele
 
   def disp(): Unit =
-    eContent.clear()
-    eContent(ShahokokuhoDisp(shahokokuho).ele)
+    val d = ShahokokuhoDisp(gen, shahokokuho)
+    eContent.setChild(d.ele)
     eCommands.clear()
     eCommands(
+      clearChildren,
       button("削除", onclick := (onDelete _)),
       button("編集", onclick := (onEdit _)),
       button("閉じる", onclick := (() => block.ele.remove()))
@@ -95,3 +96,4 @@ class ShahokokuhoSubblock(gen: Int, shahokokuho: Shahokokuho):
     val updated = event.detail.updated
     val newSub = ShahokokuhoSubblock(gen, updated)
     block.ele.replaceBy(newSub.block.ele)
+

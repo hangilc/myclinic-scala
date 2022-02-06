@@ -11,7 +11,7 @@ import dev.myclinic.scala.model.*
 import java.time.LocalDate
 import dev.fujiwara.kanjidate.KanjiDate
 
-class ShahokokuhoDisp(shahokokuho: Shahokokuho):
+class ShahokokuhoDisp(var gen: Int, var shahokokuho: Shahokokuho):
   val ele = Form.rows(
     span("保険者番号") -> div(shahokokuho.hokenshaBangou.toString),
     span("被保険者") -> div(
