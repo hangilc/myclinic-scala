@@ -42,6 +42,8 @@ class ShahokokuhoSubblock(gen: Int, shahokokuho: Shahokokuho):
   )
   disp()
 
+  def ele = block.ele
+
   def disp(): Unit =
     eContent.clear()
     eContent(ShahokokuhoDisp(shahokokuho).ele)

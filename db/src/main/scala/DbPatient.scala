@@ -21,13 +21,18 @@ trait DbPatient extends Mysql:
     mysql(Prim.getPatient(patientId).option)
 
   def searchPatient(text: String): IO[(Int, List[Patient])] =
+    val digitsPat = "[0-9]+".r
     val pat = Pattern.compile(raw"\s+", Pattern.UNICODE_CHARACTER_CLASS)
     val parts: Array[String] = pat.split(text, 2)
     mysql(for
       gen <- DbEventPrim.currentEventId()
-      patients <- 
+      patients <-
         if parts.size == 0 then List.empty.pure[ConnectionIO]
-        else if parts.size == 1 then Prim.searchPatient(text).to[List]
+        else if parts.size == 1 then
+          parts(0) match {
+            case s @ digitsPat() => DbPatientPrim.getPatient(s.toInt).to[List]
+            case _               => Prim.searchPatient(text).to[List]
+          }
         else Prim.searchPatient(parts(0), parts(1)).to[List]
     yield (gen, patients))
 

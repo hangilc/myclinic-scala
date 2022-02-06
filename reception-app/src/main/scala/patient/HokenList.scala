@@ -29,37 +29,10 @@ class HokenList(
     var roujinList: List[Roujin],
     var kouhiList: List[Kouhi]
 ):
-  var onShahokokuhoSelect: (Int, Shahokokuho) => Unit =
-    (gen, shahokokuho) => println(("shaho-click", gen, shahokokuho))
-  var onKoukikoureiSelect: (Int, Koukikourei) => Unit = (_, _) => ()
-  var onRoujinSelect: (Int, Roujin) => Unit = (_, _) => ()
-  var onKouhiSelect: (Int, Kouhi) => Unit = (_, _) => ()
   val errorBox = ErrorBox()
   val eDisp = div()
   val eListAll: HTMLInputElement = checkbox()
   val ele = div(
-    // cls := """shahokokuho-created koukikourei-created kouhi-created
-    //   shahokokuho-updated koukikourei-updated kouhi-updated
-    // """,
-    // oncustomevent[ShahokokuhoCreated]("shahokokuho-created") := (
-    //   (e: CustomEvent[ShahokokuhoCreated]) => onShahokokuhoCreated(e)
-    // ),
-    // oncustomevent[KoukikoureiCreated]("koukikourei-created") := (
-    //   (e: CustomEvent[KoukikoureiCreated]) => onKoukikoureiCreated(e)
-    // ),
-    // oncustomevent[KouhiCreated]("kouhi-created") := (
-    //   (e: CustomEvent[KouhiCreated]) => onKouhiCreated(e)
-    // ),
-    // oncustomevent[ShahokokuhoUpdated]("shahokokuho-updated") := (
-    //   (e: CustomEvent[ShahokokuhoUpdated]) => onShahokokuhoUpdated(e)
-    // ),
-    // oncustomevent[KoukikoureiUpdated]("koukikourei-updated") := (
-    //   (e: CustomEvent[KoukikoureiUpdated]) => onKoukikoureiUpdated(e)
-    // ),
-    // oncustomevent[KouhiUpdated]("kouhi-updated") := (
-    //   (e: CustomEvent[KouhiUpdated]) => onKouhiUpdated(e)
-    // )
-  )(
     errorBox.ele,
     eDisp(cls := "hoken-list-disp"),
     div(
@@ -88,131 +61,6 @@ class HokenList(
       case Failure(ex) => System.err.println(ex.getMessage)
     }
 
-  // private def onShahokokuhoCreated(
-  //     event: CustomEvent[ShahokokuhoCreated]
-  // ): Unit =
-  //   val created = event.detail.created
-  //   if eListAll.checked || created.isValidAt(LocalDate.now()) then
-  //     eDisp.qSelector(s".shahokokuho-${created.shahokokuhoId}").match {
-  //       case Some(_) => ()
-  //       case None => {
-  //         val item = ShahokokuhoHokenItem(event.detail.created)
-  //         val e = createDisp(item)
-  //         val eles = eDisp.qSelectorAll("[data-valid-from]")
-  //         eDisp.insertInOrderDesc(
-  //           e,
-  //           "[data-valid-from]",
-  //           _.getAttribute("data-valid-from")
-  //         )
-  //       }
-  //     }
-
-  // private def onKoukikoureiCreated(
-  //     event: CustomEvent[KoukikoureiCreated]
-  // ): Unit =
-  //   val created = event.detail.created
-  //   if eListAll.checked || created.isValidAt(LocalDate.now()) then
-  //     eDisp.qSelector(s".koukikourei-${created.koukikoureiId}").match {
-  //       case Some(_) => ()
-  //       case None => {
-  //         val item = KoukikoureiHokenItem(event.detail.created)
-  //         val e = createDisp(item)
-  //         eDisp.insertInOrderDesc(
-  //           e,
-  //           "[data-valid-from]",
-  //           _.getAttribute("data-valid-from")
-  //         )
-  //       }
-  //     }
-
-  // private def onKouhiCreated(
-  //     event: CustomEvent[KouhiCreated]
-  // ): Unit =
-  //   val created = event.detail.created
-  //   if eListAll.checked || created.isValidAt(LocalDate.now()) then
-  //     eDisp.qSelector(s".kouhi-${created.kouhiId}").match {
-  //       case Some(_) => ()
-  //       case None => {
-  //         val item = KouhiHokenItem(event.detail.created)
-  //         val e = createDisp(item)
-  //         eDisp.insertInOrderDesc(
-  //           e,
-  //           "[data-valid-from]",
-  //           _.getAttribute("data-valid-from")
-  //         )
-  //       }
-  //     }
-
-  // private def onShahokokuhoUpdated(
-  //     event: CustomEvent[ShahokokuhoUpdated]
-  // ): Unit =
-  //   val updated = event.detail.updated
-  //   val cur = eDisp.qSelector(s".shahokokuho-${updated.shahokokuhoId}")
-  //   println(("isValidAt", updated.isValidAt(LocalDate.now())))
-  //   if eListAll.checked || updated.isValidAt(LocalDate.now()) then
-  //     val item = HokenItem(updated)
-  //     val newEle = createDisp(item)
-  //     cur match {
-  //       case Some(c) => c.replaceBy(newEle)
-  //       case None =>
-  //         eDisp.insertInOrderDesc(
-  //           newEle,
-  //           "[data-valid-from]",
-  //           _.getAttribute("data-valid-from")
-  //         )
-  //     }
-  //   else
-  //     cur match {
-  //       case Some(c) => c.remove()
-  //       case None    => ()
-  //     }
-
-  // private def onKoukikoureiUpdated(
-  //     event: CustomEvent[KoukikoureiUpdated]
-  // ): Unit =
-  //   val updated = event.detail.updated
-  //   val cur = eDisp.qSelector(s".koukikourei-${updated.koukikoureiId}")
-  //   if eListAll.checked || updated.isValidAt(LocalDate.now()) then
-  //     val item = HokenItem(updated)
-  //     val newEle = createDisp(item)
-  //     cur match {
-  //       case Some(c) => c.replaceBy(newEle)
-  //       case None =>
-  //         eDisp.insertInOrderDesc(
-  //           newEle,
-  //           "[data-valid-from]",
-  //           _.getAttribute("data-valid-from")
-  //         )
-  //     }
-  //   else
-  //     cur match {
-  //       case Some(c) => c.remove()
-  //       case None    => ()
-  //     }
-
-  // private def onKouhiUpdated(
-  //     event: CustomEvent[KouhiUpdated]
-  // ): Unit =
-  //   val updated = event.detail.updated
-  //   val cur = eDisp.qSelector(s".kouhi-${updated.kouhiId}")
-  //   if eListAll.checked || updated.isValidAt(LocalDate.now()) then
-  //     val item = HokenItem(updated)
-  //     val newEle = createDisp(item)
-  //     cur match {
-  //       case Some(c) => c.replaceBy(newEle)
-  //       case None =>
-  //         eDisp.insertInOrderDesc(
-  //           newEle,
-  //           "[data-valid-from]",
-  //           _.getAttribute("data-valid-from")
-  //         )
-  //     }
-  //   else
-  //     cur match {
-  //       case Some(c) => c.remove()
-  //       case None    => ()
-  //     }
-
   private def setHokenList(list: List[HokenItem]): Unit =
     val listSorted = list.sortBy(list => list.validFrom).reverse
     eDisp.clear()
@@ -222,12 +70,17 @@ class HokenList(
     import HokenList.*
     item match {
       case ShahokokuhoHokenItem(gen, h) =>
-        ShahokokuhoDisp(gen, h, onShahokokuhoSelect(_, _)).ele
+        ShahokokuhoDisp(
+          gen,
+          h,
+          (gen, hoken) =>
+            CustomEvents.addShahokokuhoSubblock.trigger(ele, (gen, hoken))
+        ).ele
       case KoukikoureiHokenItem(gen, h) =>
-        KoukikoureiDisp(gen, h, onKoukikoureiSelect(_, _)).ele
+        KoukikoureiDisp(gen, h, (gen, hoken) => ()).ele
       case RoujinHokenItem(gen, h) =>
-        RoujinDisp(gen, h, onRoujinSelect(_, _)).ele
-      case KouhiHokenItem(gen, h) => KouhiDisp(gen, h, onKouhiSelect(_, _)).ele
+        RoujinDisp(gen, h, (gen, hoken) => ()).ele
+      case KouhiHokenItem(gen, h) => KouhiDisp(gen, h, (gen, hoken) => ()).ele
     }
 
   private def updateHokenUI(): Unit =
@@ -263,8 +116,7 @@ object HokenList:
       shahokokuho: Shahokokuho,
       onSelect: (Int, Shahokokuho) => Unit
   ) extends Disp(new DispUI, HokenItem(gen, shahokokuho)):
-    def onIconClick(): Unit =
-      onSelect(gen, shahokokuho)
+    def onIconClick(): Unit = onSelect(gen, shahokokuho)
 
   class KoukikoureiDisp(
       gen: Int,

@@ -28,10 +28,6 @@ class ManagePatientBlock(
     var kouhiList: List[Kouhi]
 ):
   import ManagePatientBlock.*
-  var onShahokokuhoSelect: (Int, Shahokokuho) => Unit = (_, _) => ()
-  var onKoukikoureiSelect: (Int, Koukikourei) => Unit = (_, _) => ()
-  var onRoujinSelect: (Int, Roujin) => Unit = (_, _) => ()
-  var onKouhiSelect: (Int, Kouhi) => Unit = (_, _) => ()
   val eLeftPane = div
   val eRightPane = div()
   val eSubblocks = div()
@@ -61,11 +57,16 @@ class ManagePatientBlock(
   updateLeftPane()
   block.ele(cls := "manage-patient-block")
   block.ele(eSubblocks(cls := "subblocks"))
-  hokenList.onShahokokuhoSelect = onShahokokuhoSelect
-  hokenList.onKoukikoureiSelect = onKoukikoureiSelect
-  hokenList.onRoujinSelect = onRoujinSelect
-  hokenList.onKouhiSelect = onKouhiSelect
   val ele = block.ele
+
+  CustomEvents.addShahokokuhoSubblock.listen(ele , onAddShahokokuhoSubblock.tupled)
+
+  private def onAddShahokokuhoSubblock(
+      gen: Int,
+      shahokokuho: Shahokokuho
+  ): Unit =
+    val sub = ShahokokuhoSubblock(gen, shahokokuho)
+    eSubblocks(sub.ele)
 
   def updateLeftPane(): Unit =
     eLeftPane.setChild(PatientDispPane(patient, onEditPatient).ele)

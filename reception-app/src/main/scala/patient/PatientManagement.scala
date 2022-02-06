@@ -14,7 +14,7 @@ import dev.myclinic.scala.webclient.Api
 import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
 import scala.util.{Success, Failure}
 
-import dev.myclinic.scala.model.Patient
+import dev.myclinic.scala.model.*
 import java.time.LocalDate
 
 class PatientManagement() extends SideMenuService:
@@ -39,6 +39,7 @@ class PatientManagement() extends SideMenuService:
     ),
     eWorkarea
   )
+
   def getElement: HTMLElement = ele
 
   def initFocus(): Unit =
@@ -106,3 +107,4 @@ class PatientManagement() extends SideMenuService:
       case Success(_)  => ()
       case Failure(ex) => System.err.println(ex.getMessage)
     }
+
