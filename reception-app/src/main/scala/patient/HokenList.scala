@@ -22,6 +22,8 @@ import scala.math.Ordered.orderingToOrdered
 import dev.fujiwara.domq.DomqUtil
 import dev.myclinic.scala.web.appbase.ElementDispatcher.*
 import dev.myclinic.scala.web.appbase.{EventPublishers, EventFetcher}
+import dev.myclinic.scala.web.appbase.EventPublisher
+import dev.myclinic.scala.web.appbase.ModelPublishers
 
 class HokenList(
     var gen: Int,
@@ -166,7 +168,48 @@ object HokenList:
       extends Disp(new DispUI, HokenItem(gen, kouhi)):
     def onIconClick(): Unit = onSelect(gen, kouhi)
 
-sealed trait HokenItem[T]:
+abstract class HokenItemDev[T](var gen: Int, var hoken: T)(using fetcher: EventFetcher):
+  class UI:
+    val icon = Icons.zoomIn()
+    val label = span
+    val ele =
+      div(
+        icon(
+          Icons.defaultStyle,
+          cls := "zoom-in-icon"
+        ),
+        label
+      )
+  val ui = new UI
+  def ele: HTMLElement = ui.ele
+  updateUI()
+  catchup()
+  ele.addUpdatedListener(getPublisher)
+
+  def rep: String
+  def validFrom: LocalDate
+  def validUpto: Option[LocalDate]
+  def catchupWith(event: AppModelEvent): Unit
+  def getPublishers: ModelPublishers[T]
+
+  def repFull: String =
+    val from = KanjiDate.dateToKanji(validFrom) + "から"
+    val upto = validUpto match {
+      case Some(d) => KanjiDate.dateToKanji(d) + "まで"
+      case None    => ""
+    }
+    rep + s"（${from}${upto}）"
+
+  def updateUI(): Unit = label(innerText := repFull)
+  def catchup(): Unit =
+    fetcher.catchup(gen, (g, e) => {
+      catchupWith(e)
+      gen = g
+    })
+
+
+
+sealed trait HokenItem:
   def rep: String
   def validFrom: LocalDate
   def validUpto: Option[LocalDate]
@@ -179,9 +222,6 @@ sealed trait HokenItem[T]:
     rep + s"（${from}${upto}）"
 
 object HokenItem:
-    given 
-
-
   def apply(
       gen: Int,
       src: Shahokokuho | Roujin | Koukikourei | Kouhi
