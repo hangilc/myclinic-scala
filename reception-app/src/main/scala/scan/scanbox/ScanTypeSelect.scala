@@ -9,7 +9,7 @@ import scala.language.implicitConversions
 
 class ScanTypeSelect(ui: ScanTypeSelect.UI):
   var onChangeCallback: String => Unit = _ => ()
-  ui.eScanTypeSelect(onchange := (() => 
+  ui.eScanTypeSelect(onchange := (() =>
     val t = ui.eScanTypeSelect.getValue
     onChangeCallback(t)
   ))
@@ -18,15 +18,15 @@ class ScanTypeSelect(ui: ScanTypeSelect.UI):
 
 object ScanTypeSelect:
   val defaultItems: List[(String, String)] =
-      List(
-        "保険証" -> "hokensho",
-        "健診結果" -> "health-check",
-        "検査結果" -> "exam-report",
-        "紹介状" -> "refer",
-        "訪問看護指示書など" -> "shijisho",
-        "訪問看護などの報告書" -> "zaitaku",
-        "その他" -> "image"
-      )
+    List(
+      "保険証" -> "hokensho",
+      "健診結果" -> "health-check",
+      "検査結果" -> "exam-report",
+      "紹介状" -> "refer",
+      "訪問看護指示書など" -> "shijisho",
+      "訪問看護などの報告書" -> "zaitaku",
+      "その他" -> "image"
+    )
 
   class UI:
     val eScanTypeSelect = select
@@ -35,15 +35,14 @@ object ScanTypeSelect:
       eScanTypeSelect
     )
     addDefaultScanTypes()
-    
+
     private def addDefaultScanTypes(): Unit =
       populateScanTypes(defaultItems)
 
     private def populateScanTypes(items: List[(String, String)]): Unit =
-      eScanTypeSelect.addChildren(
-        items.map({ case (name, optValue) =>
-          option(name, value := optValue)
-        })
+      eScanTypeSelect(
+        children :=
+          items.map({ case (name, optValue) =>
+            option(name, value := optValue)
+          })
       )
-
-

@@ -69,7 +69,7 @@ class ManagePatientBlock(
     eSubblocks(sub.ele)
 
   def updateLeftPane(): Unit =
-    eLeftPane.setChild(PatientDispPane(patient, onEditPatient).ele)
+    eLeftPane(clear, PatientDispPane(patient, onEditPatient).ele)
 
   def onClose(): Unit = block.ele.remove()
 
@@ -83,7 +83,7 @@ class ManagePatientBlock(
       yield
         patient = updated
         updateLeftPane()
-    eLeftPane.setChild(form.ele)
+    eLeftPane(clear, form.ele)
 
   private def onNewShahokokuho(): Unit =
     val b = new NewShahokokuhoSubblock(patient.patientId)

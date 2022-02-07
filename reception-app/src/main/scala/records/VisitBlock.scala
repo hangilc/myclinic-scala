@@ -25,18 +25,20 @@ class VisitBlock(visit: VisitEx):
     div(cls := "visit-title")(formatVisitTime(visit.visitedAt)),
     div(cls := "visit-record")(
       div(cls := "left")(
-        eText.setChildren(
-          visit.texts.map(text => TextBlock(text).ele)
+        eText(
+          clear,
+          children := visit.texts.map(text => TextBlock(text).ele)
         )
       ),
       div(cls := "right")(
         eHoken(
           HokenUtil.hokenRep(visit)
         ),
-        eShinryou.setChildren(
-          visit.shinryouList.map(shinryou => div(shinryou.master.name))
+        eShinryou(
+          clear,
+          children := visit.shinryouList.map(shinryou => div(shinryou.master.name))
         ),
-        eDrug.setChildren(drugElements(visit.drugs)),
+        eDrug(clear, children := drugElements(visit.drugs)),
         eCashier(chargeElement(visit.chargeOption))
       )
     )

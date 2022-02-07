@@ -46,10 +46,9 @@ class ShahokokuhoSubblock(var gen: Int, var shahokokuho: Shahokokuho):
 
   def disp(): Unit =
     val d = ShahokokuhoDisp(gen, shahokokuho)
-    eContent.setChild(d.ele)
-    eCommands.clear()
+    eContent(clear, d.ele)
     eCommands(
-      clearChildren,
+      clear,
       button("削除", onclick := (onDelete _)),
       button("編集", onclick := (onEdit _)),
       button("閉じる", onclick := (() => block.ele.remove()))
@@ -59,10 +58,9 @@ class ShahokokuhoSubblock(var gen: Int, var shahokokuho: Shahokokuho):
     val form = ShahokokuhoForm()
     val errBox = ErrorBox()
     form.setData(shahokokuho)
-    eContent.clear()
-    eContent(errBox.ele, form.ele)
-    eCommands.clear()
+    eContent(clear, errBox.ele, form.ele)
     eCommands(
+      clear,
       button("入力", onclick := (() => onEnter(form, errBox))),
       button("キャンセル", onclick := (() => disp()))
     )
