@@ -33,7 +33,7 @@ class HotlineHandler(
         case HotlineCreated(_, created) => handleHotline(gen, created)
         case _ => ()
       })
-      publishers.hotlineCreated.subscribe((event, appEventId) => {
+      publishers.hotlineCreated.subscribe((appEventId, event) => {
         handleHotline(appEventId, event.created)
       })
       ui.sendButton(onclick := (() => onSend(ui.messageInput.value.trim)))

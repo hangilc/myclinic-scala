@@ -34,12 +34,6 @@ class ShahokokuhoSubblock(var gen: Int, var shahokokuho: Shahokokuho):
     eContent,
     eCommands
   )
-  block.ele(
-    cls := s"shahokokuho-${shahokokuho.shahokokuhoId}",
-    oncustomevent[ShahokokuhoUpdated](
-      "shahokokuho-updated"
-    ) := (onUpdated _)
-  )
   disp()
 
   def ele = block.ele
@@ -74,7 +68,10 @@ class ShahokokuhoSubblock(var gen: Int, var shahokokuho: Shahokokuho):
       .asEither match {
       case Right(h) => {
         Api.updateShahokokuho(h).onComplete {
-          case Success(_)  => ()
+          case Success(_gen)  => 
+            gen = _gen
+            shahokokuho = h
+            disp()
           case Failure(ex) => errBox.show(ex.getMessage)
         }
       }

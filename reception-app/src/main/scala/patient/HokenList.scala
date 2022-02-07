@@ -20,6 +20,8 @@ import org.scalajs.dom.Event
 import dev.myclinic.scala.util.DateTimeOrdering
 import scala.math.Ordered.orderingToOrdered
 import dev.fujiwara.domq.DomqUtil
+import dev.myclinic.scala.web.appbase.ElementDispatcher.*
+import dev.myclinic.scala.web.appbase.{EventPublishers, EventFetcher}
 
 class HokenList(
     var gen: Int,
@@ -28,7 +30,7 @@ class HokenList(
     var koukikoureiList: List[Koukikourei],
     var roujinList: List[Roujin],
     var kouhiList: List[Kouhi]
-):
+)(using publishers: EventPublishers, fetcher: EventFetcher):
   val errorBox = ErrorBox()
   val eDisp = div()
   val eListAll: HTMLInputElement = checkbox()
@@ -94,28 +96,59 @@ class HokenList(
 object HokenList:
   class DispUI:
     val icon = Icons.zoomIn()
+    val label = span
     val ele =
       div(
         icon(
           Icons.defaultStyle,
           cls := "zoom-in-icon"
-        )
+        ),
+        label
       )
 
   abstract class Disp(ui: DispUI, item: HokenItem):
     val ele = ui.ele
     ele(
       attr("data-valid-from") := DateUtil.toSqlDate(item.validFrom)
-    )(item.repFull)
+    )
     ui.icon(onclick := (onIconClick _))
+    updateUI()
 
     def onIconClick(): Unit
+    def updateUI(): Unit = ui.label(innerText := item.repFull)
 
   class ShahokokuhoDisp(
-      gen: Int,
-      shahokokuho: Shahokokuho,
+      var gen: Int,
+      var shahokokuho: Shahokokuho,
       onSelect: (Int, Shahokokuho) => Unit
-  ) extends Disp(new DispUI, HokenItem(gen, shahokokuho)):
+  )(using publishers: EventPublishers, fetcher: EventFetcher)
+      extends Disp(new DispUI, HokenItem(gen, shahokokuho)):
+    fetcher.catchup(
+      gen,
+      (g, e) =>
+        e match {
+          case ShahokokuhoUpdated(at, updated) => {
+            if updated.shahokokuhoId == shahokokuho.shahokokuhoId then
+              shahokokuho = updated
+              updateUI()
+          }
+          case ShahokokuhoDeleted(at, deleted) => {
+            if deleted.shahokokuhoId == shahokokuho.shahokokuhoId then
+              ele.remove()
+          }
+          case _ => ()
+        }
+        gen = g
+    )
+    ele.addUpdatedListener(
+      publishers.shahokokuho,
+      (g, e) => {
+        println(("update", g, e))
+        gen = g
+        shahokokuho = e.updated
+        updateUI()
+      }
+    )
     def onIconClick(): Unit = onSelect(gen, shahokokuho)
 
   class KoukikoureiDisp(
@@ -133,7 +166,7 @@ object HokenList:
       extends Disp(new DispUI, HokenItem(gen, kouhi)):
     def onIconClick(): Unit = onSelect(gen, kouhi)
 
-sealed trait HokenItem:
+sealed trait HokenItem[T]:
   def rep: String
   def validFrom: LocalDate
   def validUpto: Option[LocalDate]
@@ -146,6 +179,9 @@ sealed trait HokenItem:
     rep + s"（${from}${upto}）"
 
 object HokenItem:
+    given 
+
+
   def apply(
       gen: Int,
       src: Shahokokuho | Roujin | Koukikourei | Kouhi

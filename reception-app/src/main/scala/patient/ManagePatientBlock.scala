@@ -18,6 +18,7 @@ import java.time.LocalDateTime
 import java.time.LocalDate
 import dev.myclinic.scala.util.{HokenRep, RcptUtil}
 import dev.myclinic.scala.apputil.FutanWari
+import dev.myclinic.scala.web.appbase.{EventPublishers, EventFetcher}
 
 class ManagePatientBlock(
     var gen: Int,
@@ -26,7 +27,7 @@ class ManagePatientBlock(
     var koukikoureiList: List[Koukikourei],
     var roujinList: List[Roujin],
     var kouhiList: List[Kouhi]
-):
+)(using EventPublishers, EventFetcher):
   import ManagePatientBlock.*
   val eLeftPane = div
   val eRightPane = div()
