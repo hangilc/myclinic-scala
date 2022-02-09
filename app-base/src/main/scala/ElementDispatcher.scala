@@ -18,7 +18,7 @@ object ElementDispatcher:
       )
 
     def addCreatedDispatcher(): EventSubscriber[C] =
-      p.created.subscribe((created, gen) => {
+      p.created.subscribe((gen, created) => {
         val evt: CustomEvent[(C, Int)] =
           CustomEvent(p.createdEventType, (created, gen), false)
         document.body

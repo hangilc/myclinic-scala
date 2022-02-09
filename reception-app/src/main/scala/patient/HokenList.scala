@@ -20,6 +20,9 @@ import org.scalajs.dom.Event
 import dev.myclinic.scala.util.DateTimeOrdering
 import scala.math.Ordered.orderingToOrdered
 import dev.fujiwara.domq.DomqUtil
+import dev.myclinic.scala.web.appbase.EventPublishers
+import dev.myclinic.scala.web.appbase.EventFetcher
+import dev.myclinic.scala.web.appbase.ElementDispatcher.*
 
 class HokenList(
     var gen: Int,
@@ -28,7 +31,7 @@ class HokenList(
     var koukikoureiList: List[Koukikourei],
     var roujinList: List[Roujin],
     var kouhiList: List[Kouhi]
-):
+)(using EventPublishers, EventFetcher):
   val errorBox = ErrorBox()
   val eDisp = div()
   val eListAll: HTMLInputElement = checkbox()
@@ -92,6 +95,78 @@ class HokenList(
     setHokenList(list)
 
 object HokenList:
+
+  trait Item:
+    def ele: HTMLElement
+    def validFrom: LocalDate
+
+  class ItemUI:
+    val icon = Icons.zoomIn()
+    val label = span
+    val ele =
+      div(
+        icon(
+          Icons.defaultStyle,
+          cls := "zoom-in-icon"
+        ),
+        span
+      )
+
+  def makeLabel(
+      rep: String,
+      validFrom: LocalDate,
+      validUpto: Option[LocalDate]
+  ): String =
+    val from = KanjiDate.dateToKanji(validFrom) + "から"
+    val upto = validUpto match {
+      case Some(d) => KanjiDate.dateToKanji(d) + "まで"
+      case None    => ""
+    }
+    rep + s"（${from}${upto}）"
+
+  def shahokokuhoRep(shahokokuho: Shahokokuho): String =
+    HokenRep.shahokokuhoRep(
+      shahokokuho.hokenshaBangou,
+      shahokokuho.koureiFutanWari
+    )
+
+  def shahokokuhoLabel(shahokokuho: Shahokokuho): String =
+    makeLabel(
+      shahokokuhoRep(shahokokuho),
+      shahokokuho.validFrom,
+      shahokokuho.validUptoOption
+    )
+
+  class ShahokokuhoItem(var gen: Int, var shahokokuho: Shahokokuho)(using
+      publishers: EventPublishers,
+      fetcher: EventFetcher
+  ) extends Item:
+    val ui = new ItemUI
+    def ele = ui.ele
+    def validFrom = shahokokuho.validFrom
+
+    updateUI()
+    fetcher.catchup(gen, (g, e) => {
+      e match {
+        case ShahokokuhoUpdated(at, updated) => 
+          if updated.shahokokuhoId == shahokokuho.shahokokuhoId then
+            shahokokuho = updated
+            updateUI()
+        case ShahokokuhoDeleted(at, deleted) =>
+          if deleted.shahokokuhoId == shahokokuho.shahokokuhoId then
+            ele.remove()
+        case _ => ()
+      }
+      gen = g
+    })
+    ele.addUpdatedListener(publishers.shahokokuho, (g, e) => {
+      
+    })
+    
+     publishers.shahokokuho
+
+    def updateUI(): Unit = ui.label.innerText = shahokokuhoLabel(shahokokuho)
+
   class DispUI:
     val icon = Icons.zoomIn()
     val ele =
