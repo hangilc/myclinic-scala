@@ -27,10 +27,10 @@ class PatientImages(ui: PatientImages.UI, patient: Patient):
     val url = s"/api/get-patient-image?patient-id=${patient.patientId}&file-name=${file}"
     if file.endsWith(".pdf") then
       org.scalajs.dom.window.open(url, "_blank")
-      ui.eImageDisp.clear()
+      ui.eImageDisp(clear)
     else
       val img = dev.fujiwara.domq.all.img(attr("src") := url)
-      ui.eImageDisp.setChild(img)
+      ui.eImageDisp(clear, img)
 
   def onClose(): Unit =
     ui.ele.remove()

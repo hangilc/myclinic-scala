@@ -38,7 +38,7 @@ abstract class MainUI(using publishers: EventPublishers, fetcher: EventFetcher):
     eMain,
     List(
       "メイン" -> (() => Cashier()),
-      "患者管理" -> (() => PatientManagement()),
+      "患者管理" -> (() => new PatientManagement()),
       "診療記録" -> (() => Records()),
       "スキャン" -> (() => Scan())
     )

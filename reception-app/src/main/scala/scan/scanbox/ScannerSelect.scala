@@ -31,10 +31,12 @@ class ScannerSelect(ui: ScannerSelect.UI):
     yield setSelectOptions(devices)
 
   private def setSelectOptions(devices: List[ScannerDevice]): Unit =
-    ui.eScannerSelect.setChildren(
-      devices.map(device => {
-        option(device.name, value := device.deviceId)
-      })
+    ui.eScannerSelect(
+      clear,
+      children :=
+        devices.map(device => {
+          option(device.name, value := device.deviceId)
+        })
     )
 
 object ScannerSelect:
@@ -48,4 +50,3 @@ object ScannerSelect:
         "更新"
       )
     )
-

@@ -112,7 +112,7 @@ class AppointSheet(using eventPublishers: EventPublishers):
         val at = Misc.formatAppointDate(a)
         val bt = Misc.formatAppointDate(b)
         val txt = s"${at} - ${bt}"
-        daySpanDisp.clear()
+        daySpanDisp(clear)
         daySpanDisp(span(txt), displayDefault)
       }
       case None => hideDaySpanDisp()
@@ -203,6 +203,6 @@ class AppointSheet(using eventPublishers: EventPublishers):
     )
 
     def init(cols: List[AppointColumn]): Unit =
-      columnWrapper.setChildren(cols.map(_.ele))
+      columnWrapper(clear, children := cols.map(_.ele))
 
 

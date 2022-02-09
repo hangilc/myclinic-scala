@@ -103,7 +103,7 @@ case class AppointColumn(
   def adjustVacantClass(): Unit =
     val kinds = probeVacantKinds()
     val wrapper = vacantKindsArea
-    wrapper.clear()
+    wrapper(clear)
     if kinds.isEmpty then dateElement(cls :- "vacant")
     else
       dateElement(cls := "vacant")
@@ -123,7 +123,7 @@ case class AppointColumn(
 
   def markKenshin(): Unit =
     val n = countKenshin()
-    kenshinArea.clear()
+    kenshinArea(clear)
     if n > 0 then kenshinArea(s"健$n")
 
   def totalAppoints: Int =

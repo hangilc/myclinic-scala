@@ -36,9 +36,9 @@ class KoukikoureiSubblock(koukikourei: Koukikourei):
   disp()
 
   def disp(): Unit =
-    eContent.clear()
+    eContent(clear)
     eContent(KoukikoureiDisp(koukikourei).ele)
-    eCommands.clear()
+    eCommands(clear)
     eCommands(
       button("削除", onclick := (onDelete _)),
       button("編集", onclick := (onEdit _)),
@@ -49,9 +49,9 @@ class KoukikoureiSubblock(koukikourei: Koukikourei):
     val form = KoukikoureiForm()
     val errBox = ErrorBox()
     form.setData(koukikourei)
-    eContent.clear()
+    eContent(clear)
     eContent(errBox.ele, form.ele)
-    eCommands.clear()
+    eCommands(clear)
     eCommands(
       button("入力", onclick := (() => onEnter(form, errBox))),
       button("キャンセル", onclick := (() => disp()))

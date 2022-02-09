@@ -18,7 +18,7 @@ class CovidThirdShot(val ui: CovidThirdShot.UI):
   def onSearchSubmit(): Unit =
     val text = ui.eSearchInput.value.trim
     if !text.isEmpty then
-      ui.eDisp.clear()
+      ui.eDisp(clear)
       for (gen, patients) <- Api.searchPatient(text)
       yield
         if patients.size == 1 then
@@ -38,10 +38,10 @@ class CovidThirdShot(val ui: CovidThirdShot.UI):
       case Some(age, secondShotAt, _thirdShotDue) =>
         val due = CovidThirdShot.thirdShotDue(age, secondShotAt)
         val disp = CovidThirdShot.Disp(patient, age, secondShotAt, due)
-        ui.eDisp.setChild(disp.ui.ele)
+        ui.eDisp(clear, disp.ui.ele)
       case None =>
         val query = CovidThirdShot.Query(patient)
-        ui.eDisp.setChild(query.ui.ele)
+        ui.eDisp(clear, query.ui.ele)
     }
 
 object CovidThirdShot:

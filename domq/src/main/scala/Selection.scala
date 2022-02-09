@@ -13,7 +13,7 @@ class Selection[T](
 ):
   val ele = ui.ele
   def addAll(items: List[(String, T)]): Unit =
-    ui.ele.addChildren((items.map { case (label, value) =>
+    ui.ele(children := (items.map { case (label, value) =>
       SelectionItem(label, value).ele
     }))
 
@@ -30,7 +30,7 @@ class Selection[T](
     addItems(items, format)
 
   def clear(): Unit =
-    ui.ele.clear()
+    ui.ele(dev.fujiwara.domq.Modifiers.clear)
 
   def show(): Unit = ui.ele(displayDefault)
   def hide(): Unit = ui.ele(displayNone)

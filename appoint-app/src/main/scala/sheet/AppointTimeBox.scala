@@ -38,9 +38,9 @@ class AppointTimeBox(
     updateUI()
 
     def updateUI(): Unit =
-      eLabel.clear()
+      eLabel(clear)
       eLabel(label)
-      eTags.clear()
+      eTags(clear)
       eTags(tagsRep)
     def label: String =
       val patientId: String =

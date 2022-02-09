@@ -24,6 +24,8 @@ case class UnknownAppEvent(
     data: String
 ) extends AppModelEvent
 
+case class AppCreatedEvent[T](createdAt: LocalDateTime, created: T)
+
 case class AppointCreated(createdAt: LocalDateTime, created: Appoint)
     extends AppModelEvent
 case class AppointUpdated(createdAt: LocalDateTime, updated: Appoint)

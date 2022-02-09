@@ -100,13 +100,15 @@ class ScannedItem(
   def isUploaded: Boolean = uploadedFlag
 
   private def showSuccessIcon(): Unit =
-    ui.eIconWrapper.setChildren(
-      List(Icons.check(stroke := "green"))
+    ui.eIconWrapper(
+      clear,
+      children := List(Icons.check(stroke := "green"))
     )
 
   private def showFailureIcon(): Unit =
-    ui.eIconWrapper.setChildren(
-      List(Icons.x(stroke := "red"))
+    ui.eIconWrapper(
+      clear,
+      children := List(Icons.x(stroke := "red"))
     )
 
   def upload: Future[Unit] =
@@ -154,7 +156,7 @@ class ScannedItem(
         val scale = 1.5
         image.width = (210 * scale).toInt
         image.height = (297 * scale).toInt
-        ui.ePreviewImageWrapper.setChild(image)
+        ui.ePreviewImageWrapper(clear, image)
         ui.ePreview(displayDefault)
     )
 
@@ -164,7 +166,7 @@ class ScannedItem(
 
   ui.eClosePreviewButton(
     onclick := (_ =>
-      ui.ePreviewImageWrapper.clear()
+      ui.ePreviewImageWrapper(clear)
       ui.ePreview(displayNone)
     )
   )
@@ -173,13 +175,13 @@ class ScannedItem(
     for _ <- Api.deletePatientImage(patientId.get, uploadFile)
     yield
       uploadedFlag = false
-      ui.eIconWrapper.clear()
+      ui.eIconWrapper(clear)
 
   def rescanTask(deviceId: String): ScanTask =
     ScanTask(
       () =>
         ui.eRescanLink.hide
-        ui.eScanProgress.clear().show
+        ui.eScanProgress(clear).show
         for
           saved <- Api.scan(
             deviceId,
@@ -191,7 +193,7 @@ class ScannedItem(
           _ <-
             if isUploaded then cancelUpload
             else Future.successful(())
-        yield ui.eScanProgress.clear().hide
+        yield ui.eScanProgress(clear).hide
       ,
       isScanning = Some(deviceId)
     )
@@ -209,7 +211,7 @@ class ScannedItem(
     if isUploaded then
       for _ <- Api.deletePatientImage(patientId.get, uploadFile).map(_ => ())
       yield
-        ui.eIconWrapper.clear()
+        ui.eIconWrapper(clear)
         uploadedFlag = false
     else Future.successful(())
 

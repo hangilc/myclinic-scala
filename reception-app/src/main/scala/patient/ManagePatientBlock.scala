@@ -18,6 +18,7 @@ import java.time.LocalDateTime
 import java.time.LocalDate
 import dev.myclinic.scala.util.{HokenRep, RcptUtil}
 import dev.myclinic.scala.apputil.FutanWari
+import dev.myclinic.scala.web.appbase.{EventPublishers, EventFetcher}
 
 class ManagePatientBlock(
     var gen: Int,
@@ -26,7 +27,7 @@ class ManagePatientBlock(
     var koukikoureiList: List[Koukikourei],
     var roujinList: List[Roujin],
     var kouhiList: List[Kouhi]
-):
+)(using EventPublishers, EventFetcher):
   import ManagePatientBlock.*
   val eLeftPane = div
   val eRightPane = div()
@@ -69,7 +70,7 @@ class ManagePatientBlock(
     eSubblocks(sub.ele)
 
   def updateLeftPane(): Unit =
-    eLeftPane.setChild(PatientDispPane(patient, onEditPatient).ele)
+    eLeftPane(clear, PatientDispPane(patient, onEditPatient).ele)
 
   def onClose(): Unit = block.ele.remove()
 
@@ -83,7 +84,7 @@ class ManagePatientBlock(
       yield
         patient = updated
         updateLeftPane()
-    eLeftPane.setChild(form.ele)
+    eLeftPane(clear, form.ele)
 
   private def onNewShahokokuho(): Unit =
     val b = new NewShahokokuhoSubblock(patient.patientId)

@@ -209,7 +209,7 @@ object MiscService extends DateTimeQueryParam with Publisher:
           shahokokuho <- req.as[Shahokokuho]
           event <- Db.updateShahokokuho(shahokokuho)
           _ <- publish(event)
-        yield true
+        yield event.appEventId
       )
 
     case GET -> Root / "delete-shahokokuho" :? intShahokokuhoId(

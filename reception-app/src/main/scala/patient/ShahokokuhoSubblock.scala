@@ -26,7 +26,7 @@ import java.time.LocalDate
 import dev.myclinic.scala.util.{HokenRep, RcptUtil}
 import dev.myclinic.scala.apputil.FutanWari
 
-class ShahokokuhoSubblock(gen: Int, shahokokuho: Shahokokuho):
+class ShahokokuhoSubblock(var gen: Int, var shahokokuho: Shahokokuho):
   val eContent = div()
   val eCommands = div()
   val block: Subblock = Subblock(
@@ -34,21 +34,15 @@ class ShahokokuhoSubblock(gen: Int, shahokokuho: Shahokokuho):
     eContent,
     eCommands
   )
-  block.ele(
-    cls := s"shahokokuho-${shahokokuho.shahokokuhoId}",
-    oncustomevent[ShahokokuhoUpdated](
-      "shahokokuho-updated"
-    ) := (onUpdated _)
-  )
   disp()
 
   def ele = block.ele
 
   def disp(): Unit =
-    eContent.clear()
-    eContent(ShahokokuhoDisp(shahokokuho).ele)
-    eCommands.clear()
+    val d = ShahokokuhoDisp(gen, shahokokuho)
+    eContent(clear, d.ele)
     eCommands(
+      clear,
       button("削除", onclick := (onDelete _)),
       button("編集", onclick := (onEdit _)),
       button("閉じる", onclick := (() => block.ele.remove()))
@@ -58,10 +52,9 @@ class ShahokokuhoSubblock(gen: Int, shahokokuho: Shahokokuho):
     val form = ShahokokuhoForm()
     val errBox = ErrorBox()
     form.setData(shahokokuho)
-    eContent.clear()
-    eContent(errBox.ele, form.ele)
-    eCommands.clear()
+    eContent(clear, errBox.ele, form.ele)
     eCommands(
+      clear,
       button("入力", onclick := (() => onEnter(form, errBox))),
       button("キャンセル", onclick := (() => disp()))
     )
@@ -75,7 +68,10 @@ class ShahokokuhoSubblock(gen: Int, shahokokuho: Shahokokuho):
       .asEither match {
       case Right(h) => {
         Api.updateShahokokuho(h).onComplete {
-          case Success(_)  => ()
+          case Success(_gen)  => 
+            gen = _gen
+            shahokokuho = h
+            disp()
           case Failure(ex) => errBox.show(ex.getMessage)
         }
       }
@@ -95,3 +91,4 @@ class ShahokokuhoSubblock(gen: Int, shahokokuho: Shahokokuho):
     val updated = event.detail.updated
     val newSub = ShahokokuhoSubblock(gen, updated)
     block.ele.replaceBy(newSub.block.ele)
+

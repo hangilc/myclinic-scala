@@ -101,4 +101,4 @@ class Records() extends SideMenuService:
     val r = RecordUI(patient)
     for
       _ <- r.init()
-    yield eRecord.setChildren(List(r.ele))
+    yield eRecord(clear, children := List(r.ele))

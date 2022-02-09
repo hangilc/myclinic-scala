@@ -66,4 +66,4 @@ class RecordUI(patient: Patient):
     }
 
   def setVisits(visits: List[VisitEx]): Unit =
-    eRecords.setChildren(visits.map(VisitBlock(_).ele))
+    eRecords(clear, children := visits.map(VisitBlock(_).ele))
