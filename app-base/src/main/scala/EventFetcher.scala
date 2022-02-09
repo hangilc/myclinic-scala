@@ -15,20 +15,21 @@ import io.circe.parser.decode
 import dev.myclinic.scala.model.jsoncodec.Implicits.{given}
 import dev.myclinic.scala.model.jsoncodec.EventType
 import dev.myclinic.scala.model.HotlineBeep
+import java.time.LocalDateTime
 
 abstract class EventFetcher:
-  def publish(event: AppModelEvent, appEventId: Int): Unit = ()
+  def publish(event: AppModelEvent): Unit = ()
   def publish(event: HotlineBeep): Unit = ()
 
-  private var events: Vector[(Int, AppModelEvent)] = Vector.empty
+  private var events: Vector[AppModelEvent] = Vector.empty
 
-  def catchup(lastExcludedEventId: Int, f: (Int, AppModelEvent) => Unit): Unit =
+  def catchup(lastExcludedEventId: Int, f: AppModelEvent => Unit): Unit =
     val i = events.lastIndexWhere(_._1 <= lastExcludedEventId)
-    events.slice(i+1, events.size).foreach((gen, m) => f(gen, m))
+    events.slice(i+1, events.size).foreach(f)
 
-  private def onNewAppEvent(event: AppModelEvent, eventId: Int): Unit =
-    events = events :+ (eventId, event)
-    publish(event, eventId)
+  private def onNewAppEvent(event: AppModelEvent): Unit =
+    events = events :+ event
+    publish(event)
 
   var nextEventId: Int = 0
   def start(): Future[Unit] =

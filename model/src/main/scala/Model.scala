@@ -92,6 +92,8 @@ object AppointTime:
     }
 
   given Ordering[AppointTime] = Ordering.by(a => (a.date, a.fromTime))
+  val modelSymbol: String = "appoint-time"
+  given ModelSymbol[AppointTime] = () => modelSymbol
 
 case class Appoint(
     appointId: Int,
@@ -134,8 +136,14 @@ object Appoint:
   def constructMemo(s: String, ts: Set[String]): String =
     if ts.isEmpty then s
     else "{{" + ts.mkString(",") + "}}" + s
+  given DataId[Appoint] = _.appointId
+  val modelSymbol = "appoint"
+  given appointModelSymbol: ModelSymbol[Appoint] = () => modelSymbol
 
 case class Hotline(message: String, sender: String, recipient: String)
+
+object Hotline:
+  val modelSymbol = "hotline"
 
 enum WaitState(val code: Int, val label: String):
   case WaitExam extends WaitState(0, "診待")
@@ -149,6 +157,9 @@ object WaitState:
     WaitState.values.find(_.code == code).get
 
 case class Wqueue(visitId: Int, waitState: WaitState)
+
+object Wqueue:
+  val modelSymbol = "wqueue"
 
 case class VisitAttributes(
     val futanWari: Option[Int] = None
@@ -184,6 +195,7 @@ object Visit:
   given Encoder[VisitAttributes] = deriveEncoder[VisitAttributes]
   def encodeAttributes(value: VisitAttributes): String =
     value.asJson.toString
+  val modelSymbol = "visit"
 
 case class Text(
     textId: Int,
@@ -315,6 +327,11 @@ case class Shahokokuho(
   def isValidAt(at: LocalDate): Boolean =
     validFrom <= at && at <= validUpto
 
+object Shahokokuho:
+  given DataId[Shahokokuho] = _.shahokokuhoId
+  val modelSymbol = "shahokokuho"
+  given shahokokuhoModelSymbol: ModelSymbol[Shahokokuho] = () => modelSymbol
+
 case class Roujin(
     roujinId: Int,
     patientId: Int,
@@ -327,6 +344,10 @@ case class Roujin(
   def validUptoOption: Option[LocalDate] = validUpto.value
   def isValidAt(at: LocalDate): Boolean =
     validFrom <= at && at <= validUpto
+
+object Roujin:
+  given DataId[Roujin] = _.roujinId
+  val modelSymbol = "roujin"
 
 case class Koukikourei(
     koukikoureiId: Int,
@@ -341,6 +362,10 @@ case class Koukikourei(
   def isValidAt(at: LocalDate): Boolean =
     validFrom <= at && at <= validUpto
 
+object Koukikourei:
+  given DataId[Koukikourei] = _.koukikoureiId
+  val modelSymbol = "koukikourei"
+
 case class Kouhi(
     kouhiId: Int,
     futansha: Int,
@@ -352,6 +377,10 @@ case class Kouhi(
   def validUptoOption: Option[LocalDate] = validUpto.value
   def isValidAt(at: LocalDate): Boolean =
     validFrom <= at && at <= validUpto
+
+object Kouhi:
+  given DataId[Kouhi] = _.kouhiId
+  val modelSymbol = "kouhi"
 
 case class MeisaiSectionData(
     section: MeisaiSection,

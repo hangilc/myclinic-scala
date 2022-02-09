@@ -124,7 +124,8 @@ object HokenList:
 
   abstract class ItemBase[T](gen: Int, hoken: T)(using
       EventPublishers,
-      EventFetcher
+      EventFetcher,
+      DataId[T]
   ) extends SyncedComp[T](gen, hoken)
       with Item:
     def validFrom: LocalDate
@@ -145,7 +146,6 @@ object HokenList:
     def validFrom = currentData.validFrom
     def validUpto = currentData.validUptoOption
     def rep = shahokokuhoRep(currentData)
-    def id(s: Shahokokuho): Int = s.shahokokuhoId
     val filterUpdatedEvent = { case e: ShahokokuhoUpdated =>
       e.updated
     }
@@ -159,12 +159,12 @@ object HokenList:
     ): Unit =
       ele.addUpdatedWithIdListener(
         publishers.shahokokuho,
-        id(shahokokuho),
+        getDataId(shahokokuho),
         handler
       )
       ele.addDeletedWithIdListener(
         publishers.shahokokuho,
-        id(shahokokuho),
+        getDataId(shahokokuho),
         handler
       )
 

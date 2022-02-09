@@ -1,13 +1,16 @@
 package dev.myclinic.scala.web.appbase
 
-import dev.myclinic.scala.model.AppModelEvent
+import dev.myclinic.scala.model.{AppModelEvent, DataId}
 import org.scalajs.dom.HTMLElement
 
-abstract class SyncedComp[T](private var gen: Int, private var data: T)(using
+abstract class SyncedComp[T](
+    private var gen: Int,
+    private var data: T
+)(using
+    dataId: DataId[T],
     publishers: EventPublishers,
     fetcher: EventFetcher
 ):
-  def id(d: T): Int
   val filterUpdatedEvent: PartialFunction[AppModelEvent, T]
   val filterDeletedEvent: PartialFunction[AppModelEvent, T]
   def addListeners(
@@ -19,15 +22,16 @@ abstract class SyncedComp[T](private var gen: Int, private var data: T)(using
 
   def currentGen: Int = gen
   def currentData: T = data
+  final def getDataId(d: T): Int = dataId.getId(d)
   private def handleEvent(g: Int, e: AppModelEvent): Unit =
     if filterUpdatedEvent.isDefinedAt(e) then
       val updated = filterUpdatedEvent(e)
-      if id(updated) == id(data) then
+      if getDataId(updated) == getDataId(data) then
         data = updated
         updateUI()
     if filterDeletedEvent.isDefinedAt(e) then
       val deleted = filterDeletedEvent(e)
-      if id(deleted) == id(data) then ele.remove()
+      if dataId.getId(deleted) == getDataId(data) then ele.remove()
   def getGenData: (Int, T) = (gen, data)
 
   updateUI()
