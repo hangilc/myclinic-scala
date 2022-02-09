@@ -200,6 +200,10 @@ object HokenList:
         handleEvent _
       )
 
+    ui.icon(onclick := (() => {
+      CustomEvents.addKoukikoureiSubblock.trigger(ele, getData)
+    }))
+
   class RoujinItem(gen: Int, roujin: Roujin)(using
       EventPublishers,
       EventFetcher
@@ -222,6 +226,10 @@ object HokenList:
         handleEvent _
       )
 
+    ui.icon(onclick := (() => {
+      CustomEvents.addRoujinSubblock.trigger(ele, getData)
+    }))
+
   class KouhiItem(gen: Int, kouhi: Kouhi)(using
       EventPublishers,
       EventFetcher
@@ -243,4 +251,8 @@ object HokenList:
         hokenId(kouhi),
         handleEvent _
       )
+
+    ui.icon(onclick := (() => {
+      CustomEvents.addKouhiSubblock.trigger(ele, getData)
+    }))
 
