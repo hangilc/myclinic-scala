@@ -71,16 +71,16 @@ abstract class EventFetcher:
     if isRelevant(appEvent) then
       val modelEvent = AppModelEvent.from(appEvent)
       if appEvent.appEventId == nextEventId then
-        onNewAppEvent(modelEvent, appEvent.appEventId)
+        onNewAppEvent(modelEvent)
         nextEventId += 1
       else if appEvent.appEventId > nextEventId then
         Api
           .listAppEventInRange(nextEventId, appEvent.appEventId)
           .onComplete({
             case Success(events) =>
-              val modelEvents = events.map(raw => (AppModelEvent.from(raw), raw))
-              modelEvents.foreach((event, raw) => onNewAppEvent(event, raw.appEventId))
-              onNewAppEvent(modelEvent, appEvent.appEventId)
+              val modelEvents = events.map(raw => AppModelEvent.from(raw))
+              modelEvents.foreach(event => onNewAppEvent(event))
+              onNewAppEvent(modelEvent)
               nextEventId = appEvent.appEventId + 1
             case Failure(ex) => System.err.println(ex.getMessage)
           })

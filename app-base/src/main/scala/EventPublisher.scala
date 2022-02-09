@@ -11,54 +11,35 @@ class LocalEventPublisher[T]:
     subscribers = subscribers :+ handler
   def publish(t: T): Unit = subscribers.foreach(_(t))
 
-// class ModelEventPublisherOrig[T](val code: String):
-//   type ModelType = T
-//   val created = EventPublisher[TypedModelEvent[T]]()
-//   val updated = EventPublisher[TypedModelEvent[T]]()
-//   val deleted = EventPublisher[TypedModelEvent[T]]()
-//   val createdEventType = code + "-created"
-//   val updatedEventType = code + "-updated"
-//   val deletedEventType = code + "-deleted"
-//   val createdListenerClass = createdEventType
-//   val updatedListenerClass = updatedEventType
-//   def updatedWithIdListenerClass(id: Int) =
-//     updatedListenerClass + "-" + id.toString
-//   val deletedListenerClass = deletedEventType
-//   def deletedWithIdListenerClass(id: Int) =
-//     deletedListenerClass + "-" + id.toString
-//   val createdSelector = "." + createdListenerClass
-//   val updatedSelector = "." + updatedListenerClass
-//   def updatedWithIdSelector(id: Int) = "." + updatedWithIdListenerClass(id)
-//   def deletedSelector = "." + deletedListenerClass
-//   def deletedWithIdSelector(id: Int) = "." + deletedWithIdListenerClass(id)
-
-class ModelEventPublisher[T](using modelSymbol: ModelSymbol[T], dataId: DataId[T]):
+class ModelCreatedEventPublisher[T](using modelSymbol: ModelSymbol[T]):
   val M = modelSymbol.getSymbol()
   val C = AppModelEvent.createdSymbol
-  val U = AppModelEvent.updatedSymbol
-  val D = AppModelEvent.deletedSymbol
   val createdEventType = M + "-" + AppModelEvent.createdSymbol
-  val updatedEventType = M + "-" + AppModelEvent.updatedSymbol
-  val deletedEventType = M + "-" + AppModelEvent.deletedSymbol
   val createdListenerClass = createdEventType
-  val updatedListenerClass = updatedEventType
-  def updatedWithIdListenerClass(id: Int) =
-    updatedListenerClass + "-" + id.toString
-  val deletedListenerClass = deletedEventType
-  def deletedWithIdListenerClass(id: Int) =
-    deletedListenerClass + "-" + id.toString
   val createdSelector = "." + createdListenerClass
-  val updatedSelector = "." + updatedListenerClass
-  def updatedWithIdSelector(id: Int) = "." + updatedWithIdListenerClass(id)
-  def deletedSelector = "." + deletedListenerClass
-  def deletedWithIdSelector(id: Int) = "." + deletedWithIdListenerClass(id)
-
   def publishCreated(event: AppModelEvent): Unit =
     val ce: CustomEvent[AppModelEvent] =
       CustomEvent(createdEventType, event, false)
     document.body
       .qSelectorAll(createdSelector)
       .foreach(_.dispatchEvent(ce))
+
+class ModelEventPublisher[T](using modelSymbol: ModelSymbol[T], dataId: DataId[T])
+  extends ModelCreatedEventPublisher[T]:
+  val U = AppModelEvent.updatedSymbol
+  val D = AppModelEvent.deletedSymbol
+  val updatedEventType = M + "-" + AppModelEvent.updatedSymbol
+  val deletedEventType = M + "-" + AppModelEvent.deletedSymbol
+  val updatedListenerClass = updatedEventType
+  def updatedWithIdListenerClass(id: Int) =
+    updatedListenerClass + "-" + id.toString
+  val deletedListenerClass = deletedEventType
+  def deletedWithIdListenerClass(id: Int) =
+    deletedListenerClass + "-" + id.toString
+  val updatedSelector = "." + updatedListenerClass
+  def updatedWithIdSelector(id: Int) = "." + updatedWithIdListenerClass(id)
+  def deletedSelector = "." + deletedListenerClass
+  def deletedWithIdSelector(id: Int) = "." + deletedWithIdListenerClass(id)
 
   def publishUpdated(event: AppModelEvent): Unit =
     val ce: CustomEvent[AppModelEvent] =
@@ -92,8 +73,8 @@ class EventPublishers:
   val koukikourei = new ModelEventPublisher[Koukikourei]
   val roujin = new ModelEventPublisher[Roujin]
   val kouhi = new ModelEventPublisher[Kouhi]
-  val hotlineCreated = new EventPublisher[HotlineCreated]
-  val hotlineBeep = new RealTimeEventPublisher[HotlineBeep]()
+  val hotlineCreated = new ModelCreatedEventPublisher[Hotline]
+  val hotlineBeep = new LocalEventPublisher[HotlineBeep]()
 
   def publish(event: AppModelEvent): Unit =
     val C = AppModelEvent.createdSymbol
@@ -104,27 +85,25 @@ class EventPublishers:
       case (Appoint.modelSymbol, C) => appoint.publishCreated(event)
       case (Appoint.modelSymbol, U) => appoint.publishUpdated(event)
       case (Appoint.modelSymbol, D) => appoint.publishDeleted(event)
-      // case e: AppointUpdated     => appoint.updated.publish(gen, e)
-      // case e: AppointDeleted     => appoint.deleted.publish(gen, e)
-      // case e: AppointTimeCreated => appointTime.created.publish(gen, e)
-      // case e: AppointTimeUpdated => appointTime.updated.publish(gen, e)
-      // case e: AppointTimeDeleted => appointTime.deleted.publish(gen, e)
-      // case e: WqueueCreated      => wqueue.created.publish(gen, e)
-      // case e: WqueueUpdated      => wqueue.updated.publish(gen, e)
-      // case e: WqueueDeleted      => wqueue.deleted.publish(gen, e)
-      // case e: ShahokokuhoCreated => shahokokuho.created.publish(gen, e)
-      // case e: ShahokokuhoUpdated => shahokokuho.updated.publish(gen, e)
-      // case e: ShahokokuhoDeleted => shahokokuho.deleted.publish(gen, e)
-      // case e: KoukikoureiCreated => koukikourei.created.publish(gen, e)
-      // case e: KoukikoureiUpdated => koukikourei.updated.publish(gen, e)
-      // case e: KoukikoureiDeleted => koukikourei.deleted.publish(gen, e)
-      // case e: RoujinCreated      => roujin.created.publish(gen, e)
-      // case e: RoujinUpdated      => roujin.updated.publish(gen, e)
-      // case e: RoujinDeleted      => roujin.deleted.publish(gen, e)
-      // case e: KouhiCreated       => kouhi.created.publish(gen, e)
-      // case e: KouhiUpdated       => kouhi.updated.publish(gen, e)
-      // case e: KouhiDeleted       => kouhi.deleted.publish(gen, e)
-      // case e: HotlineCreated     => hotlineCreated.publish(gen, e)
+      case (AppointTime.modelSymbol, C) => appointTime.publishCreated(event)
+      case (AppointTime.modelSymbol, U) => appointTime.publishUpdated(event)
+      case (AppointTime.modelSymbol, D) => appointTime.publishDeleted(event)
+      case (Wqueue.modelSymbol, C) => wqueue.publishCreated(event)
+      case (Wqueue.modelSymbol, U) => wqueue.publishUpdated(event)
+      case (Wqueue.modelSymbol, D) => wqueue.publishDeleted(event)
+      case (Shahokokuho.modelSymbol, C) => shahokokuho.publishCreated(event)
+      case (Shahokokuho.modelSymbol, U) => shahokokuho.publishUpdated(event)
+      case (Shahokokuho.modelSymbol, D) => shahokokuho.publishDeleted(event)
+      case (Koukikourei.modelSymbol, C) => koukikourei.publishCreated(event)
+      case (Koukikourei.modelSymbol, U) => koukikourei.publishUpdated(event)
+      case (Koukikourei.modelSymbol, D) => koukikourei.publishDeleted(event)
+      case (Roujin.modelSymbol, C) => roujin.publishCreated(event)
+      case (Roujin.modelSymbol, U) => roujin.publishUpdated(event)
+      case (Roujin.modelSymbol, D) => roujin.publishDeleted(event)
+      case (Kouhi.modelSymbol, C) => kouhi.publishCreated(event)
+      case (Kouhi.modelSymbol, U) => kouhi.publishUpdated(event)
+      case (Kouhi.modelSymbol, D) => kouhi.publishDeleted(event)
+      case (Hotline.modelSymbol, C) => hotlineCreated.publishCreated(event)
       case _ => ()
     }
   def publish(event: HotlineBeep): Unit = hotlineBeep.publish(event)

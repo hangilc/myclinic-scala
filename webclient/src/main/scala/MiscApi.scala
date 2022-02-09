@@ -6,7 +6,6 @@ import dev.myclinic.scala.model._
 import dev.myclinic.scala.clinicop.*
 import io.circe._
 import io.circe.syntax._
-import io.circe.parser.decode
 import dev.myclinic.scala.model.jsoncodec.Implicits.{given}
 import dev.myclinic.scala.webclient.ParamsImplicits.{given}
 import scala.language.implicitConversions
@@ -31,12 +30,8 @@ object MiscApi extends ApiBase:
     def hotlineBeep(recipient: String): Future[Boolean] =
       get("hotline-beep", Params("recipient" -> recipient))
 
-    def listTodaysHotline()
-        : Future[List[(Int, LocalDateTime, Hotline)]] = // (appEventId, HotlineCreated)
-      get[List[AppEvent]]("list-todays-hotline", Params()).map(_.map(event => {
-        val hotline = decode[Hotline](event.data).toOption.get
-        (event.appEventId, event.createdAt, hotline)
-      }))
+    def listTodaysHotline(): Future[List[AppEvent]] = // (appEventId, HotlineCreated)
+      get("list-todays-hotline", Params())
 
     def listWqueue(): Future[List[Wqueue]] =
       get("list-wqueue", Params())

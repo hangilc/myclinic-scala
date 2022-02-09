@@ -3,9 +3,11 @@ package dev.myclinic.scala.web.appbase
 import org.scalajs.dom.{HTMLTextAreaElement, HTMLElement}
 import dev.fujiwara.domq.all.{*, given}
 import dev.myclinic.scala.webclient.{Api, global}
-import dev.myclinic.scala.model.{Hotline, HotlineCreated}
+import dev.myclinic.scala.model.{Hotline, HotlineCreated, AppModelEvent}
+import dev.myclinic.scala.model.jsoncodec.Implicits.given
 import scala.concurrent.Future
 import scala.util.{Success, Failure}
+import io.circe.parser.decode
 
 trait HotlineUI:
   def messageInput: HTMLTextAreaElement
@@ -22,20 +24,25 @@ class HotlineHandler(
 ):
   var lastAppEventId = 0
 
+  def decodeHotline(data: String): Hotline =
+    decode[Hotline](data).toOption.get
+
   def init(): Future[Unit] =
     for
       hotlines <- Api.listTodaysHotline()
-      _ = hotlines.foreach(pair => pair match {
-        case (appEventId, event) => handleHotline(appEventId, event.created)
-      })
     yield
-      fetcher.catchup(lastAppEventId, (gen, event) => event match {
-        case HotlineCreated(_, created) => handleHotline(gen, created)
-        case _ => ()
-      })
-      publishers.hotlineCreated.subscribe((appEventId, event) => {
-        handleHotline(appEventId, event.created)
-      })
+      hotlines.foreach(event => 
+        val appEventId = event.appEventId
+        val hotline = decodeHotline(event.data)
+        handleHotline(appEventId, hotline)
+      )
+      fetcher.catchup(lastAppEventId, event =>
+        (event.model, event.kind) match {
+          case (Hotline.modelSymbol, AppModelEvent.createdSymbol) =>
+            handleHotline(event.appEventId, event.data.asInstanceOf[Hotline])
+          case _ => ()
+        }
+      )
       ui.sendButton(onclick := (() => onSend(ui.messageInput.value.trim)))
       ui.rogerButton(onclick := (() => onSend("了解")))
       ui.beepButton(onclick := (() => { Api.hotlineBeep(sendTo); () }))

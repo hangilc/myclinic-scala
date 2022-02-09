@@ -94,6 +94,7 @@ object AppointTime:
   given Ordering[AppointTime] = Ordering.by(a => (a.date, a.fromTime))
   val modelSymbol: String = "appoint-time"
   given ModelSymbol[AppointTime] = () => modelSymbol
+  given DataId[AppointTime] = _.appointTimeId
 
 case class Appoint(
     appointId: Int,
@@ -144,6 +145,7 @@ case class Hotline(message: String, sender: String, recipient: String)
 
 object Hotline:
   val modelSymbol = "hotline"
+  given ModelSymbol[Hotline] = () => modelSymbol
 
 enum WaitState(val code: Int, val label: String):
   case WaitExam extends WaitState(0, "診待")
@@ -160,6 +162,8 @@ case class Wqueue(visitId: Int, waitState: WaitState)
 
 object Wqueue:
   val modelSymbol = "wqueue"
+  given ModelSymbol[Wqueue] = () => modelSymbol
+  given DataId[Wqueue] = _.visitId
 
 case class VisitAttributes(
     val futanWari: Option[Int] = None
@@ -196,6 +200,8 @@ object Visit:
   def encodeAttributes(value: VisitAttributes): String =
     value.asJson.toString
   val modelSymbol = "visit"
+  given ModelSymbol[Visit] = () => modelSymbol
+  given DataId[Visit] = _.visitId
 
 case class Text(
     textId: Int,
@@ -348,6 +354,7 @@ case class Roujin(
 object Roujin:
   given DataId[Roujin] = _.roujinId
   val modelSymbol = "roujin"
+  given ModelSymbol[Roujin] = () => modelSymbol
 
 case class Koukikourei(
     koukikoureiId: Int,
@@ -365,6 +372,7 @@ case class Koukikourei(
 object Koukikourei:
   given DataId[Koukikourei] = _.koukikoureiId
   val modelSymbol = "koukikourei"
+  given ModelSymbol[Koukikourei] = () => modelSymbol
 
 case class Kouhi(
     kouhiId: Int,
@@ -381,6 +389,7 @@ case class Kouhi(
 object Kouhi:
   given DataId[Kouhi] = _.kouhiId
   val modelSymbol = "kouhi"
+  given ModelSymbol[Kouhi] = () => modelSymbol
 
 case class MeisaiSectionData(
     section: MeisaiSection,
