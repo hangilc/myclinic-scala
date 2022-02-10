@@ -13,7 +13,8 @@ class ElementEventCreated[T](using modelSymbol: ModelSymbol[T]):
 
 object ElementEventCreated:
   extension (ele: HTMLElement)
-    def addCreatedListener[T](handler: AppModelEvent => Unit): Unit =
+    def addCreatedListener[T](handler: AppModelEvent => Unit)(using ModelSymbol[T]): Unit =
+      val ee = new ElementEventCreated[T]
       ele(oncustomevent[AppModelEvent](createdEventType) := handler))
 
 class ElementEvent[T](using modelSymbol: ModelSymbol[T], dataId: DataId[T])
