@@ -11,58 +11,41 @@ class LocalEventPublisher[T]:
     subscribers = subscribers :+ handler
   def publish(t: T): Unit = subscribers.foreach(_(t))
 
-class ModelCreatedEventPublisher[T](using modelSymbol: ModelSymbol[T]):
-  val M = modelSymbol.getSymbol()
-  val C = AppModelEvent.createdSymbol
-  val createdEventType = M + "-" + AppModelEvent.createdSymbol
-  val createdListenerClass = createdEventType
-  val createdSelector = "." + createdListenerClass
+class ModelCreatedEventPublisher[T](using ModelSymbol[T]):
+  private val ee = new ElementEventCreated[T]
   def publishCreated(event: AppModelEvent): Unit =
     val ce: CustomEvent[AppModelEvent] =
-      CustomEvent(createdEventType, event, false)
+      CustomEvent(ee.createdEventType, event, false)
     document.body
-      .qSelectorAll(createdSelector)
+      .qSelectorAll(ee.createdSelector)
       .foreach(_.dispatchEvent(ce))
 
 class ModelEventPublisher[T](using modelSymbol: ModelSymbol[T], dataId: DataId[T])
   extends ModelCreatedEventPublisher[T]:
-  val U = AppModelEvent.updatedSymbol
-  val D = AppModelEvent.deletedSymbol
-  val updatedEventType = M + "-" + AppModelEvent.updatedSymbol
-  val deletedEventType = M + "-" + AppModelEvent.deletedSymbol
-  val updatedListenerClass = updatedEventType
-  def updatedWithIdListenerClass(id: Int) =
-    updatedListenerClass + "-" + id.toString
-  val deletedListenerClass = deletedEventType
-  def deletedWithIdListenerClass(id: Int) =
-    deletedListenerClass + "-" + id.toString
-  val updatedSelector = "." + updatedListenerClass
-  def updatedWithIdSelector(id: Int) = "." + updatedWithIdListenerClass(id)
-  def deletedSelector = "." + deletedListenerClass
-  def deletedWithIdSelector(id: Int) = "." + deletedWithIdListenerClass(id)
+  private val ee = new ElementEvent[T]
 
   def publishUpdated(event: AppModelEvent): Unit =
     val ce: CustomEvent[AppModelEvent] =
-      CustomEvent(updatedEventType, event, false)
+      CustomEvent(ee.updatedEventType, event, false)
     val updated: T = event.data.asInstanceOf[T]
     val id = dataId.getId(updated)
     document.body
-      .qSelectorAll(updatedWithIdSelector(id))
+      .qSelectorAll(ee.updatedWithIdSelector(id))
       .foreach(e => e.dispatchEvent(ce))
     document.body
-      .qSelectorAll(updatedSelector)
+      .qSelectorAll(ee.updatedSelector)
       .foreach(e => e.dispatchEvent(ce))
 
   def publishDeleted(event: AppModelEvent): Unit =
     val ce: CustomEvent[AppModelEvent] =
-      CustomEvent(deletedEventType, event, false)
+      CustomEvent(ee.deletedEventType, event, false)
     val deleted: T = event.data.asInstanceOf[T]
     val id = dataId.getId(deleted)
     document.body
-      .qSelectorAll(deletedWithIdSelector(id))
+      .qSelectorAll(ee.deletedWithIdSelector(id))
       .foreach(e => e.dispatchEvent(ce))
     document.body
-      .qSelectorAll(deletedSelector)
+      .qSelectorAll(ee.deletedSelector)
       .foreach(e => e.dispatchEvent(ce))
 
 class EventPublishers:
