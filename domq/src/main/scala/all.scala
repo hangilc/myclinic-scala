@@ -15,3 +15,5 @@ object all:
   val Icons = dev.fujiwara.domq.Icons
   type Table = dev.fujiwara.domq.Table
   val Table = dev.fujiwara.domq.Table
+  val ContextMenu = dev.fujiwara.domq.ContextMenu
+  val FloatWindow = dev.fujiwara.domq.FloatWindow

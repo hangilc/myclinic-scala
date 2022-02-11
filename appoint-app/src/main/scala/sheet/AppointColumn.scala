@@ -1,7 +1,7 @@
 package dev.myclinic.scala.web.appoint.sheet
 
 import java.time.{LocalTime, LocalDate}
-import dev.myclinic.scala.model.{AppointTime, Appoint}
+import dev.myclinic.scala.model.{*, given}
 import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
@@ -14,17 +14,16 @@ import org.scalajs.dom.{HTMLElement, MouseEvent}
 import cats.syntax.all.*
 import dev.myclinic.scala.webclient.Api
 import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
-
+import dev.myclinic.scala.web.appbase.ElementEvent.*
+import dev.myclinic.scala.web.appbase.EventFetcher
 import dev.myclinic.scala.clinicop.*
 import scala.util.Success
 import scala.util.Failure
-import dev.myclinic.scala.web.appbase.ElementDispatcher.*
-import dev.myclinic.scala.web.appoint.AppEvents
 
 case class AppointColumn(
     date: LocalDate,
     op: ClinicOperation
-):
+)(using EventFetcher):
   var boxes: List[AppointTimeBox] = List.empty
   val dateElement = div()
   val vacantKindsArea = span()
@@ -47,44 +46,28 @@ case class AppointColumn(
     adjustVacantClass()
     markKenshin()
 
-  ele.addCreatedListener(
-    AppEvents.publishers.appointTime,
-    (event, gen) => {
-      val created = event.created
+  ele.addCreatedListener[AppointTime](
+    event => {
+      val created = event.dataAs[AppointTime]
       if created.date == date then 
-        addAppointTime(created, gen)
+        addAppointTime(event.appEventId, created)
         updateUI()
     }
   )
-  ele.addUpdatedListener(
-    AppEvents.publishers.appointTime,
-    (event, gen) => {
-      if event.updated.date == date then updateUI()
-    }
+  ele.addCreatedListener[Appoint](
+    event => 
+      val created = event.dataAs[Appoint]
+      if hasAppointTimeId(created.appointTimeId) then updateUI()
   )
-  ele.addDeletedListener(
-    AppEvents.publishers.appointTime,
-    (event, gen) => {
-      val deleted = event.deleted
-      if deleted.date == date then 
-        removeAppointTime(deleted, gen)
-        updateUI()
-    }
+  ele.addUpdatedAllListener[Appoint](
+    event => 
+      val updated = event.dataAs[Appoint]
+      if hasAppointTimeId(updated.appointTimeId) then updateUI()
   )
-  ele.addCreatedListener(
-    AppEvents.publishers.appoint,
-    (event, gen) => 
-      if hasAppointTimeId(event.created.appointTimeId) then updateUI()
-  )
-  ele.addUpdatedListener(
-    AppEvents.publishers.appoint,
-    (event, gen) => 
-      if hasAppointTimeId(event.updated.appointTimeId) then updateUI()
-  )
-  ele.addDeletedListener(
-    AppEvents.publishers.appoint,
-    (event, gen) => 
-      if hasAppointTimeId(event.deleted.appointTimeId) then updateUI()
+  ele.addDeletedAllListener[Appoint](
+    event => 
+      val deleted = event.dataAs[Appoint]
+      if hasAppointTimeId(deleted.appointTimeId) then updateUI()
   )
 
   def dateRep: String = Misc.formatAppointDate(date)
@@ -93,7 +76,7 @@ case class AppointColumn(
     boxes
       .map(b => b.probeVacantKind())
       .filter(_ != None)
-      .sequence
+      .sequence[Option, String]
       .map(_.toSet)
       .getOrElse(Set.empty)
       .toList
@@ -178,7 +161,7 @@ case class AppointColumn(
     )
     updateUI()
 
-  def addAppointTime(appointTime: AppointTime, gen: Int): Unit =
+  def addAppointTime(gen: Int, appointTime: AppointTime): Unit =
     val box = makeAppointTimeBox(
       appointTime,
       gen,

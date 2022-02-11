@@ -9,8 +9,9 @@ import cats.*
 import cats.syntax.all.*
 import scala.util.{Success, Failure}
 import dev.myclinic.scala.model.AppointTime
+import dev.myclinic.scala.web.appbase.EventFetcher
 
-class AdminAppointColumn(date: LocalDate, op: ClinicOperation)
+class AdminAppointColumn(date: LocalDate, op: ClinicOperation)(using EventFetcher)
     extends AppointColumn(date, op):
 
   override def composeContextMenu(

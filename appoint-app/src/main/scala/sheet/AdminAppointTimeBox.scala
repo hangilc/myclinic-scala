@@ -24,12 +24,13 @@ import dev.myclinic.scala.validator.Validators
 import java.time.LocalTime
 import dev.myclinic.scala.util.DateTimeOrdering.{*, given}
 import scala.math.Ordered.orderingToOrdered
+import dev.myclinic.scala.web.appbase.EventFetcher
 
 class AdminAppointTimeBox(
     _appointTime: AppointTime,
     _gen: Int,
     _findVacantFollowers: () => List[AppointTime]
-) extends AppointTimeBox(_appointTime, _gen, _findVacantFollowers):
+)(using EventFetcher) extends AppointTimeBox(_appointTime, _gen, _findVacantFollowers):
   ele(oncontextmenu := (onContextMenu _))
 
   def onContextMenu(event: MouseEvent): Unit =

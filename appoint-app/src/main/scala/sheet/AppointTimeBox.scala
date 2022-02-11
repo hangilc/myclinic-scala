@@ -1,7 +1,7 @@
 package dev.myclinic.scala.web.appoint.sheet
 
 import dev.myclinic.scala.web.appoint.Misc
-import dev.myclinic.scala.model.*
+import dev.myclinic.scala.model.{*, given}
 import dev.myclinic.scala.model.jsoncodec.Implicits.given
 import dev.fujiwara.domq.ElementQ.{given, *}
 import dev.fujiwara.domq.Html.{given, *}
@@ -19,29 +19,29 @@ import java.time.LocalDate
 import dev.myclinic.scala.web.appoint.sheet.Types.SortedElement
 import dev.myclinic.scala.web.appoint.sheet.appointdialog.EditAppointDialog
 import dev.myclinic.scala.web.appoint.sheet.appointdialog.MakeAppointDialog
-import dev.myclinic.scala.web.appoint.AppEvents
-import dev.myclinic.scala.web.appbase.ElementDispatcher.*
+import dev.myclinic.scala.web.appbase.ElementEvent.*
+import dev.myclinic.scala.web.appbase.{EventFetcher, SyncedComp}
 
 class AppointTimeBox(
     var appointTime: AppointTime,
     gen: Int,
     val findVacantFollowers: () => List[AppointTime]
-):
-  case class Slot(var appoint: Appoint):
+)(using EventFetcher):
+  case class Slot(_gen: Int, _appoint: Appoint)
+      extends SyncedComp[Appoint](_gen, _appoint):
     val eLabel = div()
     val eTags = div()
     val ele = div(
       cls := "appoint-slot",
-      cls := s"appoint-id-${appoint.appointId}"
+      cls := s"appoint-id-${_appoint.appointId}"
     )(onclick := (onClick _))(eLabel, eTags)
     var dialog: Option[EditAppointDialog] = None
-    updateUI()
+    initSyncedComp()
 
     def updateUI(): Unit =
-      eLabel(clear)
-      eLabel(label)
-      eTags(clear)
-      eTags(tagsRep)
+      eLabel(clear, label)
+      eTags(clear, tagsRep)
+    def appoint: Appoint = currentData
     def label: String =
       val patientId: String =
         if appoint.patientId == 0 then ""
@@ -58,10 +58,6 @@ class AppointTimeBox(
       m.onClose(() => { dialog = None })
       dialog = Some(m)
       m.open()
-    def onAppointUpdated(updated: Appoint): Unit =
-      appoint = updated
-      updateUI()
-      dialog.foreach(d => d.onAppointUpdated(updated))
 
   object Slot:
     given Ordering[Slot] = Ordering.by(_.appoint.appointId)
@@ -80,26 +76,15 @@ class AppointTimeBox(
     )(eTimeRep, eKindRep, slotsElement)
   updateUI()
 
-  ele.addCreatedHandler(
-    AppEvents.publishers.appoint,
-    (evt, gen) => {
-      addAppoint(evt.created, gen)
-    }
-  )
-  ele.addDeletedHandler(
-    AppEvents.publishers.appoint,
-    (evt, gen) => {
-      deleteAppoint(evt.deleted, gen)
-    }
-  )
-  ele.addUpdatedWithIdListener(
-    AppEvents.publishers.appointTime,
-    appointTime.appointTimeId,
-    (evt, gen) => {
-      appointTime = evt.updated
-      updateUI()
-    }
-  )
+  ele.addCreatedListener[Appoint](event => {
+    val created = event.dataAs[Appoint]
+    addAppoint(event.appEventId, created)
+  })
+  ele.addDeletedAllListener[Appoint](event => {
+    val deleted = event.dataAs[Appoint]
+    if deleted.appointTimeId == appointTime.appointTimeId then
+      slots = slots.filter(_.appoint.appointTimeId != deleted.appointTimeId)
+  })
 
   def updateUI(): Unit =
     if !kindCssClass.isEmpty then ele(cls :- kindCssClass)
@@ -135,26 +120,15 @@ class AppointTimeBox(
 
   def setAppoints(gen: Int, appoints: List[Appoint]): Unit =
     slots = appoints.map(appoint => {
-      val slot = Slot(appoint)
+      val slot = Slot(gen, appoint)
       slotsElement(slot.ele)
       slot
     })
     adjustVacantClass()
 
-  def addAppoint(appoint: Appoint, gen: Int): Unit =
-    slots = Types.insert(Slot(appoint), _.ele, slots, slotsElement)
+  def addAppoint(gen: Int, appoint: Appoint): Unit =
+    slots = Types.insert(Slot(gen, appoint), _.ele, slots, slotsElement)
     adjustVacantClass()
-
-  def deleteAppoint(appoint: Appoint, gen: Int): Unit =
-    slots = Types.delete(_.appoint.appointId == appoint.appointId, _.ele, slots, slotsElement)
-    adjustVacantClass()
-
-  def updateAppoint(appoint: Appoint): Unit =
-    slots
-      .find(s => s.appoint.appointId == appoint.appointId)
-      .foreach(slot => {
-        slot.onAppointUpdated(appoint)
-      })
 
   def appointTimeSpanRep: String =
     val f = Misc.formatAppointTime(appointTime.fromTime)
@@ -171,7 +145,8 @@ class AppointTimeBox(
     if numSlots < appointTime.capacity then openAppointDialog()
 
   def openAppointDialog(): Unit =
-    MakeAppointDialog(appointTime, () => findVacantFollowers().headOption).open()
+    MakeAppointDialog(appointTime, () => findVacantFollowers().headOption)
+      .open()
 
   def doDeleteAppointTime(): Unit =
     System.err.println("doDeleteAppointTime not implemented.")

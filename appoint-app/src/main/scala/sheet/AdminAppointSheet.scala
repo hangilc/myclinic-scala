@@ -9,11 +9,11 @@ import dev.fujiwara.domq.ContextMenu
 import scala.language.implicitConversions
 import org.scalajs.dom.MouseEvent
 import dev.myclinic.scala.webclient.Api
-import dev.myclinic.scala.web.appbase.EventPublishers
+import dev.myclinic.scala.web.appbase.EventFetcher
 import java.time.LocalDate
 import dev.myclinic.scala.clinicop.ClinicOperation
 
-class AdminAppointSheet(using EventPublishers) extends AppointSheet:
+class AdminAppointSheet(using EventFetcher) extends AppointSheet:
   val cog = Icons.cog(Icons.defaultStyle)
   TopMenu.topMenuBox(cog)
   cog(onclick := onCogClick)

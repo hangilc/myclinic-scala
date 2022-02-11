@@ -28,12 +28,12 @@ import dev.myclinic.scala.web.appbase.{
   EventFetcher,
   EventPublishers
 }
-import dev.myclinic.scala.web.appbase.ElementDispatcher.*
 
 @JSExportTopLevel("JsMain")
 object JsMain:
   @JSExport
   def main(isAdmin: Boolean): Unit =
+    import AppointEvent.{*, given}
     val body = document.body
     val content = div(attr("id") := "content")
     val workarea = div()
@@ -43,10 +43,9 @@ object JsMain:
         workarea
       )
     )
-    AppEvents.start().onComplete {
+    fetcher.start().onComplete {
       case Failure(ex) => System.err.println(ex.getMessage)
       case Success(_) =>
-        given EventPublishers = AppEvents.publishers
         val sheet = if isAdmin then AdminAppointSheet() else AppointSheet()
         val startDate = DateUtil.startDayOfWeek(LocalDate.now())
         val endDate = startDate.plusDays(6)
@@ -58,9 +57,8 @@ object JsMain:
     val text = "診察予約" + (if isAdmin then "（管理）" else "")
     div(text)(cls := "banner")
 
-object AppEvents extends EventFetcher:
-  val publishers = EventPublishers()
-  publishers.appoint.addDispatchers()
-  publishers.appointTime.addDispatchers()
-  override def publish(event: AppModelEvent, gen: Int): Unit =
-    publishers.publish(event, gen)
+object AppointEvent:
+  val publishers = new EventPublishers
+  given fetcher: EventFetcher = new EventFetcher:
+    override def publish(event: AppModelEvent): Unit = publishers.publish(event)
+    override def publish(event: HotlineBeep): Unit = publishers.publish(event)

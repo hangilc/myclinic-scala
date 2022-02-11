@@ -31,31 +31,35 @@ object History:
   def appEventToHistory(appEvent: AppEvent): Option[Future[History]] =
     val modelEvent = AppModelEvent.from(appEvent)
     val createdAt: LocalDateTime = appEvent.createdAt
-    modelEvent match {
-      case m: AppointCreated => {
+    val M = Appoint.modelSymbol
+    (modelEvent.model, modelEvent.kind) match {
+      case (M, AppModelEvent.createdSymbol) => {
+        val m: Appoint = modelEvent.dataAs[Appoint]
         Some(
           Api
-            .getAppointTime(m.created.appointTimeId)
+            .getAppointTime(m.appointTimeId)
             .map(appointTime =>
-              AppointCreatedHistory(m.created, appointTime, createdAt)
+              AppointCreatedHistory(m, appointTime, createdAt)
             )
         )
       }
-      case m: AppointUpdated => {
+      case (M, AppModelEvent.updatedSymbol) => {
+        val m: Appoint = modelEvent.dataAs[Appoint]
         Some(
           Api
-            .getAppointTime(m.updated.appointTimeId)
+            .getAppointTime(m.appointTimeId)
             .map(appointTime =>
-              AppointUpdatedHistory(m.updated, appointTime, createdAt)
+              AppointUpdatedHistory(m, appointTime, createdAt)
             )
         )
       }
-      case m: AppointDeleted => {
+      case (M, AppModelEvent.deletedSymbol) => {
+        val m: Appoint = modelEvent.dataAs[Appoint]
         Some(
           Api
-            .getAppointTime(m.deleted.appointTimeId)
+            .getAppointTime(m.appointTimeId)
             .map(appointTime =>
-              AppointDeletedHistory(m.deleted, appointTime, createdAt)
+              AppointDeletedHistory(m, appointTime, createdAt)
             )
         )
       }

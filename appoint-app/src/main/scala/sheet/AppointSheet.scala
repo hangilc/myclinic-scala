@@ -1,22 +1,12 @@
 package dev.myclinic.scala.web.appoint.sheet
 
-import dev.fujiwara.domq.ElementQ.{given, *}
-import dev.fujiwara.domq.Html.{given, *}
-import dev.fujiwara.domq.Modifiers.{given, *}
-import dev.fujiwara.domq.{
-  Icons,
-  ContextMenu,
-  FloatWindow,
-  ShowMessage,
-  CustomEvent
-}
+import dev.fujiwara.domq.all.{given, *}
 import dev.myclinic.scala.model.*
 import dev.myclinic.scala.clinicop.*
 import dev.myclinic.scala.util.DateUtil
 import math.Ordered.orderingToOrdered
 import org.scalajs.dom.HTMLElement
 import java.time.LocalDate
-
 import scala.util.Failure
 import scala.util.Success
 import scala.concurrent.Future
@@ -33,44 +23,16 @@ import cats.Monoid
 import dev.myclinic.scala.web.appoint.AppointHistoryWindow
 import dev.myclinic.scala.web.appoint.sheet.covidthirdshot.CovidThirdShot
 import dev.myclinic.scala.clinicop.{NationalHoliday, RegularHoliday}
-import dev.myclinic.scala.web.appoint.AppEvents
-import dev.myclinic.scala.web.appbase.ElementDispatcher.*
+import dev.myclinic.scala.web.appbase.ElementEvent.*
+import dev.myclinic.scala.web.appbase.EventFetcher
 
-class AppointSheet(using eventPublishers: EventPublishers):
+class AppointSheet(using EventFetcher):
   val daySpanDisp: HTMLElement = div(css(style => {
     style.display = "none"
     style.textAlign = "center"
     style.padding = "1rem 0"
   }))
   val eles = div(TopMenu.ele, daySpanDisp, AppointRow.ele)
-  eles.addCreatedListener(
-    AppEvents.publishers.appoint,
-    (event, gen) => {
-      val appoint: Appoint = event.created
-      val selector =
-        s".appoint-time-box.appoint-time-id-${appoint.appointTimeId}"
-      val targets = eles.qSelectorAll(selector)
-      CustomEvent.dispatchTo(
-        AppEvents.publishers.appoint.createdEventType,
-        (event, gen),
-        targets
-      )
-    }
-  )
-  eles.addDeletedListener(
-    AppEvents.publishers.appoint,
-    (event, gen) => {
-      val appoint: Appoint = event.deleted
-      val selector =
-        s".appoint-time-box.appoint-time-id-${appoint.appointTimeId}"
-      val targets = eles.qSelectorAll(selector)
-      CustomEvent.dispatchTo(
-        AppEvents.publishers.appoint.deletedEventType,
-        (event, gen),
-        targets
-      )
-    }
-  )
 
   var dateRange: Option[(LocalDate, LocalDate)] = None
   type AppointTimeId = Int
