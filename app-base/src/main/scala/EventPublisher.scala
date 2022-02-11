@@ -58,9 +58,6 @@ class EventPublishers:
   val hotlineBeep = new LocalEventPublisher[HotlineBeep]()
 
   def publish(event: AppModelEvent): Unit =
-    event.kind match {
-      case AppModelEvent.createdSymbol => 
-    }
     val C = AppModelEvent.createdSymbol
     val U = AppModelEvent.updatedSymbol
     val D = AppModelEvent.deletedSymbol

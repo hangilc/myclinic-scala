@@ -45,6 +45,8 @@ class WqueueRow(_gen: Int, _wq: Wqueue, visit: Visit, patient: Patient)(
   )
   def age:Int = DateUtil.calcAge(patient.birthday, LocalDate.now())
 
+  initSyncedComp()
+
         // e => {
         //   if wq.waitState == WaitState.WaitCashier then
         //     e(

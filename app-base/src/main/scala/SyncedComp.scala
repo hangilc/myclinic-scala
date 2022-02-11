@@ -34,7 +34,8 @@ abstract class SyncedComp[T](
       if dataId.getId(deleted) == id then ele.remove()
     gen = e.appEventId
 
-  updateUI()
-  fetcher.catchup(gen, handleEvent _)
-  ele.addUpdatedListener(id, handleEvent _)
-  ele.addDeletedListener(id, handleEvent _)
+  def initSyncedComp(): Unit =
+    updateUI()
+    fetcher.catchup(gen, handleEvent _)
+    ele.addUpdatedListener[T](id, handleEvent _)
+    ele.addDeletedListener[T](id, handleEvent _)

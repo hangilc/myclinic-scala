@@ -32,10 +32,11 @@ object ElementEvent:
     ): Unit =
       val ee = new ElementEvent[T]
       ele(
-        oncustomevent[AppModelEvent](ee.createdListenerClass) := (e =>
+        oncustomevent[AppModelEvent](ee.createdEventType) := (e =>
           handler(e.detail)
         )
       )
+      ele(cls := ee.createdListenerClass)
       ()
 
   extension (ele: HTMLElement)
@@ -45,10 +46,11 @@ object ElementEvent:
     ): Unit =
       val ee = new ElementEvent[T]
       ele(
-        oncustomevent[AppModelEvent](ee.updatedWithIdListenerClass(id)) := (e =>
+        oncustomevent[AppModelEvent](ee.updatedEventType) := (e =>
           handler(e.detail)
         )
       )
+      ele(cls := ee.updatedWithIdListenerClass(id))
       ()
 
     def addUpdatedAllListener[T](handler: AppModelEvent => Unit)(using
@@ -57,10 +59,11 @@ object ElementEvent:
     ): Unit =
       val ee = new ElementEvent[T]
       ele(
-        oncustomevent[AppModelEvent](ee.updatedListenerClass) := (e =>
+        oncustomevent[AppModelEvent](ee.updatedEventType) := (e =>
           handler(e.detail)
         )
       )
+      ele(cls := ee.updatedListenerClass)
       ()
 
   extension (ele: HTMLElement)
@@ -69,10 +72,11 @@ object ElementEvent:
     ): Unit =
       val ee = new ElementEvent[T]
       ele(
-        oncustomevent[AppModelEvent](ee.deletedWithIdListenerClass(id)) := (e =>
+        oncustomevent[AppModelEvent](ee.deletedEventType) := (e =>
           handler(e.detail)
         )
       )
+      ele(cls := ee.deletedWithIdListenerClass(id))
       ()
 
     def addDeletedAllListener[T](handler: AppModelEvent => Unit)(using
@@ -84,4 +88,5 @@ object ElementEvent:
           handler(e.detail)
         )
       )
+      ele(cls := ee.deletedListenerClass)
       ()

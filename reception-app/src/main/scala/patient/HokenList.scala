@@ -9,7 +9,7 @@ import org.scalajs.dom.{HTMLElement, HTMLInputElement}
 import scala.scalajs.js
 import dev.myclinic.scala.util.{DateUtil, HokenRep}
 import dev.fujiwara.kanjidate.KanjiDate
-import dev.myclinic.scala.model.*
+import dev.myclinic.scala.model.{*, given}
 import java.time.LocalDate
 import dev.myclinic.scala.webclient.Api
 import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
@@ -134,10 +134,10 @@ object HokenList:
     def updateUI(): Unit = ui.label.innerText =
       makeLabel(rep, validFrom, validUpto)
 
+    initSyncedComp()
+
   class ShahokokuhoItem(_gen: Int, _shahokokuho: Shahokokuho)(using
-      EventFetcher,
-      DataId[Shahokokuho],
-      ModelSymbol[Shahokokuho]
+      EventFetcher
   ) extends ItemBase[Shahokokuho](_gen, _shahokokuho):
     def validFrom = currentData.validFrom
     def validUpto = currentData.validUptoOption
