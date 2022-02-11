@@ -15,7 +15,6 @@ import scala.language.implicitConversions
 import scala.util.{Success, Failure}
 import org.scalajs.dom.{HTMLElement, HTMLInputElement}
 import scala.concurrent.Future
-import dev.myclinic.scala.web.appbase.{EventSubscriber}
 import org.scalajs.dom.MouseEvent
 import dev.myclinic.scala.webclient.Api
 import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
@@ -87,8 +86,8 @@ class ShahokokuhoSubblock(var gen: Int, var shahokokuho: Shahokokuho):
       case Failure(ex) => ShowMessage.showError(ex.getMessage)
     }
 
-  private def onUpdated(event: CustomEvent[ShahokokuhoUpdated]): Unit =
-    val updated = event.detail.updated
-    val newSub = ShahokokuhoSubblock(gen, updated)
-    block.ele.replaceBy(newSub.block.ele)
+  // private def onUpdated(event: CustomEvent[ShahokokuhoUpdated]): Unit =
+  //   val updated = event.detail.updated
+  //   val newSub = ShahokokuhoSubblock(gen, updated)
+  //   block.ele.replaceBy(newSub.block.ele)
 

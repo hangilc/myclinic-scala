@@ -12,7 +12,7 @@ class LocalEventPublisher[T]:
   def publish(t: T): Unit = subscribers.foreach(_(t))
 
 class ModelCreatedEventPublisher[T](using ModelSymbol[T]):
-  private val ee = new ElementEventCreated[T]
+  val ee = new ElementEvent[T]
   def publishCreated(event: AppModelEvent): Unit =
     val ce: CustomEvent[AppModelEvent] =
       CustomEvent(ee.createdEventType, event, false)
@@ -22,8 +22,6 @@ class ModelCreatedEventPublisher[T](using ModelSymbol[T]):
 
 class ModelEventPublisher[T](using modelSymbol: ModelSymbol[T], dataId: DataId[T])
   extends ModelCreatedEventPublisher[T]:
-  private val ee = new ElementEvent[T]
-
   def publishUpdated(event: AppModelEvent): Unit =
     val ce: CustomEvent[AppModelEvent] =
       CustomEvent(ee.updatedEventType, event, false)
@@ -60,6 +58,9 @@ class EventPublishers:
   val hotlineBeep = new LocalEventPublisher[HotlineBeep]()
 
   def publish(event: AppModelEvent): Unit =
+    event.kind match {
+      case AppModelEvent.createdSymbol => 
+    }
     val C = AppModelEvent.createdSymbol
     val U = AppModelEvent.updatedSymbol
     val D = AppModelEvent.deletedSymbol

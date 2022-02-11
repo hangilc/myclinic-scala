@@ -8,7 +8,6 @@ import scala.language.implicitConversions
 import scala.util.{Success, Failure}
 import org.scalajs.dom.{HTMLElement, HTMLInputElement}
 import scala.concurrent.Future
-import dev.myclinic.scala.web.appbase.{EventSubscriber}
 import org.scalajs.dom.MouseEvent
 import dev.myclinic.scala.webclient.Api
 import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
@@ -29,9 +28,9 @@ class KoukikoureiSubblock(koukikourei: Koukikourei):
   )
   block.ele(
     cls := s"koukikourei-${koukikourei.koukikoureiId}",
-    oncustomevent[KoukikoureiUpdated](
-      "koukikourei-updated"
-    ) := (onUpdated _)
+    // oncustomevent[KoukikoureiUpdated](
+    //   "koukikourei-updated"
+    // ) := (onUpdated _)
   )
   disp()
 
@@ -82,7 +81,3 @@ class KoukikoureiSubblock(koukikourei: Koukikourei):
       case Failure(ex) => ShowMessage.showError(ex.getMessage)
     }
 
-  private def onUpdated(event: CustomEvent[KoukikoureiUpdated]): Unit =
-    val updated = event.detail.updated
-    val newSub = KoukikoureiSubblock(updated)
-    block.ele.replaceBy(newSub.block.ele)

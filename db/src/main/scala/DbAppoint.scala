@@ -4,13 +4,14 @@ import cats.*
 import cats.implicits.*
 import cats.effect.IO
 import dev.myclinic.scala.model.*
+import dev.myclinic.scala.model.jsoncodec.Implicits.given
 import dev.myclinic.scala.db.{DbAppointPrim => Prim}
 import dev.myclinic.scala.db.DoobieMapping.*
 import doobie.*
 import doobie.implicits.*
 import dev.myclinic.scala.util.DateTimeOrdering.{*, given}
 import scala.math.Ordered.orderingToOrdered
-
+import io.circe.parser.decode
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.temporal.ChronoUnit
@@ -254,11 +255,9 @@ trait DbAppoint extends Mysql:
     """.query[AppEvent]
         .stream
         .filter(e => {
-          AppModelEvent.from(e) match {
-            case AppointCreated(_, a) => a.appointTimeId == appointTimeId
-            case AppointUpdated(_, a) => a.appointTimeId == appointTimeId
-            case AppointDeleted(_, a) => a.appointTimeId == appointTimeId
-            case _ => false
+          decode[Appoint](e.data) match {
+            case Right(a) => a.appointTimeId == appointTimeId
+            case Left(_) => false
           }
         })
         .compile

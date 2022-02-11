@@ -3,7 +3,7 @@ package dev.myclinic.scala.web.appbase
 import org.scalajs.dom.{HTMLTextAreaElement, HTMLElement}
 import dev.fujiwara.domq.all.{*, given}
 import dev.myclinic.scala.webclient.{Api, global}
-import dev.myclinic.scala.model.{Hotline, HotlineCreated, AppModelEvent}
+import dev.myclinic.scala.model.{Hotline, AppModelEvent}
 import dev.myclinic.scala.model.jsoncodec.Implicits.given
 import scala.concurrent.Future
 import scala.util.{Success, Failure}
@@ -18,10 +18,8 @@ trait HotlineUI:
 class HotlineHandler(
     ui: HotlineUI,
     sendAs: String,
-    sendTo: String,
-    fetcher: EventFetcher,
-    publishers: EventPublishers
-):
+    sendTo: String
+)(using fetcher: EventFetcher):
   var lastAppEventId = 0
 
   def decodeHotline(data: String): Hotline =

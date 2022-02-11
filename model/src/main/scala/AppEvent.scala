@@ -4,6 +4,7 @@ import java.time.LocalDateTime
 import io.circe.*
 import io.circe.syntax.*
 import io.circe.parser.decode
+import io.circe.generic.semiauto._
 import dev.myclinic.scala.model.jsoncodec.Implicits.given
 
 case class AppEvent(
@@ -20,7 +21,8 @@ case class AppModelEvent(
     model: String,
     kind: String,
     data: Any
-)
+):
+  def dataAs[T]: T = data.asInstanceOf[T]
 
 object AppModelEvent:
   val createdSymbol = "created"

@@ -6,25 +6,24 @@ import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.{ShowMessage, Icons, Colors, ContextMenu, Table}
 import scala.language.implicitConversions
 import dev.myclinic.scala.web.appbase.{SideMenu, EventPublishers, PrintDialog}
+import dev.myclinic.scala.web.appbase.ElementEvent.*
 import dev.myclinic.scala.model.*
 import dev.fujiwara.kanjidate.KanjiDate
 import dev.myclinic.scala.util.DateUtil
 import dev.myclinic.scala.webclient.Api
 import org.scalajs.dom.{HTMLElement, MouseEvent}
 import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
-
 import scala.util.Success
 import scala.util.Failure
 import scala.concurrent.Future
 import java.time.LocalDate
 import dev.myclinic.scala.web.appbase.SideMenuService
-import dev.myclinic.scala.web.appbase.EventSubscriber
 import scala.collection.mutable
-import dev.myclinic.scala.web.appbase.ElementDispatcher.*
 import dev.myclinic.scala.web.appbase.EventFetcher
 
-class Cashier(using publishers: EventPublishers, fetcher: EventFetcher) extends SideMenuService:
-  val table = makeTable()
+class Cashier(using EventFetcher) extends SideMenuService:
+  val table = new Table
+  initTable()
   val ele: HTMLElement = div(
     div(
       h1("受付患者", display := "inline-block"),
@@ -48,17 +47,13 @@ class Cashier(using publishers: EventPublishers, fetcher: EventFetcher) extends 
       )
     )
   )
-  val rowMap: mutable.Map[Int, HTMLElement] = mutable.Map.empty
+  ele.addCreatedListener[Wqueue](onCreated _)
+
+  //val rowMap: mutable.Map[Int, HTMLElement] = mutable.Map.empty
 
   override def getElement: HTMLElement = ele
   override def init(): Future[Unit] = refresh()
   override def onReactivate: Future[Unit] = refresh()
-
-  def registerEventListeners(): Unit =
-    ele.addCreatedListener(publishers.wqueue, (gen, event) => {})
-
-  def unregisterEventListeners(): Unit =
-    ele.removeCreatedListener(publishers.wqueue)
 
   private def onMenu(event: MouseEvent): Unit =
     val m = ContextMenu(
@@ -77,72 +72,47 @@ class Cashier(using publishers: EventPublishers, fetcher: EventFetcher) extends 
       case Failure(ex) => ShowMessage.showError(ex.getMessage)
     }
 
-  private def makeTable(): Table =
-    val tab = Table()
-    tab.setColumns(
+  private def initTable(): Unit =
+    table.addColumns(
       List(
-        e => e(width := "3rem", textAlign := "center"),
-        e => e(width := "5rem", textAlign := "center"),
-        e => e(width := "6rem", textAlign := "center"),
-        e => e(width := "8rem", textAlign := "center"),
-        e => e(width := "3rem", textAlign := "center"),
-        e => e(width := "6rem", textAlign := "center"),
-        e => e(width := "3rem", textAlign := "center"),
-        e => e(width := "3rem", textAlign := "center")
+        Table.column(width := "3rem", textAlign := "center"),
+        Table.column(width := "5rem", textAlign := "center"),
+        Table.column(width := "6rem", textAlign := "center"),
+        Table.column(width := "8rem", textAlign := "center"),
+        Table.column(width := "3rem", textAlign := "center"),
+        Table.column(width := "6rem", textAlign := "center"),
+        Table.column(width := "3rem", textAlign := "center"),
+        Table.column(width := "3rem", textAlign := "center")
       )
     )
     val heads = List("状態", "患者番号", "氏名", "よみ", "性別", "生年月日", "年齢", "操作")
-    tab.addHeaderRow(heads.map(h => e => e(h)))
-    tab
+    val headerCells: List[HTMLElement] = 
+      heads.map(label => Table.headerCell(innerText := label))
+    table.addRow(Table.row(children := headerCells))
 
-  private def addRow(wq: Wqueue, visit: Visit, patient: Patient): Unit =
-    val birthday = KanjiDate.dateToKanji(
-      patient.birthday,
-      formatYear = i => s"${i.gengouAlphaChar}${i.nen}",
-      formatMonth = i => s".${i.month}",
-      formatDay = i => s".${i.day}",
-      formatYoubi = _ => ""
-    )
-    val age = DateUtil.calcAge(patient.birthday, LocalDate.now())
-    val row = table.addRow(
-      List(
-        e => e(wq.waitState.label),
-        e => e(patient.patientId.toString),
-        e => e(patient.fullName()),
-        e => e(patient.fullNameYomi()),
-        e => e(patient.sex.rep),
-        e => e(birthday),
-        e => e(s"${age}才"),
-        e => {
-          if wq.waitState == WaitState.WaitCashier then
-            e(
-              button("会計")(
-                onclick := (() =>
-                  doCashier(wq.visitId, patient, visit.visitedAt.toLocalDate)
-                )
-              )
-            )
-          if wq.waitState == WaitState.WaitExam then
-            e(a("削除", onclick := (() => doDelete(visit, patient))))
-        }
-      )
-    )
-    rowMap.addOne(wq.visitId, row)
+  private def addRow(gen: Int, wq: Wqueue, visit: Visit, patient: Patient): Unit =
+    val wqRow = new WqueueRow(gen, wq, visit, patient)
+    table.addRow(wqRow.ele)
 
   private def removeRow(visitId: Int): Unit =
-    rowMap.get(visitId).foreach(row => row.remove())
+    ele.qSelectorAll(s".wqueue-row-${visitId}").foreach(_.remove())
 
-  private def onWqueueCreated(wqueue: Wqueue): Unit =
-    ???
+  private def onCreated(event: AppModelEvent): Unit =
+    Api.findWqueueFull(event.dataAs[Wqueue].visitId).onComplete {
+      case Success(Some(gen, wq, visit, patient)) => addRow(gen, wq, visit, patient)
+      case Success(None) => ()
+      case Failure(ex) => System.err.println(ex.getMessage)
+    }
 
   def refresh(): Future[Unit] =
     for (gen, list, visitMap, patientMap) <- Api.listWqueueFull()
     yield {
       table.clear()
+      initTable()
       list.foreach(wq => {
         val visit = visitMap(wq.visitId)
         val patient = patientMap(visit.patientId)
-        addRow(wq, visit, patient)
+        addRow(gen, wq, visit, patient)
       })
     }
 

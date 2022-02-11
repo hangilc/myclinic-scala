@@ -9,7 +9,6 @@ import dev.fujiwara.domq.{ShowMessage}
 import scala.language.implicitConversions
 import dev.myclinic.scala.webclient.Api
 import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
-import dev.myclinic.scala.web.appbase.ElementDispatcher.*
 
 import scala.util.Success
 import scala.util.Failure
@@ -23,13 +22,12 @@ import dev.myclinic.scala.web.appbase.HotlineHandler
 @JSExportTopLevel("JsMain")
 object JsMain:
   val ui = createUI()
-  given publishers: EventPublishers = EventPublishers()
-  given fetcher: EventFetcher = ReceptionEventFetcher
+  import ReceptionEvent.given
 
   @JSExport
   def main(isAdmin: Boolean): Unit =
     (for 
-      _ <- ReceptionEventFetcher.start()
+      _ <- fetcher.start()
       _ <- createHotlineHandler().init()
     yield
       document.body(ui.ele)
@@ -53,14 +51,6 @@ object JsMain:
     HotlineHandler(
       hotlineUI,
       "reception",
-      "practice",
-      ReceptionEventFetcher,
-      publishers
+      "practice"
     )
 
-  object ReceptionEventFetcher extends EventFetcher:
-    publishers.shahokokuho.addDispatchers()
-    publishers.koukikourei.addDispatchers()
-    publishers.roujin.addDispatchers()
-    override def publish(event: AppModelEvent, appEventId: Int): Unit =
-      publishers.publish(event, appEventId)

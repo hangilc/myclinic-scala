@@ -13,5 +13,5 @@ object all:
   val CustomEvent = dev.fujiwara.domq.CustomEvent
   type CustomEvent[T] = dev.fujiwara.domq.CustomEvent[T]
   val Icons = dev.fujiwara.domq.Icons
-
-
+  type Table = dev.fujiwara.domq.Table
+  val Table = dev.fujiwara.domq.Table

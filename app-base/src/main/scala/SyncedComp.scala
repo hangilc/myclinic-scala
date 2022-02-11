@@ -2,38 +2,39 @@ package dev.myclinic.scala.web.appbase
 
 import dev.myclinic.scala.model.{AppModelEvent, DataId}
 import org.scalajs.dom.HTMLElement
+import dev.myclinic.scala.model.ModelSymbol
+import dev.myclinic.scala.web.appbase.ElementEvent
+import dev.myclinic.scala.web.appbase.ElementEvent.*
 
 abstract class SyncedComp[T](
     private var gen: Int,
     private var data: T
 )(using
     dataId: DataId[T],
-    publishers: EventPublishers,
+    modelSymbol: ModelSymbol[T],
     fetcher: EventFetcher
 ):
-  val filterUpdatedEvent: PartialFunction[AppModelEvent, T]
-  val filterDeletedEvent: PartialFunction[AppModelEvent, T]
-  def addListeners(
-      publishers: EventPublishers,
-      handler: (Int, AppModelEvent) => Unit
-  ): Unit
   def updateUI(): Unit
   def ele: HTMLElement
 
   def currentGen: Int = gen
   def currentData: T = data
   final def getDataId(d: T): Int = dataId.getId(d)
-  private def handleEvent(g: Int, e: AppModelEvent): Unit =
-    if filterUpdatedEvent.isDefinedAt(e) then
-      val updated = filterUpdatedEvent(e)
-      if getDataId(updated) == getDataId(data) then
+  val id = getDataId(data)
+  def getGenData: (Int, T) = (gen, data)
+  private val msym = modelSymbol.getSymbol()
+  private def handleEvent(e: AppModelEvent): Unit =
+    if e.model == msym && e.kind == AppModelEvent.updatedSymbol then
+      val updated = e.dataAs[T]
+      if getDataId(updated) == id then
         data = updated
         updateUI()
-    if filterDeletedEvent.isDefinedAt(e) then
-      val deleted = filterDeletedEvent(e)
-      if dataId.getId(deleted) == getDataId(data) then ele.remove()
-  def getGenData: (Int, T) = (gen, data)
+    if e.model == msym && e.kind == AppModelEvent.deletedSymbol then
+      val deleted = e.dataAs[T]
+      if dataId.getId(deleted) == id then ele.remove()
+    gen = e.appEventId
 
   updateUI()
   fetcher.catchup(gen, handleEvent _)
-  addListeners(publishers, handleEvent _)
+  ele.addUpdatedListener(id, handleEvent _)
+  ele.addDeletedListener(id, handleEvent _)

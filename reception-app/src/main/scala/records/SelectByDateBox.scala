@@ -9,7 +9,6 @@ import scala.language.implicitConversions
 import dev.fujiwara.dateinput.DateInput
 import org.scalajs.dom.{HTMLElement, HTMLInputElement}
 import scala.concurrent.Future
-import dev.myclinic.scala.web.appbase.EventSubscriber
 import org.scalajs.dom.MouseEvent
 import dev.myclinic.scala.webclient.Api
 import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._

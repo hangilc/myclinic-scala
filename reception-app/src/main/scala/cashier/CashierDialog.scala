@@ -21,26 +21,26 @@ class CashierDialog(meisai: Meisai, visit: VisitEx):
   val patient: Patient = visit.patient
   val at: LocalDate = visit.visitedAt.toLocalDate
   val table = Table()
-  table.setColumns(
+  table.addColumns(
     List(
-      e => e(width := "*"),
-      e => e(cls := "right-column")
+      Table.column(width := "*"),
+      Table.column(cls := "right-column")
     )
   )
   meisai.items.foreach(item => {
-    table.addRow(
+    table.addRow(Table.row(children :=
       List(
-        e => e(span(cls := "section-title")(item.section.label)),
-        e => e(span(""))
+        Table.cell(span(cls := "section-title")(item.section.label)),
+        Table.cell(span(""))
       )
-    )
+    ))
     item.entries.foreach(entry => {
-      table.addRow(
+      table.addRow(Table.row(children := 
         List(
-          e => e(span(entry.label)),
-          e => e(span(s"${entry.tanka} x ${entry.count} = ${entry.total}"))
+          Table.cell(span(entry.label)),
+          Table.cell(span(s"${entry.tanka} x ${entry.count} = ${entry.total}"))
         )
-      )
+      ))
     })
   })
   val errBox = ErrorBox()
@@ -92,20 +92,6 @@ class CashierDialog(meisai: Meisai, visit: VisitEx):
       ops <- Api.drawReceipt(data)
     yield {
       CashierLib.openPrintDialog("領収書印刷", ops, modal.zIndex + 2)
-      // val scale = 3
-      // val w = 148
-      // val h = 105
-      // val settingNames = List("手動", "処方箋", "会計")
-      // val dlog = PrintDialog(
-      //   "領収書印刷",
-      //   ops,
-      //   w * scale,
-      //   h * scale, 
-      //   s"0, 0, $w, $h",
-      //   prefKind = "receipt",
-      //   zIndex = modal.zIndex + 2
-      // )
-      // dlog.open()
     }
 
   def doFinishCashier(): Unit =

@@ -7,7 +7,7 @@ import dev.fujiwara.domq.{ShowMessage, Icons, Colors, ContextMenu}
 import dev.fujiwara.domq.PullDown.pullDownLink
 import scala.language.implicitConversions
 import dev.myclinic.scala.web.appbase.{SideMenu, EventPublishers}
-import dev.myclinic.scala.model.{HotlineCreated, Patient}
+import dev.myclinic.scala.model.{Patient}
 import dev.myclinic.scala.webclient.Api
 import org.scalajs.dom.{HTMLElement, MouseEvent}
 import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
@@ -21,8 +21,9 @@ import dev.myclinic.scala.web.reception.records.Records
 import dev.myclinic.scala.web.reception.scan.Scan
 import dev.myclinic.scala.web.appbase.HotlineUI
 import dev.myclinic.scala.web.appbase.EventFetcher
+import dev.myclinic.scala.model.Hotline
 
-abstract class MainUI(using publishers: EventPublishers, fetcher: EventFetcher):
+abstract class MainUI(using fetcher: EventFetcher):
   def postHotline(msg: String): Unit
   def invoke(label: String): Unit =
     sideMenu.invokeByLabel(label)
@@ -86,11 +87,11 @@ abstract class MainUI(using publishers: EventPublishers, fetcher: EventFetcher):
       )
     )
 
-  def appendHotline(appEventId: Int, evt: HotlineCreated): Unit =
+  def appendHotline(appEventId: Int, hotline: Hotline): Unit =
     val id = appEventId
     if id > lastHotlineAppEventId then
-      val rep = Setting.hotlineNameRep(evt.created.sender)
-      val msg = evt.created.message
+      val rep = Setting.hotlineNameRep(hotline.sender)
+      val msg = hotline.message
       hotlineMessages.value += s"${rep}> ${msg}\n"
       lastHotlineAppEventId = id
 

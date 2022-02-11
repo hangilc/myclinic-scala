@@ -17,7 +17,7 @@ import dev.myclinic.scala.model.*
 import java.time.LocalDate
 import dev.myclinic.scala.web.appbase.{EventPublishers, EventFetcher}
 
-class PatientManagement(using EventPublishers, EventFetcher) extends SideMenuService:
+class PatientManagement(using EventFetcher) extends SideMenuService:
   val eSearchText: HTMLInputElement = inputText()
   val eWorkarea: HTMLElement = div()
   val ele: HTMLElement = div(cls := "patient-management")(

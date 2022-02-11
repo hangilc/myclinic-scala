@@ -20,10 +20,7 @@ import org.scalajs.dom.Event
 import dev.myclinic.scala.util.DateTimeOrdering
 import scala.math.Ordered.orderingToOrdered
 import dev.fujiwara.domq.DomqUtil
-import dev.myclinic.scala.web.appbase.ElementDispatcher.*
-import dev.myclinic.scala.web.appbase.{EventPublishers, EventFetcher}
-import dev.myclinic.scala.web.appbase.EventPublisher
-import dev.myclinic.scala.web.appbase.ModelPublishers
+import dev.myclinic.scala.web.appbase.{EventFetcher}
 import dev.myclinic.scala.web.appbase.SyncedComp
 
 class HokenList(
@@ -33,7 +30,7 @@ class HokenList(
     var koukikoureiList: List[Koukikourei],
     var roujinList: List[Roujin],
     var kouhiList: List[Kouhi]
-)(using EventPublishers, EventFetcher):
+)(using EventFetcher):
   import HokenList.*
   val errorBox = ErrorBox()
   val eDisp = div()
@@ -123,9 +120,9 @@ object HokenList:
   def kouhiRep(kouhi: Kouhi): String = HokenRep.kouhiRep(kouhi.futansha)
 
   abstract class ItemBase[T](gen: Int, hoken: T)(using
-      EventPublishers,
       EventFetcher,
-      DataId[T]
+      DataId[T],
+      ModelSymbol[T]
   ) extends SyncedComp[T](gen, hoken)
       with Item:
     def validFrom: LocalDate
@@ -137,125 +134,55 @@ object HokenList:
     def updateUI(): Unit = ui.label.innerText =
       makeLabel(rep, validFrom, validUpto)
 
-    updateUI()
-
-  class ShahokokuhoItem(gen: Int, shahokokuho: Shahokokuho)(using
-      EventPublishers,
-      EventFetcher
-  ) extends ItemBase[Shahokokuho](gen, shahokokuho):
+  class ShahokokuhoItem(_gen: Int, _shahokokuho: Shahokokuho)(using
+      EventFetcher,
+      DataId[Shahokokuho],
+      ModelSymbol[Shahokokuho]
+  ) extends ItemBase[Shahokokuho](_gen, _shahokokuho):
     def validFrom = currentData.validFrom
     def validUpto = currentData.validUptoOption
     def rep = shahokokuhoRep(currentData)
-    val filterUpdatedEvent = { case e: ShahokokuhoUpdated =>
-      e.updated
-    }
-    val filterDeletedEvent = { case e: ShahokokuhoDeleted =>
-      e.deleted
-    }
-
-    def addListeners(
-        publishers: EventPublishers,
-        handler: (Int, AppModelEvent) => Unit
-    ): Unit =
-      ele.addUpdatedWithIdListener(
-        publishers.shahokokuho,
-        getDataId(shahokokuho),
-        handler
-      )
-      ele.addDeletedWithIdListener(
-        publishers.shahokokuho,
-        getDataId(shahokokuho),
-        handler
-      )
 
     ui.icon(onclick := (() => {
       CustomEvents.addShahokokuhoSubblock
         .trigger(ele, (currentGen, currentData))
     }))
 
-  class KoukikoureiItem(gen: Int, koukikourei: Koukikourei)(using
-      EventPublishers,
-      EventFetcher
-  ) extends ItemBase[Koukikourei](gen, koukikourei):
+  class KoukikoureiItem(_gen: Int, _koukikourei: Koukikourei)(using
+      EventFetcher,
+      DataId[Koukikourei],
+      ModelSymbol[Koukikourei]
+  ) extends ItemBase[Koukikourei](_gen, _koukikourei):
     def validFrom = currentData.validFrom
     def validUpto = currentData.validUptoOption
     def rep = koukikoureiRep(currentData)
-    def id(s: Koukikourei): Int = s.koukikoureiId
-    val filterUpdatedEvent = { case e: KoukikoureiUpdated =>
-      e.updated
-    }
-    val filterDeletedEvent = { case e: KoukikoureiDeleted =>
-      e.deleted
-    }
-
-    def addListeners(
-        publishers: EventPublishers,
-        handler: (Int, AppModelEvent) => Unit
-    ): Unit =
-      ele.addUpdatedWithIdListener(
-        publishers.koukikourei,
-        id(koukikourei),
-        handler
-      )
 
     ui.icon(onclick := (() => {
       CustomEvents.addKoukikoureiSubblock
         .trigger(ele, (currentGen, currentData))
     }))
 
-  class RoujinItem(gen: Int, roujin: Roujin)(using
-      EventPublishers,
-      EventFetcher
-  ) extends ItemBase[Roujin](gen, roujin):
+  class RoujinItem(_gen: Int, _roujin: Roujin)(using
+      EventFetcher,
+      DataId[Koukikourei],
+      ModelSymbol[Koukikourei]
+  ) extends ItemBase[Roujin](_gen, _roujin):
     def validFrom = currentData.validFrom
     def validUpto = currentData.validUptoOption
     def rep = roujinRep(currentData)
-    def id(s: Roujin): Int = s.roujinId
-    val filterUpdatedEvent = { case e: RoujinUpdated =>
-      e.updated
-    }
-    val filterDeletedEvent = { case e: RoujinDeleted =>
-      e.deleted
-    }
-
-    def addListeners(
-        publishers: EventPublishers,
-        handler: (Int, AppModelEvent) => Unit
-    ): Unit =
-      ele.addUpdatedWithIdListener(
-        publishers.roujin,
-        id(roujin),
-        handler
-      )
 
     ui.icon(onclick := (() => {
       CustomEvents.addRoujinSubblock.trigger(ele, (currentGen, currentData))
     }))
 
-  class KouhiItem(gen: Int, kouhi: Kouhi)(using
-      EventPublishers,
-      EventFetcher
-  ) extends ItemBase[Kouhi](gen, kouhi):
+  class KouhiItem(_gen: Int, _kouhi: Kouhi)(using
+      EventFetcher,
+      DataId[Koukikourei],
+      ModelSymbol[Koukikourei]
+  ) extends ItemBase[Kouhi](_gen, _kouhi):
     def validFrom = currentData.validFrom
     def validUpto = currentData.validUptoOption
     def rep = kouhiRep(currentData)
-    def id(s: Kouhi): Int = s.kouhiId
-    val filterUpdatedEvent = { case e: KouhiUpdated =>
-      e.updated
-    }
-    val filterDeletedEvent = { case e: KouhiDeleted =>
-      e.deleted
-    }
-
-    def addListeners(
-        publishers: EventPublishers,
-        handler: (Int, AppModelEvent) => Unit
-    ): Unit =
-      ele.addUpdatedWithIdListener(
-        publishers.kouhi,
-        id(kouhi),
-        handler
-      )
 
     ui.icon(onclick := (() => {
       CustomEvents.addKouhiSubblock.trigger(ele, (currentGen, currentData))

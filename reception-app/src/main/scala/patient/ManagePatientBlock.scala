@@ -8,7 +8,6 @@ import scala.language.implicitConversions
 import scala.util.{Success, Failure}
 import org.scalajs.dom.{HTMLElement, HTMLInputElement}
 import scala.concurrent.Future
-import dev.myclinic.scala.web.appbase.{EventSubscriber}
 import org.scalajs.dom.MouseEvent
 import dev.myclinic.scala.webclient.Api
 import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
@@ -18,7 +17,7 @@ import java.time.LocalDateTime
 import java.time.LocalDate
 import dev.myclinic.scala.util.{HokenRep, RcptUtil}
 import dev.myclinic.scala.apputil.FutanWari
-import dev.myclinic.scala.web.appbase.{EventPublishers, EventFetcher}
+import dev.myclinic.scala.web.appbase.{EventFetcher}
 
 class ManagePatientBlock(
     var gen: Int,
@@ -27,7 +26,7 @@ class ManagePatientBlock(
     var koukikoureiList: List[Koukikourei],
     var roujinList: List[Roujin],
     var kouhiList: List[Kouhi]
-)(using EventPublishers, EventFetcher):
+)(using EventFetcher):
   import ManagePatientBlock.*
   val eLeftPane = div
   val eRightPane = div()
