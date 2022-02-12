@@ -23,9 +23,18 @@ abstract class EventFetcher:
 
   private var events: Vector[AppModelEvent] = Vector.empty
 
+  private def findLastIndex(lastExcludedEventId: Int): Int =
+    // returns -1 if not found
+    events.lastIndexWhere(_.appEventId <= lastExcludedEventId)
+
   def catchup(lastExcludedEventId: Int, f: AppModelEvent => Unit): Unit =
-    val i = events.lastIndexWhere(_._1 <= lastExcludedEventId)
+    val i = findLastIndex(lastExcludedEventId)
     events.slice(i+1, events.size).foreach(f)
+
+  def updateTo(lastExcludedEventId: Int, uptoEventId: Int, f: AppModelEvent => Unit): Unit =
+    val i = findLastIndex(lastExcludedEventId)
+    val j = events.lastIndexWhere(_.appEventId == uptoEventId)
+    events.slice(i+1, j+1).foreach(f)
 
   private def onNewAppEvent(event: AppModelEvent): Unit =
     events = events :+ event

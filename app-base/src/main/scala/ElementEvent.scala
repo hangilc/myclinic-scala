@@ -5,7 +5,7 @@ import org.scalajs.dom.HTMLElement
 import dev.fujiwara.domq.all.{*, given}
 
 class ElementEvent[T](using modelSymbol: ModelSymbol[T]):
-  val M = modelSymbol.getSymbol()
+  val M = modelSymbol.getSymbol
   val C = AppModelEvent.createdSymbol
   val U = AppModelEvent.updatedSymbol
   val D = AppModelEvent.deletedSymbol

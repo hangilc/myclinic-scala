@@ -4,6 +4,6 @@ trait DataId[T]:
   def getId(data: T): Int
 
 trait ModelSymbol[T]:
-  def getSymbol(): String
+  def getSymbol: String
 
  
