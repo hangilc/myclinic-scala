@@ -13,10 +13,11 @@ abstract class SyncedComp[T](
     dataId: DataId[T],
     modelSymbol: ModelSymbol[T],
     fetcher: EventFetcher
-):
+) extends Comp: 
   def updateUI(): Unit
   def ele: HTMLElement
-
+  
+  def getElement: HTMLElement = ele
   def currentGen: Int = gen
   def currentData: T = data
   final def getDataId(d: T): Int = dataId.getId(d)
@@ -39,3 +40,4 @@ abstract class SyncedComp[T](
     fetcher.catchup(gen, handleEvent _)
     ele.addUpdatedListener[T](id, handleEvent _)
     ele.addDeletedListener[T](id, handleEvent _)
+

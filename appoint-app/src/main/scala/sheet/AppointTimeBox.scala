@@ -17,51 +17,15 @@ import dev.myclinic.scala.util.DateTimeOrdering.given
 import scala.math.Ordered.orderingToOrdered
 import java.time.LocalDate
 import dev.myclinic.scala.web.appoint.sheet.Types.SortedElement
-import dev.myclinic.scala.web.appoint.sheet.appointdialog.EditAppointDialog
 import dev.myclinic.scala.web.appoint.sheet.appointdialog.MakeAppointDialog
 import dev.myclinic.scala.web.appbase.ElementEvent.*
 import dev.myclinic.scala.web.appbase.{EventFetcher, SyncedComp}
 
 class AppointTimeBox(
-    var appointTime: AppointTime,
-    gen: Int,
+    _gen: Int,
+    _appointTime: AppointTime,
     val findVacantFollowers: () => List[AppointTime]
-)(using EventFetcher):
-  case class Slot(_gen: Int, _appoint: Appoint)
-      extends SyncedComp[Appoint](_gen, _appoint):
-    val eLabel = div()
-    val eTags = div()
-    val ele = div(
-      cls := "appoint-slot",
-      cls := s"appoint-id-${_appoint.appointId}"
-    )(onclick := (onClick _))(eLabel, eTags)
-    var dialog: Option[EditAppointDialog] = None
-    initSyncedComp()
-
-    def updateUI(): Unit =
-      eLabel(clear, label)
-      eTags(clear, tagsRep)
-    def appoint: Appoint = currentData
-    def label: String =
-      val patientId: String =
-        if appoint.patientId == 0 then ""
-        else s"(${appoint.patientId}) "
-      val name: String = s"${appoint.patientName}"
-      val memo: String =
-        if appoint.memoString.isEmpty then "" else s" （${appoint.memoString}）"
-      patientId + name + memo
-    def tagsRep: String =
-      appoint.tags.mkString("、")
-    def onClick(event: MouseEvent): Unit =
-      event.stopPropagation()
-      val m = EditAppointDialog(appoint, appointTime)
-      m.onClose(() => { dialog = None })
-      dialog = Some(m)
-      m.open()
-
-  object Slot:
-    given Ordering[Slot] = Ordering.by(_.appoint.appointId)
-
+)(using EventFetcher) extends SyncedComp[AppointTime](_gen, _appointTime):
   var slots: List[Slot] = List.empty
   val eTimeRep = div
   val eKindRep = div
