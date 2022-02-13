@@ -45,28 +45,42 @@ case class AppointColumn(date: LocalDate, op: ClinicOperation)(using
   dateElement(oncontextmenu := (onContextMenu _))
 
   def init: Future[Unit] =
-    for
-      (gen, appFull) <- listAppoints(date)
-    yield appFull.foreach {
-      case (appointTime, appoints) => 
-        createAppointTimeBox(gen, appointTime).foreach(box => insertBox(box))
-    }
+    for (gen, appFull) <- listAppoints(date)
+    yield
+      appFull.foreach { case (appointTime, appoints) =>
+        createAppointTimeBox(gen, appointTime).foreach(box => {
+          insertBox(box)
+          box.addAppoints(gen, appoints)
+        })
+      }
+      adjustUI()
 
-  def insertBox(appointTimeBox: AppointTimeBox): Unit =
+  private def adjustUI(): Unit =
+    adjustVacantClass(boxes, vacantKindsArea, dateElement)
+    markKenshin(boxes, kenshinArea)
+
+  private def insertBox(appointTimeBox: AppointTimeBox): Unit =
     boxes = SortedCompList.insert(boxes, appointTimeBox, boxesWrapper)
 
-  def createAppointTimeBox(g: Int, appointTime: AppointTime): Option[AppointTimeBox] =
-    given SyncedComp[AppointTimeBox, AppointTime] = 
-      AppointTimeBox.createSyncedComp(() => findVacantFollowers(boxes, appointTime))
+  private def createAppointTimeBox(
+      g: Int,
+      appointTime: AppointTime
+  ): Option[AppointTimeBox] =
+    given SyncedComp[AppointTimeBox, AppointTime] =
+      AppointTimeBox.createSyncedComp(() =>
+        findVacantFollowers(boxes, appointTime)
+      )
     SyncedComp.createSynced(g, appointTime)
 
-  def onContextMenu(event: MouseEvent): Unit =
+  private def onContextMenu(event: MouseEvent): Unit =
     ()
 
 object AppointColumn:
   def dateRep(date: LocalDate): String = Misc.formatAppointDate(date)
 
-  def listAppoints(date: LocalDate): Future[(Int, List[(AppointTime, List[Appoint])])] =
+  def listAppoints(
+      date: LocalDate
+  ): Future[(Int, List[(AppointTime, List[Appoint])])] =
     Api.listAppointTimeFilled(date)
 
   def findVacantFollowers(
@@ -81,6 +95,48 @@ object AppointColumn:
       .tail
       .takeWhile(a => a.numSlots == 0)
       .map(_.appointTime)
+
+  def probeVacantKinds(boxes: List[AppointTimeBox]): List[AppointKind] =
+    boxes
+      .map(b => b.probeVacantKind())
+      .filter(_ != None)
+      .sequence[Option, String]
+      .map(_.toSet)
+      .getOrElse(Set.empty)
+      .toList
+      .map(AppointKind(_))
+      .sortBy(_.ord)
+
+  def adjustVacantClass(
+      boxes: List[AppointTimeBox],
+      vacantKindsArea: HTMLElement,
+      dateElement: HTMLElement
+  ): Unit =
+    val kinds = probeVacantKinds(boxes)
+    val wrapper = vacantKindsArea
+    wrapper(clear)
+    if kinds.isEmpty then dateElement(cls :- "vacant")
+    else
+      dateElement(cls := "vacant")
+      kinds.foreach(k => {
+        val icon =
+          Icons.circleFilled(
+            Icons.defaultStaticStyle,
+            css(style => {
+              style.fill = k.iconColor
+            })
+          )
+        wrapper(icon)
+      })
+
+  def countKenshin(boxes: List[AppointTimeBox]): Int =
+    boxes.foldLeft(0)((acc, ele) => acc + ele.countKenshin())
+
+  def markKenshin(boxes: List[AppointTimeBox], kenshinArea: HTMLElement): Unit =
+    val n = countKenshin(boxes)
+    kenshinArea(clear)
+    if n > 0 then kenshinArea(s"健$n")
+
 
 
 // case class AppointColumnOrig(

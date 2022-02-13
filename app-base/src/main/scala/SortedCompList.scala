@@ -10,12 +10,11 @@ object SortedCompList:
       sorted: List[C],
       c: C,
       wrapper: HTMLElement
-  )(using compData: Comp[C]): List[C] =
-    val (pre, post) =
-      sorted.span(t => t < c)
-    if post.isEmpty then wrapper(compData.ele(c))
+  )(using comp: Comp[C]): List[C] =
+    val (pre, post) = sorted.span(t => t < c)
+    if post.isEmpty then wrapper(comp.ele(c))
     else
-      compData.ele(post.head).preInsert(compData.ele(c))
+      comp.ele(post.head).preInsert(comp.ele(c))
     pre ++ (c :: post)
 
   def delete[C, T](

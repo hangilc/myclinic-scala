@@ -25,6 +25,7 @@ import dev.myclinic.scala.web.appbase.{
   CompList
 }
 import dev.myclinic.scala.web.appbase.CompData
+import dev.myclinic.scala.web.appbase.SortedCompList
 
 class AppointTimeBox(
     var gen: Int,
@@ -35,14 +36,14 @@ class AppointTimeBox(
   private var slots: List[Slot] = List.empty
   val eTimeRep = div
   val eKindRep = div
-  val slotsElement = div
+  val slotsWrapper = div
   var kindCssClass = ""
   val ele =
     div(
       cls := "appoint-time-box",
       cls := s"appoint-time-id-${appointTime.appointTimeId}",
       css(style => style.cursor = "pointer")
-    )(eTimeRep, eKindRep, slotsElement)
+    )(eTimeRep, eKindRep, slotsWrapper)
   ele(onclick := (onElementClick _))
   updateUI()
 
@@ -66,9 +67,27 @@ class AppointTimeBox(
 
   def hasVacancy: Boolean = numSlots < appointTime.capacity
 
+  def addAppoints(g: Int, appoints: List[Appoint]): Unit =
+    appoints.foreach(appoint => {
+      SyncedComp2.createSynced(g, appoint, gen, appointTime) match {
+        case Some(c) => 
+          slots = SortedCompList.insert(slots, c, slotsWrapper)
+        case None => ()
+      }
+    })
+    adjustVacantClass()
+
+  def probeVacantKind(): Option[String] =
+    if hasVacancy then Some(appointTime.kind) else None
+
   private def adjustVacantClass(): Unit =
     if hasVacancy then ele(cls := "vacant")
     else ele(cls :- "vacant")
+
+  def countKenshin(): Int =
+    slots.foldLeft(0)((acc, ele) => {
+      if ele.appoint.hasTag("健診") then acc + 1 else acc
+    })
 
   private def onElementClick(): Unit =
     ()
@@ -100,10 +119,7 @@ object AppointTimeBox:
   )(using EventFetcher): SyncedComp[AppointTimeBox, AppointTime] =
     new SyncedComp[AppointTimeBox, AppointTime]:
       def create(gen: Int, appointTime: AppointTime): AppointTimeBox =
-        println(("enter createAppointTimeBox"))
-        val c = new AppointTimeBox(gen, appointTime, findVacantFollowers)
-        println(("leave createAppointTime"))
-        c
+        new AppointTimeBox(gen, appointTime, findVacantFollowers)
       def ele(c: AppointTimeBox): HTMLElement = c.ele
       def updateUI(c: AppointTimeBox, gen: Int, appointTime: AppointTime): Unit =
         c.updateUI(gen, appointTime)

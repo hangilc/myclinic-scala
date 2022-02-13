@@ -24,11 +24,15 @@ case class Slot(
     eTags
   )
   var dialog: Option[EditAppointDialog] = None
+  updateUI()
 
   def updateUI(_gen: Int, _appoint: Appoint, _appointTime: AppointTime): Unit =
     gen = _gen
     appoint = _appoint
     appointTime = _appointTime
+    updateUI()
+
+  def updateUI(): Unit =
     eLabel(clear, label)
     eTags(clear, tagsRep)
 
