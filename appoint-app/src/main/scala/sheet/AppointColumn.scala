@@ -14,11 +14,13 @@ import cats.syntax.all.*
 import dev.myclinic.scala.webclient.Api
 import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
 import dev.myclinic.scala.web.appbase.ElementEvent.*
-import dev.myclinic.scala.web.appbase.EventFetcher
+import dev.myclinic.scala.web.appbase.{EventFetcher, SyncedComp}
 import dev.myclinic.scala.clinicop.*
 import scala.util.Success
 import scala.util.Failure
 import scala.concurrent.Future
+import dev.myclinic.scala.web.appbase.SortedCompList
+import scala.math.Ordered.orderingToOrdered
 
 case class AppointColumn(date: LocalDate, op: ClinicOperation)(using
     EventFetcher
@@ -41,18 +43,46 @@ case class AppointColumn(date: LocalDate, op: ClinicOperation)(using
   )
   dateElement(oncontextmenu := (onContextMenu _))
 
+  var boxes: List[AppointTimeBox] = List.empty
+
   def init: Future[Unit] =
     for
       (gen, appFull) <- listAppoints(date)
-    yield println((gen, appFull))
+    yield appFull.foreach {
+      case (appointTime, appoints) => 
+        createAppointTimeBox(gen, appointTime).foreach(box => insertBox(box))
+    }
+
+  def insertBox(appointTimeBox: AppointTimeBox): Unit =
+    boxes = SortedCompList.insert(boxes, appointTimeBox, boxesWrapper)
+
+  def createAppointTimeBox(g: Int, appointTime: AppointTime): Option[AppointTimeBox] =
+    given SyncedComp[AppointTimeBox, AppointTime] = 
+      AppointTimeBox.createSyncedComp(() => findVacantFollowers(boxes, appointTime))
+    SyncedComp.createSynced(g, appointTime)
 
   def onContextMenu(event: MouseEvent): Unit =
     ()
 
 object AppointColumn:
   def dateRep(date: LocalDate): String = Misc.formatAppointDate(date)
+
   def listAppoints(date: LocalDate): Future[(Int, List[(AppointTime, List[Appoint])])] =
     Api.listAppointTimeFilled(date)
+
+  def findVacantFollowers(
+      boxes: List[AppointTimeBox],
+      appointTime: AppointTime
+  ): List[AppointTime] =
+    val list = boxes
+      .dropWhile(b => b.appointTime.appointTimeId != appointTime.appointTimeId)
+    AppointTime
+      .extractAdjacentRunEmbedded(list, _.appointTime)
+      ._1
+      .tail
+      .takeWhile(a => a.numSlots == 0)
+      .map(_.appointTime)
+
 
 // case class AppointColumnOrig(
 //     date: LocalDate,

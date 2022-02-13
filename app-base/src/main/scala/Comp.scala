@@ -11,6 +11,9 @@ import dev.myclinic.scala.model.DataId
 trait Comp[C]:
   def ele(c: C): HTMLElement
 
+trait CompData[C, T] extends Comp[C]:
+  def data(c: C): T
+
 // object Comp:
 //   def insert[C, T: Ordering](
 //       sorted: List[C],

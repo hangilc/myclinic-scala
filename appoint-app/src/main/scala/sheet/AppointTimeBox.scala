@@ -24,6 +24,7 @@ import dev.myclinic.scala.web.appbase.{
   Comp,
   CompList
 }
+import dev.myclinic.scala.web.appbase.CompData
 
 class AppointTimeBox(
     var gen: Int,
@@ -32,13 +33,33 @@ class AppointTimeBox(
 )(using EventFetcher, SyncedComp2[Slot, Appoint, AppointTime]):
   val ele = div("BOX")
 
+  private var slots: List[Slot] = List.empty
+
+  def numSlots: Int = slots.size
   def updateUI(_gen: Int, _appointTime: AppointTime): Unit =
     gen = _gen
     appointTime = _appointTime
     updateUI()
 
-  def updateUI(): Unit =
+  private def updateUI(): Unit =
     ()
+
+object AppointTimeBox:
+  given Ordering[AppointTimeBox] = Ordering.by(_.appointTime)
+
+  given CompData[AppointTimeBox, AppointTime] with
+    def ele(c: AppointTimeBox) = c.ele
+    def data(c: AppointTimeBox) = c.appointTime
+
+  def createSyncedComp(
+      findVacantFollowers: () => List[AppointTime]
+  )(using EventFetcher): SyncedComp[AppointTimeBox, AppointTime] =
+    new SyncedComp[AppointTimeBox, AppointTime]:
+      def create(gen: Int, appointTime: AppointTime): AppointTimeBox =
+        new AppointTimeBox(gen, appointTime, findVacantFollowers)
+      def ele(c: AppointTimeBox): HTMLElement = c.ele
+      def updateUI(c: AppointTimeBox, gen: Int, appointTime: AppointTime): Unit =
+        c.updateUI(gen, appointTime)
 
 class AppointTimeBoxOrig(
     var gen: Int,
@@ -136,15 +157,3 @@ class AppointTimeBoxOrig(
       if ele.appoint.hasTag("健診") then acc + 1 else acc
     })
 
-object AppointTimeBox:
-  given Ordering[AppointTimeBox] = Ordering.by(_.appointTime)
-
-  def createSyncedComp(
-      findVacantFollowers: () => List[AppointTime]
-  )(using EventFetcher): SyncedComp[AppointTimeBox, AppointTime] =
-    new SyncedComp[AppointTimeBox, AppointTime]:
-      def create(gen: Int, appointTime: AppointTime): AppointTimeBox =
-        new AppointTimeBox(gen, appointTime, findVacantFollowers)
-      def ele(c: AppointTimeBox): HTMLElement = c.ele
-      def updateUI(c: AppointTimeBox, gen: Int, appointTime: AppointTime): Unit =
-        c.updateUI(gen, appointTime)
