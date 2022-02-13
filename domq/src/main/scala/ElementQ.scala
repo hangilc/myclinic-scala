@@ -15,22 +15,6 @@ object ElementQ:
       ele
 
   extension [E <: HTMLElement](ele: E)
-    // def clear(): E =
-    //   ele.innerHTML = ""
-    //   ele
-
-    // def addChildren(elements: List[HTMLElement]): E =
-    //   elements.foreach(e => ele.appendChild(e))
-    //   ele
-
-    // def setChildren(elements: List[HTMLElement]): E =
-    //   clear()
-    //   addChildren(elements)
-    //   ele
-
-    // def setChild(element: HTMLElement): E =
-    //   setChildren(List(element))
-
     def getParent: Option[HTMLElement] =
       val parent = ele.parentElement
       if parent != null then Some(parent)

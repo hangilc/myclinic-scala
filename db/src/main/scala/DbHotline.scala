@@ -7,7 +7,6 @@ import dev.myclinic.scala.model.*
 import dev.myclinic.scala.db.DoobieMapping.*
 import doobie.*
 import doobie.implicits.*
-import dev.myclinic.scala.util.DateTimeOrdering.{*, given}
 import java.time.LocalDate
 
 trait DbHotline extends Mysql:

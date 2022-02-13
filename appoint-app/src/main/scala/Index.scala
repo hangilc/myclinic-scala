@@ -49,8 +49,9 @@ object JsMain:
         val sheet = if isAdmin then AdminAppointSheet() else AppointSheet()
         val startDate = DateUtil.startDayOfWeek(LocalDate.now())
         val endDate = startDate.plusDays(6)
-        sheet.setupTo(workarea)
-        sheet.setupDateRange(startDate, endDate)
+        workarea(clear, sheet.ele)
+        //sheet.setupTo(workarea)
+        //sheet.setupDateRange(startDate, endDate)
     }
 
   def banner(isAdmin: Boolean): HTMLElement =

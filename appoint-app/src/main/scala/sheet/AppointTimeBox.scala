@@ -13,19 +13,38 @@ import dev.myclinic.scala.webclient.Api
 import org.scalajs.dom.MouseEvent
 import org.scalajs.dom.EventTarget
 import org.scalajs.dom.document
-import dev.myclinic.scala.util.DateTimeOrdering.given
 import scala.math.Ordered.orderingToOrdered
 import java.time.LocalDate
-import dev.myclinic.scala.web.appoint.sheet.Types.SortedElement
 import dev.myclinic.scala.web.appoint.sheet.appointdialog.MakeAppointDialog
 import dev.myclinic.scala.web.appbase.ElementEvent.*
-import dev.myclinic.scala.web.appbase.{EventFetcher, SyncedComp}
+import dev.myclinic.scala.web.appbase.{
+  EventFetcher,
+  SyncedComp,
+  SyncedComp2,
+  Comp,
+  CompList
+}
 
 class AppointTimeBox(
-    _gen: Int,
-    _appointTime: AppointTime,
+    var gen: Int,
+    var appointTime: AppointTime,
     val findVacantFollowers: () => List[AppointTime]
-)(using EventFetcher) extends SyncedComp[AppointTime](_gen, _appointTime):
+)(using EventFetcher, SyncedComp2[Slot, Appoint, AppointTime]):
+  val ele = div("BOX")
+
+  def updateUI(_gen: Int, _appointTime: AppointTime): Unit =
+    gen = _gen
+    appointTime = _appointTime
+    updateUI()
+
+  def updateUI(): Unit =
+    ()
+
+class AppointTimeBoxOrig(
+    var gen: Int,
+    var appointTime: AppointTime,
+    val findVacantFollowers: () => List[AppointTime]
+)(using EventFetcher, SyncedComp2[Slot, Appoint, AppointTime]):
   var slots: List[Slot] = List.empty
   val eTimeRep = div
   val eKindRep = div
@@ -38,17 +57,11 @@ class AppointTimeBox(
       css(style => style.cursor = "pointer"),
       onclick := (onElementClick)
     )(eTimeRep, eKindRep, slotsElement)
-  updateUI()
 
-  ele.addCreatedListener[Appoint](event => {
-    val created = event.dataAs[Appoint]
-    addAppoint(event.appEventId, created)
-  })
-  ele.addDeletedAllListener[Appoint](event => {
-    val deleted = event.dataAs[Appoint]
-    if deleted.appointTimeId == appointTime.appointTimeId then
-      slots = slots.filter(_.appoint.appointTimeId != deleted.appointTimeId)
-  })
+  def updateUI(_gen: Int, _appointTime: AppointTime): Unit =
+    gen = _gen
+    appointTime = _appointTime
+    updateUI()
 
   def updateUI(): Unit =
     if !kindCssClass.isEmpty then ele(cls :- kindCssClass)
@@ -60,6 +73,21 @@ class AppointTimeBox(
     eTimeRep(innerText := appointTimeSpanRep)
     eKindRep(innerText := appointTimeKindRep)
     adjustVacantClass()
+
+  def createSlot(genAppoint: Int, appoint: Appoint): Option[Slot] =
+    SyncedComp2.createSynced(genAppoint, appoint, gen, appointTime)
+
+  def addAppoints(gen: Int, appoints: List[Appoint]): Unit =
+    appoints.foreach(appoint => {
+      createSlot(gen, appoint) match {
+        case Some(slot) => slots = CompList.append(slot, slots, slotsElement)
+        case None => ()
+      }
+    })
+    adjustVacantClass()
+
+  def addAppoint(gen: Int, appoint: Appoint): Unit =
+    addAppoints(gen, List(appoint))
 
   def appointKindToCssClass(kind: String): String = {
     AppointKind(kind).cssClass
@@ -81,18 +109,6 @@ class AppointTimeBox(
 
   def numSlots: Int =
     ele.qSelectorAllCount(".appoint-slot")
-
-  def setAppoints(gen: Int, appoints: List[Appoint]): Unit =
-    slots = appoints.map(appoint => {
-      val slot = Slot(gen, appoint)
-      slotsElement(slot.ele)
-      slot
-    })
-    adjustVacantClass()
-
-  def addAppoint(gen: Int, appoint: Appoint): Unit =
-    slots = Types.insert(Slot(gen, appoint), _.ele, slots, slotsElement)
-    adjustVacantClass()
 
   def appointTimeSpanRep: String =
     val f = Misc.formatAppointTime(appointTime.fromTime)
@@ -122,3 +138,13 @@ class AppointTimeBox(
 
 object AppointTimeBox:
   given Ordering[AppointTimeBox] = Ordering.by(_.appointTime)
+
+  def createSyncedComp(
+      findVacantFollowers: () => List[AppointTime]
+  )(using EventFetcher): SyncedComp[AppointTimeBox, AppointTime] =
+    new SyncedComp[AppointTimeBox, AppointTime]:
+      def create(gen: Int, appointTime: AppointTime): AppointTimeBox =
+        new AppointTimeBox(gen, appointTime, findVacantFollowers)
+      def ele(c: AppointTimeBox): HTMLElement = c.ele
+      def updateUI(c: AppointTimeBox, gen: Int, appointTime: AppointTime): Unit =
+        c.updateUI(gen, appointTime)

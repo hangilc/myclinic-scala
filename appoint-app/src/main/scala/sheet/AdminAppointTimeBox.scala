@@ -22,7 +22,6 @@ import cats.data.ValidatedNec
 import cats.data.Validated.{validNec, invalidNec, condNec, Valid, Invalid}
 import dev.myclinic.scala.validator.Validators
 import java.time.LocalTime
-import dev.myclinic.scala.util.DateTimeOrdering.{*, given}
 import scala.math.Ordered.orderingToOrdered
 import dev.myclinic.scala.web.appbase.EventFetcher
 
@@ -30,7 +29,13 @@ class AdminAppointTimeBox(
     _appointTime: AppointTime,
     _gen: Int,
     _findVacantFollowers: () => List[AppointTime]
-)(using EventFetcher) extends AppointTimeBox(_appointTime, _gen, _findVacantFollowers):
+)(using EventFetcher) extends AppointTimeBox(_gen, _appointTime, _findVacantFollowers)
+
+class AdminAppointTimeBoxOrig(
+    _appointTime: AppointTime,
+    _gen: Int,
+    _findVacantFollowers: () => List[AppointTime]
+)(using EventFetcher) extends AppointTimeBox(_gen, _appointTime, _findVacantFollowers):
   ele(oncontextmenu := (onContextMenu _))
 
   def onContextMenu(event: MouseEvent): Unit =
@@ -41,7 +46,7 @@ class AdminAppointTimeBox(
       "分割" -> doSplit,
       "延長" -> doExtend,
     )
-    if slots.isEmpty then menu = menu :+ ("削除" -> doDelete)
+    //if slots.isEmpty then menu = menu :+ ("削除" -> doDelete)
     ContextMenu(menu).open(event)
 
   def doConvert(): Unit =

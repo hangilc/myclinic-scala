@@ -27,6 +27,51 @@ import dev.myclinic.scala.web.appbase.ElementEvent.*
 import dev.myclinic.scala.web.appbase.EventFetcher
 
 class AppointSheet(using EventFetcher):
+  import AppointSheet.*
+  val topMenu = new TopMenu(startDayOfWeek)
+  val columnsWrapper = div
+  val ele = div(
+    topMenu.ele,
+    columnsWrapper(display := "flex", justifyContent := "center")
+  )
+  topMenu.onDateSelected.subscribe(setup _)
+  setup(topMenu.getStartDate)
+
+  def setup(startDate: LocalDate): Unit =
+    for workDays <- listWorkingDays(startDate)
+    yield
+      columnsWrapper(clear)
+      workDays.foreach { case (date, op) =>
+        val col = AppointColumn(date, op)
+        col.init
+        columnsWrapper(col.ele)
+      }
+
+object AppointSheet:
+  def startDayOfWeek(at: LocalDate): LocalDate = DateUtil.startDayOfWeek(at)
+  def startDayOfWeek: LocalDate = startDayOfWeek(LocalDate.now())
+  def isWorkingDay(op: ClinicOperation): Boolean =
+    op match {
+      case _: RegularHoliday => false
+      case _                 => true
+    }
+  def listWorkingDays(
+      dates: List[LocalDate]
+  ): Future[List[(LocalDate, ClinicOperation)]] =
+    for clinicOpMap <- Api.batchResolveClinicOperations(dates)
+    yield dates
+      .map(date =>
+        val op = clinicOpMap(date)
+        if isWorkingDay(op) then Some(date, op) else None
+      )
+      .flatten
+  def listWorkingDays(
+      startDate: LocalDate
+  ): Future[List[(LocalDate, ClinicOperation)]] =
+    val dates = DateUtil.enumDates(startDate, startDate.plusDays(6))
+    listWorkingDays(dates)
+
+class AppointSheetOrig(using EventFetcher):
   val daySpanDisp: HTMLElement = div(css(style => {
     style.display = "none"
     style.textAlign = "center"
@@ -45,12 +90,11 @@ class AppointSheet(using EventFetcher):
         makeAppointColumn(date, op)
       )
       _ = AppointRow.init(cols)
-    yield
-      dateRange = Some(from, upto)
-      cols.foreach(col => {
-        for (gen, appointTimesFilled) <- Api.listAppointTimeFilled(col.date)
-        yield col.setAppointTimes(gen, appointTimesFilled)
-      })
+    yield dateRange = Some(from, upto)
+  // cols.foreach(col => {
+  //   for (gen, appointTimesFilled) <- Api.listAppointTimeFilled(col.date)
+  //   yield col.setAppointTimes(gen, appointTimesFilled)
+  // })
 
   def filterDates(
       dates: List[LocalDate],
@@ -166,5 +210,3 @@ class AppointSheet(using EventFetcher):
 
     def init(cols: List[AppointColumn]): Unit =
       columnWrapper(clear, children := cols.map(_.ele))
-
-

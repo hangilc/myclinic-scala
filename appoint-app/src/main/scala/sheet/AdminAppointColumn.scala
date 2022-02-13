@@ -12,35 +12,38 @@ import dev.myclinic.scala.model.AppointTime
 import dev.myclinic.scala.web.appbase.EventFetcher
 
 class AdminAppointColumn(date: LocalDate, op: ClinicOperation)(using EventFetcher)
-    extends AppointColumn(date, op):
+    extends AppointColumn(date, op)
 
-  override def composeContextMenu(
-      prev: List[(String, () => Unit)]
-  ): List[(String, () => Unit)] =
-    (prev :+ ("予約枠追加", (doAddAppointTime _)))
-      ++ (if totalAppoints == 0 then
-            List("予約枠全削除" -> (doDeleteAllAppointTimes _))
-          else List.empty)
+// class AdminAppointColumn(date: LocalDate, op: ClinicOperation)(using EventFetcher)
+//     extends AppointColumn(date, op):
 
-  def doAddAppointTime(): Unit =
-    AddAppointTimeDialog(date).open()
+//   override def composeContextMenu(
+//       prev: List[(String, () => Unit)]
+//   ): List[(String, () => Unit)] =
+//     (prev :+ ("予約枠追加", (doAddAppointTime _)))
+//       ++ (if totalAppoints == 0 then
+//             List("予約枠全削除" -> (doDeleteAllAppointTimes _))
+//           else List.empty)
 
-  def doDeleteAllAppointTimes(): Unit =
-    val dateRep = Misc.formatAppointDate(date)
-    ShowMessage.confirm(
-      s"${dateRep}の予約枠を全部削除していいですか？"
-    )(() => {
-      val ids: List[Int] = boxes.map(_.appointTimeId).toList
-      (for _ <- ids.map(id => Api.deleteAppointTime(id)).sequence.void
-      yield ()).onComplete {
-        case Success(_)  => ()
-        case Failure(ex) => System.err.println(ex.getMessage)
-      }
-    })
+//   def doAddAppointTime(): Unit =
+//     AddAppointTimeDialog(date).open()
 
-  override def makeAppointTimeBox(
-      appointTime: AppointTime,
-      gen: Int,
-      findVacantFollower: () => List[AppointTime]
-  ): AppointTimeBox =
-    new AdminAppointTimeBox(appointTime, gen, findVacantFollower)
+//   def doDeleteAllAppointTimes(): Unit =
+//     val dateRep = Misc.formatAppointDate(date)
+//     ShowMessage.confirm(
+//       s"${dateRep}の予約枠を全部削除していいですか？"
+//     )(() => {
+//       val ids: List[Int] = boxes.map(_.appointTimeId).toList
+//       (for _ <- ids.map(id => Api.deleteAppointTime(id)).sequence.void
+//       yield ()).onComplete {
+//         case Success(_)  => ()
+//         case Failure(ex) => System.err.println(ex.getMessage)
+//       }
+//     })
+
+//   override def makeAppointTimeBox(
+//       appointTime: AppointTime,
+//       gen: Int,
+//       findVacantFollower: () => List[AppointTime]
+//   ): AppointTimeBox =
+//     new AdminAppointTimeBox(appointTime, gen, findVacantFollower)

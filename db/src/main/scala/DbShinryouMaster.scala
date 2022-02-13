@@ -8,7 +8,6 @@ import dev.myclinic.scala.db.{DbShinryouMasterPrim => Prim}
 import dev.myclinic.scala.db.DoobieMapping.*
 import doobie.*
 import doobie.implicits.*
-import dev.myclinic.scala.util.DateTimeOrdering.{*, given}
 import scala.math.Ordered.orderingToOrdered
 
 import java.time.LocalDate

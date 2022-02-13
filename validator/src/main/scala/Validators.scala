@@ -2,7 +2,6 @@ package dev.myclinic.scala.validator
 
 import cats.data.{ValidatedNec, NonEmptyChain}
 import cats.data.Validated.*
-import dev.myclinic.scala.util.DateTimeOrdering.{given}
 import scala.math.Ordered.orderingToOrdered
 import java.time.{LocalTime}
 import java.util.regex.Pattern

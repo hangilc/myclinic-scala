@@ -13,20 +13,22 @@ import dev.myclinic.scala.web.appbase.EventFetcher
 import java.time.LocalDate
 import dev.myclinic.scala.clinicop.ClinicOperation
 
-class AdminAppointSheet(using EventFetcher) extends AppointSheet:
-  val cog = Icons.cog(Icons.defaultStyle)
-  TopMenu.topMenuBox(cog)
-  cog(onclick := onCogClick)
+class AdminAppointSheet(using EventFetcher) extends AppointSheet
 
-  override def makeAppointColumn(date: LocalDate, op: ClinicOperation): AppointColumn =
-    new AdminAppointColumn(date, op)
+//class AdminAppointSheet(using EventFetcher) extends AppointSheet:
+  // val cog = Icons.cog(Icons.defaultStyle)
+  // TopMenu.topMenuBox(cog)
+  // cog(onclick := onCogClick)
 
-  def onCogClick(event: MouseEvent): Unit =
-    ContextMenu(List("予約枠わりあて" -> doFillAppointTimes)).open(event)
+  // override def makeAppointColumn(date: LocalDate, op: ClinicOperation): AppointColumn =
+  //   new AdminAppointColumn(date, op)
 
-  def doFillAppointTimes(): Unit =
-    println(("date-range", dateRange))
-    dateRange.map {
-      case (from, upto) => Api.fillAppointTimes(from, upto)
-    }
+  // def onCogClick(event: MouseEvent): Unit =
+  //   ContextMenu(List("予約枠わりあて" -> doFillAppointTimes)).open(event)
+
+  // def doFillAppointTimes(): Unit =
+  //   println(("date-range", dateRange))
+  //   dateRange.map {
+  //     case (from, upto) => Api.fillAppointTimes(from, upto)
+  //   }
 

@@ -1,7 +1,6 @@
 package dev.fujiwara.kanjidate
 
 import java.time.{LocalDate, LocalTime}
-import dev.fujiwara.kanjidate.DateTimeOrdering
 import scala.Ordered.orderingToOrdered
 import java.time.DayOfWeek
 

@@ -1,4 +1,4 @@
-package dev.myclinic.scala.web.reception.sheet
+package dev.myclinic.scala.web.appoint.sheet
 
 import dev.myclinic.scala.model.{*, given}
 import dev.myclinic.scala.web.appbase.{SyncedComp, EventFetcher}
@@ -7,6 +7,7 @@ import dev.myclinic.scala.web.appoint.sheet.appointdialog.EditAppointDialog
 import org.scalajs.dom.MouseEvent
 import dev.myclinic.scala.web.appbase.SyncedComp2
 import org.scalajs.dom.HTMLElement
+import dev.myclinic.scala.web.appbase.Comp
 
 case class Slot(
     var gen: Int,
@@ -59,3 +60,6 @@ object Slot:
     def ele(c: Slot): HTMLElement = c.ele
     def updateUI(c: Slot, gen: Int, appoint: Appoint, appointTime: AppointTime): Unit =
       c.updateUI(gen, appoint, appointTime)
+
+  given Comp[Slot] with
+    def ele(c: Slot): HTMLElement = c.ele

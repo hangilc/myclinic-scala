@@ -9,7 +9,6 @@ import dev.myclinic.scala.db.{DbAppointPrim => Prim}
 import dev.myclinic.scala.db.DoobieMapping.*
 import doobie.*
 import doobie.implicits.*
-import dev.myclinic.scala.util.DateTimeOrdering.{*, given}
 import scala.math.Ordered.orderingToOrdered
 import io.circe.parser.decode
 import java.time.LocalDate

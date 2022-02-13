@@ -17,7 +17,6 @@ import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
 import scala.util.{Success, Failure}
 import scala.concurrent.Future
 import org.scalajs.dom.Event
-import dev.myclinic.scala.util.DateTimeOrdering
 import scala.math.Ordered.orderingToOrdered
 import dev.fujiwara.domq.DomqUtil
 import dev.myclinic.scala.web.appbase.{EventFetcher}

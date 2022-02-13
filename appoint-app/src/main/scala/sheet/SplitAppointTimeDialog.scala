@@ -9,7 +9,6 @@ import scala.language.implicitConversions
 import dev.myclinic.scala.webclient.Api
 import dev.myclinic.scala.web.appoint.Misc
 import java.time.LocalTime
-import dev.myclinic.scala.util.DateTimeOrdering
 import scala.math.Ordered.orderingToOrdered
 
 class SplitAppointTimeDialog(appointTime: AppointTime):
