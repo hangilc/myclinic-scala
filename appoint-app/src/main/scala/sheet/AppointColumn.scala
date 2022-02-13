@@ -26,6 +26,7 @@ case class AppointColumn(date: LocalDate, op: ClinicOperation)(using
     EventFetcher
 ):
   import AppointColumn.*
+  var boxes: List[AppointTimeBox] = List.empty
   val dateElement = div
   val vacantKindsArea = span
   val kenshinArea = span
@@ -42,8 +43,6 @@ case class AppointColumn(date: LocalDate, op: ClinicOperation)(using
     boxesWrapper
   )
   dateElement(oncontextmenu := (onContextMenu _))
-
-  var boxes: List[AppointTimeBox] = List.empty
 
   def init: Future[Unit] =
     for

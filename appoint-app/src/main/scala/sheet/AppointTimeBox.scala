@@ -31,9 +31,21 @@ class AppointTimeBox(
     var appointTime: AppointTime,
     val findVacantFollowers: () => List[AppointTime]
 )(using EventFetcher, SyncedComp2[Slot, Appoint, AppointTime]):
-  val ele = div("BOX")
-
+  import AppointTimeBox.*
   private var slots: List[Slot] = List.empty
+  val eTimeRep = div
+  val eKindRep = div
+  val slotsElement = div
+  var kindCssClass = ""
+  val ele =
+    div(
+      cls := "appoint-time-box",
+      cls := s"appoint-time-id-${appointTime.appointTimeId}",
+      css(style => style.cursor = "pointer")
+    )(eTimeRep, eKindRep, slotsElement)
+  ele(onclick := (onElementClick _))
+  updateUI()
+
 
   def numSlots: Int = slots.size
   def updateUI(_gen: Int, _appointTime: AppointTime): Unit =
@@ -42,9 +54,41 @@ class AppointTimeBox(
     updateUI()
 
   private def updateUI(): Unit =
+    if !kindCssClass.isEmpty then ele(cls :- kindCssClass)
+    kindCssClass = appointKindToCssClass(appointTime.kind)
+    ele(
+      cls := (if !kindCssClass.isEmpty then Some(kindCssClass) else None),
+      cls := (if appointTime.capacity > 0 then Some("vacant") else None)
+    )
+    eTimeRep(innerText := appointTimeSpanRep(appointTime))
+    eKindRep(innerText := appointTimeKindRep(appointTime))
+    adjustVacantClass()
+
+  def hasVacancy: Boolean = numSlots < appointTime.capacity
+
+  private def adjustVacantClass(): Unit =
+    if hasVacancy then ele(cls := "vacant")
+    else ele(cls :- "vacant")
+
+  private def onElementClick(): Unit =
     ()
 
 object AppointTimeBox:
+  def appointKindToCssClass(kind: String): String = {
+    AppointKind(kind).cssClass
+  }
+
+  def appointTimeSpanRep(appointTime: AppointTime): String =
+    val f = Misc.formatAppointTime(appointTime.fromTime)
+    val u = Misc.formatAppointTime(appointTime.untilTime)
+    val capa: String =
+      if appointTime.capacity <= 1 then "" else s" (${appointTime.capacity})"
+    (s"$f - $u") + capa
+
+  def appointTimeKindRep(appointTime: AppointTime): String =
+    val label = AppointKind(appointTime.kind).label
+    if label.isEmpty then "" else s"[${label}]"
+
   given Ordering[AppointTimeBox] = Ordering.by(_.appointTime)
 
   given CompData[AppointTimeBox, AppointTime] with
@@ -56,7 +100,10 @@ object AppointTimeBox:
   )(using EventFetcher): SyncedComp[AppointTimeBox, AppointTime] =
     new SyncedComp[AppointTimeBox, AppointTime]:
       def create(gen: Int, appointTime: AppointTime): AppointTimeBox =
-        new AppointTimeBox(gen, appointTime, findVacantFollowers)
+        println(("enter createAppointTimeBox"))
+        val c = new AppointTimeBox(gen, appointTime, findVacantFollowers)
+        println(("leave createAppointTime"))
+        c
       def ele(c: AppointTimeBox): HTMLElement = c.ele
       def updateUI(c: AppointTimeBox, gen: Int, appointTime: AppointTime): Unit =
         c.updateUI(gen, appointTime)
