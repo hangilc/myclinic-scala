@@ -12,7 +12,35 @@ import dev.myclinic.scala.model.AppointTime
 import dev.myclinic.scala.web.appbase.EventFetcher
 
 class AdminAppointColumn(date: LocalDate, op: ClinicOperation)(using EventFetcher)
-    extends AppointColumn(date, op)
+    extends AppointColumn(date, op):
+  override protected def composeContextMenu: List[(String, () => Unit)] =
+    import AdminAppointColumn.*
+    val menu = List(
+        "予約枠追加" -> (() => doAddAppointTime(date))
+    ) ++ (
+        if totalAppoints == 0 then
+            List("予約枠全削除" -> (() => doDeleteAllAppointTimes(boxes, date)))
+        else List.empty
+    )
+    super.composeContextMenu ++ menu
+
+object AdminAppointColumn:
+  def doAddAppointTime(date: LocalDate): Unit =
+    AddAppointTimeDialog(date).open()
+
+  def doDeleteAllAppointTimes(boxes: List[AppointTimeBox], date: LocalDate): Unit =
+    val dateRep = Misc.formatAppointDate(date)
+    ShowMessage.confirm(
+      s"${dateRep}の予約枠を全部削除していいですか？"
+    )(() => {
+      val ids: List[Int] = boxes.map(_.appointTime.appointTimeId).toList
+      (for _ <- ids.map(id => Api.deleteAppointTime(id)).sequence.void
+      yield ()).onComplete {
+        case Success(_)  => ()
+        case Failure(ex) => System.err.println(ex.getMessage)
+      }
+    })
+
 
 // class AdminAppointColumn(date: LocalDate, op: ClinicOperation)(using EventFetcher)
 //     extends AppointColumn(date, op):

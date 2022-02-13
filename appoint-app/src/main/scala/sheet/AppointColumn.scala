@@ -59,6 +59,9 @@ case class AppointColumn(date: LocalDate, op: ClinicOperation)(using
     adjustVacantClass(boxes, vacantKindsArea, dateElement)
     markKenshin(boxes, kenshinArea)
 
+  def totalAppoints: Int =
+    boxes.foldLeft(0)((acc, b) => acc + b.numSlots)
+
   private def insertBox(appointTimeBox: AppointTimeBox): Unit =
     boxes = SortedCompList.insert(boxes, appointTimeBox, boxesWrapper)
 
@@ -72,8 +75,14 @@ case class AppointColumn(date: LocalDate, op: ClinicOperation)(using
       )
     SyncedComp.createSynced(g, appointTime)
 
+  protected def composeContextMenu: List[(String, () => Unit)] =
+    List.empty
+
   private def onContextMenu(event: MouseEvent): Unit =
-    ()
+    event.preventDefault()
+    event.stopPropagation()
+    val contextMenu = composeContextMenu
+    if !contextMenu.isEmpty then ContextMenu(contextMenu).open(event)
 
 object AppointColumn:
   def dateRep(date: LocalDate): String = Misc.formatAppointDate(date)

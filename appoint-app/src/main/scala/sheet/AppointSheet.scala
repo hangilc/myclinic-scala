@@ -42,10 +42,13 @@ class AppointSheet(using EventFetcher):
     yield
       columnsWrapper(clear)
       workDays.foreach { case (date, op) =>
-        val col = AppointColumn(date, op)
+        val col = makeAppointColumn(date, op)
         col.init
         columnsWrapper(col.ele)
       }
+
+  def makeAppointColumn(date: LocalDate, op: ClinicOperation): AppointColumn =
+    AppointColumn(date, op)
 
 object AppointSheet:
   def startDayOfWeek(at: LocalDate): LocalDate = DateUtil.startDayOfWeek(at)

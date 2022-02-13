@@ -38,6 +38,7 @@ class TopMenu(private var startDate: LocalDate):
   menuIcon(onclick := (onMenuClick _))
 
   def getStartDate: LocalDate = startDate
+  def getDateRange: (LocalDate, LocalDate) = (startDate, startDate.plusDays(6))
 
   private def advanceDays(diff: Int): Unit =
     startDate = startDate.plusDays(diff)
