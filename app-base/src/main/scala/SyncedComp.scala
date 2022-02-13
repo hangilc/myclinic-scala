@@ -8,17 +8,6 @@ import dev.myclinic.scala.web.appbase.ElementEvent.*
 import cats.*
 import cats.syntax.all.*
 
-trait SyncedComp[C, T]:
-  def create: C
-  def ele(c: C): HTMLElement
-  def updateUI(c: C, gen: Int, data: T): Unit
-
-  def updateUI(c: C, gen: Int, dataOption: Option[T]): Unit =
-    dataOption match {
-      case Some(d) => updateUI(c, gen, d)
-      case None    => ele(c).remove()
-    }
-
 case class SyncedData[T](var data: Option[T], model: String, id: Int)(using
     dataId: DataId[T]
 ):
@@ -67,6 +56,17 @@ object SyncedData:
     )
     (g, syncedData1.data, syncedData2.data)
 
+trait SyncedComp[C, T]:
+  def create(gen: Int, data: T): C
+  def ele(c: C): HTMLElement
+  def updateUI(c: C, gen: Int, data: T): Unit
+
+  def updateUI(c: C, gen: Int, dataOption: Option[T]): Unit =
+    dataOption match {
+      case Some(d) => updateUI(c, gen, d)
+      case None    => ele(c).remove()
+    }
+
 object SyncedComp:
   def createSynced[C, T](gen: Int, data: T)(using
       syncedComp: SyncedComp[C, T],
@@ -78,8 +78,7 @@ object SyncedComp:
     val id = dataId.getId(data)
     dOption match {
       case Some(d) =>
-        val c = syncedComp.create
-        syncedComp.updateUI(c, g, d)
+        val c = syncedComp.create(g, d)
         syncedComp
           .ele(c)
           .addUpdatedListener[T](
@@ -101,7 +100,7 @@ object SyncedComp:
     }
 
 trait SyncedComp2[C, T, U]:
-  def create: C
+  def create(gen: Int, data1: T, data2: U): C
   def ele(c: C): HTMLElement
   def updateUI(c: C, gen: Int, data1: T, data2: U): Unit
 
@@ -131,8 +130,7 @@ object SyncedComp2:
     val id2 = dataId2.getId(data2)
     (d1Option, d2Option).tupled match {
       case Some(d1, d2) =>
-        val c = syncedComp.create
-        syncedComp.updateUI(c, g, d1, d2)
+        val c = syncedComp.create(g, d1, d2)
         syncedComp
           .ele(c)
           .addUpdatedListener[T](
