@@ -128,7 +128,7 @@ object AppointTimeBox:
       def ele(c: AppointTimeBox): HTMLElement = c.ele
       def updateUI(c: AppointTimeBox, gen: Int, appointTime: AppointTime): Unit =
         c.updateUI(gen, appointTime)
-      def onDeleted(c: AppointTimeBox): Unit = c.onDeleted()
+      def onDeleted(c: AppointTimeBox, parent: HTMLElement): Unit = c.onDeleted(parent)
 
 class AppointTimeBoxOrig(
     var gen: Int,
