@@ -20,7 +20,7 @@ import dev.myclinic.scala.web.appoint.history.History
 import cats.syntax.all._
 import cats.implicits._
 import cats.Monoid
-import dev.myclinic.scala.web.appoint.AppointHistoryWindow
+import dev.myclinic.scala.web.appoint.{AppointHistoryWindow, CustomEvents}
 import dev.myclinic.scala.web.appoint.sheet.covidthirdshot.CovidThirdShot
 import dev.myclinic.scala.clinicop.{NationalHoliday, RegularHoliday}
 import dev.myclinic.scala.web.appbase.ElementEvent.*
@@ -36,6 +36,17 @@ class AppointSheet(using EventFetcher):
   )
   topMenu.onDateSelected.subscribe(setup _)
   setup(topMenu.getStartDate)
+  ele.addCreatedListener[AppointTime](event => {
+    val g = event.appEventId
+    val created = event.dataAs[AppointTime]
+    val date = created.date
+    val seltor = s".appoint-column.date-${date}"
+    ele
+      .qSelector(seltor)
+      .foreach(e => {
+        CustomEvents.appointTimeCreated.trigger(e, (g, created), false)
+      })
+  })
 
   def setup(startDate: LocalDate): Unit =
     for workDays <- listWorkingDays(startDate)

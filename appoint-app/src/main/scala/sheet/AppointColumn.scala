@@ -21,6 +21,7 @@ import scala.util.Failure
 import scala.concurrent.Future
 import dev.myclinic.scala.web.appbase.SortedCompList
 import scala.math.Ordered.orderingToOrdered
+import dev.myclinic.scala.web.appoint.CustomEvents
 
 case class AppointColumn(date: LocalDate, op: ClinicOperation)(using
     EventFetcher
@@ -42,7 +43,11 @@ case class AppointColumn(date: LocalDate, op: ClinicOperation)(using
     ),
     boxesWrapper
   )
+  ele(cls := s"date-${date}")
   dateElement(oncontextmenu := (onContextMenu _))
+  CustomEvents.appointTimeCreated.handle(ele, {
+    case (g, t) => createAppointTimeBox(g, t).foreach(box => insertBox(box))
+  })
 
   def init: Future[Unit] =
     for (gen, appFull) <- listAppoints(date)

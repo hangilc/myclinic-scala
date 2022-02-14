@@ -42,7 +42,7 @@ class CustomEventConnect[T](eventType: String):
   def trigger(e: HTMLElement, detail: T, bubbles: Boolean = true): Unit =
     e.dispatchEvent(CustomEvent[T](eventType, detail, bubbles))
 
-  def listen(e: HTMLElement, handler: T => Unit): Unit =
+  def handle(e: HTMLElement, handler: T => Unit): Unit =
     e.addEventListener(eventType, (e: CustomEvent[T]) => handler(e.detail))
 
   def listen(e: HTMLElement, handler: js.Function1[CustomEvent[T], Unit]): Unit =

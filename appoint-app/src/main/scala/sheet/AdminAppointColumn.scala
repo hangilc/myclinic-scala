@@ -26,7 +26,9 @@ class AdminAppointColumn(date: LocalDate, op: ClinicOperation)(using EventFetche
 
 object AdminAppointColumn:
   def doAddAppointTime(date: LocalDate): Unit =
-    AddAppointTimeDialog(date).open()
+    val dlog = AddAppointTimeDialog(date)
+    dlog.open()
+    dlog.initFocus()
 
   def doDeleteAllAppointTimes(boxes: List[AppointTimeBox], date: LocalDate): Unit =
     val dateRep = Misc.formatAppointDate(date)

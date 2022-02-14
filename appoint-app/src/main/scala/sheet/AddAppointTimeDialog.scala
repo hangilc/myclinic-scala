@@ -37,8 +37,9 @@ class AddAppointTimeDialog(date: LocalDate):
       button("キャンセル", onclick := (() => dlog.close()))
     )
   )
-  def open(): Unit = 
-    dlog.open()
+  def open(): Unit = dlog.open()
+
+  def initFocus(): Unit = eFromTime.focus()
 
   def doEnter(): Unit = 
     val f = 
