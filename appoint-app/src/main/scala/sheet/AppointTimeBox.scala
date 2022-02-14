@@ -25,7 +25,7 @@ import dev.myclinic.scala.web.appbase.{
   CompList
 }
 import dev.myclinic.scala.web.appbase.CompData
-import dev.myclinic.scala.web.appbase.SortedCompList
+import dev.myclinic.scala.web.appbase.CompList
 import dev.myclinic.scala.web.appoint.CustomEvents
 
 class AppointTimeBox(
@@ -46,6 +46,11 @@ class AppointTimeBox(
       css(style => style.cursor = "pointer")
     )(eTimeRep, eKindRep, slotsWrapper)
   ele(onclick := (onElementClick _))
+  CustomEvents.appointPostDeleted.handle(ele, deleted => {
+    val id = appointTime.appointTimeId
+    slots = CompList.delete(slots, _.appointTime.appointTimeId == id)
+    adjustUI()
+  })
   updateUI()
 
 
@@ -65,6 +70,9 @@ class AppointTimeBox(
     )
     eTimeRep(innerText := appointTimeSpanRep(appointTime))
     eKindRep(innerText := appointTimeKindRep(appointTime))
+    adjustUI()
+
+  def adjustUI(): Unit =
     adjustVacantClass()
 
   def onDeleted(parent: HTMLElement): Unit =
@@ -76,11 +84,11 @@ class AppointTimeBox(
     appoints.foreach(appoint => {
       SyncedComp2.createSynced(g, appoint, gen, appointTime) match {
         case Some(c) => 
-          slots = SortedCompList.insert(slots, c, slotsWrapper)
+          slots = CompList.append(slots, c, slotsWrapper)
         case None => ()
       }
     })
-    adjustVacantClass()
+    adjustUI()
 
   def probeVacantKind(): Option[String] =
     if hasVacancy then Some(appointTime.kind) else None
@@ -170,7 +178,7 @@ class AppointTimeBoxOrig(
   def addAppoints(gen: Int, appoints: List[Appoint]): Unit =
     appoints.foreach(appoint => {
       createSlot(gen, appoint) match {
-        case Some(slot) => slots = CompList.append(slot, slots, slotsElement)
+        case Some(slot) => slots = CompList.append(slots, slot, slotsElement)
         case None => ()
       }
     })

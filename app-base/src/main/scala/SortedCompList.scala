@@ -19,10 +19,12 @@ object SortedCompList:
 
   def delete[C, T](
       sorted: List[C],
-      id: Int
+      id: Int,
+      removeElement: Boolean = false
   )(using compData: CompData[C, T], dataId: DataId[T]): List[C] =
     val (pre, post) = sorted.span(t => dataId.getId(compData.data(t)) != id)
     if post.isEmpty then sorted
     else
-      compData.ele(post.head).remove()
+      if removeElement then
+        compData.ele(post.head).remove()
       pre ++ post.tail
