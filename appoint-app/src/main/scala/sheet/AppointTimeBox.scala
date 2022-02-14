@@ -46,13 +46,15 @@ class AppointTimeBox(
       css(style => style.cursor = "pointer")
     )(eTimeRep, eKindRep, slotsWrapper)
   ele(onclick := (onElementClick _))
-  CustomEvents.appointPostDeleted.handle(ele, deleted => {
-    val id = appointTime.appointTimeId
-    slots = CompList.delete(slots, _.appointTime.appointTimeId == id)
-    adjustUI()
-  })
+  CustomEvents.appointPostDeleted.handle(
+    ele,
+    deleted => {
+      val id = appointTime.appointTimeId
+      slots = CompList.delete(slots, _.appointTime.appointTimeId == id)
+      adjustUI()
+    }
+  )
   updateUI()
-
 
   def numSlots: Int = slots.size
 
@@ -83,7 +85,7 @@ class AppointTimeBox(
   def addAppoints(g: Int, appoints: List[Appoint]): Unit =
     appoints.foreach(appoint => {
       SyncedComp2.createSynced(g, appoint, gen, appointTime) match {
-        case Some(c) => 
+        case Some(c) =>
           slots = CompList.append(slots, c, slotsWrapper)
         case None => ()
       }
@@ -102,8 +104,11 @@ class AppointTimeBox(
       if ele.appoint.hasTag("健診") then acc + 1 else acc
     })
 
+  def findVacantRegular(): Option[AppointTime] =
+    findVacantFollowers().headOption
+
   private def onElementClick(): Unit =
-    ()
+    if numSlots < appointTime.capacity then openAppointDialog(appointTime, findVacantRegular _)
 
 object AppointTimeBox:
   def appointKindToCssClass(kind: String): String = {
@@ -121,6 +126,13 @@ object AppointTimeBox:
     val label = AppointKind(appointTime.kind).label
     if label.isEmpty then "" else s"[${label}]"
 
+  def openAppointDialog(
+      appointTime: AppointTime,
+      fVacantFollower: () => Option[AppointTime]
+  ): Unit =
+    MakeAppointDialog(appointTime, fVacantFollower)
+      .open()
+
   given Ordering[AppointTimeBox] = Ordering.by(_.appointTime)
 
   given CompData[AppointTimeBox, AppointTime] with
@@ -134,9 +146,14 @@ object AppointTimeBox:
       def create(gen: Int, appointTime: AppointTime): AppointTimeBox =
         new AppointTimeBox(gen, appointTime, findVacantFollowers)
       def ele(c: AppointTimeBox): HTMLElement = c.ele
-      def updateUI(c: AppointTimeBox, gen: Int, appointTime: AppointTime): Unit =
+      def updateUI(
+          c: AppointTimeBox,
+          gen: Int,
+          appointTime: AppointTime
+      ): Unit =
         c.updateUI(gen, appointTime)
-      def onDeleted(c: AppointTimeBox, parent: HTMLElement): Unit = c.onDeleted(parent)
+      def onDeleted(c: AppointTimeBox, parent: HTMLElement): Unit =
+        c.onDeleted(parent)
 
 class AppointTimeBoxOrig(
     var gen: Int,
@@ -179,7 +196,7 @@ class AppointTimeBoxOrig(
     appoints.foreach(appoint => {
       createSlot(gen, appoint) match {
         case Some(slot) => slots = CompList.append(slots, slot, slotsElement)
-        case None => ()
+        case None       => ()
       }
     })
     adjustVacantClass()
@@ -233,4 +250,3 @@ class AppointTimeBoxOrig(
     slots.foldLeft(0)((acc, ele) => {
       if ele.appoint.hasTag("健診") then acc + 1 else acc
     })
-
