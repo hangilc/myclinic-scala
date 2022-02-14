@@ -8,6 +8,7 @@ import org.scalajs.dom.MouseEvent
 import dev.myclinic.scala.web.appbase.SyncedComp2
 import org.scalajs.dom.HTMLElement
 import dev.myclinic.scala.web.appbase.Comp
+import dev.myclinic.scala.web.appoint.CustomEvents
 
 case class Slot(
     var gen: Int,
@@ -35,6 +36,9 @@ case class Slot(
   def updateUI(): Unit =
     eLabel(clear, label)
     eTags(clear, tagsRep)
+
+  def onDeleted(parent: HTMLElement): Unit = 
+    CustomEvents.appointPostDeleted.trigger(parent, appoint, true)
 
   def label: String =
     val patientId: String =
@@ -64,6 +68,7 @@ object Slot:
     def ele(c: Slot): HTMLElement = c.ele
     def updateUI(c: Slot, gen: Int, appoint: Appoint, appointTime: AppointTime): Unit =
       c.updateUI(gen, appoint, appointTime)
+    def onDeleted(c: Slot, parent: HTMLElement): Unit = c.onDeleted(parent)
 
   given Comp[Slot] with
     def ele(c: Slot): HTMLElement = c.ele

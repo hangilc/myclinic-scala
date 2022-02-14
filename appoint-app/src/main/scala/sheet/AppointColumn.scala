@@ -46,7 +46,13 @@ case class AppointColumn(date: LocalDate, op: ClinicOperation)(using
   ele(cls := s"date-${date}")
   dateElement(oncontextmenu := (onContextMenu _))
   CustomEvents.appointTimeCreated.handle(ele, {
-    case (g, t) => createAppointTimeBox(g, t).foreach(box => insertBox(box))
+    case (g, t) => createAppointTimeBox(g, t).foreach(box => 
+      insertBox(box)
+      CustomEvents.appointTimePostCreated.trigger(ele, t, true)
+    )
+  })
+  CustomEvents.appointTimePostDeleted.handle(ele, deleted => {
+    boxes = SortedCompList.delete(boxes, deleted.appointTimeId)
   })
 
   def init: Future[Unit] =

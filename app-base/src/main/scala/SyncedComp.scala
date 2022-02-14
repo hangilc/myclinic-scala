@@ -60,6 +60,7 @@ trait SyncedComp[C, T]:
   def create(gen: Int, data: T): C
   def ele(c: C): HTMLElement
   def updateUI(c: C, gen: Int, data: T): Unit
+  def onDeleted(c: C, parent: HTMLElement): Unit
 
   def updateUI(c: C, gen: Int, dataOption: Option[T]): Unit =
     dataOption match {
@@ -92,7 +93,9 @@ object SyncedComp:
           .addDeletedListener[T](
             id,
             event => {
+              val parent = syncedComp.ele(c).parentElement
               syncedComp.ele(c).remove()
+              syncedComp.onDeleted(c, parent)
             }
           )
         Some(c)
@@ -103,6 +106,7 @@ trait SyncedComp2[C, T, U]:
   def create(gen: Int, data1: T, data2: U): C
   def ele(c: C): HTMLElement
   def updateUI(c: C, gen: Int, data1: T, data2: U): Unit
+  def onDeleted(c: C, parent: HTMLElement): Unit
 
   def updateUI(
       c: C,
@@ -156,7 +160,9 @@ object SyncedComp2:
           .addDeletedListener[T](
             id1,
             event => {
+              val parent = syncedComp.ele(c).parentElement
               syncedComp.ele(c).remove()
+              syncedComp.onDeleted(c, parent)
             }
           )
         syncedComp
@@ -164,7 +170,9 @@ object SyncedComp2:
           .addDeletedListener[U](
             id2,
             event => {
+              val parent = syncedComp.ele(c).parentElement
               syncedComp.ele(c).remove()
+              syncedComp.onDeleted(c, parent)
             }
           )
         Some(c)

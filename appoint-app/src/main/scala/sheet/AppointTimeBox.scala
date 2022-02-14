@@ -26,6 +26,7 @@ import dev.myclinic.scala.web.appbase.{
 }
 import dev.myclinic.scala.web.appbase.CompData
 import dev.myclinic.scala.web.appbase.SortedCompList
+import dev.myclinic.scala.web.appoint.CustomEvents
 
 class AppointTimeBox(
     var gen: Int,
@@ -49,6 +50,7 @@ class AppointTimeBox(
 
 
   def numSlots: Int = slots.size
+
   def updateUI(_gen: Int, _appointTime: AppointTime): Unit =
     gen = _gen
     appointTime = _appointTime
@@ -64,6 +66,9 @@ class AppointTimeBox(
     eTimeRep(innerText := appointTimeSpanRep(appointTime))
     eKindRep(innerText := appointTimeKindRep(appointTime))
     adjustVacantClass()
+
+  def onDeleted(parent: HTMLElement): Unit =
+    CustomEvents.appointTimePostDeleted.trigger(parent, appointTime, true)
 
   def hasVacancy: Boolean = numSlots < appointTime.capacity
 
@@ -123,6 +128,7 @@ object AppointTimeBox:
       def ele(c: AppointTimeBox): HTMLElement = c.ele
       def updateUI(c: AppointTimeBox, gen: Int, appointTime: AppointTime): Unit =
         c.updateUI(gen, appointTime)
+      def onDeleted(c: AppointTimeBox): Unit = c.onDeleted()
 
 class AppointTimeBoxOrig(
     var gen: Int,
