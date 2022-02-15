@@ -8,6 +8,62 @@ import dev.myclinic.scala.web.appbase.ElementEvent.*
 import cats.*
 import cats.syntax.all.*
 
+trait DataSource[T]:
+  def data: T
+  val onUpdated: LocalEventPublisher[Unit]
+  val onDeleted: LocalEventPublisher[Unit]
+
+class SimpleDataSource[T](value: T) extends DataSource[T]:
+  def data: T = value
+  val onUpdated = LocalEventPublisher[Unit]
+  val onDeleted = LocalEventPublisher[Unit]
+
+class SyncedDataSource[T](
+    gen: Int,
+    initialValue: T,
+    ele: HTMLElement,
+    val onUpdated: LocalEventPublisher[Unit],
+    val onDeleted: LocalEventPublisher[Unit]
+)(using
+    fetcher: EventFetcher,
+    modelSymbol: ModelSymbol[T],
+    dataId: DataId[T]
+) extends DataSource[T]:
+  private var g: Int = gen
+  private var t: T = initialValue
+  private val M = modelSymbol.getSymbol
+  private val id: Int = dataId.getId(initialValue)
+  def data: T = t
+
+  private def handleEvent(event: AppModelEvent): Unit =
+    g = event.appEventId
+    event.model match {
+      case M =>
+        event.kind match {
+          case AppModelEvent.updatedSymbol =>
+            val updated = event.dataAs[T]
+            if dataId.getId(updated) == id then
+              t = updated
+              onUpdated.publish(())
+          case AppModelEvent.deletedSymbol =>
+            onDeleted.publish(())
+        }
+      case _ => ()
+    }
+
+  fetcher.catchup(gen, handleEvent _)
+  ele.addUpdatedListener[T](id, handleEvent _)
+  ele.addDeletedListener[T](id, handleEvent _)
+
+object SyncedDataSource:
+  def composite[T1, T2](g1: Int, t1: T1, g2: Int, t2: T2)(using
+    ModelSymbol[T1], DataId[T1], ModelSymbol[T2], DataId[T2], EventFetcher
+  ): Option[SyncedDataSource[(T1, T2)]] =
+    SyncedData.update2(g1, t1, g2, t2) {
+      case (g, opt1, opt2)
+    }
+    ???
+
 case class SyncedData[T](var data: Option[T], model: String, id: Int)(using
     dataId: DataId[T]
 ):
