@@ -63,6 +63,9 @@ case class AppointColumn(date: LocalDate, op: ClinicOperation)(using
       adjustUI()
     }
   )
+  CustomEvents.appointPostCreated.handle(ele, _ => adjustUI())
+  CustomEvents.appointPostUpdated.handle(ele, _ => adjustUI())
+  CustomEvents.appointPostDeleted.handle(ele, _ => adjustUI())
 
   def init: Future[Unit] =
     for (gen, appFull) <- listAppoints(date)

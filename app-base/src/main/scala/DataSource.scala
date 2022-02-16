@@ -27,12 +27,12 @@ class LocalDataSource[T](init: T) extends DataSource[T]:
   def onDelete(handler: () => Unit): Unit =
     onDeletePublisher.subscribe(_ => handler())
 
-  def update(value: T): Unit =
+  private[appbase] def update(value: T): Unit =
     assert(!deletedFlag)
     cur = value
     onUpdatePublisher.publish(())
 
-  def delete(): Unit =
+  private[appbase] def delete(): Unit =
     deletedFlag = true
     onDeletePublisher.publish(())
 
@@ -43,6 +43,8 @@ trait SyncedDataSourceCommon:
   private[appbase] def handleEvent(event: AppModelEvent): Unit
   private[appbase] def listenAt(ele: HTMLElement): Unit
   def isDeleted: Boolean
+  def onUpdate(handler: () => Unit): Unit
+  def onDelete(handler: () => Unit): Unit
 
 class SyncedDataSource[T](initGen: Int, init: T)(using
     fetcher: EventFetcher,
@@ -88,9 +90,16 @@ class SyncedDataSource2[T1, T2](initGen: Int, init1: T1, init2: T2)(using
   private val s1 = SyncedDataSource(g, init1)
   private val s2 = SyncedDataSource(g, init2)
   private val src: List[SyncedDataSourceCommon] = List(s1, s2)
+  src.foreach(s => {
+    s.onUpdate(doUpdate _)
+    s.onDelete(delete _)
+  })
 
   def genData: (Int, T1, T2) = (g, s1.data, s2.data)
   def gen: Int = g
+
+  private def doUpdate(): Unit =
+    update(s1.data, s2.data)
 
   def startSync(ele: HTMLElement): Unit =
     catchup()
@@ -119,13 +128,20 @@ class SyncedDataSource3[T1, T2, T3](
     DataId[T2],
     ModelSymbol[T3],
     DataId[T3]
-) extends LocalDataSource[(T1, T2)](init1, init2):
+) extends LocalDataSource[(T1, T2, T3)](init1, init2, init3):
   val fetcher = summon[EventFetcher]
   private var g = initGen
   private val s1 = SyncedDataSource(g, init1)
   private val s2 = SyncedDataSource(g, init2)
   private val s3 = SyncedDataSource(g, init3)
   private val src: List[SyncedDataSourceCommon] = List(s1, s2, s3)
+  src.foreach(s => {
+    s.onUpdate(doUpdate _)
+    s.onDelete(delete _)
+  })
+
+  private def doUpdate(): Unit =
+    update(s1.data, s2.data, s3.data)
 
   def genData: (Int, T1, T2, T3) = (g, s1.data, s2.data, s3.data)
   def gen: Int = g

@@ -46,6 +46,15 @@ class AppointTimeBox(
       adjustUI()
     }
   )
+  CustomEvents.appointCreated.handle(
+    ele,
+    {
+      case (g, created) => {
+        addAppoints(g, List(created))
+        CustomEvents.appointPostCreated.trigger(ele, created, true)
+      }
+    }
+  )
   updateUI()
   dsrc.onUpdate(updateUI _)
   dsrc.onUpdate(() => CustomEvents.appointTimePostUpdated.trigger(ele, appointTime, true))

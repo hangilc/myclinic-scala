@@ -47,6 +47,16 @@ class AppointSheet(using EventFetcher):
         CustomEvents.appointTimeCreated.trigger(e, (g, created), false)
       })
   })
+  ele.addCreatedListener[Appoint](event => {
+    val g = event.appEventId
+    val created: Appoint = event.dataAs[Appoint]
+    val seltor = s".appoint-time-box.appoint-time-id-${created.appointTimeId}"
+    ele
+      .qSelector(seltor)
+      .foreach(e => {
+        CustomEvents.appointCreated.trigger(e, (g, created), false)
+      })
+  })
 
   def setup(startDate: LocalDate): Unit =
     for workDays <- listWorkingDays(startDate)
