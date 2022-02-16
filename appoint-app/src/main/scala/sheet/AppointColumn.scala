@@ -51,6 +51,7 @@ case class AppointColumn(date: LocalDate, op: ClinicOperation)(using
     { case (g, t) =>
       val box = createAppointTimeBox(g, t)
       insertBox(box)
+      adjustUI()
       CustomEvents.appointTimePostCreated.trigger(ele, t, true)
     }
   )
@@ -66,6 +67,7 @@ case class AppointColumn(date: LocalDate, op: ClinicOperation)(using
     yield
       appFull.foreach { case (appointTime, appoints) =>
         val box = createAppointTimeBox(gen, appointTime)
+        insertBox(box)
         box.addAppoints(gen, appoints)
       }
       adjustUI()

@@ -7,6 +7,7 @@ import dev.myclinic.scala.model.ModelSymbol
 import dev.myclinic.scala.model.DataId
 import dev.myclinic.scala.model.AppModelEvent
 import org.scalajs.dom.HTMLElement
+import org.scalajs.dom.document
 
 trait DataSource[T]:
   def data: T
@@ -64,6 +65,8 @@ class SyncedDataSource[T](initGen: Int, init: T)(using
     fetcher.catchup(g, handleEvent _)
 
   private[appbase] def listenAt(ele: HTMLElement): Unit =
+    if ele.parentElement == null then
+      SyncedDataSource.tmpWrapper.appendChild(ele)
     ele.addUpdatedListener[T](id, handleEvent _)
     ele.addDeletedListener[T](id, handleEvent _)
 
@@ -142,6 +145,13 @@ class SyncedDataSource3[T1, T2, T3](
     src.foreach(_.handleEvent(event))
 
 object SyncedDataSource:
+  val tmpWrapper: HTMLElement = {
+    val e = document.createElement("div").asInstanceOf[HTMLElement]
+    e.style.display = "none"
+    document.body.appendChild(e)
+    e
+  }
+
   def syncGen[T1, T2](
       g1: Int,
       data1: T1,
