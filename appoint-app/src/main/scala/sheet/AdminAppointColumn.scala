@@ -10,6 +10,7 @@ import cats.syntax.all.*
 import scala.util.{Success, Failure}
 import dev.myclinic.scala.model.AppointTime
 import dev.myclinic.scala.web.appbase.EventFetcher
+import dev.myclinic.scala.web.appbase.SyncedDataSource
 
 class AdminAppointColumn(date: LocalDate, op: ClinicOperation)(using EventFetcher)
     extends AppointColumn(date, op):
@@ -23,6 +24,16 @@ class AdminAppointColumn(date: LocalDate, op: ClinicOperation)(using EventFetche
         else List.empty
     )
     super.composeContextMenu ++ menu
+
+  override def createAppointTimeBox(
+      g: Int,
+      appointTime: AppointTime
+  ): AppointTimeBox =
+    AdminAppointTimeBox(
+      SyncedDataSource(g, appointTime),
+      () => AppointColumn.findVacantFollowers(boxes, appointTime)
+    )
+
 
 object AdminAppointColumn:
   def doAddAppointTime(date: LocalDate): Unit =

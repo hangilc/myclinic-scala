@@ -55,10 +55,12 @@ case class AppointColumn(date: LocalDate, op: ClinicOperation)(using
       CustomEvents.appointTimePostCreated.trigger(ele, t, true)
     }
   )
+  CustomEvents.appointTimePostUpdated.handle(ele, _ => adjustUI())
   CustomEvents.appointTimePostDeleted.handle(
     ele,
     deleted => {
       boxes = SortedCompList.delete(boxes, deleted.appointTimeId)
+      adjustUI()
     }
   )
 
@@ -82,7 +84,7 @@ case class AppointColumn(date: LocalDate, op: ClinicOperation)(using
   private def insertBox(appointTimeBox: AppointTimeBox): Unit =
     boxes = SortedCompList.insert(boxes, appointTimeBox, boxesWrapper)
 
-  private def createAppointTimeBox(
+  protected def createAppointTimeBox(
       g: Int,
       appointTime: AppointTime
   ): AppointTimeBox =

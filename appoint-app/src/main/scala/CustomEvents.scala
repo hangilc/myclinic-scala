@@ -8,6 +8,8 @@ object CustomEvents:
     CustomEventConnect[(Int, AppointTime)]("appoint-app-appoiont-time-created")
   val appointTimePostCreated =
     CustomEventConnect[AppointTime]("appoint-app-appoiont-time-post-created")
+  val appointTimePostUpdated =
+    CustomEventConnect[AppointTime]("appoint-app-appoiont-time-post-updated")
   val appointTimePostDeleted =
     CustomEventConnect[AppointTime]("appoint-app-appoiont-time-post-deleted")
   val appointPostDeleted =

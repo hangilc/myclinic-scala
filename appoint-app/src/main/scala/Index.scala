@@ -50,8 +50,6 @@ object JsMain:
         val startDate = DateUtil.startDayOfWeek(LocalDate.now())
         val endDate = startDate.plusDays(6)
         workarea(clear, sheet.ele)
-        //sheet.setupTo(workarea)
-        //sheet.setupDateRange(startDate, endDate)
     }
 
   def banner(isAdmin: Boolean): HTMLElement =

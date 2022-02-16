@@ -26,7 +26,7 @@ class AppointTimeBox(
 )(using EventFetcher):
   import AppointTimeBox.*
   def appointTime: AppointTime = dsrc.data
-  private var slots: List[Slot] = List.empty
+  protected var slots: List[Slot] = List.empty
   val eTimeRep = div
   val eKindRep = div
   val slotsWrapper = div
@@ -48,6 +48,7 @@ class AppointTimeBox(
   )
   updateUI()
   dsrc.onUpdate(updateUI _)
+  dsrc.onUpdate(() => CustomEvents.appointTimePostUpdated.trigger(ele, appointTime, true))
   dsrc.onDelete(() => {
     val parent = ele.parentElement
     ele.remove()

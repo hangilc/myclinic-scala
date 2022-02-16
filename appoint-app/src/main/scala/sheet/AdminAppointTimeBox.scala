@@ -29,7 +29,44 @@ import dev.myclinic.scala.web.appbase.SyncedDataSource
 class AdminAppointTimeBox(
     dsrc: SyncedDataSource[AppointTime],
     _findVacantFollowers: () => List[AppointTime]
-)(using EventFetcher) extends AppointTimeBox(dsrc, _findVacantFollowers)
+)(using EventFetcher) extends AppointTimeBox(dsrc, _findVacantFollowers):
+  ele(oncontextmenu := (onContextMenu _))
+
+  def onContextMenu(event: MouseEvent): Unit =
+    event.preventDefault()
+    var menu: List[(String, () => Unit)] = List(
+      "編集" -> doConvert,
+      "結合" -> doCombine,
+      "分割" -> doSplit,
+      "延長" -> doExtend,
+    )
+    if slots.isEmpty then menu = menu :+ ("削除" -> doDelete)
+    ContextMenu(menu).open(event)
+
+  def doConvert(): Unit =
+    ConvertAppointTimeDialog(appointTime).open()
+
+  def doCombine(): Unit =
+    println(("followers", findVacantFollowers()))
+    CombineAppointTimesDialog(appointTime, findVacantFollowers()).open()
+
+  def doSplit(): Unit =
+    SplitAppointTimeDialog(appointTime).open()
+
+  def doExtend(): Unit =
+    val dlog = ExtendAppointTimeDialog(appointTime)
+    dlog.open()    
+
+  def doDelete(): Unit =
+    val msg = "本当に削除しますか？"
+    ShowMessage.confirm(msg)(() => {
+      Api.deleteAppointTime(appointTime.appointTimeId)
+      ()
+    })
+
+//   def doExtend(): Unit =
+//     val dlog = ExtendAppointTimeDialog(appointTime)
+//     dlog.open()    
 
 // class AdminAppointTimeBoxOrig(
 //     _appointTime: AppointTime,
