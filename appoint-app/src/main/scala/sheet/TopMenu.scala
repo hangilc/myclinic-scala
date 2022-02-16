@@ -3,6 +3,11 @@ package dev.myclinic.scala.web.appoint.sheet
 import dev.fujiwara.domq.all.{*, given}
 import dev.myclinic.scala.web.appbase.{LocalEventPublisher}
 import java.time.LocalDate
+import dev.myclinic.scala.web.appoint.sheet.covidthirdshot.CovidThirdShot
+import dev.myclinic.scala.webclient.{Api, global}
+import dev.myclinic.scala.web.appoint.AppointHistoryWindow
+import scala.util.{Success, Failure}
+import org.scalajs.dom.MouseEvent
 
 class TopMenu(private var startDate: LocalDate):
   val onDateSelected = new LocalEventPublisher[LocalDate]
@@ -34,7 +39,7 @@ class TopMenu(private var startDate: LocalDate):
   thisWeek(onclick := (onThisWeekClick _))
   nextWeek(onclick := (() => advanceDays(7)))
   nextMonth(onclick := (() => advanceDays(28)))
-  thirdShot(onclick := (onThirdShotClick _))
+  thirdShot(onclick := (TopMenu.openThirdShotDialog _))
   menuIcon(onclick := (onMenuClick _))
 
   def getStartDate: LocalDate = startDate
@@ -49,6 +54,27 @@ class TopMenu(private var startDate: LocalDate):
     onDateSelected.publish(startDate)
 
   private def onThirdShotClick(): Unit = ()
-  private def onMenuClick(): Unit = ()
+  private def onMenuClick(event: MouseEvent): Unit =
+    ContextMenu(List("変更履歴" -> (TopMenu.showHistory _))).open(event)
+
+object TopMenu:
+  def openThirdShotDialog(): Unit =
+    val content = CovidThirdShot()
+    val w =
+      FloatWindow("追加接種", content.ui.ele(padding := "10px"), width = "300px")
+    w.open()
+    content.initFocus()
+
+  def showHistory(): Unit =
+    val f =
+      for
+        events <- Api.listAppointEvents(30, 0)
+        _ <- AppointHistoryWindow.open(events)
+      yield ()
+    f.onComplete {
+      case Success(_)  => ()
+      case Failure(ex) => ShowMessage.showError(ex.getMessage)
+    }
+
 
 
