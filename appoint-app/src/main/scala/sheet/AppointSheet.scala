@@ -105,10 +105,6 @@ class AppointSheetOrig(using EventFetcher):
       )
       _ = AppointRow.init(cols)
     yield dateRange = Some(from, upto)
-  // cols.foreach(col => {
-  //   for (gen, appointTimesFilled) <- Api.listAppointTimeFilled(col.date)
-  //   yield col.setAppointTimes(gen, appointTimesFilled)
-  // })
 
   def filterDates(
       dates: List[LocalDate],

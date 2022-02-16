@@ -14,7 +14,7 @@ import cats.syntax.all.*
 import dev.myclinic.scala.webclient.Api
 import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
 import dev.myclinic.scala.web.appbase.ElementEvent.*
-import dev.myclinic.scala.web.appbase.{EventFetcher, SyncedComp}
+import dev.myclinic.scala.web.appbase.EventFetcher
 import dev.myclinic.scala.clinicop.*
 import scala.util.Success
 import scala.util.Failure
@@ -22,6 +22,7 @@ import scala.concurrent.Future
 import dev.myclinic.scala.web.appbase.SortedCompList
 import scala.math.Ordered.orderingToOrdered
 import dev.myclinic.scala.web.appoint.CustomEvents
+import dev.myclinic.scala.web.appbase.SyncedDataSource
 
 case class AppointColumn(date: LocalDate, op: ClinicOperation)(using
     EventFetcher
@@ -45,24 +46,27 @@ case class AppointColumn(date: LocalDate, op: ClinicOperation)(using
   )
   ele(cls := s"date-${date}")
   dateElement(oncontextmenu := (onContextMenu _))
-  CustomEvents.appointTimeCreated.handle(ele, {
-    case (g, t) => createAppointTimeBox(g, t).foreach(box => 
+  CustomEvents.appointTimeCreated.handle(
+    ele,
+    { case (g, t) =>
+      val box = createAppointTimeBox(g, t)
       insertBox(box)
       CustomEvents.appointTimePostCreated.trigger(ele, t, true)
-    )
-  })
-  CustomEvents.appointTimePostDeleted.handle(ele, deleted => {
-    boxes = SortedCompList.delete(boxes, deleted.appointTimeId)
-  })
+    }
+  )
+  CustomEvents.appointTimePostDeleted.handle(
+    ele,
+    deleted => {
+      boxes = SortedCompList.delete(boxes, deleted.appointTimeId)
+    }
+  )
 
   def init: Future[Unit] =
     for (gen, appFull) <- listAppoints(date)
     yield
       appFull.foreach { case (appointTime, appoints) =>
-        createAppointTimeBox(gen, appointTime).foreach(box => {
-          insertBox(box)
-          box.addAppoints(gen, appoints)
-        })
+        val box = createAppointTimeBox(gen, appointTime)
+        box.addAppoints(gen, appoints)
       }
       adjustUI()
 
@@ -79,12 +83,11 @@ case class AppointColumn(date: LocalDate, op: ClinicOperation)(using
   private def createAppointTimeBox(
       g: Int,
       appointTime: AppointTime
-  ): Option[AppointTimeBox] =
-    given SyncedComp[AppointTimeBox, AppointTime] =
-      AppointTimeBox.createSyncedComp(() =>
-        findVacantFollowers(boxes, appointTime)
-      )
-    SyncedComp.createSynced(g, appointTime)
+  ): AppointTimeBox =
+    AppointTimeBox(
+      SyncedDataSource(g, appointTime),
+      () => findVacantFollowers(boxes, appointTime)
+    )
 
   protected def composeContextMenu: List[(String, () => Unit)] =
     List.empty
@@ -156,8 +159,6 @@ object AppointColumn:
     val n = countKenshin(boxes)
     kenshinArea(clear)
     if n > 0 then kenshinArea(s"健$n")
-
-
 
 // case class AppointColumnOrig(
 //     date: LocalDate,

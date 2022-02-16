@@ -1,20 +1,17 @@
 package dev.myclinic.scala.web.appoint.sheet
 
 import dev.myclinic.scala.model.{*, given}
-import dev.myclinic.scala.web.appbase.{SyncedComp, EventFetcher}
+import dev.myclinic.scala.web.appbase.{SyncedDataSource2, EventFetcher}
 import dev.fujiwara.domq.all.{*, given}
 import dev.myclinic.scala.web.appoint.sheet.appointdialog.EditAppointDialog
 import org.scalajs.dom.MouseEvent
-import dev.myclinic.scala.web.appbase.SyncedComp2
 import org.scalajs.dom.HTMLElement
 import dev.myclinic.scala.web.appbase.Comp
 import dev.myclinic.scala.web.appoint.CustomEvents
 
-case class Slot(
-    var gen: Int,
-    var appoint: Appoint,
-    var appointTime: AppointTime
-):
+case class Slot(dsrc: SyncedDataSource2[Appoint, AppointTime]):
+  def appoint: Appoint = dsrc.data._1
+  def appointTime: AppointTime = dsrc.data._2
   val eLabel = div()
   val eTags = div()
   val ele = div(
@@ -26,19 +23,17 @@ case class Slot(
   )
   var dialog: Option[EditAppointDialog] = None
   updateUI()
-
-  def updateUI(_gen: Int, _appoint: Appoint, _appointTime: AppointTime): Unit =
-    gen = _gen
-    appoint = _appoint
-    appointTime = _appointTime
-    updateUI()
+  dsrc.onUpdate(updateUI _)
+  dsrc.onDelete(() => {
+    val parent = ele.parentElement
+    ele.remove()
+    CustomEvents.appointPostDeleted.trigger(parent, appoint, true)
+  })
+  dsrc.startSync(ele)
 
   def updateUI(): Unit =
     eLabel(clear, label)
     eTags(clear, tagsRep)
-
-  def onDeleted(parent: HTMLElement): Unit = 
-    CustomEvents.appointPostDeleted.trigger(parent, appoint, true)
 
   def label: String =
     val patientId: String =
@@ -61,14 +56,6 @@ case class Slot(
 
 object Slot:
   given Ordering[Slot] = Ordering.by(_.appoint.appointId)
-
-  given SyncedComp2[Slot, Appoint, AppointTime] with
-    def create(gen: Int, appoint: Appoint, appointTime: AppointTime): Slot =
-      Slot(gen, appoint, appointTime)
-    def ele(c: Slot): HTMLElement = c.ele
-    def updateUI(c: Slot, gen: Int, appoint: Appoint, appointTime: AppointTime): Unit =
-      c.updateUI(gen, appoint, appointTime)
-    def onDeleted(c: Slot, parent: HTMLElement): Unit = c.onDeleted(parent)
 
   given Comp[Slot] with
     def ele(c: Slot): HTMLElement = c.ele
