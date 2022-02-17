@@ -8,6 +8,7 @@ import dev.myclinic.scala.webclient.{Api, global}
 import dev.myclinic.scala.web.appoint.AppointHistoryWindow
 import scala.util.{Success, Failure}
 import org.scalajs.dom.MouseEvent
+import dev.myclinic.scala.util.DateUtil
 
 class TopMenu(private var startDate: LocalDate):
   val onDateSelected = new LocalEventPublisher[LocalDate]
@@ -50,7 +51,7 @@ class TopMenu(private var startDate: LocalDate):
     onDateSelected.publish(startDate)
 
   private def onThisWeekClick(): Unit =
-    startDate = LocalDate.now()
+    startDate = DateUtil.startDayOfWeek(LocalDate.now())
     onDateSelected.publish(startDate)
 
   private def onThirdShotClick(): Unit = ()
