@@ -1,6 +1,8 @@
 package dev.myclinic.scala.server
 
 import cats.effect._
+import cats.syntax.all.*
+import cats.data.OptionT
 import fs2.Pipe
 import fs2.concurrent.Topic
 import org.http4s._
@@ -17,7 +19,13 @@ import org.http4s.websocket.WebSocketFrame.Text
 import javax.net.ssl.SSLContext
 import scala.concurrent.ExecutionContext.Implicits.global
 import java.nio.file.Files
-import cats.data.OptionT
+import dev.myclinic.scala.db.Db
+import dev.myclinic.scala.model.EventIdNotice
+import dev.myclinic.scala.model.jsoncodec.EventType
+import dev.myclinic.scala.model.jsoncodec.Implicits.given
+import io.circe._
+import io.circe.syntax._
+
 object Main extends IOApp:
 
   object AppEventBroadcaster:
@@ -29,13 +37,18 @@ object Main extends IOApp:
 
   def ws(topic: Topic[IO, WebSocketFrame]) = HttpRoutes.of[IO] {
     case GET -> Root / "events" =>
-      val toClient = topic
-        .subscribe(10)
-      val fromClient: Pipe[IO, WebSocketFrame, Unit] = _.evalMap {
-        case Text(t, _) => IO.delay(println(t))
-        case f          => IO.delay(println(s"Unknown type: $f"))
-      }
-      WebSocketBuilder[IO].build(toClient, fromClient)
+      for
+        eventId <- Db.currentEventId()
+        toClient = fs2.Stream[IO, WebSocketFrame](
+          Text(EventIdNotice(eventId).asInstanceOf[EventType].asJson.toString)
+        ) ++ topic.subscribe(10)
+        fromClient = (s: fs2.Stream[IO, WebSocketFrame]) => s.evalMap {
+          case Text(t, _) => IO.delay(println(t))
+          case f          => IO.delay(println(s"Unknown type: $f"))
+        }
+        resp <- WebSocketBuilder[IO].build(toClient, fromClient)
+      yield
+        resp
   }
 
   val staticService = fileService[IO](FileService.Config("./web", "/"))
@@ -59,11 +72,14 @@ object Main extends IOApp:
       .withHttpApp(
         Router(
           "/appoint" -> HttpRoutes.of[IO] { case GET -> Root =>
-            PermanentRedirect(Location(uri"/appoint/")) },
+            PermanentRedirect(Location(uri"/appoint/"))
+          },
           "/reception" -> HttpRoutes.of[IO] { case GET -> Root =>
-            PermanentRedirect(Location(uri"/reception/")) },
+            PermanentRedirect(Location(uri"/reception/"))
+          },
           "/practice" -> HttpRoutes.of[IO] { case GET -> Root =>
-            PermanentRedirect(Location(uri"/practice/")) },
+            PermanentRedirect(Location(uri"/practice/"))
+          },
           "/api" -> RestService.routes,
           "/ws" -> ws(topic),
           "/deploy" -> deployTestService,

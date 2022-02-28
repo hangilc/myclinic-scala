@@ -13,6 +13,9 @@ trait DbEvent extends Mysql {
   def nextGlobalEventId(): IO[Int] =
     mysql(DbEventPrim.nextGlobalEventId())
 
+  def currentEventId(): IO[Int] =
+    mysql(DbEventPrim.currentEventId())
+
   def listGlobalEventSince(eventId: Int): IO[List[AppEvent]] =
     mysql(DbEventPrim.listGlobalEventSince(eventId).to[List])
 

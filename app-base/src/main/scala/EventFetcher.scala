@@ -14,7 +14,7 @@ import io.circe.syntax.*
 import io.circe.parser.decode
 import dev.myclinic.scala.model.jsoncodec.Implicits.{given}
 import dev.myclinic.scala.model.jsoncodec.EventType
-import dev.myclinic.scala.model.HotlineBeep
+import dev.myclinic.scala.model.{HotlineBeep, EventIdNotice}
 import java.time.LocalDateTime
 
 abstract class EventFetcher:
@@ -25,7 +25,7 @@ abstract class EventFetcher:
 
   def catchup(lastExcludedEventId: Int, f: AppModelEvent => Unit): Unit =
     val i = events.lastIndexWhere(_.appEventId <= lastExcludedEventId)
-    events.slice(i+1, events.size).foreach(f)
+    events.slice(i + 1, events.size).foreach(f)
 
   private def onNewAppEvent(event: AppModelEvent): Unit =
     events = events :+ event
@@ -59,12 +59,26 @@ abstract class EventFetcher:
   private def handleMessage(msg: String): Unit =
     println(("message", msg))
     decode[EventType](msg) match {
-      case Right(event) => 
+      case Right(event) =>
         event match {
-          case appEvent @ _: AppEvent => handleAppEvent(appEvent)
+          case appEvent @ _: AppEvent       => handleAppEvent(appEvent)
           case hotlineBeep @ _: HotlineBeep => publish(hotlineBeep)
+          case eventIdNotice: EventIdNotice =>
+            if eventIdNotice.currentEventId >= nextEventId then drainEvents()
         }
-      case Left(ex)        => System.err.println(ex.getMessage)
+      case Left(ex) => System.err.println(ex.getMessage)
+    }
+
+  private def drainEvents(): Unit =
+    val op = for events <- Api.listAppEventSince(nextEventId)
+      yield events.foreach(event => {
+        val modelEvent = AppModelEvent.from(event)
+        onNewAppEvent(modelEvent)
+        nextEventId = event.appEventId + 1
+      })
+    op.onComplete {
+      case Success(_) => ()
+      case Failure(ex) => System.err.println(ex.getMessage)
     }
 
   private def handleAppEvent(appEvent: AppEvent): Unit =
@@ -73,16 +87,14 @@ abstract class EventFetcher:
       if appEvent.appEventId == nextEventId then
         onNewAppEvent(modelEvent)
         nextEventId += 1
-      else if appEvent.appEventId > nextEventId then
-        Api
-          .listAppEventInRange(nextEventId, appEvent.appEventId)
-          .onComplete({
-            case Success(events) =>
-              val modelEvents = events.map(raw => AppModelEvent.from(raw))
-              modelEvents.foreach(event => onNewAppEvent(event))
-              onNewAppEvent(modelEvent)
-              nextEventId = appEvent.appEventId + 1
-            case Failure(ex) => System.err.println(ex.getMessage)
-          })
-
-
+      else if appEvent.appEventId > nextEventId then drainEvents()
+// Api
+//   .listAppEventInRange(nextEventId, appEvent.appEventId)
+//   .onComplete({
+//     case Success(events) =>
+//       val modelEvents = events.map(raw => AppModelEvent.from(raw))
+//       modelEvents.foreach(event => onNewAppEvent(event))
+//       onNewAppEvent(modelEvent)
+//       nextEventId = appEvent.appEventId + 1
+//     case Failure(ex) => System.err.println(ex.getMessage)
+//   })
