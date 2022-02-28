@@ -17,6 +17,7 @@ import dev.myclinic.scala.model.jsoncodec.EventType
 import dev.myclinic.scala.model.{HotlineBeep, EventIdNotice, HeartBeat}
 import java.time.LocalDateTime
 import org.scalajs.dom.WebSocket
+import org.scalajs.dom.CloseEvent
 
 abstract class EventFetcher:
   def publish(event: AppModelEvent): Unit = ()
@@ -36,8 +37,25 @@ abstract class EventFetcher:
   var wsOpt: Option[WebSocket] = None
   def start(): Future[Unit] =
     for nextEventIdValue <- Api.getNextAppEventId()
-    yield {
+    yield
       nextEventId = nextEventIdValue
+      connect()
+
+  private def connect(): Unit =
+    val ws = new dom.WebSocket(url)
+    wsOpt = Some(ws)
+    ws.onmessage = { (e: dom.MessageEvent) =>
+      {
+        val msg = e.data.asInstanceOf[String]
+        handleMessage(msg)
+      }
+    }
+    ws.onclose = (e: dom.CloseEvent) => {
+      wsOpt = None
+      connect()
+    }
+
+  def isRelevant(appEvent: AppEvent): Boolean = true
       val ws = new dom.WebSocket(url)
       wsOpt = Some(ws)
       ws.onmessage = { (e: dom.raw.MessageEvent) =>
@@ -46,9 +64,6 @@ abstract class EventFetcher:
           handleMessage(msg)
         }
       }
-    }
-
-  def isRelevant(appEvent: AppEvent): Boolean = true
 
   private def url: String =
     val location = dom.window.location
