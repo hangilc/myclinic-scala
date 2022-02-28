@@ -14,8 +14,9 @@ import io.circe.syntax.*
 import io.circe.parser.decode
 import dev.myclinic.scala.model.jsoncodec.Implicits.{given}
 import dev.myclinic.scala.model.jsoncodec.EventType
-import dev.myclinic.scala.model.{HotlineBeep, EventIdNotice}
+import dev.myclinic.scala.model.{HotlineBeep, EventIdNotice, HeartBeat}
 import java.time.LocalDateTime
+import org.scalajs.dom.WebSocket
 
 abstract class EventFetcher:
   def publish(event: AppModelEvent): Unit = ()
@@ -32,11 +33,13 @@ abstract class EventFetcher:
     publish(event)
 
   var nextEventId: Int = 0
+  var wsOpt: Option[WebSocket] = None
   def start(): Future[Unit] =
     for nextEventIdValue <- Api.getNextAppEventId()
     yield {
       nextEventId = nextEventIdValue
       val ws = new dom.WebSocket(url)
+      wsOpt = Some(ws)
       ws.onmessage = { (e: dom.raw.MessageEvent) =>
         {
           val msg = e.data.asInstanceOf[String]
@@ -57,14 +60,21 @@ abstract class EventFetcher:
     s"${protocol}//${host}/ws/events"
 
   private def handleMessage(msg: String): Unit =
-    println(("message", msg))
     decode[EventType](msg) match {
       case Right(event) =>
         event match {
-          case appEvent @ _: AppEvent       => handleAppEvent(appEvent)
+          case appEvent @ _: AppEvent       => 
+            handleAppEvent(appEvent)
+            println(("app-event", msg))
           case hotlineBeep @ _: HotlineBeep => publish(hotlineBeep)
           case eventIdNotice: EventIdNotice =>
-            if eventIdNotice.currentEventId >= nextEventId then drainEvents()
+            if eventIdNotice.currentEventId >= nextEventId then 
+              drainEvents()
+              println(("drained", eventIdNotice.currentEventId))
+          case _: HeartBeat => 
+            // println("heart-beat")
+            wsOpt.foreach(ws => ws.send("heart-beat"))
+            ()
         }
       case Left(ex) => System.err.println(ex.getMessage)
     }

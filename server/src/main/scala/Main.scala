@@ -1,7 +1,9 @@
 package dev.myclinic.scala.server
 
-import cats.effect._
+import cats.*
 import cats.syntax.all.*
+import cats.effect._
+import cats.effect.syntax.*
 import cats.data.OptionT
 import fs2.Pipe
 import fs2.concurrent.Topic
@@ -25,6 +27,11 @@ import dev.myclinic.scala.model.jsoncodec.EventType
 import dev.myclinic.scala.model.jsoncodec.Implicits.given
 import io.circe._
 import io.circe.syntax._
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+import dev.myclinic.scala.model.HeartBeat
+import dev.myclinic.scala.model.jsoncodec.Implicits.given
+import scala.concurrent.duration.DurationInt
 
 object Main extends IOApp:
 
@@ -42,13 +49,18 @@ object Main extends IOApp:
         toClient = fs2.Stream[IO, WebSocketFrame](
           Text(EventIdNotice(eventId).asInstanceOf[EventType].asJson.toString)
         ) ++ topic.subscribe(10)
-        fromClient = (s: fs2.Stream[IO, WebSocketFrame]) => s.evalMap {
-          case Text(t, _) => IO.delay(println(t))
-          case f          => IO.delay(println(s"Unknown type: $f"))
-        }
+        fromClient = (s: fs2.Stream[IO, WebSocketFrame]) =>
+          s.evalMap {
+            case Text("heart-beat", _) =>
+              IO.delay(
+                // println("heart-beat received")
+                ()
+              )
+            case Text(t, _) => IO.delay(println(t))
+            case f          => IO.delay(println(s"Unknown type: $f"))
+          }
         resp <- WebSocketBuilder[IO].build(toClient, fromClient)
-      yield
-        resp
+      yield resp
   }
 
   val staticService = fileService[IO](FileService.Config("./web", "/"))
@@ -87,7 +99,19 @@ object Main extends IOApp:
         ).orNotFound
       )
       .resource
-      .use(_ => IO.never)
+      .use(_ => {
+        val heartBeatFrame =
+          Text(HeartBeat().asInstanceOf[EventType].asJson.toString)
+        fs2.Stream
+          .awakeEvery[IO](15.seconds)
+          .evalMap(_ => {
+            topic.publish1(heartBeatFrame)
+          })
+          .compile
+          .drain
+      })
+      .flatMap(_ => IO.never)
+      //.use(_ => IO.never)
       .as(ExitCode.Success)
 
   override def run(args: List[String]): IO[ExitCode] =
@@ -104,5 +128,8 @@ object Main extends IOApp:
       else None
     for
       topic <- Topic[IO, WebSocketFrame]
+      // _ <- fs2.Stream.awakeEvery[IO](15.seconds).map(_ => {
+      //   topic.publish1(heartBeatFrame)
+      // }).compile.drain
       exitCode <- buildServer(topic, port, sslContextOption)
     yield exitCode

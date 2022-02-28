@@ -1,10 +1,12 @@
 package dev.myclinic.scala.model.jsoncodec
 
-import dev.myclinic.scala.model.{AppEvent, HotlineBeep, EventIdNotice}
+import dev.myclinic.scala.model.{AppEvent, HotlineBeep, EventIdNotice, HeartBeat}
+import cats.*
+import cats.syntax.all.*
 import io.circe.*
 import io.circe.syntax.*
 
-type EventType = AppEvent | HotlineBeep | EventIdNotice
+type EventType = AppEvent | HotlineBeep | EventIdNotice | HeartBeat
 
 trait Event extends AppEventCodec with Model:
   given Decoder[EventType] with
@@ -15,6 +17,7 @@ trait Event extends AppEventCodec with Model:
           case "appevent" => c.downField("data").as[AppEvent]
           case "hotline-beep" => c.downField("data").as[HotlineBeep]
           case "event-id-notice" => c.downField("data").as[EventIdNotice]
+          case "heart-beat" => Right(HeartBeat())
         }
       yield event.asInstanceOf[EventType]
 
@@ -24,6 +27,7 @@ trait Event extends AppEventCodec with Model:
         case appEvent @ _: AppEvent => serialize("appevent", appEvent)
         case hotlineBeep @ _: HotlineBeep => serialize("hotline-beep", hotlineBeep)
         case eventIdNotice @_: EventIdNotice => serialize("event-id-notice", eventIdNotice)
+        case _: HeartBeat => serialize("heart-beat", "")
       }
     
     def serialize[T](format: String, data: T)(using Encoder[T]): Json =
