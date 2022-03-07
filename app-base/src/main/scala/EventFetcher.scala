@@ -56,14 +56,6 @@ abstract class EventFetcher:
     }
 
   def isRelevant(appEvent: AppEvent): Boolean = true
-      val ws = new dom.WebSocket(url)
-      wsOpt = Some(ws)
-      ws.onmessage = { (e: dom.raw.MessageEvent) =>
-        {
-          val msg = e.data.asInstanceOf[String]
-          handleMessage(msg)
-        }
-      }
 
   private def url: String =
     val location = dom.window.location
@@ -87,7 +79,7 @@ abstract class EventFetcher:
               drainEvents()
               println(("drained", eventIdNotice.currentEventId))
           case _: HeartBeat => 
-            // println("heart-beat")
+            println("heart-beat")
             wsOpt.foreach(ws => ws.send("heart-beat"))
             ()
         }
