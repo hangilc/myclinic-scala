@@ -23,6 +23,7 @@ import dev.myclinic.scala.web.appbase.{EventFetcher}
 import dev.myclinic.scala.web.appbase.{DataSource, SyncedDataSource}
 import dev.myclinic.scala.web.appbase.SortedCompList
 import dev.myclinic.scala.web.appbase.Comp
+import dev.myclinic.scala.web.appbase.LocalEventPublisher
 
 class HokenList(
     var gen: Int,
@@ -49,6 +50,10 @@ class HokenList(
   val list: SortedCompList[Item] = SortedCompList(eDisp)
   updateHokenUI()
 
+  private def deleteItem(item: Item): Unit =
+    list.delete(c => c.id == item.id, removeElement = false)
+    println(("deleted", list))
+
   private def onListAllChange(): Unit =
     (for
       (g, _, s, kk, r, kh) <-
@@ -67,15 +72,16 @@ class HokenList(
     }
 
   private def setHokenList(items: List[Item]): Unit = list.set(items)
-    // val listSorted = list.sortBy(list => list.validFrom).reverse
-    // eDisp(clear, children := listSorted.map(_.ele))
 
   private def updateHokenUI(): Unit =
     val list: List[Item] =
       shahokokuhoList.map(shaho => ShahokokuhoItem(SyncedDataSource(gen, shaho)))
         ++ roujinList.map(roujin => RoujinItem(SyncedDataSource(gen, roujin)))
-        ++ koukikoureiList.map(koukikourei => KoukikoureiItem(SyncedDataSource(gen, koukikourei)))
+        ++ koukikoureiList.map(koukikourei =>
+          KoukikoureiItem(SyncedDataSource(gen, koukikourei))
+        )
         ++ kouhiList.map(kouhi => KouhiItem(SyncedDataSource(gen, kouhi)))
+    list.foreach(item => item.onDelete.subscribe(deleteItem(_)))
     setHokenList(list)
 
 object HokenList:
@@ -83,6 +89,8 @@ object HokenList:
   trait Item:
     def ele: HTMLElement
     def validFrom: LocalDate
+    def id: (String, Int)
+    val onDelete: LocalEventPublisher[Item] = LocalEventPublisher[Item]
 
   object Item:
     given Ordering[Item] = Ordering.by((item: Item) => item.validFrom).reverse
@@ -126,15 +134,16 @@ object HokenList:
   def kouhiRep(kouhi: Kouhi): String = HokenRep.kouhiRep(kouhi.futansha)
 
   abstract class ItemBase[T](ds: SyncedDataSource[T])(using
-      EventFetcher,
-      DataId[T],
-      ModelSymbol[T]
+      fetcher: EventFetcher,
+      dataId: DataId[T],
+      modelSymbol: ModelSymbol[T]
   ) extends Item:
     def validFrom: LocalDate
     def validUpto: Option[LocalDate]
     def rep: String
     def currentData: T = ds.data
     def currentGen: Int = ds.gen
+    def id: (String, Int) = (modelSymbol.getSymbol, dataId.getId(currentData))
 
     val ui = new ItemUI
     updateUI()
