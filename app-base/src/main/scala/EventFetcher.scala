@@ -42,18 +42,25 @@ abstract class EventFetcher:
       connect()
 
   private def connect(): Unit =
-    val ws = new dom.WebSocket(url)
-    wsOpt = Some(ws)
-    ws.onmessage = { (e: dom.MessageEvent) =>
-      {
-        val msg = e.data.asInstanceOf[String]
-        handleMessage(msg)
+    if wsOpt.isEmpty then
+      println("ws-connect")
+      val ws = new dom.WebSocket(url)
+      ws.onopen = { (e: dom.Event) =>
+        println("ws-open")
+        if wsOpt.isEmpty then
+          wsOpt = Some(ws)
+          ws.onclose = (e: dom.CloseEvent) => {
+            wsOpt = None
+            println("ws-close")
+            connect()
+          }
       }
-    }
-    ws.onclose = (e: dom.CloseEvent) => {
-      wsOpt = None
-      connect()
-    }
+      ws.onmessage = { (e: dom.MessageEvent) =>
+        {
+          val msg = e.data.asInstanceOf[String]
+          handleMessage(msg)
+        }
+      }
 
   def isRelevant(appEvent: AppEvent): Boolean = true
 
