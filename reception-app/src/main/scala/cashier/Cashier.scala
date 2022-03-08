@@ -5,7 +5,7 @@ import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.{ShowMessage, Icons, Colors, ContextMenu, Table}
 import scala.language.implicitConversions
-import dev.myclinic.scala.web.appbase.{SideMenu, EventPublishers, PrintDialog}
+import dev.myclinic.scala.web.appbase.{SideMenu, EventPublishers, PrintDialog,}
 import dev.myclinic.scala.web.appbase.ElementEvent.*
 import dev.myclinic.scala.model.*
 import dev.fujiwara.kanjidate.KanjiDate
@@ -20,6 +20,7 @@ import java.time.LocalDate
 import dev.myclinic.scala.web.appbase.SideMenuService
 import scala.collection.mutable
 import dev.myclinic.scala.web.appbase.EventFetcher
+import dev.myclinic.scala.web.appbase.{DataSource, SyncedDataSource, SyncedDataSource3}
 
 class Cashier(using EventFetcher) extends SideMenuService:
   val table = new Table
@@ -91,7 +92,8 @@ class Cashier(using EventFetcher) extends SideMenuService:
     table.addRow(Table.row(children := headerCells))
 
   private def addRow(gen: Int, wq: Wqueue, visit: Visit, patient: Patient): Unit =
-    val wqRow = new WqueueRow(gen, wq, visit, patient)
+    val ds: DataSource[(Wqueue, Visit, Patient)] = SyncedDataSource3(gen, wq, visit, patient)
+    val wqRow = new WqueueRow(ds)
     table.addRow(wqRow.ele)
 
   private def removeRow(visitId: Int): Unit =
