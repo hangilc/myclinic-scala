@@ -5,7 +5,7 @@ import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.{ShowMessage, Icons, Colors, ContextMenu, Table}
 import scala.language.implicitConversions
-import dev.myclinic.scala.web.appbase.{SideMenu, EventPublishers, PrintDialog,}
+import dev.myclinic.scala.web.appbase.{SideMenu, EventPublishers, PrintDialog}
 import dev.myclinic.scala.web.appbase.ElementEvent.*
 import dev.myclinic.scala.model.*
 import dev.fujiwara.kanjidate.KanjiDate

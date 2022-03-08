@@ -24,8 +24,9 @@ import java.time.LocalDateTime
 import java.time.LocalDate
 import dev.myclinic.scala.util.{HokenRep, RcptUtil}
 import dev.myclinic.scala.apputil.FutanWari
+import dev.myclinic.scala.web.appbase.SyncedDataSource
 
-class ShahokokuhoSubblock(var gen: Int, var shahokokuho: Shahokokuho):
+class ShahokokuhoSubblock(ds: SyncedDataSource[Shahokokuho]):
   val eContent = div()
   val eCommands = div()
   val block: Subblock = Subblock(
@@ -34,8 +35,12 @@ class ShahokokuhoSubblock(var gen: Int, var shahokokuho: Shahokokuho):
     eCommands
   )
   disp()
+  ds.onDelete(() => ele.remove())
+  ds.startSync(ele)
 
   def ele = block.ele
+  def gen: Int = ds.gen
+  def shahokokuho: Shahokokuho = ds.data
 
   def disp(): Unit =
     val d = ShahokokuhoDisp(gen, shahokokuho)
@@ -67,10 +72,7 @@ class ShahokokuhoSubblock(var gen: Int, var shahokokuho: Shahokokuho):
       .asEither match {
       case Right(h) => {
         Api.updateShahokokuho(h).onComplete {
-          case Success(_gen)  => 
-            gen = _gen
-            shahokokuho = h
-            disp()
+          case Success(_gen)  => disp()
           case Failure(ex) => errBox.show(ex.getMessage)
         }
       }
@@ -82,12 +84,8 @@ class ShahokokuhoSubblock(var gen: Int, var shahokokuho: Shahokokuho):
 
   private def doDelete(shahokokuhoId: Int): Unit =
     Api.deleteShahokokuho(shahokokuhoId).onComplete {
-      case Success(_)  => block.close()
+      case Success(_)  => ()
       case Failure(ex) => ShowMessage.showError(ex.getMessage)
     }
 
-  // private def onUpdated(event: CustomEvent[ShahokokuhoUpdated]): Unit =
-  //   val updated = event.detail.updated
-  //   val newSub = ShahokokuhoSubblock(gen, updated)
-  //   block.ele.replaceBy(newSub.block.ele)
 

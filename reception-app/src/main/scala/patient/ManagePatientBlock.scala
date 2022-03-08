@@ -18,6 +18,7 @@ import java.time.LocalDate
 import dev.myclinic.scala.util.{HokenRep, RcptUtil}
 import dev.myclinic.scala.apputil.FutanWari
 import dev.myclinic.scala.web.appbase.{EventFetcher}
+import dev.myclinic.scala.web.appbase.SyncedDataSource
 
 class ManagePatientBlock(
     var gen: Int,
@@ -57,15 +58,15 @@ class ManagePatientBlock(
   updateLeftPane()
   block.ele(cls := "manage-patient-block")
   block.ele(eSubblocks(cls := "subblocks"))
-  val ele = block.ele
+  def ele = block.ele
 
-  CustomEvents.addShahokokuhoSubblock.listen(ele , onAddShahokokuhoSubblock.tupled)
+  CustomEvents.addShahokokuhoSubblock.handle(ele , onAddShahokokuhoSubblock.tupled)
 
   private def onAddShahokokuhoSubblock(
       gen: Int,
       shahokokuho: Shahokokuho
   ): Unit =
-    val sub = ShahokokuhoSubblock(gen, shahokokuho)
+    val sub = ShahokokuhoSubblock(SyncedDataSource(gen, shahokokuho))
     eSubblocks(sub.ele)
 
   def updateLeftPane(): Unit =

@@ -20,7 +20,7 @@ import org.scalajs.dom.Event
 import scala.math.Ordered.orderingToOrdered
 import dev.fujiwara.domq.DomqUtil
 import dev.myclinic.scala.web.appbase.{EventFetcher}
-import dev.myclinic.scala.web.appbase.SyncedComp
+import dev.myclinic.scala.web.appbase.{DataSource, SyncedDataSource}
 
 class HokenList(
     var gen: Int,
@@ -69,10 +69,10 @@ class HokenList(
 
   private def updateHokenUI(): Unit =
     val list: List[Item] =
-      shahokokuhoList.map(ShahokokuhoItem(gen, _))
-        ++ roujinList.map(RoujinItem(gen, _))
-        ++ koukikoureiList.map(KoukikoureiItem(gen, _))
-        ++ kouhiList.map(KouhiItem(gen, _))
+      shahokokuhoList.map(shaho => ShahokokuhoItem(SyncedDataSource(gen, shaho)))
+        ++ roujinList.map(roujin => RoujinItem(SyncedDataSource(gen, roujin)))
+        ++ koukikoureiList.map(koukikourei => KoukikoureiItem(SyncedDataSource(gen, koukikourei)))
+        ++ kouhiList.map(kouhi => KouhiItem(SyncedDataSource(gen, kouhi)))
     setHokenList(list)
 
 object HokenList:
@@ -118,26 +118,28 @@ object HokenList:
 
   def kouhiRep(kouhi: Kouhi): String = HokenRep.kouhiRep(kouhi.futansha)
 
-  abstract class ItemBase[T](gen: Int, hoken: T)(using
+  abstract class ItemBase[T](ds: SyncedDataSource[T])(using
       EventFetcher,
       DataId[T],
       ModelSymbol[T]
-  ) extends SyncedComp[T](gen, hoken)
-      with Item:
+  ) extends Item:
     def validFrom: LocalDate
     def validUpto: Option[LocalDate]
     def rep: String
+    def currentData: T = ds.data
+    def currentGen: Int = ds.gen
 
     val ui = new ItemUI
+    updateUI()
+    ds.onDelete(() => ele.remove())
+    ds.startSync(ele)
     def ele = ui.ele
     def updateUI(): Unit = ui.label.innerText =
       makeLabel(rep, validFrom, validUpto)
 
-    initSyncedComp()
-
-  class ShahokokuhoItem(_gen: Int, _shahokokuho: Shahokokuho)(using
+  class ShahokokuhoItem(ds: SyncedDataSource[Shahokokuho])(using
       EventFetcher
-  ) extends ItemBase[Shahokokuho](_gen, _shahokokuho):
+  ) extends ItemBase[Shahokokuho](ds):
     def validFrom = currentData.validFrom
     def validUpto = currentData.validUptoOption
     def rep = shahokokuhoRep(currentData)
@@ -147,11 +149,11 @@ object HokenList:
         .trigger(ele, (currentGen, currentData))
     }))
 
-  class KoukikoureiItem(_gen: Int, _koukikourei: Koukikourei)(using
+  class KoukikoureiItem(ds: SyncedDataSource[Koukikourei])(using
       EventFetcher,
       DataId[Koukikourei],
       ModelSymbol[Koukikourei]
-  ) extends ItemBase[Koukikourei](_gen, _koukikourei):
+  ) extends ItemBase[Koukikourei](ds):
     def validFrom = currentData.validFrom
     def validUpto = currentData.validUptoOption
     def rep = koukikoureiRep(currentData)
@@ -161,11 +163,11 @@ object HokenList:
         .trigger(ele, (currentGen, currentData))
     }))
 
-  class RoujinItem(_gen: Int, _roujin: Roujin)(using
+  class RoujinItem(ds: SyncedDataSource[Roujin])(using
       EventFetcher,
       DataId[Koukikourei],
       ModelSymbol[Koukikourei]
-  ) extends ItemBase[Roujin](_gen, _roujin):
+  ) extends ItemBase[Roujin](ds):
     def validFrom = currentData.validFrom
     def validUpto = currentData.validUptoOption
     def rep = roujinRep(currentData)
@@ -174,11 +176,11 @@ object HokenList:
       CustomEvents.addRoujinSubblock.trigger(ele, (currentGen, currentData))
     }))
 
-  class KouhiItem(_gen: Int, _kouhi: Kouhi)(using
+  class KouhiItem(ds: SyncedDataSource[Kouhi])(using
       EventFetcher,
       DataId[Koukikourei],
       ModelSymbol[Koukikourei]
-  ) extends ItemBase[Kouhi](_gen, _kouhi):
+  ) extends ItemBase[Kouhi](ds):
     def validFrom = currentData.validFrom
     def validUpto = currentData.validUptoOption
     def rep = kouhiRep(currentData)
