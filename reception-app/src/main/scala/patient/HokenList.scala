@@ -21,6 +21,8 @@ import scala.math.Ordered.orderingToOrdered
 import dev.fujiwara.domq.DomqUtil
 import dev.myclinic.scala.web.appbase.{EventFetcher}
 import dev.myclinic.scala.web.appbase.{DataSource, SyncedDataSource}
+import dev.myclinic.scala.web.appbase.SortedCompList
+import dev.myclinic.scala.web.appbase.Comp
 
 class HokenList(
     var gen: Int,
@@ -44,6 +46,7 @@ class HokenList(
       span("過去の保険も含める  ")
     )
   )
+  val list: SortedCompList[Item] = SortedCompList(eDisp)
   updateHokenUI()
 
   private def onListAllChange(): Unit =
@@ -63,9 +66,9 @@ class HokenList(
       case Failure(ex) => System.err.println(ex.getMessage)
     }
 
-  private def setHokenList(list: List[Item]): Unit =
-    val listSorted = list.sortBy(list => list.validFrom).reverse
-    eDisp(clear, children := listSorted.map(_.ele))
+  private def setHokenList(items: List[Item]): Unit = list.set(items)
+    // val listSorted = list.sortBy(list => list.validFrom).reverse
+    // eDisp(clear, children := listSorted.map(_.ele))
 
   private def updateHokenUI(): Unit =
     val list: List[Item] =
@@ -80,6 +83,10 @@ object HokenList:
   trait Item:
     def ele: HTMLElement
     def validFrom: LocalDate
+
+  object Item:
+    given Ordering[Item] = Ordering.by((item: Item) => item.validFrom).reverse
+    given Comp[Item] = _.ele
 
   class ItemUI:
     val icon = Icons.zoomIn()
