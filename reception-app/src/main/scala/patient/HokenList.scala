@@ -21,9 +21,11 @@ import scala.math.Ordered.orderingToOrdered
 import dev.fujiwara.domq.DomqUtil
 import dev.myclinic.scala.web.appbase.{EventFetcher}
 import dev.myclinic.scala.web.appbase.{DataSource, SyncedDataSource}
-import dev.myclinic.scala.web.appbase.SortedCompList
+import dev.myclinic.scala.web.appbase.ListOfSortedComp
 import dev.myclinic.scala.web.appbase.Comp
 import dev.myclinic.scala.web.appbase.LocalEventPublisher
+import dev.myclinic.scala.web.appbase.DeleteNotifier
+import dev.myclinic.scala.web.appbase.ElementEvent.*
 
 class HokenList(
     var gen: Int,
@@ -47,12 +49,14 @@ class HokenList(
       span("過去の保険も含める  ")
     )
   )
-  val list: SortedCompList[Item] = SortedCompList(eDisp)
+  val list: ListOfSortedComp[Item] = ListOfSortedComp(eDisp)
   updateHokenUI()
-
-  private def deleteItem(item: Item): Unit =
-    list.delete(c => c.id == item.id, removeElement = false)
-    println(("deleted", list))
+  ele.addCreatedListener[Shahokokuho](event => {
+    val gen = event.appEventId
+    val created = event.dataAs[Shahokokuho]
+    val item = ShahokokuhoItem(SyncedDataSource(gen, created))
+    list.insert(item)
+  })
 
   private def onListAllChange(): Unit =
     (for
@@ -81,7 +85,6 @@ class HokenList(
           KoukikoureiItem(SyncedDataSource(gen, koukikourei))
         )
         ++ kouhiList.map(kouhi => KouhiItem(SyncedDataSource(gen, kouhi)))
-    list.foreach(item => item.onDelete.subscribe(deleteItem(_)))
     setHokenList(list)
 
 object HokenList:
@@ -90,11 +93,14 @@ object HokenList:
     def ele: HTMLElement
     def validFrom: LocalDate
     def id: (String, Int)
-    val onDelete: LocalEventPublisher[Item] = LocalEventPublisher[Item]
+    def onDelete(handler: () => Unit): Unit
 
   object Item:
     given Ordering[Item] = Ordering.by((item: Item) => item.validFrom).reverse
     given Comp[Item] = _.ele
+    given DeleteNotifier[Item] with
+      def subscribe(item: Item, handler: () => Unit) =
+        item.onDelete(handler)
 
   class ItemUI:
     val icon = Icons.zoomIn()
@@ -144,6 +150,8 @@ object HokenList:
     def currentData: T = ds.data
     def currentGen: Int = ds.gen
     def id: (String, Int) = (modelSymbol.getSymbol, dataId.getId(currentData))
+    def onDelete(handler: () => Unit): Unit =
+      ds.onDelete(handler)
 
     val ui = new ItemUI
     updateUI()

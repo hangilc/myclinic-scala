@@ -14,56 +14,41 @@ trait Comp[C]:
 trait CompData[C, T] extends Comp[C]:
   def data(c: C): T
 
-// object Comp:
-//   def insert[C, T: Ordering](
-//       sorted: List[C],
-//       c: C,
-//       wrapperOption: Option[HTMLElement]
-//   )(using compElement: CompElement[C], compData: CompData[C, T]): List[C] =
-//     val (pre, post) =
-//       sorted.span(t => compData.getData(t) < compData.getData(c))
-//     wrapperOption match {
-//       case Some(wrapper) =>
-//         if post.isEmpty then wrapper(compElement.getElement(c))
-//         else
-//           compElement.getElement(post.head).preInsert(compElement.getElement(c))
-//       case None => ()
-//     }
-//     pre ++ (c :: post)
+trait DeleteNotifier[C]:
+  def subscribe(c: C, handler: () => Unit): Unit
 
-//   def delete[C, T: Ordering](
-//       sorted: List[C],
-//       pred: C => Boolean,
-//       removeElement: Boolean = false
-//   )(using compElement: CompElement[C], compData: CompData[C, T]): List[C] =
-//     val (pre, post) = sorted.span(t => !pred(t))
-//     if post.isEmpty then sorted
-//     else
-//       if removeElement then compElement.getElement(post.head).remove()
-//       pre ++ post.tail
+class ListOfComp[C](wrapper: HTMLElement)(using
+    comp: Comp[C],
+    deleteNotifier: DeleteNotifier[C]
+):
+  protected var store: List[C] = List.empty
+  def append(c: C): Unit =
+    subscribe(c)
+    wrapper(comp.ele(c))
+  def prepend(c: C): Unit =
+    subscribe(c)
+    wrapper.prepend(comp.ele(c))
+  def list: List[C] = store
+  protected def subscribe(c: C): Unit =
+    deleteNotifier.subscribe(
+      c,
+      () => {
+        store = store.filter(_ != c)
+      }
+    )
 
-// class CompList[C, T](wrapper: HTMLElement, ctor: (Int, T) => C)(using
-//     compElement: CompElement[C],
-//     compData: CompData[C, T],
-//     modelSymbol: ModelSymbol[T],
-//     dataId: DataId[T]
-// ):
-//   var list: List[C] = List.empty
-
-//   wrapper.addCreatedListener[T](event => {
-//     val created = event.dataAs[T]
-//     val c = ctor(event.appEventId, created)
-//     append(c)
-//   })
-
-//   wrapper.addDeletedAllListener[T](event => {
-//     val deleted = event.dataAs[T]
-//     val id = dataId.getId(deleted)
-//     list = list
-//       .find(c => dataId.getId(compData.getData(c)) == id)
-//       .fold(list)(d => list.filterNot(_ != d))
-//   })
-
-//   def append(c: C): Unit =
-//     list = list :+ c
-//     wrapper(compElement.getElement(c))
+class ListOfSortedComp[C](wrapper: HTMLElement)(using
+    ordering: Ordering[C],
+    comp: Comp[C],
+    deleteNotifier: DeleteNotifier[C]
+) extends ListOfComp[C](wrapper):
+  def insert(c: C): Unit =
+    subscribe(c)
+    store = SortedCompList.insert(store, c, wrapper)
+  def set(cs: List[C]): Unit =
+    wrapper(clear)
+    store = cs.sorted
+    store.foreach(c => {
+      subscribe(c)
+      wrapper(comp.ele(c))
+    })
