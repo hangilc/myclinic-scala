@@ -29,6 +29,13 @@ class ListOfComp[C](wrapper: HTMLElement)(using
     subscribe(c)
     wrapper.prepend(comp.ele(c))
   def list: List[C] = store
+  def contains(pred: C => Boolean): Boolean = store.find(pred(_)).isDefined
+  def delete(c: C): Unit =
+    delete((item: C) => item == c)
+  def delete(pred: C => Boolean): Unit =
+    val (dels, eles) = store.partition(pred)
+    dels.foreach(d => comp.ele(d).remove())
+    store = eles
   protected def subscribe(c: C): Unit =
     deleteNotifier.subscribe(
       c,

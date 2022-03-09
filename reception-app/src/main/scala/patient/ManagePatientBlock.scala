@@ -20,26 +20,14 @@ import dev.myclinic.scala.apputil.FutanWari
 import dev.myclinic.scala.web.appbase.{EventFetcher}
 import dev.myclinic.scala.web.appbase.SyncedDataSource
 
-class ManagePatientBlock(
-    var gen: Int,
-    var patient: Patient,
-    var shahokokuhoList: List[Shahokokuho],
-    var koukikoureiList: List[Koukikourei],
-    var roujinList: List[Roujin],
-    var kouhiList: List[Kouhi]
-)(using EventFetcher):
+class ManagePatientBlock(ds: SyncedDataSource[Patient])(using EventFetcher):
   import ManagePatientBlock.*
+  def gen: Int = ds.gen
+  def patient: Patient = ds.data
   val eLeftPane = div
   val eRightPane = div()
   val eSubblocks = div()
-  val hokenList = HokenList(
-    gen,
-    patient.patientId,
-    shahokokuhoList,
-    koukikoureiList,
-    roujinList,
-    kouhiList
-  )
+  val hokenList = HokenList(patient.patientId)
   val block = Block(
     s"${patient.fullName()} (${patient.patientId})",
     div(cls := "manage-patient-block-content")(
@@ -58,9 +46,13 @@ class ManagePatientBlock(
   updateLeftPane()
   block.ele(cls := "manage-patient-block")
   block.ele(eSubblocks(cls := "subblocks"))
-  def ele = block.ele
+  CustomEvents.addShahokokuhoSubblock.handle(
+    ele,
+    onAddShahokokuhoSubblock.tupled
+  )
+  ds.startSync(ele)
 
-  CustomEvents.addShahokokuhoSubblock.handle(ele , onAddShahokokuhoSubblock.tupled)
+  def ele = block.ele
 
   private def onAddShahokokuhoSubblock(
       gen: Int,
@@ -76,14 +68,8 @@ class ManagePatientBlock(
 
   def onEditPatient(): Unit =
     val form = PatientEdit(patient)
-    form.onCancel = () =>
-      println("cancel")
-      updateLeftPane()
-    form.onDone = () =>
-      for updated <- Api.getPatient(patient.patientId)
-      yield
-        patient = updated
-        updateLeftPane()
+    form.onCancel = () => updateLeftPane()
+    form.onDone = () => updateLeftPane()
     eLeftPane(clear, form.ele)
 
   private def onNewShahokokuho(): Unit =

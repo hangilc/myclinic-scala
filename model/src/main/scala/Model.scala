@@ -10,6 +10,7 @@ import io.circe.syntax.*
 import io.circe.parser.decode
 import io.circe.generic.semiauto._
 import scala.concurrent.duration.FiniteDuration
+import dev.myclinic.scala.util.DateUtil
 
 case class ValidUpto(value: Option[LocalDate])
 
@@ -277,6 +278,12 @@ case class Payment(
     paytime: LocalDateTime
 )
 
+trait EffectivePeriodProvider[T]:
+  def getValidFrom(t: T): LocalDate
+  def getValidUpto(t: T): ValidUpto
+  def isValidAt(t: T, d: LocalDate): Boolean =
+    DateUtil.isValidAt(d, getValidFrom(t), getValidUpto(t).value)
+
 case class IyakuhinMaster(
     iyakuhincode: Int,
     yakkacode: String,
@@ -291,6 +298,11 @@ case class IyakuhinMaster(
     validUpto: ValidUpto
 ):
   def yakka: Double = yakkaStore.toDouble
+
+object IyakuhinMaster:
+  given EffectivePeriodProvider[IyakuhinMaster] with
+    def getValidFrom(t: IyakuhinMaster): LocalDate = t.validFrom
+    def getValidUpto(t: IyakuhinMaster): ValidUpto = t.validUpto
 
 case class ShinryouMaster(
     shinryoucode: Int,
@@ -317,6 +329,9 @@ case class KizaiMaster(
 ):
   def kingaku: Double = kingakuStore.toDouble
 
+trait PatientIdProvider[T]:
+  def getPatientId(t: T): Int
+
 case class Shahokokuho(
     shahokokuhoId: Int,
     patientId: Int,
@@ -342,6 +357,10 @@ object Shahokokuho:
   val modelSymbol = "shahokokuho"
   given shahokokuhoModelSymbol: ModelSymbol[Shahokokuho] with
     def getSymbol: String = modelSymbol
+  given EffectivePeriodProvider[Shahokokuho] with
+    def getValidFrom(t: Shahokokuho) = t.validFrom
+    def getValidUpto(t: Shahokokuho) = t.validUpto
+  given PatientIdProvider[Shahokokuho] = _.patientId
 
 case class Roujin(
     roujinId: Int,
@@ -361,6 +380,10 @@ object Roujin:
   val modelSymbol = "roujin"
   given ModelSymbol[Roujin] with
     def getSymbol: String = modelSymbol
+  given EffectivePeriodProvider[Roujin] with
+    def getValidFrom(t: Roujin) = t.validFrom
+    def getValidUpto(t: Roujin) = t.validUpto
+  given PatientIdProvider[Roujin] = _.patientId
 
 case class Koukikourei(
     koukikoureiId: Int,
@@ -380,6 +403,10 @@ object Koukikourei:
   val modelSymbol = "koukikourei"
   given ModelSymbol[Koukikourei] with
     def getSymbol: String = modelSymbol
+  given EffectivePeriodProvider[Koukikourei] with
+    def getValidFrom(t: Koukikourei) = t.validFrom
+    def getValidUpto(t: Koukikourei) = t.validUpto
+  given PatientIdProvider[Koukikourei] = _.patientId
 
 case class Kouhi(
     kouhiId: Int,
@@ -398,6 +425,10 @@ object Kouhi:
   val modelSymbol = "kouhi"
   given ModelSymbol[Kouhi] with
     def getSymbol: String = modelSymbol
+  given EffectivePeriodProvider[Kouhi] with
+    def getValidFrom(t: Kouhi) = t.validFrom
+    def getValidUpto(t: Kouhi) = t.validUpto
+  given PatientIdProvider[Kouhi] = _.patientId
 
 case class MeisaiSectionData(
     section: MeisaiSection,

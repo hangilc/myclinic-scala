@@ -79,6 +79,13 @@ object DateUtil:
   def calcAge(birthday: LocalDate, at: LocalDate): Int =
     birthday.until(at, ChronoUnit.YEARS).toInt
 
+  def isValidAt(d: LocalDate, from: LocalDate, uptoOpt: Option[LocalDate]): Boolean =
+    if d.isBefore(from) then false
+    else uptoOpt match {
+      case None => true
+      case Some(upto) => !d.isAfter(upto)
+    }
+
 
   
 

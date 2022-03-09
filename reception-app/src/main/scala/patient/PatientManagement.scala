@@ -1,6 +1,6 @@
 package dev.myclinic.scala.web.reception.patient
 
-import dev.myclinic.scala.web.appbase.SideMenuService
+import dev.myclinic.scala.web.appbase.{SideMenuService, SyncedDataSource}
 import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
@@ -81,30 +81,14 @@ class PatientManagement(using EventFetcher) extends SideMenuService:
           val block = SearchPatientBlock(
             patients,
             _.remove(),
-            addManagePatientBlock
+            patient => addManagePatientBlock(gen, patient)
           )
           eWorkarea.prepend(block.ele)
           eSearchText.value = ""
         else ShowMessage.showMessage("該当患者が見つかりませんでした。")
       }
 
-  private def addManagePatientBlock(patient: Patient): Unit =
-    val f =
-      for
-        (gen, patient, shahokokuho, koukikourei, roujin, kouhi) <- Api
-          .getPatientHoken(patient.patientId, LocalDate.now())
-      yield
-        val manage = ManagePatientBlock(
-          gen,
-          patient,
-          shahokokuho,
-          koukikourei,
-          roujin,
-          kouhi
-        )
-        eWorkarea.prepend(manage.ele)
-    f.onComplete {
-      case Success(_)  => ()
-      case Failure(ex) => System.err.println(ex.getMessage)
-    }
+  private def addManagePatientBlock(gen: Int, patient: Patient): Unit =
+    val ds: SyncedDataSource[Patient] = SyncedDataSource(gen, patient)
+    eWorkarea.prepend(ManagePatientBlock(ds).ele)
 

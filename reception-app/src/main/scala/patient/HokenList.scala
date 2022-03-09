@@ -27,14 +27,7 @@ import dev.myclinic.scala.web.appbase.LocalEventPublisher
 import dev.myclinic.scala.web.appbase.DeleteNotifier
 import dev.myclinic.scala.web.appbase.ElementEvent.*
 
-class HokenList(
-    var gen: Int,
-    patientId: Int,
-    var shahokokuhoList: List[Shahokokuho],
-    var koukikoureiList: List[Koukikourei],
-    var roujinList: List[Roujin],
-    var kouhiList: List[Kouhi]
-)(using EventFetcher):
+class HokenList(patientId: Int)(using EventFetcher):
   import HokenList.*
   val errorBox = ErrorBox()
   val eDisp = div()
@@ -49,58 +42,162 @@ class HokenList(
       span("過去の保険も含める  ")
     )
   )
-  val list: ListOfSortedComp[Item] = ListOfSortedComp(eDisp)
-  updateHokenUI()
+  private val list: ListOfSortedComp[Item] = ListOfSortedComp(eDisp)
+  addCreatedListener[Shahokokuho]
+  addCreatedListener[Koukikourei]
+  addCreatedListener[Kouhi]
+  addCreatedListener[Roujin]
+  onListAllChange()
   ele.addCreatedListener[Shahokokuho](event => {
     val gen = event.appEventId
     val created = event.dataAs[Shahokokuho]
-    val item = ShahokokuhoItem(SyncedDataSource(gen, created))
+    val item = Item(gen, created)
     list.insert(item)
   })
+  ele.addUpdatedAllListener[Shahokokuho](event => {
+    val updated = event.dataAs[Shahokokuho]
+    if !isListingAll then
+      if updated.isValidAt(LocalDate.now()) && !list.contains(
+          _.id == HokenId(updated)
+        )
+      then list.insert(createShahokokuhoItem(event.appEventId, updated))
+      else if !updated.isValidAt(LocalDate.now()) && list.contains(
+          _.id == HokenId(updated)
+        )
+      then list.delete(item => item.id == HokenId(updated))
+  })
+
+  private def addCreatedListener[T](using
+      modelSymbol: ModelSymbol[T],
+      dataId: DataId[T],
+      periodProvider: EffectivePeriodProvider[T],
+      repProvider: RepProvider[T],
+      patientIdProvider: PatientIdProvider[T]
+  ): Unit =
+    ele.addCreatedListener[T](event => {
+      val created = event.dataAs[T]
+      if patientIdProvider.getPatientId(created) == patientId then
+        if isListingAll || periodProvider.isValidAt(created, LocalDate.now()) then
+          val gen = event.appEventId
+          val item = Item(gen, created)
+          list.insert(item)
+      })
+
+  private def addUpdatedAllListener[T](using
+      modelSymbol: ModelSymbol[T],
+      dataId: DataId[T],
+      periodProvider: EffectivePeriodProvider[T],
+      repProvider: RepProvider[T]
+  ): Unit =
+    ele.addUpdatedAllListener[T](event => {
+      val updated = event.dataAs[T]
+      val isValid: Boolean = periodProvider.isValidAt(updated, LocalDate.now())
+      if !isListingAll then
+        if isValid && !list.contains(_.id == HokenId(updated)) then
+          list.insert(createShahokokuhoItem(event.appEventId, updated))
+        else if !updated.isValidAt(LocalDate.now()) && list.contains(
+            _.id == HokenId(updated)
+          )
+        then list.delete(item => item.id == HokenId(updated))
+    })
+
+  private def isListingAll: Boolean = eListAll.checked
 
   private def onListAllChange(): Unit =
     (for
-      (g, _, s, kk, r, kh) <-
-        if eListAll.checked then Api.getPatientAllHoken(patientId)
-        else Api.getPatientHoken(patientId, LocalDate.now())
-    yield
-      gen = g
-      shahokokuhoList = s
-      koukikoureiList = kk
-      roujinList = r
-      kouhiList = kh
-      updateHokenUI()
-    ).onComplete {
+      items <-
+        if isListingAll then fetchAll()
+        else fetchCurrent()
+    yield list.set(items)).onComplete {
       case Success(_)  => ()
       case Failure(ex) => System.err.println(ex.getMessage)
     }
 
   private def setHokenList(items: List[Item]): Unit = list.set(items)
 
-  private def updateHokenUI(): Unit =
+  private def fetchCurrent(): Future[List[Item]] =
+    Api.getPatientHoken(patientId, LocalDate.now()).map(convertToItems.tupled)
+
+  private def fetchAll(): Future[List[Item]] =
+    Api.getPatientAllHoken(patientId).map(convertToItems.tupled)
+
+  private def convertToItems(
+      gen: Int,
+      _patient: Patient,
+      shahokokuhoList: List[Shahokokuho],
+      koukikoureiList: List[Koukikourei],
+      roujinList: List[Roujin],
+      kouhiList: List[Kouhi]
+  ): List[Item] =
     val list: List[Item] =
-      shahokokuhoList.map(shaho => ShahokokuhoItem(SyncedDataSource(gen, shaho)))
-        ++ roujinList.map(roujin => RoujinItem(SyncedDataSource(gen, roujin)))
-        ++ koukikoureiList.map(koukikourei =>
-          KoukikoureiItem(SyncedDataSource(gen, koukikourei))
-        )
-        ++ kouhiList.map(kouhi => KouhiItem(SyncedDataSource(gen, kouhi)))
-    setHokenList(list)
+      shahokokuhoList.map(shaho => Item(gen, shaho))
+        ++ roujinList.map(roujin => Item(gen, roujin))
+        ++ koukikoureiList.map(koukikourei => Item(gen, koukikourei))
+        ++ kouhiList.map(kouhi => Item(gen, kouhi))
+    list
 
 object HokenList:
+  case class HokenId(symbol: String, id: Int)
+
+  object HokenId:
+    def apply[T](
+        t: T
+    )(using modelSymbol: ModelSymbol[T], dataId: DataId[T]): HokenId =
+      HokenId(modelSymbol.getSymbol, dataId.getId(t))
 
   trait Item:
     def ele: HTMLElement
     def validFrom: LocalDate
-    def id: (String, Int)
+    def id: HokenId
     def onDelete(handler: () => Unit): Unit
+    def validUpto: Option[LocalDate]
+    def isValidAt(d: LocalDate): Boolean =
+      DateUtil.isValidAt(d, validFrom, validUpto)
 
   object Item:
+    def apply[T](gen: Int, data: T)(using
+        periodProvider: EffectivePeriodProvider[T],
+        repProvider: RepProvider[T],
+        modelSymbol: ModelSymbol[T],
+        dataId: DataId[T],
+        eventFetcher: EventFetcher
+    ): Item =
+      ItemImpl(SyncedDataSource(gen, data))
     given Ordering[Item] = Ordering.by((item: Item) => item.validFrom).reverse
     given Comp[Item] = _.ele
     given DeleteNotifier[Item] with
       def subscribe(item: Item, handler: () => Unit) =
         item.onDelete(handler)
+
+  trait RepProvider[T]:
+    def rep(t: T): String
+
+  given RepProvider[Shahokokuho] = (shahokokuhoRep _)
+  given RepProvider[Koukikourei] = (koukikoureiRep _)
+  given RepProvider[Kouhi] = (kouhiRep _)
+  given RepProvider[Roujin] = (roujinRep _)
+
+  class ItemImpl[T](ds: SyncedDataSource[T])(using
+      periodProvider: EffectivePeriodProvider[T],
+      repProvider: RepProvider[T],
+      modelSymbol: ModelSymbol[T],
+      dataId: DataId[T],
+      eventFetcher: EventFetcher
+  ) extends Item:
+    def gen: Int = ds.gen
+    def data: T = ds.data
+    def validFrom = periodProvider.getValidFrom(data)
+    def id = HokenId(data)
+    def onDelete(handler: () => Unit): Unit = ds.onDelete(handler)
+    def validUpto = periodProvider.getValidUpto(data).value
+    val ui = new ItemUI
+    updateUI()
+    ds.onDelete(() => ele.remove())
+    ds.onUpdate(() => updateUI())
+    ds.startSync(ele)
+    def ele = ui.ele
+    def updateUI(): Unit = ui.label.innerText =
+      makeLabel(repProvider.rep(data), validFrom, validUpto)
 
   class ItemUI:
     val icon = Icons.zoomIn()
@@ -149,13 +246,14 @@ object HokenList:
     def rep: String
     def currentData: T = ds.data
     def currentGen: Int = ds.gen
-    def id: (String, Int) = (modelSymbol.getSymbol, dataId.getId(currentData))
+    def id = HokenId(currentData)
     def onDelete(handler: () => Unit): Unit =
       ds.onDelete(handler)
 
     val ui = new ItemUI
     updateUI()
     ds.onDelete(() => ele.remove())
+    ds.onUpdate(() => updateUI())
     ds.startSync(ele)
     def ele = ui.ele
     def updateUI(): Unit = ui.label.innerText =
