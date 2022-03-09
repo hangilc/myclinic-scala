@@ -6,4 +6,9 @@ trait DataId[T]:
 trait ModelSymbol[T]:
   def getSymbol: String
 
+trait RepProvider[T]:
+  def rep(t: T): String
+
+
+
  

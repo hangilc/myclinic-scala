@@ -11,6 +11,7 @@ import io.circe.parser.decode
 import io.circe.generic.semiauto._
 import scala.concurrent.duration.FiniteDuration
 import dev.myclinic.scala.util.DateUtil
+import dev.myclinic.scala.util.HokenRep
 
 case class ValidUpto(value: Option[LocalDate])
 
@@ -361,6 +362,9 @@ object Shahokokuho:
     def getValidFrom(t: Shahokokuho) = t.validFrom
     def getValidUpto(t: Shahokokuho) = t.validUpto
   given PatientIdProvider[Shahokokuho] = _.patientId
+  given RepProvider[Shahokokuho] = t => HokenRep.shahokokuhoRep(
+    t.hokenshaBangou, t.koureiFutanWari
+  )
 
 case class Roujin(
     roujinId: Int,
@@ -384,6 +388,7 @@ object Roujin:
     def getValidFrom(t: Roujin) = t.validFrom
     def getValidUpto(t: Roujin) = t.validUpto
   given PatientIdProvider[Roujin] = _.patientId
+  given RepProvider[Roujin] = t => HokenRep.roujinRep(t.futanWari)
 
 case class Koukikourei(
     koukikoureiId: Int,
@@ -407,6 +412,7 @@ object Koukikourei:
     def getValidFrom(t: Koukikourei) = t.validFrom
     def getValidUpto(t: Koukikourei) = t.validUpto
   given PatientIdProvider[Koukikourei] = _.patientId
+  given RepProvider[Koukikourei] = t => HokenRep.koukikoureiRep(t.futanWari)
 
 case class Kouhi(
     kouhiId: Int,
@@ -429,6 +435,7 @@ object Kouhi:
     def getValidFrom(t: Kouhi) = t.validFrom
     def getValidUpto(t: Kouhi) = t.validUpto
   given PatientIdProvider[Kouhi] = _.patientId
+  given RepProvider[Kouhi] = t => HokenRep.kouhiRep(t.futansha)
 
 case class MeisaiSectionData(
     section: MeisaiSection,
