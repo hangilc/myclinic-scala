@@ -186,8 +186,7 @@ object HokenList:
     val ui = new ItemUI
     updateUI()
     ui.icon(onclick := (() => {
-      CustomEvents.addShahokokuhoSubblock
-        .trigger(ele, (currentGen, currentData))
+      CustomEvents.addHokenSubblock[T].trigger(ele, (gen, data))
     }))
     ds.onDelete(() => ele.remove())
     ds.onUpdate(() => updateUI())

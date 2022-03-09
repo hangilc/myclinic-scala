@@ -20,7 +20,7 @@ import dev.myclinic.scala.apputil.FutanWari
 import dev.myclinic.scala.web.appbase.{EventFetcher}
 import dev.myclinic.scala.web.appbase.SyncedDataSource
 
-class ManagePatientBlock(ds: SyncedDataSource[Patient])(using EventFetcher):
+class ManagePatientBlock(ds: => SyncedDataSource[Patient])(using EventFetcher):
   import ManagePatientBlock.*
   def gen: Int = ds.gen
   def patient: Patient = ds.data
@@ -46,9 +46,13 @@ class ManagePatientBlock(ds: SyncedDataSource[Patient])(using EventFetcher):
   updateLeftPane()
   block.ele(cls := "manage-patient-block")
   block.ele(eSubblocks(cls := "subblocks"))
-  CustomEvents.addShahokokuhoSubblock.handle(
+  CustomEvents.addHokenSubblock[Shahokokuho].handle(
     ele,
     onAddShahokokuhoSubblock.tupled
+  )
+  CustomEvents.addHokenSubblock[Koukikourei].handle(
+    ele,
+    onAddKoukikoureiSubblock.tupled
   )
   ds.startSync(ele)
 
@@ -59,6 +63,13 @@ class ManagePatientBlock(ds: SyncedDataSource[Patient])(using EventFetcher):
       shahokokuho: Shahokokuho
   ): Unit =
     val sub = ShahokokuhoSubblock(SyncedDataSource(gen, shahokokuho))
+    eSubblocks(sub.ele)
+
+  private def onAddKoukikoureiSubblock(
+      gen: Int,
+      koukikourei: Koukikourei
+  ): Unit =
+    val sub = KoukikoureiSubblock(SyncedDataSource(gen, koukikourei))
     eSubblocks(sub.ele)
 
   def updateLeftPane(): Unit =

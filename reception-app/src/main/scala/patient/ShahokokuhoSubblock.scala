@@ -26,7 +26,7 @@ import dev.myclinic.scala.util.{HokenRep, RcptUtil}
 import dev.myclinic.scala.apputil.FutanWari
 import dev.myclinic.scala.web.appbase.SyncedDataSource
 
-class ShahokokuhoSubblock(ds: SyncedDataSource[Shahokokuho]):
+class ShahokokuhoSubblock(ds: => SyncedDataSource[Shahokokuho]):
   val eContent = div()
   val eCommands = div()
   val block: Subblock = Subblock(
@@ -43,7 +43,7 @@ class ShahokokuhoSubblock(ds: SyncedDataSource[Shahokokuho]):
   def shahokokuho: Shahokokuho = ds.data
 
   def disp(): Unit =
-    val d = ShahokokuhoDisp(gen, shahokokuho)
+    val d = ShahokokuhoDisp(ds)
     eContent(clear, d.ele)
     eCommands(
       clear,

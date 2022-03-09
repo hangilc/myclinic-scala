@@ -3,7 +3,14 @@ package dev.myclinic.scala.web.reception.patient
 import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
-import dev.fujiwara.domq.{Icons, Form, ErrorBox, Modifier, ShowMessage, CustomEvent}
+import dev.fujiwara.domq.{
+  Icons,
+  Form,
+  ErrorBox,
+  Modifier,
+  ShowMessage,
+  CustomEvent
+}
 import scala.language.implicitConversions
 import scala.util.{Success, Failure}
 import org.scalajs.dom.{HTMLElement, HTMLInputElement}
@@ -17,8 +24,11 @@ import java.time.LocalDateTime
 import java.time.LocalDate
 import dev.myclinic.scala.util.{HokenRep, RcptUtil}
 import dev.myclinic.scala.apputil.FutanWari
+import dev.myclinic.scala.web.appbase.SyncedDataSource
 
-class KoukikoureiSubblock(koukikourei: Koukikourei):
+class KoukikoureiSubblock(ds: => SyncedDataSource[Koukikourei]):
+  def gen = ds.gen
+  def koukikourei = ds.data
   val eContent = div()
   val eCommands = div()
   val block: Subblock = Subblock(
@@ -27,16 +37,16 @@ class KoukikoureiSubblock(koukikourei: Koukikourei):
     eCommands
   )
   block.ele(
-    cls := s"koukikourei-${koukikourei.koukikoureiId}",
-    // oncustomevent[KoukikoureiUpdated](
-    //   "koukikourei-updated"
-    // ) := (onUpdated _)
+    cls := s"koukikourei-${koukikourei.koukikoureiId}"
   )
   disp()
+  ds.startSync(ele)
+
+  def ele = block.ele
 
   def disp(): Unit =
     eContent(clear)
-    eContent(KoukikoureiDisp(koukikourei).ele)
+    eContent(KoukikoureiDisp(ds).ele)
     eCommands(clear)
     eCommands(
       button("削除", onclick := (onDelete _)),
@@ -73,11 +83,12 @@ class KoukikoureiSubblock(koukikourei: Koukikourei):
     }
 
   private def onDelete(): Unit =
-    ShowMessage.confirm("この保険を削除していいですか？")(() => doDelete(koukikourei.koukikoureiId))
+    ShowMessage.confirm("この保険を削除していいですか？")(() =>
+      doDelete(koukikourei.koukikoureiId)
+    )
 
   private def doDelete(koukikoureiId: Int): Unit =
     Api.deleteKoukikourei(koukikoureiId).onComplete {
-      case Success(_) => block.close()
+      case Success(_)  => block.close()
       case Failure(ex) => ShowMessage.showError(ex.getMessage)
     }
-

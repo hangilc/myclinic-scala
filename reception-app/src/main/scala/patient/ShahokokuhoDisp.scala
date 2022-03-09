@@ -10,25 +10,46 @@ import dev.myclinic.scala.util.DateUtil
 import dev.myclinic.scala.model.*
 import java.time.LocalDate
 import dev.fujiwara.kanjidate.KanjiDate
+import dev.myclinic.scala.web.appbase.SyncedDataSource
 
-class ShahokokuhoDisp(var gen: Int, var shahokokuho: Shahokokuho):
+class ShahokokuhoDisp(ds: SyncedDataSource[Shahokokuho]):
+  def gen = ds.gen
+  def shahokokuho = ds.data
+  val eHokenshaBangou = div
+  val eHihokensha = div
+  val eEdaban = div
+  val eHonnin = div
+  val eKourei = div
+  val eValidFrom = div
+  val eValidUpto = div
   val ele = Form.rows(
-    span("保険者番号") -> div(shahokokuho.hokenshaBangou.toString),
-    span("被保険者") -> div(
+    span("保険者番号") -> eHokenshaBangou,
+    span("被保険者") -> eHihokensha,
+    span("枝番") -> eEdaban,
+    span("本人・家族") -> eHonnin,
+    span("高齢") -> eKourei,
+    span("期限開始") -> eValidFrom,
+    span("期限終了") -> eValidUpto
+  )
+  ele(cls := "shahokokuho-disp")
+  ds.onUpdate(updateUI _)
+  updateUI()
+
+  def updateUI(): Unit =
+    eHokenshaBangou(innerText := shahokokuho.hokenshaBangou.toString)
+    eHihokensha(clear, 
       shahokokuho.hihokenshaKigou,
       "・",
       shahokokuho.hihokenshaBangou
-    ),
-    span("枝番") -> div(shahokokuho.edaban),
-    span("本人・家族") -> div(if shahokokuho.isHonnin then "本人" else "家族"),
-    span("高齢") -> span(koureiRep(shahokokuho.koureiStore)),
-    span("期限開始") -> div(KanjiDate.dateToKanji(shahokokuho.validFrom)),
-    span("期限終了") -> div(shahokokuho.validUptoOption match {
+    )
+    eEdaban(innerText := shahokokuho.edaban)
+    eHonnin(innerText := (if shahokokuho.isHonnin then "本人" else "家族"))
+    eKourei(innerText := koureiRep(shahokokuho.koureiStore))
+    eValidFrom(innerText := KanjiDate.dateToKanji(shahokokuho.validFrom))
+    eValidUpto(innerText := (shahokokuho.validUptoOption match {
       case Some(d) => KanjiDate.dateToKanji(d)
       case None => "（期限なし）"
-    })
-  )
-  ele(cls := "shahokokuho-disp")
+    }))
 
   def koureiRep(kourei: Int): String = kourei match {
     case 0 => "高齢でない"
