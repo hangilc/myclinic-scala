@@ -26,7 +26,8 @@ import dev.myclinic.scala.util.{HokenRep, RcptUtil}
 import dev.myclinic.scala.apputil.FutanWari
 import dev.myclinic.scala.web.appbase.SyncedDataSource
 
-class KoukikoureiSubblock(ds: => SyncedDataSource[Koukikourei]):
+class KoukikoureiSubblock(dsCtor: () => SyncedDataSource[Koukikourei]):
+  val ds = dsCtor()
   def gen = ds.gen
   def koukikourei = ds.data
   val eContent = div()

@@ -62,14 +62,14 @@ class ManagePatientBlock(ds: => SyncedDataSource[Patient])(using EventFetcher):
       gen: Int,
       shahokokuho: Shahokokuho
   ): Unit =
-    val sub = ShahokokuhoSubblock(SyncedDataSource(gen, shahokokuho))
+    val sub = ShahokokuhoSubblock(() => SyncedDataSource(gen, shahokokuho))
     eSubblocks(sub.ele)
 
   private def onAddKoukikoureiSubblock(
       gen: Int,
       koukikourei: Koukikourei
   ): Unit =
-    val sub = KoukikoureiSubblock(SyncedDataSource(gen, koukikourei))
+    val sub = KoukikoureiSubblock(() => SyncedDataSource(gen, koukikourei))
     eSubblocks(sub.ele)
 
   def updateLeftPane(): Unit =
