@@ -3,6 +3,5 @@
 sbt clean
 sbt server/pack
 sbt appointApp/fullLinkJS
-# sbt receptionApp/fullLinkJS
+sbt receptionApp/fullLinkJS
 cp -r server/web server/target/pack/web
-# xcopy /E /I server\web server\target\pack\web\

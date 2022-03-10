@@ -16,8 +16,7 @@ import scala.util.{Success, Failure}
 import org.scalajs.dom.{HTMLElement, HTMLInputElement}
 import scala.concurrent.Future
 import org.scalajs.dom.MouseEvent
-import dev.myclinic.scala.webclient.Api
-import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
+import dev.myclinic.scala.webclient.{Api, global}
 
 import dev.myclinic.scala.model.*
 import java.time.LocalDateTime

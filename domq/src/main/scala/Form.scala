@@ -8,6 +8,41 @@ import dev.fujiwara.domq.Modifiers.{*, given}
 import scala.language.implicitConversions
 import org.scalajs.dom.HTMLInputElement
 
+class TableForm:
+  val ele = div(css(style => {
+      style.display = "table"
+      style.borderCollapse = "separate"
+      style.borderSpacing = "0.5rem 0.3rem"
+      style.margin = "-0.3rem -0.5rem"
+    }))
+
+  def row(key: String): HTMLElement =
+      val value = div
+      ele(
+        div(css(style => style.display = "table-row"))(
+          span(
+            key,
+            css(style => {
+              style.display = "table-cell"
+              style.textAlign = "right"
+              style.wordBreak = "keep-all"
+            }),
+            cls := "domq-form-key"
+          ),
+          value(
+            css(style => {
+              style.display = "table-cell"
+              style.verticalAlign = "middle"
+            }),
+            cls := "domq-form-value"
+          )(
+            input
+          )
+        )
+      )
+      value
+
+
 object Form:
   def rows(spec: (HTMLElement, HTMLElement)*): HTMLElement =
     val tab = div(css(style => {
