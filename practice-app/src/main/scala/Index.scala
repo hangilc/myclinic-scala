@@ -1,4 +1,4 @@
-package dev.myclinic.scala.web.practice
+package dev.myclinic.scala.web.practiceapp
 
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 import dev.fujiwara.domq.all.{*, given}
@@ -7,8 +7,30 @@ import dev.myclinic.scala.web.appbase.{HotlineEnv, HotlineUI, HotlineHandler}
 import dev.myclinic.scala.web.appbase.EventFetcher
 import dev.myclinic.scala.web.appbase.EventPublishers
 import dev.myclinic.scala.model.*
+import org.scalajs.dom.HTMLElement
+import dev.myclinic.scala.web.appbase.SideMenu
+import dev.myclinic.scala.web.practiceapp.practice.PracticeService
 
-class JsMain(val ui: MainUI)(using EventFetcher)
+class JsMain(val ui: MainUI)(using EventFetcher):
+  ui.sideMenuWrapper(PracticeSideMenu(ui.main))
+
+object PracticeSideMenu:
+  def apply(main: HTMLElement): HTMLElement =
+    val sideMenu = SideMenu(main, List(
+      "診察" -> (() => new PracticeService)
+    ))
+    sideMenu.ele
+
+    // a("診察"),
+    // a("会計"),
+    // a("受付"),
+    // a("ファックス済処方箋"),
+    // a("訪問看護"),
+    // a("主治医意見書"),
+    // a("ファックス送信"),
+    // a("印刷設定"),
+    // a("紹介状"),
+    // a("診断書"),
 
 class HotlineBlock:
   val messageInput = textarea
@@ -30,16 +52,6 @@ class HotlineBlock:
       attr("tabindex") := "-1"
     )
   )
-          // a("診察"),
-          // a("会計"),
-          // a("受付"),
-          // a("ファックス済処方箋"),
-          // a("訪問看護"),
-          // a("主治医意見書"),
-          // a("ファックス送信"),
-          // a("印刷設定"),
-          // a("紹介状"),
-          // a("診断書"),
 
 class MainUI:
   val sideMenuWrapper = div
