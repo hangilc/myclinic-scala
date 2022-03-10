@@ -121,6 +121,14 @@ object ElementQ:
     def listenToCustomEvent[T](typeArg: String, handler: T => Unit): Unit =
       ele.addEventListener(typeArg, (e: CustomEvent[T]) => handler(e.detail))
 
+    def extractFollowingSiblings(): List[HTMLElement] =
+      var sibs: List[HTMLElement] = Nil
+      while ele.nextElementSibling != null do
+        val e = ele.nextElementSibling.asInstanceOf[HTMLElement]
+        sibs = e :: sibs
+        e.remove()
+      sibs.reverse
+
   extension (s: HTMLSelectElement)
     def setValue(value: String): Boolean =
       s.qSelectorAllFind(

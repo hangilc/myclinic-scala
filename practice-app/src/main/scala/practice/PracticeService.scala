@@ -8,3 +8,11 @@ class PracticeService extends SideMenuService:
 
   def getElement = ele
 
+class PracticeServiceUI:
+  val leftColumn = div
+  val rightColumn = div
+  val ele = div(cls := "practice-workarea")(
+    leftColumn(cls := "practice-left-column"),
+    rightColumn
+  )
+

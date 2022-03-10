@@ -15,16 +15,19 @@ import scala.util.Failure
 case class SideMenuItem(label: String, creator: () => HTMLElement)
 
 trait SideMenuService:
-  def getElement: HTMLElement
+  //def getElement: HTMLElement
+  def getElements: List[HTMLElement]
   def init(): Future[Unit] = Future.successful(())
   def onReactivate: Future[Unit] = Future.successful(())
   def dispose(): Unit = ()
 
 class SideMenu(
-    main: HTMLElement,
+    wrapper: HTMLElement,
     args: List[(String, () => SideMenuService)]
 ):
   val ele: HTMLElement = div()
+  wrapper(ele)
+
   def invokeByLabel(label: String): Unit =
     items.find(_.label == label).foreach(invoke(_))
 
@@ -32,23 +35,26 @@ class SideMenu(
       label: String,
       link: HTMLElement,
       builder: () => SideMenuService,
-      var cache: Option[SideMenuService]
+      var cache: Option[(SideMenuService, List[HTMLElement])]
   ):
     def inactivate(): Unit =
-      cache.foreach(service => {
-        service.getElement.remove()
-        link(cls :- "current")
-      })
+      cache.foreach {
+        case (service, eles) => 
+          eles.foreach(e => DomUtil.hook(e))
+      }
+      link(cls :- "current")
+
     def activate(): Future[Unit] =
       cache.fold({
         val service = builder()
-        val e = service.getElement
-        main(clear)
-        main(div(e))
+        val eles = service.getElements
+        eles.foreach(wrapper(_))
         link(cls := "current")
-        cache = Some(service)
+        cache = Some(service, eles)
         service.init()
       })(service => {
+        ele.removeAllSiblings()
+        service.populateElements(wrapper)
         main(clear)
         main(div(service.getElement))
         link(cls := "current")

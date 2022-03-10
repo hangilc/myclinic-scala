@@ -5,20 +5,6 @@ import scala.math.Ordered.orderingToOrdered
 import dev.fujiwara.domq.all.{*, given}
 import dev.myclinic.scala.model.DataId
 
-// class SortedCompList[C](wrapper: HTMLElement)(
-//   using ordering: Ordering[C], comp: Comp[C]
-// ):
-//   private var store: List[C] = List.empty
-//   import SortedCompList as O
-//   def list: List[C] = store
-//   def set(cs: List[C]): Unit = 
-//     wrapper(clear)
-//     store = cs.sorted
-//     store.foreach(c => wrapper(comp.ele(c)))
-//   def insert(c: C): Unit =
-//     store = O.insert(store, c, wrapper)
-//   def delete(pred: C => Boolean, removeElement: Boolean = false): Unit =
-//     store = O.delete(store, pred, removeElement)
 
 object SortedCompList:
   def insert[C: Ordering](

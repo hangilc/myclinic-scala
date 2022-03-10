@@ -68,7 +68,7 @@ class SyncedDataSource[T](initGen: Int, init: T)(using
 
   private[appbase] def listenAt(ele: HTMLElement): Unit =
     if ele.parentElement == null then
-      SyncedDataSource.tmpWrapper.appendChild(ele)
+      DomUtil.hook(ele)
     ele.addUpdatedListener[T](id, handleEvent _)
     ele.addDeletedListener[T](id, handleEvent _)
 
@@ -161,12 +161,12 @@ class SyncedDataSource3[T1, T2, T3](
     src.foreach(_.handleEvent(event))
 
 object SyncedDataSource:
-  val tmpWrapper: HTMLElement = {
-    val e = document.createElement("div").asInstanceOf[HTMLElement]
-    e.style.display = "none"
-    document.body.appendChild(e)
-    e
-  }
+  // val tmpWrapper: HTMLElement = {
+  //   val e = document.createElement("div").asInstanceOf[HTMLElement]
+  //   e.style.display = "none"
+  //   document.body.appendChild(e)
+  //   e
+  // }
 
   def syncGen[T1, T2](
       g1: Int,
