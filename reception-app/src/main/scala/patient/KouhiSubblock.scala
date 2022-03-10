@@ -17,8 +17,13 @@ import java.time.LocalDateTime
 import java.time.LocalDate
 import dev.myclinic.scala.util.{HokenRep, RcptUtil}
 import dev.myclinic.scala.apputil.FutanWari
+import dev.myclinic.scala.web.appbase.SyncedDataSource
+import dev.myclinic.scala.web.appbase.EventFetcher
 
-class KouhiSubblock(kouhi: Kouhi):
+class KouhiSubblock(oriGen: Int, oriKouhi: Kouhi)(using EventFetcher):
+  val ds = SyncedDataSource(oriGen, oriKouhi)
+  def gen = ds.gen
+  def kouhi = ds.data
   val eContent = div()
   val eCommands = div()
   val block: Subblock = Subblock(
@@ -30,10 +35,13 @@ class KouhiSubblock(kouhi: Kouhi):
     cls := s"kouhi-${kouhi.kouhiId}"
   )
   disp()
+  ds.startSync(ele)
+
+  def ele = block.ele
 
   def disp(): Unit =
     eContent(clear)
-    eContent(KouhiDisp(kouhi).ele)
+    eContent(KouhiDisp(ds).ele)
     eCommands(clear)
     eCommands(
       button("削除", onclick := (onDelete _)),

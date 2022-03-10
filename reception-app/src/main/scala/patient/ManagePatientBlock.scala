@@ -54,6 +54,10 @@ class ManagePatientBlock(ds: => SyncedDataSource[Patient])(using EventFetcher):
     ele,
     onAddKoukikoureiSubblock.tupled
   )
+  CustomEvents.addHokenSubblock[Kouhi].handle(
+    ele,
+    onAddKouhiSubblock.tupled
+  )
   ds.startSync(ele)
 
   def ele = block.ele
@@ -70,6 +74,13 @@ class ManagePatientBlock(ds: => SyncedDataSource[Patient])(using EventFetcher):
       koukikourei: Koukikourei
   ): Unit =
     val sub = KoukikoureiSubblock(() => SyncedDataSource(gen, koukikourei))
+    eSubblocks(sub.ele)
+
+  private def onAddKouhiSubblock(
+      gen: Int,
+      kouhi: Kouhi
+  ): Unit =
+    val sub = KouhiSubblock(gen, kouhi)
     eSubblocks(sub.ele)
 
   def updateLeftPane(): Unit =
