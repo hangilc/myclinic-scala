@@ -67,9 +67,14 @@ button {
   margin: 4px 0 0 0;
 }
 
-#main {
+.practice-main {
   flex: 1 1 auto;
   margin: 10px 0 0 10px;
+  border: 1px solid blue;
+}
+
+.practice-right-column {
+  border: 1px solid yellow;
 }
 
 #main h1 {

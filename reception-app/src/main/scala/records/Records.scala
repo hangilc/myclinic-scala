@@ -20,7 +20,7 @@ import java.time.LocalDate
 class Records() extends SideMenuService:
   val selectPatientButton = PullDown.createButtonAnchor("患者選択")
   val eRecord = div()
-  def getElement: HTMLElement =
+  override def getElement: HTMLElement =
     div(cls := "records")(
       div(cls := "header")(
         h1("診療記録"),

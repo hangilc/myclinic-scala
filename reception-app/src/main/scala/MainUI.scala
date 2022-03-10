@@ -58,22 +58,9 @@ abstract class MainUI(using fetcher: EventFetcher):
           sideMenu.ele(id := "side-menu"),
           hotlineInput(id := "hotline-input"),
           div(id := "hotline-commands")(
-            hotlineSendButton(
-              "送信",
-              // onclick := (() => {
-              //   postHotline(hotlineInput.value)
-              //   hotlineInput.value = ""
-              // })
-            ),
-            hotlineRogerButton(
-              "了解",
-              // onclick := (() => {
-              //   postHotline("了解")
-              // })
-            ),
-            hotlineBeepButton("Beep", 
-              // onclick := (() => { Api.beep(); () })
-            ),
+            hotlineSendButton("送信"),
+            hotlineRogerButton("了解"),
+            hotlineBeepButton("Beep"), 
             pullDownLink("常用", regularMenuItems),
             pullDownLink("患者", patientMenuItems)
           ),

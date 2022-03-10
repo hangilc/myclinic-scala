@@ -12,11 +12,11 @@ import dev.myclinic.scala.web.appbase.SideMenu
 import dev.myclinic.scala.web.practiceapp.practice.PracticeService
 
 class JsMain(val ui: MainUI)(using EventFetcher):
-  ui.sideMenuWrapper(PracticeSideMenu(ui.main))
+  ui.sideMenuWrapper(PracticeSideMenu(ui.workarea))
 
 object PracticeSideMenu:
-  def apply(main: HTMLElement): HTMLElement =
-    val sideMenu = SideMenu(main, List(
+  def apply(wrapper: HTMLElement): HTMLElement =
+    val sideMenu = SideMenu(wrapper, List(
       "診察" -> (() => new PracticeService)
     ))
     sideMenu.ele
@@ -55,16 +55,15 @@ class HotlineBlock:
 
 class MainUI:
   val sideMenuWrapper = div
+  val workarea = div
   val hotlineBlock = new HotlineBlock
-  val main = div
   val ele = div(id := "content")(
     div(id := "banner", "診察"),
-    div(id := "workarea")(
+    workarea(id := "workarea")(
       div(id := "side-bar")(
         sideMenuWrapper(id := "side-menu"),
         hotlineBlock.ele
-      ),
-      main(id := "main")
+      )
     )
   )
 
