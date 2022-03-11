@@ -16,7 +16,7 @@ class HotlineBlock(sendAs: String, sendTo: String)(using fetcher: EventFetcher):
   ui.sendButton(onclick := (() => onSend(ui.messageInput.value.trim)))
   ui.rogerButton(onclick := (() => onSend("了解")))
   ui.beepButton(onclick := (() => { Api.hotlineBeep(sendTo); () }))
-  ui.regularsLink.builder = (regularsBuilder _)
+  ui.regularsLink.setBuilder(regulars)
 
   def ele = ui.ele
   def init(): Future[Unit] =
@@ -61,16 +61,8 @@ class HotlineBlock(sendAs: String, sendTo: String)(using fetcher: EventFetcher):
         case Success(_)  => ui.messageInput.value = ""
         case Failure(ex) => ShowMessage.showError(ex.getMessage)
       }
-  private def regularsBuilder(wrapper: HTMLElement, close: () => Unit, cb: () => Unit): Unit =
-    val ms = HotlineEnv.regulars(sendAs)
-    println(("ms", ms))
-    ms.foreach(m => {
-      val link = a(m)(display := "block", onclick := (() => {
-
-      }))
-      wrapper(link)
-      cb()
-    })
+  private def regulars: List[(String, () => Unit)] =
+    HotlineEnv.regulars(sendAs).map(m => (m, () => onSend(m)))
 
 class HotlineBlockUI:
   import dev.fujiwara.domq.PullDownLink

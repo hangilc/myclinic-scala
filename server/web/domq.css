@@ -115,6 +115,31 @@
 
 /* Pull Down *************************************************************/
 
+.domq-pull-down-wrapper {
+  background: rgba(255, 255, 255, 1);
+  border: 1px solid gray;
+  padding: 10px;
+}
+
+.domq-pull-down-wrapper a {
+  display: block;
+}
+
+.domq-pull-down-link svg {
+  width: 0.8rem;
+  height: 0.8rem;
+  margin-left: 0.15rem;
+  position: relative;
+  top: -0.08rem;
+  fill: var(--primary-color)
+}
+
+.domq-pull-down-wrapper a svg {
+  display: block;
+}
+
+/* Pull Down (old) *******************************************************/
+
 .domq-pull-down {
   display: inline-flex;
   align-items: center;

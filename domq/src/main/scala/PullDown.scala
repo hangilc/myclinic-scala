@@ -41,20 +41,40 @@ class PullDownMenu:
     ZIndexManager.release(zIndexScreen)
 
 class PullDownLink(label: String):
-  var builder: (HTMLElement, PullDown.CloseFun, PullDown.Callback) => Unit = (wrapper, close, cb) => cb()
-  val link: HTMLElement = PullDown.createLinkAnchor(label)
+  private var builder: (HTMLElement, PullDown.CloseFun, PullDown.Callback) => Unit =
+    (wrapper, close, cb) => cb()
+  val link: HTMLElement = a(label, Icons.downTriangleFlat)(cls := "domq-pull-down-link")
   link(onclick := ((e: MouseEvent) => {
-    PullDown.open(builder)
+    PullDown.open(builder, fe => PullDown.locatePullDownMenu(link, fe))
   }))
+
+  def setBuilder(b: (HTMLElement, PullDown.CloseFun, PullDown.Callback) => Unit) =
+    builder = b
+  def setBuilder(items: List[(String, () => Unit)]): Unit =
+    builder = (wrapper, close, cb) => {
+      items.foreach {
+        case (label, handler) =>
+          val anchor = a(label)(onclick := (() => {
+            close()
+            handler()
+          }))
+          wrapper(anchor)
+      }
+      cb()
+    }
 
 object PullDown:
   type CloseFun = () => Unit
   type Callback = () => Unit
-  def open(builder: (HTMLElement, CloseFun, Callback) => Unit): Unit =
+  type Locator = FloatingElement => Unit
+  def open(
+      builder: (HTMLElement, CloseFun, Callback) => Unit,
+      locator: Locator
+  ): Unit =
     val screen: HTMLElement = Screen.screen
     val zIndexScreen = ZIndexManager.alloc()
     val zIndexMenu = ZIndexManager.alloc()
-    val wrapper = div
+    val wrapper = div(cls := "domq-pull-down-wrapper")
     val fe = FloatingElement(wrapper)
     val close: () => Unit = () => {
       fe.hide()
@@ -75,6 +95,7 @@ object PullDown:
       close,
       () => {
         fe.ele(zIndex := zIndexMenu)
+        locator(fe)
         document.body(screen)
         fe.show()
       }
