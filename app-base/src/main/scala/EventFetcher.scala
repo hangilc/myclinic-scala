@@ -19,9 +19,9 @@ import java.time.LocalDateTime
 import org.scalajs.dom.WebSocket
 import org.scalajs.dom.CloseEvent
 
-abstract class EventFetcher:
-  def publish(event: AppModelEvent): Unit = ()
-  def publish(event: HotlineBeep): Unit = ()
+class EventFetcher:
+  val appModelEventPublisher: LocalEventPublisher[AppModelEvent] = LocalEventPublisher[AppModelEvent]
+  val hotlineBeepEventPublisher: LocalEventPublisher[HotlineBeep] = LocalEventPublisher[HotlineBeep]
 
   private var events: Vector[AppModelEvent] = Vector.empty
 
@@ -31,7 +31,7 @@ abstract class EventFetcher:
 
   private def onNewAppEvent(event: AppModelEvent): Unit =
     events = events :+ event
-    publish(event)
+    appModelEventPublisher.publish(event)
 
   var nextEventId: Int = 0
   var wsOpt: Option[WebSocket] = None
@@ -80,7 +80,7 @@ abstract class EventFetcher:
           case appEvent @ _: AppEvent       => 
             handleAppEvent(appEvent)
             println(("app-event", msg))
-          case hotlineBeep @ _: HotlineBeep => publish(hotlineBeep)
+          case hotlineBeep @ _: HotlineBeep => hotlineBeepEventPublisher.publish(hotlineBeep)
           case eventIdNotice: EventIdNotice =>
             if eventIdNotice.currentEventId >= nextEventId then 
               drainEvents()
@@ -112,13 +112,3 @@ abstract class EventFetcher:
         onNewAppEvent(modelEvent)
         nextEventId += 1
       else if appEvent.appEventId > nextEventId then drainEvents()
-// Api
-//   .listAppEventInRange(nextEventId, appEvent.appEventId)
-//   .onComplete({
-//     case Success(events) =>
-//       val modelEvents = events.map(raw => AppModelEvent.from(raw))
-//       modelEvents.foreach(event => onNewAppEvent(event))
-//       onNewAppEvent(modelEvent)
-//       nextEventId = appEvent.appEventId + 1
-//     case Failure(ex) => System.err.println(ex.getMessage)
-//   })

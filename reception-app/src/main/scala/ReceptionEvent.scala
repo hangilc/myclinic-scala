@@ -6,6 +6,6 @@ import dev.myclinic.scala.model.{AppModelEvent, HotlineBeep}
 object ReceptionEvent:
   val publishers = new EventPublishers
 
-  given fetcher: EventFetcher = new EventFetcher:
-    override def publish(event: AppModelEvent): Unit = publishers.publish(event)
-    override def publish(event: HotlineBeep): Unit = publishers.publish(event)
+  given fetcher: EventFetcher = new EventFetcher
+  fetcher.appModelEventPublisher.subscribe(event => publishers.publish(event))
+  fetcher.hotlineBeepEventPublisher.subscribe(event => publishers.publish(event))
