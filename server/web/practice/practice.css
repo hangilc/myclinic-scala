@@ -1,5 +1,5 @@
 body {
-  width: 860px;
+  width: 1200px;
   margin: 0 auto;
 }
 
@@ -24,12 +24,13 @@ button {
 }
 
 #workarea {
-  display: grid;
+  display: flex;
   grid-template-columns: 180px auto;
 }
 
 #side-bar {
   margin-top: 10px;
+  flex-basis: 200px;
 }
 
 #side-menu {
@@ -70,17 +71,28 @@ button {
 .practice-main {
   flex: 1 1 auto;
   margin: 10px 0 0 10px;
-  border: 1px solid blue;
 }
 
 .practice-right-column {
-  border: 1px solid yellow;
+  flex-basis: 240px;
+  margin: 10px 0 0 10px;
 }
 
-#main h1 {
+.practice-header {
+  display: flex;
+  align-items: center;
+}
+
+.practice-header-title {
   font-weight: normal;
-  margin: 0 0 10px 0;
+  margin: 0 100px 0 0;
+  padding: 0;
   font-size: 1.5rem;
+  display: inline-block;
+}
+
+.practice-header-choice {
+  margin-right: 20px;
 }
 
 .table .header {
