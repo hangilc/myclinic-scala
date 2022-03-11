@@ -6,34 +6,54 @@ import dev.myclinic.scala.webclient.{Api, global}
 import io.circe.parser.decode
 import dev.myclinic.scala.model.Hotline
 import dev.myclinic.scala.model.jsoncodec.Implicits.given
+import dev.myclinic.scala.model.AppModelEvent
+import scala.util.Success
+import scala.util.Failure
 
-class HotlineBlock:
+class HotlineBlock(sendAs: String, sendTo: String)(using fetcher: EventFetcher):
   val ui = new HotlineBlockUI
+  ui.sendButton(onclick := (() => onSend(ui.messageInput.value.trim)))
 
   def ele = ui.ele
   def init(): Future[Unit] =
-    for
-      hotlines <- Api.listTodaysHotline()
+    for hotlines <- Api.listTodaysHotline()
     yield
-      hotlines.foreach(event => 
-        val appEventId = event.appEventId
-        val hotline = event.data
-        handleHotline(appEventId, hotline)
+      var lastAppEventId = 0
+      hotlines.foreach(event =>
+        val hotline = decodeHotline(event.data)
+        handleHotline(hotline)
+        lastAppEventId = event.appEventId
       )
-      // fetcher.catchup(lastAppEventId, event =>
-      //   (event.model, event.kind) match {
-      //     case (Hotline.modelSymbol, AppModelEvent.createdSymbol) =>
-      //       handleHotline(event.appEventId, event.data.asInstanceOf[Hotline])
-      //     case _ => ()
-      //   }
-      // )
-      // ui.sendButton(onclick := (() => onSend(ui.messageInput.value.trim)))
-      // ui.rogerButton(onclick := (() => onSend("了解")))
-      // ui.beepButton(onclick := (() => { Api.hotlineBeep(sendTo); () }))
+      fetcher.catchup(
+        lastAppEventId,
+        event =>
+          if isHotlineCreatedEvent(event.model, event.kind) then
+            handleHotline(event.data.asInstanceOf[Hotline])
+      )
+      fetcher.appModelEventPublisher.subscribe(event => {
+        if isHotlineCreatedEvent(event.model, event.kind) then
+          handleHotline(event.dataAs[Hotline])
+      })
+  // ui.rogerButton(onclick := (() => onSend("了解")))
+  // ui.beepButton(onclick := (() => { Api.hotlineBeep(sendTo); () }))
   private def decodeHotline(data: String): Hotline =
     decode[Hotline](data).toOption.get
-  private def handleHotline(gen: Int, message: String): Unit =
-    println(("hotline", message))
+  private def isHotlineCreatedEvent(model: String, kind: String): Boolean =
+    model == Hotline.modelSymbol && kind == AppModelEvent.createdSymbol
+  private def handleHotline(hotline: Hotline): Unit =
+    val recipient = hotline.recipient
+    if recipient == sendAs then
+      val rep = HotlineEnv.hotlineNameRep(hotline.sender)
+      val msg = hotline.message
+      val line = s"${rep}> ${msg}\n"
+      ui.messages.value += line
+  private def onSend(msg: String): Unit =
+    if !msg.isEmpty then
+      val h = Hotline(msg, sendAs, sendTo)
+      Api.postHotline(h).onComplete {
+        case Success(_)  => ui.messageInput.value = ""
+        case Failure(ex) => ShowMessage.showError(ex.getMessage)
+      }
 
 class HotlineBlockUI:
   import dev.fujiwara.domq.PullDownLink

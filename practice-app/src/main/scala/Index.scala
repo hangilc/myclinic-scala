@@ -14,9 +14,16 @@ import dev.myclinic.scala.web.appbase.SideMenuProcs
 import dev.myclinic.scala.web.appbase.SideMenuService
 import dev.myclinic.scala.web.appbase.MockSideMenuService
 import dev.myclinic.scala.web.appbase.HotlineBlock
+import dev.myclinic.scala.webclient.global
 
 class JsMain(val ui: MainUI)(using EventFetcher):
   ui.sideMenu.addItems(sideMenuItems)
+  for 
+    _ <- ui.hotlineBlock.init()
+    _ <- ui.hotlineBlock2.init()
+    _ <- JsMain.fetcher.start()
+  yield
+    ()
 
   private def sideMenuItems: List[(String, SideMenuProcs => SideMenuService)] =
     List(
@@ -42,16 +49,18 @@ object PracticeSideMenu:
     )
     sideMenu.ele
 
-class MainUI:
+class MainUI(using EventFetcher):
   val workarea = div
   val sideMenu = SideMenu(workarea)
-  val hotlineBlock = new HotlineBlock
+  val hotlineBlock = new HotlineBlock("practice", "reception")
+  val hotlineBlock2 = new HotlineBlock("reception", "practice")
   val ele = div(id := "content")(
     div(id := "banner", "診察"),
     workarea(id := "workarea")(
       div(id := "side-bar")(
         sideMenu.ele(id := "side-menu"),
-        hotlineBlock.ele
+        hotlineBlock.ele,
+        hotlineBlock2.ele
       )
     )
   )
