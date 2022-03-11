@@ -9,12 +9,14 @@ import dev.myclinic.scala.model.jsoncodec.Implicits.given
 import dev.myclinic.scala.model.AppModelEvent
 import scala.util.Success
 import scala.util.Failure
+import org.scalajs.dom.HTMLElement
 
 class HotlineBlock(sendAs: String, sendTo: String)(using fetcher: EventFetcher):
   val ui = new HotlineBlockUI
   ui.sendButton(onclick := (() => onSend(ui.messageInput.value.trim)))
   ui.rogerButton(onclick := (() => onSend("了解")))
   ui.beepButton(onclick := (() => { Api.hotlineBeep(sendTo); () }))
+  ui.regularsLink.builder = (regularsBuilder _)
 
   def ele = ui.ele
   def init(): Future[Unit] =
@@ -59,6 +61,16 @@ class HotlineBlock(sendAs: String, sendTo: String)(using fetcher: EventFetcher):
         case Success(_)  => ui.messageInput.value = ""
         case Failure(ex) => ShowMessage.showError(ex.getMessage)
       }
+  private def regularsBuilder(wrapper: HTMLElement, close: () => Unit, cb: () => Unit): Unit =
+    val ms = HotlineEnv.regulars(sendAs)
+    println(("ms", ms))
+    ms.foreach(m => {
+      val link = a(m)(display := "block", onclick := (() => {
+
+      }))
+      wrapper(link)
+      cb()
+    })
 
 class HotlineBlockUI:
   import dev.fujiwara.domq.PullDownLink

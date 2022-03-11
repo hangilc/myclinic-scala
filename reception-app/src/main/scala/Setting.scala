@@ -16,7 +16,7 @@ object Setting:
 
   val regularHotlineMessages: List[String] =
     List(
-      "おはようございます。体温 {} 度でした。",
+      "おはようございます。",
       "退出します。",
       "戻りました。",
       "検温中です。",

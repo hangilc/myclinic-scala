@@ -41,7 +41,7 @@ class PullDownMenu:
     ZIndexManager.release(zIndexScreen)
 
 class PullDownLink(label: String):
-  val builder: (HTMLElement, PullDown.CloseFun, PullDown.Callback) => Unit = (wrapper, close, cb) => cb()
+  var builder: (HTMLElement, PullDown.CloseFun, PullDown.Callback) => Unit = (wrapper, close, cb) => cb()
   val link: HTMLElement = PullDown.createLinkAnchor(label)
   link(onclick := ((e: MouseEvent) => {
     PullDown.open(builder)
