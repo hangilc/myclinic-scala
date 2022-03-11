@@ -13,6 +13,7 @@ import dev.myclinic.scala.web.practiceapp.practice.PracticeService
 import dev.myclinic.scala.web.appbase.SideMenuProcs
 import dev.myclinic.scala.web.appbase.SideMenuService
 import dev.myclinic.scala.web.appbase.MockSideMenuService
+import dev.myclinic.scala.web.appbase.HotlineBlock
 
 class JsMain(val ui: MainUI)(using EventFetcher):
   ui.sideMenu.addItems(sideMenuItems)
@@ -40,38 +41,6 @@ object PracticeSideMenu:
       )
     )
     sideMenu.ele
-
-// a("診察"),
-// a("会計"),
-// a("受付"),
-// a("ファックス済処方箋"),
-// a("訪問看護"),
-// a("主治医意見書"),
-// a("ファックス送信"),
-// a("印刷設定"),
-// a("紹介状"),
-// a("診断書"),
-
-class HotlineBlock:
-  val messageInput = textarea
-  val sendButton = button
-  val rogerButton = button
-  val beepButton = button
-  val ele = div(
-    messageInput(id := "hotline-input"),
-    div(id := "hotline-commands")(
-      sendButton("送信"),
-      rogerButton("了解"),
-      beepButton("Beep"),
-      PullDown.createLinkAnchor("常用"),
-      PullDown.createLinkAnchor("患者")
-    ),
-    textarea(
-      id := "hotline-messages",
-      attr("readonly") := "readonly",
-      attr("tabindex") := "-1"
-    )
-  )
 
 class MainUI:
   val workarea = div

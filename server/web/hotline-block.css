@@ -1,0 +1,21 @@
+.hotline-block-message-input {
+  width: 100%;
+  height: 5rem;
+  margin: 10px 0 0 0;
+  resize: vertical;
+}
+
+.hotline-block-commands {
+  margin: 4px 0 0 0;
+}
+
+.hotline-block-commands a {
+  font-size: 85%;
+  margin-left: 0.3rem;
+}
+
+.hotline-block-messages {
+  width: 100%;
+  height: 15rem;
+  margin: 4px 0 0 0;
+}

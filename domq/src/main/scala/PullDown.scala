@@ -2,9 +2,7 @@ package dev.fujiwara.domq
 
 import org.scalajs.dom.{HTMLElement}
 import org.scalajs.dom.{document}
-import dev.fujiwara.domq.ElementQ.{*, given}
-import dev.fujiwara.domq.Html.{*, given}
-import dev.fujiwara.domq.Modifiers.{*, given}
+import dev.fujiwara.domq.all.{*, given}
 import dev.fujiwara.domq.{Geometry, Icons, FloatingElement, Screen}
 import scala.language.implicitConversions
 import org.scalajs.dom.MouseEvent
@@ -42,7 +40,46 @@ class PullDownMenu:
     ZIndexManager.release(zIndexMenu)
     ZIndexManager.release(zIndexScreen)
 
+class PullDownLink(label: String):
+  val builder: (HTMLElement, PullDown.CloseFun, PullDown.Callback) => Unit = (wrapper, close, cb) => cb()
+  val link: HTMLElement = PullDown.createLinkAnchor(label)
+  link(onclick := ((e: MouseEvent) => {
+    PullDown.open(builder)
+  }))
+
 object PullDown:
+  type CloseFun = () => Unit
+  type Callback = () => Unit
+  def open(builder: (HTMLElement, CloseFun, Callback) => Unit): Unit =
+    val screen: HTMLElement = Screen.screen
+    val zIndexScreen = ZIndexManager.alloc()
+    val zIndexMenu = ZIndexManager.alloc()
+    val wrapper = div
+    val fe = FloatingElement(wrapper)
+    val close: () => Unit = () => {
+      fe.hide()
+      screen.remove()
+      ZIndexManager.release(zIndexMenu)
+      ZIndexManager.release(zIndexScreen)
+    }
+
+    screen(zIndex := zIndexScreen)(
+      onclick := ((e: MouseEvent) => {
+        e.preventDefault()
+        e.stopPropagation()
+        close()
+      })
+    )
+    builder(
+      wrapper,
+      close,
+      () => {
+        fe.ele(zIndex := zIndexMenu)
+        document.body(screen)
+        fe.show()
+      }
+    )
+
   def locatePullDownMenu(anchor: HTMLElement, f: FloatingElement): Unit =
     val rect = Geometry.getRect(anchor)
     val p = rect.leftBottom.shiftY(4)
@@ -67,12 +104,11 @@ object PullDown:
     anchor(
       onclick := (() => {
         val m = new PullDownMenu()
-        (for
-          c <- content(() => m.close())
+        (for c <- content(() => m.close())
         yield {
           m.open(c, f => locatePullDownMenu(anchor, f))
         }).onComplete {
-          case Success(_) => ()
+          case Success(_)  => ()
           case Failure(ex) => System.err.println(ex.getMessage)
         }
       })
@@ -88,11 +124,13 @@ object PullDown:
       label: String,
       commands: Future[List[(String, () => Unit)]]
   ): HTMLElement =
-    pullDownFuture(createLinkAnchor(label), close => {
-      for
-        c <- commands
-      yield createContent(close, c)
-    })
+    pullDownFuture(
+      createLinkAnchor(label),
+      close => {
+        for c <- commands
+        yield createContent(close, c)
+      }
+    )
 
   def pullDownButton(
       label: String,
@@ -117,12 +155,16 @@ object PullDown:
       items: List[(String, () => Unit)]
   ): HTMLElement =
     def anchor(label: String, f: () => Unit): HTMLElement =
-      a(label, onclick := (() => {
-        close()
-        f()
-      }))
-    div(cls := "domq-context-menu")(children :=
-      items.map({ case (label, f) =>
-        div(anchor(label, f))
-      })
+      a(
+        label,
+        onclick := (() => {
+          close()
+          f()
+        })
+      )
+    div(cls := "domq-context-menu")(
+      children :=
+        items.map({ case (label, f) =>
+          div(anchor(label, f))
+        })
     )

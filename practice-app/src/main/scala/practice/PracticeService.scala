@@ -29,12 +29,14 @@ class PracticeMainUI:
   )
 
   def choice: HTMLElement =
-    PullDown.pullDownLink("患者選択", List(
-      "受付患者選択" -> (() => ()),
-      "患者検索" -> (() => ()),
-      "最近の診察" -> (() => ()),
-      "日付別" -> (() => ())
-    ))
+    import dev.fujiwara.domq.PullDownLink
+    PullDownLink("患者選択").link
+    // PullDown.pullDownLink("患者選択", List(
+    //   "受付患者選択" -> (() => ()),
+    //   "患者検索" -> (() => ()),
+    //   "最近の診察" -> (() => ()),
+    //   "日付別" -> (() => ())
+    // ))
 
 class PracticeRight:
   val ui = new PracticeRightUI
