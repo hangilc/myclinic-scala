@@ -13,6 +13,8 @@ import scala.util.Failure
 class HotlineBlock(sendAs: String, sendTo: String)(using fetcher: EventFetcher):
   val ui = new HotlineBlockUI
   ui.sendButton(onclick := (() => onSend(ui.messageInput.value.trim)))
+  ui.rogerButton(onclick := (() => onSend("了解")))
+  ui.beepButton(onclick := (() => { Api.hotlineBeep(sendTo); () }))
 
   def ele = ui.ele
   def init(): Future[Unit] =
@@ -34,8 +36,11 @@ class HotlineBlock(sendAs: String, sendTo: String)(using fetcher: EventFetcher):
         if isHotlineCreatedEvent(event.model, event.kind) then
           handleHotline(event.dataAs[Hotline])
       })
-  // ui.rogerButton(onclick := (() => onSend("了解")))
-  // ui.beepButton(onclick := (() => { Api.hotlineBeep(sendTo); () }))
+      fetcher.hotlineBeepEventPublisher.subscribe(event => {
+        if event.recipient == sendAs then
+          Api.beep()
+      })
+
   private def decodeHotline(data: String): Hotline =
     decode[Hotline](data).toOption.get
   private def isHotlineCreatedEvent(model: String, kind: String): Boolean =
