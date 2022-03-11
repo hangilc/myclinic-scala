@@ -30,17 +30,19 @@ class SideMenu(
   val ele: HTMLElement = div()
   private val procs: SideMenuProcs = new AnyRef with SideMenuProcs
   private var current: Option[SideMenuItem] = None
-  private val items: List[SideMenuItem] = args.map {
-    case (label, builder) => {
-      val link = a(label)
-      val item = SideMenuItem(label, link, builder)
-      link(onclick := (() => invoke(item)))
-      item
-    }
-  }
-  items.foreach(item => {
+  private var items: List[SideMenuItem] = List.empty
+
+  addItems(args)
+
+  def addItem(label: String, builder: SideMenuProcs => SideMenuService): Unit =
+    val link = a(label)
+    val item = SideMenuItem(label, link, builder)
+    link(onclick := (() => invoke(item)))
     ele(item.link)
-  })
+    items = items :+ item
+
+  def addItems(items: List[(String, SideMenuProcs => SideMenuService)]): Unit =
+    items.foreach((addItem _).tupled)
 
   def invokeByLabel(label: String): Unit =
     items.find(_.label == label).foreach(invoke(_))
@@ -61,7 +63,7 @@ class SideMenu(
 object SideMenu:
   def apply(
       wrapper: HTMLElement,
-      args: List[(String, () => SideMenuService)]
+      args: List[(String, () => SideMenuService)] = List.empty
   ): SideMenu =
     new SideMenu(
       wrapper,
@@ -95,3 +97,8 @@ case class SideMenuItem(
       link(cls := "current")
       service.onReactivate
     }
+
+object MockSideMenuService:
+  def apply(label: String = "MOCK"): SideMenuService =
+    new SideMenuService:
+      override def getElement = div(label)

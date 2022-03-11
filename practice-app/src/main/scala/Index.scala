@@ -10,27 +10,47 @@ import dev.myclinic.scala.model.*
 import org.scalajs.dom.HTMLElement
 import dev.myclinic.scala.web.appbase.SideMenu
 import dev.myclinic.scala.web.practiceapp.practice.PracticeService
+import dev.myclinic.scala.web.appbase.SideMenuProcs
+import dev.myclinic.scala.web.appbase.SideMenuService
+import dev.myclinic.scala.web.appbase.MockSideMenuService
 
 class JsMain(val ui: MainUI)(using EventFetcher):
-  ui.sideMenuWrapper(PracticeSideMenu(ui.workarea))
+  ui.sideMenu.addItems(sideMenuItems)
+
+  private def sideMenuItems: List[(String, SideMenuProcs => SideMenuService)] =
+    List(
+      "診察" -> (_ => PracticeService()),
+      "会計" -> (_ => MockSideMenuService("会計")),
+      "受付" -> (_ => MockSideMenuService("受付")),
+      "ファックス済処方箋" -> (_ => MockSideMenuService("ファックス済処方箋")),
+      "訪問看護" -> (_ => MockSideMenuService("訪問看護")),
+      "主治医意見書" -> (_ => MockSideMenuService("主治医意見書")),
+      "ファックス送信" -> (_ => MockSideMenuService("ファックス送信")),
+      "印刷設定" -> (_ => MockSideMenuService("印刷設定")),
+      "紹介状" -> (_ => MockSideMenuService("紹介状")),
+      "診断書" -> (_ => MockSideMenuService("診断書"))
+    )
 
 object PracticeSideMenu:
   def apply(wrapper: HTMLElement): HTMLElement =
-    val sideMenu = SideMenu(wrapper, List(
-      "診察" -> (() => new PracticeService)
-    ))
+    val sideMenu = SideMenu(
+      wrapper,
+      List(
+        "診察" -> (() => new PracticeService)
+      )
+    )
     sideMenu.ele
 
-    // a("診察"),
-    // a("会計"),
-    // a("受付"),
-    // a("ファックス済処方箋"),
-    // a("訪問看護"),
-    // a("主治医意見書"),
-    // a("ファックス送信"),
-    // a("印刷設定"),
-    // a("紹介状"),
-    // a("診断書"),
+// a("診察"),
+// a("会計"),
+// a("受付"),
+// a("ファックス済処方箋"),
+// a("訪問看護"),
+// a("主治医意見書"),
+// a("ファックス送信"),
+// a("印刷設定"),
+// a("紹介状"),
+// a("診断書"),
 
 class HotlineBlock:
   val messageInput = textarea
@@ -54,14 +74,14 @@ class HotlineBlock:
   )
 
 class MainUI:
-  val sideMenuWrapper = div
   val workarea = div
+  val sideMenu = SideMenu(workarea)
   val hotlineBlock = new HotlineBlock
   val ele = div(id := "content")(
     div(id := "banner", "診察"),
     workarea(id := "workarea")(
       div(id := "side-bar")(
-        sideMenuWrapper(id := "side-menu"),
+        sideMenu.ele(id := "side-menu"),
         hotlineBlock.ele
       )
     )
