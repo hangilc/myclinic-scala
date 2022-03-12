@@ -21,36 +21,18 @@ import dev.myclinic.scala.web.appbase.HotlineHandler
 
 @JSExportTopLevel("JsMain")
 object JsMain:
-  val ui = createUI()
   import ReceptionEvent.given
+  val ui = new MainUI
 
   @JSExport
   def main(isAdmin: Boolean): Unit =
     (for 
+      _ <- ui.hotline.init()
       _ <- fetcher.start()
-      _ <- createHotlineHandler().init()
     yield
       document.body(ui.ele)
       ui.invoke("メイン")).onComplete {
         case Success(_) => ()
         case Failure(ex) => System.err.println(ex.getMessage)
       }
-
-  def createUI(): MainUI =
-    new MainUI:
-      def postHotline(msg: String): Unit =
-        if !msg.isEmpty then
-          val h = Hotline(msg, Setting.hotlineSender, Setting.hotlineRecipient)
-          Api.postHotline(h).onComplete {
-            case Success(_)  => ()
-            case Failure(ex) => ShowMessage.showError(ex.getMessage)
-          }
-
-  def createHotlineHandler(): HotlineHandler =
-    val hotlineUI = ui.hotlineUI
-    HotlineHandler(
-      hotlineUI,
-      "reception",
-      "practice"
-    )
 

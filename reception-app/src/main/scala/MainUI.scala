@@ -22,18 +22,14 @@ import dev.myclinic.scala.web.reception.scan.Scan
 import dev.myclinic.scala.web.appbase.HotlineUI
 import dev.myclinic.scala.web.appbase.EventFetcher
 import dev.myclinic.scala.model.Hotline
+import dev.myclinic.scala.web.appbase.HotlineBlock
 
-abstract class MainUI(using fetcher: EventFetcher):
-  def postHotline(msg: String): Unit
+class MainUI(using fetcher: EventFetcher):
   def invoke(label: String): Unit =
     sideMenu.invokeByLabel(label)
+  val hotline = new HotlineBlock("reception", "practice")
 
   private var lastHotlineAppEventId = 0
-  private val hotlineInput = textarea()
-  private val hotlineSendButton = button
-  private val hotlineRogerButton = button
-  private val hotlineBeepButton = button
-  private val hotlineMessages = textarea()
   private val eMain: HTMLElement = div()
   private val sideMenu = SideMenu(
     eMain,
@@ -44,83 +40,74 @@ abstract class MainUI(using fetcher: EventFetcher):
       "スキャン" -> (() => Scan())
     )
   )
-  def hotlineUI: HotlineUI =
-    new HotlineUI:
-      def messageInput = hotlineInput
-      def sendButton = hotlineSendButton
-      def rogerButton = hotlineRogerButton
-      def beepButton = hotlineBeepButton
+
   val ele =
     div(id := "content")(
       div(id := "banner")("受付"),
       div(id := "workarea")(
         div(id := "side-bar")(
           sideMenu.ele(id := "side-menu"),
-          hotlineInput(id := "hotline-input"),
-          div(id := "hotline-commands")(
-            hotlineSendButton("送信"),
-            hotlineRogerButton("了解"),
-            hotlineBeepButton("Beep"), 
-            pullDownLink("常用", regularMenuItems),
-            pullDownLink("患者", patientMenuItems)
-          ),
-          hotlineMessages(
-            id := "hotline-messages",
-            attr("readonly") := "readonly",
-            attr("tabindex") := "-1"
-          )
+          hotline.ele
         ),
         eMain(id := "main")
       )
     )
 
-  def appendHotline(appEventId: Int, hotline: Hotline): Unit =
-    val id = appEventId
-    if id > lastHotlineAppEventId then
-      val rep = Setting.hotlineNameRep(hotline.sender)
-      val msg = hotline.message
-      hotlineMessages.value += s"${rep}> ${msg}\n"
-      lastHotlineAppEventId = id
+  // def hotlineUI: HotlineUI =
+  //   new HotlineUI:
+  //     def messageInput = hotlineInput
+  //     def sendButton = hotlineSendButton
+  //     def rogerButton = hotlineRogerButton
+  //     def beepButton = hotlineBeepButton
 
-  private def downTriangle(): HTMLElement =
-    Icons.downTriangleFlat(
-      Icons.defaultStaticStyle,
-      ml := "0.2rem"
-    )
 
-  private def insertIntoHotlineInput(s: String): Unit =
-    val start = hotlineInput.selectionStart
-    val end = hotlineInput.selectionEnd
-    val left = hotlineInput.value.substring(0, start)
-    val right = hotlineInput.value.substring(end)
-    val index = s.indexOf("{}")
-    val msgLeft = if index < 0 then s else s.substring(0, index)
-    val msgRight = if index < 0 then "" else s.substring(index + 2)
-    hotlineInput.value = left + msgLeft + msgRight + right
-    hotlineInput.focus()
-    val pos = start + msgLeft.size
-    hotlineInput.selectionStart = pos
-    hotlineInput.selectionEnd = pos
+  // def appendHotline(appEventId: Int, hotline: Hotline): Unit =
+  //   val id = appEventId
+  //   if id > lastHotlineAppEventId then
+  //     val rep = Setting.hotlineNameRep(hotline.sender)
+  //     val msg = hotline.message
+  //     hotlineMessages.value += s"${rep}> ${msg}\n"
+  //     lastHotlineAppEventId = id
 
-  private def regularMenuItems: List[(String, () => Unit)] =
-    val items: List[String] = Setting.regularHotlineMessages
-    items.map(msg => msg -> (() => insertIntoHotlineInput(msg)))
+  // private def downTriangle(): HTMLElement =
+  //   Icons.downTriangleFlat(
+  //     Icons.defaultStaticStyle,
+  //     ml := "0.2rem"
+  //   )
 
-  private def patientMenuItems: Future[List[(String, () => Unit)]] =
-    def exec(patient: Patient): Unit =
-      val txt = s"""(${patient.patientId}) ${patient.fullName("")}様、"""
-      insertIntoHotlineInput(txt)
-    for
-      wqueue <- Api.listWqueue()
-      visitIds = wqueue.map(_.visitId)
-      visitMap <- Api.batchGetVisit(visitIds)
-      patientMap <- Api.batchGetPatient(
-        visitMap.values.map(_.patientId).toList
-      )
-    yield {
-      val patients = patientMap.values.toList
-      patients.map(patient => {
-        patient.fullName("") -> (() => exec(patient))
-      })
-    }
+  // private def insertIntoHotlineInput(s: String): Unit =
+  //   val start = hotlineInput.selectionStart
+  //   val end = hotlineInput.selectionEnd
+  //   val left = hotlineInput.value.substring(0, start)
+  //   val right = hotlineInput.value.substring(end)
+  //   val index = s.indexOf("{}")
+  //   val msgLeft = if index < 0 then s else s.substring(0, index)
+  //   val msgRight = if index < 0 then "" else s.substring(index + 2)
+  //   hotlineInput.value = left + msgLeft + msgRight + right
+  //   hotlineInput.focus()
+  //   val pos = start + msgLeft.size
+  //   hotlineInput.selectionStart = pos
+  //   hotlineInput.selectionEnd = pos
+
+  // private def regularMenuItems: List[(String, () => Unit)] =
+  //   val items: List[String] = Setting.regularHotlineMessages
+  //   items.map(msg => msg -> (() => insertIntoHotlineInput(msg)))
+
+  // private def patientMenuItems: Future[List[(String, () => Unit)]] =
+  //   def exec(patient: Patient): Unit =
+  //     val txt = s"""(${patient.patientId}) ${patient.fullName("")}様、"""
+  //     insertIntoHotlineInput(txt)
+  //   for
+  //     wqueue <- Api.listWqueue()
+  //     visitIds = wqueue.map(_.visitId)
+  //     visitMap <- Api.batchGetVisit(visitIds)
+  //     patientMap <- Api.batchGetPatient(
+  //       visitMap.values.map(_.patientId).toList
+  //     )
+  //   yield {
+  //     val patients = patientMap.values.toList
+  //     patients.map(patient => {
+  //       patient.fullName("") -> (() => exec(patient))
+  //     })
+  //   }
 

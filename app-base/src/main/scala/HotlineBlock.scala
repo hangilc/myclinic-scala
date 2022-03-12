@@ -54,12 +54,24 @@ class HotlineBlock(sendAs: String, sendTo: String)(using fetcher: EventFetcher):
     model == Hotline.modelSymbol && kind == AppModelEvent.createdSymbol
 
   private def handleHotline(hotline: Hotline): Unit =
-    val recipient = hotline.recipient
-    if recipient == sendAs then
-      val rep = HotlineEnv.hotlineNameRep(hotline.sender)
-      val msg = hotline.message
-      val line = s"${rep}> ${msg}\n"
+    for
+      line <- myMessage(hotline)
+    yield
       ui.messages.value += line
+
+  private def isRelevant(who: String): Boolean =
+    who == sendAs || who == sendTo
+  
+  private def isRelevantHotline(hotline: Hotline): Boolean =
+    isRelevant(hotline.recipient) || isRelevant(hotline.sender)
+
+  private def myMessage(hotline: Hotline): Option[String] =
+    for
+      who <- if isRelevantHotline(hotline) then Some(hotline.sender)
+        else None
+      rep = HotlineEnv.hotlineNameRep(who)
+    yield
+      s"${rep}> ${hotline.message}\n"
 
   private def onSend(msg: String): Unit =
     if !msg.isEmpty then
@@ -68,6 +80,7 @@ class HotlineBlock(sendAs: String, sendTo: String)(using fetcher: EventFetcher):
         case Success(_)  => ui.messageInput.value = ""
         case Failure(ex) => ShowMessage.showError(ex.getMessage)
       }
+
   private def regulars: List[(String, () => Unit)] =
     HotlineEnv
       .regulars(sendAs)
