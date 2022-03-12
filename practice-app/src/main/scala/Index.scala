@@ -3,7 +3,7 @@ package dev.myclinic.scala.web.practiceapp
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 import dev.fujiwara.domq.all.{*, given}
 import org.scalajs.dom.document
-import dev.myclinic.scala.web.appbase.{HotlineEnv, HotlineUI, HotlineHandler}
+import dev.myclinic.scala.web.appbase.{HotlineEnv}
 import dev.myclinic.scala.web.appbase.EventFetcher
 import dev.myclinic.scala.web.appbase.EventPublishers
 import dev.myclinic.scala.model.*

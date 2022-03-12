@@ -16,8 +16,6 @@ import dev.myclinic.scala.model.{Hotline, AppModelEvent}
 import dev.myclinic.scala.web.appbase.{EventFetcher, EventPublishers}
 import scala.concurrent.Future
 import dev.myclinic.scala.model.AppEvent
-import dev.myclinic.scala.web.appbase.HotlineUI
-import dev.myclinic.scala.web.appbase.HotlineHandler
 
 @JSExportTopLevel("JsMain")
 object JsMain:
