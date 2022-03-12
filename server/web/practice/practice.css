@@ -21,39 +21,6 @@ button {
   color: white;
 }
 
-#workarea {
-  display: flex;
-  grid-template-columns: 180px auto;
-}
-
-#side-bar {
-  margin-top: 10px;
-  flex-basis: 200px;
-}
-
-
-#hotline-input {
-  width: 100%;
-  height: 5rem;
-  margin: 10px 0 0 0;
-  resize: vertical;
-}
-
-#hotline-commands {
-  margin: 4px 0 0 0;
-}
-
-#hotline-commands a {
-  font-size: 85%;
-  margin-left: 0.3rem;
-}
-
-#hotline-messages {
-  width: 100%;
-  height: 15rem;
-  margin: 4px 0 0 0;
-}
-
 .practice-main {
   flex: 1 1 auto;
   margin: 10px 0 0 10px;
