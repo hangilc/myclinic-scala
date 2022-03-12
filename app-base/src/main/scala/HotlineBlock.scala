@@ -12,6 +12,7 @@ import scala.util.Failure
 import org.scalajs.dom.HTMLElement
 import org.scalajs.dom.HTMLInputElement
 import org.scalajs.dom.HTMLTextAreaElement
+import dev.myclinic.scala.model.Patient
 
 class HotlineBlock(sendAs: String, sendTo: String)(using fetcher: EventFetcher):
   val ui = new HotlineBlockUI
@@ -19,6 +20,7 @@ class HotlineBlock(sendAs: String, sendTo: String)(using fetcher: EventFetcher):
   ui.rogerButton(onclick := (() => onSend("了解")))
   ui.beepButton(onclick := (() => { Api.hotlineBeep(sendTo); () }))
   ui.regularsLink.setBuilder(regulars)
+  ui.patientsLink.setBuilder(() => patients)
 
   def ele = ui.ele
   def init(): Future[Unit] =
@@ -39,6 +41,7 @@ class HotlineBlock(sendAs: String, sendTo: String)(using fetcher: EventFetcher):
       fetcher.appModelEventPublisher.subscribe(event => {
         if isHotlineCreatedEvent(event.model, event.kind) then
           handleHotline(event.dataAs[Hotline])
+          Api.beep()
       })
       fetcher.hotlineBeepEventPublisher.subscribe(event => {
         if event.recipient == sendAs then Api.beep()
@@ -71,6 +74,21 @@ class HotlineBlock(sendAs: String, sendTo: String)(using fetcher: EventFetcher):
       .map(m =>
         (m, () => HotlineBlock.insertIntoHotlineInput(ui.messageInput, m))
       )
+
+  private def patients: Future[List[(String, () => Unit)]] =
+    for
+      wqueue <- Api.listWqueue()
+      visitIds = wqueue.map(_.visitId)
+      visitMap <- Api.batchGetVisit(visitIds)
+      patientMap <- Api.batchGetPatient(
+        visitMap.values.map(_.patientId).toList
+      )
+    yield 
+      val patients = patientMap.values.toList
+      patients.map(patient => {
+        val txt = s"(${patient.patientId}) ${patient.fullName("")}様、"
+        (patient.fullName(), () => HotlineBlock.insertIntoHotlineInput(ui.messageInput, txt))
+      })
 
 object HotlineBlock:
   def insertIntoHotlineInput(hotlineInput: HTMLTextAreaElement, s: String): Unit =
