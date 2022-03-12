@@ -14,7 +14,7 @@ import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
 
 
 object AppointHistoryWindow:
-  def open(events: List[AppEvent], zIndex: Option[Int] = None): Future[Unit] =
+  def open(events: List[AppEvent]): Future[Unit] =
     for histories <- History.fromAppEvents(events)
     yield
       val content: HTMLElement = div(cls := "appoint-history")(
@@ -24,4 +24,4 @@ object AppointHistoryWindow:
         }),
         innerText := histories.map(_.description).mkString("\n")
       )
-      FloatWindow("変更履歴", content, width = "", zIndex = zIndex).open()
+      FloatWindow("変更履歴", content, width = "").open()

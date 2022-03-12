@@ -39,7 +39,7 @@ class EditAppointDialog(val appoint: Appoint, appointTime: AppointTime):
     ContextMenu(List(
       "最初にもどす" -> (doRevert _),
       "変更履歴" -> (doHistory _)
-      ), zIndex = dlog.zIndex + 2)
+      ))
       .open(event)
 
   def doRevert(): Unit =
@@ -52,7 +52,7 @@ class EditAppointDialog(val appoint: Appoint, appointTime: AppointTime):
     val f = 
       for
         appEvents <- Api.appointHistoryAt(appointTime.appointTimeId)
-        _ <- AppointHistoryWindow.open(appEvents, zIndex = Some(dlog.zIndex + 2))
+        _ <- AppointHistoryWindow.open(appEvents)
       yield ()
     f.onComplete {
       case Success(_) => ()

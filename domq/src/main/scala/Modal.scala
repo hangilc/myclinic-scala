@@ -7,13 +7,15 @@ import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
 import scala.language.implicitConversions
 
-class Modal(title: String, content: HTMLElement, val zIndex: Int = Modal.zIndexDefault):
-  val backdrop = div(Modal.modalBackdrop(zIndex - 1))
+class Modal(title: String, content: HTMLElement):
+  val zIndexScreen = ZIndexManager.alloc()
+  val zIndexContent = ZIndexManager.alloc()
+  val backdrop = div(Modal.modalBackdrop(zIndexScreen))
   val auxMenu: HTMLElement = span()
   val closeIcon = Icons.x
   val workarea = content
   var onCloseCallbacks: List[Boolean => Unit] = List.empty
-  val dialog = div(Modal.modalContent(zIndex), cls := "domq-modal")(
+  val dialog = div(Modal.modalContent(zIndexContent), cls := "domq-modal")(
     div(
       css(style => style.width = "*"),
       span(Modal.modalTitle)(title),
@@ -36,6 +38,8 @@ class Modal(title: String, content: HTMLElement, val zIndex: Int = Modal.zIndexD
   def close(value: Boolean): Unit =
     dialog.remove()
     backdrop.remove()
+    ZIndexManager.release(zIndexContent)
+    ZIndexManager.release(zIndexScreen)
     onCloseCallbacks.foreach(_(value))
 
   def close(): Unit = close(false)

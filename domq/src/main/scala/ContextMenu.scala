@@ -10,7 +10,9 @@ import org.scalajs.dom.{document, window}
 import org.scalajs.dom.ClientRect
 import org.scalajs.dom.Event
 
-class ContextMenu(zIndex: Int = Modal.zIndexDefault):
+class ContextMenu:
+  val zIndexScreen = ZIndexManager.alloc()
+  val zIndexMenu = ZIndexManager.alloc()
   val menu: HTMLElement = makeEmptyMenu()
   val screen: HTMLElement = makeScreen()
 
@@ -35,7 +37,7 @@ class ContextMenu(zIndex: Int = Modal.zIndexDefault):
       style.backgroundColor = "#5a6268"
       style.opacity = "0"
       style.overflowY = "auto"
-      style.zIndex = (zIndex - 1).toString
+      style.zIndex = zIndexScreen.toString
     }))
 
   def calcPlacement(
@@ -68,13 +70,6 @@ class ContextMenu(zIndex: Int = Modal.zIndexDefault):
       window.innerWidth,
       window.innerHeight
     )
-    // val (x, y) = ContextMenu.calcPlacement(
-    //   event.clientX,
-    //   event.clientY,
-    //   menu.getClientRects()(0),
-    //   window.innerWidth,
-    //   window.innerHeight
-    // )
     val xx = (x + window.scrollX).toInt
     val yy = (y + window.scrollY).toInt
     menu(css(style => {
@@ -86,13 +81,14 @@ class ContextMenu(zIndex: Int = Modal.zIndexDefault):
   def close(): Unit =
     menu.remove()
     screen.remove()
+    ZIndexManager.release(zIndexMenu)
+    ZIndexManager.release(zIndexScreen)
 
 object ContextMenu:
   def apply(
-      commands: List[(String, () => Unit)],
-      zIndex: Int = 2002
+      commands: List[(String, () => Unit)]
   ): ContextMenu =
-    val m = new ContextMenu(zIndex)
+    val m = new ContextMenu
     def makeItem(label: String, f: () => Unit): HTMLElement =
       div(
         a(

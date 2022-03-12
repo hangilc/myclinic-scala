@@ -91,7 +91,7 @@ class CashierDialog(meisai: Meisai, visit: VisitEx):
     for 
       ops <- Api.drawReceipt(data)
     yield {
-      CashierLib.openPrintDialog("領収書印刷", ops, modal.zIndex + 2)
+      CashierLib.openPrintDialog("領収書印刷", ops)
     }
 
   def doFinishCashier(): Unit =

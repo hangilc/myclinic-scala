@@ -12,9 +12,9 @@ import scala.scalajs.js
 case class FloatWindow(
     title: String,
     content: HTMLElement,
-    zIndex: Option[Int] = None,
     width: String = "200px"
 ):
+  val zIndex = ZIndexManager.alloc()
   val eTitle: HTMLElement = div()
   val ele = div(css(style => {
     style.width = width
@@ -23,7 +23,7 @@ case class FloatWindow(
     style.padding = "4px"
     style.backgroundColor = "white"
     style.borderRadius = "4px"
-    style.zIndex = zIndex.getOrElse(1980).toString
+    style.zIndex = zIndex.toString
   }))(
     eTitle(css(style => {
       style.fontWeight = "bold"
@@ -64,6 +64,7 @@ case class FloatWindow(
 
   def close(): Unit =
     ele.remove()
+    ZIndexManager.release(zIndex)
 
   val onMouseMove: js.Function1[MouseEvent, Unit] = (event: MouseEvent) => {
     val x = event.clientX
