@@ -52,7 +52,7 @@ class Cashier(using EventFetcher) extends SideMenuService:
 
   //val rowMap: mutable.Map[Int, HTMLElement] = mutable.Map.empty
 
-  override def getElement: HTMLElement = ele
+  override def getElement: HTMLElement = ele(cls := "content")
   override def init(): Future[Unit] = refresh()
   override def onReactivate: Future[Unit] = refresh()
 

@@ -21,7 +21,7 @@ class Records() extends SideMenuService:
   val selectPatientButton = PullDown.createButtonAnchor("患者選択")
   val eRecord = div()
   override def getElement: HTMLElement =
-    div(cls := "records")(
+    div(cls := "records", cls := "content")(
       div(cls := "header")(
         h1("診療記録"),
         selectPatientButton(onclick := (onSelectPatient _))

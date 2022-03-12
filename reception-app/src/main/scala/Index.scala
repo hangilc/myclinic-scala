@@ -16,11 +16,28 @@ import dev.myclinic.scala.model.{Hotline, AppModelEvent}
 import dev.myclinic.scala.web.appbase.{EventFetcher, EventPublishers}
 import scala.concurrent.Future
 import dev.myclinic.scala.model.AppEvent
+import dev.myclinic.scala.web.appbase.PageLayout1
+import dev.myclinic.scala.web.appbase.SideMenuService
+import dev.myclinic.scala.web.appbase.SideMenuProcs
+import dev.myclinic.scala.web.reception.cashier.Cashier
+import dev.myclinic.scala.web.reception.patient.PatientManagement
+import dev.myclinic.scala.web.reception.records.Records
+import dev.myclinic.scala.web.reception.scan.Scan
 
 @JSExportTopLevel("JsMain")
 object JsMain:
   import ReceptionEvent.given
-  val ui = new MainUI
+  val ui = new PageLayout1("reception", "practice")
+  ui.banner("受付")
+  ui.sideMenu.addItems(sideMenuItems)
+
+  def sideMenuItems: List[(String, SideMenuProcs => SideMenuService)] =
+    List(
+      "メイン" -> (_ => Cashier()),
+      "患者管理" -> (_ => new PatientManagement()),
+      "診療記録" -> (_ => Records()),
+      "スキャン" -> (_ => Scan())
+    )
 
   @JSExport
   def main(isAdmin: Boolean): Unit =
@@ -29,7 +46,7 @@ object JsMain:
       _ <- fetcher.start()
     yield
       document.body(ui.ele)
-      ui.invoke("メイン")).onComplete {
+      ui.sideMenu.invokeByLabel("メイン")).onComplete {
         case Success(_) => ()
         case Failure(ex) => System.err.println(ex.getMessage)
       }

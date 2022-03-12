@@ -20,7 +20,6 @@ class JsMain(val ui: MainUI)(using EventFetcher):
   ui.sideMenu.addItems(sideMenuItems)
   for 
     _ <- ui.hotlineBlock.init()
-    _ <- ui.hotlineBlock2.init()
     _ <- JsMain.fetcher.start()
   yield
     ()
@@ -53,14 +52,12 @@ class MainUI(using EventFetcher):
   val workarea = div
   val sideMenu = SideMenu(workarea)
   val hotlineBlock = new HotlineBlock("practice", "reception")
-  val hotlineBlock2 = new HotlineBlock("reception", "practice")
   val ele = div(id := "content")(
     div(id := "banner", "診察"),
     workarea(id := "workarea")(
       div(id := "side-bar")(
         sideMenu.ele(id := "side-menu"),
-        hotlineBlock.ele,
-        hotlineBlock2.ele
+        hotlineBlock.ele
       )
     )
   )

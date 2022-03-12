@@ -40,7 +40,7 @@ class PatientManagement(using EventFetcher) extends SideMenuService:
     eWorkarea
   )
 
-  override def getElement: HTMLElement = ele
+  override def getElement: HTMLElement = ele(cls := "content")
 
   def initFocus(): Unit =
     eSearchText.focus()

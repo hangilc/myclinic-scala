@@ -1,8 +1,3 @@
-body {
-  width: 860px;
-  margin: 0 auto;
-}
-
 a {
   color: #007bff;
   word-break: keep-all;
@@ -12,67 +7,12 @@ button {
   min-height: 1.68rem;
 }
 
-#content {
-  margin: 10px 0;
-}
-
-#banner {
+#page-layout1-banner {
   background-color: #17a2b8;
   color: white;
-  font-size: 40px;
-  padding: 16px;
 }
 
-#workarea {
-  display: grid;
-  grid-template-columns: 180px auto;
-}
-
-#side-bar {
-  margin-top: 10px;
-}
-
-#side-menu {
-  background-color: #eee;
-  padding: 6px;
-}
-
-#side-menu a {
-  display: block;
-}
-
-#side-menu a.current {
-  font-weight: bold;
-}
-
-#hotline-input {
-  width: 100%;
-  height: 5rem;
-  margin: 10px 0 0 0;
-  resize: vertical;
-}
-
-#hotline-commands {
-  margin: 4px 0 0 0;
-}
-
-#hotline-commands a {
-  font-size: 85%;
-  margin-left: 0.3rem;
-}
-
-#hotline-messages {
-  width: 100%;
-  height: 15rem;
-  margin: 4px 0 0 0;
-}
-
-#main {
-  flex: 1 1 auto;
-  margin: 10px 0 0 10px;
-}
-
-#main h1 {
+.content h1 {
   font-weight: normal;
   margin: 0 0 10px 0;
   font-size: 1.5rem;

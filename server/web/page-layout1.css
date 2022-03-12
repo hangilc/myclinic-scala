@@ -1,0 +1,39 @@
+#page-layout1-content {
+  margin: 0 10%;
+}
+
+#page-layout1-banner {
+  font-size: 40px;
+  padding: 16px;
+  background-color: gray;
+}
+
+#page-layout1-workarea {
+  display: flex;
+}
+
+#page-layout1-workarea .content {
+  flex: 1 1 auto;
+  margin: 10px 0 0 10px;
+}
+
+#page-layout1-side-bar {
+  margin-top: 10px;
+  flex: 0 0 200px;
+}
+
+#page-layout1-side-menu {
+  background-color: #eee;
+  padding: 6px;
+}
+
+#page-layout1-side-menu a {
+  display: block;
+  padding: 0;
+  margin: 0;
+}
+
+#page-layout1-side-menu a.current {
+  font-weight: bold;
+}
+

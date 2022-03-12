@@ -12,8 +12,6 @@ import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
 import scala.util.Success
 import scala.util.Failure
 
-//case class SideMenuItem(label: String, creator: () => HTMLElement)
-
 trait SideMenuService:
   def getElement: HTMLElement = div
   def getElements: List[HTMLElement] = List(getElement)

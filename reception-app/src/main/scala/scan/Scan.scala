@@ -20,7 +20,7 @@ class Scan(ui: Scan.UI) extends SideMenuService:
   ui.ePatientImagesButton(onclick := (patientImages _))
   addBox()
 
-  override def getElement = ui.ele
+  override def getElement = ui.ele(cls := "content")
 
   def addBox(): Unit =
     val box = ScanBox()

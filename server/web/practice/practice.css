@@ -33,20 +33,6 @@ button {
   flex-basis: 200px;
 }
 
-#side-menu {
-  background-color: #eee;
-  padding: 6px;
-}
-
-#side-menu a {
-  display: block;
-  padding: 0;
-  margin: 0;
-}
-
-#side-menu a.current {
-  font-weight: bold;
-}
 
 #hotline-input {
   width: 100%;
