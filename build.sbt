@@ -184,7 +184,7 @@ lazy val domq = project
 lazy val appbase = project
   .in(file("app-base"))
   .enablePlugins(ScalaJSPlugin)
-  .dependsOn(domq, modelJS, utilJS, webclient, validatorJS, drawerJS)
+  .dependsOn(domq, modelJS, utilJS, webclient, validatorJS, drawerJS, kanjidateJS)
   .settings(
     name := "myclinic-appbase",
     libraryDependencies ++= Seq(

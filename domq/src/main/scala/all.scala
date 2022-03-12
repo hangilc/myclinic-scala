@@ -5,6 +5,7 @@ object all:
   export Html.*
   export Modifiers.{*, given}
   val Modal = dev.fujiwara.domq.Modal
+  type Selection[T] = dev.fujiwara.domq.Selection[T]
   val Selection = dev.fujiwara.domq.Selection
   val ErrorBox = dev.fujiwara.domq.ErrorBox
   val Form = dev.fujiwara.domq.Form
