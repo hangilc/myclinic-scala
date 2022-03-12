@@ -1,7 +1,7 @@
-body {
+/* body {
   width: 1200px;
   margin: 0 auto;
-}
+} */
 
 a {
   color: #007bff;
@@ -12,15 +12,13 @@ button {
   min-height: 1.68rem;
 }
 
-#content {
-  margin: 10px 0;
+#page-layout1-content {
+  margin: 10px 10%;
 }
 
-#banner {
+#page-layout1-banner {
   background-color: navy;
   color: white;
-  font-size: 40px;
-  padding: 16px;
 }
 
 #workarea {

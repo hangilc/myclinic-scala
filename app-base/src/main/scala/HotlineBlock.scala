@@ -58,6 +58,7 @@ class HotlineBlock(sendAs: String, sendTo: String)(using fetcher: EventFetcher):
       line <- myMessage(hotline)
     yield
       ui.messages.value += line
+      ui.messages.scrollTop = ui.messages.scrollHeight
 
   private def isRelevant(who: String): Boolean =
     who == sendAs || who == sendTo

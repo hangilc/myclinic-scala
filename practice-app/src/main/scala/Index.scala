@@ -15,11 +15,15 @@ import dev.myclinic.scala.web.appbase.SideMenuService
 import dev.myclinic.scala.web.appbase.MockSideMenuService
 import dev.myclinic.scala.web.appbase.HotlineBlock
 import dev.myclinic.scala.webclient.global
+import dev.myclinic.scala.web.appbase.PageLayout1
 
-class JsMain(val ui: MainUI)(using EventFetcher):
+class JsMain(using EventFetcher):
+  val ui = new PageLayout1("practice", "reception")
+  ui.banner("診察")
   ui.sideMenu.addItems(sideMenuItems)
+  document.body(ui.ele)
   for 
-    _ <- ui.hotlineBlock.init()
+    _ <- ui.hotline.init()
     _ <- JsMain.fetcher.start()
   yield
     ()
@@ -66,7 +70,7 @@ class MainUI(using EventFetcher):
 object JsMain:
   @JSExport
   def main(): Unit =
-    val jsMain = new JsMain(new MainUI)
+    val jsMain = new JsMain
     document.body(jsMain.ui.ele)
 
   val publishers = new EventPublishers

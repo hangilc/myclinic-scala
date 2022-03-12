@@ -30,6 +30,7 @@ object JsMain:
   val ui = new PageLayout1("reception", "practice")
   ui.banner("受付")
   ui.sideMenu.addItems(sideMenuItems)
+  document.body(ui.ele)
 
   def sideMenuItems: List[(String, SideMenuProcs => SideMenuService)] =
     List(
@@ -45,7 +46,6 @@ object JsMain:
       _ <- ui.hotline.init()
       _ <- fetcher.start()
     yield
-      document.body(ui.ele)
       ui.sideMenu.invokeByLabel("メイン")).onComplete {
         case Success(_) => ()
         case Failure(ex) => System.err.println(ex.getMessage)
