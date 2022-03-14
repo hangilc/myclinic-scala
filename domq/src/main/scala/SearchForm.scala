@@ -16,15 +16,15 @@ trait InputProvider[I]:
 trait TriggerProvider[T]:
   def onSearch(t: T, cb: () => Unit): Unit
 
-trait SelectionProvider[S[_]]:
-  def setItems[D](s: S[D], items: List[D]): Unit
-  def selected[D](s: S[D]): Option[D]
+trait SelectionProvider[S[_, _]]:
+  def setItems[Src, D](s: S[Src, D], items: List[Src]): Unit
+  def selected[Src, D](s: S[Src, D]): Option[D]
 
-class SearchFormEngine[I, T, S[_], D](
+class SearchFormEngine[I, T, Src, D, S[_, _]](
     input: I,
     trigger: T,
-    selection: S[D],
-    search: String => Future[List[D]]
+    selection: S[Src, D],
+    search: String => Future[List[Src]]
 )(using
     inputProvider: InputProvider[I],
     triggerProvider: TriggerProvider[T],
@@ -51,20 +51,19 @@ object Implicits:
     def onSearch(form: HTMLFormElement, cb: () => Unit): Unit =
       form(onsubmit := cb)
   given SelectionProvider[Selection] with
-    def setItems[D](s: Selection[D], items: List[D]): Unit =
+    def setItems[Src, D](s: Selection[Src, D], items: List[Src]): Unit =
       s.clear()
       s.addAll(items)
-    def selected[D](s: Selection[D]): Option[D] =
+    def selected[Src, D](s: Selection[Src, D]): Option[D] =
       s.selected
 
-class SearchFormElements[D]:
+class SearchFormElementsBase[Src, D](mapper: Src => D):
   val input: HTMLInputElement = inputText
   val button: HTMLButtonElement = Html.button("検索")
-  val selection: Selection[D] = Selection[D]()
+  val selection: Selection[Src, D] = new Selection[Src, D](mapper)
 
-class SearchFormBasic[D]:
-  val search: String => Future[List[D]] = _ => Future.successful(List.empty)
-  val ui = new SearchFormElements[D]
+class SearchFormBase[Src, D](mapper: Src => D, search: String => Future[List[Src]]):
+  val ui = new SearchFormElementsBase[Src, D](mapper)
   val ele = div(
     div(ui.input, ui.button),
     ui.selection.ele
@@ -73,16 +72,17 @@ class SearchFormBasic[D]:
   val engine = new SearchFormEngine(ui.input, ui.button, ui.selection, search)
   def selected: Option[D] = engine.selected
 
-class SearchForm[D]:
-  val search: String => Future[List[D]] = _ => Future.successful(List.empty)
-  val ui = new SearchFormElements[D]
-  val form: HTMLFormElement = Html.form
+class SearchFormElements[Src, D](mapper: Src => D) extends SearchFormElementsBase[Src, D](mapper):
+  val form = Html.form(input, button)
+
+class SearchForm[Src, D](mapper: Src => D, search: String => Future[List[Src]]):
+  val ui = new SearchFormElements[Src, D](mapper)
   val ele = div(
-    form(ui.input, ui.button),
+    ui.form,
     ui.selection.ele
   )
   import Implicits.given
-  val engine = new SearchFormEngine(ui.input, form, ui.selection, search)
+  val engine = new SearchFormEngine(ui.input, ui.form, ui.selection, search)
   def selected: Option[D] = engine.selected
 
 

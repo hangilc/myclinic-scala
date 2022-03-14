@@ -6,7 +6,7 @@ object all:
   export Modifiers.{*, given}
   val Modal = dev.fujiwara.domq.Modal
   type ModalDialog3 = dev.fujiwara.domq.ModalDialog3
-  type Selection[T] = dev.fujiwara.domq.Selection[T]
+  type Selection[Src, T] = dev.fujiwara.domq.Selection[Src, T]
   val Selection = dev.fujiwara.domq.Selection
   val ErrorBox = dev.fujiwara.domq.ErrorBox
   val Form = dev.fujiwara.domq.Form

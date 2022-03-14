@@ -2,6 +2,7 @@ package dev.myclinic.scala.web.practiceapp.practice
 
 import dev.myclinic.scala.web.appbase.SideMenuService
 import dev.fujiwara.domq.all.{*, given}
+import dev.fujiwara.domq.searchform.*
 import org.scalajs.dom.HTMLElement
 import scala.concurrent.Future
 import dev.myclinic.scala.model.Patient
@@ -9,7 +10,7 @@ import dev.myclinic.scala.webclient.{Api, global}
 import dev.myclinic.scala.appbase.Selections
 import dev.myclinic.scala.model.Visit
 import dev.myclinic.scala.web.appbase.LocalEventPublisher
-import dev.myclinic.scala.appbase.PatientSearch
+import dev.fujiwara.kanjidate.KanjiDate
 
 class PracticeService extends SideMenuService:
   val left = new PracticeMain
@@ -18,11 +19,11 @@ class PracticeService extends SideMenuService:
   override def getElements = List(left.ele, right.ele)
 
   left.startPatientPublisher.subscribe(patient => println(("start-patient", patient)))
-  left.startVisitPublisher.subscribe((patient, visit) => println(("start-visit", patient, visit)))
+  left.startVisitPublisher.subscribe(patient => println(("start-visit", patient)))
 
 class PracticeMain:
   val startPatientPublisher = LocalEventPublisher[Patient]
-  val startVisitPublisher = LocalEventPublisher[(Patient, Visit)]
+  val startVisitPublisher = LocalEventPublisher[Patient]
   val ui = new PracticeMainUI
   def ele = ui.ele
   ui.choice.setBuilder(List(
@@ -54,17 +55,25 @@ class PracticeMain:
 
   def selectBySearchPatient(): Unit =
     val d = new ModalDialog3
-    val search = new PatientSearch
+    val search = new SearchForm[Patient, Patient](identity, Api.searchPatient(_).map(_._2))
+    search.ui.selection.formatter = PracticeService.patientFormatter
     d.title("患者検索")
     d.body(
       search.ele
     )
     d.commands(
-      button("診察登録"),
-      button("選択"),
+      button("診察登録", onclick := (() => {
+        d.close()
+        search.selected.foreach(patient => startVisitPublisher.publish(patient))
+      })),
+      button("選択", onclick := (() => {
+        d.close()
+        search.selected.foreach(patient => startPatientPublisher.publish(patient))
+      })),
       button("閉じる", onclick := (() => d.close()))
     )
     d.open()
+    search.ui.input.focus()
 
 object PracticeService:
   def listRegisteredPatient(): Future[List[(Patient, Visit)]] =
@@ -76,6 +85,10 @@ object PracticeService:
         val p = patientMap(v.patientId)
         (p, v)  
       )
+
+  val patientFormatter: Patient => String = patient =>
+    String.format("%04d %s (%s)", patient.patientId, patient.fullName(), 
+      KanjiDate.dateToKanji(patient.birthday))
     
 
 class PracticeMainUI:

@@ -12,12 +12,12 @@ object Selections:
         patient.fullName()
       )
 
-  def patientSelection(): Selection[Patient] =
-    val s = new Selection[Patient]
+  def patientSelection(): Selection[Patient, Patient] =
+    val s = new Selection[Patient, Patient](identity)
     s.formatter = patientFormatter
     s
 
-  def patientSelectionWithData[D](): Selection[(Patient, D)] =
-    val s = new Selection[(Patient, D)]
+  def patientSelectionWithData[D](): Selection[(Patient, D), Patient] =
+    val s = new Selection[(Patient, D), Patient](_._1)
     s.formatter = arg => patientFormatter(arg._1)
     s

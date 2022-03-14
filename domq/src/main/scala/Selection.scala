@@ -4,19 +4,17 @@ import dev.fujiwara.domq.all.{*, given}
 import scala.language.implicitConversions
 import org.scalajs.dom.HTMLElement
 
-class Selection[T]:
+class Selection[S, T](mapper: S => T):
   var onSelect: T => Unit = _ => ()
   private var selectedValue: Option[T] = None
-  var formatter: T => String = _.toString
-  val ui = new Selection.UI
-  val ele = ui.ele
+  var formatter: S => String = _.toString
+  val ele = div(cls := "domq-selection")
   def clear(): Unit = ele(dev.fujiwara.domq.Modifiers.clear)
-  def add(t: T): Unit = addItem(new SelectionItem(formatter(t), t))
-  def add(label: String, t: T): Unit = addItem(new SelectionItem(label, t))
-  def addAll(ts: List[T]): Unit = ts.foreach(add(_))
-  def show(): Unit = ui.ele(displayDefault)
-  def hide(): Unit = ui.ele(displayNone)
-  def scrollToTop: Unit = ui.ele.scrollTop = 0
+  def add(s: S): Unit = addItem(new SelectionItem(formatter(s), mapper(s)))
+  def addAll(ss: List[S]): Unit = ss.foreach(add(_))
+  def show(): Unit = ele(displayDefault)
+  def hide(): Unit = ele(displayNone)
+  def scrollToTop: Unit = ele.scrollTop = 0
   def selected: Option[T] = selectedValue
 
   private def addItem(item: SelectionItem[T]): Unit =
@@ -31,27 +29,15 @@ class Selection[T]:
     ele.listChild().foreach(_(cls :- "selected"))
 
 object Selection:
-  def apply[T](): Selection[T] = new Selection[T]
+  def apply[T](): Selection[T, T] = new Selection[T, T](identity)
   def apply[T](
       items: List[(String, T)] = List.empty,
       onSelect: T => Unit = ((_: T) => ())
-  ): Selection[T] =
-    val ui = new UI
-    val sel = new Selection[T]
+  ): Selection[(String, T), T] =
+    val sel = new Selection[(String, T), T](_._2)
     sel.onSelect = onSelect
-    items.foreach {
-      case (label, value) => sel.add(label, value)
-    }
+    sel.addAll(items)
     sel
-
-  class UI:
-    val ele = div(cls := "domq-selection")
-    def hide: UI = 
-      ele(displayNone)
-      this
-    def show: UI =
-      ele(displayDefault)
-      this
 
 private class SelectionItem[T](label: String, value: T):
   var onSelect: T => Unit = _ => ()
