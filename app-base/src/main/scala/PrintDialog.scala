@@ -24,8 +24,7 @@ class PrintDialog(
     width: Double,
     height: Double,
     viewBox: String,
-    prefKind: String = "手動",
-    zIndex: Int = Modal.zIndexDefault
+    prefKind: String = "手動"
 ):
   val svg =
     DrawerSvg.drawerJsonToSvg(ops.asJson.toString, width, height, viewBox)
@@ -89,7 +88,7 @@ class PrintDialog(
       yield ()
     f.onComplete {
       case Success(_) => dlog.close()
-      case Failure(ex) => ShowMessage.showError(ex.getMessage, zIndex = zIndex + 2)
+      case Failure(ex) => ShowMessage.showError(ex.getMessage)
     }
 
   def handlePrefUpdate(setting: Option[String]): Future[Boolean] = 

@@ -105,7 +105,7 @@ object Modal extends ModalModifiers:
   def apply(title: String, content: HTMLElement): Modal =
     new Modal(title, content(modalBody))
 
-  def apply[T](
+  def apply(
       title: String,
       body: HTMLElement,
       commands: HTMLElement
