@@ -40,7 +40,7 @@ class PracticeMain:
       sel.addItems(pairs)
       val d = new ModalDialog3
       d.title("受付患者選択")
-      d.body(sel.ele)
+      d.body(sel.ele(cls := "practice-select-from-registered-selection"))
       d.commands(
         button("選択", onclick := (() => 
           sel.selected.foreach(pair => 

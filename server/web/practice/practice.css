@@ -48,6 +48,6 @@ button {
   margin-right: 20px;
 }
 
-.table .header {
-  font-weight: bold;
+.practice-select-from-registered-selection {
+  min-height: 60px;
 }
