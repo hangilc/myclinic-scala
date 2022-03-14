@@ -41,8 +41,7 @@ class MakeAppointDialog(
     ui.kenshinCheck(onchange := (_ => {
       ui.alsoCheck(disabled := !ui.kenshinCheck.checked)
     }))
-  else
-    ui.alsoWrapper(displayNone)
+  else ui.alsoWrapper(displayNone)
 
   def open(): Unit =
     dlog.open()
@@ -143,13 +142,12 @@ object MakeAppointDialog:
       if !txt.isEmpty then
         for (gen, patients) <- Api.searchPatient(txt)
         yield
-          if patients.size == 1 then 
-            onSelect(patients.head)
+          if patients.size == 1 then onSelect(patients.head)
           else
-            ui.searchResult.setItems(
-              patients,
-              patient => s"(${patient.patientId}) ${patient.fullName()}"
-            )
+            ui.searchResult.clear()
+            ui.searchResult.formatter = patient =>
+              s"(${patient.patientId}) ${patient.fullName()}"
+            ui.searchResult.addAll(patients)
             ui.showSearchResult()
 
     def value: String = ui.input.value

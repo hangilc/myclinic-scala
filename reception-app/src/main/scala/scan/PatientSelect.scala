@@ -12,10 +12,12 @@ class PatientSelect(ui: PatientSelect.UI, onSelectCallback: Patient => Unit):
   val m = Modal("患者選択", ui.body, ui.commands)
 
   var selected: Option[Patient] = None
-  val result = Selection.create[Patient](ui.selectionUI, patient =>
+  val result = Selection[Patient]()
+  result.formatter = (formatPatient _)
+  result.onSelect = patient =>
     selected = Some(patient)
     ui.eSelectButton.enable()
-  )
+
   ui.eSelectButton(onclick := (onSelectClick _))
   ui.eCancelButton(onclick := (() => m.close()))
   ui.eSearchForm(onsubmit := (onSearch _))
@@ -38,12 +40,8 @@ class PatientSelect(ui: PatientSelect.UI, onSelectCallback: Patient => Unit):
       for
         (gen, patients) <- Api.searchPatient(text)
       yield 
-        result.setItems(patients, formatPatient _)
-        // result.clear()
-        // patients.foreach(patient =>
-        //   val label = formatPatient(patient)
-        //   result.add(label, patient)
-        // )
+        result.clear()
+        result.addAll(patients)
 
   private def onTodaysPatients(): Unit =
     for
@@ -51,7 +49,8 @@ class PatientSelect(ui: PatientSelect.UI, onSelectCallback: Patient => Unit):
       patientMap <- Api.batchGetPatient(visits.map(_.patientId))
     yield
       val patients = visits.map(visit => patientMap(visit.patientId))
-      result.setItems(patients, formatPatient _)
+      result.clear()
+      result.addAll(patients)
 
 
   private def formatPatient(patient: Patient): String =

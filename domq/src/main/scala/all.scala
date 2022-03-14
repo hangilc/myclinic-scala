@@ -1,10 +1,11 @@
 package dev.fujiwara.domq
 
 object all:
-  export ElementQ.*
+  export ElementQ.{*, given}
   export Html.*
   export Modifiers.{*, given}
   val Modal = dev.fujiwara.domq.Modal
+  type ModalDialog3 = dev.fujiwara.domq.ModalDialog3
   type Selection[T] = dev.fujiwara.domq.Selection[T]
   val Selection = dev.fujiwara.domq.Selection
   val ErrorBox = dev.fujiwara.domq.ErrorBox

@@ -1,73 +1,47 @@
 package dev.fujiwara.domq
 
-import dev.fujiwara.domq.ElementQ.{*, given}
-import dev.fujiwara.domq.Html.{*, given}
-import dev.fujiwara.domq.Modifiers.{*, given}
-import dev.fujiwara.domq.{Modifier}
-import org.scalajs.dom.{HTMLElement}
+import dev.fujiwara.domq.all.{*, given}
 import scala.language.implicitConversions
+import org.scalajs.dom.HTMLElement
 
-class Selection[T](
-    val ui: Selection.UI,
-    var onSelect: T => Unit = ((_: T) => ())
-):
+class Selection[T]:
+  var onSelect: T => Unit = _ => ()
+  private var selectedValue: Option[T] = None
+  var formatter: T => String = _.toString
+  val ui = new Selection.UI
   val ele = ui.ele
-  def addAll(items: List[(String, T)]): Unit =
-    ui.ele(children := (items.map { case (label, value) =>
-      SelectionItem(label, value).ele
-    }))
-
-  def add(item: (String, T)): Unit =
-    item match {
-      case (label, value) => ui.ele(SelectionItem(label, value).ele)
-    }
-
-  def addItems(items: List[T], format: T => String): Unit =
-    addAll(items.map(t => (format(t), t)))
-
-  def setItems(items: List[T], format: T => String): Unit =
-    clear()
-    addItems(items, format)
-
-  def clear(): Unit =
-    ui.ele(dev.fujiwara.domq.Modifiers.clear)
-
+  def clear(): Unit = ele(dev.fujiwara.domq.Modifiers.clear)
+  def add(t: T): Unit = addItem(new SelectionItem(formatter(t), t))
+  def add(label: String, t: T): Unit = addItem(new SelectionItem(label, t))
+  def addAll(ts: List[T]): Unit = ts.foreach(add(_))
   def show(): Unit = ui.ele(displayDefault)
   def hide(): Unit = ui.ele(displayNone)
-
   def scrollToTop: Unit = ui.ele.scrollTop = 0
+  def selected: Option[T] = selectedValue
+
+  private def addItem(item: SelectionItem[T]): Unit =
+    item.onSelect = value => {
+      clearSelected()
+      item.ele(cls := "selected")
+      selectedValue = Some(value)
+    }
+    ele(item.ele)
 
   private def clearSelected(): Unit =
-    val nodes = ui.ele.querySelectorAll(".domq-selection-item.selected")
-    for i <- 0 until nodes.length do
-      nodes
-        .item(i)
-        .asInstanceOf[HTMLElement]
-        .classList
-        .remove("selected")
-
-  class SelectionItem(label: String, value: T):
-    val ele: HTMLElement = div(cls := "domq-selection-item")(
-      label,
-      onclick := (() => {
-        clearSelected()
-        addSelected()
-        onSelect(value)
-        ()
-      })
-    )
-
-    def addSelected(): Unit =
-      ele(cls := "selected")
+    ele.listChild().foreach(_(cls :- "selected"))
 
 object Selection:
+  def apply[T](): Selection[T] = new Selection[T]
   def apply[T](
       items: List[(String, T)] = List.empty,
       onSelect: T => Unit = ((_: T) => ())
   ): Selection[T] =
     val ui = new UI
-    val sel = new Selection(ui, onSelect)
-    sel.addAll(items)
+    val sel = new Selection[T]
+    sel.onSelect = onSelect
+    items.foreach {
+      case (label, value) => sel.add(label, value)
+    }
     sel
 
   class UI:
@@ -79,5 +53,9 @@ object Selection:
       ele(displayDefault)
       this
 
-  def create[T](ui: UI, onSelect: T => Unit): Selection[T] =
-    new Selection[T](ui, onSelect)
+private class SelectionItem[T](label: String, value: T):
+  var onSelect: T => Unit = _ => ()
+  val ele: HTMLElement = div(cls := "domq-selection-item")(
+    label,
+    onclick := (() => onSelect(value))
+  )

@@ -9,6 +9,7 @@ import dev.myclinic.scala.webclient.{Api, global}
 import dev.myclinic.scala.appbase.Selections
 import dev.myclinic.scala.model.Visit
 import dev.myclinic.scala.web.appbase.LocalEventPublisher
+import dev.myclinic.scala.appbase.PatientSearch
 
 class PracticeService extends SideMenuService:
   val left = new PracticeMain
@@ -26,18 +27,18 @@ class PracticeMain:
   def ele = ui.ele
   ui.choice.setBuilder(List(
       "受付患者選択" -> (selectFromRegistered _),
-      "患者検索" -> (() => ()),
+      "患者検索" -> (selectBySearchPatient _),
       "最近の診察" -> (() => ()),
       "日付別" -> (() => ())
   ))
 
   def selectFromRegistered(): Unit =
-    import dev.fujiwara.domq.ModalDialog3
     for
       pairs <- PracticeService.listRegisteredPatient()
     yield
       val sel = Selections.patientSelectionWithData[Visit]()
-      sel.addItems(pairs)
+      sel.clear()
+      sel.addAll(pairs)
       val d = new ModalDialog3
       d.title("受付患者選択")
       d.body(sel.ele(cls := "practice-select-from-registered-selection"))
@@ -50,6 +51,20 @@ class PracticeMain:
         button("キャンセル", onclick := (() => d.close()))
       )
       d.open()
+
+  def selectBySearchPatient(): Unit =
+    val d = new ModalDialog3
+    val search = new PatientSearch
+    d.title("患者検索")
+    d.body(
+      search.ele
+    )
+    d.commands(
+      button("診察登録"),
+      button("選択"),
+      button("閉じる", onclick := (() => d.close()))
+    )
+    d.open()
 
 object PracticeService:
   def listRegisteredPatient(): Future[List[(Patient, Visit)]] =

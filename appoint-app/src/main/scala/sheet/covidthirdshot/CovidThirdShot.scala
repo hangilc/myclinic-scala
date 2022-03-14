@@ -24,7 +24,9 @@ class CovidThirdShot(val ui: CovidThirdShot.UI):
         if patients.size == 1 then
           onSelect(patients.head)
         else
-          ui.searchResult.setItems(patients, formatOption _)
+          ui.searchResult.clear()
+          ui.searchResult.formatter = (formatOption _)
+          ui.searchResult.addAll(patients)
           ui.searchResult.show()
           ui.eSearchInput.value = ""
 

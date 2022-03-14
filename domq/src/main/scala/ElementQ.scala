@@ -129,6 +129,14 @@ object ElementQ:
         e.remove()
       sibs.reverse
 
+    def listChild(): List[HTMLElement] =
+      val n = ele.childElementCount
+      val cs = ele.children
+      var result: List[HTMLElement] = Nil
+      for(i <- (n-1) to 0 by -1)
+        result = cs.item(i).asInstanceOf[HTMLElement] :: result
+      result
+
   extension (s: HTMLSelectElement)
     def setValue(value: String): Boolean =
       s.qSelectorAllFind(
