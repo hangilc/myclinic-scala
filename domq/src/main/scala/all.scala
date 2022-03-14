@@ -11,6 +11,8 @@ object all:
   val Form = dev.fujiwara.domq.Form
   type TableForm = dev.fujiwara.domq.TableForm
   val PullDown = dev.fujiwara.domq.PullDown
+  type PullDownLink = dev.fujiwara.domq.PullDownLink
+  val PullDownLink = dev.fujiwara.domq.PullDownLink
   val ShowMessage = dev.fujiwara.domq.ShowMessage
   val CustomEvent = dev.fujiwara.domq.CustomEvent
   type CustomEvent[T] = dev.fujiwara.domq.CustomEvent[T]

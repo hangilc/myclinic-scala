@@ -7,8 +7,7 @@ import dev.fujiwara.scala.drawer.Op
 object CashierLib:
   def openPrintDialog(
       title: String,
-      ops: List[Op],
-      zIndex: Int = Modal.zIndexDefault
+      ops: List[Op]
   ): Unit =
     val scale = 3
     val w = 148
@@ -19,7 +18,6 @@ object CashierLib:
       w * scale,
       h * scale,
       s"0, 0, $w, $h",
-      prefKind = "receipt",
-      zIndex = zIndex
+      prefKind = "receipt"
     )
     dlog.open()

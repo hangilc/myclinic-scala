@@ -51,6 +51,7 @@ class PullDownLink(label: String):
   }))
   def onError(ex: Throwable): Unit =
     System.err.println(ex)
+  def ele: HTMLElement = link
 
   def setBuilder(
       b: (HTMLElement, PullDown.CloseFun, PullDown.Callback) => Unit
@@ -87,6 +88,9 @@ class PullDownLink(label: String):
       }))
       wrapper(anchor)
     }
+
+object PullDownLink:
+  def apply(label: String): PullDownLink = new PullDownLink(label)
 
 object PullDown:
   type CloseFun = () => Unit
