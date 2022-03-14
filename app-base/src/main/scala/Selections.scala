@@ -14,12 +14,19 @@ class Selection[T]:
   def addItem(t: T): Unit = addItems(List(t))
 
 object Selections:
-  def patientSelection(): Selection[Patient] =
-    val s = new Selection[Patient]
-    s.formatter = patient =>
+  def patientFormatter: Patient => String = patient =>
       String.format(
         "[%04d] %s",
         patient.patientId,
         patient.fullName()
       )
+
+  def patientSelection(): Selection[Patient] =
+    val s = new Selection[Patient]
+    s.formatter = patientFormatter
+    s
+
+  def patientSelectionWithData[D](): Selection[(Patient, D)] =
+    val s = new Selection[(Patient, D)]
+    s.formatter = arg => patientFormatter(arg._1)
     s

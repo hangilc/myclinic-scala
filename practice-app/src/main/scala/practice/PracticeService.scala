@@ -3,6 +3,11 @@ package dev.myclinic.scala.web.practiceapp.practice
 import dev.myclinic.scala.web.appbase.SideMenuService
 import dev.fujiwara.domq.all.{*, given}
 import org.scalajs.dom.HTMLElement
+import scala.concurrent.Future
+import dev.myclinic.scala.model.Patient
+import dev.myclinic.scala.webclient.{Api, global}
+import dev.myclinic.scala.appbase.Selections
+import dev.myclinic.scala.model.Visit
 
 class PracticeService extends SideMenuService:
   val left = new PracticeMain
@@ -21,10 +26,31 @@ class PracticeMain:
   ))
 
   def selectFromRegistered(): Unit =
-    import dev.fujiwara.domq.ModalDialog
-    val d = new ModalDialog
-    d.content(button(onclick := (() => d.close())))
-    d.open()
+    import dev.fujiwara.domq.ModalDialog3
+    for
+      pairs <- PracticeService.listRegisteredPatient()
+    yield
+      val sel = Selections.patientSelectionWithData[Visit]()
+      sel.addItems(pairs)
+      val d = new ModalDialog3
+      d.title("受付患者選択")
+      d.body(sel.ele)
+      d.commands(
+        button("選択"),
+        button("キャンセル", onclick := (() => d.close()))
+      )
+      d.open()
+
+object PracticeService:
+  def listRegisteredPatient(): Future[List[(Patient, Visit)]] =
+    for
+      (gen, wqList, visitMap, patientMap) <- Api.listWqueueFull()
+    yield
+      wqList.map(wq => 
+        val v = visitMap(wq.visitId)
+        val p = patientMap(v.patientId)
+        (p, v)  
+      )
     
 
 class PracticeMainUI:

@@ -113,6 +113,21 @@
   /* maxHeight: (window.innerHeight - 60).toString + px; */
 }
 
+.domq-modal-dialog3-title {
+  vertical-align: middle;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.domq-modal-dialog3-body {
+  padding: 0.5em 0;
+}
+
+.domq-modal-dialog3-commands {
+  text-align: end;
+}
+
+
 /* Screen ****************************************************************/
 
 .domq-screen {      
@@ -200,6 +215,10 @@
   overflow-y: auto;
   border: 1px solid gray;
   padding: 10px;
+}
+
+.domq-selection-item {
+  user-select: none;
 }
 
 .domq-selection-item:hover {

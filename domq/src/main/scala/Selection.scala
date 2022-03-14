@@ -35,6 +35,9 @@ class Selection[T](
   def show(): Unit = ui.ele(displayDefault)
   def hide(): Unit = ui.ele(displayNone)
 
+  def selected: T =
+    ???
+
   def scrollToTop: Unit = ui.ele.scrollTop = 0
 
   private def clearSelected(): Unit =

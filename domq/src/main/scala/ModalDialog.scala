@@ -21,6 +21,9 @@ class ModalDialog:
     ZIndexManager.release(zIndexContent)
     ZIndexManager.release(zIndexScreen)
 
-object ModalDialog:
-  def apply(title: String, bodyStuffer: HTMLElement => Unit, commandsStuffer: HTMLElement => Unit): ModalDialog =
-    ???
+class ModalDialog3 extends ModalDialog:
+  val title: HTMLElement = div(cls := "domq-modal-dialog3-title")
+  val body: HTMLElement = div(cls := "domq-modal-dialog3-body")
+  val commands: HTMLElement = div(cls := "domq-modal-dialog3-commands")
+  content(title, body, commands)
+
