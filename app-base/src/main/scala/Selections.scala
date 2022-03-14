@@ -5,13 +5,16 @@ import dev.myclinic.scala.model.{*, given}
 
 class Selection[T]:
   var formatter: T => String = _.toString
+  private var selectedValue: Option[T] = None
   val onSelect = LocalEventPublisher[T]
+  onSelect.subscribe(t => selectedValue = Some(t))
   private val sel =
     dev.fujiwara.domq.Selection(onSelect = t => onSelect.publish(t))
   def ele = sel.ele
   def addItems(ts: List[T]): Unit =
     sel.addItems(ts, formatter)
   def addItem(t: T): Unit = addItems(List(t))
+  def selected: Option[T] = selectedValue
 
 object Selections:
   def patientFormatter: Patient => String = patient =>

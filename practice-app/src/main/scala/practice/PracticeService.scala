@@ -8,6 +8,7 @@ import dev.myclinic.scala.model.Patient
 import dev.myclinic.scala.webclient.{Api, global}
 import dev.myclinic.scala.appbase.Selections
 import dev.myclinic.scala.model.Visit
+import dev.myclinic.scala.web.appbase.LocalEventPublisher
 
 class PracticeService extends SideMenuService:
   val left = new PracticeMain
@@ -15,7 +16,12 @@ class PracticeService extends SideMenuService:
 
   override def getElements = List(left.ele, right.ele)
 
+  left.startPatientPublisher.subscribe(patient => println(("start-patient", patient)))
+  left.startVisitPublisher.subscribe((patient, visit) => println(("start-visit", patient, visit)))
+
 class PracticeMain:
+  val startPatientPublisher = LocalEventPublisher[Patient]
+  val startVisitPublisher = LocalEventPublisher[(Patient, Visit)]
   val ui = new PracticeMainUI
   def ele = ui.ele
   ui.choice.setBuilder(List(
@@ -36,7 +42,11 @@ class PracticeMain:
       d.title("受付患者選択")
       d.body(sel.ele)
       d.commands(
-        button("選択"),
+        button("選択", onclick := (() => 
+          sel.selected.foreach(pair => 
+            d.close()
+            startVisitPublisher.publish(_)
+      ))),
         button("キャンセル", onclick := (() => d.close()))
       )
       d.open()
