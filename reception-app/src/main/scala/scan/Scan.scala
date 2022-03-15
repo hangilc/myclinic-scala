@@ -12,50 +12,71 @@ import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
 
 import scala.util.Success
 import scala.util.Failure
-import dev.myclinic.scala.web.reception.scan.scanbox.ScanBox
+import dev.myclinic.scala.web.reception.scan.docscan.DocScan
+import dev.myclinic.scala.web.reception.scan.patientimages.PatientImagesOrig
 import dev.myclinic.scala.web.reception.scan.patientimages.PatientImages
 
-class Scan(ui: Scan.UI) extends SideMenuService:
-  ui.eNewScanButton(onclick := (newScan _))
-  ui.ePatientImagesButton(onclick := (patientImages _))
-  addBox()
+class Scan() extends SideMenuService:
+  val boxes = div
+  val ele = div(cls := "content scan")(
+        div(cls := "header")(
+          h1("スキャン"),
+          button("新規スキャン", onclick := (doScan _)),
+          button("患者画像", onclick := (doPatientImages _))
+        ),
+        boxes
+      )
 
-  override def getElement = ui.ele(cls := "content")
+  override def getElement = ele
 
-  def addBox(): Unit =
-    val box = ScanBox()
-    box.onClosedCallbacks.add(_ => onBoxClose())
-    box.init.onComplete {
-      case Success(_) =>
-        ui.eScannedBoxes.prepend(box.ui.ele)
-        box.initFocus
-      case Failure(ex) => System.err.println(ex.getMessage)
-    }
+  def doScan(): Unit = 
+    val docScan = new DocScan
+    boxes.prepend(docScan.ele)
 
-  private def newScan(): Unit = addBox()
+  def doPatientImages(): Unit =
+    val patientImages = new PatientImages
+    boxes.prepend(patientImages.ele)
 
-  private def patientImages(): Unit = 
-    PatientSelect.open(patient => 
-      val pi = PatientImages(patient)
-      for 
-        _ <- pi.init()
-      yield ui.eScannedBoxes.prepend(pi.ele)
-    )
 
-  private def countBoxes: Int =
-    ui.eScannedBoxes.qSelectorAll(s".${ScanBox.cssClassName}").size
+  // ui.eNewScanButton(onclick := (newScan _))
+  // ui.ePatientImagesButton(onclick := (patientImages _))
+  // addBox()
 
-  private def onBoxClose(): Unit =
-    if countBoxes == 0 then addBox()
 
-  private def scanBoxes: List[HTMLElement] =
-    ui.ele.qSelectorAll(s".${ScanBox.cssClassName}")
+  // def addBox(): Unit =
+  //   val box = ScanBox()
+  //   box.onClosedCallbacks.add(_ => onBoxClose())
+  //   box.init.onComplete {
+  //     case Success(_) =>
+  //       ui.eScannedBoxes.prepend(box.ui.ele)
+  //       box.initFocus
+  //     case Failure(ex) => System.err.println(ex.getMessage)
+  //   }
 
-  private def broadcastScanStarted(deviceId: String): Unit =
-    CustomEvent.dispatchTo[String]("scan-started", deviceId, scanBoxes)
+  // private def newScan(): Unit = addBox()
 
-  private def broadcastScanEnded(deviceId: String): Unit =
-    CustomEvent.dispatchTo[String]("scan-ended", deviceId, scanBoxes)
+  // private def patientImages(): Unit = 
+  //   PatientSelect.open(patient => 
+  //     val pi = PatientImages(patient)
+  //     for 
+  //       _ <- pi.init()
+  //     yield ui.eScannedBoxes.prepend(pi.ele)
+  //   )
+
+  // private def countBoxes: Int =
+  //   ui.eScannedBoxes.qSelectorAll(s".${ScanBox.cssClassName}").size
+
+  // private def onBoxClose(): Unit =
+  //   if countBoxes == 0 then addBox()
+
+  // private def scanBoxes: List[HTMLElement] =
+  //   ui.ele.qSelectorAll(s".${ScanBox.cssClassName}")
+
+  // private def broadcastScanStarted(deviceId: String): Unit =
+  //   CustomEvent.dispatchTo[String]("scan-started", deviceId, scanBoxes)
+
+  // private def broadcastScanEnded(deviceId: String): Unit =
+  //   CustomEvent.dispatchTo[String]("scan-ended", deviceId, scanBoxes)
 
 object Scan:
   class UI:
@@ -72,7 +93,7 @@ object Scan:
         eScannedBoxes
       )
 
-  def apply(): Scan = new Scan(new Scan.UI())
+  def apply(): Scan = new Scan
 
     
 

@@ -6,11 +6,17 @@ import dev.myclinic.scala.web.reception.scan.{PatientDisp}
 import scala.concurrent.Future
 import dev.myclinic.scala.webclient.Api
 import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
+import dev.myclinic.scala.web.reception.scan.ScanBox
 
-class PatientImages(ui: PatientImages.UI, patient: Patient):
-  import PatientImages.ImageList
+class PatientImages:
+  val box = new ScanBox
+  box.title("患者画像")
+  def ele = box.ele
+
+class PatientImagesOrig(ui: PatientImagesOrig.UI, patient: Patient):
+  import PatientImagesOrig.ImageList
   val ele = ui.ele
-  val patientDisp = new PatientDisp(ui.patientDispUI)
+  val patientDisp = new PatientDisp
   val imageList = new ImageList(ui.imageListUI)
 
   patientDisp.setPatient(patient)
@@ -35,7 +41,7 @@ class PatientImages(ui: PatientImages.UI, patient: Patient):
   def onClose(): Unit =
     ui.ele.remove()
 
-object PatientImages:
+object PatientImagesOrig:
   val itemCssClassName = "scan-patient-images-item"
   class ImageItemUI:
     val ele = div(cls := itemCssClassName)
@@ -64,14 +70,14 @@ object PatientImages:
       ui.ele.qSelectorAll(s".${itemCssClassName}").foreach(_(cls :- "selected"))
 
   class UI:
-    val patientDispUI = new PatientDisp.UI
+    val patientDisp = new PatientDisp
     val imageListUI = new ImageListUI
     val eImageDisp = div
     val eCloseButton = button
 
     val ele = div(cls := "scan-patient-images")(
       div("保存画像", fontWeight := "bold"),
-      patientDispUI.ele,
+      patientDisp.ele,
       imageListUI.ele,
       eImageDisp,
       div(textAlign := "end")(
@@ -79,8 +85,8 @@ object PatientImages:
       )
     )
 
-  def apply(patient: Patient): PatientImages =
+  def apply(patient: Patient): PatientImagesOrig =
     val ui = new UI
-    new PatientImages(ui, patient)
+    new PatientImagesOrig(ui, patient)
 
 

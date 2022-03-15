@@ -249,117 +249,141 @@ button {
 
 /* Scan ***********************************************************************/
 
-#main .scan .header {
+.scan .header {
   display: flex;
   align-items: center;
   margin-bottom: 10px;
 }
 
-#main .scan .header h1 {
+.scan .header h1 {
   display: inline-block;
   margin: 0 4rem 0 0; 
 }
 
-#main .scan .header button {
+.scan .header button {
   border: 1px solid gray;
   margin-right: 10px;
 }
 
-#main .scan .scan-box {
+.scan-box {
   border: 1px solid var(--info-color);
   padding: 10px;
   border-radius: 4px; 
   margin-bottom: 10px;
 }
 
-#main .scan .scan-patient-images {
+.scan-box-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin: 0 0 10px 0;
+}
+
+.scan .doc-scan-subtitle {
+  font-size: 1rem;
+  font-weight: bold;
+  margin: 0 0 10px 0;
+}
+
+.scan .doc-scan-subcontent {
+  margin: 10px 0 10px 10px;
+}
+
+
+/* .scan .scan-box {
+  border: 1px solid var(--info-color);
+  padding: 10px;
+  border-radius: 4px; 
+  margin-bottom: 10px;
+}
+
+.scan .scan-patient-images {
   border: 1px solid var(--success-color);
   padding: 10px;
   border-radius: 4px; 
   margin-bottom: 10px;
 }
 
-#main .scan .scan-box .search-area {
+.scan .scan-box .search-area {
   display: flex;
   align-items: center;
   flex-wrap: nowrap;
 }
 
-#main .scan .scan-box h2 {
+.scan .scan-box h2 {
   display: inline-block;
   font-size: 1.2rem;
   font-weight: normal;
   margin: 0;
 }
 
-#main .scan .scan-box .search-area form {
+.scan .scan-box .search-area form {
   display: inline-box;
   margin: 0 0 0 0.5rem;
 }
 
-#main .scan .scan-box .search-area form button {
+.scan .scan-box .search-area form button {
   margin: 0 0 0 0.2rem;
 }
 
-#main .scan .scan-box .search-result {
+.scan .scan-box .search-result {
   max-width: 16rem;
   overflow-x: auto;
   border-radius: 4px;
   margin: 10px 0;
 }
 
-#main .scan .scan-box .selected-patient {
+.scan .scan-box .selected-patient {
   margin: 10px 0;
 }
 
-#main .scan .scan-box .scan-type-area,
-#main .scan .scan-box .scanner-selection-area,
-#main .scan .scan-box .scan-progress-area {
+.scan .scan-box .scan-type-area,
+.scan .scan-box .scanner-selection-area,
+.scan .scan-box .scan-progress-area {
   display: flex;
   align-items: center;
   margin: 10px 0;
 }
 
-#main .scan .scan-box .scan-type-area select,
-#main .scan .scan-box .scanner-selection-area select {
+.scan .scan-box .scan-type-area select,
+.scan .scan-box .scanner-selection-area select {
   margin-left: 10px;
 }
 
-#main .scan .scan-box .scanner-selection-area button,
-#main .scan .scan-box .scanner-selection-area a {
+.scan .scan-box .scanner-selection-area button,
+.scan .scan-box .scanner-selection-area a {
   margin-left: 10px;
 }
 
-#main .scan .scan-box .command-box {
+.scan .scan-box .command-box {
   display: flex;
   justify-content: flex-end;
 }
 
-#main .scan .scan-box .scan-progress-area span {
+.scan .scan-box .scan-progress-area span {
   margin-left: 10px;
 }
 
-#main .scan .scan-box .scanned {
+.scan .scan-box .scanned {
   border: 1px solid gray;
   padding: 10px;
   border-radius: 4px;
   margin: 10px 0;
 }
 
-#main .scan .scan-box .scanned .scanned-item {
+.scan .scan-box .scanned .scanned-item {
   display: flex;
   align-items: center;
 }
 
-#main .scan .scan-box .scanned .scanned-item a {
+.scan .scan-box .scanned .scanned-item a {
   margin-left: 10px;
 }
 
-#main .scan .scan-box .scanned .scanned-item .upload-file-disp {
+.scan .scan-box .scanned .scanned-item .upload-file-disp {
   margin-right: 10px;
 }
 
-#main .scan .scan-box .scanned .upload-button {
+.scan .scan-box .scanned .upload-button {
   margin-top: 10px;
 }
 
@@ -379,4 +403,4 @@ button {
 
 .scan-patient-images-item.selected {
   font-weight: bold;
-}
+} */

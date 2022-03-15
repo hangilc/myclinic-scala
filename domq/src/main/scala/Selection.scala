@@ -9,7 +9,9 @@ class Selection[S, T](mapper: S => T):
   private var selectedValue: Option[T] = None
   var formatter: S => String = _.toString
   val ele = div(cls := "domq-selection")
-  def clear(): Unit = ele(dev.fujiwara.domq.Modifiers.clear)
+  def clear(): Unit = 
+    println("Selection-clear")
+    ele(dev.fujiwara.domq.Modifiers.clear)
   def add(s: S): Unit = addItem(new SelectionItem(formatter(s), mapper(s)))
   def addAll(ss: List[S]): Unit = ss.foreach(add(_))
   def show(): Unit = ele(displayDefault)

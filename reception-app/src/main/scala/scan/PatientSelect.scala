@@ -12,12 +12,11 @@ class PatientSelect(ui: PatientSelect.UI, onSelectCallback: Patient => Unit):
   val m = Modal("患者選択", ui.body, ui.commands)
 
   var selected: Option[Patient] = None
-  val result = Selection[Patient]()
-  result.formatter = (formatPatient _)
+  val result = ui.selection
+  result.formatter = patient => String.format("%04d %s", patient.patientId, patient.fullName())
   result.onSelect = patient =>
     selected = Some(patient)
     ui.eSelectButton.enable()
-
   ui.eSelectButton(onclick := (onSelectClick _))
   ui.eCancelButton(onclick := (() => m.close()))
   ui.eSearchForm(onsubmit := (onSearch _))
@@ -26,7 +25,6 @@ class PatientSelect(ui: PatientSelect.UI, onSelectCallback: Patient => Unit):
   def open(): Unit = m.open()
 
   def close(): Unit = m.close()
-
 
   def initFocus(): Unit = ui.initFocus()
 
@@ -53,10 +51,10 @@ class PatientSelect(ui: PatientSelect.UI, onSelectCallback: Patient => Unit):
       result.addAll(patients)
 
 
-  private def formatPatient(patient: Patient): String =
-    val id = String.format("%04d", patient.patientId)
-    val name = patient.fullName()
-    s"(${id}) ${name} ${patient.birthdayRep}生 ${patient.age}才 ${patient.sex.rep}性"
+  // private def formatPatient(patient: Patient): String =
+  //   val id = String.format("%04d", patient.patientId)
+  //   val name = patient.fullName()
+  //   s"(${id}) ${name} ${patient.birthdayRep}生 ${patient.age}才 ${patient.sex.rep}性"
 
 object PatientSelect:
   class UI:
@@ -64,7 +62,7 @@ object PatientSelect:
     val eInputText = inputText
     val eSearchButton = button
     val eTodaysPatientsLink = a
-    val selectionUI = new Selection.UI
+    val selection = Selection[Patient]()
     val eSelectButton = button
     val eCancelButton = button
     val body = div(
@@ -73,7 +71,7 @@ object PatientSelect:
         eSearchButton("検索", ml := "5px", attr("type") := "default"),
         eTodaysPatientsLink("本日の受診", ml := "10px")
       ),
-      selectionUI.ele(
+      selection.ele(
         maxWidth := "300px",
         maxHeight := "300px",
         overflowX := "auto",

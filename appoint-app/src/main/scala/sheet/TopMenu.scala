@@ -1,7 +1,6 @@
 package dev.myclinic.scala.web.appoint.sheet
 
 import dev.fujiwara.domq.all.{*, given}
-import dev.myclinic.scala.web.appbase.{LocalEventPublisher}
 import java.time.LocalDate
 import dev.myclinic.scala.web.appoint.sheet.covidthirdshot.CovidThirdShot
 import dev.myclinic.scala.webclient.{Api, global}

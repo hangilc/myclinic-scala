@@ -23,7 +23,6 @@ import dev.myclinic.scala.web.appbase.{EventFetcher}
 import dev.myclinic.scala.web.appbase.{DataSource, SyncedDataSource}
 import dev.myclinic.scala.web.appbase.ListOfSortedComp
 import dev.myclinic.scala.web.appbase.Comp
-import dev.myclinic.scala.web.appbase.LocalEventPublisher
 import dev.myclinic.scala.web.appbase.DeleteNotifier
 import dev.myclinic.scala.web.appbase.ElementEvent.*
 

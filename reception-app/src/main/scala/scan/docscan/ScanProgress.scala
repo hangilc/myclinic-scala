@@ -1,4 +1,4 @@
-package dev.myclinic.scala.web.reception.scan.scanbox
+package dev.myclinic.scala.web.reception.scan.docscan
 
 import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
@@ -29,7 +29,7 @@ object ScanProgress:
 
 class ScanProgress(ui: ScanProgress.UI, deviceRef: () => Option[String])(using
     queue: ScanWorkQueue,
-    scope: ScanBox.Scope
+    scope: DocScan.Scope
 ):
   var onScannedCallback: String => Future[Unit] = _ => Future.successful(())
   val onScannedCallbacks = new FutureCallbacks[String]
@@ -48,7 +48,7 @@ class ScanProgress(ui: ScanProgress.UI, deviceRef: () => Option[String])(using
         for
           file <- Api.scan(
             deviceId,
-            ScanBox.reportProgress(ui.eScanProgress),
+            DocScan.reportProgress(ui.eScanProgress),
             scope.resolution
           )
           _ = {

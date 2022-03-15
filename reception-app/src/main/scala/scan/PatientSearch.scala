@@ -32,40 +32,35 @@ object PatientSearch:
 class PatientSearch(ui: PatientSearch.UI):
   var onSelectCallback: Patient => Unit = _ => ()
   ui.eSearchForm(onsubmit := (onSearch _))
+  ui.searchResult.onSelect = onSelect
 
   def focus(): Unit = ui.eSearchInput.focus()
+
+  private def onSelect(patient: Patient): Unit =
+    ui.searchResult.clear()
+    ui.searchResult.hide()
+    onSelectCallback(patient)
 
   def hideResult: Unit =
     ui.searchResult.hide()
 
-  private def onSelect(patient: Patient): Unit =
-    onSelectCallback(patient)
-
   private def onSearch(): Unit =
     val txt = ui.eSearchInput.value.trim
     val searchResult = ui.searchResult
+    searchResult.formatter = (formatPatient _)
     if !txt.isEmpty then
       ui.eSearchInput.value = ""
       for (gen, patients) <- Api.searchPatient(txt)
       yield
         if patients.size == 1 then
-          val patient = patients.head
-          searchResult.clear()
-          searchResult.hide()
           onSelect(patients.head)
         else if patients.size == 0 then
           ()
         else
           searchResult.clear()
-          patients.foreach(addSearchResult(_))
+          searchResult.addAll(patients)
           searchResult.show()
           searchResult.scrollToTop
-
-  private def addSearchResult(patient: Patient): Unit =
-    ui.searchResult.add(
-      formatPatient(patient),
-      patient
-    )
 
   private def formatPatient(patient: Patient): String =
     String.format("(%04d) %s", patient.patientId, patient.fullName())

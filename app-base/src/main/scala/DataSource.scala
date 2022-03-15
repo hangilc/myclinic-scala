@@ -1,6 +1,5 @@
 package dev.myclinic.scala.web.appbase
 
-import dev.myclinic.scala.web.appbase.LocalEventPublisher
 import dev.myclinic.scala.web.appbase.EventFetcher
 import dev.myclinic.scala.web.appbase.ElementEvent.*
 import dev.myclinic.scala.model.ModelSymbol
@@ -8,6 +7,7 @@ import dev.myclinic.scala.model.DataId
 import dev.myclinic.scala.model.AppModelEvent
 import org.scalajs.dom.HTMLElement
 import org.scalajs.dom.document
+import dev.fujiwara.domq.LocalEventPublisher
 
 trait DataSource[T]:
   def data: T

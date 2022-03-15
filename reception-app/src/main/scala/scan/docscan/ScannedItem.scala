@@ -1,4 +1,4 @@
-package dev.myclinic.scala.web.reception.scan.scanbox
+package dev.myclinic.scala.web.reception.scan.docscan
 
 import org.scalajs.dom.{HTMLElement, URL, HTMLImageElement, Event}
 import org.scalajs.dom.{Blob, BlobPropertyBag}
@@ -49,7 +49,7 @@ object ScannedItem:
       timestamp: String,
       index: Int,
       total: Int
-  )(using ScanWorkQueue, ScanBox.Scope): ScannedItem =
+  )(using ScanWorkQueue, DocScan.Scope): ScannedItem =
     val ui = new UI
     new ScannedItem(
       ui,
@@ -75,7 +75,7 @@ class ScannedItem(
     timestamp: String,
     var index: Int,
     var total: Int
-)(using queue: ScanWorkQueue, scope: ScanBox.Scope):
+)(using queue: ScanWorkQueue, scope: DocScan.Scope):
   val onDeletedCallbacks = new FutureCallbacks[Int]
   val serialId = ScannedItem.serial
   val ele = ui.ele
@@ -185,7 +185,7 @@ class ScannedItem(
         for
           saved <- Api.scan(
             deviceId,
-            ScanBox.reportProgress(ui.eScanProgress),
+            DocScan.reportProgress(ui.eScanProgress),
             scope.resolution
           )
           _ <- Api.deleteScannedFile(savedFile)
@@ -297,7 +297,7 @@ class ScannedItem(
 
   def adapt(patientId: Option[Int], deviceId: Option[String]): Unit =
     val queueIsEmpty = queue.isEmpty
-    val canScan = ScanBox.canScan(patientId, deviceId)
+    val canScan = DocScan.canScan(patientId, deviceId)
     ui.ePreviewLink.show(queueIsEmpty)
     ui.eRescanLink.show(queueIsEmpty && canScan)
     ui.eDeleteLink.show(queueIsEmpty)

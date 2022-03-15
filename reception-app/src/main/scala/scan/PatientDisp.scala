@@ -6,16 +6,16 @@ import dev.fujiwara.domq.Modifiers.{*, given}
 import scala.language.implicitConversions
 import dev.myclinic.scala.model.Patient
 
-class PatientDisp(ui: PatientDisp.UI):
+class PatientDisp:
+  val disp = span
+  val ele = div(
+    h2("患者"),
+    disp,
+    a("変更")
+  )
   def setPatient(patient: Patient): Unit =
-    ui.ele.innerText = formatPatient(patient)
-    ui.ele(displayDefault)
+    disp(innerText := formatPatient(patient))
 
   private def formatPatient(patient: Patient): String =
     String.format("(%04d) %s", patient.patientId, patient.fullName())
-
-object PatientDisp:
-  class UI:
-    val ele = div(displayNone)
-
 

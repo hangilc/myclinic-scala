@@ -1,6 +1,5 @@
 package dev.myclinic.scala.appbase
 
-import dev.myclinic.scala.web.appbase.LocalEventPublisher
 import dev.myclinic.scala.model.{*, given}
 import dev.fujiwara.domq.all.{*, given}
 

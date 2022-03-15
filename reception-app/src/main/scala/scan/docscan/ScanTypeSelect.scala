@@ -1,4 +1,4 @@
-package dev.myclinic.scala.web.reception.scan.scanbox
+package dev.myclinic.scala.web.reception.scan.docscan
 
 import dev.fujiwara.domq.ElementQ.*
 import dev.fujiwara.domq.Html

@@ -1,4 +1,4 @@
-package dev.myclinic.scala.web.reception.scan.scanbox
+package dev.myclinic.scala.web.reception.scan.docscan
 
 import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
@@ -19,7 +19,7 @@ class ScannedItems(
     ui: ScannedItems.UI,
     timestamp: String,
     scannerRef: () => Option[String]
-)(using ScanWorkQueue, ScanBox.Scope):
+)(using ScanWorkQueue, DocScan.Scope):
   val ele = ui.ele
   var items: List[ScannedItem] = List.empty
   def size: Int = items.size

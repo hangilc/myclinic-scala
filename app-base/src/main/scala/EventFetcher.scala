@@ -18,6 +18,7 @@ import dev.myclinic.scala.model.{HotlineBeep, EventIdNotice, HeartBeat}
 import java.time.LocalDateTime
 import org.scalajs.dom.WebSocket
 import org.scalajs.dom.CloseEvent
+import dev.fujiwara.domq.LocalEventPublisher
 
 class EventFetcher:
   val appModelEventPublisher: LocalEventPublisher[AppModelEvent] = LocalEventPublisher[AppModelEvent]

@@ -32,7 +32,7 @@ class SearchPatientBlock(
     "患者検索結果",
     div(cls := "content")(
       div(cls := "left-pane")(
-        result.ui.ele
+        result.ele
       ),
       div(cls := "right-pane")(
         errorBox.ele,

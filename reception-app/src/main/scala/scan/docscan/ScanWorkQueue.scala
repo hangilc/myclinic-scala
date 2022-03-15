@@ -1,4 +1,4 @@
-package dev.myclinic.scala.web.reception.scan.scanbox
+package dev.myclinic.scala.web.reception.scan.docscan
 
 import dev.myclinic.scala.webclient.Api
 import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._

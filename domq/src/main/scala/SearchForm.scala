@@ -30,12 +30,15 @@ class SearchFormEngine[I, T, Src, D, S[_, _]](
     triggerProvider: TriggerProvider[T],
     selectionProvider: SelectionProvider[S]
 ):
+  var onSearchDone: () => Unit = () => ()
   triggerProvider.onSearch(
     trigger,
     () => {
       val text = inputProvider.getText(input)
       for result <- search(text)
-      yield selectionProvider.setItems(selection, result)
+      yield 
+        selectionProvider.setItems(selection, result)
+        onSearchDone()
     }
   )
 
@@ -84,5 +87,6 @@ class SearchForm[Src, D](mapper: Src => D, search: String => Future[List[Src]]):
   import Implicits.given
   val engine = new SearchFormEngine(ui.input, ui.form, ui.selection, search)
   def selected: Option[D] = engine.selected
+  def onSelect(handler: D => Unit): Unit = ui.selection.onSelect = handler
 
 

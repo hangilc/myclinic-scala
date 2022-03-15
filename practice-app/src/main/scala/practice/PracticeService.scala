@@ -9,7 +9,6 @@ import dev.myclinic.scala.model.Patient
 import dev.myclinic.scala.webclient.{Api, global}
 import dev.myclinic.scala.appbase.Selections
 import dev.myclinic.scala.model.Visit
-import dev.myclinic.scala.web.appbase.LocalEventPublisher
 import dev.fujiwara.kanjidate.KanjiDate
 import scala.util.Success
 import scala.util.Failure
@@ -24,8 +23,8 @@ class PracticeService extends SideMenuService:
   left.startVisitPublisher.subscribe(patient => println(("start-visit", patient)))
 
 class PracticeMain:
-  val startPatientPublisher = LocalEventPublisher[Patient]
-  val startVisitPublisher = LocalEventPublisher[Patient]
+  val startPatientPublisher = new LocalEventPublisher[Patient]
+  val startVisitPublisher = new LocalEventPublisher[Patient]
   val ui = new PracticeMainUI
   def ele = ui.ele
   ui.choice.setBuilder(List(

@@ -1,4 +1,4 @@
-package dev.myclinic.scala.web.reception.scan.scanbox
+package dev.myclinic.scala.web.reception.scan.docscan
 
 import dev.myclinic.scala.web.appbase.SideMenuService
 import dev.fujiwara.domq.ElementQ.{*, given}
@@ -25,20 +25,29 @@ import cats.*
 import cats.syntax.all.*
 import dev.fujiwara.domq.Icons
 import dev.myclinic.scala.web.reception.scan.{Callbacks, PatientSearch, PatientDisp}
+import dev.myclinic.scala.web.reception.scan.ScanBox
 
-class ScanBox(val ui: ScanBox.UI)(using queue: ScanWorkQueue)
-    extends ScanBox.Scope:
-  given ScanBox.Scope = this
+class DocScan:
+  val box = new ScanBox
+  box.title(innerText := "書類のスキャン")
+  box.content(
+    (new PatientSelect).ele
+  )
+  def ele = box.ele
+
+class ScanBoxOrig(val ui: DocScan.UI)(using queue: ScanWorkQueue)
+    extends DocScan.Scope:
+  given DocScan.Scope = this
   val onClosedCallbacks = new Callbacks[Unit]
-  val timestamp = ScanBox.makeTimeStamp
+  val timestamp = DocScan.makeTimeStamp
   val patientSearch = new PatientSearch(ui.patientSearchUI)
-  val patientDisp = new PatientDisp(ui.patientDispUI)
+  val patientDisp = new PatientDisp
   val scanTypeSelect = new ScanTypeSelect(ui.scanTypeSelectUI)
   val scannerSelect = new ScannerSelect(ui.scannerSelectUI)
   val scanProgress = new ScanProgress(ui.scanProgressUI, () => selectedScanner)
   val scannedItems = new ScannedItems(
     ui.scannedItemsUI,
-    ScanBox.makeTimeStamp,
+    DocScan.makeTimeStamp,
     () => selectedScanner
   )
 
@@ -49,7 +58,7 @@ class ScanBox(val ui: ScanBox.UI)(using queue: ScanWorkQueue)
 
   var scanType: String = scanTypeSelect.getValue
   def init: Future[Unit] =
-    scanTypeSelect.setValue(ScanBox.defaultScanType)
+    scanTypeSelect.setValue(DocScan.defaultScanType)
     scanType = scanTypeSelect.getValue
     for _ <- scannerSelect.init
     yield ()
@@ -136,7 +145,7 @@ class ScanBox(val ui: ScanBox.UI)(using queue: ScanWorkQueue)
 
   private def adaptScan: Unit =
     val enable =
-      ScanBox.canScan(patient.map(_.patientId), scannerSelect.selected)
+      DocScan.canScan(patient.map(_.patientId), scannerSelect.selected)
     scanProgress.enableScan(enable)
 
   def adapt(): Unit =
@@ -146,19 +155,19 @@ class ScanBox(val ui: ScanBox.UI)(using queue: ScanWorkQueue)
 
   adapt()
 
-object ScanBox:
+object DocScan:
   val cssClassName: String = "scan-box"
   val defaultScanType: String = "image"
 
-  def apply(): ScanBox =
-    given queue: ScanWorkQueue = ScanWorkQueue()
-    val box = new ScanBox(new UI)
-    box.onClosedCallbacks.add(_ => ScanWorkQueue.remove(queue))
-    box
+  // def apply(): ScanBox =
+    // given queue: ScanWorkQueue = ScanWorkQueue()
+    // val box = new DocScan
+    // box.onClosedCallbacks.add(_ => ScanWorkQueue.remove(queue))
+    // box
 
   class UI:
     val patientSearchUI = new PatientSearch.UI
-    val patientDispUI = new PatientDisp.UI
+    val patientDisp = new PatientDisp
     val scanTypeSelectUI = new ScanTypeSelect.UI
     val scannerSelectUI = new ScannerSelect.UI
     val scanProgressUI = new ScanProgress.UI
@@ -167,7 +176,7 @@ object ScanBox:
     val eCloseButton = button()
     val ele = div(cls := cssClassName)(
       patientSearchUI.ele,
-      patientDispUI.ele(cls := "selected-patient"),
+      patientDisp.ele(cls := "selected-patient"),
       scanTypeSelectUI.ele(cls := "scan-type-area"),
       scannerSelectUI.ele(cls := "scanner-selection-area"),
       scanProgressUI.ele(cls := "scan-progress-area"),
