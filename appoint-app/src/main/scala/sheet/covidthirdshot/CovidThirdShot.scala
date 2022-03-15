@@ -61,7 +61,7 @@ object CovidThirdShot:
         eSearchInput,
         button(attr("type") := "default", "検索", ml := "6px")
       ),
-      searchResult.ui.ele,
+      searchResult.ele,
       eDisp
     )
 

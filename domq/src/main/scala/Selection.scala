@@ -22,6 +22,7 @@ class Selection[S, T](mapper: S => T):
       clearSelected()
       item.ele(cls := "selected")
       selectedValue = Some(value)
+      onSelect(value)
     }
     ele(item.ele)
 
