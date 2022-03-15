@@ -24,6 +24,10 @@ button + button {
   margin-left: 0.3em;
 }
 
+input + button {
+  margin-left: 0.3rem;
+}
+
 input[type=text]:focus {
   outline: none;
   border-radius: 4px;
