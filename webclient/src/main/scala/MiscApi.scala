@@ -201,6 +201,9 @@ object MiscApi extends ApiBase:
     def listRecentVisit(offset: Int, count: Int): Future[List[Visit]] =
       get("list-recent-visit", Params("offset" -> offset, "count" -> count))
 
+    def listRecentVisitFull(offset: Int, count: Int): Future[List[(Visit, Patient)]] =
+      get("list-recent-visit-full", Params("offset" -> offset, "count" -> count))
+
     def listVisitByDate(at: LocalDate): Future[List[Visit]] =
       get("list-visit-by-date", Params("at" -> at))
 

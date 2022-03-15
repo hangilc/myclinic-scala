@@ -6,10 +6,12 @@ import cats.syntax.all.*
 import cats.effect.IO
 import dev.myclinic.scala.model.*
 import doobie.free.ConnectionIO
+import doobie.syntax.all.*
 import scala.util.Try
 import java.time.LocalDateTime
 import java.time.LocalDate
 import dev.myclinic.scala.db.DbKoukikoureiPrim
+import dev.myclinic.scala.db.DoobieMapping.given
 
 object Db
     extends Mysql
@@ -242,4 +244,11 @@ object Db
         roujin <- DbRoujinPrim.listRoujin(patientId)
         kouhi <- DbKouhiPrim.listKouhi(patientId)
       yield (gen, patient, shahokokuho, koukikourei, roujin, kouhi)
+    mysql(op)
+
+  def listRecentVisitFull(offset: Int, limit: Int): IO[List[(Visit, Patient)]] = 
+    val op = sql"""
+      select visit.*, patient.* from visit inner join patient on visit.patient_id = patient.patient_id
+      order by visit.visit_id desc limit ${limit} offset ${offset}
+    """.query[(Visit, Patient)].to[List]
     mysql(op)

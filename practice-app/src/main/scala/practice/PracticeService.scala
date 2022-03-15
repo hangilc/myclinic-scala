@@ -11,6 +11,8 @@ import dev.myclinic.scala.appbase.Selections
 import dev.myclinic.scala.model.Visit
 import dev.myclinic.scala.web.appbase.LocalEventPublisher
 import dev.fujiwara.kanjidate.KanjiDate
+import scala.util.Success
+import scala.util.Failure
 
 class PracticeService extends SideMenuService:
   val left = new PracticeMain
@@ -29,7 +31,7 @@ class PracticeMain:
   ui.choice.setBuilder(List(
       "受付患者選択" -> (selectFromRegistered _),
       "患者検索" -> (selectBySearchPatient _),
-      "最近の診察" -> (() => ()),
+      "最近の診察" -> (selectFromRecentVisits _),
       "日付別" -> (() => ())
   ))
 
@@ -74,6 +76,50 @@ class PracticeMain:
     )
     d.open()
     search.ui.input.focus()
+
+  def selectFromRecentVisits(): Unit =
+    var offset = 0
+    val count = 20
+    val d = new ModalDialog3
+    val selection = new Selection[(Visit, Patient), Patient](_._2)
+    selection.formatter = (visit, patient) => 
+      String.format("%04d %s [%s]", patient.patientId, patient.fullName(),
+        KanjiDate.dateToKanji(visit.visitedAt.toLocalDate))
+    def update(): Future[Unit] =
+      for
+        result <- Api.listRecentVisitFull(offset, count)
+      yield
+        selection.clear()
+        selection.addAll(result)
+    d.body(
+      selection.ele,
+      div(
+        a("前へ", onclick := (() => {
+          offset -= count
+          if offset < 0 then offset = 0
+          update()
+          ()
+        })),
+        a("次へ", onclick := (() => {
+          offset += count
+          update()
+          ()
+        }))
+      )
+    )
+    d.commands(
+      button("選択", onclick := (() => {
+        d.close()
+        selection.selected.foreach(patient => startPatientPublisher.publish(patient))
+      })),
+      button("キャンセル", onclick := (() => d.close()))
+    )
+    update().onComplete {
+      case Success(_) => d.open()
+      case Failure(ex) => System.err.println(ex.getMessage)
+    }
+
+      
 
 object PracticeService:
   def listRegisteredPatient(): Future[List[(Patient, Visit)]] =
