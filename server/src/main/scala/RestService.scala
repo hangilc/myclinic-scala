@@ -57,6 +57,9 @@ object RestService extends DateTimeQueryParam with Publisher:
     case GET -> Root / "get-appoint-time" :? intAppointTimeId(appointTimeId) =>
       Ok(Db.getAppointTime(appointTimeId))
 
+    case GET -> Root / "find-appoint-time" :? intAppointTimeId(appointTimeId) =>
+      Ok(Db.findAppointTime(appointTimeId))
+
     case GET -> Root / "list-appoint-times-for-date" :? dateDate(date) =>
       Ok(Db.listAppointTimesForDate(date))
 

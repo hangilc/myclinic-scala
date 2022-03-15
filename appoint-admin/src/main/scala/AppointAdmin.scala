@@ -128,7 +128,7 @@ object AppointAdmin:
     yield ()
 
   def getAppointTimeById(appointTimeId: Int): IO[AppointTime] =
-    Db.getAppointTimeById(appointTimeId)
+    Db.getAppointTime(appointTimeId)
 
   def addAppoint(a: Appoint): IO[(Appoint, AppEvent)] =
     Db.addAppoint(a)

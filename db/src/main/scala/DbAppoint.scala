@@ -87,6 +87,9 @@ trait DbAppoint extends Mysql:
   def getAppointTime(appointTimeId: Int): IO[AppointTime] =
     mysql(Prim.getAppointTime(appointTimeId).unique)
 
+  def findAppointTime(appointTimeId: Int): IO[Option[AppointTime]] =
+    mysql(Prim.getAppointTime(appointTimeId).option)
+
   private def batchGetAppointTimes(
       appointTimeIds: List[Int]
   ): ConnectionIO[List[AppointTime]] =
@@ -190,9 +193,6 @@ trait DbAppoint extends Mysql:
         gen <- DbEventPrim.currentEventId()
       yield (gen, result)
     mysql(op)
-
-  def getAppointTimeById(appointTimeId: Int): IO[AppointTime] =
-    mysql(Prim.getAppointTime(appointTimeId).unique)
 
   private def enterAppointWithEvent(
       a: Appoint

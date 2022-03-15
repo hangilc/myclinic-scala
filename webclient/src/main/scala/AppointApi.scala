@@ -27,6 +27,9 @@ object AppointApi extends ApiBase:
     def getAppointTime(appointTimeId: Int): Future[AppointTime] =
       get("get-appoint-time", Params("appoint-time-id" -> appointTimeId))
 
+    def findAppointTime(appointTimeId: Int): Future[Option[AppointTime]] =
+      get("find-appoint-time", Params("appoint-time-id" -> appointTimeId))
+
     def addAppointTime(appointTime: AppointTime): Future[Boolean] =
       post("add-appoint-time", Params(), appointTime)
 

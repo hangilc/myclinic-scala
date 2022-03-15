@@ -37,7 +37,7 @@ object History:
         val m: Appoint = modelEvent.dataAs[Appoint]
         Some(
           Api
-            .getAppointTime(m.appointTimeId)
+            .findAppointTime(m.appointTimeId)
             .map(appointTime =>
               AppointCreatedHistory(m, appointTime, createdAt)
             )
@@ -47,7 +47,7 @@ object History:
         val m: Appoint = modelEvent.dataAs[Appoint]
         Some(
           Api
-            .getAppointTime(m.appointTimeId)
+            .findAppointTime(m.appointTimeId)
             .map(appointTime =>
               AppointUpdatedHistory(m, appointTime, createdAt)
             )
@@ -57,7 +57,7 @@ object History:
         val m: Appoint = modelEvent.dataAs[Appoint]
         Some(
           Api
-            .getAppointTime(m.appointTimeId)
+            .findAppointTime(m.appointTimeId)
             .map(appointTime =>
               AppointDeletedHistory(m, appointTime, createdAt)
             )
@@ -68,7 +68,7 @@ object History:
 
 case class AppointCreatedHistory(
     appoint: Appoint,
-    appointTime: AppointTime,
+    appointTime: Option[AppointTime],
     createdAt: LocalDateTime
 ) extends History:
   def description: String = {
@@ -78,7 +78,7 @@ case class AppointCreatedHistory(
 
 case class AppointUpdatedHistory(
     appoint: Appoint,
-    appointTime: AppointTime,
+    appointTime: Option[AppointTime],
     val createdAt: LocalDateTime
 ) extends History:
   def description: String = {
@@ -88,7 +88,7 @@ case class AppointUpdatedHistory(
 
 case class AppointDeletedHistory(
     appoint: Appoint,
-    appointTime: AppointTime,
+    appointTime: Option[AppointTime],
     val createdAt: LocalDateTime
 ) extends History:
   def description: String = {
@@ -96,9 +96,9 @@ case class AppointDeletedHistory(
   }
   def resume: Option[() => Future[Either[String, Unit]]] = None
 
-object Renderer:
-  def renderAppoint(a: Appoint, t: AppointTime, stamp: LocalDateTime): String =
-    val dt: String = Misc.formatAppointDateTime(t)
+private object Renderer:
+  def renderAppoint(a: Appoint, t: Option[AppointTime], stamp: LocalDateTime): String =
+    val dt: String = t.fold("???")(Misc.formatAppointDateTime(_))
     val patientIdRep = if a.patientId == 0 then "" else a.patientId.toString
     val tagsRep = a.tags.mkString("、")
     val createdAt =
