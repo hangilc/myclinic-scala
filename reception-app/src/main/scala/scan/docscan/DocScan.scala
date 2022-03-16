@@ -31,7 +31,8 @@ class DocScan:
   val box = new ScanBox
   box.title(innerText := "書類のスキャン")
   box.content(
-    (new PatientRow).ele
+    (new PatientRow).ele,
+    (new DocTypeRow).ele,
   )
   def ele = box.ele
 
