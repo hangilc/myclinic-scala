@@ -30,6 +30,9 @@ object TypeClasses:
       def setTriggerHandler(f: HTMLFormElement, handler: () => Unit): Unit =
         f(onsubmit := handler)
 
+  trait GeneralTriggerProvider[T, Kind]:
+    def setTriggerHandler(t: T, handler: () => Unit): Unit
+
   trait DataProvider[T, D]:
     def getData(t: T): D
 

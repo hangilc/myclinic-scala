@@ -13,7 +13,8 @@ class InPlaceEdit[Disp, Edit, Data](
     editElementProvider: ElementProvider[Edit],
     editSetter: DataAcceptor[Edit, Option[Data]],
     editGetter: DataProvider[Edit, Option[Data]],
-    editDoneTrigger: TriggerProvider[Edit]
+    editDoneTrigger: TriggerProvider[Edit],
+    editCancelTrigger: GeneralTriggerProvider[Edit, "cancel"]
 ):
   private var dataOpt: Option[Data] = origDataOpt
   var onDataChange: Option[Data] => Unit = _ => ()
@@ -27,6 +28,15 @@ class InPlaceEdit[Disp, Edit, Data](
     dispSetter.setData(dispComponent, dataOpt)
     disp()
     onDataChange(dataOpt)
+  })
+
+  editCancelTrigger.setTriggerHandler(editComponent, () => {
+    disp()
+  })
+
+  dispTrigger.setTriggerHandler(dispComponent, () => {
+    editSetter.setData(editComponent, dataOpt)
+    edit()
   })
 
   def disp(): Unit =

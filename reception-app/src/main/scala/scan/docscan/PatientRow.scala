@@ -22,17 +22,20 @@ object PatientRow:
   class PatientDisp:
     var onEdit: () => Unit = () => ()
     val disp = span
+    val cancelLink = a()
     val row = new Row
     row.title("患者")
     row.content(
       disp,
-      a("[変更]", onclick := (() => onEdit()))
+      cancelLink(innerText := "[変更]", onclick := (() => onEdit()))
     )
     def ele = row.ele
     def set(patient: Patient): Unit =
       disp(innerText := format(patient))
+      cancelLink(displayDefault)
     def clear(): Unit =
-      disp(Modifiers.clear)
+      disp(Modifiers.clear, "（選択されていません）")
+      cancelLink(innerText := "[選択]")
     def format(patient: Patient): String =
       String.format("(%d) %s", patient.patientId, patient.fullName())
 
@@ -41,18 +44,20 @@ object PatientRow:
     given DataAcceptor[PatientDisp, Option[Patient]] with
       def setData(t: PatientDisp, d: Option[Patient]): Unit =
         d.fold(t.clear())(t.set(_))
-    given TriggerProvider[PatientDisp]: Unit =
+    given TriggerProvider[PatientDisp] with
       def setTriggerHandler(t: PatientDisp, handler: () => Unit): Unit =
         t.onEdit = handler
 
   class PatientSelect:
     var onSelect: Patient => Unit = _ => ()
+    var onCancel: () => Unit = () => ()
     val search = new SearchForm[Patient, Patient](
       identity,
       text => Api.searchPatient(text).map(_._2)
     )
     search.ui.selection.formatter = patient =>
       String.format("(%04d) %s", patient.patientId, patient.fullName())
+    search.ui.form(a("[キャンセル]", onclick := (() => onCancel())))
     search.ui.selection.hide()
     search.engine.onSearchDone = () => search.ui.selection.show()
     search.onSelect(patient => {
@@ -77,4 +82,7 @@ object PatientRow:
         t.search.ui.selection.selected
     given TriggerProvider[PatientSelect] with
       def setTriggerHandler(t: PatientSelect, handler: () => Unit): Unit =
-        t.search.onSelect(_ => handler())
+        t.onSelect = (_ => handler())
+    given GeneralTriggerProvider[PatientSelect, "cancel"] with
+      def setTriggerHandler(t: PatientSelect, handler: () => Unit): Unit =
+        t.onCancel = handler
