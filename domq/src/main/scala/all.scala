@@ -4,6 +4,7 @@ object all:
   export ElementQ.{*, given}
   export Html.*
   export Modifiers.{*, given}
+  export TypeClasses.{*, given}
   val Modal = dev.fujiwara.domq.Modal
   type ModalDialog3 = dev.fujiwara.domq.ModalDialog3
   type Selection[Src, T] = dev.fujiwara.domq.Selection[Src, T]

@@ -4,6 +4,7 @@ import org.scalajs.dom.HTMLElement
 import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
+import dev.fujiwara.domq.TypeClasses.{*, given}
 
 class FlipFlop[Flip, Flop](flipComponent: Flip, flopComponent: Flop)(using 
   flipComp: ElementProvider[Flip],

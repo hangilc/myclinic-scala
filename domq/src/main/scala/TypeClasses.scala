@@ -9,29 +9,30 @@ import org.scalajs.dom.HTMLButtonElement
 import org.scalajs.dom.HTMLAnchorElement
 import org.scalajs.dom.HTMLFormElement
 
-trait ElementProvider[T]:
-  def getElement(t: T): HTMLElement
+object TypeClasses:
+  trait ElementProvider[T]:
+    def getElement(t: T): HTMLElement
 
-object ElementProvider:
-  given ElementProvider[HTMLElement] = ele => ele
+  object ElementProvider:
+    given ElementProvider[HTMLElement] = ele => ele
 
-trait TriggerProvider[T]:
-  def setTriggerHandler(t: T, handler: () => Unit): Unit
+  trait TriggerProvider[T]:
+    def setTriggerHandler(t: T, handler: () => Unit): Unit
 
-object TriggerProvider:
-  given TriggerProvider[HTMLButtonElement] with
-    def setTriggerHandler(b: HTMLButtonElement, handler: () => Unit): Unit =
-      b(onclick := handler)
-  given TriggerProvider[HTMLAnchorElement] with
-    def setTriggerHandler(a: HTMLAnchorElement, handler: () => Unit): Unit =
-      a(onclick := handler)
-  given TriggerProvider[HTMLFormElement] with
-    def setTriggerHandler(f: HTMLFormElement, handler: () => Unit): Unit =
-      f(onsubmit := handler)
+  object TriggerProvider:
+    given TriggerProvider[HTMLButtonElement] with
+      def setTriggerHandler(b: HTMLButtonElement, handler: () => Unit): Unit =
+        b(onclick := handler)
+    given TriggerProvider[HTMLAnchorElement] with
+      def setTriggerHandler(a: HTMLAnchorElement, handler: () => Unit): Unit =
+        a(onclick := handler)
+    given TriggerProvider[HTMLFormElement] with
+      def setTriggerHandler(f: HTMLFormElement, handler: () => Unit): Unit =
+        f(onsubmit := handler)
 
-trait DataProvider[T, D]:
-  def getData(t: T): D
+  trait DataProvider[T, D]:
+    def getData(t: T): D
 
-trait DataAcceptor[T, D]:
-  def setData(t: T, d: D): Unit
+  trait DataAcceptor[T, D]:
+    def setData(t: T, d: D): Unit
 
