@@ -29,6 +29,13 @@ class Selection[S, T](mapper: S => T):
       selectItem(sel)
       true
     })
+  def selectOpt(optValue: Option[T]): Boolean =
+    optValue match {
+      case Some(value) => select(value)
+      case None => 
+        clearSelected()
+        false
+    }
   private def selectItem(item: SelectionItem[T]): Unit =
     clearSelected()
     item.ele(cls := "selected")
