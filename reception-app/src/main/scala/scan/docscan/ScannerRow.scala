@@ -21,30 +21,25 @@ object ScannerRow:
   type Data = Option[ScannerDevice]
 
   class Disp:
-    val disp = span
-    val editLink = a
+    val disp: HTMLSpanElement = span
+    val editLink: HTMLAnchorElement = a
     val ele = div(disp, editLink)
 
   object Disp:
     given ElementProvider[Disp] = _.ele
     given DataAcceptor[Disp, Data] =
-        DataAcceptor.by[Disp, Data, HTMLSpanElement, String](
-          t => t.disp,
-          d => d.map(_.description).getOrElse("（選択されていません）")
-        ) |+|
-        DataAcceptor.by(
-          t => t.editLink,
-          _ match {
-            case Some(_) => "[変更]"
-            case None    => "[選択]"
-          }
-        )
-    given TriggerProvider[Disp] =
-      TriggerProvider.by(_.editLink)
+      DataAcceptor[HTMLSpanElement, String]
+        .contraInst[Disp](_.disp)
+        .contramap[Data](_.map(_.description).getOrElse("（選択されていません）"))
+      |+|
+      DataAcceptor[HTMLAnchorElement, String]
+        .contraInst[Disp](_.editLink)
+        .contramap[Data](_.fold("[選択]")(_ => "[変更]"))
+    given TriggerProvider[Disp] = TriggerProvider.by(_.editLink)
 
   class Edit:
     private var devices: List[ScannerDevice] = List.empty
-    val select = new Selection[ScannerDevice, ScannerDevice](identity)
+    val select: Selection[ScannerDevice, ScannerDevice] = Selection[ScannerDevice]()
     select.formatter = _.description
     val cancelLink = a
     val ele = div(

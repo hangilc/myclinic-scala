@@ -9,6 +9,8 @@ import org.scalajs.dom.HTMLButtonElement
 import org.scalajs.dom.HTMLAnchorElement
 import org.scalajs.dom.HTMLFormElement
 import org.scalajs.dom.HTMLSpanElement
+import cats.*
+import cats.syntax.all.*
 
 object TypeClasses:
   trait ElementProvider[T]:
@@ -19,8 +21,15 @@ object TypeClasses:
 
   trait TriggerProvider[T]:
     def setTriggerHandler(t: T, handler: () => Unit): Unit
+    def contraInst[S](f: S => T): TriggerProvider[S] =
+      val self: TriggerProvider[T] = this
+      new TriggerProvider[S]:
+        def setTriggerHandler(s: S, handler: () => Unit): Unit =
+          self.setTriggerHandler(f(s), handler)
+
 
   object TriggerProvider:
+    def apply[T](using prov: TriggerProvider[T]): TriggerProvider[T] = prov
     def by[T, U](f: T => U)(using
         uProvider: TriggerProvider[U]
     ): TriggerProvider[T] =
@@ -72,7 +81,13 @@ object TypeClasses:
       new DataProvider[T, E]:
         def getData(t: T): E = f(self.getData(t))
 
+    def contraInst[S](f: S => T): DataProvider[S, D] =
+      val self: DataProvider[T, D] = this
+      new DataProvider[S, D]:
+        def getData(s: S): D = self.getData(f(s))
+
   object DataProvider:
+    def apply[T, D](using prov: DataProvider[T, D]): DataProvider[T, D] = prov
     def by[T, D, U](f: T => U)(using
         uProvider: DataProvider[U, D]
     ): DataProvider[T, D] =
@@ -98,10 +113,16 @@ object TypeClasses:
       new DataAcceptor[T, C]:
         def setData(t: T, c: C): Unit = self.setData(t, f(c))
 
+    def contraInst[S](f: S => T): DataAcceptor[S, D] =
+      val self: DataAcceptor[T, D] = this
+      new DataAcceptor[S, D]:
+        def setData(s: S, d: D): Unit = self.setData(f(s), d)
+
   object DataAcceptor:
-    def apply[T, D](): DataAcceptor[T, D] =
+    def apply[T, D](using acc: DataAcceptor[T, D]): DataAcceptor[T, D] = acc
+    def apply[T, D](f: (T, D) => Unit): DataAcceptor[T, D] =
       new DataAcceptor[T, D]:
-        def setData(t: T, d: D): Unit = ()
+        def setData(t: T, d: D): Unit = f(t, d)
     def by[T, D, U](f: T => U)(using
         uAcceptor: DataAcceptor[U, D]
     ): DataAcceptor[T, D] =
@@ -113,11 +134,13 @@ object TypeClasses:
       new DataAcceptor[T, D]:
         def setData(t: T, d: D): Unit =
           uAcceptor.setData(f(t), m(d))
-    
-    import cats.*
+
     given [T, D]: Monoid[DataAcceptor[T, D]] with
-      def empty: DataAcceptor[T, D] = DataAcceptor[T, D]()
-      def combine(a: DataAcceptor[T, D], b: DataAcceptor[T, D]): DataAcceptor[T, D] =
+      def empty: DataAcceptor[T, D] = DataAcceptor[T, D]((_, _) => ())
+      def combine(
+          a: DataAcceptor[T, D],
+          b: DataAcceptor[T, D]
+      ): DataAcceptor[T, D] =
         new DataAcceptor[T, D]:
           def setData(t: T, d: D): Unit =
             a.setData(t, d)
@@ -125,9 +148,9 @@ object TypeClasses:
 
     given DataAcceptor[HTMLSpanElement, String] with
       def setData(t: HTMLSpanElement, d: String): Unit = t(innerText := d)
-    
+
     given DataAcceptor[HTMLAnchorElement, String] with
-      def setData(t: HTMLAnchorElement, d: String): Unit = 
+      def setData(t: HTMLAnchorElement, d: String): Unit =
         t(innerText := d)
 
     given selectionDataAcceptor[T, D]: DataAcceptor[Selection[T, D], Option[D]]
@@ -135,5 +158,5 @@ object TypeClasses:
       def setData(t: Selection[T, D], opt: Option[D]): Unit =
         opt match {
           case Some(d) => t.select(d, false)
-          case None => t.unselect()
+          case None    => t.unselect()
         }
