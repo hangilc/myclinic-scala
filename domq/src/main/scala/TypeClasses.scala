@@ -133,4 +133,7 @@ object TypeClasses:
     given selectionDataAcceptor[T, D]: DataAcceptor[Selection[T, D], Option[D]]
       with
       def setData(t: Selection[T, D], opt: Option[D]): Unit =
-        t.selectOpt(opt)
+        opt match {
+          case Some(d) => t.select(d, false)
+          case None => t.unselect()
+        }

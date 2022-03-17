@@ -40,34 +40,29 @@ object DocTypeRow:
         t.onEdit = handler
 
   class Edit:
-    var onSelect: Option[(String, String)] => Unit = _ => ()
-    var onCancel: () => Unit = () => ()
-    val select = new Selection[(String, String), (String, String)](identity)
+    val onSelect = new LocalEventPublisher[Option[(String, String)]]
+    val cancelLink = a
+    val select: Selection[(String, String), (String, String)] = 
+      new Selection[(String, String), (String, String)](identity)
     select.formatter = _._1
     select.set(defaultItems)
-    select.addSelectEventHandler(s => onSelect(Some(s)))
+    select.addSelectEventHandler(s => onSelect.publish(Some(s)))
     val ele = div(
       select.ele,
-      div(a("キャンセル", onclick := (() => onCancel())))
+      div(cancelLink("キャンセル"))
     )
   
   object Edit:
+    type Data = Option[(String, String)]
     given ElementProvider[Edit] = _.ele
-    given DataAcceptor[Edit, Option[(String, String)]] with
-      def setData(t: Edit, opt: Option[(String, String)]): Unit =
-        opt match {
-          case Some(data) => t.select.select(data)
-          case None => t.select.clearSelected()
-        }
-    given DataProvider[Edit, Option[(String, String)]] with
-      def getData(t: Edit): Option[(String, String)] =
-        t.select.selected
-    given TriggerProvider[Edit] with
-      def setTriggerHandler(t: Edit, handler: () => Unit): Unit =
-        t.onSelect = _ => handler()
-    given GeneralTriggerProvider[Edit, "cancel"] with
-      def setTriggerHandler(t: Edit, handler: () => Unit): Unit =
-        t.onCancel = handler
+    given DataAcceptor[Edit, Data] =
+      DataAcceptor.by((edit: Edit) => edit.select)
+    given DataProvider[Edit, Option[(String, String)]] =
+      DataProvider.by((edit: Edit) => edit.select)
+    given TriggerProvider[Edit] =
+      TriggerProvider.by((edit: Edit) => edit.select)
+    given GeneralTriggerProvider[Edit, "cancel"] =
+      GeneralTriggerProvider.by((edit: Edit) => edit.cancelLink)
 
   val defaultItems: List[(String, String)] =
     List(
