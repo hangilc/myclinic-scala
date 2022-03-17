@@ -58,7 +58,8 @@ object TypeClasses:
         def setTriggerHandler(t: T, handler: () => Unit): Unit =
           uTrigger.setTriggerHandler(f(t), handler)
 
-    given genAnchorTrigger[Kind]: GeneralTriggerProvider[HTMLAnchorElement, Kind] =
+    given genAnchorTrigger[Kind]
+        : GeneralTriggerProvider[HTMLAnchorElement, Kind] =
       new GeneralTriggerProvider[HTMLAnchorElement, Kind]:
         def setTriggerHandler(t: HTMLAnchorElement, handler: () => Unit): Unit =
           t(onclick := (() => handler()))
@@ -77,7 +78,7 @@ object TypeClasses:
     ): DataProvider[T, D] =
       new DataProvider[T, D]:
         def getData(t: T): D = uProvider.getData(f(t))
-    def by[T, D, U, E](f: T => U, m: E => D)(using
+    def by[T, D, U, E](f: T => U)(m: E => D)(using
         uProvider: DataProvider[U, E]
     ): DataProvider[T, D] =
       new DataProvider[T, D]:
@@ -97,7 +98,17 @@ object TypeClasses:
       new DataAcceptor[T, C]:
         def setData(t: T, c: C): Unit = self.setData(t, f(c))
 
+    // def ++(arg: DataAcceptor[T, D]): DataAcceptor[T, D] =
+    //   val self: DataAcceptor[T, D] = this
+    //   new DataAcceptor[T, D]:
+    //     def setData(t: T, d: D): Unit = 
+    //       self.setData(t, d)
+    //       arg.setData(t, d)
+
   object DataAcceptor:
+    def apply[T, D](): DataAcceptor[T, D] =
+      new DataAcceptor[T, D]:
+        def setData(t: T, d: D): Unit = ()
     def by[T, D, U](f: T => U)(using
         uAcceptor: DataAcceptor[U, D]
     ): DataAcceptor[T, D] =
@@ -109,9 +120,23 @@ object TypeClasses:
       new DataAcceptor[T, D]:
         def setData(t: T, d: D): Unit =
           uAcceptor.setData(f(t), m(d))
+    
+    import cats.*
+    given dataAcceptorMonoid[T, D]: Monoid[DataAcceptor[T, D]] with
+      def empty: DataAcceptor[T, D] = DataAcceptor[T, D]()
+      def combine(a: DataAcceptor[T, D], b: DataAcceptor[T, D]): DataAcceptor[T, D] =
+        new DataAcceptor[T, D]:
+          def setData(t: T, d: D): Unit =
+            a.setData(t, d)
+            b.setData(t, d)
+
 
     given DataAcceptor[HTMLSpanElement, String] with
       def setData(t: HTMLSpanElement, d: String): Unit = t(innerText := d)
+    
+    given DataAcceptor[HTMLAnchorElement, String] with
+      def setData(t: HTMLAnchorElement, d: String): Unit = 
+        t(innerText := d)
 
     given selectionDataAcceptor[T, D]: DataAcceptor[Selection[T, D], Option[D]]
       with

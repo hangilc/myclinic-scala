@@ -33,6 +33,7 @@ class DocScan:
   box.content(
     (new PatientRow).ele,
     (new DocTypeRow).ele,
+    (new ScannerRow).ele,
   )
   def ele = box.ele
 

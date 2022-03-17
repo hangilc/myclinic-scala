@@ -178,6 +178,7 @@ lazy val domq = project
     libraryDependencies ++= Seq(
       "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion,
       "org.scala-js" %%% "scala-js-macrotask-executor" % macrotaskExecutorVersion,
+      "org.typelevel" %%% "cats-core" % catsVersion,
     )
   )
 
