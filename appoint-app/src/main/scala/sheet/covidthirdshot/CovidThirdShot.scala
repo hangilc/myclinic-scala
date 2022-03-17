@@ -11,7 +11,7 @@ import scala.util.{Try, Success, Failure}
 
 class CovidThirdShot(val ui: CovidThirdShot.UI):
   ui.eSearchFrom(onsubmit := (onSearchSubmit _))
-  ui.searchResult.onSelect = onSelect _
+  ui.searchResult.addSelectEventHandler(onSelect _)
 
   def initFocus(): Unit = ui.eSearchInput.focus()
 

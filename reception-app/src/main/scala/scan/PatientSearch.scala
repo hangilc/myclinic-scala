@@ -32,7 +32,7 @@ object PatientSearch:
 class PatientSearch(ui: PatientSearch.UI):
   var onSelectCallback: Patient => Unit = _ => ()
   ui.eSearchForm(onsubmit := (onSearch _))
-  ui.searchResult.onSelect = onSelect
+  ui.searchResult.addSelectEventHandler(onSelect)
 
   def focus(): Unit = ui.eSearchInput.focus()
 

@@ -45,7 +45,7 @@ object DocTypeRow:
     val select = new Selection[(String, String), (String, String)](identity)
     select.formatter = _._1
     select.set(defaultItems)
-    select.onSelect = s => onSelect(Some(s))
+    select.addSelectEventHandler(s => onSelect(Some(s)))
     val ele = div(
       select.ele,
       div(a("キャンセル", onclick := (() => onCancel())))

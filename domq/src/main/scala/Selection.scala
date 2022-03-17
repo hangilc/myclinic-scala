@@ -5,7 +5,9 @@ import scala.language.implicitConversions
 import org.scalajs.dom.HTMLElement
 
 class Selection[S, T](mapper: S => T):
-  var onSelect: T => Unit = _ => ()
+  private val onSelect = LocalEventPublisher[T]
+  def addSelectEventHandler(handler: T => Unit): Unit =
+    onSelect.subscribe(handler)
   private var selectedValue: Option[T] = None
   var formatter: S => String = _.toString
   val ele = div(cls := "domq-selection")
@@ -44,7 +46,7 @@ class Selection[S, T](mapper: S => T):
   private def addItem(item: SelectionItem[T]): Unit =
     item.onSelect = value => {
       selectItem(item)
-      onSelect(value)
+      onSelect.publish(value)
     }
     ele(item.ele)
     items = items :+ item
@@ -59,7 +61,7 @@ object Selection:
       onSelect: T => Unit = ((_: T) => ())
   ): Selection[(String, T), T] =
     val sel = new Selection[(String, T), T](_._2)
-    sel.onSelect = onSelect
+    sel.addSelectEventHandler(onSelect)
     sel.addAll(items)
     sel
 

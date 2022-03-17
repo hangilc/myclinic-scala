@@ -132,10 +132,11 @@ object MakeAppointDialog:
     var onSelect: Patient => Unit = _ => ()
     ui.searchForm(onsubmit := (onSubmit _))
     ui.searchIcon(onclick := (onSubmit _))
-    ui.searchResult.onSelect = patient =>
+    ui.searchResult.addSelectEventHandler(patient =>
       ui.input.value = patient.fullName()
       ui.hideSearchResult()
       onSelect(patient)
+    )
 
     def onSubmit(): Unit =
       val txt = value

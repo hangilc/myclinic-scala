@@ -87,6 +87,6 @@ class SearchForm[Src, D](mapper: Src => D, search: String => Future[List[Src]]):
   import Implicits.given
   val engine = new SearchFormEngine(ui.input, ui.form, ui.selection, search)
   def selected: Option[D] = engine.selected
-  def onSelect(handler: D => Unit): Unit = ui.selection.onSelect = handler
+  def onSelect(handler: D => Unit): Unit = ui.selection.addSelectEventHandler(handler)
 
 

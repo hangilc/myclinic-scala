@@ -45,7 +45,7 @@ object TypeClasses:
     given selectionDataProvider[S, T]: TriggerProvider[Selection[S, T]] =
       new TriggerProvider[Selection[S, T]]:
         def setTriggerHandler(t: Selection[S, T], handler: () => Unit): Unit =
-          t.onSelect = _ => handler()
+          t.addSelectEventHandler(_ => handler())
 
   trait GeneralTriggerProvider[T, Kind]:
     def setTriggerHandler(t: T, handler: () => Unit): Unit
