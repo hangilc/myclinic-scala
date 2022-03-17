@@ -98,13 +98,6 @@ object TypeClasses:
       new DataAcceptor[T, C]:
         def setData(t: T, c: C): Unit = self.setData(t, f(c))
 
-    // def ++(arg: DataAcceptor[T, D]): DataAcceptor[T, D] =
-    //   val self: DataAcceptor[T, D] = this
-    //   new DataAcceptor[T, D]:
-    //     def setData(t: T, d: D): Unit = 
-    //       self.setData(t, d)
-    //       arg.setData(t, d)
-
   object DataAcceptor:
     def apply[T, D](): DataAcceptor[T, D] =
       new DataAcceptor[T, D]:
@@ -122,14 +115,13 @@ object TypeClasses:
           uAcceptor.setData(f(t), m(d))
     
     import cats.*
-    given dataAcceptorMonoid[T, D]: Monoid[DataAcceptor[T, D]] with
+    given [T, D]: Monoid[DataAcceptor[T, D]] with
       def empty: DataAcceptor[T, D] = DataAcceptor[T, D]()
       def combine(a: DataAcceptor[T, D], b: DataAcceptor[T, D]): DataAcceptor[T, D] =
         new DataAcceptor[T, D]:
           def setData(t: T, d: D): Unit =
             a.setData(t, d)
             b.setData(t, d)
-
 
     given DataAcceptor[HTMLSpanElement, String] with
       def setData(t: HTMLSpanElement, d: String): Unit = t(innerText := d)

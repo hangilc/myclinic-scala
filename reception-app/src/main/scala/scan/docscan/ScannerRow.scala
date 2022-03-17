@@ -28,11 +28,10 @@ object ScannerRow:
     import cats.implicits.*
     given ElementProvider[Disp] = _.ele
     given DataAcceptor[Disp, Data] =
-      DataAcceptor[Disp, Data]() |+|
-        DataAcceptor.by(
+        (DataAcceptor.by(
           t => t.disp,
           d => d.map(_.description).getOrElse("（選択されていません）")
-        ) |+|
+        ): DataAcceptor[Disp, Data]) |+|
         DataAcceptor.by(
           t => t.editLink,
           _ match {
