@@ -10,12 +10,20 @@ class Selection[S, T](mapper: S => T):
   private val onSelect = LocalEventPublisher[T]
   def addSelectEventHandler(handler: T => Unit): Unit =
     onSelect.subscribe(handler)
+  private def publishSelectEvent(t: T)(using p: PublishSelectEvent): Unit =
+    if p.value then onSelect.publish(t)
+
   private val onUnselect = LocalEventPublisher[Unit]
   def addUnselectEventHandler(handler: Unit => Unit): Unit =
     onUnselect.subscribe(handler)
+  private def publishUnselectEvent(): Unit =
+    onUnselect.publish(())
+
   private val onSingleResult = LocalEventPublisher[T]
   def addSingleResultEventHandler(handler: T => Unit): Unit =
     onSingleResult.subscribe(handler)
+  private def publishSingleResultEvent(t: T)(using p: PublishSingleResultEvent): Unit =
+    if p.value then onSingleResult.publish(t)
 
   private var selectedValue: Option[T] = None
   var formatter: S => String = _.toString
