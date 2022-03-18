@@ -37,6 +37,9 @@ object ElementQ:
     def remove(): Boolean =
       withParent(n => n.removeChild(ele))
 
+    def removeLater(seconds: Double): DelayedCall =
+      DelayedCall.callLater(seconds, () => ele.remove())
+
     def isEmpty: Boolean =
       ele.childElementCount == 0
 
