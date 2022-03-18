@@ -56,7 +56,11 @@ object DocTypeRow:
     type Data = Option[(String, String)]
     given ElementProvider[Edit] = _.ele
     given DataAcceptor[Edit, Data] =
-      DataAcceptor.by((edit: Edit) => edit.select)
+      (t: Edit, opt: Data) => 
+        opt match {
+          case Some(d) => t.select.select(d)(using Selection.PublishSelectEvent(false))
+          case None => t.select.unselect()
+        }
     given DataProvider[Edit, Option[(String, String)]] =
       DataProvider.by((edit: Edit) => edit.select)
     given TriggerProvider[Edit] =

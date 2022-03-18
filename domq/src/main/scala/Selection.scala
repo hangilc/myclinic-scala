@@ -3,6 +3,8 @@ package dev.fujiwara.domq
 import dev.fujiwara.domq.all.{*, given}
 import scala.language.implicitConversions
 import org.scalajs.dom.HTMLElement
+import dev.fujiwara.domq.Selection.PublishSelectEvent
+import dev.fujiwara.domq.Selection.PublishSingleResultEvent
 
 class Selection[S, T](mapper: S => T):
   private val onSelect = LocalEventPublisher[T]
@@ -20,7 +22,7 @@ class Selection[S, T](mapper: S => T):
   val ele = div(cls := "domq-selection")
   private var items: List[SelectionItem[T]] = List.empty
 
-  def clear(): Unit = 
+  def clear(): Unit =
     ele(dev.fujiwara.domq.Modifiers.clear)
     items = List.empty
     selectedValue = None
@@ -30,9 +32,10 @@ class Selection[S, T](mapper: S => T):
     ele(item.ele)
     items = items :+ item
   def addAll(ss: List[S]): Unit = ss.foreach(add(_))
-  def noMore(): Unit =
-    if items.size == 1 then onSingleResult.publish(items(0).value)
-  def set(ss: List[S]): Unit =
+  def noMore()(using publish: PublishSingleResultEvent, PublishSelectEvent): Unit =
+    if publish.value then
+      if items.size == 1 then onSingleResult.publish(items(0).value)
+  def set(ss: List[S])(using PublishSingleResultEvent, PublishSelectEvent): Unit =
     clear()
     addAll(ss)
     noMore()
@@ -40,7 +43,7 @@ class Selection[S, T](mapper: S => T):
   def hide(): Unit = ele(displayNone)
   def scrollToTop: Unit = ele.scrollTop = 0
   def selected: Option[T] = selectedValue
-  def select(value: T, fireEvent: Boolean = true): Boolean =
+  def select(value: T)(using publish: PublishSelectEvent): Boolean =
     findItemByValue(value).fold(false)(item => {
       selectItem(item)
       true
@@ -52,11 +55,13 @@ class Selection[S, T](mapper: S => T):
 
   private def findItemByValue(value: T): Option[SelectionItem[T]] =
     items.find(_.value == value)
-  private def selectItem(item: SelectionItem[T]): Unit =
+  private def selectItem(item: SelectionItem[T])(using
+      publish: PublishSelectEvent
+  ): Unit =
     unmark()
     item.mark()
     selectedValue = Some(item.value)
-    onSelect.publish(item.value)
+    if publish.value then onSelect.publish(item.value)
   private def unmark(): Unit =
     items.foreach(_.unmark())
 
@@ -70,6 +75,13 @@ object Selection:
     sel.addSelectEventHandler(onSelect)
     sel.addAll(items)
     sel
+
+  case class PublishSelectEvent(val value: Boolean)
+  given PublishSelectEvent = PublishSelectEvent(true)
+
+  case class PublishSingleResultEvent(val value: Boolean)
+  given PublishSingleResultEvent = PublishSingleResultEvent(true)
+
 
 private class SelectionItem[T](val label: String, val value: T):
   val ele: HTMLElement = div(cls := "domq-selection-item")(

@@ -27,7 +27,6 @@ object TypeClasses:
         def setTriggerHandler(s: S, handler: () => Unit): Unit =
           self.setTriggerHandler(f(s), handler)
 
-
   object TriggerProvider:
     def apply[T](using prov: TriggerProvider[T]): TriggerProvider[T] = prov
     def by[T, U](f: T => U)(using
@@ -157,6 +156,7 @@ object TypeClasses:
       with
       def setData(t: Selection[T, D], opt: Option[D]): Unit =
         opt match {
-          case Some(d) => t.select(d, false)
+          case Some(d) => t.select(d)
           case None    => t.unselect()
         }
+
