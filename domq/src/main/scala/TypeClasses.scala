@@ -50,10 +50,10 @@ object TypeClasses:
     given TriggerProvider[HTMLFormElement] with
       def setTriggerHandler(f: HTMLFormElement, handler: () => Unit): Unit =
         f(onsubmit := handler)
-    given selectionDataProvider[S, T]: TriggerProvider[Selection[S, T]] =
-      new TriggerProvider[Selection[S, T]]:
-        def setTriggerHandler(t: Selection[S, T], handler: () => Unit): Unit =
-          t.addSelectEventHandler(_ => handler())
+
+    given [T]: TriggerProvider[Selection[T]] with
+      def setTriggerHandler(s: Selection[T], handler: () => Unit): Unit =
+        s.addSelectEventHandler(_ => handler())
 
   trait GeneralTriggerProvider[T, Kind]:
     def setTriggerHandler(t: T, handler: () => Unit): Unit
@@ -99,10 +99,8 @@ object TypeClasses:
         def getData(t: T): D =
           m(uProvider.getData(f(t)))
 
-    given selectionDataProvider[S, T]
-        : DataProvider[Selection[S, T], Option[T]] =
-      new DataProvider[Selection[S, T], Option[T]]:
-        def getData(t: Selection[S, T]): Option[T] = t.selected
+    given [T]: DataProvider[Selection[T], Option[T]] with
+      def getData(s: Selection[T]): Option[T] = s.marked
 
   trait DataAcceptor[T, D]:
     def setData(t: T, d: D): Unit
@@ -152,11 +150,10 @@ object TypeClasses:
       def setData(t: HTMLAnchorElement, d: String): Unit =
         t(innerText := d)
 
-    given selectionDataAcceptor[T, D]: DataAcceptor[Selection[T, D], Option[D]]
-      with
-      def setData(t: Selection[T, D], opt: Option[D]): Unit =
+    given [T]: DataAcceptor[Selection[T], Option[T]] with
+      def setData(t: Selection[T], opt: Option[T]): Unit =
         opt match {
           case Some(d) => t.select(d)
-          case None    => t.unselect()
+          case None    => t.unmark()
         }
 
