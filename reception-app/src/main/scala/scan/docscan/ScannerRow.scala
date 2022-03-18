@@ -11,11 +11,20 @@ import cats.syntax.all.*
 class ScannerRow:
   import ScannerRow.*
   private var dataOpt: Option[ScannerDevice] = None
-  val inPlaceEdit = new InPlaceEdit(new Disp, (new Edit).init, dataOpt)
+  val edit: Edit = new Edit
+  val inPlaceEdit = new InPlaceEdit(new Disp, edit, dataOpt)
   val row = new Row
   row.title("スキャナー")
   row.content(inPlaceEdit.ele)
   def ele = row.ele
+  edit.select.addSingleResultEventHandler(device => {
+    edit.select.select(device)
+  })
+  edit.onRefresh.subscribe(_ => {
+
+  })
+  ScannerList.get(edit.setDevices _)
+
 
 object ScannerRow:
   type Data = Option[ScannerDevice]
@@ -38,20 +47,17 @@ object ScannerRow:
     given TriggerProvider[Disp] = TriggerProvider.by(_.editLink)
 
   class Edit:
-    private var devices: List[ScannerDevice] = List.empty
+    val onRefresh = new LocalEventPublisher[Unit]
     val select: Selection[ScannerDevice, ScannerDevice] = Selection[ScannerDevice]()
     select.formatter = _.description
     val cancelLink = a
     val ele = div(
       select.ele,
-      cancelLink("キャンセル")
+      cancelLink("キャンセル"),
+      a("更新", onclick := (() => onRefresh.publish(())))
     )
-    def init: Edit =
-      ScannerList.get(list => {
-        devices = list
-        select.set(devices)
-      })
-      this
+    def setDevices(list: List[ScannerDevice]): Unit =
+      select.set(list)
 
   object Edit:
     given ElementProvider[Edit] = _.ele
