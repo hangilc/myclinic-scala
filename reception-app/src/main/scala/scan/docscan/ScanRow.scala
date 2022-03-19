@@ -16,8 +16,8 @@ class ScanRow(using ds: DataSources):
     flipFlop.flop()
 
   def onDone(scannedFile: String): Unit =
-    println(("scanned", scannedFile))
     flipFlop.flip()
+    ds.scannedDoc.update(scannedFile)
 
 object ScanRow:
   class Waiting(onStart: () => Unit):

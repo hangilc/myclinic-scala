@@ -180,15 +180,15 @@ object HokenList:
     def data: T = ds.data
     def validFrom = periodProvider.getValidFrom(data)
     def id = HokenId(data)
-    def onDelete(handler: () => Unit): Unit = ds.onDelete(handler)
+    def onDelete(handler: () => Unit): Unit = ds.onDelete(_ => handler())
     def validUpto = periodProvider.getValidUpto(data).value
     val ui = new ItemUI
     updateUI()
     ui.icon(onclick := (() => {
       CustomEvents.addHokenSubblock[T].trigger(ele, (gen, data))
     }))
-    ds.onDelete(() => ele.remove())
-    ds.onUpdate(() => updateUI())
+    ds.onDelete(_ => ele.remove())
+    ds.onUpdate(_ => updateUI())
     ds.startSync(ele)
     def ele = ui.ele
     def updateUI(): Unit = ui.label.innerText =

@@ -36,7 +36,7 @@ class ShahokokuhoSubblock(dsCtor: () => SyncedDataSource[Shahokokuho]):
     eCommands
   )
   disp()
-  ds.onDelete(() => ele.remove())
+  ds.onDelete(_ => ele.remove())
   ds.startSync(ele)
 
   def ele = block.ele

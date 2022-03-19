@@ -27,7 +27,7 @@ class KouhiDisp(ds: SyncedDataSource[Kouhi]):
     span("期限終了") -> eValidUpto
   )
   ele(cls := "kouhi-disp")
-  ds.onUpdate(updateUI _)
+  ds.onUpdate(_ => updateUI())
   updateUI()
 
   def updateUI(): Unit =

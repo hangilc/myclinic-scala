@@ -56,9 +56,9 @@ class AppointTimeBox(
     }
   )
   updateUI()
-  dsrc.onUpdate(updateUI _)
-  dsrc.onUpdate(() => CustomEvents.appointTimePostUpdated.trigger(ele, appointTime, true))
-  dsrc.onDelete(() => {
+  dsrc.onUpdate(_ => updateUI())
+  dsrc.onUpdate(_ => CustomEvents.appointTimePostUpdated.trigger(ele, appointTime, true))
+  dsrc.onDelete(_ => {
     val parent = ele.parentElement
     ele.remove()
     CustomEvents.appointTimePostDeleted.trigger(parent, appointTime, true)

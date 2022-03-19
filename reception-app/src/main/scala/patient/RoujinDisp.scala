@@ -13,7 +13,7 @@ class RoujinDisp(ds: SyncedDataSource[Roujin]):
   val eFutanWari = form.row("負担割")
   val eValidFrom = form.row("期限開始")
   val eValidUpto = form.row("期限終了")
-  ds.onUpdate(updateUI _)
+  ds.onUpdate(_ => updateUI())
   updateUI()
   
   def ele = form.ele

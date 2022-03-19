@@ -28,7 +28,7 @@ class KoukikoureiDisp(ds: SyncedDataSource[Koukikourei]):
     span("期限終了") -> eValidUpto
   )
   ele(cls := "koukikourei-disp")
-  ds.onUpdate(updateUI _)
+  ds.onUpdate(_ => updateUI())
   updateUI()
 
   def updateUI(): Unit =

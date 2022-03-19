@@ -23,8 +23,8 @@ case class Slot(dsrc: SyncedDataSource2[Appoint, AppointTime]):
   )
   var dialog: Option[EditAppointDialog] = None
   updateUI()
-  dsrc.onUpdate(updateUI _)
-  dsrc.onDelete(() => {
+  dsrc.onUpdate(_ => updateUI())
+  dsrc.onDelete(_ => {
     val parent = ele.parentElement
     ele.remove()
     CustomEvents.appointPostDeleted.trigger(parent, appoint, true)

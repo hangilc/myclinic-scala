@@ -11,42 +11,13 @@ import dev.fujiwara.domq.LocalEventPublisher
 import dev.fujiwara.domq.DataSource
 import dev.fujiwara.domq.LocalDataSource
 
-// trait DataSource[T]:
-//   def data: T
-//   def onUpdate(handler: () => Unit): Unit
-//   def onDelete(handler: () => Unit): Unit
-//   def isDeleted: Boolean
-
-// class LocalDataSource[T](init: T) extends DataSource[T]:
-//   private var cur: T = init
-//   private val onUpdatePublisher = LocalEventPublisher[Unit]
-//   private val onDeletePublisher = LocalEventPublisher[Unit]
-//   private var deletedFlag = false
-
-//   def data: T = cur
-//   def onUpdate(handler: () => Unit): Unit =
-//     onUpdatePublisher.subscribe(_ => handler())
-//   def onDelete(handler: () => Unit): Unit =
-//     onDeletePublisher.subscribe(_ => handler())
-
-//   private[appbase] def update(value: T): Unit =
-//     assert(!deletedFlag)
-//     cur = value
-//     onUpdatePublisher.publish(())
-
-//   private[appbase] def delete(): Unit =
-//     deletedFlag = true
-//     onDeletePublisher.publish(())
-
-//   def isDeleted: Boolean = deletedFlag
-
 trait SyncedDataSourceCommon:
   def gen: Int
   private[appbase] def handleEvent(event: AppModelEvent): Unit
   private[appbase] def listenAt(ele: HTMLElement): Unit
-  def isDeleted: Boolean
-  def onUpdate(handler: () => Unit): Unit
-  def onDelete(handler: () => Unit): Unit
+  // def isDeleted: Boolean
+  // def onUpdate(handler: () => Unit): Unit
+  // def onDelete(handler: () => Unit): Unit
 
 class SyncedDataSource[T](initGen: Int, init: T)(using
     fetcher: EventFetcher,
@@ -86,16 +57,17 @@ class SyncedDataSource2[T1, T2](initGen: Int, init1: T1, init2: T2)(using
     DataId[T1],
     ModelSymbol[T2],
     DataId[T2]
-) extends LocalDataSource[(T1, T2)](init1, init2):
+) extends LocalDataSource[(T1, T2)](init1, init2) with SyncedDataSourceCommon:
   val fetcher = summon[EventFetcher]
   private var g = initGen
   private val s1 = SyncedDataSource(g, init1)
   private val s2 = SyncedDataSource(g, init2)
-  private val src: List[SyncedDataSourceCommon] = List(s1, s2)
-  src.foreach(s => {
-    s.onUpdate(doUpdate _)
-    s.onDelete(delete _)
-  })
+  private val src = List[SyncedDataSourceCommon](s1, s2)
+
+  s1.onUpdate(_ => doUpdate())
+  s1.onDelete(_ => delete())
+  s2.onUpdate(_ => doUpdate())
+  s2.onDelete(_ => delete())
 
   def genData: (Int, T1, T2) = (g, s1.data, s2.data)
   def gen: Int = g
@@ -137,10 +109,13 @@ class SyncedDataSource3[T1, T2, T3](
   private val s2 = SyncedDataSource(g, init2)
   private val s3 = SyncedDataSource(g, init3)
   private val src: List[SyncedDataSourceCommon] = List(s1, s2, s3)
-  src.foreach(s => {
-    s.onUpdate(doUpdate _)
-    s.onDelete(delete _)
-  })
+
+  s1.onUpdate(_ => doUpdate())
+  s1.onDelete(_ => delete())
+  s2.onUpdate(_ => doUpdate())
+  s2.onDelete(_ => delete())
+  s3.onUpdate(_ => doUpdate())
+  s3.onDelete(_ => delete())
 
   private def doUpdate(): Unit =
     update(s1.data, s2.data, s3.data)
@@ -163,13 +138,6 @@ class SyncedDataSource3[T1, T2, T3](
     src.foreach(_.handleEvent(event))
 
 object SyncedDataSource:
-  // val tmpWrapper: HTMLElement = {
-  //   val e = document.createElement("div").asInstanceOf[HTMLElement]
-  //   e.style.display = "none"
-  //   document.body.appendChild(e)
-  //   e
-  // }
-
   def syncGen[T1, T2](
       g1: Int,
       data1: T1,
@@ -192,7 +160,7 @@ object SyncedDataSource:
       event =>
         src.foreach(s => if event.appEventId > s.gen then s.handleEvent(event))
     )
-    if src.map(_.gen).min < maxGen || src.find(_.isDeleted).isDefined then
+    if src.map(_.gen).min < maxGen || s1.isDeleted || s2.isDeleted then
       None
     else
       Some(s1.gen, s1.data, s2.data)
@@ -224,7 +192,7 @@ object SyncedDataSource:
       event =>
         src.foreach(s => if event.appEventId > s.gen then s.handleEvent(event))
     )
-    if src.map(_.gen).min < maxGen || src.find(_.isDeleted).isDefined then
+    if src.map(_.gen).min < maxGen || s1.isDeleted || s2.isDeleted || s3.isDeleted then
       None
     else
       Some(s1.gen, s1.data, s2.data, s3.data)
