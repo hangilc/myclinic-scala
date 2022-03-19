@@ -8,35 +8,37 @@ import dev.myclinic.scala.model.AppModelEvent
 import org.scalajs.dom.HTMLElement
 import org.scalajs.dom.document
 import dev.fujiwara.domq.LocalEventPublisher
+import dev.fujiwara.domq.DataSource
+import dev.fujiwara.domq.LocalDataSource
 
-trait DataSource[T]:
-  def data: T
-  def onUpdate(handler: () => Unit): Unit
-  def onDelete(handler: () => Unit): Unit
-  def isDeleted: Boolean
+// trait DataSource[T]:
+//   def data: T
+//   def onUpdate(handler: () => Unit): Unit
+//   def onDelete(handler: () => Unit): Unit
+//   def isDeleted: Boolean
 
-class LocalDataSource[T](init: T) extends DataSource[T]:
-  private var cur: T = init
-  private val onUpdatePublisher = LocalEventPublisher[Unit]
-  private val onDeletePublisher = LocalEventPublisher[Unit]
-  private var deletedFlag = false
+// class LocalDataSource[T](init: T) extends DataSource[T]:
+//   private var cur: T = init
+//   private val onUpdatePublisher = LocalEventPublisher[Unit]
+//   private val onDeletePublisher = LocalEventPublisher[Unit]
+//   private var deletedFlag = false
 
-  def data: T = cur
-  def onUpdate(handler: () => Unit): Unit =
-    onUpdatePublisher.subscribe(_ => handler())
-  def onDelete(handler: () => Unit): Unit =
-    onDeletePublisher.subscribe(_ => handler())
+//   def data: T = cur
+//   def onUpdate(handler: () => Unit): Unit =
+//     onUpdatePublisher.subscribe(_ => handler())
+//   def onDelete(handler: () => Unit): Unit =
+//     onDeletePublisher.subscribe(_ => handler())
 
-  private[appbase] def update(value: T): Unit =
-    assert(!deletedFlag)
-    cur = value
-    onUpdatePublisher.publish(())
+//   private[appbase] def update(value: T): Unit =
+//     assert(!deletedFlag)
+//     cur = value
+//     onUpdatePublisher.publish(())
 
-  private[appbase] def delete(): Unit =
-    deletedFlag = true
-    onDeletePublisher.publish(())
+//   private[appbase] def delete(): Unit =
+//     deletedFlag = true
+//     onDeletePublisher.publish(())
 
-  def isDeleted: Boolean = deletedFlag
+//   def isDeleted: Boolean = deletedFlag
 
 trait SyncedDataSourceCommon:
   def gen: Int
@@ -128,7 +130,7 @@ class SyncedDataSource3[T1, T2, T3](
     DataId[T2],
     ModelSymbol[T3],
     DataId[T3]
-) extends LocalDataSource[(T1, T2, T3)](init1, init2, init3):
+) extends LocalDataSource[(T1, T2, T3)]((init1, init2, init3)):
   val fetcher = summon[EventFetcher]
   private var g = initGen
   private val s1 = SyncedDataSource(g, init1)

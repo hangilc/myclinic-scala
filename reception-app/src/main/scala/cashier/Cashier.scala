@@ -3,7 +3,7 @@ package dev.myclinic.scala.web.reception.cashier
 import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
-import dev.fujiwara.domq.{ShowMessage, Icons, Colors, ContextMenu, Table}
+import dev.fujiwara.domq.{ShowMessage, Icons, Colors, ContextMenu, Table, DataSource}
 import scala.language.implicitConversions
 import dev.myclinic.scala.web.appbase.{SideMenu, EventPublishers, PrintDialog}
 import dev.myclinic.scala.web.appbase.ElementEvent.*
@@ -20,7 +20,8 @@ import java.time.LocalDate
 import dev.myclinic.scala.web.appbase.SideMenuService
 import scala.collection.mutable
 import dev.myclinic.scala.web.appbase.EventFetcher
-import dev.myclinic.scala.web.appbase.{DataSource, SyncedDataSource, SyncedDataSource3}
+import dev.myclinic.scala.web.appbase.{SyncedDataSource, SyncedDataSource3}
+
 
 class Cashier(using EventFetcher) extends SideMenuService:
   val table = new Table

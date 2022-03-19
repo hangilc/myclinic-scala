@@ -28,6 +28,7 @@ import dev.myclinic.scala.web.reception.scan.{Callbacks, PatientSearch, PatientD
 import dev.myclinic.scala.web.reception.scan.ScanBox
 
 class DocScan:
+  given ds: DataSources = new DataSources
   val box = new ScanBox
   box.title(innerText := "書類のスキャン")
   box.content(

@@ -8,11 +8,13 @@ import org.scalajs.dom.HTMLSpanElement
 import cats.*
 import cats.syntax.all.*
 
-class ScannerRow:
+class ScannerRow(using ds: DataSources):
   import ScannerRow.*
   private var dataOpt: Option[ScannerDevice] = None
   val edit: Edit = new Edit
-  val inPlaceEdit = new InPlaceEdit(new Disp, edit, dataOpt)
+  val inPlaceEdit = new InPlaceEdit(new Disp, edit, dataOpt, device => 
+    ds.scanner.update(device)
+  )
   val row = new Row
   row.title("スキャナー")
   row.content(inPlaceEdit.ele)

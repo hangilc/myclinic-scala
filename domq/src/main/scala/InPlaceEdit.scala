@@ -5,19 +5,21 @@ import dev.fujiwara.domq.TypeClasses.{*, given}
 class InPlaceEdit[Disp, Edit, Data](
     dispComponent: Disp,
     editComponent: Edit,
-    origDataOpt: Option[Data]
+    origDataOpt: Option[Data],
+    onDataChange: Option[Data] => Unit
 )(using
     dispElementProvider: ElementProvider[Disp],
     dispSetter: DataAcceptor[Disp, Option[Data]],
     dispTrigger: TriggerProvider[Disp],
+    dispActive: EventAcceptor[Disp, "activate", Unit],
     editElementProvider: ElementProvider[Edit],
     editSetter: DataAcceptor[Edit, Option[Data]],
     editGetter: DataProvider[Edit, Option[Data]],
     editDoneTrigger: TriggerProvider[Edit],
-    editCancelTrigger: GeneralTriggerProvider[Edit, "cancel"]
+    editCancelTrigger: GeneralTriggerProvider[Edit, "cancel"],
+    editActive: EventAcceptor[Edit, "activate", Unit]
 ):
   private var dataOpt: Option[Data] = origDataOpt
-  var onDataChange: Option[Data] => Unit = _ => ()
   val flipFlop = new FlipFlop(dispComponent, editComponent)
   def ele = flipFlop.ele
   def getData: Option[Data] = dataOpt

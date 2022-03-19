@@ -7,7 +7,7 @@ import dev.myclinic.scala.webclient.{Api, global}
 import scala.util.Success
 import scala.util.Failure
 
-class ScanRow:
+class ScanRow(using ds: DataSources):
   import ScanRow.*
   val flipFlop = FlipFlop(new Waiting(onStart _), new Busy(onDone _))
   val ele = flipFlop.ele
@@ -28,13 +28,25 @@ object ScanRow:
   object Waiting:
     given ElementProvider[Waiting] = _.ele
 
-  class Busy(onDone: String => Unit):
+  class Busy(onDone: String => Unit)(using ds: DataSources):
     import Busy.*
     val ele = div("BUSY")
-    doMockScan(onDone)
+
+    def progress(c: Double, t: Double): Unit =
+      println(s"progress: ${c}/${c}")
+
+    def onError(ex: Throwable): Unit =
+      System.err.println(ex.getMessage)
+
+    def scan(): Unit = 
+      println(("scanner", ds.scanner.data))
+      ds.scanner.data.foreach(scanner => 
+        doMockScan(scanner.deviceId, progress _, ds.resolution.data, onDone, onError)
+      )
 
   object Busy:
     given ElementProvider[Busy] = _.ele
+    given EventAcceptor[Busy, "activate", Unit] = (t: Busy, e: Unit) => t.scan()
 
     def doScan(
         deviceId: String,

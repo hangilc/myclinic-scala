@@ -8,15 +8,13 @@ import dev.fujiwara.domq.searchform.SearchForm
 import dev.myclinic.scala.model.Patient
 import dev.myclinic.scala.webclient.{Api, global}
 
-class PatientRow:
+class PatientRow(using ds: DataSources):
   import PatientRow.*
-  var onDataChange: Option[Patient] => Unit = _ => ()
   val disp = new PatientDisp
   val select = new PatientSelect
-  val ipe = new InPlaceEdit(disp, select, None)
+  val ipe = new InPlaceEdit(disp, select, None, ds.patient.update(_))
   ipe.edit()
   def ele = ipe.ele
-  ipe.onDataChange = patientOpt => onDataChange(patientOpt)
 
 object PatientRow:
   class PatientDisp:

@@ -1,8 +1,9 @@
 package dev.myclinic.scala.web.reception.cashier
 
 import dev.myclinic.scala.model.*
-import dev.myclinic.scala.web.appbase.{EventFetcher, DataSource}
+import dev.myclinic.scala.web.appbase.EventFetcher
 import dev.fujiwara.domq.all.{*, given}
+import dev.fujiwara.domq.DataSource
 import org.scalajs.dom.HTMLElement
 import dev.fujiwara.kanjidate.KanjiDate
 import dev.myclinic.scala.util.DateUtil

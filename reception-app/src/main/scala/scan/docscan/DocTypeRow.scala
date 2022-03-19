@@ -3,11 +3,16 @@ package dev.myclinic.scala.web.reception.scan.docscan
 import dev.fujiwara.domq.all.{*, given}
 import dev.fujiwara.domq.InPlaceEdit
 
-class DocTypeRow:
+class DocTypeRow(using ds: DataSources):
   import DocTypeRow.*
   val disp = new Disp
   val edit = new Edit
-  val inPlaceEdit = new InPlaceEdit(disp, edit, None)
+  val inPlaceEdit = new InPlaceEdit(
+    disp,
+    edit,
+    None,
+    (data: Data) => ds.docType.update(data.map(_._2))
+  )
   val row = new Row
   row.title("文書の種類")
   row.content(inPlaceEdit.ele)
@@ -15,6 +20,7 @@ class DocTypeRow:
   def selected: Option[String] = inPlaceEdit.getData.map(_._2)
 
 object DocTypeRow:
+  type Data = Option[(String, String)]
   class Disp:
     var onEdit: () => Unit = () => ()
     val label = span
@@ -22,25 +28,25 @@ object DocTypeRow:
     val ele = div(label, editLink(onclick := (() => onEdit())))
     def set(nameOpt: Option[String]): Unit =
       nameOpt match {
-        case Some(name) => 
+        case Some(name) =>
           label(innerText := name)
           editLink(innerText := "[変更]")
-        case None => 
+        case None =>
           label(innerText := "（選択されていません）")
           editLink(innerText := "[設定]")
       }
 
   object Disp:
     given ElementProvider[Disp] = _.ele
-    given DataAcceptor[Disp, Option[(String, String)]] with
-      def setData(t: Disp, opt: Option[(String, String)]): Unit =
+    given DataAcceptor[Disp, Data] with
+      def setData(t: Disp, opt: Data): Unit =
         t.set(opt.map(_._1))
     given TriggerProvider[Disp] with
       def setTriggerHandler(t: Disp, handler: () => Unit): Unit =
         t.onEdit = handler
 
   class Edit:
-    val onSelect = new LocalEventPublisher[Option[(String, String)]]
+    val onSelect = new LocalEventPublisher[Data]
     val cancelLink = a
     val select: Selection[(String, String)] = new Selection[(String, String)]
     select.clear()
@@ -50,17 +56,16 @@ object DocTypeRow:
       select.ele,
       div(cancelLink("キャンセル"))
     )
-  
+
   object Edit:
-    type Data = Option[(String, String)]
     given ElementProvider[Edit] = _.ele
     given DataAcceptor[Edit, Data] =
-      (t: Edit, opt: Data) => 
+      (t: Edit, opt: Data) =>
         opt match {
           case Some(d) => t.select.select(d)
-          case None => t.select.unmark()
+          case None    => t.select.unmark()
         }
-    given DataProvider[Edit, Option[(String, String)]] =
+    given DataProvider[Edit, Data] =
       DataProvider.by((edit: Edit) => edit.select)
     given TriggerProvider[Edit] =
       TriggerProvider.by((edit: Edit) => edit.select)
@@ -77,4 +82,3 @@ object DocTypeRow:
       "訪問看護などの報告書" -> "zaitaku",
       "その他" -> "image"
     )
-

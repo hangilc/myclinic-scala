@@ -157,3 +157,10 @@ object TypeClasses:
           case None    => t.unmark()
         }
 
+  trait EventAcceptor[T, Kind, E]:
+    def accept(t: T, e: E): Unit
+
+  object EventAcceptor:
+    given [T, Kind, E]: EventAcceptor[T, Kind, E] with
+      def accept(t: T, e: E): Unit = ()
+
