@@ -6,6 +6,7 @@ import java.time.LocalDateTime
 
 class ScannedDoc(scannedFile: String)(using ds: DataSources)
 
+  
 object ScannedDoc:
   class UI:
     val eIconWrapper: HTMLElement = div
