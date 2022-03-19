@@ -13,7 +13,7 @@ class PatientSelect(ui: PatientSelect.UI, onSelectCallback: Patient => Unit):
 
   var selected: Option[Patient] = None
   val result = ui.selection
-  result.formatter = patient => String.format("%04d %s", patient.patientId, patient.fullName())
+  // result.formatter = patient => String.format("%04d %s", patient.patientId, patient.fullName())
   result.addSelectEventHandler(patient =>
     selected = Some(patient)
     ui.eSelectButton.enable()
@@ -40,7 +40,7 @@ class PatientSelect(ui: PatientSelect.UI, onSelectCallback: Patient => Unit):
         (gen, patients) <- Api.searchPatient(text)
       yield 
         result.clear()
-        result.addAll(patients)
+        result.addAll(patients, formatPatient _, identity)
 
   private def onTodaysPatients(): Unit =
     for
@@ -49,7 +49,10 @@ class PatientSelect(ui: PatientSelect.UI, onSelectCallback: Patient => Unit):
     yield
       val patients = visits.map(visit => patientMap(visit.patientId))
       result.clear()
-      result.addAll(patients)
+      result.addAll(patients, formatPatient _, identity)
+
+  private def formatPatient(patient: Patient): String =
+    String.format("%04d %s", patient.patientId, patient.fullName())
 
 
   // private def formatPatient(patient: Patient): String =
@@ -63,7 +66,7 @@ object PatientSelect:
     val eInputText = inputText
     val eSearchButton = button
     val eTodaysPatientsLink = a
-    val selection = Selection[Patient]()
+    val selection = Selection[Patient]
     val eSelectButton = button
     val eCancelButton = button
     val body = div(

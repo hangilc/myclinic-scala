@@ -146,9 +146,9 @@ object MakeAppointDialog:
           if patients.size == 1 then onSelect(patients.head)
           else
             ui.searchResult.clear()
-            ui.searchResult.formatter = patient =>
+            val toLabel: Patient => String = patient =>
               s"(${patient.patientId}) ${patient.fullName()}"
-            ui.searchResult.addAll(patients)
+            ui.searchResult.addAll(patients, toLabel, identity)
             ui.showSearchResult()
 
     def value: String = ui.input.value
@@ -165,7 +165,7 @@ object MakeAppointDialog:
       val searchIcon = Icons.search
       val searchResult = Selection[Patient]()
       private val searchResultWrapper = div(displayNone)
-      searchResult.hide()
+      searchResult.ele.hide
       val ele = div(
         inputArea(Form.inputGroup)(
           searchForm(input, flex := "1 1 auto"),
@@ -174,8 +174,8 @@ object MakeAppointDialog:
         searchResultWrapper(searchResult.ele(mt := "6px"))
       )
       def showSearchResult(): Unit =
-        searchResult.show()
+        searchResult.ele.show
         searchResultWrapper(displayDefault)
       def hideSearchResult(): Unit =
-        searchResult.hide()
+        searchResult.ele.hide
         searchResultWrapper(displayNone)

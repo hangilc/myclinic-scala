@@ -25,16 +25,15 @@ class CovidThirdShot(val ui: CovidThirdShot.UI):
           onSelect(patients.head)
         else
           ui.searchResult.clear()
-          ui.searchResult.formatter = (formatOption _)
-          ui.searchResult.addAll(patients)
-          ui.searchResult.show()
+          ui.searchResult.addAll(patients, formatOption, identity)
+          ui.searchResult.ele.show
           ui.eSearchInput.value = ""
 
   def formatOption(patient: Patient): String =
     String.format("(%04d) %s", patient.patientId, patient.fullName())
 
   def onSelect(patient: Patient): Unit =
-    ui.searchResult.hide()
+    ui.searchResult.ele.hide
     for data <- Api.getCovid2ndShotData(patient.patientId)
     yield data match {
       case Some(age, secondShotAt, _thirdShotDue) =>
@@ -54,7 +53,7 @@ object CovidThirdShot:
   class UI:
     val eSearchFrom = form
     val eSearchInput = inputText
-    val searchResult = Selection[Patient]()
+    val searchResult = Selection[Patient]
     val eDisp = div
     val ele = div(
       eSearchFrom(mb := "6px")(

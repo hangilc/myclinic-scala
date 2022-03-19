@@ -93,7 +93,7 @@ class RecentVisitBox(cb: Patient => Unit):
         val atLabel = KanjiDate.dateToKanji(visit.visitedAt.toLocalDate(),
         formatYoubi = info => s"（${info.youbi}）")
         val label = s"${patientLabel} -- ${atLabel}"
-        selection.add(label, patient)
+        selection.add(patient, _ => label, identity)
     }
     
 

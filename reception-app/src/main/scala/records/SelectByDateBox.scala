@@ -63,6 +63,6 @@ class SelectByDateBox(cb: Patient => Unit):
     items.foreach {
       case (visit, patient) => 
         val label = String.format("(%04d) %s", patient.patientId, patient.fullName(""))
-        selection.add(label, patient)
+        selection.add(patient, _ => label, identity)
     }
     

@@ -35,7 +35,7 @@ class SearchPatientBox(cb: Patient => Unit):
       searchText.value = ""
       patients.foreach(patient => {
         val label = String.format("(%04d) %s", patient.patientId, patient.fullName(""))
-        selection.add(label, patient)
+        selection.add(patient, _ => label, identity)
       })
     }
 

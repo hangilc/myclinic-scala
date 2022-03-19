@@ -139,6 +139,9 @@ object ElementQ:
       for(i <- (n-1) to 0 by -1)
         result = cs.item(i).asInstanceOf[HTMLElement] :: result
       result
+    
+    def scrollToTop: Unit =
+      ele.scrollTop = 0
 
   extension (s: HTMLSelectElement)
     def setValue(value: String): Boolean =
