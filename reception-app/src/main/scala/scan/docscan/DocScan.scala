@@ -34,6 +34,7 @@ class DocScan:
     (new PatientRow).ele,
     (new DocTypeRow).ele,
     (new ScannerRow).ele,
+    (new ScanRow).ele,
   )
   def ele = box.ele
 

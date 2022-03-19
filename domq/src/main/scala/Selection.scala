@@ -16,11 +16,11 @@ class SelectionItem[T](val value: T):
 object SelectionItem:
   def apply[T](label: String, value: T): SelectionItem[T] =
     val item = new SelectionItem[T](value)
-    item.ele(innerText := label)
+    item.ele(innerText := label, cls := "domq-selection-item")
     item
 
 class Selection[T]:
-  val ele = div
+  val ele = div(cls := "domq-selection")
   private val selectEventPublisher = LocalEventPublisher[T]
   private var items: List[SelectionItem[T]] = List.empty
   private var markedValue: Option[T] = None
