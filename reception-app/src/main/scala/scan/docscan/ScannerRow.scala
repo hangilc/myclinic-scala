@@ -17,14 +17,16 @@ class ScannerRow:
   row.title("スキャナー")
   row.content(inPlaceEdit.ele)
   def ele = row.ele
-  edit.select.addSingleResultEventHandler(device => {
-    edit.select.select(device)
-  })
   edit.onRefresh.subscribe(_ => {
-    given Selection.PublishSingleResultEvent = Selection.PublishSingleResultEvent(false)
-    ScannerList.get(list => edit.setDevices(list))
+    ScannerList.get(list => 
+      edit.setDevices(list)
+      if list.size == 1 then edit.select.mark(list(0))
+    )
   })
-  ScannerList.get(list => edit.setDevices(list))
+  ScannerList.get(list => 
+    edit.setDevices(list)
+    if list.size == 1 then edit.select.select(list(0))
+  )
 
 object ScannerRow:
   type Data = Option[ScannerDevice]
@@ -48,19 +50,18 @@ object ScannerRow:
 
   class Edit:
     val onRefresh = new LocalEventPublisher[Unit]
-    val select: Selection[ScannerDevice, ScannerDevice] =
+    val select: Selection[ScannerDevice] =
       Selection[ScannerDevice]()
-    select.formatter = _.description
+    val formatter: ScannerDevice => String = _.description
     val cancelLink = a
     val ele = div(
       select.ele,
       cancelLink("キャンセル"),
       a("更新", onclick := (() => onRefresh.publish(())))
     )
-    def setDevices(list: List[ScannerDevice])(using
-        Selection.PublishSingleResultEvent
-    ): Unit =
-      select.set(list)
+    def setDevices(list: List[ScannerDevice]): Unit =
+      select.clear()
+      select.addAll(list, formatter, identity)
 
   object Edit:
     given ElementProvider[Edit] = _.ele

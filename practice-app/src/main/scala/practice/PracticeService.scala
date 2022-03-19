@@ -7,11 +7,12 @@ import org.scalajs.dom.HTMLElement
 import scala.concurrent.Future
 import dev.myclinic.scala.model.Patient
 import dev.myclinic.scala.webclient.{Api, global}
-import dev.myclinic.scala.appbase.Selections
 import dev.myclinic.scala.model.Visit
 import dev.fujiwara.kanjidate.KanjiDate
+import dev.myclinic.scala.util.DateUtil
 import scala.util.Success
 import scala.util.Failure
+import java.time.LocalDate
 
 class PracticeService extends SideMenuService:
   val left = new PracticeMain
@@ -19,58 +20,85 @@ class PracticeService extends SideMenuService:
 
   override def getElements = List(left.ele, right.ele)
 
-  left.startPatientPublisher.subscribe(patient => println(("start-patient", patient)))
-  left.startVisitPublisher.subscribe(patient => println(("start-visit", patient)))
+  left.startPatientPublisher.subscribe(patient =>
+    println(("start-patient", patient))
+  )
+  left.startVisitPublisher.subscribe(patient =>
+    println(("start-visit", patient))
+  )
 
 class PracticeMain:
   val startPatientPublisher = new LocalEventPublisher[Patient]
   val startVisitPublisher = new LocalEventPublisher[Patient]
   val ui = new PracticeMainUI
   def ele = ui.ele
-  ui.choice.setBuilder(List(
+  ui.choice.setBuilder(
+    List(
       "受付患者選択" -> (selectFromRegistered _),
       "患者検索" -> (selectBySearchPatient _),
       "最近の診察" -> (selectFromRecentVisits _),
       "日付別" -> (() => ())
-  ))
+    )
+  )
+
+  def formatPatient(patient: Patient): String =
+    String.format(
+      "%04d %s (%d才)",
+      patient.patientId,
+      patient.fullName,
+      DateUtil.calcAge(patient.birthday, LocalDate.now())
+    )
 
   def selectFromRegistered(): Unit =
-    for
-      pairs <- PracticeService.listRegisteredPatient()
+    for pairs <- PracticeService.listRegisteredPatient()
     yield
-      val sel = Selections.patientSelectionWithData[Visit]()
+      val sel = Selection[(Patient, Visit)]
       sel.clear()
-      sel.addAll(pairs)
+      sel.addAll(pairs, pair => formatPatient(pair._1), identity)
       val d = new ModalDialog3
       d.title("受付患者選択")
       d.body(sel.ele(cls := "practice-select-from-registered-selection"))
       d.commands(
-        button("選択", onclick := (() => 
-          sel.selected.foreach(pair => 
-            d.close()
-            startVisitPublisher.publish(_)
-      ))),
+        button(
+          "選択",
+          onclick := (() =>
+            sel.marked.foreach(pair =>
+              d.close()
+              startVisitPublisher.publish(_)
+            )
+          )
+        ),
         button("キャンセル", onclick := (() => d.close()))
       )
       d.open()
 
   def selectBySearchPatient(): Unit =
     val d = new ModalDialog3
-    val search = new SearchForm[Patient, Patient](identity, Api.searchPatient(_).map(_._2))
-    search.ui.selection.formatter = PracticeService.patientFormatter
+    val search =
+      new SearchForm[Patient, Patient](formatPatient _, identity, Api.searchPatient(_).map(_._2))
     d.title("患者検索")
     d.body(
       search.ele
     )
     d.commands(
-      button("診察登録", onclick := (() => {
-        d.close()
-        search.selected.foreach(patient => startVisitPublisher.publish(patient))
-      })),
-      button("選択", onclick := (() => {
-        d.close()
-        search.selected.foreach(patient => startPatientPublisher.publish(patient))
-      })),
+      button(
+        "診察登録",
+        onclick := (() => {
+          d.close()
+          search.selected.foreach(patient =>
+            startVisitPublisher.publish(patient)
+          )
+        })
+      ),
+      button(
+        "選択",
+        onclick := (() => {
+          d.close()
+          search.selected.foreach(patient =>
+            startPatientPublisher.publish(patient)
+          )
+        })
+      ),
       button("閉じる", onclick := (() => d.close()))
     )
     d.open()
@@ -80,61 +108,74 @@ class PracticeMain:
     var offset = 0
     val count = 20
     val d = new ModalDialog3
-    val selection = new Selection[(Visit, Patient), Patient](_._2)
-    selection.formatter = (visit, patient) => 
-      String.format("%04d %s [%s]", patient.patientId, patient.fullName(),
-        KanjiDate.dateToKanji(visit.visitedAt.toLocalDate))
+    val selection = new Selection[Patient]
+    val formatter: (Visit, Patient) => String = (visit, patient) =>
+      String.format(
+        "%04d %s [%s]",
+        patient.patientId,
+        patient.fullName(),
+        KanjiDate.dateToKanji(visit.visitedAt.toLocalDate)
+      )
     def update(): Future[Unit] =
-      for
-        result <- Api.listRecentVisitFull(offset, count)
+      for result <- Api.listRecentVisitFull(offset, count)
       yield
         selection.clear()
-        selection.addAll(result)
+        selection.addAll(result, formatter.tupled, _._2)
     d.body(
       selection.ele,
       div(
-        a("前へ", onclick := (() => {
-          offset -= count
-          if offset < 0 then offset = 0
-          update()
-          ()
-        })),
-        a("次へ", onclick := (() => {
-          offset += count
-          update()
-          ()
-        }))
+        a(
+          "前へ",
+          onclick := (() => {
+            offset -= count
+            if offset < 0 then offset = 0
+            update()
+            ()
+          })
+        ),
+        a(
+          "次へ",
+          onclick := (() => {
+            offset += count
+            update()
+            ()
+          })
+        )
       )
     )
     d.commands(
-      button("選択", onclick := (() => {
-        d.close()
-        selection.selected.foreach(patient => startPatientPublisher.publish(patient))
-      })),
+      button(
+        "選択",
+        onclick := (() => {
+          d.close()
+          selection.marked.foreach(patient =>
+            startPatientPublisher.publish(patient)
+          )
+        })
+      ),
       button("キャンセル", onclick := (() => d.close()))
     )
     update().onComplete {
-      case Success(_) => d.open()
+      case Success(_)  => d.open()
       case Failure(ex) => System.err.println(ex.getMessage)
     }
 
-      
-
 object PracticeService:
   def listRegisteredPatient(): Future[List[(Patient, Visit)]] =
-    for
-      (gen, wqList, visitMap, patientMap) <- Api.listWqueueFull()
-    yield
-      wqList.map(wq => 
-        val v = visitMap(wq.visitId)
-        val p = patientMap(v.patientId)
-        (p, v)  
-      )
+    for (gen, wqList, visitMap, patientMap) <- Api.listWqueueFull()
+    yield wqList.map(wq =>
+      val v = visitMap(wq.visitId)
+      val p = patientMap(v.patientId)
+      (p, v)
+    )
 
-  val patientFormatter: Patient => String = patient =>
-    String.format("%04d %s (%s)", patient.patientId, patient.fullName(), 
-      KanjiDate.dateToKanji(patient.birthday))
-    
+  // val patientFormatter: Patient => String = patient =>
+  //   String.format(
+  //     "%04d %s (%s)",
+  //     patient.patientId,
+  //     patient.fullName(),
+  //     KanjiDate.dateToKanji(patient.birthday)
+  //   )
 
 class PracticeMainUI:
   val choice = PullDownLink("患者選択")
@@ -157,5 +198,3 @@ class PracticeRight:
 
 class PracticeRightUI:
   val ele = div(cls := "practice-right-column")
-
-

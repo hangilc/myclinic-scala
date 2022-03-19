@@ -19,8 +19,6 @@ object SelectionItem:
     item.ele(innerText := label)
     item
 
-case class SelectionController()
-
 class Selection[T]:
   val ele = div
   private val selectEventPublisher = LocalEventPublisher[T]

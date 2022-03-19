@@ -52,16 +52,17 @@ object PatientRow:
     var onSelect: Patient => Unit = _ => ()
     var onCancel: () => Unit = () => ()
     val search = new SearchForm[Patient, Patient](
+      formatPatient _,
       identity,
       text => Api.searchPatient(text).map(_._2)
     )
-    search.ui.selection.formatter = patient =>
+    def formatPatient(patient: Patient): String = 
       String.format("(%04d) %s", patient.patientId, patient.fullName())
     search.ui.form(a("[キャンセル]", onclick := (() => onCancel())))
-    search.ui.selection.hide()
-    search.engine.onSearchDone = () => search.ui.selection.show()
+    search.ui.selection.ele.hide
+    search.engine.onSearchDone = () => search.ui.selection.ele.show
     search.onSelect(patient => {
-      search.ui.selection.hide()
+      search.ui.selection.ele.hide
       onSelect(patient)
     })
     val row = new Row
@@ -79,7 +80,7 @@ object PatientRow:
         )
     given DataProvider[PatientSelect, Option[Patient]] with
       def getData(t: PatientSelect): Option[Patient] =
-        t.search.ui.selection.selected
+        t.search.ui.selection.marked
     given TriggerProvider[PatientSelect] with
       def setTriggerHandler(t: PatientSelect, handler: () => Unit): Unit =
         t.onSelect = (_ => handler())

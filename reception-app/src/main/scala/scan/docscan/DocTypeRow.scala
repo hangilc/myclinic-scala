@@ -42,10 +42,9 @@ object DocTypeRow:
   class Edit:
     val onSelect = new LocalEventPublisher[Option[(String, String)]]
     val cancelLink = a
-    val select: Selection[(String, String), (String, String)] = 
-      new Selection[(String, String), (String, String)](identity)
-    select.formatter = _._1
-    select.set(defaultItems)
+    val select: Selection[(String, String)] = new Selection[(String, String)]
+    select.clear()
+    select.addAll(defaultItems, _._1, identity)
     select.addSelectEventHandler(s => onSelect.publish(Some(s)))
     val ele = div(
       select.ele,
@@ -58,8 +57,8 @@ object DocTypeRow:
     given DataAcceptor[Edit, Data] =
       (t: Edit, opt: Data) => 
         opt match {
-          case Some(d) => t.select.select(d)(using Selection.PublishSelectEvent(false))
-          case None => t.select.unselect()
+          case Some(d) => t.select.select(d)
+          case None => t.select.unmark()
         }
     given DataProvider[Edit, Option[(String, String)]] =
       DataProvider.by((edit: Edit) => edit.select)
