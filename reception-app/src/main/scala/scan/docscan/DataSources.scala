@@ -9,5 +9,7 @@ class DataSources:
   val docType = new LocalDataSource[Option[String]](None)
   val scanner = new LocalDataSource[Option[ScannerDevice]](None)
   val resolution = new LocalDataSource[Int](100)
-  val scannedDoc =  new LocalDataSource[String]("")
+  val newlyScannedFile =  new LocalDataSource[String]("")
+  val scannedDocs = new LocalDataSource[List[ScannedDoc]](List.empty)
+  
 

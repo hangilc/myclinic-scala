@@ -17,7 +17,7 @@ class ScanRow(using ds: DataSources):
 
   def onDone(scannedFile: String): Unit =
     flipFlop.flip()
-    ds.scannedDoc.update(scannedFile)
+    ds.newlyScannedFile.update(scannedFile)
 
 object ScanRow:
   class Waiting(onStart: () => Unit):
@@ -76,9 +76,9 @@ object ScanRow:
         errCb: Throwable => Unit
     ): Unit =
       for i <- 1 to 9 do
-        DelayedCall.callLater(i, () => progress(i, 10))
+        DelayedCall.callLater(i*0.2, () => progress(i, 10))
       val s = s"file://scanned-file-${mockSerial}.jpeg"
       mockSerial += 1
-      DelayedCall.callLater(10, () => cb(s))
+      DelayedCall.callLater(10*0.2, () => cb(s))
       
 

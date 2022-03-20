@@ -3,17 +3,31 @@ package dev.myclinic.scala.web.reception.scan.docscan
 import org.scalajs.dom.HTMLElement
 import dev.fujiwara.domq.all.{*, given}
 import java.time.LocalDateTime
+import dev.fujiwara.domq.LocalDataSource
+import scala.concurrent.Future
+import dev.myclinic.scala.webclient.{Api, global}
 
-class ScannedDoc(scannedFile: String)(using ds: DataSources):
+class ScannedDoc(scannedFile: String, val index: LocalDataSource[Int])(using ds: DataSources):
   import ScannedDoc.*
+  private var uploadFileName = updatedUploadFileName
+  private val api = new MockUploadApi
+  def getUploadFileName = uploadFileName
   val ui = new UI
-  ui.eUploadFile("scannedFile")
+  ui.eUploadFile(uploadFileName)
   val ele = ui.ele
 
-  def composeUploadFileName: String =
+  def upload(): Unit =
+    ds.patient.data.map(_.patientId).foreach(patientId =>
+      api.upload(scannedFile, patientId, uploadFileName)
+    )
 
-
-  
+  def updatedUploadFileName: String =
+    createUploadFileName(
+      ds.patient.data.map(_.patientId),
+      ds.docType.data.getOrElse("image"),
+      makeTimeStamp,
+      index.data
+    )
 
 object ScannedDoc:
   class UI:
@@ -57,21 +71,43 @@ object ScannedDoc:
       patientIdOption: Option[Int],
       scanType: String,
       timestamp: String,
-      index: Int,
-      total: Int,
-      serialId: Option[Int]
+      index: Int
   ): String =
     val pat = patientIdOption match {
       case Some(patientId) => patientId.toString
       case None            => "????"
     }
-    val ser: String = if total <= 1 then "" else s"(${index})"
-    val base = s"${pat}-${scanType}-${timestamp}${ser}" +
-      (serialId match {
-        case None => ""
-        case Some(id) => s"-${id}"
-      })
-    val ext = ".jpg"
-    base + ext
+    val ser = String.format("%02d", index)
+    val ext = "jpg"
+    s"${pat}-$scanType-${timestamp}-${ser}.${ext}"
+
+  trait UploadApi:
+    def upload(
+        scannedFile: String,
+        patientId: Int,
+        uploadFileName: String
+    ): Future[Unit]
+
+  class RealUploadApi extends UploadApi:
+    def upload(
+        scannedFile: String,
+        patientId: Int,
+        uploadFileName: String
+    ): Future[Unit] =
+      for
+        data <- Api.getScannedFile(scannedFile)
+        ok <- Api.savePatientImage(patientId, uploadFileName, data)
+      yield ()
+
+  class MockUploadApi extends UploadApi:
+    def upload(
+        scannedFile: String,
+        patientId: Int,
+        uploadFileName: String
+    ): Future[Unit] = 
+      println(s"File uploaded ${scannedFile} -> ${patientId}/${uploadFileName}")
+      Future.successful(())
+
+    
 
 

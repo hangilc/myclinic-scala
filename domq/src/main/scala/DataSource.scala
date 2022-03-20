@@ -23,6 +23,9 @@ class LocalDataSource[T](init: T) extends DataSource[T]:
     cur = value
     onUpdatePublisher.publish(value)
 
+  def triggerUpdate(): Unit =
+    update(cur)
+
   def delete(): Unit =
     assert(!deletedFlag)
     deletedFlag = true
