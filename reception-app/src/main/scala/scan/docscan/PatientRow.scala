@@ -18,12 +18,10 @@ class PatientRow(using ds: DataSources):
   if ds.mock.data then mockInit()
 
   def ele = ipe.ele
-      
+
   def mockInit(): Future[Unit] =
-    for
-      patient <- Api.getPatient(4593)
-    yield
-      ipe.triggerEditDone(Some(patient))
+    for patient <- Api.getPatient(4593)
+    yield ipe.triggerEditDone(Some(patient))
 
 object PatientRow:
   class PatientDisp:
@@ -56,7 +54,7 @@ object PatientRow:
       def setTriggerHandler(t: PatientDisp, handler: () => Unit): Unit =
         t.onEdit = handler
 
-  class PatientSelect:
+  class PatientSelect(using ds: DataSources):
     var onSelect: Patient => Unit = _ => ()
     var onCancel: () => Unit = () => ()
     val search = new SearchForm[Patient, Patient](
@@ -64,19 +62,30 @@ object PatientRow:
       identity,
       text => Api.searchPatient(text).map(_._2)
     )
-    def formatPatient(patient: Patient): String = 
+    def formatPatient(patient: Patient): String =
       String.format("(%04d) %s", patient.patientId, patient.fullName())
     search.ui.form(a("[キャンセル]", onclick := (() => onCancel())))
     search.ui.selection.ele.hide
     search.engine.onSearchDone = () => search.ui.selection.ele.show
     search.onSelect(patient => {
-      search.ui.selection.ele.hide
-      onSelect(patient)
+      def proc(): Unit =
+        search.ui.selection.ele.hide
+        onSelect(patient)
+        
+      if countUploads > 0 then
+        ShowMessage.confirm("アップロードされた文書がありますが、患者名を変更しますか？")(
+          proc, 
+          onCancel
+        )
+      else proc()
     })
     val row = new Row
     row.title("患者選択")
     row.content(search.ele)
     def ele = row.ele
+
+    def countUploads: Int =
+      ds.scannedDocs.data.filter(_.getState == ScannedDoc.State.Uploaded).size
 
   object PatientSelect:
     given ElementProvider[PatientSelect] = _.ele

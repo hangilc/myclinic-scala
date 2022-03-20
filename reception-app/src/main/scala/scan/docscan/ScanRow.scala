@@ -122,7 +122,7 @@ object ScanRow:
         cb: String => Unit,
         errCb: Throwable => Unit
     ): Unit =
-      val duration = 20
+      val duration = 1
       for i <- 1 to 9 do DelayedCall.callLater(i * duration / 10, () => progress(i, 10))
       val s = s"file://scanned-file-${mockSerial}.jpeg"
       mockSerial += 1

@@ -34,7 +34,7 @@ class ScannerRow(using ds: DataSources):
     if ds.mock.data then
       cb(List(
         new ScannerDevice("", "Mock scanner", "Mock scanner"),
-        new ScannerDevice("", "Mock scanner", "Mock scanner 2"),
+        // new ScannerDevice("", "Mock scanner", "Mock scanner 2"),
       ))
     else
       ScannerList.list(cb)
