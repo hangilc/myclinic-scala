@@ -30,16 +30,22 @@ object ScanRow:
 
   class Busy(onDone: String => Unit)(using ds: DataSources):
     import Busy.*
-    val ele = div("BUSY")
+    val prog = span
+    val ele = div("スキャン中...", prog)
 
     def progress(c: Double, t: Double): Unit =
-      println(s"progress: ${c}/${c}")
+      val pct = (c/t*100).toInt
+      prog(innerText := s"${pct}%")
 
     def onError(ex: Throwable): Unit =
       System.err.println(ex.getMessage)
 
+    def init(): Unit =
+      prog(clear)
+      progress(0, 10)
+
     def scan(): Unit = 
-      println(("scanner", ds.scanner.data))
+      init()
       ds.scanner.data.foreach(scanner => 
         doMockScan(scanner.deviceId, progress _, ds.resolution.data, onDone, onError)
       )

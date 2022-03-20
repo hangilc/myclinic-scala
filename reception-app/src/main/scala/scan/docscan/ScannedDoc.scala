@@ -4,9 +4,17 @@ import org.scalajs.dom.HTMLElement
 import dev.fujiwara.domq.all.{*, given}
 import java.time.LocalDateTime
 
-class ScannedDoc(scannedFile: String)(using ds: DataSources)
+class ScannedDoc(scannedFile: String)(using ds: DataSources):
+  import ScannedDoc.*
+  val ui = new UI
+  ui.eUploadFile("scannedFile")
+  val ele = ui.ele
+
+  def composeUploadFileName: String =
+
 
   
+
 object ScannedDoc:
   class UI:
     val eIconWrapper: HTMLElement = div
