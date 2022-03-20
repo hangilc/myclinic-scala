@@ -73,6 +73,9 @@ object TypeClasses:
         def setTriggerHandler(t: HTMLAnchorElement, handler: () => Unit): Unit =
           t(onclick := (() => handler()))
 
+  trait GeneralTriggerDataProvider[T, D, Kind]:
+    def setTriggerHandler(t: T, handler: D => Unit): Unit
+
   trait DataProvider[T, D]:
     def getData(t: T): D
 
@@ -164,4 +167,7 @@ object TypeClasses:
   object EventAcceptor:
     given [T, Kind, E]: EventAcceptor[T, Kind, E] with
       def accept(t: T, e: E): Unit = ()
+
+  trait IdProvider[T, Id]:
+    def getId(t: T): Id
 
