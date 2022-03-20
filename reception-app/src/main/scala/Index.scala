@@ -27,27 +27,27 @@ import dev.myclinic.scala.web.reception.scan.Scan
 @JSExportTopLevel("JsMain")
 object JsMain:
   import ReceptionEvent.given
-  val ui = new PageLayout1("reception", "practice")
-  ui.banner("受付")
-  ui.sideMenu.addItems(sideMenuItems)
-  document.body(ui.ele)
-
-  def sideMenuItems: List[(String, SideMenuProcs => SideMenuService)] =
+  def sideMenuItems(
+      admin: Boolean,
+      mock: Boolean
+  ): List[(String, SideMenuProcs => SideMenuService)] =
     List(
       "メイン" -> (_ => Cashier()),
       "患者管理" -> (_ => new PatientManagement()),
       "診療記録" -> (_ => Records()),
-      "スキャン" -> (_ => Scan())
+      "スキャン" -> (_ => Scan(mock))
     )
 
   @JSExport
-  def main(isAdmin: Boolean): Unit =
-    (for 
+  def main(isAdmin: Boolean, isMock: Boolean): Unit =
+    val ui = new PageLayout1("reception", "practice")
+    ui.banner("受付")
+    ui.sideMenu.addItems(sideMenuItems(isAdmin, isMock))
+    document.body(ui.ele)
+    (for
       _ <- ui.hotline.init()
       _ <- fetcher.start()
-    yield
-      ui.sideMenu.invokeByLabel("メイン")).onComplete {
-        case Success(_) => ()
-        case Failure(ex) => System.err.println(ex.getMessage)
-      }
-
+    yield ui.sideMenu.invokeByLabel("メイン")).onComplete {
+      case Success(_)  => ()
+      case Failure(ex) => System.err.println(ex.getMessage)
+    }

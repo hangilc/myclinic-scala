@@ -20,11 +20,13 @@ class LocalDataSource[T](init: T) extends DataSource[T]:
 
   def update(value: T): Unit =
     assert(!deletedFlag)
-    cur = value
-    onUpdatePublisher.publish(value)
+    if cur != value then
+      cur = value
+    triggerUpdate()
 
   def triggerUpdate(): Unit =
-    update(cur)
+    assert(!deletedFlag)
+    onUpdatePublisher.publish(cur)
 
   def delete(): Unit =
     assert(!deletedFlag)

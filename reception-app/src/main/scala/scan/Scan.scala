@@ -16,7 +16,7 @@ import dev.myclinic.scala.web.reception.scan.docscan.DocScan
 import dev.myclinic.scala.web.reception.scan.patientimages.PatientImagesOrig
 import dev.myclinic.scala.web.reception.scan.patientimages.PatientImages
 
-class Scan() extends SideMenuService:
+class Scan(mock: Boolean) extends SideMenuService:
   val boxes = div
   val ele = div(cls := "content scan")(
         div(cls := "header")(
@@ -30,7 +30,7 @@ class Scan() extends SideMenuService:
   override def getElement = ele
 
   def doScan(): Unit = 
-    val docScan = new DocScan
+    val docScan = new DocScan(mock)
     boxes.prepend(docScan.ele)
 
   def doPatientImages(): Unit =
@@ -92,8 +92,6 @@ object Scan:
         ),
         eScannedBoxes
       )
-
-  def apply(): Scan = new Scan
 
     
 

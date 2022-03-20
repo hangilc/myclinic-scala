@@ -27,8 +27,9 @@ import dev.fujiwara.domq.Icons
 import dev.myclinic.scala.web.reception.scan.{Callbacks, PatientSearch, PatientDisp}
 import dev.myclinic.scala.web.reception.scan.ScanBox
 
-class DocScan:
+class DocScan(mock: Boolean = false):
   given ds: DataSources = new DataSources
+  ds.mock.update(mock)
   val box = new ScanBox
   box.title(innerText := "書類のスキャン")
   box.content(

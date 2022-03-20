@@ -16,7 +16,8 @@
     <script type="text/javascript" src="./scalajs/main.js"></script>
     <script type="text/javascript">
       let url = new URL(document.location)
-      JsMain.main(url.searchParams.get("admin") === "true")
+      let searchParams = url.searchParams
+      JsMain.main(searchParams.get("admin") === "true", searchParams.get("mock") === "true")
     </script>
   </body>
 </html>

@@ -20,15 +20,21 @@ class ScannerRow(using ds: DataSources):
   row.content(inPlaceEdit.ele)
   def ele = row.ele
   edit.onRefresh.subscribe(_ => {
-    ScannerList.get(list => 
+    listScanner(list => 
       edit.setDevices(list)
       if list.size == 1 then edit.select.mark(list(0))
     )
   })
-  ScannerList.get(list => 
+  listScanner(list => 
     edit.setDevices(list)
     if list.size == 1 then edit.select.select(list(0))
   )
+
+  def listScanner(cb: List[ScannerDevice] => Unit): Unit =
+    if ds.mock.data then
+      cb(List(new ScannerDevice("", "Mock scanner", "Mock scanner")))
+    else
+      ScannerList.list(cb)
 
 object ScannerRow:
   type Data = Option[ScannerDevice]
