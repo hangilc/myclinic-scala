@@ -11,5 +11,7 @@ class DataSources:
   val resolution = new LocalDataSource[Int](100)
   val newlyScannedFile =  new LocalDataSource[String]("")
   val scannedDocs = new LocalDataSource[List[ScannedDoc]](List.empty)
+
+  val mock = new LocalDataSource[Boolean](false)
   
 

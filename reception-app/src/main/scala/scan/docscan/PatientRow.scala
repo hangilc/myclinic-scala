@@ -7,6 +7,7 @@ import dev.fujiwara.domq.TypeClasses.*
 import dev.fujiwara.domq.searchform.SearchForm
 import dev.myclinic.scala.model.Patient
 import dev.myclinic.scala.webclient.{Api, global}
+import scala.concurrent.Future
 
 class PatientRow(using ds: DataSources):
   import PatientRow.*
@@ -14,7 +15,15 @@ class PatientRow(using ds: DataSources):
   val select = new PatientSelect
   val ipe = new InPlaceEdit(disp, select, None, ds.patient.update(_))
   ipe.edit()
+  if ds.mock.data then mockInit()
+
   def ele = ipe.ele
+      
+  def mockInit(): Future[Unit] =
+    for
+      patient <- Api.getPatient(4593)
+    yield
+      ipe.triggerEditDone(Some(patient))
 
 object PatientRow:
   class PatientDisp:
@@ -27,6 +36,7 @@ object PatientRow:
       disp,
       cancelLink(innerText := "[変更]", onclick := (() => onEdit()))
     )
+
     def ele = row.ele
     def set(patient: Patient): Unit =
       disp(innerText := format(patient))

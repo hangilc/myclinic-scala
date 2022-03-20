@@ -37,9 +37,12 @@ class DocScan:
     (new ScannerRow).ele,
     (new ScanRow).ele,
     (new ScannedRow).ele,
-    (new UploadRow).ele
+    (new UploadRow(doClose _)).ele
   )
   def ele = box.ele
+
+  def doClose(): Unit =
+    box.ele.remove()
 
 class ScanBoxOrig(val ui: DocScan.UI)(using queue: ScanWorkQueue)
     extends DocScan.Scope:

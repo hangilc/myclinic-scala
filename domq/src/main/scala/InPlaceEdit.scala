@@ -26,10 +26,7 @@ class InPlaceEdit[Disp, Edit, Data](
   disp()
 
   editDoneTrigger.setTriggerHandler(editComponent, () => {
-    dataOpt = editGetter.getData(editComponent)
-    dispSetter.setData(dispComponent, dataOpt)
-    disp()
-    onDataChange(dataOpt)
+    triggerEditDone(editGetter.getData(editComponent))
   })
 
   editCancelTrigger.setTriggerHandler(editComponent, () => {
@@ -40,6 +37,12 @@ class InPlaceEdit[Disp, Edit, Data](
     editSetter.setData(editComponent, dataOpt)
     edit()
   })
+
+  def triggerEditDone(opt: Option[Data]): Unit =
+    dataOpt = opt
+    dispSetter.setData(dispComponent, dataOpt)
+    disp()
+    onDataChange(dataOpt)
 
   def disp(): Unit =
     dispSetter.setData(dispComponent, dataOpt)

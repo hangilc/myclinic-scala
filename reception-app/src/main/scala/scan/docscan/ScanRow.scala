@@ -9,7 +9,8 @@ import scala.util.Failure
 
 class ScanRow(using ds: DataSources):
   import ScanRow.*
-  val flipFlop = FlipFlop(new Waiting(onStart _), new Busy(onDone _))
+  val api = if ds.mock.data then new MockApi else new RealApi
+  val flipFlop = FlipFlop(new Waiting(onStart _), new Busy(onDone _, api))
   val ele = flipFlop.ele
 
   def onStart(): Unit =
@@ -28,7 +29,7 @@ object ScanRow:
   object Waiting:
     given ElementProvider[Waiting] = _.ele
 
-  class Busy(onDone: String => Unit)(using ds: DataSources):
+  class Busy(onDone: String => Unit, api: ScanApi)(using ds: DataSources):
     import Busy.*
     val prog = span
     val ele = div("スキャン中...", prog)
@@ -47,14 +48,24 @@ object ScanRow:
     def scan(): Unit = 
       init()
       ds.scanner.data.foreach(scanner => 
-        doMockScan(scanner.deviceId, progress _, ds.resolution.data, onDone, onError)
+        api.scan(scanner.deviceId, progress _, ds.resolution.data, onDone, onError)
       )
 
   object Busy:
     given ElementProvider[Busy] = _.ele
     given EventAcceptor[Busy, "activate", Unit] = (t: Busy, e: Unit) => t.scan()
 
-    def doScan(
+  trait ScanApi:
+    def scan(
+          deviceId: String,
+          progress: (Double, Double) => Unit,
+          resolution: Int = 100,
+          cb: String => Unit,
+          errCb: Throwable => Unit
+      ): Unit
+
+  class RealApi extends ScanApi:   
+    def scan(
         deviceId: String,
         progress: (Double, Double) => Unit,
         resolution: Int = 100,
@@ -66,9 +77,9 @@ object ScanRow:
         case Failure(ex) => errCb(ex)
       }
 
+  class MockApi extends ScanApi:
     private var mockSerial: Int = 1
-
-    def doMockScan(
+    def scan(
         deviceId: String,
         progress: (Double, Double) => Unit,
         resolution: Int = 100,
