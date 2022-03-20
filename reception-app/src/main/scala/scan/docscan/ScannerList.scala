@@ -23,6 +23,8 @@ object ScannerList:
   def onBusyScannersChange(handler: Set[ScannerDevice] => Unit): Unit =
     onBusyScannersChange.subscribe(handler)
 
+  def getBusyScanners: Set[ScannerDevice] = busyScanners
+
   def openScanner(scanner: ScannerDevice): Boolean =
     println(("open-scanner", scanner.name))
     if busyScanners.contains(scanner) then false

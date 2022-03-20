@@ -22,12 +22,17 @@ object SelectionItem:
 class Selection[T]:
   val ele = div(cls := "domq-selection")
   private val selectEventPublisher = LocalEventPublisher[T]
+  private val unselectEventPublisher = LocalEventPublisher[Unit]
   private var items: List[SelectionItem[T]] = List.empty
   private var markedValue: Option[T] = None
 
   def addSelectEventHandler(handler: T => Unit): Unit = 
     selectEventPublisher.subscribe(handler)
   private def publishSelect(t: T): Unit = selectEventPublisher.publish(t)
+
+  def addUnselectEventHandler(handler: () => Unit): Unit =
+    unselectEventPublisher.subscribe(_ => handler())
+  private def publishUnselect(): Unit = unselectEventPublisher.publish(())
 
   def add[U](u: U, toLabel: U => String, toValue: U => T): Unit =
     val item = SelectionItem(toLabel(u), toValue(u))
@@ -52,6 +57,11 @@ class Selection[T]:
 
   def select(value: T): Unit =
     items.find(_.value == value).foreach(selectItem(_))
+
+  def unselect(): Unit =
+    unmark()
+    markedValue = None
+    publishUnselect()
 
   def marked: Option[T] = markedValue
 

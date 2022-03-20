@@ -32,7 +32,10 @@ class ScannerRow(using ds: DataSources):
 
   def listScanner(cb: List[ScannerDevice] => Unit): Unit =
     if ds.mock.data then
-      cb(List(new ScannerDevice("", "Mock scanner", "Mock scanner")))
+      cb(List(
+        new ScannerDevice("", "Mock scanner", "Mock scanner"),
+        new ScannerDevice("", "Mock scanner", "Mock scanner 2"),
+      ))
     else
       ScannerList.list(cb)
 
@@ -65,11 +68,16 @@ object ScannerRow:
     val ele = div(
       select.ele,
       cancelLink("キャンセル"),
-      a("更新", onclick := (() => onRefresh.publish(())))
+      a("更新", onclick := (() => onRefresh.publish(()))),
+      a("選択解除", onclick := (() => onUnselect()))
     )
+
     def setDevices(list: List[ScannerDevice]): Unit =
       select.clear()
       select.addAll(list, formatter, identity)
+
+    private def onUnselect(): Unit =
+      select.unselect()
 
   object Edit:
     given ElementProvider[Edit] = _.ele

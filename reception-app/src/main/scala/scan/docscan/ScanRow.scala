@@ -6,6 +6,7 @@ import dev.fujiwara.domq.DelayedCall
 import dev.myclinic.scala.webclient.{Api, global}
 import scala.util.Success
 import scala.util.Failure
+import dev.myclinic.scala.model.ScannerDevice
 
 class ScanRow(using ds: DataSources):
   import ScanRow.*
@@ -14,12 +15,21 @@ class ScanRow(using ds: DataSources):
   val busyComp = new Busy(onDone _, onError _, api)
   val flipFlop = FlipFlop(waitingComp, busyComp)
   val ele = flipFlop.ele
-  ScannerList.onBusyScannersChange(busyScanners => {
-    val scanEnabled = ds.scanner.data.fold(false)(scanner => {
+  ds.scanner.onUpdate(updateScanButton(_, ScannerList.getBusyScanners))
+  ScannerList.onBusyScannersChange(updateScanButton(ds.scanner.data, _))
+  updateScanButton(
+    ds.scanner.data,
+    ScannerList.getBusyScanners
+  )
+
+  def updateScanButton(
+      scannerOpt: Option[ScannerDevice],
+      busyScanners: Set[ScannerDevice]
+  ): Unit =
+    val scanEnabled = scannerOpt.fold(false)(scanner => {
       !busyScanners.contains(scanner)
     })
     waitingComp.scanButton(enabled := scanEnabled)
-  })
 
   def onStart(): Unit =
     flipFlop.flop()
@@ -112,7 +122,8 @@ object ScanRow:
         cb: String => Unit,
         errCb: Throwable => Unit
     ): Unit =
-      for i <- 1 to 9 do DelayedCall.callLater(i * 0.2, () => progress(i, 10))
+      val duration = 20
+      for i <- 1 to 9 do DelayedCall.callLater(i * duration / 10, () => progress(i, 10))
       val s = s"file://scanned-file-${mockSerial}.jpeg"
       mockSerial += 1
-      DelayedCall.callLater(10 * 0.2, () => cb(s))
+      DelayedCall.callLater(10 * duration / 10, () => cb(s))
