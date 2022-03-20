@@ -104,6 +104,10 @@ object Modifiers:
         }
       )
 
+  object enabled:
+    def :=(arg: Boolean): Modifier[HTMLInputElement | HTMLButtonElement] =
+      disabled := !arg
+
   val checked = Assign[HTMLInputElement, Boolean](
     (e, b) => e.checked = b
   )

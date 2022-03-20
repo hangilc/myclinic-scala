@@ -467,6 +467,7 @@ case class ClinicInfo(
     doctorName: String
 )
 
+// should be 'case class', because == operator is used
 case class ScannerDevice(
     deviceId: String,
     name: String,
