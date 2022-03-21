@@ -8,9 +8,9 @@ import dev.fujiwara.domq.TypeClasses.{*, given}
 
 class FlipFlop[Flip, Flop](flipComponent: Flip, flopComponent: Flop)(using 
   flipComp: ElementProvider[Flip],
-  flipActivate: EventAcceptor[Flip, "activate", Unit],
+  flipActivate: EventAcceptor[Flip, Unit, "activate"],
   flopComp: ElementProvider[Flop],
-  flopActivate: EventAcceptor[Flop, "activate", Unit]
+  flopActivate: EventAcceptor[Flop, Unit, "activate"]
 ):
   private def flipElement = flipComp.getElement(flipComponent)
   private def flopElement = flopComp.getElement(flopComponent)

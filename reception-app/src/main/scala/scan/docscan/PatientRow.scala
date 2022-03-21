@@ -68,24 +68,17 @@ object PatientRow:
     search.ui.selection.ele.hide
     search.engine.onSearchDone = () => search.ui.selection.ele.show
     search.onSelect(patient => {
-      def proc(): Unit =
+      val hurdles =
+        ds.scannedDocs.data.filter(_.getState != ScannedDoc.State.Scanned).size
+      if hurdles == 0 then
         search.ui.selection.ele.hide
         onSelect(patient)
-        
-      if countUploads > 0 then
-        ShowMessage.confirm("アップロードされた文書がありますが、患者名を変更しますか？")(
-          proc, 
-          onCancel
-        )
-      else proc()
+      else ShowMessage.showError("文書がすでにアップロードされているか、または操作中であるため、患者の変更ができません。")
     })
     val row = new Row
     row.title("患者選択")
     row.content(search.ele)
     def ele = row.ele
-
-    def countUploads: Int =
-      ds.scannedDocs.data.filter(_.getState == ScannedDoc.State.Uploaded).size
 
   object PatientSelect:
     given ElementProvider[PatientSelect] = _.ele

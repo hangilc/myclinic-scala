@@ -89,7 +89,7 @@ object ScanRow:
 
   object Busy:
     given ElementProvider[Busy] = _.ele
-    given EventAcceptor[Busy, "activate", Unit] = (t: Busy, e: Unit) => t.scan()
+    given EventAcceptor[Busy, Unit, "activate"] = (t: Busy, e: Unit) => t.scan()
 
   trait ScanApi:
     def scan(

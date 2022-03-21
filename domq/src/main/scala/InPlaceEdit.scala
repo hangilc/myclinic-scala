@@ -11,13 +11,13 @@ class InPlaceEdit[Disp, Edit, Data](
     dispElementProvider: ElementProvider[Disp],
     dispSetter: DataAcceptor[Disp, Option[Data]],
     dispTrigger: TriggerProvider[Disp],
-    dispActive: EventAcceptor[Disp, "activate", Unit],
+    dispActive: EventAcceptor[Disp, Unit, "activate"],
     editElementProvider: ElementProvider[Edit],
     editSetter: DataAcceptor[Edit, Option[Data]],
     editGetter: DataProvider[Edit, Option[Data]],
     editDoneTrigger: TriggerProvider[Edit],
     editCancelTrigger: GeneralTriggerProvider[Edit, "cancel"],
-    editActive: EventAcceptor[Edit, "activate", Unit]
+    editActive: EventAcceptor[Edit, Unit, "activate"]
 ):
   private var dataOpt: Option[Data] = origDataOpt
   val flipFlop = new FlipFlop(dispComponent, editComponent)

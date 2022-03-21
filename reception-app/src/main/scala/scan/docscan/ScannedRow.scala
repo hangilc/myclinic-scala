@@ -13,7 +13,7 @@ class ScannedRow(using ds: DataSources):
   ds.newlyScannedFile.onUpdate(scannedFile => 
     val docs = ds.scannedDocs.data
     val index = docs.size + 1
-    val item = new ScannedDoc(scannedFile, LocalDataSource[Int](index))
+    val item = new ScannedDoc(scannedFile, ds.scannedDocs.data.size + 1)
     docElementsWrapper(item.ele)
     ds.scannedDocs.update(docs :+ item)
   )
