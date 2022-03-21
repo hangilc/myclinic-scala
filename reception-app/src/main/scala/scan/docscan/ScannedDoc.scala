@@ -15,19 +15,20 @@ import scala.concurrent.Promise
 class ScannedDoc(scannedFile: String, origIndex: Int)(using ds: DataSources):
   import ScannedDoc.*
   val errBox = ErrorBox()
-  val slot = Slot(
+  given slot: Slot = Slot(
     state = State.Scanned,
     scannedFile = scannedFile,
     index = origIndex,
     timestamp = makeTimeStamp,
     patientId = ds.patient.data.map(_.patientId),
-    scanType = ds.docType.data.getOrElse("image")
+    scanType = ds.docType.data.getOrElse("image"),
+    api = if ds.mock.data then new MockDocApi else new RealDocApi
   )
   slot.currentError.onUpdate {
     case Some(msg) => errBox.show(msg)
     case None => errBox.hide()
   }
-  val mp = new MultiPanel(new DispPanel(slot))
+  val mp = new MultiPanel(new DispPanel, new UploadPanel)
   val ele = div(
     mp.ele,
     errBox.ele
@@ -37,41 +38,17 @@ class ScannedDoc(scannedFile: String, origIndex: Int)(using ds: DataSources):
 
   def getState: State = slot.state
   def changePatient(patientIdOpt: Option[Int]): Unit =
-    println(("change patient to: ", patientIdOpt))
-    // if patientIdOpt != slot.patientId then
-    //   slot.state match {
-    //     case State.Scanned =>
-    //       slot.uploadFileName = Some(resolveUpload)
-    //     case _ => 
-    //       slot.onError(Some("患者名の変更ができない状態です。"))
-    //       Future.failed(new Exception("Failed to change patient."))
-    //   }
-    // else Future.successful(())
-
-  // private var uploadFileName: Option[String] = None
-  // private var state: State = State.Scanned
-  private val api = if ds.mock.data then new MockUploadApi else new RealUploadApi
-  // def getUploadFileName = uploadFileName
-  // def getState: State = state
-  // val ui = new UI
-  // val ele = ui.ele
-
-  // def init(index: Int): Unit =
-  //   val fn = resolveUploadFileName(index)
-  //   uploadFileName = Some(fn)
-  //   ui.eUploadFile(innerText := fn)
-
-  def upload(): Unit =
-    if slot.state == State.Scanned && slot.patientId.isDefined then
-      val patientId = slot.patientId.get
-      api.upload(scannedFile, patientId, slot.uploadFileName).onComplete {
-        case Success(_) => 
-          slot.state = State.Uploaded
+    if patientIdOpt != slot.patientId then
+      slot.state match {
+        case State.Scanned =>
+          slot.patientId = patientIdOpt
+          slot.updateUploadFileName()
           mp.switchTo("disp")
-        case Failure(ex) => 
-          slot.currentError.update(Some("file upload failed: " + ex.getMessage))
-          mp.switchTo("disp")
+        case _ => 
+          slot.currentError.update(Some("患者名の変更ができない状態です。"))
       }
+
+  def upload(): Unit = mp.switchTo("upload")
 
   private def resolveUploadFileName(index: Int): String =
     createUploadFileName(
@@ -83,7 +60,7 @@ class ScannedDoc(scannedFile: String, origIndex: Int)(using ds: DataSources):
 
 object ScannedDoc:
   enum State:
-    case Scanned, Uploaded, Rescanning, DeletingUpload, Deleting
+    case Scanned, Uploading, Uploaded, Rescanning, DeletingUpload, Deleting
 
   case class Slot(
     var state: State,
@@ -92,7 +69,8 @@ object ScannedDoc:
     val timestamp: String,
     var patientId: Option[Int],
     var scanType: String,
-    val currentError: LocalDataSource[Option[String]] = LocalDataSource[Option[String]](None)
+    val currentError: LocalDataSource[Option[String]] = LocalDataSource[Option[String]](None),
+    val api: DocApi
   ):
     var uploadFileName: String = resolveUploadFileName()
 
@@ -107,7 +85,7 @@ object ScannedDoc:
         index
       )
 
-  class DispPanel(slot: Slot):
+  class DispPanel(using slot: Slot):
     var switchTo: String => Unit = _ => ()
     val ui = new DispPanelUI
 
@@ -180,6 +158,46 @@ object ScannedDoc:
       at.getSecond
     )
 
+  class UploadPanel(using slot: Slot):
+    val iconWrapper = span
+    var switchTo: String => Unit = _ => ()
+    val ele = div(
+      iconWrapper,
+      s"${slot.uploadFileName} をアップロード中..."
+    )
+
+    private def showUploadingIcon(): Unit =
+      iconWrapper(
+        clear,
+        children := List(Icons.arrowCircleUp(stroke := "blue"))
+      )
+
+    def startUpload(): Unit =
+      slot.state match {
+        case State.Scanned =>
+          slot.state = State.Uploading
+          showUploadingIcon()
+          slot.patientId.foreach(patientId => {
+            slot.api.upload(slot.scannedFile, patientId, slot.uploadFileName).onComplete {
+              case Success(_) => 
+                slot.state = State.Uploaded
+                switchTo("disp")
+              case Failure(ex) => 
+                slot.currentError.update(Some("file upload failed: " + ex.getMessage))
+                slot.state = State.Scanned
+                switchTo("disp")
+            }
+          })
+        case _ => switchTo("disp")
+      }
+
+  object UploadPanel:
+    given ElementProvider[UploadPanel] = _.ele
+    given IdProvider[UploadPanel, String] = _ => "upload"
+    given EventAcceptor[UploadPanel, Unit, "activate"] = (t, _) => t.startUpload()
+    given GeneralTriggerDataProvider[UploadPanel, String, "switch-to"] =
+      (t, handler) => t.switchTo = handler
+
   def createUploadFileName(
       patientIdOption: Option[Int],
       scanType: String,
@@ -194,14 +212,14 @@ object ScannedDoc:
     val ext = "jpg"
     s"${pat}-$scanType-${timestamp}-${ser}.${ext}"
 
-  trait UploadApi:
+  trait DocApi:
     def upload(
         scannedFile: String,
         patientId: Int,
         uploadFileName: String
     ): Future[Unit]
 
-  class RealUploadApi extends UploadApi:
+  class RealDocApi extends DocApi:
     def upload(
         scannedFile: String,
         patientId: Int,
@@ -212,16 +230,19 @@ object ScannedDoc:
         ok <- Api.savePatientImage(patientId, uploadFileName, data)
       yield ()
 
-  class MockUploadApi extends UploadApi:
+  class MockDocApi extends DocApi:
     def upload(
         scannedFile: String,
         patientId: Int,
         uploadFileName: String
     ): Future[Unit] = 
       println(s"File uploaded ${scannedFile} -> ${patientId}/${uploadFileName}")
+      val delaySec = 5
       val p = Promise[Unit]()
       import scala.scalajs.js
-      js.setTimeout
+      scala.scalajs.js.timers.setTimeout(delaySec * 1000){
+        p.success(())
+      }
       p.future
 
     

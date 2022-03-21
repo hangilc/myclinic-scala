@@ -76,6 +76,9 @@ object TypeClasses:
   trait GeneralTriggerDataProvider[T, D, Kind]:
     def setTriggerHandler(t: T, handler: D => Unit): Unit
 
+  object GeneralTriggerDataProvider:
+    given [T, D, Kind]: GeneralTriggerDataProvider[T, D, Kind] = (t, handler) => ()
+
   trait DataProvider[T, D]:
     def getData(t: T): D
 
