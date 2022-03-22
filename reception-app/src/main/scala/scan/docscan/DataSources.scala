@@ -14,4 +14,6 @@ class DataSources:
 
   val mock = new LocalDataSource[Boolean](false)
   
+  def isDocTypeChangeable: Boolean = 
+    scannedDocs.data.find(_.getState != ScannedDoc.State.Scanned).size == 0
 

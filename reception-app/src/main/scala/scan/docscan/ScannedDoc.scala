@@ -34,6 +34,7 @@ class ScannedDoc(scannedFile: String, origIndex: Int)(using ds: DataSources):
     errBox.ele
   )
   ds.patient.onUpdate(patient => changePatient(patient.map(_.patientId)))
+  ds.docType.onUpdate(docType => changeDocType(docType))
   mp.switchTo("disp")
 
   def getState: State = slot.state
@@ -47,13 +48,19 @@ class ScannedDoc(scannedFile: String, origIndex: Int)(using ds: DataSources):
         case _ => 
           slot.currentError.update(Some("患者名の変更ができない状態です。"))
       }
+  def changeDocType(docTypeOpt: Option[String]): Unit =
+    val docType = resolveDocType(docTypeOpt)
+    ???
 
   def upload(): Unit = mp.switchTo("upload")
+
+  private def resolveDocType(docTypeOpt: Option[String]): String =
+    docTypeOpt.getOrElse("image")
 
   private def resolveUploadFileName(index: Int): String =
     createUploadFileName(
       ds.patient.data.map(_.patientId),
-      ds.docType.data.getOrElse("image"),
+      resolveDocType(ds.docType.data),
       makeTimeStamp,
       index
     )

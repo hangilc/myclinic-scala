@@ -16,16 +16,26 @@ class DocTypeRow(using ds: DataSources):
   val row = new Row
   row.title("文書の種類")
   row.content(inPlaceEdit.ele)
+
   def ele = row.ele
   def selected: Option[String] = inPlaceEdit.getData.map(_._2)
 
 object DocTypeRow:
   type Data = Option[(String, String)]
-  class Disp:
+
+  class Disp(using ds: DataSources):
     var onEdit: () => Unit = () => ()
     val label = span
     val editLink = a()
-    val ele = div(label, editLink(onclick := (() => onEdit())))
+    val ele = div(
+      label,
+      editLink(onclick := (() => {
+        ShowMessage.confirmIf(
+          !ds.isDocTypeChangeable,
+          "文書の種類が変更できない状態ですが、それでも変更を試みますか？"
+        )(onEdit)
+      }))
+    )
     def set(nameOpt: Option[String]): Unit =
       nameOpt match {
         case Some(name) =>
