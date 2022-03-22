@@ -1,6 +1,6 @@
 package dev.myclinic.scala.web.reception.scan.docscan
 
-import org.scalajs.dom.HTMLElement
+import org.scalajs.dom.{HTMLElement, HTMLImageElement}
 import dev.fujiwara.domq.all.{*, given}
 import java.time.LocalDateTime
 import dev.fujiwara.domq.LocalDataSource
@@ -11,6 +11,7 @@ import dev.myclinic.scala.webclient.{Api, global}
 import scala.util.Success
 import scala.util.Failure
 import scala.concurrent.Promise
+import dev.fujiwara.domq.DataImage
 
 class ScannedDoc(scannedFile: String, origIndex: Int)(using ds: DataSources):
   import ScannedDoc.*
@@ -21,7 +22,7 @@ class ScannedDoc(scannedFile: String, origIndex: Int)(using ds: DataSources):
     index = origIndex,
     timestamp = makeTimeStamp,
     patientId = ds.patient.data.map(_.patientId),
-    scanType = ds.docType.data.getOrElse("image"),
+    docType = ds.docType.data.getOrElse("image"),
     api = if ds.mock.data then new MockDocApi else new RealDocApi
   )
   slot.currentError.onUpdate {
@@ -48,7 +49,7 @@ class ScannedDoc(scannedFile: String, origIndex: Int)(using ds: DataSources):
           slot.currentError.update(Some("患者名の変更ができない状態です。"))
       }
   def changeDocType(): Unit =
-    slot.scanType = resolveDocType(ds.docType.data)
+    slot.docType = resolveDocType(ds.docType.data)
     slot.updateUploadFileName()
     mp.switchTo("disp")
 
@@ -75,7 +76,7 @@ object ScannedDoc:
     var index: Int,
     val timestamp: String,
     var patientId: Option[Int],
-    var scanType: String,
+    var docType: String,
     val currentError: LocalDataSource[Option[String]] = LocalDataSource[Option[String]](None),
     val api: DocApi
   ):
@@ -87,7 +88,7 @@ object ScannedDoc:
     def resolveUploadFileName(): String =
       createUploadFileName(
         patientId,
-        scanType,
+        docType,
         timestamp,
         index
       )
@@ -95,6 +96,7 @@ object ScannedDoc:
   class DispPanel(using slot: Slot):
     var switchTo: String => Unit = _ => ()
     val ui = new DispPanelUI
+    ui.ePreviewLink(onclick := (onPreview _))
 
     def ele = ui.ele
     def update(): Unit =
@@ -117,6 +119,15 @@ object ScannedDoc:
         clear,
         children := List(Icons.x(stroke := "red"))
       )
+    private def onPreview(): Unit =
+      (for
+        image <- createPreviewImage(slot.scannedFile, "image/jpeg")
+      yield
+        ui.ePreviewImageWrapper(clear, image)
+        ui.showPreview()).onComplete {
+          case Success(_) => ()
+          case Failure(ex) => System.err.println(ex.getMessage)
+        }
 
   object DispPanel:
     given ElementProvider[DispPanel] = _.ele
@@ -149,9 +160,15 @@ object ScannedDoc:
       eErrorBox.ele,
       ePreview(displayNone)(
         ePreviewImageWrapper,
-        div(eClosePreviewButton("閉じる"))
+        div(eClosePreviewButton("閉じる", onclick := (hidePreview _)))
       )
     )
+
+    def showPreview(): Unit = ePreview(displayDefault)
+    def hidePreview(): Unit = 
+      ePreviewImageWrapper(clear)
+      ePreview(displayNone)
+
 
   def makeTimeStamp: String =
     val at = LocalDateTime.now()
@@ -218,6 +235,16 @@ object ScannedDoc:
     val ser = String.format("%02d", index)
     val ext = "jpg"
     s"${pat}-$scanType-${timestamp}-${ser}.${ext}"
+
+  def createPreviewImage(savedFile: String, mimeType: String): Future[HTMLImageElement] =
+      for
+        data <- Api.getScannedFile(savedFile)
+      yield
+        val image = DataImage(data, mimeType)
+        val scale = 1.5
+        image.width = (210 * scale).toInt
+        image.height = (297 * scale).toInt
+        image
 
   trait DocApi:
     def upload(
