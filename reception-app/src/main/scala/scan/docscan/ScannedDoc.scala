@@ -312,6 +312,15 @@ object ScannedDoc:
         patientId: Int,
         uploadFileName: String
     ): Future[Unit]
+    def renameUploadedFile(patientId: Int, src: String, dst: String): Future[Unit]
+    def deleteUploadedFile(patientId: Int, file: String): Future[Unit]
+    def swapUploadedFileNames(patientId: Int, file1: String, file2: String): Future[Unit] =
+      val save = file1 + "-save"
+      for 
+        _ <- renameUploadedFile(patientId, file1, save)
+        _ <- renameUploadedFile(patientId, file2, file1)
+        _ <- renameUploadedFile(patientId, save, file2)
+      yield ()
 
   class RealDocApi extends DocApi:
     def upload(
@@ -323,6 +332,12 @@ object ScannedDoc:
         data <- Api.getScannedFile(scannedFile)
         ok <- Api.savePatientImage(patientId, uploadFileName, data)
       yield ()
+
+    def renameUploadedFile(patientId: Int, src: String, dst: String): Future[Unit] =
+      Api.renamePatientImage(patientId, src, dst).map(_ => ())
+
+    def deleteUploadedFile(patientId: Int, file: String): Future[Unit] =
+      Api.deletePatientImage(patientId: Int, file).map(_ => ())
 
   class MockDocApi extends DocApi:
     def upload(
@@ -338,3 +353,11 @@ object ScannedDoc:
         p.success(())
       }
       p.future
+
+    def renameUploadedFile(patientId: Int, src: String, dst: String): Future[Unit] =
+      println((s"rename: ${src} -> ${dst}"))
+      Future.successful(())
+
+    def deleteUploadedFile(patientId: Int, file: String): Future[Unit] =
+      println((s"delete: ${file}"))
+      Future.successful(())
