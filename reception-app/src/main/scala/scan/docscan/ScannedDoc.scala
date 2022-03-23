@@ -49,9 +49,12 @@ class ScannedDoc(scannedFile: String, origIndex: Int)(using ds: DataSources):
           slot.currentError.update(Some("患者名の変更ができない状態です。"))
       }
   def changeDocType(): Unit =
-    slot.docType = resolveDocType(ds.docType.data)
-    slot.updateUploadFileName()
-    mp.switchTo("disp")
+    if slot.state == State.Scanned then
+      slot.docType = resolveDocType(ds.docType.data)
+      slot.updateUploadFileName()
+      mp.switchTo("disp")
+    else
+      slot.currentError.update(Some("文書の種類の変更ができない状態です。"))
 
   def upload(): Unit = mp.switchTo("upload")
 
