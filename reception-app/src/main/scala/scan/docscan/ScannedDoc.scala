@@ -12,6 +12,7 @@ import scala.util.Success
 import scala.util.Failure
 import scala.concurrent.Promise
 import dev.fujiwara.domq.DataImage
+import dev.myclinic.scala.model.ScannerDevice
 
 class ScannedDoc(scannedFile: String, origIndex: Int)(using ds: DataSources):
   import ScannedDoc.*
@@ -27,9 +28,9 @@ class ScannedDoc(scannedFile: String, origIndex: Int)(using ds: DataSources):
   )
   slot.currentError.onUpdate {
     case Some(msg) => errBox.show(msg)
-    case None => errBox.hide()
+    case None      => errBox.hide()
   }
-  val mp = new MultiPanel(new DispPanel, new UploadPanel)
+  val mp = new MultiPanel(new DispPanel, new UploadPanel, new RescanPanel)
   val ele = div(
     mp.ele,
     errBox.ele
@@ -45,7 +46,7 @@ class ScannedDoc(scannedFile: String, origIndex: Int)(using ds: DataSources):
         case State.Scanned =>
           slot.updateUploadFileName()
           mp.switchTo("disp")
-        case _ => 
+        case _ =>
           slot.currentError.update(Some("患者名の変更ができない状態です。"))
       }
   def changeDocType(): Unit =
@@ -53,8 +54,7 @@ class ScannedDoc(scannedFile: String, origIndex: Int)(using ds: DataSources):
       slot.docType = resolveDocType(ds.docType.data)
       slot.updateUploadFileName()
       mp.switchTo("disp")
-    else
-      slot.currentError.update(Some("文書の種類の変更ができない状態です。"))
+    else slot.currentError.update(Some("文書の種類の変更ができない状態です。"))
 
   def upload(): Unit = mp.switchTo("upload")
 
@@ -74,14 +74,15 @@ object ScannedDoc:
     case Scanned, Uploading, Uploaded, Rescanning, DeletingUpload, Deleting
 
   case class Slot(
-    var state: State,
-    var scannedFile: String,
-    var index: Int,
-    val timestamp: String,
-    var patientId: Option[Int],
-    var docType: String,
-    val currentError: LocalDataSource[Option[String]] = LocalDataSource[Option[String]](None),
-    val api: DocApi
+      var state: State,
+      var scannedFile: String,
+      var index: Int,
+      val timestamp: String,
+      var patientId: Option[Int],
+      var docType: String,
+      val currentError: LocalDataSource[Option[String]] =
+        LocalDataSource[Option[String]](None),
+      val api: DocApi
   ):
     var uploadFileName: String = resolveUploadFileName()
 
@@ -96,20 +97,23 @@ object ScannedDoc:
         index
       )
 
-  class DispPanel(using slot: Slot):
+  class DispPanel(using slot: Slot, ds: DataSources):
     var switchTo: String => Unit = _ => ()
     val ui = new DispPanelUI
     ui.ePreviewLink(onclick := (onPreview _))
+    ui.eRescanLink(onclick := (onRescan _))
 
     def ele = ui.ele
+
     def update(): Unit =
       ui.eUploadFile(innerText := slot.uploadFileName)
       slot.currentError.data match {
         case Some(_) => showFailureIcon()
-        case None => slot.state match {
-          case State.Uploaded => showUploadedIcon()
-          case _ => ()
-        }
+        case None =>
+          slot.state match {
+            case State.Uploaded => showUploadedIcon()
+            case _              => ()
+          }
       }
     private def showUploadedIcon(): Unit =
       ui.eIconWrapper(
@@ -123,14 +127,18 @@ object ScannedDoc:
         children := List(Icons.x(stroke := "red"))
       )
     private def onPreview(): Unit =
-      (for
-        image <- createPreviewImage(slot.scannedFile, "image/jpeg")
+      (for image <- createPreviewImage(slot.scannedFile, "image/jpeg")
       yield
         ui.ePreviewImageWrapper(clear, image)
-        ui.showPreview()).onComplete {
-          case Success(_) => ()
-          case Failure(ex) => System.err.println(ex.getMessage)
-        }
+        ui.showPreview()
+      ).onComplete {
+        case Success(_)  => ()
+        case Failure(ex) => System.err.println(ex.getMessage)
+      }
+
+    private def onRescan(): Unit =
+      if slot.state == State.Scanned then switchTo("rescan")
+      else slot.currentError.update(Some("再スキャンできない状態です。"))
 
   object DispPanel:
     given ElementProvider[DispPanel] = _.ele
@@ -168,10 +176,9 @@ object ScannedDoc:
     )
 
     def showPreview(): Unit = ePreview(displayDefault)
-    def hidePreview(): Unit = 
+    def hidePreview(): Unit =
       ePreviewImageWrapper(clear)
       ePreview(displayNone)
-
 
   def makeTimeStamp: String =
     val at = LocalDateTime.now()
@@ -205,15 +212,18 @@ object ScannedDoc:
           slot.state = State.Uploading
           showUploadingIcon()
           slot.patientId.foreach(patientId => {
-            slot.api.upload(slot.scannedFile, patientId, slot.uploadFileName).onComplete {
-              case Success(_) => 
-                slot.state = State.Uploaded
-                switchTo("disp")
-              case Failure(ex) => 
-                slot.currentError.update(Some("file upload failed: " + ex.getMessage))
-                slot.state = State.Scanned
-                switchTo("disp")
-            }
+            slot.api
+              .upload(slot.scannedFile, patientId, slot.uploadFileName)
+              .onComplete {
+                case Success(_) =>
+                  slot.state = State.Uploaded
+                  switchTo("disp")
+                case Failure(ex) =>
+                  slot.currentError
+                    .update(Some("file upload failed: " + ex.getMessage))
+                  slot.state = State.Scanned
+                  switchTo("disp")
+              }
           })
         case _ => switchTo("disp")
       }
@@ -221,7 +231,8 @@ object ScannedDoc:
   object UploadPanel:
     given ElementProvider[UploadPanel] = _.ele
     given IdProvider[UploadPanel, String] = _ => "upload"
-    given EventAcceptor[UploadPanel, Unit, "activate"] = (t, _) => t.startUpload()
+    given EventAcceptor[UploadPanel, Unit, "activate"] = (t, _) =>
+      t.startUpload()
     given GeneralTriggerDataProvider[UploadPanel, String, "switch-to"] =
       (t, handler) => t.switchTo = handler
 
@@ -239,15 +250,61 @@ object ScannedDoc:
     val ext = "jpg"
     s"${pat}-$scanType-${timestamp}-${ser}.${ext}"
 
-  def createPreviewImage(savedFile: String, mimeType: String): Future[HTMLImageElement] =
-      for
-        data <- Api.getScannedFile(savedFile)
-      yield
-        val image = DataImage(data, mimeType)
-        val scale = 1.5
-        image.width = (210 * scale).toInt
-        image.height = (297 * scale).toInt
-        image
+  class RescanPanel(using slot: Slot, ds: DataSources):
+    val iconWrapper = span
+    var switchTo: String => Unit = _ => ()
+    val progSpan = span
+    val ele = div(
+      iconWrapper,
+      s"${slot.uploadFileName}の再スキャン中...",
+      progSpan
+    )
+
+    def startRescan(): Unit =
+      if slot.state == State.Scanned then
+        slot.state = State.Rescanning
+        val scanner: ScannerDevice = ds.scanner.data.get
+        if ScannerList.openScanner(scanner) then
+          val api = ScanRow.ScanApi(ds)
+          def progress(pct: Double, total: Double): Unit =
+            progSpan(innerText := s"${(pct / total * 100).toInt}%")
+          def prolog(): Unit =
+            ScannerList.closeScanner(scanner)
+            slot.state = State.Scanned
+            switchTo("disp")
+          iconWrapper(clear, Icons.save(stroke := "orange"))
+          api.scan(
+            scanner.deviceId,
+            progress _,
+            ds.resolution.data,
+            file => {
+              prolog()
+            },
+            err => {
+              slot.currentError.update(Some(err.getMessage))
+              prolog()
+            }
+          )
+
+  object RescanPanel:
+    given ElementProvider[RescanPanel] = _.ele
+    given IdProvider[RescanPanel, String] = _ => "rescan"
+    given EventAcceptor[RescanPanel, Unit, "activate"] = (t, _) =>
+      t.startRescan()
+    given GeneralTriggerDataProvider[RescanPanel, String, "switch-to"] =
+      (t, handler) => t.switchTo = handler
+
+  def createPreviewImage(
+      savedFile: String,
+      mimeType: String
+  ): Future[HTMLImageElement] =
+    for data <- Api.getScannedFile(savedFile)
+    yield
+      val image = DataImage(data, mimeType)
+      val scale = 1.5
+      image.width = (210 * scale).toInt
+      image.height = (297 * scale).toInt
+      image
 
   trait DocApi:
     def upload(
@@ -272,16 +329,12 @@ object ScannedDoc:
         scannedFile: String,
         patientId: Int,
         uploadFileName: String
-    ): Future[Unit] = 
+    ): Future[Unit] =
       println(s"File uploaded ${scannedFile} -> ${patientId}/${uploadFileName}")
       val delaySec = 5
       val p = Promise[Unit]()
       import scala.scalajs.js
-      scala.scalajs.js.timers.setTimeout(delaySec * 1000){
+      scala.scalajs.js.timers.setTimeout(delaySec * 1000) {
         p.success(())
       }
       p.future
-
-    
-
-

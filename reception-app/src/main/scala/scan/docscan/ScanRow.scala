@@ -10,7 +10,7 @@ import dev.myclinic.scala.model.ScannerDevice
 
 class ScanRow(using ds: DataSources):
   import ScanRow.*
-  val api = if ds.mock.data then new MockApi else new RealApi
+  val api = ScanApi(ds)
   val waitingComp = new Waiting(onStart _)
   val busyComp = new Busy(onDone _, onError _, api)
   val flipFlop = FlipFlop(waitingComp, busyComp)
@@ -100,6 +100,11 @@ object ScanRow:
         errCb: Throwable => Unit
     ): Unit
 
+  object ScanApi:
+    def apply(ds: DataSources): ScanApi =
+      if ds.mock.data == true then new MockApi
+      else new RealApi
+
   class RealApi extends ScanApi:
     def scan(
         deviceId: String,
@@ -122,7 +127,7 @@ object ScanRow:
         cb: String => Unit,
         errCb: Throwable => Unit
     ): Unit =
-      val duration = 1
+      val duration = 4
       for i <- 1 to 9 do DelayedCall.callLater(i * duration / 10, () => progress(i, 10))
       val s = s"file://scanned-file-${mockSerial}.jpeg"
       mockSerial += 1
