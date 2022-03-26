@@ -7,6 +7,8 @@ import dev.myclinic.scala.webclient.{Api, global}
 import scala.util.Success
 import scala.util.Failure
 import dev.myclinic.scala.model.ScannerDevice
+import scala.concurrent.Future
+import scala.scalajs.js.typedarray.ArrayBuffer
 
 class ScanRow(using ds: DataSources):
   import ScanRow.*
@@ -99,6 +101,7 @@ object ScanRow:
         cb: String => Unit,
         errCb: Throwable => Unit
     ): Unit
+    def getSavedImage(file: String): Future[ArrayBuffer]
 
   object ScanApi:
     def apply(ds: DataSources): ScanApi =
@@ -118,8 +121,11 @@ object ScanRow:
         case Failure(ex)    => errCb(ex)
       }
 
+    def getSavedImage(file: String): Future[ArrayBuffer] =
+      Api.getScannedFile(file)
+
   class MockApi extends ScanApi:
-    private var mockSerial: Int = 1
+    import MockApi.*
     def scan(
         deviceId: String,
         progress: (Double, Double) => Unit,
@@ -127,8 +133,29 @@ object ScanRow:
         cb: String => Unit,
         errCb: Throwable => Unit
     ): Unit =
-      val duration = 4
+      val duration = 3
       for i <- 1 to 9 do DelayedCall.callLater(i * duration / 10, () => progress(i, 10))
       val s = s"file://scanned-file-${mockSerial}.jpeg"
+      import org.scalajs.dom.{HTMLCanvasElement, document}
+      val canvas = document.createElement("canvas").asInstanceOf[HTMLCanvasElement]
+      val ctx = canvas.getContext("2d")
+      ctx.fillStyle = "white"
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+      ctx.fillStyle = "black"
+      ctx.font = "40px sans-serif"
+      ctx.fillText(mockSerial.toString, 20, 60)
+      val dataURL = canvas.toDataURL("image/jpeg")
+      saveImage(s, dataURL)
       mockSerial += 1
       DelayedCall.callLater(10 * duration / 10, () => cb(s))
+
+    def getSavedImage(file: String): Future[ArrayBuffer] =
+      val dataURL = getImage(file)
+      Future.successful(dev.fujiwara.domq.DomqUtil.dataURLtoArrayBuffer(dataURL))
+
+  object MockApi:
+    var mockSerial: Int = 1
+    private var fileMap: Map[String, String] = Map.empty
+    def saveImage(file: String, dataURL: String): Unit = 
+      fileMap = fileMap + (file -> dataURL)
+    def getImage(file: String): String = fileMap(file)

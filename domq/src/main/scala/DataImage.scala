@@ -30,3 +30,13 @@ object DataImage:
     image.src = oURL
     image
 
+  def apply(dataURL: String): HTMLImageElement = 
+    val image = org.scalajs.dom.document
+      .createElement("img")
+      .asInstanceOf[HTMLImageElement]
+    image.onload = (e: Event) => {
+      URL.revokeObjectURL(dataURL)
+    }
+    image.src = dataURL
+    image
+

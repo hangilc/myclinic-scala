@@ -329,8 +329,9 @@ object ScannedDoc:
   def createPreviewImage(
       savedFile: String,
       mimeType: String
-  ): Future[HTMLImageElement] =
-    for data <- Api.getScannedFile(savedFile)
+  )(using ds: DataSources): Future[HTMLImageElement] =
+    val scanApi = ScanRow.ScanApi(ds)
+    for data <- scanApi.getSavedImage(savedFile)
     yield
       val image = DataImage(data, mimeType)
       val scale = 1.5
