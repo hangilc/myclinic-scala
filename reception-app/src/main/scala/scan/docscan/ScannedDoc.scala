@@ -60,7 +60,30 @@ class ScannedDoc(scannedFile: String, origIndex: Int)(using ds: DataSources):
   def upload(): Unit = mp.switchTo("upload")
 
   def dispose(): Future[Unit] =
-    ???
+    val docApi = DocApi(ds)
+    for
+      _ <- docApi.deleteScannedFile(slot.scannedFile)
+      _ <-
+        if slot.state == State.Uploaded then
+          docApi.deleteUploadedFile(slot.patientId.get, slot.uploadFileName)
+        else Future.successful(())
+    yield ele.remove()
+
+  def swapWith(other: ScannedDoc): Future[Unit] =
+    import State.*
+    (getState, other.getState) match {
+      case (Scanned, Scanned) =>
+        val myIndex = getIndex
+        val otherIndex = other.getIndex
+        slot.index = otherIndex
+        slot.updateUploadFileName()
+        other.slot.index = myIndex
+        other.slot.updateUploadFileName()
+        mp.switchTo("disp")
+        other.mp.switchTo("disp")
+        Future.successful(())
+      case _ => Future.failed(new Exception("Swap operation not allowed."))
+    }
 
   private def resolveDocType(docTypeOpt: Option[String]): String =
     docTypeOpt.getOrElse("image")
@@ -107,8 +130,9 @@ object ScannedDoc:
     ui.ePreviewLink(onclick := (onPreview _))
     ui.eRescanLink(onclick := (onRescan _))
     ui.eDeleteLink(onclick := (() => {
-      if slot.state == State.Scanned then
-        ds.reqDelete.update(slot.index)
+      if slot.state == State.Scanned then ds.reqDelete.update(slot.index)
+      else 
+        System.err.println(("Cannot Delete", slot.state))
     }))
 
     def ele = ui.ele
@@ -320,17 +344,33 @@ object ScannedDoc:
         patientId: Int,
         uploadFileName: String
     ): Future[Unit]
-    def renameUploadedFile(patientId: Int, src: String, dst: String): Future[Unit]
+    def deleteScannedFile(file: String): Future[Unit]
+    def renameUploadedFile(
+        patientId: Int,
+        src: String,
+        dst: String
+    ): Future[Unit]
     def deleteUploadedFile(patientId: Int, file: String): Future[Unit]
-    def swapUploadedFileNames(patientId: Int, file1: String, file2: String): Future[Unit] =
+    def swapUploadedFileNames(
+        patientId: Int,
+        file1: String,
+        file2: String
+    ): Future[Unit] =
       val save = file1 + "-save"
-      for 
+      for
         _ <- renameUploadedFile(patientId, file1, save)
         _ <- renameUploadedFile(patientId, file2, file1)
         _ <- renameUploadedFile(patientId, save, file2)
       yield ()
 
+  object DocApi:
+    def apply(ds: DataSources): DocApi =
+      if ds.mock.data then new MockDocApi
+      else new RealDocApi
+
   class RealDocApi extends DocApi:
+    def deleteScannedFile(file: String): Future[Unit] =
+      Api.deleteScannedFile(file).map(_ => ())
     def upload(
         scannedFile: String,
         patientId: Int,
@@ -341,13 +381,20 @@ object ScannedDoc:
         ok <- Api.savePatientImage(patientId, uploadFileName, data)
       yield ()
 
-    def renameUploadedFile(patientId: Int, src: String, dst: String): Future[Unit] =
+    def renameUploadedFile(
+        patientId: Int,
+        src: String,
+        dst: String
+    ): Future[Unit] =
       Api.renamePatientImage(patientId, src, dst).map(_ => ())
 
     def deleteUploadedFile(patientId: Int, file: String): Future[Unit] =
       Api.deletePatientImage(patientId: Int, file).map(_ => ())
 
   class MockDocApi extends DocApi:
+    def deleteScannedFile(file: String): Future[Unit] =
+      println(("deleting scanned file", file))
+      Future.successful(())
     def upload(
         scannedFile: String,
         patientId: Int,
@@ -362,7 +409,11 @@ object ScannedDoc:
       }
       p.future
 
-    def renameUploadedFile(patientId: Int, src: String, dst: String): Future[Unit] =
+    def renameUploadedFile(
+        patientId: Int,
+        src: String,
+        dst: String
+    ): Future[Unit] =
       println((s"rename: ${src} -> ${dst}"))
       Future.successful(())
 

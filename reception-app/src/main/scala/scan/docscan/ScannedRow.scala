@@ -6,6 +6,8 @@ import scala.concurrent.Future
 import scala.util.Success
 import scala.util.Failure
 import dev.myclinic.scala.webclient.global
+import cats.*
+import cats.syntax.all.*
 
 class ScannedRow(using ds: DataSources):
   val row = new Row
@@ -23,6 +25,7 @@ class ScannedRow(using ds: DataSources):
   )
 
   ds.reqDelete.onUpdate(index => {
+    println(("enter reqDelete", index))
     val busy = ds.scannedDocs.data.filter(doc => doc.getState != ScannedDoc.State.Scanned).size > 0
     if !busy then
       val f: Future[List[ScannedDoc]] = 
@@ -31,7 +34,15 @@ class ScannedRow(using ds: DataSources):
           case Nil => Future.successful(Nil)
           case doc :: Nil => doc.dispose().map(_ => pre)
           case doc :: rest =>
-          ds.scannedDocs.update(pre ++ rest.tail)
+            val docApi = ScannedDoc.DocApi(ds)
+            val f = ds.scannedDocs.data.sliding(2, 1).toList.map(_ match {
+              case a :: b :: Nil => a.swapWith(b)
+              case _ => throw new Exception("Cannot happen.")
+            }).sequence.void
+            for
+              _ <- f
+              _ <- doc.dispose()
+            yield pre ++ rest
         }
       f.onComplete {
         case Success(docs) => ds.scannedDocs.update(docs)
@@ -39,4 +50,5 @@ class ScannedRow(using ds: DataSources):
       }
     else System.err.println("Cannot delete doc: BUSY")
   })
+
 
