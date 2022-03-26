@@ -2,6 +2,10 @@ package dev.myclinic.scala.web.reception.scan.docscan
 
 import dev.fujiwara.domq.all.{*, given}
 import dev.fujiwara.domq.LocalDataSource
+import scala.concurrent.Future
+import scala.util.Success
+import scala.util.Failure
+import dev.myclinic.scala.webclient.global
 
 class ScannedRow(using ds: DataSources):
   val row = new Row
@@ -13,8 +17,26 @@ class ScannedRow(using ds: DataSources):
   ds.newlyScannedFile.onUpdate(scannedFile => 
     val docs = ds.scannedDocs.data
     val index = docs.size + 1
-    val item = new ScannedDoc(scannedFile, ds.scannedDocs.data.size + 1)
+    val item = new ScannedDoc(scannedFile, index)
     docElementsWrapper(item.ele)
     ds.scannedDocs.update(docs :+ item)
   )
+
+  ds.reqDelete.onUpdate(index => {
+    val busy = ds.scannedDocs.data.filter(doc => doc.getState != ScannedDoc.State.Scanned).size > 0
+    if !busy then
+      val f: Future[List[ScannedDoc]] = 
+        val (pre, post) = ds.scannedDocs.data.span(doc => doc.getIndex != index)
+        post match {
+          case Nil => Future.successful(Nil)
+          case doc :: Nil => doc.dispose().map(_ => pre)
+          case doc :: rest =>
+          ds.scannedDocs.update(pre ++ rest.tail)
+        }
+      f.onComplete {
+        case Success(docs) => ds.scannedDocs.update(docs)
+        case Failure(ex) => System.err.println(ex.getMessage)
+      }
+    else System.err.println("Cannot delete doc: BUSY")
+  })
 

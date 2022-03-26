@@ -12,6 +12,8 @@ class DataSources:
   val newlyScannedFile =  new LocalDataSource[String]("")
   val scannedDocs = new LocalDataSource[List[ScannedDoc]](List.empty)
 
+  val reqDelete = new LocalDataSource[Int](0)
+
   val mock = new LocalDataSource[Boolean](false)
   
   def isDocTypeChangeable: Boolean = 

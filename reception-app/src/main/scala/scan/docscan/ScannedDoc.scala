@@ -40,6 +40,7 @@ class ScannedDoc(scannedFile: String, origIndex: Int)(using ds: DataSources):
   mp.switchTo("disp")
 
   def getState: State = slot.state
+  def getIndex: Int = slot.index
   def changePatient(patientIdOpt: Option[Int]): Unit =
     if patientIdOpt != slot.patientId then
       slot.state match {
@@ -57,6 +58,9 @@ class ScannedDoc(scannedFile: String, origIndex: Int)(using ds: DataSources):
     else slot.currentError.update(Some("文書の種類の変更ができない状態です。"))
 
   def upload(): Unit = mp.switchTo("upload")
+
+  def dispose(): Future[Unit] =
+    ???
 
   private def resolveDocType(docTypeOpt: Option[String]): String =
     docTypeOpt.getOrElse("image")
@@ -102,6 +106,10 @@ object ScannedDoc:
     val ui = new DispPanelUI
     ui.ePreviewLink(onclick := (onPreview _))
     ui.eRescanLink(onclick := (onRescan _))
+    ui.eDeleteLink(onclick := (() => {
+      if slot.state == State.Scanned then
+        ds.reqDelete.update(slot.index)
+    }))
 
     def ele = ui.ele
 
