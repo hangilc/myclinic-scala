@@ -29,7 +29,6 @@ class AdminAppointSheet(using EventFetcher) extends AppointSheet:
 
 object AdminAppointSheet:
   def doFillAppointTimes(from: LocalDate, upto: LocalDate): Unit =
-    println("fill-appoint-times")
     Api.fillAppointTimes(from, upto)
 
 //class AdminAppointSheet(using EventFetcher) extends AppointSheet:

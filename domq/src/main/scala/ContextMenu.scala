@@ -95,7 +95,6 @@ object ContextMenu:
           label,
           href := "",
           onclick := ((e: Event) => {
-            println(("context-menu"))
             e.preventDefault()
             m.close()
             f()
