@@ -22,7 +22,7 @@ class ContextMenu:
       style.background = "rgba(255, 255, 255, 1)"
       style.border = "1px solid gray"
       style.padding = "10px"
-      style.zIndex = zIndex.toString
+      style.zIndex = zIndexMenu.toString
       style.visibility = "hidden"
     }))
 
@@ -95,6 +95,7 @@ object ContextMenu:
           label,
           href := "",
           onclick := ((e: Event) => {
+            println(("context-menu"))
             e.preventDefault()
             m.close()
             f()
