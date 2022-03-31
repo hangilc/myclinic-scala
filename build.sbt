@@ -16,6 +16,7 @@ val catsVersion = "2.7.0"
 val macrotaskExecutorVersion = "1.0.0"
 val jacksonVersion = "2.13.1"
 val slf4jVersion = "1.7.25"
+val fs2Version = "3.2.6"
 
 ThisBuild / scalacOptions ++= Seq("-deprecation", "-encoding", "UTF-8")
 ThisBuild / javacOptions ++= Seq("-encoding", "UTF-8")
@@ -107,7 +108,9 @@ lazy val masterDb = project
   .settings(
     name := "master-db",
     libraryDependencies ++= Seq(
-      "org.apache.commons" % "commons-csv" % "1.9.0"
+      "org.apache.commons" % "commons-csv" % "1.9.0",
+      "co.fs2" %% "fs2-core" % fs2Version,
+      "co.fs2" %% "fs2-io" % fs2Version,
     )
   )
 

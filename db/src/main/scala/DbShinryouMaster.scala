@@ -18,6 +18,9 @@ trait DbShinryouMaster extends Mysql:
   def getShinryouMaster(shinryoucode: Int, at: LocalDate): IO[ShinryouMaster] =
     mysql(Prim.getShinryouMaster(shinryoucode, at).unique)
 
+  def findShinryouMaster(shinryoucode: Int, at: LocalDate): IO[Option[ShinryouMaster]] =
+    mysql(Prim.getShinryouMaster(shinryoucode, at).option)
+
   def batchResolveShinryouMaster(shinryoucodes: List[Int], at: LocalDate): IO[Map[Int, ShinryouMaster]] =
     val op = shinryoucodes.map(code => Prim.getShinryouMaster(code, at).unique)
       .sequence
