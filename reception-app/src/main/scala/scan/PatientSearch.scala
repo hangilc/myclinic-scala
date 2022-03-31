@@ -32,6 +32,7 @@ object PatientSearch:
 class PatientSearch(ui: PatientSearch.UI):
   var onSelectCallback: Patient => Unit = _ => ()
   ui.eSearchForm(onsubmit := (onSearch _))
+  ui.searchResult.formatter = formatPatient _
 
   def focus(): Unit = ui.eSearchInput.focus()
 
@@ -62,10 +63,7 @@ class PatientSearch(ui: PatientSearch.UI):
           searchResult.scrollToTop
 
   private def addSearchResult(patient: Patient): Unit =
-    ui.searchResult.add(
-      formatPatient(patient),
-      patient
-    )
+    ui.searchResult.add(patient)
 
   private def formatPatient(patient: Patient): String =
     String.format("(%04d) %s", patient.patientId, patient.fullName())
