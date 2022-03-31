@@ -53,7 +53,8 @@ lazy val root = project
     utilJVM,
     validatorJS,
     validatorJVM,
-    webclient
+    webclient,
+    masterDb
   )
   .settings(
     publish := {},
@@ -97,6 +98,16 @@ lazy val db = project
       "org.tpolecat" %% "doobie-hikari" % doobieVersion,
       "org.http4s" %% "http4s-circe" % http4sVersion,
       "io.circe" %%% "circe-core" % circeVersion
+    )
+  )
+
+lazy val masterDb = project
+  .in(file("master-db"))
+  .dependsOn(db)
+  .settings(
+    name := "master-db",
+    libraryDependencies ++= Seq(
+      "org.apache.commons" % "commons-csv" % "1.9.0"
     )
   )
 

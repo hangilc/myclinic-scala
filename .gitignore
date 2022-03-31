@@ -11,3 +11,4 @@ server/deploy/
 project/project/
 project/target/
 *.class
+/work/
