@@ -27,15 +27,12 @@ object Update:
         yield 
           (r, m)
       })
-      .scanChunksOpt(0)(s => {
-        
-      })
+      .fold(0) {
+        case (count, item) => count + 1
+      }
+      .evalMap(count => IO{ println(count) })
       .compile
       .drain
-
-  // extension (r: CSVRecord)
-  //   def getString(index: Int): String =
-  //     r.get(index - 1)
 
   def getMasterFilesDir: File =
     val dir = new File("./work/master-files")
