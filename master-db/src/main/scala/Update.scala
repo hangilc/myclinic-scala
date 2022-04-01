@@ -9,13 +9,27 @@ import dev.myclinic.scala.db.Db
 import java.time.LocalDate
 import cats.effect.unsafe.implicits.global
 import cats.*
+import cats.syntax.all.*
+import cats.effect.*
 import fs2.Stream
 
 object Update:
-  def updateShinryou(): Unit =
+  def updateShinryou(): IO[Unit] =
     val master = getShinryouFile
     val parser = CSVParser.parse(master.toFile, Charset.forName("MS932"), CSVFormat.RFC4180)
-    println(Stream.unfold(parser.iterator)(i => if i.hasNext then Some(i.next, i) else None).toList.size)
+    Stream.unfold(parser.iterator)(i => if i.hasNext then Some(i.next, i) else None)
+      .covary[IO]
+      .evalMap(csv => {
+        val r = ShinryouMasterCSV.from(csv)
+        for
+          m <- Db.findShinryouMaster(r.shinryoucode, LocalDate.now)
+        yield 
+          println(m)
+          (r, m)
+      })
+      .compile
+      .drain
+      
     
     // var total = 0
     // var newItem = 0

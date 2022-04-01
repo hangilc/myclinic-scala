@@ -1,10 +1,14 @@
 package dev.myclinic.scala.masterdb
 
-@main def main(cmd: String, cmdArgs: String*): Unit =
-  cmd match {
-    case "update-shinryou" => Update.updateShinryou()
-    case _ => usage
-  }
+import cats.effect.*
+
+object Main extends IOApp:
+  override def run(args: List[String]): IO[ExitCode] =
+    args match {
+      case "update-shinryou" :: rest => 
+        Update.updateShinryou().as[ExitCode](ExitCode.Success)
+      case _ => (IO { usage }).as[ExitCode](ExitCode.Error)
+    }
 
 def usage: Unit =
   System.err.println("usage: masterDb download")
