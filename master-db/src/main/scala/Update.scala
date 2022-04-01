@@ -25,8 +25,10 @@ object Update:
         for
           m <- Db.findShinryouMaster(r.shinryoucode, LocalDate.now)
         yield 
-          println(m)
           (r, m)
+      })
+      .scanChunksOpt(0)(s => {
+        
       })
       .compile
       .drain
