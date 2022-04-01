@@ -6,6 +6,7 @@ import org.apache.commons.csv.{CSVParser, CSVFormat, CSVRecord}
 import java.nio.charset.Charset
 import collection.convert.ImplicitConversions.*
 import dev.myclinic.scala.db.Db
+import dev.myclinic.scala.masterdb.CSVRecordEx.*
 import java.time.LocalDate
 import cats.effect.unsafe.implicits.global
 import cats.*
@@ -29,25 +30,10 @@ object Update:
       })
       .compile
       .drain
-      
-    
-    // var total = 0
-    // var newItem = 0
-    // for rec <- parser do
-    //   val data = ShinryouMasterCSV.from(rec)
-    //   val m = Db.findShinryouMaster(data.shinryoucode, LocalDate.now).unsafeRunSync()
-    //   m match {
-    //     case Some(master) => ()
-    //     case None => newItem += 1
-    //   }
-    //   println(s"${total} ${data.name}")
-    //   total += 1
-    // println(s"new items: ${newItem}")
-    // println(s"total: ${total}")
 
-  extension (r: CSVRecord)
-    def getString(index: Int): String =
-      r.get(index - 1)
+  // extension (r: CSVRecord)
+  //   def getString(index: Int): String =
+  //     r.get(index - 1)
 
   def getMasterFilesDir: File =
     val dir = new File("./work/master-files")

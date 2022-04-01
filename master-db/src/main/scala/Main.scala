@@ -11,6 +11,6 @@ object Main extends IOApp:
     }
 
 def usage: Unit =
-  System.err.println("usage: masterDb download")
+  System.err.println("usage: masterDb update-shinryou [go]")
 
 
