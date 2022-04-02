@@ -15,24 +15,29 @@ import cats.syntax.all.*
 import cats.effect.*
 import fs2.Stream
 
-sealed trait ShinryouUpdate
+sealed trait ShinryouUpdate:
+  def token: String
 
 case class ShinryouModified(
     val record: ShinryouMasterCSV,
     val current: ShinryouMaster
-) extends ShinryouUpdate
+) extends ShinryouUpdate:
+  def token: String = "shinryou-modified"
 
 case class ShinryouUnchanged(
     val current: ShinryouMaster
-) extends ShinryouUpdate
+) extends ShinryouUpdate:
+  def token: String = "shinryou-unchanged"
 
 case class ShinryouEnded(
     val current: Option[ShinryouMaster]
-) extends ShinryouUpdate
+) extends ShinryouUpdate:
+  def token: String = "shinryou-ended"
 
 case class ShinryouNew(
     val record: ShinryouMasterCSV
-) extends ShinryouUpdate
+) extends ShinryouUpdate:
+  def token: String = "shinryou-new"
 
 object Update:
   def updateShinryou(): IO[Unit] =
@@ -50,15 +55,13 @@ object Update:
         for m <- Db.findShinryouMaster(r.shinryoucode, LocalDate.now)
         yield (r, m)
       })
-      .fold(0) { case (count, item) =>
-        count + 1
+      .map(classifyShinryou.tupled)
+      .fold(Map[String, Int]().withDefaultValue(0)) { case (stat, item) =>
+        stat.updated(item.token, stat(item.token) + 1)
       }
-      .evalMap(count => IO { println(count) })
+      .evalMap(stat => IO { println(stat) })
       .compile
       .drain
-
-  def createShinryouStat: Map[String, Int] =
-    Map()
 
   def classifyShinryou(
       record: ShinryouMasterCSV,
