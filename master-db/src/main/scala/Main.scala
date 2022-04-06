@@ -86,6 +86,16 @@ object Main extends IOApp:
             .drain
         }.as[ExitCode](ExitCode.Success)
       
+      case "print-shuushokugo" :: masterCSV :: _ =>
+        {
+          CSVStream(new File(masterCSV))
+            .map(ShuushokugoMasterCSV.from(_))
+            .map(rec => rec.toMaster)
+            .evalTap(m => IO { println(m)} )
+            .compile
+            .drain
+        }.as[ExitCode](ExitCode.Success)
+      
       case "help" :: _ => (IO { usage }).as[ExitCode](ExitCode.Success)
       case _ => (IO { usage }).as[ExitCode](ExitCode.Error)
     }

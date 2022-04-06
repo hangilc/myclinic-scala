@@ -4,7 +4,6 @@ import org.apache.commons.csv.CSVRecord
 import CSVRecordEx.*
 import java.time.LocalDate
 import dev.myclinic.scala.model.ByoumeiMaster
-import dev.myclinic.scala.model.ValidUpto
 
 case class ByoumeiMasterCSV(
     kubun: Int,
