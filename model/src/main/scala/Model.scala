@@ -330,6 +330,16 @@ case class KizaiMaster(
 ):
   def kingaku: Double = kingakuStore.toDouble
 
+case class ByoumeiMaster(
+  shoubyoumeicode: Int,
+  name: String
+)
+
+case class ShuushokugoMaster(
+  shuushokugocode: Int,
+  name: String
+)
+
 trait PatientIdProvider[T]:
   def getPatientId(t: T): Int
 

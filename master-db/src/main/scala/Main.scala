@@ -60,10 +60,38 @@ object Main extends IOApp:
             )
             .map(rec => rec.toMaster(validFrom))
             .filter(_.kingakuStore.size <= 10)
-            // .evalTap(m => IO {
-            //   if m.kingakuStore.size > 10 then println(m)
-            // })
             .evalMap(m => Db.enterKizaiMaster(m))
+            .compile
+            .drain
+        }.as[ExitCode](ExitCode.Success)
+      
+      case "print-iyakuhin" :: masterCSV :: _ =>
+        {
+          val validFrom = LocalDate.now
+          CSVStream(new File(masterCSV))
+            .map(IyakuhinMasterCSV.from(_))
+            .map(rec => rec.toMaster(validFrom))
+            .evalTap(m => IO { println(m)} )
+            .compile
+            .drain
+        }.as[ExitCode](ExitCode.Success)
+      
+      case "print-byoumei" :: masterCSV :: _ =>
+        {
+          CSVStream(new File(masterCSV))
+            .map(ByoumeiMasterCSV.from(_))
+            .map(rec => rec.toMaster)
+            .evalTap(m => IO { println(m)} )
+            .compile
+            .drain
+        }.as[ExitCode](ExitCode.Success)
+      
+      case "print-shuushokugo" :: masterCSV :: _ =>
+        {
+          CSVStream(new File(masterCSV))
+            .map(ShuushokugoMasterCSV.from(_))
+            .map(rec => rec.toMaster)
+            .evalTap(m => IO { println(m)} )
             .compile
             .drain
         }.as[ExitCode](ExitCode.Success)
