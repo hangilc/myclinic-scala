@@ -13,11 +13,10 @@ class PatientSelect(ui: PatientSelect.UI, onSelectCallback: Patient => Unit):
 
   var selected: Option[Patient] = None
   val result = ui.selection
-  // result.formatter = patient => String.format("%04d %s", patient.patientId, patient.fullName())
-  result.addSelectEventHandler(patient =>
+  result.formatter = (formatPatient _)
+  result.onSelect = patient =>
     selected = Some(patient)
     ui.eSelectButton.enable()
-  )
   ui.eSelectButton(onclick := (onSelectClick _))
   ui.eCancelButton(onclick := (() => m.close()))
   ui.eSearchForm(onsubmit := (onSearch _))
@@ -55,18 +54,13 @@ class PatientSelect(ui: PatientSelect.UI, onSelectCallback: Patient => Unit):
     String.format("%04d %s", patient.patientId, patient.fullName())
 
 
-  // private def formatPatient(patient: Patient): String =
-  //   val id = String.format("%04d", patient.patientId)
-  //   val name = patient.fullName()
-  //   s"(${id}) ${name} ${patient.birthdayRep}生 ${patient.age}才 ${patient.sex.rep}性"
-
 object PatientSelect:
   class UI:
     val eSearchForm = form
     val eInputText = inputText
     val eSearchButton = button
     val eTodaysPatientsLink = a
-    val selection = Selection[Patient]
+    val selection = new Selection[Patient, Patient](identity)
     val eSelectButton = button
     val eCancelButton = button
     val body = div(

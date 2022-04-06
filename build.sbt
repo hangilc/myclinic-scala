@@ -16,6 +16,7 @@ val catsVersion = "2.7.0"
 val macrotaskExecutorVersion = "1.0.0"
 val jacksonVersion = "2.13.1"
 val slf4jVersion = "1.7.25"
+val fs2Version = "3.2.6"
 
 ThisBuild / scalacOptions ++= Seq("-deprecation", "-encoding", "UTF-8")
 ThisBuild / javacOptions ++= Seq("-encoding", "UTF-8")
@@ -53,7 +54,8 @@ lazy val root = project
     utilJVM,
     validatorJS,
     validatorJVM,
-    webclient
+    webclient,
+    masterDb
   )
   .settings(
     publish := {},
@@ -97,6 +99,19 @@ lazy val db = project
       "org.tpolecat" %% "doobie-hikari" % doobieVersion,
       "org.http4s" %% "http4s-circe" % http4sVersion,
       "io.circe" %%% "circe-core" % circeVersion
+    )
+  )
+
+lazy val masterDb = project
+  .in(file("master-db"))
+  .dependsOn(db)
+  .enablePlugins(PackPlugin)
+  .settings(
+    name := "master-db",
+    libraryDependencies ++= Seq(
+      "org.apache.commons" % "commons-csv" % "1.9.0",
+      "co.fs2" %% "fs2-core" % fs2Version,
+      "co.fs2" %% "fs2-io" % fs2Version,
     )
   )
 
