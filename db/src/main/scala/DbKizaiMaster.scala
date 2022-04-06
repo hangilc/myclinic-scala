@@ -29,3 +29,13 @@ trait DbKizaiMaster extends Mysql:
       update tokuteikizai_master_arch set valid_upto = ${validUpto} 
       where valid_upto = '0000-00-00'
     """.update.run)
+
+  def enterKizaiMaster(m: KizaiMaster): IO[Unit] =
+    mysql(sql"""
+      insert into tokuteikizai_master_arch (
+        kizaicode, name, yomi, unit, kingaku, valid_from, valid_upto
+      ) values (
+        ${m.kizaicode}, ${m.name}, ${m.yomi}, ${m.unit}, ${m.kingakuStore},
+        ${m.validFrom}, ${m.validUpto}
+      )
+    """.update.run.void)
