@@ -57,11 +57,23 @@ object ClinicOperation:
 
   val adHocHolidayMap: Map[LocalDate, AdHocHoliday] =
     Map(
-      adHocHolidayRange(
+      (adHocHolidayRange(
         LocalDate.of(2021, 12, 29),
         LocalDate.of(2022, 1, 5),
         "冬休み"
-      ).toList: _*
+      )
+        ++
+          adHocHolidayRange(
+            LocalDate.of(2022, 8, 10),
+            LocalDate.of(2022, 8, 17),
+            "夏休み"
+          )
+          ++
+          adHocHolidayRange(
+            LocalDate.of(2022, 12, 28),
+            LocalDate.of(2023, 1, 4),
+            "冬休み"
+          )).toList: _*
     )
 
   val adHocWorkdayMap: Map[LocalDate, AdHocWorkday] = Map.empty
