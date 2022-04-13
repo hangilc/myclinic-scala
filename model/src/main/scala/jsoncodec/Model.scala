@@ -6,6 +6,7 @@ import io.circe.generic.semiauto._
 import dev.myclinic.scala.model._
 import scala.util.Try
 import java.time.LocalDate
+import dev.myclinic.scala.clinicop.AdHocHolidayRange
 
 trait Model extends DateTime with WaitStateCodec:
 
@@ -192,5 +193,9 @@ trait Model extends DateTime with WaitStateCodec:
 
   given Encoder[FileInfo] = deriveEncoder[FileInfo]
   given Decoder[FileInfo] = deriveDecoder[FileInfo]
+
+  given Encoder[AdHocHolidayRange] = deriveEncoder[AdHocHolidayRange]
+  given Decoder[AdHocHolidayRange] = deriveDecoder[AdHocHolidayRange]
+  
 
 
