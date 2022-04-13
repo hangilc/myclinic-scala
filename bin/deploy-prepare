@@ -3,6 +3,6 @@
 sbt clean
 sbt server/pack
 sbt appointApp/fullLinkJS
-sbt receptionApp/fullLinkJS
-sbt practiceApp/fullLinkJS
+# sbt receptionApp/fullLinkJS
+# sbt practiceApp/fullLinkJS
 cp -r server/web server/target/pack/web
