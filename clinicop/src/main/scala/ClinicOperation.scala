@@ -48,23 +48,18 @@ object ClinicOperation:
       case _                     => ""
     }
 
-  def rangeToMap(range: AdHocHolidayRange): Map[LocalDate, AdHocHoliday] =
-    Map(
+  def rangeToSet(range: AdHocHolidayRange): Set[(LocalDate, AdHocHoliday)] =
       DateUtil
         .enumDates(range.from, range.upto)
-        .map(date => (date, AdHocHoliday(range.name))): _*
-    )
+        .map(date => (date, AdHocHoliday(range.name)))
+        .toSet
 
-  private var adHocHolidayMap: Map[LocalDate, AdHocHoliday] = initAdHocHolidays()
+  private var adHocHolidayMap: Map[LocalDate, AdHocHoliday] = Map.empty
 
-  def initAdHocHolidays(): Map[LocalDate, AdHocHoliday] =
-    rangeToMap(
-      AdHocHolidayRange(
-        LocalDate.of(2021, 12, 29),
-        LocalDate.of(2022, 1, 5),
-        "冬休み"
-      )
-    )
+  def setAdHocHolidayRanges(ranges: List[AdHocHolidayRange]): Unit =
+    val empty: Set[(LocalDate, AdHocHoliday)] = Set.empty
+    val items = ranges.foldLeft(empty)((acc, r) => acc ++ rangeToSet(r))
+    adHocHolidayMap = Map.from(items)
 
   val adHocWorkdayMap: Map[LocalDate, AdHocWorkday] = Map.empty
 

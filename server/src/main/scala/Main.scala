@@ -33,6 +33,8 @@ import dev.myclinic.scala.model.HeartBeat
 import dev.myclinic.scala.model.jsoncodec.Implicits.given
 import scala.concurrent.duration.DurationInt
 import com.typesafe.scalalogging.Logger
+import dev.myclinic.scala.clinicop.ClinicOperation
+import dev.myclinic.scala.config.Config
 
 object Main extends IOApp:
   val logger = Logger(getClass.getName)
@@ -129,6 +131,9 @@ object Main extends IOApp:
       else None
     for
       topic <- Topic[IO, WebSocketFrame]
+      _ <- IO {
+        ClinicOperation.setAdHocHolidayRanges(Config.adHocHolidayRanges)
+      }
       _ <- IO{ logger.info("Starting server.") }
       exitCode <- buildServer(topic, port, sslContextOption)
     yield exitCode
