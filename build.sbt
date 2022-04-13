@@ -161,6 +161,7 @@ lazy val server = project
     name := "server",
     resolvers += Resolver.mavenLocal,
     libraryDependencies ++= Seq(
+      "com.typesafe.scala-logging" %% "scala-logging" % "3.9.4",
       "ch.qos.logback" % "logback-classic" % "1.1.3" % "runtime",
       "org.http4s" %% "http4s-blaze-server" % http4sVersion,
       "org.http4s" %% "http4s-dsl" % http4sVersion,

@@ -32,8 +32,10 @@ import java.util.concurrent.TimeUnit
 import dev.myclinic.scala.model.HeartBeat
 import dev.myclinic.scala.model.jsoncodec.Implicits.given
 import scala.concurrent.duration.DurationInt
+import com.typesafe.scalalogging.Logger
 
 object Main extends IOApp:
+  val logger = Logger(getClass.getName)
 
   object AppEventBroadcaster:
     def broadcast(
@@ -111,7 +113,6 @@ object Main extends IOApp:
           .drain
       })
       .flatMap(_ => IO.never)
-      //.use(_ => IO.never)
       .as(ExitCode.Success)
 
   override def run(args: List[String]): IO[ExitCode] =
@@ -128,8 +129,6 @@ object Main extends IOApp:
       else None
     for
       topic <- Topic[IO, WebSocketFrame]
-      // _ <- fs2.Stream.awakeEvery[IO](15.seconds).map(_ => {
-      //   topic.publish1(heartBeatFrame)
-      // }).compile.drain
+      _ <- IO{ logger.info("Starting server.") }
       exitCode <- buildServer(topic, port, sslContextOption)
     yield exitCode
