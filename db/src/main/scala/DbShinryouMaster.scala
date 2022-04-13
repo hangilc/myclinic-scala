@@ -26,3 +26,19 @@ trait DbShinryouMaster extends Mysql:
       .sequence
       .map(items => Map(items.map(m => (m.shinryoucode, m)): _*))
     mysql(op)
+
+  def setShinryouMasterValidUpto(validUpto: LocalDate): IO[Int] =
+    mysql(sql"""
+      update shinryoukoui_master_arch set valid_upto = ${validUpto} 
+      where valid_upto = '0000-00-00'
+    """.update.run)
+
+  def enterShinryouMaster(m: ShinryouMaster): IO[Unit] =
+    mysql(sql"""
+      insert into shinryoukoui_master_arch 
+      (shinryoucode, name, tensuu, tensuu_shikibetsu, shuukeisaki, houkatsukensa,
+      oushinkubun, kensagroup, valid_from, valid_upto)
+      values 
+      (${m.shinryoucode}, ${m.name}, ${m.tensuuStore}, ${m.tensuuShikibetsu}, ${m.shuukeisaki},
+      ${m.houkatsukensa}, ${m.oushinkubun}, ${m.kensagroup}, ${m.validFrom}, ${m.validUpto})
+    """.update.run.void)

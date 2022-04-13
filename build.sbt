@@ -105,6 +105,7 @@ lazy val db = project
 lazy val masterDb = project
   .in(file("master-db"))
   .dependsOn(db)
+  .enablePlugins(PackPlugin)
   .settings(
     name := "master-db",
     libraryDependencies ++= Seq(

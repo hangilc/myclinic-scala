@@ -4,6 +4,8 @@ import dev.myclinic.scala.masterdb.CSVRecordEx.*
 import org.apache.commons.csv.CSVRecord
 import dev.myclinic.scala.model.{ShinryouMaster, ValidUpto}
 import java.time.LocalDate
+import fs2.Stream
+import cats.effect.IO
 
 case class ShinryouMasterCSV(
     kubun: Int,
@@ -49,3 +51,5 @@ object ShinryouMasterCSV:
       oushinKubun = row.getString(17),
       kensaGroup = row.twoChars(51)
     )
+
+    

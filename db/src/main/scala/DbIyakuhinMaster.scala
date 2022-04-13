@@ -24,3 +24,9 @@ trait DbIyakuhinMaster extends Mysql:
       .sequence
       .map(items => Map(items.map(m => (m.iyakuhincode, m)): _*))
     mysql(op)
+
+  def setIyakuhinMasterValidUpto(validUpto: LocalDate): IO[Int] =
+    mysql(sql"""
+      update iyakuhin_master_arch set valid_upto = ${validUpto} 
+      where valid_upto = '0000-00-00'
+    """.update.run)
