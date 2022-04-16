@@ -494,3 +494,4 @@ object FileInfo:
   val epoch: LocalDateTime = LocalDateTime.of(1970, 1, 1, 0, 0, 0)
   def fromTimestamp(ts: FiniteDuration): LocalDateTime =
     epoch.plusSeconds(ts.toSeconds)
+

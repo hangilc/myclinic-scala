@@ -7,6 +7,10 @@
   --info-color:      #17a2b8;
 }
 
+body {
+  font-family: sans-serif
+}
+
 *, *:before, *:after {
   box-sizing: border-box;
 }
