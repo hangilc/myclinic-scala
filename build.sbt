@@ -17,6 +17,7 @@ val macrotaskExecutorVersion = "1.0.0"
 val jacksonVersion = "2.13.1"
 val slf4jVersion = "1.7.25"
 val fs2Version = "3.2.6"
+val scalaLoggingVersion = "3.9.4"
 
 ThisBuild / scalacOptions ++= Seq("-deprecation", "-encoding", "UTF-8")
 ThisBuild / javacOptions ++= Seq("-encoding", "UTF-8")
@@ -161,7 +162,9 @@ lazy val server = project
     name := "server",
     resolvers += Resolver.mavenLocal,
     libraryDependencies ++= Seq(
-      "ch.qos.logback" % "logback-classic" % "1.1.3" % "runtime",
+      "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion,
+      "ch.qos.logback" % "logback-classic" % "1.1.3",
+      //"ch.qos.logback" % "logback-classic" % "1.1.3" % "runtime",
       "org.http4s" %% "http4s-blaze-server" % http4sVersion,
       "org.http4s" %% "http4s-dsl" % http4sVersion,
       "org.http4s" %% "http4s-circe" % http4sVersion,
@@ -316,8 +319,6 @@ lazy val clinicop = crossProject(JVMPlatform, JSPlatform)
   .dependsOn(util, holidayjp)
   .jsSettings(
     scalaJSUseMainModuleInitializer := false,
-    libraryDependencies ++= Seq(
-    )
   )
 
 val clinicopJVM = clinicop.jvm
@@ -345,9 +346,13 @@ lazy val javalib = project
 
 lazy val config = project
   .in(file("config"))
-  .dependsOn(javalib, modelJVM)
+  .dependsOn(javalib, modelJVM, clinicopJVM)
   .settings(
-    name := "config"
+    name := "config",
+    libraryDependencies ++= Seq(
+      "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion,
+      "io.circe" %% "circe-yaml" % circeVersion,
+    ),
   )
 
 lazy val appUtil = crossProject(JVMPlatform, JSPlatform)
