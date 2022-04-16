@@ -22,6 +22,7 @@ class Selection[S, T](mapper: S => T):
       clearSelected()
       item.ele(cls := "selected")
       selectedValue = Some(value)
+      onSelect(value)
     }
     ele(item.ele)
 
@@ -43,5 +44,7 @@ private class SelectionItem[T](label: String, value: T):
   var onSelect: T => Unit = _ => ()
   val ele: HTMLElement = div(cls := "domq-selection-item")(
     label,
-    onclick := (() => onSelect(value))
+    onclick := (() => {
+      onSelect(value)
+    })
   )

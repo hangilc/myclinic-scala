@@ -133,6 +133,7 @@ object MakeAppointDialog:
     ui.searchForm(onsubmit := (onSubmit _))
     ui.searchIcon(onclick := (onSubmit _))
     ui.searchResult.onSelect = patient =>
+      println(("search-result-select", patient))
       ui.input.value = patient.fullName()
       ui.hideSearchResult()
       onSelect(patient)
