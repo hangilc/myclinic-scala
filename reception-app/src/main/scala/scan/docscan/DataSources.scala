@@ -19,3 +19,5 @@ class DataSources:
   def isDocTypeChangeable: Boolean = 
     scannedDocs.data.find(_.getState != ScannedDoc.State.Scanned).size == 0
 
+  def unUploadedImageExists: Boolean =
+    scannedDocs.data.find(scannedDoc => !scannedDoc.isUploaded).isDefined

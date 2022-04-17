@@ -31,7 +31,7 @@ object PatientSearch:
 class PatientSearch(ui: PatientSearch.UI):
   var onSelectCallback: Patient => Unit = _ => ()
   ui.eSearchForm(onsubmit := (onSearch _))
-  ui.searchResult.formatter = formatPatient _
+  //ui.searchResult.formatter = formatPatient _
 
   def focus(): Unit = ui.eSearchInput.focus()
 

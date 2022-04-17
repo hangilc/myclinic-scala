@@ -11,12 +11,14 @@ class UploadRow(reqClose: () => Unit)(using ds: DataSources):
   )
 
   def doUpload(): Unit =
-    ds.patient.data.map(_.patientId).foreach(patientId =>
-      for doc <- ds.scannedDocs.data do
-        doc.upload()
-    )
+    ds.patient.data
+      .map(_.patientId)
+      .foreach(patientId => for doc <- ds.scannedDocs.data do doc.upload())
 
   def doClose(): Unit =
-    reqClose()
+    ShowMessage.confirmIf(
+      ds.unUploadedImageExists,
+      "アップロードされていない文書がありますが、閉じまずか？"
+    )(reqClose)
 
 object UploadRow
