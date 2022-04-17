@@ -37,7 +37,7 @@ class PracticeMain:
       "受付患者選択" -> (selectFromRegistered _),
       "患者検索" -> (selectBySearchPatient _),
       "最近の診察" -> (selectFromRecentVisits _),
-      "日付別" -> (() => ())
+      "日付別" -> (selectByDate _)
     )
   )
 
@@ -45,7 +45,7 @@ class PracticeMain:
     String.format(
       "%04d %s (%d才)",
       patient.patientId,
-      patient.fullName,
+      patient.fullName(),
       DateUtil.calcAge(patient.birthday, LocalDate.now())
     )
 
@@ -75,7 +75,11 @@ class PracticeMain:
   def selectBySearchPatient(): Unit =
     val d = new ModalDialog3
     val search =
-      new SearchForm[Patient, Patient](formatPatient _, identity, Api.searchPatient(_).map(_._2))
+      new SearchForm[Patient, Patient](
+        formatPatient _,
+        identity,
+        Api.searchPatient(_).map(_._2)
+      )
     d.title("患者検索")
     d.body(
       search.ele
@@ -160,6 +164,10 @@ class PracticeMain:
       case Failure(ex) => System.err.println(ex.getMessage)
     }
 
+  def selectByDate(): Unit =
+    val ele = div("BY DATE")
+    
+
 object PracticeService:
   def listRegisteredPatient(): Future[List[(Patient, Visit)]] =
     for (gen, wqList, visitMap, patientMap) <- Api.listWqueueFull()
@@ -168,14 +176,6 @@ object PracticeService:
       val p = patientMap(v.patientId)
       (p, v)
     )
-
-  // val patientFormatter: Patient => String = patient =>
-  //   String.format(
-  //     "%04d %s (%s)",
-  //     patient.patientId,
-  //     patient.fullName(),
-  //     KanjiDate.dateToKanji(patient.birthday)
-  //   )
 
 class PracticeMainUI:
   val choice = PullDownLink("患者選択")
