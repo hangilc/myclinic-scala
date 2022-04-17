@@ -14,6 +14,8 @@ import java.time.LocalTime
 import java.time.temporal.ChronoUnit
 
 object DbShinryouMasterPrim:
+  //implicit val han: doobie.util.log.LogHandler = doobie.util.log.LogHandler.jdkLogHandler
+
   def getShinryouMaster(shinryoucode: Int, at: LocalDate): Query0[ShinryouMaster] =
     sql"""
       select * from shinryoukoui_master_arch where shinryoucode = ${shinryoucode}

@@ -40,6 +40,7 @@ class ScannedDoc(scannedFile: String, origIndex: Int)(using ds: DataSources):
   mp.switchTo("disp")
 
   def getState: State = slot.state
+  def isUploaded: Boolean = getState == State.Uploaded
   def getIndex: Int = slot.index
   def changePatient(patientIdOpt: Option[Int]): Unit =
     if patientIdOpt != slot.patientId then

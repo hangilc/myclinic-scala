@@ -45,135 +45,9 @@ class DocScan(mock: Boolean = false):
   def doClose(): Unit =
     box.ele.remove()
 
-class ScanBoxOrig(val ui: DocScan.UI)(using queue: ScanWorkQueue)
-    extends DocScan.Scope:
-  given DocScan.Scope = this
-  val onClosedCallbacks = new Callbacks[Unit]
-  val timestamp = DocScan.makeTimeStamp
-  val patientSearch = new PatientSearch(ui.patientSearchUI)
-  val patientDisp = new PatientDisp
-  val scanTypeSelect = new ScanTypeSelect(ui.scanTypeSelectUI)
-  val scannerSelect = new ScannerSelect(ui.scannerSelectUI)
-  val scanProgress = new ScanProgress(ui.scanProgressUI, () => selectedScanner)
-  val scannedItems = new ScannedItems(
-    ui.scannedItemsUI,
-    DocScan.makeTimeStamp,
-    () => selectedScanner
-  )
-
-  var resolutionStore: Int = 100
-  def resolution: Int = resolutionStore
-
-  queue.pinCallbacks.add(_ => adapt())
-
-  var scanType: String = scanTypeSelect.getValue
-  def init: Future[Unit] =
-    scanTypeSelect.setValue(DocScan.defaultScanType)
-    scanType = scanTypeSelect.getValue
-    for _ <- scannerSelect.init
-    yield ()
-    Future.successful(())
-
-  def initFocus: Unit = patientSearch.focus()
-
-  patientSearch.onSelectCallback = onPatientSelected
-  scanTypeSelect.onChangeCallback = onScanTypeSelected
-
-  def selectedScanType: String = scanTypeSelect.getValue
-  def selectedScanner: Option[String] = scannerSelect.selected
-
-  var patient: Option[Patient] = None
-
-  scanProgress.onScannedCallback = savedFile =>
-    scannedItems
-      .add(savedFile, patient.map(_.patientId), selectedScanType)
-      .andThen { case Failure(_) =>
-        Api.deleteScannedFile(savedFile)
-      }
-
-  private def onPatientSelected(selected: Patient): Unit =
-    def changePatient(): Unit =
-      patientSearch.hideResult
-      patient = Some(selected)
-      patientDisp.setPatient(selected)
-      val task = ScanTask(() => scannedItems.adjustToPatientChanged(Some(selected.patientId)))
-      queue.append(task)
-    def needConfirm: Boolean = patient.isDefined && scannedItems.size > 0
-    ShowMessage.confirmIf(needConfirm, s"患者を${selected.fullName("")}に変更しますか？")(
-      changePatient _
-    )
-
-  private def onScanTypeSelected(selected: String): Unit =
-    def changeScanType(): Unit =
-      val task = ScanTask(() => 
-        for _ <- scannedItems.adjustToScanTypeChanged(selected)
-        yield scanType = selected
-      )
-      queue.append(task)
-    if scannedItems.size == 0 then
-      scanType = selected
-    else 
-      ShowMessage.confirm("文書の種類を変更しますか？")(changeScanType _, 
-        () => scanTypeSelect.setValue(scanType)
-      )
-
-  def adaptUploadButton: Unit =
-    val enable = scannedItems.hasUnUploadedImage && queue.isEmpty
-    ui.eUploadButton.enable(enable)
-
-  def uploadTask: ScanTask = ScanTask(() => scannedItems.upload)
-
-  ui.eUploadButton(
-    onclick := (() => queue.append(uploadTask))
-  )
-
-  val onScanningDevicesChangedCallbacks = new Callbacks[Unit]
-  var scanningDevices: Set[String] = Set.empty
-  ui.ele(oncustomevent[String]("scan-started") := (ev =>
-    scanningDevices = scanningDevices + ev.detail
-    onScanningDevicesChangedCallbacks.invoke(())
-  ))
-  ui.ele(oncustomevent[String]("scan-ended") := (ev =>
-    scanningDevices = scanningDevices - ev.detail
-    onScanningDevicesChangedCallbacks.invoke(())
-  ))
-
-  onScanningDevicesChangedCallbacks.add(_ => adaptScan)
-
-  ui.eCloseButton(onclick := (() =>
-    def doClose(): Unit =
-      ui.ele.remove()
-      onClosedCallbacks.invoke(())
-      scannedItems.deleteSavedFiles.onComplete {
-        case Success(_)  => ()
-        case Failure(ex) => System.err.println(ex.getMessage)
-      }
-    if scannedItems.hasUnUploadedImage then
-      ShowMessage.confirm("アップロードされていない画像がありますが、このまま閉じますか？")(doClose _)
-    else doClose()
-  ))
-
-  private def adaptScan: Unit =
-    val enable =
-      DocScan.canScan(patient.map(_.patientId), scannerSelect.selected)
-    scanProgress.enableScan(enable)
-
-  def adapt(): Unit =
-    adaptScan
-    scannedItems.adapt(patient.map(_.patientId), selectedScanner)
-    adaptUploadButton
-
-  adapt()
-
 object DocScan:
   val cssClassName: String = "scan-box"
   val defaultScanType: String = "image"
-
-  // def apply(): ScanBox =
-    // given queue: ScanWorkQueue = ScanWorkQueue()
-    // val box = new DocScan
-    // box.onClosedCallbacks.add(_ => ScanWorkQueue.remove(queue))
-    // box
 
   class UI:
     val patientSearchUI = new PatientSearch.UI
@@ -231,3 +105,124 @@ object DocScan:
     (loaded, total) =>
       val pct = loaded / total * 100
       e.innerText = s"${pct}%"
+
+// class ScanBoxOrig(val ui: DocScan.UI)(using queue: ScanWorkQueue)
+//     extends DocScan.Scope:
+//   given DocScan.Scope = this
+//   val onClosedCallbacks = new Callbacks[Unit]
+//   val timestamp = DocScan.makeTimeStamp
+//   val patientSearch = new PatientSearch(ui.patientSearchUI)
+//   val patientDisp = new PatientDisp
+//   val scanTypeSelect = new ScanTypeSelect(ui.scanTypeSelectUI)
+//   val scannerSelect = new ScannerSelect(ui.scannerSelectUI)
+//   val scanProgress = new ScanProgress(ui.scanProgressUI, () => selectedScanner)
+//   val scannedItems = new ScannedItems(
+//     ui.scannedItemsUI,
+//     DocScan.makeTimeStamp,
+//     () => selectedScanner
+//   )
+
+//   var resolutionStore: Int = 100
+//   def resolution: Int = resolutionStore
+
+//   queue.pinCallbacks.add(_ => adapt())
+
+//   var scanType: String = scanTypeSelect.getValue
+//   def init: Future[Unit] =
+//     scanTypeSelect.setValue(DocScan.defaultScanType)
+//     scanType = scanTypeSelect.getValue
+//     for _ <- scannerSelect.init
+//     yield ()
+//     Future.successful(())
+
+//   def initFocus: Unit = patientSearch.focus()
+
+//   patientSearch.onSelectCallback = onPatientSelected
+//   scanTypeSelect.onChangeCallback = onScanTypeSelected
+
+//   def selectedScanType: String = scanTypeSelect.getValue
+//   def selectedScanner: Option[String] = scannerSelect.selected
+
+//   var patient: Option[Patient] = None
+
+//   scanProgress.onScannedCallback = savedFile =>
+//     scannedItems
+//       .add(savedFile, patient.map(_.patientId), selectedScanType)
+//       .andThen { case Failure(_) =>
+//         Api.deleteScannedFile(savedFile)
+//       }
+
+//   private def onPatientSelected(selected: Patient): Unit =
+//     def changePatient(): Unit =
+//       patientSearch.hideResult
+//       patient = Some(selected)
+//       patientDisp.setPatient(selected)
+//       val task = ScanTask(() => scannedItems.adjustToPatientChanged(Some(selected.patientId)))
+//       queue.append(task)
+//     def needConfirm: Boolean = patient.isDefined && scannedItems.size > 0
+//     ShowMessage.confirmIf(needConfirm, s"患者を${selected.fullName("")}に変更しますか？")(
+//       changePatient _
+//     )
+
+//   private def onScanTypeSelected(selected: String): Unit =
+//     def changeScanType(): Unit =
+//       val task = ScanTask(() => 
+//         for _ <- scannedItems.adjustToScanTypeChanged(selected)
+//         yield scanType = selected
+//       )
+//       queue.append(task)
+//     if scannedItems.size == 0 then
+//       scanType = selected
+//     else 
+//       ShowMessage.confirm("文書の種類を変更しますか？")(changeScanType _, 
+//         () => scanTypeSelect.setValue(scanType)
+//       )
+
+//   def adaptUploadButton: Unit =
+//     val enable = scannedItems.hasUnUploadedImage && queue.isEmpty
+//     ui.eUploadButton.enable(enable)
+
+//   def uploadTask: ScanTask = ScanTask(() => scannedItems.upload)
+
+//   ui.eUploadButton(
+//     onclick := (() => queue.append(uploadTask))
+//   )
+
+//   val onScanningDevicesChangedCallbacks = new Callbacks[Unit]
+//   var scanningDevices: Set[String] = Set.empty
+//   ui.ele(oncustomevent[String]("scan-started") := (ev =>
+//     scanningDevices = scanningDevices + ev.detail
+//     onScanningDevicesChangedCallbacks.invoke(())
+//   ))
+//   ui.ele(oncustomevent[String]("scan-ended") := (ev =>
+//     scanningDevices = scanningDevices - ev.detail
+//     onScanningDevicesChangedCallbacks.invoke(())
+//   ))
+
+//   onScanningDevicesChangedCallbacks.add(_ => adaptScan)
+
+//   ui.eCloseButton(onclick := (() =>
+//     def doClose(): Unit =
+//       ui.ele.remove()
+//       onClosedCallbacks.invoke(())
+//       scannedItems.deleteSavedFiles.onComplete {
+//         case Success(_)  => ()
+//         case Failure(ex) => System.err.println(ex.getMessage)
+//       }
+//     if scannedItems.hasUnUploadedImage then
+//       ShowMessage.confirm("アップロードされていない画像がありますが、このまま閉じますか？")(doClose _)
+//     else doClose()
+//   ))
+
+//   private def adaptScan: Unit =
+//     val enable =
+//       DocScan.canScan(patient.map(_.patientId), scannerSelect.selected)
+//     scanProgress.enableScan(enable)
+
+//   def adapt(): Unit =
+//     adaptScan
+//     scannedItems.adapt(patient.map(_.patientId), selectedScanner)
+//     adaptUploadButton
+
+//   adapt()
+

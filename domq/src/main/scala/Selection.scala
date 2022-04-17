@@ -86,5 +86,6 @@ object Selection:
   ): Selection[T] =
     val sel = Selection[T]
     sel.addAll(items, _._1, _._2)
+    sel.addSelectEventHandler(onSelect)
     sel
 

@@ -16,6 +16,8 @@ val catsVersion = "2.7.0"
 val macrotaskExecutorVersion = "1.0.0"
 val jacksonVersion = "2.13.1"
 val slf4jVersion = "1.7.25"
+val fs2Version = "3.2.6"
+val scalaLoggingVersion = "3.9.4"
 
 ThisBuild / scalacOptions ++= Seq("-deprecation", "-encoding", "UTF-8")
 ThisBuild / javacOptions ++= Seq("-encoding", "UTF-8")
@@ -53,7 +55,8 @@ lazy val root = project
     utilJVM,
     validatorJS,
     validatorJVM,
-    webclient
+    webclient,
+    masterDb
   )
   .settings(
     publish := {},
@@ -97,6 +100,19 @@ lazy val db = project
       "org.tpolecat" %% "doobie-hikari" % doobieVersion,
       "org.http4s" %% "http4s-circe" % http4sVersion,
       "io.circe" %%% "circe-core" % circeVersion
+    )
+  )
+
+lazy val masterDb = project
+  .in(file("master-db"))
+  .dependsOn(db)
+  .enablePlugins(PackPlugin)
+  .settings(
+    name := "master-db",
+    libraryDependencies ++= Seq(
+      "org.apache.commons" % "commons-csv" % "1.9.0",
+      "co.fs2" %% "fs2-core" % fs2Version,
+      "co.fs2" %% "fs2-io" % fs2Version,
     )
   )
 
@@ -146,7 +162,9 @@ lazy val server = project
     name := "server",
     resolvers += Resolver.mavenLocal,
     libraryDependencies ++= Seq(
-      "ch.qos.logback" % "logback-classic" % "1.1.3" % "runtime",
+      "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion,
+      "ch.qos.logback" % "logback-classic" % "1.1.3",
+      //"ch.qos.logback" % "logback-classic" % "1.1.3" % "runtime",
       "org.http4s" %% "http4s-blaze-server" % http4sVersion,
       "org.http4s" %% "http4s-dsl" % http4sVersion,
       "org.http4s" %% "http4s-circe" % http4sVersion,
@@ -302,8 +320,6 @@ lazy val clinicop = crossProject(JVMPlatform, JSPlatform)
   .dependsOn(util, holidayjp)
   .jsSettings(
     scalaJSUseMainModuleInitializer := false,
-    libraryDependencies ++= Seq(
-    )
   )
 
 val clinicopJVM = clinicop.jvm
@@ -331,9 +347,13 @@ lazy val javalib = project
 
 lazy val config = project
   .in(file("config"))
-  .dependsOn(javalib, modelJVM)
+  .dependsOn(javalib, modelJVM, clinicopJVM)
   .settings(
-    name := "config"
+    name := "config",
+    libraryDependencies ++= Seq(
+      "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion,
+      "io.circe" %% "circe-yaml" % circeVersion,
+    ),
   )
 
 lazy val appUtil = crossProject(JVMPlatform, JSPlatform)

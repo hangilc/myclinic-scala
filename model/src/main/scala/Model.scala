@@ -330,6 +330,16 @@ case class KizaiMaster(
 ):
   def kingaku: Double = kingakuStore.toDouble
 
+case class ByoumeiMaster(
+  shoubyoumeicode: Int,
+  name: String
+)
+
+case class ShuushokugoMaster(
+  shuushokugocode: Int,
+  name: String
+)
+
 trait PatientIdProvider[T]:
   def getPatientId(t: T): Int
 
@@ -484,3 +494,4 @@ object FileInfo:
   val epoch: LocalDateTime = LocalDateTime.of(1970, 1, 1, 0, 0, 0)
   def fromTimestamp(ts: FiniteDuration): LocalDateTime =
     epoch.plusSeconds(ts.toSeconds)
+

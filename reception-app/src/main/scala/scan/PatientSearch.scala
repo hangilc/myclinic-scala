@@ -10,7 +10,6 @@ import org.scalajs.dom.{HTMLInputElement, HTMLElement}
 import dev.myclinic.scala.webclient.Api
 import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
 
-
 object PatientSearch:
   class UI:
     val eSearchInput = inputText
@@ -32,7 +31,7 @@ object PatientSearch:
 class PatientSearch(ui: PatientSearch.UI):
   var onSelectCallback: Patient => Unit = _ => ()
   ui.eSearchForm(onsubmit := (onSearch _))
-  ui.searchResult.addSelectEventHandler(onSelect)
+  //ui.searchResult.formatter = formatPatient _
 
   def focus(): Unit = ui.eSearchInput.focus()
 
@@ -52,10 +51,8 @@ class PatientSearch(ui: PatientSearch.UI):
       ui.eSearchInput.value = ""
       for (gen, patients) <- Api.searchPatient(txt)
       yield
-        if patients.size == 1 then
-          onSelect(patients.head)
-        else if patients.size == 0 then
-          ()
+        if patients.size == 1 then onSelect(patients.head)
+        else if patients.size == 0 then ()
         else
           searchResult.clear()
           searchResult.addAll(patients, formatter, identity)
@@ -64,4 +61,3 @@ class PatientSearch(ui: PatientSearch.UI):
 
   private def formatPatient(patient: Patient): String =
     String.format("(%04d) %s", patient.patientId, patient.fullName())
-
