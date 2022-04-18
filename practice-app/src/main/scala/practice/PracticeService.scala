@@ -19,15 +19,13 @@ class PracticeService extends SideMenuService:
   val right = new PracticeRight
 
   override def getElements = List(left.ele, right.ele)
+  left.ele(new PatientDisplay().ele)
 
   PracticeBus.addRightWidgetRequest.subscribe(ele => right.ele(ele))
+  PracticeBus.startPatientRequest.subscribe(patient => startPatient(patient))
   
-  left.startPatientPublisher.subscribe(patient =>
-    println(("start-patient", patient))
-  )
-  left.startVisitPublisher.subscribe(patient =>
-    println(("start-visit", patient))
-  )
+  def startPatient(patient: Patient): Unit =
+    PracticeBus.patientChanged.publish(Some(patient))
 
 
 class PracticeMain:

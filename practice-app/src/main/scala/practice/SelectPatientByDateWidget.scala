@@ -37,7 +37,7 @@ class SelectPatientByDateWidget:
     })
 
   def onItemClick(patient: Patient, visit: Visit): Unit =
-    ???
+    PracticeBus.startPatientRequest.publish(patient)
 
 object SelectPatientByDateWidget:
   def formatDate(date: LocalDate): String =
