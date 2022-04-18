@@ -20,12 +20,15 @@ class PracticeService extends SideMenuService:
 
   override def getElements = List(left.ele, right.ele)
 
+  PracticeBus.addRightWidgetRequest.subscribe(ele => right.ele(ele))
+  
   left.startPatientPublisher.subscribe(patient =>
     println(("start-patient", patient))
   )
   left.startVisitPublisher.subscribe(patient =>
     println(("start-visit", patient))
   )
+
 
 class PracticeMain:
   val startPatientPublisher = new LocalEventPublisher[Patient]
@@ -165,8 +168,8 @@ class PracticeMain:
     }
 
   def selectByDate(): Unit =
-    val ele = div("BY DATE")
-    
+    val widget = new SelectPatientByDateWidget()
+    PracticeBus.addRightWidgetRequest.publish(widget.ele)
 
 object PracticeService:
   def listRegisteredPatient(): Future[List[(Patient, Visit)]] =
