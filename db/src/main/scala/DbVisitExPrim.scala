@@ -113,6 +113,7 @@ object DbVisitExPrim:
     for
       conduct <- DbConductPrim.getConduct(conductId).unique
       drugIds <- DbConductDrugPrim.listConductDrugIdForConduct(conductId)
+      gazouLabel <- DbGazouLabelPrim.findGazouLabel(conductId).option
       drugs <- listConductDrugEx(drugIds)
       shinryouIds <- DbConductShinryouPrim.listConductShinryouIdForConduct(
         conductId
@@ -120,7 +121,7 @@ object DbVisitExPrim:
       shinryouList <- listConductShinryouEx(shinryouIds)
       kizaiIds <- DbConductKizaiPrim.listConductKizaiIdForConduct(conductId)
       kizaiList <- listConductKizaiEx(kizaiIds)
-    yield ConductEx(conduct, drugs, shinryouList, kizaiList)
+    yield ConductEx(conduct, gazouLabel.map(_.label), drugs, shinryouList, kizaiList)
 
   def listConductEx(conductIds: List[Int]): ConnectionIO[List[ConductEx]] =
     conductIds.map(getConductEx(_)).sequence

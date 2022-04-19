@@ -41,7 +41,7 @@ object MeisaiUnit:
     }
   def fromConduct(conduct: ConductEx): List[MeisaiUnit] =
     val section: MeisaiSection =
-      if conduct.kind == MyclinicConsts.ConductKindGazou then
+      if conduct.kind == ConductKind.Gazou then
         MeisaiSection.Gazou
       else MeisaiSection.Shochi
     conduct.shinryouList.map(s => SimpleShinryouUnit(section, s.master))

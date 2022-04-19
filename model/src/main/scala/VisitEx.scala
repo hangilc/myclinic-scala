@@ -122,7 +122,8 @@ object ShinryouEx:
 case class ConductEx(
     conductId: Int,
     visitId: Int,
-    kind: Int,
+    kind: ConductKind,
+    gazouLabel: Option[String],
     drugs: List[ConductDrugEx] = List.empty,
     shinryouList: List[ConductShinryouEx] = List.empty,
     kizaiList: List[ConductKizaiEx] = List.empty
@@ -131,6 +132,7 @@ case class ConductEx(
 object ConductEx:
   def apply(
       c: Conduct,
+      gazouLabel: Option[String],
       drugs: List[ConductDrugEx],
       shinryouList: List[ConductShinryouEx],
       kizaiList: List[ConductKizaiEx]
@@ -139,6 +141,7 @@ object ConductEx:
       c.conductId,
       c.visitId,
       c.kind,
+      gazouLabel,
       drugs,
       shinryouList,
       kizaiList

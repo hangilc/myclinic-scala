@@ -242,11 +242,22 @@ case class Shinryou(
     shinryoucode: Int
 )
 
+enum ConductKind(val code: Int, val rep: String):
+    case HikaChuusha extends ConductKind(0, "皮下・筋肉注射")
+    case JoumyakuChuusha extends ConductKind(1, "静脈注射")
+    case OtherChuusha extends ConductKind(2, "その他の注射")
+    case Gazou extends ConductKind(3, "画像")
+
+object ConductKind:
+  def fromCode(kind: Int): ConductKind =
+    ConductKind.values.find(_.code == kind).get
+
 case class Conduct(
     conductId: Int,
     visitId: Int,
-    kind: Int
-)
+    kindStore: Int
+):
+  lazy val kind: ConductKind = ConductKind.fromCode(kindStore)
 
 case class ConductDrug(
     conductDrugId: Int,
@@ -266,6 +277,11 @@ case class ConductKizai(
     conductId: Int,
     kizaicode: Int,
     amount: Double
+)
+
+case class GazouLabel(
+  conductId: Int,
+  label: String
 )
 
 case class Charge(

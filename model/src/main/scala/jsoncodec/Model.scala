@@ -76,6 +76,9 @@ trait Model extends DateTime with WaitStateCodec:
   given Encoder[ConductKizai] = deriveEncoder[ConductKizai]
   given Decoder[ConductKizai] = deriveDecoder[ConductKizai]
 
+  given Encoder[GazouLabel] = deriveEncoder[GazouLabel]
+  given Decoder[GazouLabel] = deriveDecoder[GazouLabel]
+
   given Encoder[Charge] = deriveEncoder[Charge]
   given Decoder[Charge] = deriveDecoder[Charge]
 
