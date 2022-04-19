@@ -19,7 +19,10 @@ class PracticeService extends SideMenuService:
   val right = new PracticeRight
 
   override def getElements = List(left.ele, right.ele)
-  left.ele(new PatientDisplay().ele)
+  left.ele(
+    new PatientDisplay().ele,
+    new RecordsWrapper().ele
+  )
 
   PracticeBus.addRightWidgetRequest.subscribe(ele => right.ele(ele))
   PracticeBus.startPatientRequest.subscribe(patient => startPatient(patient))
