@@ -21,14 +21,27 @@ class PracticeService extends SideMenuService:
   override def getElements = List(left.ele, right.ele)
   left.ele(
     new PatientDisplay().ele,
-    new RecordsWrapper().ele
+    new Nav().ele,
+    new RecordsWrapper().ele,
+    new Nav().ele
   )
 
   PracticeBus.addRightWidgetRequest.subscribe(ele => right.ele(ele))
   PracticeBus.startPatientRequest.subscribe(patient => startPatient(patient))
   
+  val itemsPerPage = PracticeBus.visitsPerPage
+  def calcNumPages(total: Int): Int =
+    (total + itemsPerPage - 1) / itemsPerPage
+
   def startPatient(patient: Patient): Unit =
+    PracticeBus.patientChanged.publish(None)
     PracticeBus.patientChanged.publish(Some(patient))
+    for
+      total <- Api.countVisitByPatient(patient.patientId)
+      numPages = calcNumPages(total)
+    yield 
+      PracticeBus.navSettingChanged.publish(0, numPages)
+      PracticeBus.navPageChanged.publish(0)
 
 
 class PracticeMain:

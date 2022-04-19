@@ -13,3 +13,8 @@ object PracticeBus:
   def currentPatient: Option[Patient] = currentPatientStore
   patientChanged.subscribe(currentPatientStore = _)
 
+  val navPageChanged = LocalEventPublisher[Int]
+  val navSettingChanged = LocalEventPublisher[(Int, Int)]
+
+  val visitsPerPage: Int = 10
+

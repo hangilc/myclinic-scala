@@ -10,43 +10,29 @@ class RecordsWrapper:
   import RecordsWrapper as Helper
   val ele = div()
   val unsubscribers: List[() => Unit] = List(
-    PracticeBus.patientChanged.subscribe(patientOpt =>
-      patientOpt match {
-        case Some(patient) => ()
-        case None          => ele(clear)
-      }
-    ),
-    PracticeBus.patientChanged.subscribe(optPatient =>
-      optPatient match {
-        case None          => div(clear)
-        case Some(patient) => initPatient(patient)
-      }
-    )
+    PracticeBus.navPageChanged.subscribe(page => startPage(page))
   )
 
   def dispose: Unit = 
     unsubscribers.foreach(f => f())
 
-  def initPatient(patient: Patient): Unit =
+  def startPage(page: Int): Unit =
     ele(clear)
-    for
-      total <- Api.countVisitByPatient(patient.patientId)
-      numPages = Helper.calcNumPages(total)
-      visitIds <- Api.listVisitIdByPatientReverse(
-        patient.patientId,
-        0,
-        Helper.itemsPerPage
-      )
-      _ = println(visitIds)
-      _ <- Future.sequence(visitIds.map(visitId => {
-        val rec = new Record(visitId)
-        ele(rec.ele)
-        for ex <- Api.getVisitEx(visitId)
-        yield rec.init(ex)
-      }))
-    yield ()
+    PracticeBus.currentPatient match {
+      case None => ()
+      case Some(patient) =>
+        for
+          visitIds <- Api.listVisitIdByPatientReverse(
+            patient.patientId,
+            page * PracticeBus.visitsPerPage,
+            PracticeBus.visitsPerPage
+          )
+          _ <- Future.sequence(visitIds.map(visitId => {
+            val rec = new Record(visitId)
+            ele(rec.ele)
+            for ex <- Api.getVisitEx(visitId)
+            yield rec.init(ex)
+          }))
+        yield ()
+    }
 
-object RecordsWrapper:
-  val itemsPerPage = 10
-  def calcNumPages(total: Int): Int =
-    (total + itemsPerPage - 1) / itemsPerPage
