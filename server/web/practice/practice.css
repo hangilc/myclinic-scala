@@ -60,3 +60,27 @@ button {
   font-weight: bold;
   margin-bottom: 10px;
 }
+
+.practice-visit {
+  margin-bottom: 10px;
+}
+
+.practice-visit-title {
+  background-color: #eee;
+  font-weight: bold;
+  padding: 3px 6px;
+}
+
+.practice-visit-record {
+  display: grid;
+  grid-template-columns: 50% 50%;
+}
+
+.practice-visit-record-left {
+  padding-right: 10px;
+}
+
+.practice-visit-record-right {
+  padding-left: 10px;
+}
+
