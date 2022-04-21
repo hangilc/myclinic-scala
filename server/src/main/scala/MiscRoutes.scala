@@ -38,6 +38,7 @@ object MiscService extends DateTimeQueryParam with Publisher:
   object intKoukikoureiId
       extends QueryParamDecoderMatcher[Int]("koukikourei-id")
   object intKouhiId extends QueryParamDecoderMatcher[Int]("kouhi-id")
+  object intTextId extends QueryParamDecoderMatcher[Int]("text-id")
 
   given houkatsuKensa: HoukatsuKensa = (new ConfigJava).getHoukatsuKensa
 
@@ -349,5 +350,36 @@ object MiscService extends DateTimeQueryParam with Publisher:
         visitIds <- req.as[List[Int]]
         result <- Db.batchGetVisitEx(visitIds)
       yield result)
+
+    case GET -> Root / "get-text" :? intTextId(textId) => 
+      val op = Db.getText(textId)
+      Ok(op)
+
+    case req @ POST -> Root / "enter-text" =>
+      val op = 
+        for
+          text <- req.as[Text]
+          result <- Db.enterText(text)
+          (entered, event) = result
+          _ <- publish(event)
+        yield entered
+      Ok(op)
+
+    case req @ POST -> Root / "update-text" =>
+      val op =
+        for
+          text <- req.as[Text]
+          event <- Db.updateText(text)
+          _ <- publish(event)
+        yield true
+      Ok(op)
+
+    case GET -> Root / "delete-text" :? intTextId(textId) =>
+      val op =
+        for
+          event <- Db.deleteText(textId)
+          _ <- publish(event)
+        yield true
+      Ok(op)
 
   }

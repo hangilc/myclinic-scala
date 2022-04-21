@@ -4,6 +4,7 @@ import dev.fujiwara.domq.all.{*, given}
 import java.time.LocalDateTime
 import dev.fujiwara.kanjidate.KanjiDate
 import dev.myclinic.scala.model.Text as ModelText
+import dev.myclinic.scala.webclient.{Api, global}
 
 class Text(origText: ModelText):
   val ele = div()
@@ -15,11 +16,8 @@ class Text(origText: ModelText):
     ele(clear, d.ele)
 
   def edit(text: ModelText): Unit =
-    val e = new TextEdit(text, onEditDone _, () => disp(text))
+    val e = new TextEdit(text, disp _, () => disp(text))
     ele(clear, e.ele)
-
-  def onEditDone(text: ModelText): Unit =
-    ()
 
 class TextDisp(text: ModelText):
   val ele = div(innerText := text.content)
@@ -38,4 +36,8 @@ class TextEdit(text: ModelText, onDone: ModelText => Unit, onCancel: () => Unit)
 
   def onEnter(): Unit =
     val t = new ModelText(text.textId, text.visitId, ta.value.trim)
+    for
+      _ <- Api.updateText(t)
+      up <- Api.getText(t.textId)
+    yield onDone(up)
     

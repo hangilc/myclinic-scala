@@ -280,3 +280,14 @@ object MiscApi extends ApiBase:
         patientId: Int
     ): Future[Option[(Int, LocalDate, LocalDate)]] =
       get("get-covid-2nd-shot-data", Params("patient-id" -> patientId))
+
+    def getText(textId: Int): Future[Text] = get("get-text", Params("text-id" -> textId))
+
+    def enterText(text: Text): Future[Text] =
+      post("enter-text", Params(), text)
+
+    def updateText(text: Text): Future[Boolean] =
+      post("update-text", Params(), text)
+
+    def deleteText(textId: Int): Future[Boolean] =
+      get("delete-text", Params("text-id" -> textId))

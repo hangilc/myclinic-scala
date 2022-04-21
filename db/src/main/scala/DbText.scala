@@ -30,4 +30,16 @@ trait DbText extends Mysql:
       }
     ))
 
+  def getText(textId: Int): IO[Text] = mysql(DbTextPrim.getText(textId).unique)
+
+  def enterText(text: Text): IO[(Text, AppEvent)] =
+    mysql(DbTextPrim.enterText(text))
+
+  def updateText(text: Text): IO[AppEvent] =
+    mysql(DbTextPrim.updateText(text))
+
+  def deleteText(textId: Int): IO[AppEvent] =
+    mysql(DbTextPrim.deleteText(textId))
+
+
   
