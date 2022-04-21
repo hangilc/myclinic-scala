@@ -165,5 +165,6 @@ object DbVisitExPrim:
       conductIds <- DbConductPrim.listConductIdForVisit(visitId)
       conducts <- listConductEx(conductIds)
       charge <- DbChargePrim.getCharge(visitId).option
+      payment <- DbPaymentPrim.findLastPayment(visitId).option
     yield VisitEx(visit, patient, shahokokuho, roujin, koukikourei, kouhiList,
-    texts, drugs, shinryouList, conducts, charge)
+    texts, drugs, shinryouList, conducts, charge, payment)

@@ -7,6 +7,7 @@ import dev.myclinic.scala.model.*
 object PracticeBus:
   val addRightWidgetRequest = LocalEventPublisher[HTMLElement]
   val startPatientRequest = LocalEventPublisher[Patient]
+  val startVisitRequest = LocalEventPublisher[(Patient, Visit)]
   val patientChanged = LocalEventPublisher[Option[Patient]]
 
   private var currentPatientStore: Option[Patient] = None

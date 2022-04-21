@@ -18,3 +18,6 @@ trait DbPayment extends Mysql:
     mysql(sql"""
       select count(*) from visit_payment where visit_id = ${visitId}
     """.query[Int].unique)
+
+  def findLastPayment(visitId: Int): IO[Option[Payment]] =
+    mysql(DbPaymentPrim.findLastPayment(visitId).option)

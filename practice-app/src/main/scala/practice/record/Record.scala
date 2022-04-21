@@ -1,6 +1,6 @@
 package dev.myclinic.scala.web.practiceapp.practice.record
 
-import dev.myclinic.scala.model.{Text as _, Shinryou as _, Drug as _, Conduct as _, *}
+import dev.myclinic.scala.model.{Text as _, Shinryou as _, Drug as _, Conduct as _, Payment as _, *}
 import dev.fujiwara.domq.all.{*, given}
 import org.scalajs.dom.HTMLElement
 
@@ -27,6 +27,7 @@ class Record(visitId: Int):
       new Hoken(visitEx).ele,
       new Shinryou(visitEx).ele,
       new Drug(visitEx).ele,
-      new Conduct(visitEx).ele
+      new Conduct(visitEx).ele,
+      new Payment(visitEx).ele
     )
 

@@ -19,3 +19,8 @@ object DbPaymentPrim:
       _ <- op.update.run
       event <- DbEventPrim.logPaymentCreated(payment)
     yield event
+
+  def findLastPayment(visitId: Int): Query0[Payment] =
+    sql"""
+      select * from visit_payment where visit_id = ${visitId} order by visit_id, paytime desc limit 1
+    """.query[Payment]

@@ -50,7 +50,8 @@ object Modifiers:
 
   object cls:
     def :=(s: String): Modifier[HTMLElement] = (e => 
-      s.trim.split("\\s+").foreach(c => e.classList.add(c))
+      if !s.isEmpty then
+        s.trim.split("\\s+").foreach(c => e.classList.add(c))
     )
     def :=(opt: Option[String]): Modifier[HTMLElement] = (e =>{
       opt match {

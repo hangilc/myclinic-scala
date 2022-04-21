@@ -22,7 +22,8 @@ case class VisitEx(
     drugs: List[DrugEx] = List.empty,
     shinryouList: List[ShinryouEx] = List.empty,
     conducts: List[ConductEx] = List.empty,
-    chargeOption: Option[Charge] = None
+    chargeOption: Option[Charge] = None,
+    lastPayment: Option[Payment] = None
 ):
   def toVisit: Visit =
     Visit(
@@ -50,7 +51,8 @@ object VisitEx:
       drugs: List[DrugEx],
       shinryouList: List[ShinryouEx],
       conducts: List[ConductEx],
-      chargeOption: Option[Charge]
+      chargeOption: Option[Charge],
+      lastPayment: Option[Payment]
   ): VisitEx =
     VisitEx(
       visit.visitId,
@@ -72,7 +74,8 @@ object VisitEx:
       drugs,
       shinryouList,
       conducts,
-      chargeOption
+      chargeOption,
+      lastPayment
     )
 
 case class DrugEx(

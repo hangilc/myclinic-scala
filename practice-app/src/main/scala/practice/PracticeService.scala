@@ -13,6 +13,7 @@ import dev.myclinic.scala.util.DateUtil
 import scala.util.Success
 import scala.util.Failure
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 class PracticeService extends SideMenuService:
   val left = new PracticeMain
@@ -45,8 +46,8 @@ class PracticeService extends SideMenuService:
 
 
 class PracticeMain:
-  val startPatientPublisher = new LocalEventPublisher[Patient]
-  val startVisitPublisher = new LocalEventPublisher[Patient]
+  val startPatientPublisher = PracticeBus.startPatientRequest
+  val startVisitPublisher = PracticeBus.startVisitRequest
   val ui = new PracticeMainUI
   def ele = ui.ele
   ui.choice.setBuilder(
@@ -65,6 +66,11 @@ class PracticeMain:
       patient.fullName(),
       DateUtil.calcAge(patient.birthday, LocalDate.now())
     )
+
+  private def startVisit(patient: Patient): Unit =
+    for
+      visit <- Api.startVisit(patient.patientId, LocalDateTime.now())
+    yield println(visit)
 
   def selectFromRegistered(): Unit =
     for pairs <- PracticeService.listRegisteredPatient()
@@ -107,7 +113,7 @@ class PracticeMain:
         onclick := (() => {
           d.close()
           search.selected.foreach(patient =>
-            startVisitPublisher.publish(patient)
+            startVisit(patient)
           )
         })
       ),

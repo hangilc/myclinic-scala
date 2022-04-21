@@ -90,7 +90,7 @@ object MiscApi extends ApiBase:
     def drawReceipt(data: ReceiptDrawerData): Future[List[Op]] =
       post("draw-receipt", Params(), data)
 
-    def startVisit(patientId: Int, at: LocalDateTime): Future[Boolean] =
+    def startVisit(patientId: Int, at: LocalDateTime): Future[Visit] =
       get("start-visit", Params("patient-id" -> patientId, "at" -> at))
 
     def findAvailableShahokokuho(

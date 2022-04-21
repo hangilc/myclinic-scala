@@ -74,7 +74,7 @@ object Db
       wqEventOpt <- DbWqueuePrim.tryDeleteWqueue(payment.visitId)
     yield List(paymentEvent) ++ wqEventOpt.toList)
 
-  def startVisit(patientId: Int, at: LocalDateTime): IO[List[AppEvent]] =
+  def startVisit(patientId: Int, at: LocalDateTime): IO[(Visit, List[AppEvent])] =
     val date = at.toLocalDate
     mysql(
       for
@@ -112,7 +112,7 @@ object Db
         wqCreatedEvent <-
           val wqueue = Wqueue(enteredVisit.visitId, WaitState.WaitExam)
           DbWqueuePrim.enterWqueue(wqueue)
-      yield List(visitCreatedEvent, wqCreatedEvent)
+      yield (enteredVisit, List(visitCreatedEvent, wqCreatedEvent))
     )
 
   def deleteShahokokuho(shahokokuhoId: Int): IO[AppEvent] =

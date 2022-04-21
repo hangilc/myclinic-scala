@@ -1,7 +1,7 @@
 package dev.myclinic.scala.server
 
-import cats.effect._
 import cats.syntax.all._
+import cats.effect._
 import org.http4s._
 import org.http4s.dsl.io._
 import org.http4s.implicits._
@@ -140,12 +140,13 @@ object MiscService extends DateTimeQueryParam with Publisher:
     case GET -> Root / "start-visit" :? intPatientId(patientId) +& atDateTime(
           at
         ) =>
-      Ok(
+      val op =  
         for
-          events <- Db.startVisit(patientId, at)
+          result <- Db.startVisit(patientId, at)
+          (visit, events) = result
           _ <- publishAll(events)
-        yield true
-      )
+        yield visit
+      Ok(op)
 
     case GET -> Root / "find-available-shahokokuho" :? intPatientId(
           patientId
