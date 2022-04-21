@@ -60,7 +60,8 @@ object Modifiers:
       }
     })
     def :-(a: String): Modifier[HTMLElement] = (e => 
-      a.trim.split("\\s+").foreach(c => e.classList.remove(c))
+      if !a.isEmpty then
+        a.trim.split("\\s+").foreach(c => e.classList.remove(c))
     )
 
   val clear: Modifier[HTMLElement] = (e => e.innerHTML = "")

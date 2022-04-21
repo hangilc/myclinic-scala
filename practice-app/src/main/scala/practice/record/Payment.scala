@@ -15,7 +15,7 @@ class Payment(visit: VisitEx):
 
   def setPaymentStatus(status: Payment.PaymentStatus): Unit =
     statusSpan(innerText := status.rep)
-    //statusSpan(cls :- Payment.PaymentStatus.clsList)
+    statusSpan(cls :- Payment.PaymentStatus.clsList)
     statusSpan(cls := status.cls)
 
 object Payment:
@@ -30,8 +30,9 @@ object Payment:
   enum PaymentStatus(val rep: String, val cls: String = ""):
     case NotYet extends PaymentStatus("")
     case Done extends PaymentStatus("")
-    case UnderPayment extends PaymentStatus("領収額不足", "under-payment")
-    case OverPayment extends PaymentStatus("領収額超過", "over-payment")
+    case NoPayment extends PaymentStatus("（未収）", "practice-no-payment")
+    case UnderPayment extends PaymentStatus("領収額不足", "practice-under-payment")
+    case OverPayment extends PaymentStatus("領収額超過", "practice-over-payment")
 
   object PaymentStatus:
     lazy val clsList: String = PaymentStatus.values.map(_.cls).toSet.mkString(" ")
@@ -40,6 +41,7 @@ object Payment:
     import PaymentStatus.*
     (visit.chargeOption, visit.lastPayment) match {
       case (None, _) => NotYet
+      case (Some(_), None) => NoPayment
       case (Some(charge), Some(payment)) if charge.charge > payment.amount => UnderPayment
       case (Some(charge), Some(payment)) if charge.charge < payment.amount => OverPayment
       case _ => Done
