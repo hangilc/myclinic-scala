@@ -16,21 +16,32 @@ class Text(origText: ModelText):
     ele(clear, d.ele)
 
   def edit(text: ModelText): Unit =
-    val e = new TextEdit(text, disp _, () => disp(text))
+    val e = new TextEdit(
+      text,
+      onDone = (disp _),
+      onCancel = () => disp(text),
+      onDelete = () => ele.remove()
+    )
     ele(clear, e.ele)
 
 class TextDisp(text: ModelText):
-  val ele = div(innerText := text.content)
+  val c = if text.content.isEmpty then "（空白）" else text.content
+  val ele = div(innerText := c)
 
-class TextEdit(text: ModelText, onDone: ModelText => Unit, onCancel: () => Unit):
+class TextEdit(
+    text: ModelText,
+    onDone: ModelText => Unit,
+    onCancel: () => Unit,
+    onDelete: () => Unit
+):
   val ta = textarea(value := text.content, cls := "practice-text-edit-textarea")
   val ele = div(
     ta,
     div(
       a("入力", onclick := (onEnter _)),
       a("キャンセル", onclick := onCancel),
-      a("削除"),
-      a("コピー"),
+      a("削除", onclick := (doDelete _)),
+      a("コピー")
     )
   )
 
@@ -40,4 +51,9 @@ class TextEdit(text: ModelText, onDone: ModelText => Unit, onCancel: () => Unit)
       _ <- Api.updateText(t)
       up <- Api.getText(t.textId)
     yield onDone(up)
-    
+
+  def doDelete(): Unit =
+    ShowMessage.confirm("この文章を削除していいですか？")(() => {
+      for _ <- Api.deleteText(text.textId)
+      yield onDelete()
+    })

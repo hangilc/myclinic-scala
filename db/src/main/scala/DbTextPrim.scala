@@ -53,7 +53,5 @@ object DbTextPrim:
       t <- getText(textId).unique
       affected <- q.update.run
       _ = if affected != 1 then throw new RuntimeException(s"Failed to delete text: ${textId}")
-      ndel <- q.update.run
-      _ = if ndel != 1 then throw new RuntimeException(s"Failed to delete multiple texts: ${textId}")
       event <- DbEventPrim.logTextDeleted(t)
     yield event
