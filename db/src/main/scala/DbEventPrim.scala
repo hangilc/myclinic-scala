@@ -161,3 +161,12 @@ object DbEventPrim:
   def logKouhiDeleted(a: Kouhi): ConnectionIO[AppEvent] =
     enterAppEvent("kouhi", DELETED, a.asJson.toString)
 
+  def logTextCreated(a: Text): ConnectionIO[AppEvent] =
+    enterAppEvent("text", CREATED, a.asJson.toString)
+
+  def logTextUpdated(a: Text): ConnectionIO[AppEvent] =
+    enterAppEvent("text", UPDATED, a.asJson.toString)
+
+  def logTextDeleted(a: Text): ConnectionIO[AppEvent] =
+    enterAppEvent("text", DELETED, a.asJson.toString)
+

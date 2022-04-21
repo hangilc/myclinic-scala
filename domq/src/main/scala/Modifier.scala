@@ -17,6 +17,7 @@ import org.scalajs.dom.HTMLAnchorElement
 import org.scalajs.dom.KeyboardEvent
 import org.scalajs.dom.HTMLButtonElement
 import org.scalajs.dom.SVGElement
+import org.scalajs.dom.HTMLTextAreaElement
 
 trait Modifier[-E]:
   def modify(e: E): Unit
@@ -28,12 +29,10 @@ object Modifier:
 object Modifiers:
   given Conversion[String, Modifier[HTMLElement]] with
     def apply(s: String): Modifier[HTMLElement] =
-      Modifier[HTMLElement](
-        e => {
-          val t = document.createTextNode(s)
-          e.appendChild(t)
-        }
-      )
+      Modifier[HTMLElement](e => {
+        val t = document.createTextNode(s)
+        e.appendChild(t)
+      })
   given Conversion[HTMLElement, Modifier[HTMLElement]] with
     def apply(e: HTMLElement): Modifier[HTMLElement] =
       Modifier[HTMLElement](ele => ele.appendChild(e))
@@ -41,7 +40,6 @@ object Modifiers:
     def apply(e: SVGElement): Modifier[HTMLElement] =
       Modifier[HTMLElement](ele => ele.appendChild(e))
 
-  
   abstract class Assign[E, A]:
     def :=(a: A): Modifier[E]
   object Assign:
@@ -49,19 +47,21 @@ object Modifiers:
       def :=(a: A): Modifier[E] = Modifier[E](e => m(e, a))
 
   object cls:
-    def :=(s: String): Modifier[HTMLElement] = (e => 
-      if !s.isEmpty then
-        s.trim.split("\\s+").foreach(c => e.classList.add(c))
+    def :=(s: String): Modifier[HTMLElement] = (
+        e =>
+          if !s.isEmpty then
+            s.trim.split("\\s+").foreach(c => e.classList.add(c))
     )
-    def :=(opt: Option[String]): Modifier[HTMLElement] = (e =>{
+    def :=(opt: Option[String]): Modifier[HTMLElement] = (e => {
       opt match {
         case Some(s) => :=(s).modify(e)
-        case None => ()
+        case None    => ()
       }
     })
-    def :-(a: String): Modifier[HTMLElement] = (e => 
-      if !a.isEmpty then
-        a.trim.split("\\s+").foreach(c => e.classList.remove(c))
+    def :-(a: String): Modifier[HTMLElement] = (
+        e =>
+          if !a.isEmpty then
+            a.trim.split("\\s+").foreach(c => e.classList.remove(c))
     )
 
   val clear: Modifier[HTMLElement] = (e => e.innerHTML = "")
@@ -70,9 +70,7 @@ object Modifiers:
     list.foreach(e.appendChild(_))
   })
 
-  val cb = Assign[HTMLElement, HTMLElement => Unit](
-    (e, handler) => handler(e)
-  )
+  val cb = Assign[HTMLElement, HTMLElement => Unit]((e, handler) => handler(e))
 
   class Attr(name: String):
     def :=(arg: String) = Modifier[HTMLElement](e => e.setAttribute(name, arg))
@@ -80,18 +78,22 @@ object Modifiers:
   def attr(name: String) = new Attr(name)
 
   class AttrNS(namespace: String, name: String):
-    def :=(arg: String) = Modifier[HTMLElement](
-      e => e.setAttributeNS(namespace, name, arg)
-    )
+    def :=(arg: String) =
+      Modifier[HTMLElement](e => e.setAttributeNS(namespace, name, arg))
   def attrNS(namespace: String, name: String) = AttrNS(namespace, name)
 
   object value:
-    def :=(arg: String): Modifier[HTMLInputElement | HTMLOptionElement] =
-      Modifier[HTMLInputElement | HTMLOptionElement]((e: HTMLInputElement | HTMLOptionElement) =>
-        e match {
-          case i: HTMLInputElement => i.value = arg
-          case o: HTMLOptionElement => o.value = arg
-        })
+    def :=(
+        arg: String
+    ): Modifier[HTMLInputElement | HTMLOptionElement | HTMLTextAreaElement] =
+      Modifier[HTMLInputElement | HTMLOptionElement | HTMLTextAreaElement](
+        (e: HTMLInputElement | HTMLOptionElement | HTMLTextAreaElement) =>
+          e match {
+            case i: HTMLInputElement  => i.value = arg
+            case o: HTMLOptionElement => o.value = arg
+            case t: HTMLTextAreaElement => t.value = arg
+          }
+      )
 
   val id = attr("id")
 
@@ -99,31 +101,29 @@ object Modifiers:
 
   object disabled:
     def :=(arg: Boolean): Modifier[HTMLInputElement | HTMLButtonElement] =
-      Modifier[HTMLInputElement | HTMLButtonElement]((e: HTMLInputElement | HTMLButtonElement) =>
-        e match {
-          case i: HTMLInputElement => i.disabled = arg
-          case b: HTMLButtonElement => b.disabled = arg
-        }
+      Modifier[HTMLInputElement | HTMLButtonElement](
+        (e: HTMLInputElement | HTMLButtonElement) =>
+          e match {
+            case i: HTMLInputElement  => i.disabled = arg
+            case b: HTMLButtonElement => b.disabled = arg
+          }
       )
 
   object enabled:
     def :=(arg: Boolean): Modifier[HTMLInputElement | HTMLButtonElement] =
       disabled := !arg
 
-  val checked = Assign[HTMLInputElement, Boolean](
-    (e, b) => e.checked = b
-  )
+  val checked = Assign[HTMLInputElement, Boolean]((e, b) => e.checked = b)
 
   val name: Attr = attr("name")
 
-  def css(f: CSSStyleDeclaration => Unit) = Modifier[HTMLElement](
-    e => f(e.style)
-  )
+  def css(f: CSSStyleDeclaration => Unit) =
+    Modifier[HTMLElement](e => f(e.style))
 
   abstract class AssignCss:
     def :=(arg: String): Modifier[HTMLElement]
   object AssignCss:
-    def apply(f: (CSSStyleDeclaration, String) => Unit) = 
+    def apply(f: (CSSStyleDeclaration, String) => Unit) =
       new AssignCss:
         def :=(arg: String) = css(style => f(style, arg))
 
@@ -160,8 +160,8 @@ object Modifiers:
   val textAlign = AssignCss((s, v) => s.textAlign = v)
   val stroke = AssignCss((s, v) => s.stroke = v)
   val zIndex = Assign[HTMLElement, Int]((e, v) => e.style.zIndex = v.toString)
-  val showHide = Assign[HTMLElement, Boolean]((e, b) => 
-    if b then e(displayDefault) else e(displayNone)  
+  val showHide = Assign[HTMLElement, Boolean]((e, b) =>
+    if b then e(displayDefault) else e(displayNone)
   )
   val fontWeight = AssignCss((s, v) => s.fontWeight = v)
 
@@ -182,19 +182,21 @@ object Modifiers:
 
   class EventListener[Ele <: HTMLElement, Ev](name: String):
     def :=(h: Ev => Unit) = Modifier[Ele](e => e.addEventListener(name, h))
-    def :=(h: () => Unit) = Modifier[Ele](e => e.addEventListener(name, (_: Ev) => h()))
-    def :=(h: js.Function1[Ev, Unit]) = Modifier[Ele]( e =>
+    def :=(h: () => Unit) =
+      Modifier[Ele](e => e.addEventListener(name, (_: Ev) => h()))
+    def :=(h: js.Function1[Ev, Unit]) = Modifier[Ele](e =>
       if h == null then System.err.println(s"null handler for add ${name}")
       e.addEventListener(name, h)
     )
-    def :-(h: js.Function1[Ev, Unit]) = Modifier[Ele]( e =>
+    def :-(h: js.Function1[Ev, Unit]) = Modifier[Ele](e =>
       if h == null then System.err.println(s"null handler for remove ${name}")
       e.removeEventListener(name, h)
     )
 
   val onsubmit = new EventListener[HTMLFormElement, Event]("submit"):
-    override def :=(h: Event => Unit)= Modifier[HTMLFormElement](
-      e => e.addEventListener("submit",
+    override def :=(h: Event => Unit) = Modifier[HTMLFormElement](e =>
+      e.addEventListener(
+        "submit",
         (ev: Event) => {
           ev.preventDefault()
           ev.stopPropagation()
@@ -214,7 +216,8 @@ object Modifiers:
   val oninput = EventListener[HTMLElement, Event]("input")
   val onkeyup = EventListener[HTMLElement, KeyboardEvent]("keyup")
   val onkeydown = EventListener[HTMLElement, KeyboardEvent]("keydown")
-  def oncustomevent[T](name: String) = EventListener[HTMLElement, CustomEvent[T]](name)
+  def oncustomevent[T](name: String) =
+    EventListener[HTMLElement, CustomEvent[T]](name)
 
   private lazy val textAreaWorkarea = document.createElement("textarea")
 
@@ -238,4 +241,3 @@ object Modifiers:
         })
       )
     })
-
