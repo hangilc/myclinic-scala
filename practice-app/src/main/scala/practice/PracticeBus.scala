@@ -13,6 +13,7 @@ object PracticeBus:
   def currentPatient: Option[Patient] = currentPatientStore
   def currentVisitId: Option[Int] = currentVisitIdStore
   def currentTempVisitId: Option[Int] = currentTempVisitIdStore
+  val currentPatient
 
   val navPageChanged = LocalEventPublisher[Int]
   val navSettingChanged = LocalEventPublisher[(Int, Int)]
