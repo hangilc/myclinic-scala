@@ -6,13 +6,13 @@ import dev.myclinic.scala.model.*
 
 object PracticeBus:
   val addRightWidgetRequest = LocalEventPublisher[HTMLElement]
-  val startPatientRequest = LocalEventPublisher[Patient]
-  val startVisitRequest = LocalEventPublisher[(Patient, Visit)]
-  val patientChanged = LocalEventPublisher[Option[Patient]]
 
   private var currentPatientStore: Option[Patient] = None
+  private var currentVisitIdStore: Option[Int] = None
+  private var currentTempVisitIdStore: Option[Int] = None
   def currentPatient: Option[Patient] = currentPatientStore
-  patientChanged.subscribe(currentPatientStore = _)
+  def currentVisitId: Option[Int] = currentVisitIdStore
+  def currentTempVisitId: Option[Int] = currentTempVisitIdStore
 
   val navPageChanged = LocalEventPublisher[Int]
   val navSettingChanged = LocalEventPublisher[(Int, Int)]

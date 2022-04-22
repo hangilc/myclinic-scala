@@ -78,9 +78,9 @@ button {
   font-weight: bold;
 }
 
-.practice-visit-title-pulldown a {
+/* .practice-visit-title-pulldown a {
   color: black;
-}
+} */
 
 .practice-visit-record {
   display: grid;

@@ -28,15 +28,19 @@ class PracticeService extends SideMenuService:
   )
 
   PracticeBus.addRightWidgetRequest.subscribe(ele => right.ele(ele))
-  PracticeBus.startPatientRequest.subscribe(patient => startPatient(patient))
+  PracticeBus.patientChanged.subscribe(onPatientChanged _)
   
   val itemsPerPage = PracticeBus.visitsPerPage
   def calcNumPages(total: Int): Int =
     (total + itemsPerPage - 1) / itemsPerPage
 
+  def onPatientChanged(patientOpt: Option[Patient]): Unit =
+    patientOpt match {
+      case None => endPatient
+      case Some(patient) => startPatient(patient)
+    }
+
   def startPatient(patient: Patient): Unit =
-    PracticeBus.patientChanged.publish(None)
-    PracticeBus.patientChanged.publish(Some(patient))
     for
       total <- Api.countVisitByPatient(patient.patientId)
       numPages = calcNumPages(total)
@@ -44,10 +48,9 @@ class PracticeService extends SideMenuService:
       PracticeBus.navSettingChanged.publish(0, numPages)
       PracticeBus.navPageChanged.publish(0)
 
+  def endPatient: Unit = ()
 
 class PracticeMain:
-  val startPatientPublisher = PracticeBus.startPatientRequest
-  val startVisitPublisher = PracticeBus.startVisitRequest
   val ui = new PracticeMainUI
   def ele = ui.ele
   ui.choice.setBuilder(
@@ -87,7 +90,9 @@ class PracticeMain:
           onclick := (() =>
             sel.marked.foreach(pair =>
               d.close()
-              startVisitPublisher.publish(_)
+              pair match {
+                case (patient, visit) => PracticeBus.startPatient(patient, Some(visit.visitId))
+              }
             )
           )
         ),
@@ -122,7 +127,7 @@ class PracticeMain:
         onclick := (() => {
           d.close()
           search.selected.foreach(patient =>
-            startPatientPublisher.publish(patient)
+            PracticeBus.startPatient(patient, None)
           )
         })
       ),
@@ -176,7 +181,7 @@ class PracticeMain:
         onclick := (() => {
           d.close()
           selection.marked.foreach(patient =>
-            startPatientPublisher.publish(patient)
+            PracticeBus.startPatient(patient, None)
           )
         })
       ),
