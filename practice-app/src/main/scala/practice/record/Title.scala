@@ -6,8 +6,18 @@ import dev.fujiwara.kanjidate.KanjiDate
 
 class Title(at: LocalDateTime):
   import Title as Helper
+  val pullDown = PullDownLink("操作")
+  pullDown.setBuilder(List(
+    "この診察を削除" -> (() => ()),
+    "暫定診察に設定" -> (() => ()),
+    "暫定診察の解除" -> (() => ()),
+    "診療明細" -> (() => ()),
+    "負担割オーバーライド" -> (() => ()),
+    "未収リストへ" -> (() => ())
+  ))
   val ele = div(cls := "practice-visit-title",
-    innerText := Helper.formatVisitTime(at)
+    span(cls := "practice-visit-title-date", innerText := Helper.formatVisitTime(at)),
+    pullDown.link(cls := "practice-visit-title-manip")
   )
 
 

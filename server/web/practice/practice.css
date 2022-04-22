@@ -69,8 +69,17 @@ button {
 
 .practice-visit-title {
   background-color: #eee;
-  font-weight: bold;
   padding: 3px 6px;
+  display: flex;
+  justify-content: space-between
+}
+
+.practice-visit-title-date {
+  font-weight: bold;
+}
+
+.practice-visit-title-manip a {
+  color: black;
 }
 
 .practice-visit-record {
