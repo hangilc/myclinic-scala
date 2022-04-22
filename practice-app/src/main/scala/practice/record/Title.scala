@@ -3,10 +3,13 @@ package dev.myclinic.scala.web.practiceapp.practice.record
 import dev.fujiwara.domq.all.{*, given}
 import java.time.LocalDateTime
 import dev.fujiwara.kanjidate.KanjiDate
+import org.scalajs.dom.HTMLElement
 
 class Title(at: LocalDateTime):
   import Title as Helper
-  val pullDown = PullDownLink("操作")
+  val pullDown = PullDownLink("操作", 
+    wrapperPostConstruct = (e => e(cls := "practice-visit-title-pulldown"))
+  )
   pullDown.setBuilder(List(
     "この診察を削除" -> (() => ()),
     "暫定診察に設定" -> (() => ()),

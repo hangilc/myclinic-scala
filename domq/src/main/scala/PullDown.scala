@@ -40,7 +40,7 @@ class PullDownMenu:
     ZIndexManager.release(zIndexMenu)
     ZIndexManager.release(zIndexScreen)
 
-class PullDownLink(label: String):
+class PullDownLink(label: String, wrapperPostConstruct: HTMLElement => Unit = (_ => ())):
   private var builder
       : (HTMLElement, PullDown.CloseFun, PullDown.Callback) => Unit =
     (wrapper, close, cb) => cb()
@@ -59,20 +59,23 @@ class PullDownLink(label: String):
     builder = b
 
   def setBuilder(items: List[(String, () => Unit)]): Unit =
-    builder = (wrapper, close, cb) => 
+    setBuilder { (wrapper, close, cb) =>
       populateWrapper(wrapper, close, items)
       cb()
+    }
 
   def setBuilder(futItems: () => Future[List[(String, () => Unit)]]): Unit =
-    builder = (wrapper, close, cb) => {
-      val f = for
-          items <- futItems()
-        yield
-          populateWrapper(wrapper, close, items)
-          cb()
-      f.onComplete {
-        case Success(_) => ()
-        case Failure(ex) => onError(ex)
+    setBuilder { (wrapper, close, cb) =>
+      {
+        val f =
+          for items <- futItems()
+          yield
+            populateWrapper(wrapper, close, items)
+            cb()
+        f.onComplete {
+          case Success(_)  => ()
+          case Failure(ex) => onError(ex)
+        }
       }
     }
 
@@ -81,6 +84,7 @@ class PullDownLink(label: String):
       close: () => Unit,
       items: List[(String, () => Unit)]
   ): Unit =
+    wrapperPostConstruct(wrapper)
     items.foreach { case (label, handler) =>
       val anchor = a(label)(onclick := (() => {
         close()
@@ -89,8 +93,8 @@ class PullDownLink(label: String):
       wrapper(anchor)
     }
 
-object PullDownLink:
-  def apply(label: String): PullDownLink = new PullDownLink(label)
+// object PullDownLink:
+//   def apply(label: String): PullDownLink = new PullDownLink(label)
 
 object PullDown:
   type CloseFun = () => Unit
