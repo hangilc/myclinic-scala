@@ -13,10 +13,14 @@ object PracticeBus:
   def currentPatient: Option[Patient] = currentPatientStore
   def currentVisitId: Option[Int] = currentVisitIdStore
   def currentTempVisitId: Option[Int] = currentTempVisitIdStore
-  val currentPatient
+  val patientChanged = LocalEventPublisher[Option[Patient]]
+  val visitIdChanged = LocalEventPublisher[Option[Int]]
+  val tempVisitIdChanged = LocalEventPublisher[Option[Int]]
+  patientChanged.subscribe(currentPatientStore = _)
+  visitIdChanged.subscribe(currentVisitIdStore = _)
+  tempVisitIdChanged.subscribe(currentTempVisitIdStore = _)
 
   val navPageChanged = LocalEventPublisher[Int]
   val navSettingChanged = LocalEventPublisher[(Int, Int)]
 
   val visitsPerPage: Int = 10
-

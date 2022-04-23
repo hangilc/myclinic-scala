@@ -50,6 +50,16 @@ object DbWqueuePrim:
       event <- DbEventPrim.logWqueueCreated(entered)
     yield event
 
+  def updateWqueue(wq: Wqueue): ConnectionIO[AppEvent] =
+    val op = sql"""
+      update wqueue set wait_state = ${wq.waitState.code} where visit_id = ${wq.visitId}
+    """
+    for
+      affected <- op.update.run
+      _ = if affected != 1 then throw new RuntimeException(s"Failed to update wqueue: ${wq}")
+      event <- DbEventPrim.logWqueueUpdated(wq)
+    yield event
+
   def listWqueue(): Query0[Wqueue] =
     sql"""
       select visit_id, wait_state from wqueue order by visit_id

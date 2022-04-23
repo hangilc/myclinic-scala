@@ -15,3 +15,9 @@ import java.util.regex.Pattern
 trait DbWqueue extends Mysql:
   def listWqueue(): IO[List[Wqueue]] =
     mysql(DbWqueuePrim.listWqueue().to[List])
+
+  def findWqueue(visitId: Int): IO[Option[Wqueue]] =
+    mysql(DbWqueuePrim.getWqueue(visitId).option)
+
+  def updateWqueue(wq: Wqueue): IO[AppEvent] =
+    mysql(DbWqueuePrim.updateWqueue(wq))

@@ -202,6 +202,18 @@ object RestService extends DateTimeQueryParam with Publisher:
     case GET -> Root / "find-wqueue-full" :? intVisitId(visitId) =>
       Ok(Db.findWqueueFull(visitId))
 
+    case GET -> Root / "find-wqueue" :? intVisitId(visitId) =>
+      Ok(Db.findWqueue(visitId))
+
+    case req @ POST -> Root / "update-wqueue" =>
+      val op =
+        for
+          wq <- req.as[Wqueue]
+          event <- Db.updateWqueue(wq)
+          _ <- publish(event)
+        yield true
+      Ok(op)
+
     case req @ POST -> Root / "enter-patient" =>
       Ok {
         for
