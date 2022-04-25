@@ -13,31 +13,40 @@ class Title(visit: VisitEx):
   val unsubscribers = List(
     PracticeBus.tempVisitIdChanged.subscribe(onTempVisitIdChange _)
   )
-  val pullDown = PullDownLink("操作", 
+  val pullDown = PullDownLink(
+    "操作",
     wrapperPostConstruct = (e => e(cls := "practice-visit-title-pulldown"))
   )
-  pullDown.setBuilder(List(
-    "この診察を削除" -> (() => ()),
-    "暫定診察に設定" -> (() => ()),
-    "暫定診察の解除" -> (() => ()),
-    "診療明細" -> (() => ()),
-    "負担割オーバーライド" -> (() => ()),
-    "未収リストへ" -> (() => ())
-  ))
-  val ele = div(cls := "practice-visit-title",
-    span(cls := "practice-visit-title-date", innerText := Helper.formatVisitTime(at)),
+  pullDown.setBuilder(
+    List(
+      "この診察を削除" -> (() => ()),
+      "暫定診察に設定" -> (setTempVisitId _),
+      "暫定診察の解除" -> (() => { PracticeBus.tempVisitIdChanged.publish(None); () }),
+      "診療明細" -> (() => ()),
+      "負担割オーバーライド" -> (() => ()),
+      "未収リストへ" -> (() => ())
+    )
+  )
+  val ele = div(
+    cls := "practice-visit-title",
+    span(
+      cls := "practice-visit-title-date",
+      innerText := Helper.formatVisitTime(at)
+    ),
     pullDown.link(cls := "practice-visit-title-manip")
   )
+
+  def setTempVisitId(): Unit =
+    if PracticeBus.currentVisitId.isEmpty then
+      PracticeBus.tempVisitIdChanged.publish(Some(visit.visitId))
 
   def onTempVisitIdChange(optTempVisitId: Option[Int]): Unit =
     optTempVisitId match {
       case None => ele(cls :- "temp-visit")
-      case Some(visitId) => 
+      case Some(visitId) =>
         if visitId == visit.visitId then ele(cls := "temp-visit")
+        else ele(cls :- "temp-visit")
     }
-
-  def dispose: Unit =
-    unsubscribers.foreach(_())
 
 object Title:
   def formatVisitTime(at: LocalDateTime): String =
@@ -48,3 +57,4 @@ object Title:
     val p2 = KanjiDate.timeToKanji(at.toLocalTime)
     p1 + p2
 
+  given Dispose[Title] = title => title.unsubscribers.foreach(_())

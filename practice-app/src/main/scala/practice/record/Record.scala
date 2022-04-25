@@ -46,5 +46,5 @@ object Record:
   given Comp[Record] = _.ele
   given Dispose[Record] =
     rec =>
-      rec.title.dispose
+      summon[Dispose[Title]].dispose(rec.title)
 

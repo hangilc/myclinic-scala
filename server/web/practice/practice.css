@@ -74,6 +74,10 @@ button {
   justify-content: space-between
 }
 
+.practice-visit-title.temp-visit {
+  background-color: #9ff;
+}
+
 .practice-visit-title-date {
   font-weight: bold;
 }
