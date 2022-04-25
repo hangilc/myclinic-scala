@@ -10,6 +10,7 @@ import scala.concurrent.Future
 
 class SelectPatientByDateWidget:
   import SelectPatientByDateWidget as Helper
+  val patientSelected = new LocalEventPublisher[Patient]
   val origDate: LocalDate = LocalDate.now()
   val dateSpan = span
   val patientsDiv = div
@@ -37,7 +38,7 @@ class SelectPatientByDateWidget:
     })
 
   def onItemClick(patient: Patient, visit: Visit): Unit =
-    PracticeBus.startPatient(patient, None)
+    patientSelected.publish(patient)
 
 object SelectPatientByDateWidget:
   def formatDate(date: LocalDate): String =

@@ -228,6 +228,7 @@ class PracticeMain:
 
   def selectByDate(): Unit =
     val widget = new SelectPatientByDateWidget()
+    widget.patientSelected.subscribe(patient => startPatient(patient, None))
     PracticeBus.addRightWidgetRequest.publish(widget.ele)
 
 object PracticeService:

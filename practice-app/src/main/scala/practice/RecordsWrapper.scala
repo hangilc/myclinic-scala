@@ -5,9 +5,11 @@ import dev.myclinic.scala.model.*
 import dev.myclinic.scala.webclient.{Api, global}
 import scala.concurrent.Future
 import dev.myclinic.scala.web.practiceapp.practice.record.Record
+import dev.myclinic.scala.web.appbase.SortedCompList
 
 class RecordsWrapper:
   import RecordsWrapper as Helper
+  private var records: List[Record] = List.empty
   val ele = div()
   val unsubscribers: List[() => Unit] = List(
     PracticeBus.navPageChanged.subscribe(page => startPage(page))
@@ -15,12 +17,21 @@ class RecordsWrapper:
 
   def dispose: Unit = 
     unsubscribers.foreach(f => f())
+    clearRecords
+
+  def clearRecords: Unit =
+    records.foreach(record => {
+      record.ele.remove()
+      record.dispose
+    })
+    records = List.empty
 
   def startPage(page: Int): Unit =
     ele(clear)
     PracticeBus.currentPatient match {
       case None => ()
       case Some(patient) =>
+        clearRecords
         for
           visitIds <- Api.listVisitIdByPatientReverse(
             patient.patientId,
@@ -28,10 +39,10 @@ class RecordsWrapper:
             PracticeBus.visitsPerPage
           )
           _ <- Future.sequence(visitIds.map(visitId => {
-            val rec = new Record(visitId)
-            ele(rec.ele)
             for ex <- Api.getVisitEx(visitId)
-            yield rec.init(ex)
+            yield
+              val rec = new Record(ex)
+              records = SortedCompList.insert(records, rec, ele)
           }))
         yield ()
     }

@@ -68,7 +68,7 @@ object ScannerRow:
     val ele = div(
       select.ele,
       cancelLink("キャンセル"),
-      a("更新", onclick := (() => onRefresh.publish(()))),
+      a("更新", onclick := (() => { onRefresh.publish(()); () })),
       a("選択解除", onclick := (() => onUnselect()))
     )
 
