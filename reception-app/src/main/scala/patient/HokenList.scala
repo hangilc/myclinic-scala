@@ -4,6 +4,7 @@ import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.{Icons, Form, ErrorBox, Modifier, CustomEvent, DataSource}
+import dev.fujiwara.domq.TypeClasses.Comp
 import scala.language.implicitConversions
 import org.scalajs.dom.{HTMLElement, HTMLInputElement}
 import scala.scalajs.js
@@ -22,7 +23,6 @@ import dev.fujiwara.domq.DomqUtil
 import dev.myclinic.scala.web.appbase.{EventFetcher}
 import dev.myclinic.scala.web.appbase.SyncedDataSource
 import dev.myclinic.scala.web.appbase.ListOfSortedComp
-import dev.myclinic.scala.web.appbase.Comp
 import dev.myclinic.scala.web.appbase.DeleteNotifier
 import dev.myclinic.scala.web.appbase.ElementEvent.*
 

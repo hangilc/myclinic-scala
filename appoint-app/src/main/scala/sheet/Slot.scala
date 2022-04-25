@@ -6,7 +6,6 @@ import dev.fujiwara.domq.all.{*, given}
 import dev.myclinic.scala.web.appoint.sheet.appointdialog.EditAppointDialog
 import org.scalajs.dom.MouseEvent
 import org.scalajs.dom.HTMLElement
-import dev.myclinic.scala.web.appbase.Comp
 import dev.myclinic.scala.web.appoint.CustomEvents
 
 case class Slot(dsrc: SyncedDataSource2[Appoint, AppointTime]):

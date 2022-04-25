@@ -10,7 +10,7 @@ import dev.myclinic.scala.model.{
 }
 import dev.fujiwara.domq.all.{*, given}
 import org.scalajs.dom.HTMLElement
-import dev.myclinic.scala.web.appbase.Comp
+import dev.fujiwara.domq.TypeClasses.{Comp, Dispose}
 
 class Record(visitEx: VisitEx):
   val title = new Title(visitEx)
@@ -41,10 +41,10 @@ class Record(visitEx: VisitEx):
       new Payment(visitEx).ele
     )
 
-  def dispose: Unit =
-    title.dispose
-
 object Record:
-  given Ordering[Record] = Ordering.by(r => r.visitId)
+  given Ordering[Record] = Ordering.by[Record, Int](r => r.visitId).reverse
   given Comp[Record] = _.ele
+  given Dispose[Record] =
+    rec =>
+      rec.title.dispose
 

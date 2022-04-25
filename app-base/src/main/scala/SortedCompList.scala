@@ -5,7 +5,6 @@ import scala.math.Ordered.orderingToOrdered
 import dev.fujiwara.domq.all.{*, given}
 import dev.myclinic.scala.model.DataId
 
-
 object SortedCompList:
   def insert[C: Ordering](
       sorted: List[C],

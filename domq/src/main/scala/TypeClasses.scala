@@ -13,6 +13,18 @@ import cats.*
 import cats.syntax.all.*
 
 object TypeClasses:
+  trait Comp[T]:
+    def ele(t: T): HTMLElement
+
+  object Comp:
+    given Comp[HTMLElement] = e => e
+
+  trait Dispose[T]:
+    def dispose(t: T): Unit
+
+  object Dispose:
+    given [T]: Dispose[T] = _ => ()
+  
   trait ElementProvider[T]:
     def getElement(t: T): HTMLElement
 

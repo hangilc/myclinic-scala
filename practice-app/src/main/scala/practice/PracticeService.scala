@@ -82,7 +82,7 @@ class PracticeMain:
       _ <- endPatient
       _ <- PracticeBus.tempVisitIdChanged.publish(None)
       _ <- PracticeBus.visitIdChanged.publish(None)
-      _ <- PracticeBus.patientChanged.publish(None)
+      _ <- PracticeBus.patientChanged.publish(Some(patient))
     yield ()
 
   private def endPatient: Future[Unit] =

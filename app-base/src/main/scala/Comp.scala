@@ -8,8 +8,8 @@ import dev.myclinic.scala.web.appbase.ElementEvent.*
 import dev.myclinic.scala.model.ModelSymbol
 import dev.myclinic.scala.model.DataId
 
-trait Comp[C]:
-  def ele(c: C): HTMLElement
+// trait Comp[C]:
+//   def ele(c: C): HTMLElement
 
 trait CompData[C, T] extends Comp[C]:
   def data(c: C): T
