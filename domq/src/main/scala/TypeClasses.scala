@@ -23,7 +23,25 @@ object TypeClasses:
     def dispose(t: T): Unit
 
   object Dispose:
-    given [T]: Dispose[T] = _ => ()
+    def nop[T]: Dispose[T] = _ => ()
+
+    def by[T, U](u: T => U)(using ud: Dispose[U]): Dispose[T] =
+      new Dispose[T]:
+        def dispose(t: T): Unit =
+          ud.dispose(u(t))
+    
+    given [T: Dispose]: Dispose[List[T]] = 
+      new Dispose[List[T]]:
+        val dt: Dispose[T] = summon[Dispose[T]]
+        def dispose(list: List[T]): Unit = 
+          list.foreach(t => dt.dispose(t))
+
+    extension [T] (td: Dispose[T])
+      def +[U](u: T => U)(using ud: Dispose[U]): Dispose[T] =
+        new Dispose[T]:
+          def dispose(t: T): Unit =
+            td.dispose(t)
+            ud.dispose(u(t))
   
   trait ElementProvider[T]:
     def getElement(t: T): HTMLElement

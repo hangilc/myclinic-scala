@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import dev.fujiwara.kanjidate.KanjiDate
 import dev.myclinic.scala.model.Text as ModelText
 import dev.myclinic.scala.webclient.{Api, global}
+import dev.myclinic.scala.web.practiceapp.practice.PracticeBus
 
 class Text(origText: ModelText):
   val ele = div()
@@ -41,7 +42,7 @@ class TextEdit(
       a("入力", onclick := (onEnter _)),
       a("キャンセル", onclick := onCancel),
       a("削除", onclick := (doDelete _)),
-      a("コピー")
+      a("コピー", onclick := (doCopy _))
     )
   )
 
@@ -57,3 +58,17 @@ class TextEdit(
       for _ <- Api.deleteText(text.textId)
       yield onDelete()
     })
+
+  def doCopy(): Unit =
+    PracticeBus.copyTarget match {
+      case Some(visitId) => 
+        val t = ModelText(0, visitId, text.content)
+        for
+          entered <- Api.enterText(t)
+        yield onCancel()
+      case None => ShowMessage.showError("コピー先をみつけられません。")
+    }
+
+object Text:
+  given Comp[Text] = _.ele
+  given Dispose[Text] = _ => ()

@@ -11,7 +11,7 @@ class Title(visit: VisitEx):
   import Title as Helper
   def at: LocalDateTime = visit.visitedAt
   val unsubscribers = List(
-    PracticeBus.tempVisitIdChanged.subscribe(onTempVisitIdChange _)
+    PracticeBus.tempVisitIdChanged.subscribe(adaptToTempVisitId _)
   )
   val pullDown = PullDownLink(
     "操作",
@@ -35,18 +35,20 @@ class Title(visit: VisitEx):
     ),
     pullDown.link(cls := "practice-visit-title-manip")
   )
+  adaptToTempVisitId(PracticeBus.currentTempVisitId)
 
   def setTempVisitId(): Unit =
     if PracticeBus.currentVisitId.isEmpty then
       PracticeBus.tempVisitIdChanged.publish(Some(visit.visitId))
 
-  def onTempVisitIdChange(optTempVisitId: Option[Int]): Unit =
+  def adaptToTempVisitId(optTempVisitId: Option[Int]): Unit =
     optTempVisitId match {
       case None => ele(cls :- "temp-visit")
       case Some(visitId) =>
         if visitId == visit.visitId then ele(cls := "temp-visit")
         else ele(cls :- "temp-visit")
     }
+
 
 object Title:
   def formatVisitTime(at: LocalDateTime): String =

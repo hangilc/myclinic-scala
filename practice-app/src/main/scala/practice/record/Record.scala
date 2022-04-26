@@ -1,7 +1,7 @@
 package dev.myclinic.scala.web.practiceapp.practice.record
 
 import dev.myclinic.scala.model.{
-  Text as _,
+  Text as ModelText,
   Shinryou as _,
   Drug as _,
   Conduct as _,
@@ -9,27 +9,25 @@ import dev.myclinic.scala.model.{
   *
 }
 import dev.fujiwara.domq.all.{*, given}
+import dev.fujiwara.domq.CompList
+import dev.fujiwara.domq.CompList.{Append, given}
 import org.scalajs.dom.HTMLElement
-import dev.fujiwara.domq.TypeClasses.{Comp, Dispose}
 
 class Record(visitEx: VisitEx):
   val title = new Title(visitEx)
+  val leftCol: HTMLElement = div(cls := "practice-visit-record-left")
+  given CompList.Append[HTMLElement] = Append(ele)
+  val texts: CompList[Text] = CompList[Text]()
   val ele = div(cls := "practice-visit")(
     title.ele,
     div(
       cls := "practice-visit-record",
-      composeLeft(visitEx),
+      leftCol,
       composeRight(visitEx)
     )
   )
 
   def visitId: Int = visitEx.visitId
-
-  def composeLeft(visitEx: VisitEx): HTMLElement =
-    div(
-      cls := "practice-visit-record-left",
-      children := visitEx.texts.map(text => new Text(text).ele)
-    )
 
   def composeRight(visitEx: VisitEx): HTMLElement =
     div(
@@ -45,6 +43,5 @@ object Record:
   given Ordering[Record] = Ordering.by[Record, Int](r => r.visitId).reverse
   given Comp[Record] = _.ele
   given Dispose[Record] =
-    rec =>
-      summon[Dispose[Title]].dispose(rec.title)
+    Dispose.nop[Record] + (_.title) + (_.texts)
 

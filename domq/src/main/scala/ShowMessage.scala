@@ -17,7 +17,7 @@ object ShowMessage:
     b(onclick := (() => m.close()))
     m.open()
 
-  def showError(msg: String, zIndex: Int = 2002): Unit =
+  def showError(msg: String): Unit =
     val b = button("OK")
     val m: Modal = Modal(
       "エラー",

@@ -19,8 +19,11 @@ object PracticeBus:
   patientChanged.subscribe(currentPatientStore = _)
   visitIdChanged.subscribe(currentVisitIdStore = _)
   tempVisitIdChanged.subscribe(currentTempVisitIdStore = _)
+  def copyTarget: Option[Int] = currentVisitId orElse currentTempVisitId
 
   val navPageChanged = LocalEventPublisher[Int]
   val navSettingChanged = LocalEventPublisher[(Int, Int)]
 
   val visitsPerPage: Int = 10
+
+  val textEntered = LocalEventPublisher[Text]
