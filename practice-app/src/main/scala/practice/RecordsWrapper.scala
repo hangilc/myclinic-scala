@@ -16,12 +16,12 @@ class RecordsWrapper:
   given Append[HTMLElement] = Append(ele)
   given PreInsert[HTMLElement] = PreInsert(ele)
 
-  val unsubscribers: List[() => Unit] = List(
+  val unsubscribers = List(
     PracticeBus.navPageChanged.subscribe(page => startPage(page))
   )
 
   def dispose: Unit = 
-    unsubscribers.foreach(f => f())
+    unsubscribers.foreach(_.unsubscribe)
     clearRecords
 
   def clearRecords: Unit =
@@ -47,4 +47,7 @@ class RecordsWrapper:
           }))
         yield ()
     }
+
+object RecordsWrapper:
+  given Dispose[RecordsWrapper] = _.dispose
 

@@ -29,6 +29,8 @@ object TypeClasses:
       new Dispose[T]:
         def dispose(t: T): Unit =
           ud.dispose(u(t))
+
+    def byCalling[T](f: T => Unit): Dispose[T] = f(_)
     
     given [T: Dispose]: Dispose[List[T]] = 
       new Dispose[List[T]]:
