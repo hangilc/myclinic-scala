@@ -80,20 +80,18 @@ class PracticeMain:
     for
       _ <- suspendVisit
       _ <- endPatient
-      _ <- PracticeBus.tempVisitIdChanged.publish(None)
-      _ <- PracticeBus.visitIdChanged.publish(None)
-      _ <- PracticeBus.patientChanged.publish(Some(patient))
-    yield ()
+    yield
+      PracticeBus.tempVisitIdChanged.publish(None)
+      PracticeBus.visitIdChanged.publish(None)
+      PracticeBus.patientChanged.publish(Some(patient))
 
   private def endPatient: Future[Unit] =
     PracticeBus.currentPatient match {
       case None => Future.successful(())
       case Some(patient) =>
-        for
-          _ <- PracticeBus.tempVisitIdChanged.publish(None)
-          _ <- PracticeBus.visitIdChanged.publish(None)
-          _ <- PracticeBus.patientChanged.publish(None)
-        yield ()
+        PracticeBus.tempVisitIdChanged.publish(None)
+        PracticeBus.visitIdChanged.publish(None)
+        PracticeBus.patientChanged.publish(None)
     }
 
   private def suspendVisit: Future[Unit] =

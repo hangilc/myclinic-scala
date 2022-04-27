@@ -17,7 +17,7 @@ class PatientDisplay:
     case None => ele(displayNone)
   })
 
-  def dispose: Unit = unsubscribe()
+  def dispose: Unit = unsubscribe.unsubscribe
 
 object PatientDisplay:
   def formatPatient(patient: Patient): String =

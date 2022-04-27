@@ -59,4 +59,5 @@ object Title:
     val p2 = KanjiDate.timeToKanji(at.toLocalTime)
     p1 + p2
 
-  given Dispose[Title] = title => title.unsubscribers.foreach(_())
+  given Dispose[Title] = 
+    Dispose.nop[Title] + (_.unsubscribers)

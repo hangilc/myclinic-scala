@@ -9,15 +9,15 @@ import dev.myclinic.scala.model.{
   *
 }
 import dev.fujiwara.domq.all.{*, given}
-import dev.fujiwara.domq.CompList
-import dev.fujiwara.domq.CompList.{Append, given}
+import dev.fujiwara.domq.CompAppendList
+import dev.fujiwara.domq.CompAppendList.given
 import org.scalajs.dom.HTMLElement
+import dev.myclinic.scala.web.practiceapp.practice.PracticeBus
 
 class Record(visitEx: VisitEx):
   val title = new Title(visitEx)
   val leftCol: HTMLElement = div(cls := "practice-visit-record-left")
-  given CompList.Append[HTMLElement] = Append(ele)
-  val texts: CompList[Text] = CompList[Text]()
+  val texts: CompAppendList[Text] = CompAppendList[Text](leftCol)
   val ele = div(cls := "practice-visit")(
     title.ele,
     div(
@@ -25,6 +25,10 @@ class Record(visitEx: VisitEx):
       leftCol,
       composeRight(visitEx)
     )
+  )
+
+  val unsubs: List[LocalEventUnsubscriber] = List(
+    PracticeBus.textEntered.subscribe(onTextEntered _)
   )
 
   def visitId: Int = visitEx.visitId
@@ -39,9 +43,13 @@ class Record(visitEx: VisitEx):
       new Payment(visitEx).ele
     )
 
+  def onTextEntered(text: ModelText): Unit =
+    val t = Text(text)
+    texts.append(t)
+
 object Record:
   given Ordering[Record] = Ordering.by[Record, Int](r => r.visitId).reverse
   given Comp[Record] = _.ele
   given Dispose[Record] =
-    Dispose.nop[Record] + (_.title) + (_.texts)
+    Dispose.nop[Record] + (_.title) + (_.texts) + (_.unsubs)
 

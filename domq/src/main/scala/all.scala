@@ -24,3 +24,4 @@ object all:
   val ContextMenu = dev.fujiwara.domq.ContextMenu
   val FloatWindow = dev.fujiwara.domq.FloatWindow
   type LocalEventPublisher[T] = dev.fujiwara.domq.LocalEventPublisher[T]
+  type LocalEventUnsubscriber = dev.fujiwara.domq.LocalEventUnsubscriber

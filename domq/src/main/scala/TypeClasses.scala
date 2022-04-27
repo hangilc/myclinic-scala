@@ -24,7 +24,7 @@ object TypeClasses:
 
   object Dispose:
     def nop[T]: Dispose[T] = _ => ()
-
+    
     def by[T, U](u: T => U)(using ud: Dispose[U]): Dispose[T] =
       new Dispose[T]:
         def dispose(t: T): Unit =
