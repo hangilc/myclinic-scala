@@ -65,7 +65,9 @@ class TextEdit(
         val t = ModelText(0, visitId, text.content)
         for
           entered <- Api.enterText(t)
-        yield onCancel()
+        yield 
+          PracticeBus.textEntered.publish(entered)
+          onCancel()
       case None => ShowMessage.showError("コピー先をみつけられません。")
     }
 

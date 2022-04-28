@@ -26,6 +26,7 @@ class Record(visitEx: VisitEx):
       composeRight(visitEx)
     )
   )
+  texts.set(visitEx.texts.map(Text(_)))
 
   val unsubs: List[LocalEventUnsubscriber] = List(
     PracticeBus.textEntered.subscribe(onTextEntered _)
