@@ -5,16 +5,12 @@ import dev.myclinic.scala.model.*
 import dev.myclinic.scala.webclient.{Api, global}
 import scala.concurrent.Future
 import dev.myclinic.scala.web.practiceapp.practice.record.Record
-import dev.fujiwara.domq.SortedComps
 import org.scalajs.dom.HTMLElement
 
 class RecordsWrapper:
   import RecordsWrapper as Helper
-  import dev.fujiwara.domq.SortedComps.*
   val ele = div()
-  val records: SortedComps[Record] = SortedComps[Record]()
-  given Append[HTMLElement] = Append(ele)
-  given PreInsert[HTMLElement] = PreInsert(ele)
+  val records: CompSortList[Record] = new CompSortList[Record](ele)
 
   val unsubscribers = List(
     PracticeBus.navPageChanged.subscribe(page => startPage(page))

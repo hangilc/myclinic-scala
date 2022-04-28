@@ -25,3 +25,5 @@ object all:
   val FloatWindow = dev.fujiwara.domq.FloatWindow
   type LocalEventPublisher[T] = dev.fujiwara.domq.LocalEventPublisher[T]
   type LocalEventUnsubscriber = dev.fujiwara.domq.LocalEventUnsubscriber
+  type CompAppendList[C] = dev.fujiwara.domq.CompAppendList[C]
+  type CompSortList[C] = dev.fujiwara.domq.CompSortList[C]

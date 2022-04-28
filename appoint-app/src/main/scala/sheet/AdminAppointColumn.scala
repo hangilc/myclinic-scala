@@ -20,7 +20,7 @@ class AdminAppointColumn(date: LocalDate, op: ClinicOperation)(using EventFetche
         "予約枠追加" -> (() => doAddAppointTime(date))
     ) ++ (
         if totalAppoints == 0 then
-            List("予約枠全削除" -> (() => doDeleteAllAppointTimes(boxes, date)))
+            List("予約枠全削除" -> (() => doDeleteAllAppointTimes(boxes.list, date)))
         else List.empty
     )
     super.composeContextMenu ++ menu
@@ -31,7 +31,7 @@ class AdminAppointColumn(date: LocalDate, op: ClinicOperation)(using EventFetche
   ): AppointTimeBox =
     AdminAppointTimeBox(
       SyncedDataSource(g, appointTime),
-      () => AppointColumn.findVacantFollowers(boxes, appointTime)
+      () => AppointColumn.findVacantFollowers(boxes.list, appointTime)
     )
 
 

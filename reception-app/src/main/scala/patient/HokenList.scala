@@ -1,11 +1,6 @@
 package dev.myclinic.scala.web.reception.patient
 
-import dev.fujiwara.domq.ElementQ.{*, given}
-import dev.fujiwara.domq.Html.{*, given}
-import dev.fujiwara.domq.Modifiers.{*, given}
-import dev.fujiwara.domq.{Icons, Form, ErrorBox, Modifier, CustomEvent, DataSource}
-import dev.fujiwara.domq.TypeClasses.Comp
-import scala.language.implicitConversions
+import dev.fujiwara.domq.all.{*, given}
 import org.scalajs.dom.{HTMLElement, HTMLInputElement}
 import scala.scalajs.js
 import dev.myclinic.scala.util.{DateUtil, HokenRep}
@@ -22,12 +17,11 @@ import scala.math.Ordered.orderingToOrdered
 import dev.fujiwara.domq.DomqUtil
 import dev.myclinic.scala.web.appbase.{EventFetcher}
 import dev.myclinic.scala.web.appbase.SyncedDataSource
-import dev.myclinic.scala.web.appbase.ListOfSortedComp
-import dev.myclinic.scala.web.appbase.DeleteNotifier
 import dev.myclinic.scala.web.appbase.ElementEvent.*
 
 class HokenList(patientId: Int)(using EventFetcher):
   import HokenList.*
+  import HokenList.Item.given
   val errorBox = ErrorBox()
   val eDisp = div()
   val eListAll: HTMLInputElement = checkbox()
@@ -41,7 +35,7 @@ class HokenList(patientId: Int)(using EventFetcher):
       span("過去の保険も含める  ")
     )
   )
-  private val list: ListOfSortedComp[Item] = ListOfSortedComp(eDisp)
+  private val list: CompSortList[Item] = new CompSortList[Item](eDisp)
   addCreatedListener[Shahokokuho]
   addCreatedListener[Koukikourei]
   addCreatedListener[Kouhi]
@@ -67,7 +61,7 @@ class HokenList(patientId: Int)(using EventFetcher):
     DataId[T] 
   ): Boolean =
     val id = HokenId(t)
-    list.contains(_.id == id)
+    list.list.find(_.id == id).isDefined
 
   private def addCreatedListener[T](using
       modelSymbol: ModelSymbol[T],
@@ -98,7 +92,7 @@ class HokenList(patientId: Int)(using EventFetcher):
         if isToBeShown(updated) then
           if !isInList(updated) then list.insert(Item(event.appEventId, updated))
         else 
-          if isInList(updated) then list.delete(_.id == HokenId(updated))
+          if isInList(updated) then list.remove(_.id == HokenId(updated))
     })
 
   private def isListingAll: Boolean = eListAll.checked
@@ -165,9 +159,8 @@ object HokenList:
       ItemImpl(SyncedDataSource(gen, data))
     given Ordering[Item] = Ordering.by((item: Item) => item.validFrom).reverse
     given Comp[Item] = _.ele
-    given DeleteNotifier[Item] with
-      def subscribe(item: Item, handler: () => Unit) =
-        item.onDelete(handler)
+    given Dispose[Item] = Dispose.nop[Item]
+    given DataId[Item] = _.id.id
 
   class ItemImpl[T](ds: SyncedDataSource[T])(using
       periodProvider: EffectivePeriodProvider[T],

@@ -4,6 +4,7 @@ import org.scalajs.dom.HTMLElement
 import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.TypeClasses.{Comp, Dispose}
+import scala.math.Ordered.orderingToOrdered
 
 class CompListBase[C](
     remove: HTMLElement => Unit = _.remove()
@@ -46,6 +47,8 @@ case class CompAppendList[C](val wrapper: HTMLElement)(using
     wrapper(comp.ele(c))
     comps = comps :+ c
 
+  def +=(c: C): Unit = append(c)
+
   def set(cs: List[C]): Unit =
     clear
     cs.foreach(append _)
@@ -54,3 +57,25 @@ object CompAppendList:
   given [C](using comp: Comp[C], disposer: Dispose[C]): Dispose[CompAppendList[C]]
     with
     def dispose(t: CompAppendList[C]): Unit = t.clear
+
+case class CompSortList[C: Ordering](val wrapper: HTMLElement)(
+  using comp: Comp[C],
+  disposer: Dispose[C]
+) extends CompListBase[C]:
+  def insert(c: C): Unit =
+    val (pre, post) = comps.span(t => t < c)
+    if post.isEmpty then wrapper(comp.ele(c))
+    else comp.ele(post.head).preInsert(comp.ele(c))
+    comps = pre ++ (c :: post)
+
+  def +=(c: C): Unit = insert(c)
+
+  def set(cs: List[C]): Unit =
+    cs.foreach(insert _)
+
+  def setSorted(cs: List[C]): Unit =
+    clear
+    cs.foreach(c => wrapper(comp.ele(c)))
+    comps = cs
+
+
