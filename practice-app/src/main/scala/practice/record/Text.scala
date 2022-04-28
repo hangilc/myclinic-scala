@@ -46,13 +46,25 @@ class TextEdit(
     List(
       a("入力", onclick := (onEnter _)),
       a("キャンセル", onclick := onCancel)
-    ) ++ (if Text.isHikitsugi(text.content) then
-            List(a("引継ぎコピー", onclick := (doCopyHikitsugi _)))
-          else List.empty)
-      ++ List(
+    ) ++ opt(
+      Text.isHikitsugi(text.content),
+      List(a("引継ぎコピー", onclick := (doCopyHikitsugi _))),
+      List.empty
+    ) ++ opt(
+      Text.isShohousen(text.content),
+      List(shohouLink),
+      List.empty
+    ) ++ List(
         a("削除", onclick := (doDelete _)),
         a("コピー", onclick := (doCopy _))
       )
+
+  private def opt[T](test: Boolean, yes: T, no: T): T =
+    if test then yes else no
+
+  def shohouLink: HTMLElement =
+    val pullDown = new PullDownLink("処方箋")
+    pullDown.link
 
   def onEnter(): Unit =
     val t = new ModelText(text.textId, text.visitId, ta.value.trim)
@@ -63,14 +75,13 @@ class TextEdit(
 
   def doCopyHikitsugi(): Unit =
     val target = PracticeBus.copyTarget match {
-      case None => 
+      case None =>
         ShowMessage.showError("コピー先をみつけられません。")
       case Some(visitId) =>
         val hikitsugi = Text.extractHikitsugi(text.content)
         val t = ModelText(0, visitId, hikitsugi)
-        for
-          entered <- Api.enterText(t)
-        yield 
+        for entered <- Api.enterText(t)
+        yield
           PracticeBus.textEntered.publish(entered)
           onCancel()
     }
@@ -105,3 +116,6 @@ object Text:
       case None    => ""
       case Some(m) => s.substring(0, m.start)
     }
+
+  def isShohousen(s: String): Boolean =
+    s.startsWith("院外処方\nＲｐ）\n")
