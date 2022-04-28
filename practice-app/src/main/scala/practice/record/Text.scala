@@ -6,6 +6,7 @@ import dev.fujiwara.kanjidate.KanjiDate
 import dev.myclinic.scala.model.Text as ModelText
 import dev.myclinic.scala.webclient.{Api, global}
 import dev.myclinic.scala.web.practiceapp.practice.PracticeBus
+import org.scalajs.dom.HTMLElement
 
 class Text(origText: ModelText):
   val ele = div()
@@ -38,13 +39,20 @@ class TextEdit(
   val ta = textarea(value := text.content, cls := "practice-text-edit-textarea")
   val ele = div(
     ta,
-    div(
-      a("入力", onclick := (onEnter _)),
-      a("キャンセル", onclick := onCancel),
-      a("削除", onclick := (doDelete _)),
-      a("コピー", onclick := (doCopy _))
-    )
+    div(children := makeLinks)
   )
+
+  def makeLinks: List[HTMLElement] =
+    List(
+      a("入力", onclick := (onEnter _)),
+      a("キャンセル", onclick := onCancel)
+    ) ++ (if Text.isHikitsugi(text.content) then
+            List(a("引継ぎコピー", onclick := (doCopyHikitsugi _)))
+          else List.empty)
+      ++ List(
+        a("削除", onclick := (doDelete _)),
+        a("コピー", onclick := (doCopy _))
+      )
 
   def onEnter(): Unit =
     val t = new ModelText(text.textId, text.visitId, ta.value.trim)
@@ -52,6 +60,20 @@ class TextEdit(
       _ <- Api.updateText(t)
       up <- Api.getText(t.textId)
     yield onDone(up)
+
+  def doCopyHikitsugi(): Unit =
+    val target = PracticeBus.copyTarget match {
+      case None => 
+        ShowMessage.showError("コピー先をみつけられません。")
+      case Some(visitId) =>
+        val hikitsugi = Text.extractHikitsugi(text.content)
+        val t = ModelText(0, visitId, hikitsugi)
+        for
+          entered <- Api.enterText(t)
+        yield 
+          PracticeBus.textEntered.publish(entered)
+          onCancel()
+    }
 
   def doDelete(): Unit =
     ShowMessage.confirm("この文章を削除していいですか？")(() => {
@@ -61,11 +83,10 @@ class TextEdit(
 
   def doCopy(): Unit =
     PracticeBus.copyTarget match {
-      case Some(visitId) => 
+      case Some(visitId) =>
         val t = ModelText(0, visitId, text.content)
-        for
-          entered <- Api.enterText(t)
-        yield 
+        for entered <- Api.enterText(t)
+        yield
           PracticeBus.textEntered.publish(entered)
           onCancel()
       case None => ShowMessage.showError("コピー先をみつけられません。")
@@ -74,3 +95,13 @@ class TextEdit(
 object Text:
   given Comp[Text] = _.ele
   given Dispose[Text] = _ => ()
+
+  def isHikitsugi(s: String): Boolean =
+    s.startsWith("●") || s.startsWith("★")
+
+  def extractHikitsugi(s: String): String =
+    val pat = "\\n\\s*\\n".r
+    pat.findFirstMatchIn(s) match {
+      case None    => ""
+      case Some(m) => s.substring(0, m.start)
+    }
