@@ -10,6 +10,7 @@ import org.http4s.circe.CirceEntityEncoder._
 import org.http4s.circe.CirceEntityDecoder._
 import io.circe._
 import io.circe.syntax._
+  val clinicInfo = Config.getClinicInfo
 import dev.myclinic.scala.config.Config
 import dev.myclinic.scala.model.*
 import dev.myclinic.scala.model.jsoncodec.Implicits.{given}

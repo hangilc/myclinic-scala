@@ -55,15 +55,22 @@ class TextEdit(
       List(shohouLink),
       List.empty
     ) ++ List(
-        a("削除", onclick := (doDelete _)),
-        a("コピー", onclick := (doCopy _))
-      )
+      a("削除", onclick := (doDelete _)),
+      a("コピー", onclick := (doCopy _))
+    )
 
   private def opt[T](test: Boolean, yes: T, no: T): T =
     if test then yes else no
 
   def shohouLink: HTMLElement =
     val pullDown = new PullDownLink("処方箋")
+    pullDown.setBuilder(
+      List(
+        "処方箋発行" -> (() => ()),
+        "処方箋整形" -> (() => ()),
+        "編集中表示" -> (() => ())
+      )
+    )
     pullDown.link
 
   def onEnter(): Unit =

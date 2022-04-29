@@ -243,3 +243,4 @@ object RestService extends DateTimeQueryParam with Publisher:
 
   } <+> PatientService.routes <+> VisitService.routes <+> MiscService.routes
     <+> ConfigService.routes <+> FileService.routes
+    <+> DrawerService.routes
