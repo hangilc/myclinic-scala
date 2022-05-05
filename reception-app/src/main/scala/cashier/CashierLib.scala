@@ -12,7 +12,7 @@ object CashierLib:
     val scale = 3
     val w = 148
     val h = 105
-    val dlog = PrintDialog(
+    val dlog = new PrintDialog(
       title,
       ops,
       w * scale,
