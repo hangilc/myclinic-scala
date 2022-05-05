@@ -32,9 +32,11 @@ object Ajax:
             case Some(handler) => promise.success(handler(xhr))
             case None => {
               val src = xhr.responseText
+              println(("result-src", src))
               decode[T](src) match
                 case Right(value) => promise.success(value)
                 case Left(ex) => {
+                  println(("decoder", summon[Decoder[T]]))
                   System.err.println(("decode-error", src, ex.getMessage));
                   promise.failure(ex)
                 }

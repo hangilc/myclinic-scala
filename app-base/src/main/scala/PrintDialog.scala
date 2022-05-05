@@ -17,6 +17,7 @@ import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
 import scala.util.Success
 import scala.util.Failure
 import org.scalajs.dom.HTMLSelectElement
+import dev.fujiwara.scala.drawer.PaperSize
 
 class PrintDialog(
     title: String,
@@ -67,38 +68,59 @@ class PrintDialog(
       eSelect.setValue(pref.getOrElse("手動"))
     }
 
-  def open(): Unit = 
+  def open(): Unit =
     initSetting().onComplete {
       case Success(_) => dlog.open()
-      case Failure(ex) => 
+      case Failure(ex) =>
         System.err.println(ex.getMessage)
         dlog.open()
     }
 
   def doPrint(): Unit =
     val req = PrintRequest(List.empty, List(ops))
-    val setting: Option[String] = 
+    val setting: Option[String] =
       val s = eSelect.getValue
       if s == null || s == "" || s == "手動" then None
       else Some(s)
-    val f = 
+    val f =
       for
         _ <- Api.printDrawer(req, setting)
         _ <- handlePrefUpdate(setting)
       yield ()
     f.onComplete {
-      case Success(_) => dlog.close()
+      case Success(_)  => dlog.close()
       case Failure(ex) => ShowMessage.showError(ex.getMessage)
     }
 
-  def handlePrefUpdate(setting: Option[String]): Future[Boolean] = 
+  def handlePrefUpdate(setting: Option[String]): Future[Boolean] =
     val asDefaultChecked = eDefaultCheck.checked
     if asDefaultChecked then
-      val currentDefaultOpt = eSelect.qSelector("option[selected]").map(_.getAttribute("value"))
+      val currentDefaultOpt =
+        eSelect.qSelector("option[selected]").map(_.getAttribute("value"))
       if currentDefaultOpt != setting then
         Api.setPrintPref(prefKind, setting.getOrElse("手動")).map(_ => true)
-      else
-        Future.successful(false)
-    else
-      Future.successful(false)
+      else Future.successful(false)
+    else Future.successful(false)
 
+object PrintDialog:
+  val defaultWidth = 210 * 2
+  val defaultHeight = 297 * 2
+
+  def apply(
+      title: String,
+      ops: List[Op],
+      paperSize: PaperSize,
+      prefKind: String = "手動",
+      adjustScale: Double = 1.0
+  ): PrintDialog =
+    val (w, h) =
+      if paperSize.isLandscape then (defaultHeight, defaultWidth)
+      else (defaultWidth, defaultHeight)
+    new PrintDialog(
+      title,
+      ops,
+      w * adjustScale,
+      h * adjustScale,
+      s"0, 0, ${paperSize.width}, ${paperSize.height}",
+      prefKind
+    )

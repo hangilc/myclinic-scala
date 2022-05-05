@@ -1,7 +1,8 @@
 package dev.myclinic.scala.webclient
 
+import io.circe._
+import io.circe.syntax._
 import dev.fujiwara.scala.drawer.Op
-import dev.fujiwara.scala.drawer.Op.given
 import scala.concurrent.Future
 import dev.myclinic.scala.webclient.ParamsImplicits.given
 

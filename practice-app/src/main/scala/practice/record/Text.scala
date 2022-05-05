@@ -7,6 +7,8 @@ import dev.myclinic.scala.model.Text as ModelText
 import dev.myclinic.scala.webclient.{Api, global}
 import dev.myclinic.scala.web.practiceapp.practice.PracticeBus
 import org.scalajs.dom.HTMLElement
+import dev.myclinic.scala.web.appbase.PrintDialog
+import dev.fujiwara.scala.drawer.PaperSize
 
 class Text(origText: ModelText):
   val ele = div()
@@ -111,7 +113,12 @@ class TextEdit(
     }
 
   def doShohousen(): Unit =
-    ()
+    for
+      ops <- Api.shohousenDrawer(text.textId)
+    yield
+      println(ops)
+      val dlog = PrintDialog("処方箋印刷", ops, PaperSize.A5, "shohousen")
+      dlog.open()
 
 object Text:
   given Comp[Text] = _.ele

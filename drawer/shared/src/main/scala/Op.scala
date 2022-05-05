@@ -49,6 +49,7 @@ object Op:
 
   given Decoder[Op] = new Decoder[Op]:
     def apply(c: HCursor): Decoder.Result[Op] =
+      println("enter-op-decoder")
       val iter = c.values.get.iterator
       iter.next
         .as[String]
@@ -107,5 +108,6 @@ object Op:
                 cy <- iter.next.as[Double]
                 r <- iter.next.as[Double]
               yield OpCircle(cx, cy, r)
+            case c => throw new java.lang.RuntimeException("Unknown code: " + c)
           }
         })

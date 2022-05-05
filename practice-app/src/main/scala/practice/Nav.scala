@@ -20,7 +20,6 @@ class Nav:
   val unsubscribers = List(
     PracticeBus.navSettingChanged.subscribe {
       case (newPage, newTotal) => 
-        println(("nav-setting", newPage, newTotal))
         setTotal(newTotal)
         setPage(newPage)
         updateDisp()

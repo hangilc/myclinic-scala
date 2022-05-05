@@ -25,7 +25,7 @@ object DrawerService:
 
   def routes = HttpRoutes.of[IO] {
     case GET -> Root / "shohousen-drawer" :? intTextId(textId) =>
-      val op = for
+      for
         text <- Db.getText(textId)
         visit <- Db.getVisit(text.visitId)
         patient <- Db.getPatient(visit.patientId)
@@ -35,8 +35,10 @@ object DrawerService:
         val drawer = new ShohousenDrawer()
         drawer.init()
         data.applyTo(drawer)
-        objectMapper.writeValueAsString(drawer.getOps())
-      Ok(op)
+        val ops = drawer.getOps()
+        val json = objectMapper.writeValueAsString(ops)
+        Response(body = fs2.Stream.emits(json.getBytes()),
+          headers = Headers(`Content-Type`(MediaType("application", "json"))))
   }
 
   def clinicInfoDTO(src: ClinicInfo): ClinicInfoDTO =
