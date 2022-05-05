@@ -89,9 +89,9 @@ class PracticeMain:
     PracticeBus.currentPatient match {
       case None => Future.successful(())
       case Some(patient) =>
-        PracticeBus.tempVisitIdChanged.publish(None)
-        PracticeBus.visitIdChanged.publish(None)
-        PracticeBus.patientChanged.publish(None)
+        PracticeBus.tempVisitIdChanged.publishFuture(None)
+        PracticeBus.visitIdChanged.publishFuture(None)
+        PracticeBus.patientChanged.publishFuture(None)
     }
 
   private def suspendVisit: Future[Unit] =

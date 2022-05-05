@@ -30,11 +30,11 @@ object ScannerList:
     if busyScanners.contains(scanner) then false
     else
       busyScanners = busyScanners + scanner
-      onBusyScannersChange.publish(busyScanners)
+      onBusyScannersChange.publishFuture(busyScanners)
       true
 
   def closeScanner(scanner: ScannerDevice): Unit =
     println(("close-scanner", scanner.name))
     if busyScanners.contains(scanner) then
       busyScanners = busyScanners - scanner
-      onBusyScannersChange.publish(busyScanners)
+      onBusyScannersChange.publishFuture(busyScanners)

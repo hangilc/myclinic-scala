@@ -66,7 +66,7 @@ class TextEdit(
     val pullDown = new PullDownLink("処方箋")
     pullDown.setBuilder(
       List(
-        "処方箋発行" -> (() => ()),
+        "処方箋発行" -> (doShohousen _),
         "処方箋整形" -> (() => ()),
         "編集中表示" -> (() => ())
       )
@@ -109,6 +109,9 @@ class TextEdit(
           onCancel()
       case None => ShowMessage.showError("コピー先をみつけられません。")
     }
+
+  def doShohousen(): Unit =
+    ()
 
 object Text:
   given Comp[Text] = _.ele

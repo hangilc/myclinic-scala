@@ -28,11 +28,11 @@ class Selection[T]:
 
   def addSelectEventHandler(handler: T => Unit): Unit = 
     selectEventPublisher.subscribe(handler)
-  private def publishSelect(t: T): Unit = selectEventPublisher.publish(t)
+  private def publishSelect(t: T): Unit = selectEventPublisher.publishFuture(t)
 
   def addUnselectEventHandler(handler: () => Unit): Unit =
     unselectEventPublisher.subscribe(_ => handler())
-  private def publishUnselect(): Unit = unselectEventPublisher.publish(())
+  private def publishUnselect(): Unit = unselectEventPublisher.publishFuture(())
 
   def add[U](u: U, toLabel: U => String, toValue: U => T): Unit =
     val item = SelectionItem(toLabel(u), toValue(u))

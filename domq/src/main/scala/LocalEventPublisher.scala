@@ -13,8 +13,9 @@ class LocalEventPublisher[T]:
   def subscribeFuture(handler: T => Future[Unit]): LocalEventUnsubscriber =
     subscribers = subscribers :+ handler
     LocalEventUnsubscriber(() => subscribers = subscribers.filter(_ != handler))
-  def publish(t: T): Future[Unit] = 
+  def publishFuture(t: T): Future[Unit] = 
     Future.traverse(subscribers)(s => s(t)).map(_ => ())
+  def publish(t: T): Unit = publishFuture(t)
 
 case class LocalEventUnsubscriber(proc: () => Unit):
   def unsubscribe: Unit = proc()

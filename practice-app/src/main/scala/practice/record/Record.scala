@@ -16,17 +16,31 @@ import dev.myclinic.scala.web.practiceapp.practice.PracticeBus
 
 class Record(visitEx: VisitEx):
   val title = new Title(visitEx)
-  val leftCol: HTMLElement = div(cls := "practice-visit-record-left")
-  val texts: CompAppendList[Text] = CompAppendList[Text](leftCol)
+  val textsWrapper = div
+  val texts: CompAppendList[Text] = CompAppendList[Text](textsWrapper)
+  val textMenu = TextMenu()
+  textMenu.newText.subscribe(_ => doNewText())
   val ele = div(cls := "practice-visit")(
     title.ele,
     div(
       cls := "practice-visit-record",
-      leftCol,
+      div(cls := "practice-visit-record-left")(
+        textsWrapper,
+        textMenu.ele
+      ),
       composeRight(visitEx)
     )
   )
   texts.set(visitEx.texts.map(Text(_)))
+
+  def doNewText(): Unit =
+    val editor = TextEnter(visitEx.visitId)
+    editor.onDone.subscribe(_ => {
+      editor.ele.remove()
+      textMenu.ele(displayDefault)
+    })
+    textMenu.ele(displayNone)
+    textMenu.ele.preInsert(editor.ele)
 
   val unsubs: List[LocalEventUnsubscriber] = List(
     PracticeBus.textEntered.subscribe(onTextEntered _)
