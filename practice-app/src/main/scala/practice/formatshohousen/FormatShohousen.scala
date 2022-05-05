@@ -1,6 +1,7 @@
 package dev.myclinic.scala.web.practiceapp.practice.formatshohousen
 
 import scala.util.matching.Regex
+import dev.myclinic.scala.util.ZenkakuUtil
 
 trait ShohousenItem:
   def render(index: Int): String
@@ -13,9 +14,9 @@ case class FormattedShohousen(
   def render: String =
     prefix + "\n" + itemsToString + tail
 
-  def itemsToString: String = 
-    items.zipWithIndex.map {
-      case (item, index) => item.render(index + 1)
+  def itemsToString: String =
+    items.zipWithIndex.map { case (item, index) =>
+      item.render(index + 1)
     }.mkString
 
 object FormatShohousen:
@@ -37,28 +38,59 @@ object FormatShohousen:
       case _ => None
     }
 
-  def parseItems(f: FormattedShohousen, lines: List[String]):
-    Option[(FormattedShohousen, List[String])] =
-      lines match {
-        case line :: tail => 
-          if line.trim.isEmpty then parseItems(f, tail)
-          else if isItemStart(line) then
-            val (pre, post) = tail.span(isItemCont _)
-            val item = linesToItem(line :: pre)
-            Some(f.copy(items = f.items :+ item), post)
-          else Some(f, lines)
-        case _ => Some(f, List.empty)
-      }
+  def parseItems(
+      f: FormattedShohousen,
+      lines: List[String]
+  ): Option[(FormattedShohousen, List[String])] =
+    lines match {
+      case line :: tail =>
+        if line.trim.isEmpty then parseItems(f, tail)
+        else if itemStartPattern.matches(line) then
+          val strippedHead = itemStartPattern.replaceFirstIn(line, "")
+          val (pre, post) = tail.span(isItemCont _)
+          val item = linesToItem(strippedHead , pre)
+          Some(f.copy(items = f.items :+ item), post)
+        else Some(f, lines)
+      case _ => Some(f, List.empty)
+    }
 
   val itemStartPattern: Regex = raw"^[０-９0-9]+[）)]".r
 
-  def isItemStart(s: String): Boolean = itemStartPattern.matches(s)
-
   def isItemCont(s: String): Boolean = s.startsWith(" ") || s.startsWith("　")
 
-  def linesToItem(lines: List[String]): ShohousenItem =
-    new FallbackItem(lines)
+  def linesToItem(h: String, t: List[String]): ShohousenItem =
+    toNaifuku(h, t)
+      .orElse(toTonpuku(h, t))
+      .orElse(toGaiyou(h, t))
+      .getOrElse(toFallback(h, t))
 
-  def parseTail(f: FormattedShohousen, lines: List[String]):
-    Option[FormattedShohousen] =
-      Some(f.copy(tail = lines.mkString("\n")))
+  def toNaifuku(h: String, t: List[String]): Option[ShohousenItem] =
+    NaifukuItem.tryParse(h, t)
+
+  def toTonpuku(h: String, t: List[String]): Option[ShohousenItem] =
+    TonpukuItem.tryParse(h, t)
+
+  def toGaiyou(h: String, t: List[String]): Option[ShohousenItem] =
+    GaiyouItem.tryParse(h, t)
+
+  def toFallback(h: String, t: List[String]): ShohousenItem =
+    new FallbackItem(h, t)
+
+  def parseTail(
+      f: FormattedShohousen,
+      lines: List[String]
+  ): Option[FormattedShohousen] =
+    Some(f.copy(tail = lines.mkString("\n")))
+
+  def indexToZenkaku(index: Int): String =
+    ZenkakuUtil.convertToZenkakuDigits(index.toString) + "）"
+
+  val leadingSpacesPattern: Regex = raw"[ 　]+".r
+
+  def stripLeadingSpaces(s: String): String =
+    leadingSpacesPattern.replaceFirstIn(s, "")
+
+  def itemLeadingSpaces(index: Int): String =
+    if index < 10 then "　"
+    else "　　"
+

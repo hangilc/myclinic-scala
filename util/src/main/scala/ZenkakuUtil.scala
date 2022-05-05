@@ -19,7 +19,7 @@ object ZenkakuUtil:
   val toZenkakuPeriod: Char => Char = c =>
     if c == '.' then '．' else c
 
-  def convertZenkakuDigits(src: String): String =
+  def convertToZenkakuDigits(src: String): String =
     convertChars(src, toZenkakuDigits)
     
   extension (f: Char => Char)
