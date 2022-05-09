@@ -2,7 +2,7 @@ package dev.myclinic.scala.apputil
 
 import dev.myclinic.scala.model.{DrugEx}
 import dev.myclinic.scala.model.DrugCategory.*
-import dev.myclinic.scala.util.ZenkakuUtil.*
+import dev.myclinic.scala.util.ZenkakuUtil.toZenkaku
 
 object DrugUtil:
   def drugRep(drug: DrugEx): String =
@@ -17,6 +17,3 @@ object DrugUtil:
       case Gaiyou => 
         s"${master.name}${amount}${master.unit} ${drug.usage}"
     }
-
-  def toZenkaku(src: String): String =
-    convertChars(src, toZenkakuDigits <+> toZenkakuPeriod)
