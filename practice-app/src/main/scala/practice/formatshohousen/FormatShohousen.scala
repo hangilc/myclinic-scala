@@ -4,7 +4,7 @@ import scala.util.matching.Regex
 import dev.myclinic.scala.util.ZenkakuUtil
 
 trait ShohousenItem:
-  def render(index: Int): String
+  def render(index: Int, ctx: FormatContext): List[String]
 
 case class FormattedShohousen(
     prefix: String,
@@ -15,8 +15,9 @@ case class FormattedShohousen(
     prefix + "\n" + itemsToString + tail
 
   def itemsToString: String =
-    items.zipWithIndex.map { case (item, index) =>
-      item.render(index + 1)
+    val ctx = FormatContext(items.size)
+    items.zipWithIndex.flatMap { case (item, index) =>
+      item.render(index + 1, ctx)
     }.mkString
 
 object FormatShohousen:

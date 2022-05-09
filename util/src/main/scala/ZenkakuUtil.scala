@@ -1,33 +1,43 @@
 package dev.myclinic.scala.util
 
 object ZenkakuUtil:
-  val toZenkakuDigits: Char => Char = c =>
-    c match {
-      case '０' => '0'
-      case '１' => '1'
-      case '２' => '2'
-      case '３' => '3'
-      case '４' => '4'
-      case '５' => '5'
-      case '６' => '6'
-      case '７' => '7'
-      case '８' => '8'
-      case '９' => '9'
-      case _   => c
-    }
+  val alphaToZenkakuMap: Map[Char, Char] = Map(
+    '0' -> '０',
+    '1' -> '１',
+    '2' -> '２',
+    '3' -> '３',
+    '4' -> '４',
+    '5' -> '５',
+    '6' -> '６',
+    '7' -> '７',
+    '8' -> '８',
+    '9' -> '９',
+    '.' -> '．',
+    ' ' -> '　',
+    '-' -> 'ー',
+    '(' -> '（',
+    ')' -> '）',
+    ',' -> '、',
+    'g' -> 'ｇ',
+    'm' -> 'ｍ',
+  )
 
-  val toZenkakuPeriod: Char => Char = c =>
-    if c == '.' then '．' else c
+  val zenkakuToAlphaMap = alphaToZenkakuMap.map(kv => (kv._2, kv._1))
 
-  def convertToZenkakuDigits(src: String): String =
-    convertChars(src, toZenkakuDigits)
-    
-  extension (f: Char => Char)
-    def <+>(g: Char => Char): Char => Char = (c: Char) =>
-      val d = f(c)
-      if d != c then d
-      else g(c)
+  def toZenkakuChar(ch: Char): Char = alphaToZenkakuMap.getOrElse(ch, ch)
+  def toHankakuChar(ch: Char): Char = zenkakuToAlphaMap.getOrElse(ch, ch)
 
-  def convertChars(src: String, f: Char => Char): String =
-    src.toList.map(f).mkString("")
+  def toZenkaku(s: String): String = s.map(toZenkakuChar _)
+  def toHankaku(s: String): String = s.map(toHankakuChar _)
+
+  def toZenkakuFun(pred: Char => Boolean): String => String =
+    val map = alphaToZenkakuMap.view.filterKeys(pred)
+    s => s.map(c => map.getOrElse(c, c))
+
+  def toHankakuFun(pred: Char => Boolean): String => String =
+    val map = zenkakuToAlphaMap.view.filterKeys(pred)
+    s => s.map(c => map.getOrElse(c, c))
+
+
+  val convertToZenkakuDigits: String => String = toZenkakuFun(c => c >= '0' && c <= '9')
 
