@@ -11,6 +11,12 @@ case class NaifukuItem(
 
 
 object NaifukuItem:
-  val firstLine = raw"".r
+  val firstLine = raw"\s*(.+)\s+(\d.*(?:錠|g|カプセル))\s*".r
   def tryParse(h: String, t: List[String]): Option[ShohousenItem] =
-    ???
+    println(("first-line", h))
+    h :: t match {
+      case List(firstLine, _) => 
+        println("Naifuku")
+        None
+      case _ => None
+    }

@@ -18,8 +18,18 @@ object ZenkakuUtil:
     '(' -> '（',
     ')' -> '）',
     ',' -> '、',
-    'g' -> 'ｇ',
-    'm' -> 'ｍ',
+  ) ++ Map.from(
+    ('a' to 'z').toList.zipWithIndex.map {
+      case (a, i) => {
+        a -> ('ａ' + i).toChar
+      }
+    }
+  ) ++ Map.from(
+    ('A' to 'Z').toList.zipWithIndex.map {
+      case (a, i) => {
+        a -> ('Ａ' + i).toChar
+      }
+    }
   )
 
   val zenkakuToAlphaMap = alphaToZenkakuMap.map(kv => (kv._2, kv._1))
@@ -38,6 +48,5 @@ object ZenkakuUtil:
     val map = zenkakuToAlphaMap.view.filterKeys(pred)
     s => s.map(c => map.getOrElse(c, c))
 
-
-  val convertToZenkakuDigits: String => String = toZenkakuFun(c => c >= '0' && c <= '9')
-
+  val convertToZenkakuDigits: String => String =
+    toZenkakuFun(c => c >= '0' && c <= '9')

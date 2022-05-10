@@ -1,4 +1,3 @@
-import Dependencies._
 
 ThisBuild / scalaVersion := "3.1.0"
 ThisBuild / version := "0.1.0-SNAPSHOT"
@@ -18,6 +17,7 @@ val jacksonVersion = "2.13.1"
 val slf4jVersion = "1.7.25"
 val fs2Version = "3.2.6"
 val scalaLoggingVersion = "3.9.4"
+val scalaTestVersion = "3.2.10"
 
 ThisBuild / scalacOptions ++= Seq("-deprecation", "-encoding", "UTF-8")
 ThisBuild / javacOptions ++= Seq("-encoding", "UTF-8")
@@ -40,6 +40,8 @@ lazy val root = project
     domq,
     drawerJS,
     drawerJVM,
+    formatshohousenJS,
+    formatshohousenJVM,
     holidayjpJS,
     holidayjpJVM,
     javalib,
@@ -63,6 +65,24 @@ lazy val root = project
     publishLocal := {}
   )
 
+lazy val formatshohousen = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Pure)
+  .in(file("formatshohousen"))
+  .dependsOn(util)
+  .settings(
+    name := "formatshohousen"
+  )
+  .jsSettings(
+  )
+  .jvmSettings(
+    libraryDependencies ++= Seq(
+      "org.scalatest" %% "scalatest" % scalaTestVersion % "test"
+    )
+  )
+
+val formatshohousenJS = formatshohousen.js
+val formatshohousenJVM = formatshohousen.jvm
+
 lazy val model = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Pure)
   .in(file("model"))
@@ -82,7 +102,7 @@ lazy val model = crossProject(JSPlatform, JVMPlatform)
   )
   .jvmSettings(
     libraryDependencies ++= Seq(
-      scalaTest
+      "org.scalatest" %% "scalatest" % scalaTestVersion % "test"
     )
   )
 
@@ -112,22 +132,22 @@ lazy val masterDb = project
     libraryDependencies ++= Seq(
       "org.apache.commons" % "commons-csv" % "1.9.0",
       "co.fs2" %% "fs2-core" % fs2Version,
-      "co.fs2" %% "fs2-io" % fs2Version,
+      "co.fs2" %% "fs2-io" % fs2Version
     )
   )
 
 lazy val client = project
-    .in(file("client"))
-    .dependsOn(modelJVM, utilJVM)
-    .settings(
-      name := "client",
-      libraryDependencies ++= Seq(
-        "org.http4s" %% "http4s-dsl" % http4sVersion,
-        "org.http4s" %% "http4s-blaze-client" % http4sVersion,
-        "org.http4s" %% "http4s-circe" % http4sVersion,
-        "io.circe" %%% "circe-core" % circeVersion,
-      )
+  .in(file("client"))
+  .dependsOn(modelJVM, utilJVM)
+  .settings(
+    name := "client",
+    libraryDependencies ++= Seq(
+      "org.http4s" %% "http4s-dsl" % http4sVersion,
+      "org.http4s" %% "http4s-blaze-client" % http4sVersion,
+      "org.http4s" %% "http4s-circe" % http4sVersion,
+      "io.circe" %%% "circe-core" % circeVersion
     )
+  )
 
 lazy val util = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Pure)
@@ -169,7 +189,7 @@ lazy val server = project
       "org.http4s" %% "http4s-dsl" % http4sVersion,
       "org.http4s" %% "http4s-circe" % http4sVersion,
       "dev.fujiwara" % "drawer" % "1.0.0-SNAPSHOT"
-    ),
+    )
   )
 
 lazy val webclient = project
@@ -184,7 +204,7 @@ lazy val webclient = project
       "io.circe" %%% "circe-core" % circeVersion,
       "io.circe" %%% "circe-generic" % circeVersion,
       "io.circe" %%% "circe-parser" % circeVersion,
-      "org.scala-js" %%% "scala-js-macrotask-executor" % macrotaskExecutorVersion,
+      "org.scala-js" %%% "scala-js-macrotask-executor" % macrotaskExecutorVersion
     )
   )
 
@@ -196,27 +216,43 @@ lazy val domq = project
     libraryDependencies ++= Seq(
       "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion,
       "org.scala-js" %%% "scala-js-macrotask-executor" % macrotaskExecutorVersion,
-      "org.typelevel" %%% "cats-core" % catsVersion,
+      "org.typelevel" %%% "cats-core" % catsVersion
     )
   )
 
 lazy val appbase = project
   .in(file("app-base"))
   .enablePlugins(ScalaJSPlugin)
-  .dependsOn(domq, modelJS, utilJS, webclient, validatorJS, drawerJS, kanjidateJS)
+  .dependsOn(
+    domq,
+    modelJS,
+    utilJS,
+    webclient,
+    validatorJS,
+    drawerJS,
+    kanjidateJS
+  )
   .settings(
     name := "myclinic-appbase",
     libraryDependencies ++= Seq(
       "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion,
       "org.typelevel" %%% "cats-core" % catsVersion,
-      "org.scala-js" %%% "scala-js-macrotask-executor" % macrotaskExecutorVersion,
+      "org.scala-js" %%% "scala-js-macrotask-executor" % macrotaskExecutorVersion
     )
   )
 
 lazy val appointApp = project
   .in(file("appoint-app"))
   .enablePlugins(ScalaJSPlugin)
-  .dependsOn(domq, modelJS, utilJS, webclient, validatorJS, appbase, kanjidateJS)
+  .dependsOn(
+    domq,
+    modelJS,
+    utilJS,
+    webclient,
+    validatorJS,
+    appbase,
+    kanjidateJS
+  )
   .settings(
     name := "myclinic-appoint",
     Compile / fastLinkJS / scalaJSLinkerOutputDirectory :=
@@ -225,7 +261,7 @@ lazy val appointApp = project
       (rootDir.value / "server" / "web" / "appoint" / "scalajs"),
     libraryDependencies ++= Seq(
       "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion,
-      "org.scala-js" %%% "scala-js-macrotask-executor" % macrotaskExecutorVersion,
+      "org.scala-js" %%% "scala-js-macrotask-executor" % macrotaskExecutorVersion
     )
   )
 
@@ -257,7 +293,7 @@ lazy val receptionApp = project
       (rootDir.value / "server" / "web" / "reception" / "scalajs"),
     libraryDependencies ++= Seq(
       "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion,
-      "org.scala-js" %%% "scala-js-macrotask-executor" % macrotaskExecutorVersion,
+      "org.scala-js" %%% "scala-js-macrotask-executor" % macrotaskExecutorVersion
     )
   )
 
@@ -284,7 +320,7 @@ lazy val practiceApp = project
       (rootDir.value / "server" / "web" / "practice" / "scalajs"),
     libraryDependencies ++= Seq(
       "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion,
-      "org.scala-js" %%% "scala-js-macrotask-executor" % macrotaskExecutorVersion,
+      "org.scala-js" %%% "scala-js-macrotask-executor" % macrotaskExecutorVersion
     )
   )
 
@@ -319,7 +355,7 @@ lazy val clinicop = crossProject(JVMPlatform, JSPlatform)
   .in(file("clinicop"))
   .dependsOn(util, holidayjp)
   .jsSettings(
-    scalaJSUseMainModuleInitializer := false,
+    scalaJSUseMainModuleInitializer := false
   )
 
 val clinicopJVM = clinicop.jvm
@@ -352,8 +388,8 @@ lazy val config = project
     name := "config",
     libraryDependencies ++= Seq(
       "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion,
-      "io.circe" %% "circe-yaml" % circeVersion,
-    ),
+      "io.circe" %% "circe-yaml" % circeVersion
+    )
   )
 
 lazy val appUtil = crossProject(JVMPlatform, JSPlatform)

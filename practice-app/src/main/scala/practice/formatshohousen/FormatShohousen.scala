@@ -12,7 +12,8 @@ case class FormattedShohousen(
     tail: String = ""
 ):
   def render: String =
-    prefix + "\n" + itemsToString + tail
+    val alphaResult = prefix + "\n" + itemsToString + tail
+    ZenkakuUtil.toZenkaku(alphaResult)
 
   def itemsToString: String =
     val ctx = FormatContext(items.size)
@@ -25,7 +26,8 @@ object FormatShohousen:
     parse(src).fold(src)(_.render)
 
   def parse(src: String): Option[FormattedShohousen] =
-    val lines: List[String] = src.linesIterator.toList
+    val alpha = ZenkakuUtil.toHankaku(src)
+    val lines: List[String] = alpha.linesIterator.toList
     parsePrefix(lines)
       .flatMap(parseItems _)
       .flatMap(parseTail _)
@@ -33,8 +35,9 @@ object FormatShohousen:
   def parsePrefix(
       lines: List[String]
   ): Option[(FormattedShohousen, List[String])] =
+    println(("lines", lines))
     lines match {
-      case (a @ "院外処方") :: (b @ "Ｒｐ）") :: tail =>
+      case (a @ "院外処方") :: (b @ "Rp)") :: tail =>
         Some(FormattedShohousen(List(a, b).mkString("\n")), tail)
       case _ => None
     }
@@ -55,9 +58,9 @@ object FormatShohousen:
       case _ => Some(f, List.empty)
     }
 
-  val itemStartPattern: Regex = raw"^[０-９0-9]+[）)]".r
+  val itemStartPattern: Regex = raw"^[0-9]+\)".r
 
-  def isItemCont(s: String): Boolean = s.startsWith(" ") || s.startsWith("　")
+  def isItemCont(s: String): Boolean = s.startsWith(" ")
 
   def linesToItem(h: String, t: List[String]): ShohousenItem =
     toNaifuku(h, t)
@@ -92,6 +95,6 @@ object FormatShohousen:
     leadingSpacesPattern.replaceFirstIn(s, "")
 
   def itemLeadingSpaces(index: Int): String =
-    if index < 10 then "　"
-    else "　　"
+    if index < 10 then "  "
+    else "   "
 
