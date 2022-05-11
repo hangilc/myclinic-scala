@@ -1,4 +1,3 @@
-
 ThisBuild / scalaVersion := "3.1.0"
 ThisBuild / version := "0.1.0-SNAPSHOT"
 ThisBuild / organization := "dev.myclinic.scala"
@@ -66,18 +65,19 @@ lazy val root = project
   )
 
 lazy val formatshohousen = crossProject(JSPlatform, JVMPlatform)
-  .crossType(CrossType.Pure)
+  .crossType(CrossType.Full)
   .in(file("formatshohousen"))
   .dependsOn(util)
   .settings(
-    name := "formatshohousen"
+    name := "formatshohousen",
   )
   .jsSettings(
   )
   .jvmSettings(
     libraryDependencies ++= Seq(
       "org.scalatest" %% "scalatest" % scalaTestVersion % "test"
-    )
+    ),
+    Test / logBuffered := false
   )
 
 val formatshohousenJS = formatshohousen.js
