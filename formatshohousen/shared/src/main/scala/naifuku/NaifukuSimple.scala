@@ -26,7 +26,7 @@ case class NaifukuSimple(
     else
       ???
 
-  def secondLine()
+  
 
 
 object NaifukuSimple:

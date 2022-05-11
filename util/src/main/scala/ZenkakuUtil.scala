@@ -40,6 +40,13 @@ object ZenkakuUtil:
   def toZenkaku(s: String): String = s.map(toZenkakuChar _)
   def toHankaku(s: String): String = s.map(toHankakuChar _)
 
+  def toZenkakuCharExcluding(excludes: Set[Char]): Char => Char =
+    c => if excludes.contains(c) then c else toZenkakuChar(c)
+  def toZenkakuCharExcluding(excludes: Char*): Char => Char =
+    toZenkakuCharExcluding(excludes.toSet)
+  def toZenkakuWithException(s: String, excludes: Set[Char]): String =
+    s.map(toZenkakuCharExcluding(excludes))
+
   def toZenkakuFun(pred: Char => Boolean): String => String =
     val map = alphaToZenkakuMap.view.filterKeys(pred)
     s => s.map(c => map.getOrElse(c, c))
