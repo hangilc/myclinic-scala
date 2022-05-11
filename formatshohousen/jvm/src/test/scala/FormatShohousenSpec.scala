@@ -56,4 +56,6 @@ class FormatShohousenSpec extends AnyFunSuite:
     assert(item.usage == "分３　毎食後")
     assert(item.days == "５")
     assert(item.daysUnit == "日分")
+    val ctx = FormatContext(1)
+    assert(item.firstLine(1, ctx) == List("１）カロナール錠３００ｍｇ　　　　　　　　３錠"))
   }
