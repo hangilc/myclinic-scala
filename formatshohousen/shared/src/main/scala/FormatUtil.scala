@@ -15,11 +15,11 @@ object FormatUtil:
     toZenkaku(rep)
 
   def softSplitLine(
-      preBlank: String,
+      prefix: String,
       line: String,
       lineSize: Int
   ): String =
-    val softPre = softBlank.toString * preBlank.size
+    val softPre = softBlank.toString * prefix.size
     def iter(s: String, lines: List[String]): List[String] =
       if s.size <= lineSize then lines :+ s
       else
@@ -28,9 +28,16 @@ object FormatUtil:
           softPre + b,
           lines :+ a + softNewline
         )
-    iter(preBlank + line, List.empty).mkString
+    iter(prefix + line, List.empty).mkString
 
   def adjustSplit(a: String, b: String): (String, String) =
     val (pre, tail) = b.span(c => c == ' ' || c == zenkakuSpaceChar)
     (a ++ pre, tail)
+
+  def formatAdjusting(indexPre: String, leadLine: String, moreLines: List[String], lineSize: Int): String =
+    val preBlank = softBlank.toString * indexPre.size
+    val lines: List[String] = softSplitLine(indexPre, leadLine, lineSize) ::
+      moreLines.map(line => softSplitLine(preBlank, line, lineSize))
+    lines.mkString
+
 

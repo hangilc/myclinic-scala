@@ -58,7 +58,10 @@ class FormatShohousenSpec extends AnyFunSuite:
     assert(item.days == "５")
     assert(item.daysUnit == "日分")
     val ctx = FormatContext(1)
-    assert(item.firstLine(1, ctx) == List("１）カロナール錠３００ｍｇ　　　　　　　　３錠"))
+    assert(item.format(1, ctx) == List(
+      "１）カロナール錠３００ｍｇ　　　　　　　　３錠",
+      "　　分３　毎食後　　　　　　　　　　　　　５日分"
+    ).mkString("\n"))
   }
 
   test("should not split following line") {

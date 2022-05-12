@@ -15,19 +15,27 @@ case class NaifukuSimple(
     daysUnit: String
 ) extends Formatter:
   def format(index: Int, ctx: FormatContext): String =
-    firstLine(index, ctx).mkString("\n")
+    val indexRep: String = FormatUtil.indexRep(index, ctx.totalItems)
+    val blankRep: String = zenkakuSpace * indexRep.size
+    List(
+      formatLine(indexRep, name, amount + unit, ctx),
+      formatLine(blankRep, usage, days + daysUnit, ctx)
+    ).mkString("\n")
 
-  def firstLine(index: Int, ctx: FormatContext): List[String] =
-    val irep = FormatUtil.indexRep(index, ctx.totalItems)
-    val rem = ctx.tabPos - (name.size + amount.size + unit.size)
-    val fmt = irep + name + (zenkakuSpace * rem) + amount + unit
-    if fmt.size <= ctx.lineSize then
-      List(fmt)
-    else
-      ???
-
-  
-
+  def formatLine(pre: String, left: String, right: String, ctx: FormatContext): String =
+    val tabRem = ctx.tabPos - (pre.size + left.size)
+    (
+      if tabRem > 0 then
+        Some(pre + left + (zenkakuSpace * tabRem) + right)
+      else None
+    ).filter(_.size <= ctx.lineSize)
+      .getOrElse(
+        FormatUtil.softSplitLine(
+          pre,
+          left + zenkakuSpace + right,
+          ctx.lineSize
+        )
+      )
 
 object NaifukuSimple:
   val firstPattern = raw"(.*$notSpace)$space+($digitsPeriod+)($notSpace+).*".r
