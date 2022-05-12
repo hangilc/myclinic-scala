@@ -7,8 +7,8 @@ import dev.myclinic.scala.util.ZenkakuUtil.toZenkaku
 import dev.myclinic.scala.formatshohousen.FormatUtil
 
 case class NaifukuSimple(
-  drug: DrugLine,
-  usage: UsageLine
+    drug: DrugLine,
+    usage: UsageLine
 ) extends Formatter:
   def format(index: Int, ctx: FormatContext): String =
     val indexRep: String = FormatUtil.indexRep(index, ctx.totalItems)
@@ -34,15 +34,14 @@ object NaifukuSimple:
       case _ => None
     }
 
-  val oneLinePattern = (NaifukuUtil.drugRegex + s"$space+" + NaifukuUtil.usageRegex).r
-  
+  val oneLinePattern =
+    (NaifukuUtil.drugRegex + s"$space+" + NaifukuUtil.usageRegex).r
+
   def tryParseOneLine(s: String, t: List[String]): Option[NaifukuSimple] =
-    if t.isEmpty then
-      s match {
-        case oneLinePattern(name, amount, usage, days) =>
-          val drugLine = DrugLine(name, amount)
-          val usageLine = UsageLine(usage, days)
-          Some(new NaifukuSimple(drugLine, usageLine))
-        case _ => None
-      }
-    else None
+    (s :: t).mkString(zenkakuSpace) match {
+      case oneLinePattern(name, amount, usage, days) =>
+        val drugLine = DrugLine(name, amount)
+        val usageLine = UsageLine(usage, days)
+        Some(new NaifukuSimple(drugLine, usageLine))
+      case _ => None
+    }
