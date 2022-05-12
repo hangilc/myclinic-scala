@@ -13,12 +13,21 @@ object FormatUtil:
 
   def indexRep(index: Int, totalItems: Int): String =
     val w = preWidth(totalItems)
-    val rep = String.format(s"%${w}d)", index)
-    toZenkaku(rep)
+    composeIndexRep(index, w)
+
+  def composeIndexRep(index: Int, w: Int): String =
+    toZenkaku(String.format(s"%${w}d)", index))
 
   def blankRep(totalItems: Int): String =
     val w = preWidth(totalItems)
+    composeBlankRep(w)
+
+  def composeBlankRep(w: Int): String = 
     zenkakuSpace * (w + 1)
+
+  def composePre(index: Int, ctx: FormatContext): (String, String) =
+    val w = preWidth(ctx.totalItems)
+    (composeIndexRep(index, w), composeBlankRep(w))
 
   def softSplitLine(
       prefix: String,

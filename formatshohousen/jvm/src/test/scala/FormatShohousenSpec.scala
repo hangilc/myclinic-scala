@@ -7,6 +7,7 @@ import dev.myclinic.scala.formatshohousen.naifuku.NaifukuSimple
 import FormatUtil.*
 import dev.myclinic.scala.formatshohousen.naifuku.NaifukuUtil
 import dev.myclinic.scala.util.ZenkakuUtil.toZenkaku
+import dev.myclinic.scala.formatshohousen.naifuku.NaifukuMulti
 
 class FormatShohousenSpec extends AnyFunSuite:
   test("should split sample1 to item parts") {
@@ -126,4 +127,22 @@ class FormatShohousenSpec extends AnyFunSuite:
     val s = toZenkaku("ジルテック（１０）　１錠　分１朝食後　２８日分")
     val f = NaifukuSimple.tryParseOneLine(s, List.empty)
     assert(f.isDefined)
+  }
+
+  test("should format NaifukuMulti") {
+    val s = """
+      |１）カロナール錠３００ｍｇ　３錠
+      |　　アンブロキソール錠１５ｍｇ　３錠
+      |　　分３　毎食後　５日分
+    """.stripMargin.trim
+    val f = FormatShohousen.parseItemWith(s, NaifukuMulti.tryParse _)
+    assert(f.isDefined)
+    val fmt = f.get
+    val ctx = FormatContext(4)
+    val e = """
+      |１）カロナール錠３００ｍｇ　　　　　　　　３錠
+      |　　アンブロキソール錠１５ｍｇ　　　　　　３錠
+      |　　分３　毎食後　　　　　　　　　　　　　５日分
+    """.stripMargin.trim
+    assert(fmt.format(1, ctx) == e)
   }

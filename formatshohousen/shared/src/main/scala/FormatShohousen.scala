@@ -41,12 +41,21 @@ object FormatShohousen:
       (g.getOrElse("t", List.empty), g.getOrElse("c", List.empty))
     Subparts(leadLine, moreLinesStripped, trails, commands)
 
-  def parseItem(s: String): Formatter =
+  def prepareForFormat(s: String): (String, List[String]) =
     val subs = splitToSubparts(s)
     val lead = subs.leadLine
     val more = subs.lines
+    (lead, more)
+
+  def parseItem(s: String): Formatter =
+    val (lead, more) = prepareForFormat(s)
     NaifukuSimple
       .tryParse(lead, more)
       .orElse(NaifukuMulti.tryParse(lead, more))
       .orElse(NaifukuSimple.tryParseOneLine(lead, more))
       .getOrElse(FallbackFormatter(lead, more))
+
+  def parseItemWith(s: String, f: (String, List[String]) => Option[Formatter]): Option[Formatter] =
+    val (lead, more) = prepareForFormat(s)
+    f(lead, more)
+
