@@ -2,17 +2,23 @@ package dev.myclinic.scala.formatshohousen
 
 import dev.myclinic.scala.util.ZenkakuUtil.toZenkaku
 import FormatUtil.{softNewline, softBlank}
-import RegexPattern.zenkakuSpaceChar
+import RegexPattern.{zenkakuSpaceChar, zenkakuSpace}
 
 object FormatUtil:
   val softNewline = '~'
   val softBlank = '^'
   val commandStart = '@'
 
+  def preWidth(totalItems: Int): Int = if totalItems < 10 then 1 else 2
+
   def indexRep(index: Int, totalItems: Int): String =
-    val w = if totalItems < 10 then 1 else 2
+    val w = preWidth(totalItems)
     val rep = String.format(s"%${w}d)", index)
     toZenkaku(rep)
+
+  def blankRep(totalItems: Int): String =
+    val w = preWidth(totalItems)
+    zenkakuSpace * (w + 1)
 
   def softSplitLine(
       prefix: String,
@@ -39,5 +45,15 @@ object FormatUtil:
     val lines: List[String] = softSplitLine(indexPre, leadLine, lineSize) ::
       moreLines.map(line => softSplitLine(preBlank, line, lineSize))
     lines.mkString
+
+  def sequence[T](opts: List[Option[T]]): Option[List[T]] =
+    opts match {
+      case Nil => Some(List.empty)
+      case hopt :: topt =>
+        for
+          h <- hopt
+          t <- sequence(topt)
+        yield h :: t
+    }
 
 

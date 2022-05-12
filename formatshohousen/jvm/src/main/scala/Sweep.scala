@@ -8,6 +8,14 @@ object Sweep:
     val text = file.getLines.mkString("\n")
     file.close
     val items = text.split("DELIM\n")
+    val (success, fail) = items.foldLeft((0, 0)) {
+      case ((success, fail), s) => {
+        val f = FormatShohousen.parseItem(s)
+        if f.isInstanceOf[FallbackFormatter] then (success, fail + 1)
+        else (success + 1, fail)
+      }
+    }
+    println(s"${success}/${success + fail}")
     items.flatMap(item => FormatShohousen.splitToParts(item))
       .find(s => {
         val f = FormatShohousen.parseItem(s)

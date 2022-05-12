@@ -5,6 +5,8 @@ import FormatShohousen.*
 import ShohouSample.*
 import dev.myclinic.scala.formatshohousen.naifuku.NaifukuSimple
 import FormatUtil.*
+import dev.myclinic.scala.formatshohousen.naifuku.NaifukuUtil
+import dev.myclinic.scala.util.ZenkakuUtil.toZenkaku
 
 class FormatShohousenSpec extends AnyFunSuite:
   test("should split sample1 to item parts") {
@@ -23,27 +25,25 @@ class FormatShohousenSpec extends AnyFunSuite:
     val item = splitToParts(sample1)(0)
     val subs = splitToSubparts(item)
     assert(subs.leadLine == "カロナール錠３００ｍｇ　３錠")
-    assert(subs.lines == List("　　分３　毎食後　５日分"))
+    assert(subs.lines == List("分３　毎食後　５日分"))
   }
 
   test("should parse NaifukuSimple firstPattern") {
     val s = "カロナール錠３００ｍｇ　３錠"
-    val opt = NaifukuSimple.firstPattern.findPrefixMatchOf(s)
+    val opt = NaifukuUtil.drugPattern.findPrefixMatchOf(s)
     assert(opt.isDefined)
-    assert(opt.get.groupCount == 3)
+    assert(opt.get.groupCount == 2)
     assert(opt.get.group(1) == "カロナール錠３００ｍｇ")
-    assert(opt.get.group(2) == "３")
-    assert(opt.get.group(3) == "錠")
+    assert(opt.get.group(2) == "３錠")
   }
 
   test("should parse NaifukuSimple secondPattern") {
-    val s = "　　分３　毎食後　５日分"
-    val opt = NaifukuSimple.secondPattern.findPrefixMatchOf(s)
+    val s = "分３　毎食後　５日分"
+    val opt = NaifukuUtil.usagePattern.findPrefixMatchOf(s)
     assert(opt.isDefined)
-    assert(opt.get.groupCount == 3)
+    assert(opt.get.groupCount == 2)
     assert(opt.get.group(1) == "分３　毎食後")
-    assert(opt.get.group(2) == "５")
-    assert(opt.get.group(3) == "日分")
+    assert(opt.get.group(2) == "５日分")
   }
 
   test("should parse NaifukuSimple") {
@@ -51,12 +51,10 @@ class FormatShohousenSpec extends AnyFunSuite:
     val itemOpt = NaifukuSimple.tryParse(subs.leadLine, subs.lines)
     assert(itemOpt.isDefined)
     val item = itemOpt.get
-    assert(item.name == "カロナール錠３００ｍｇ")
-    assert(item.amount == "３")
-    assert(item.unit == "錠")
-    assert(item.usage == "分３　毎食後")
-    assert(item.days == "５")
-    assert(item.daysUnit == "日分")
+    assert(item.drug.name == "カロナール錠３００ｍｇ")
+    assert(item.drug.amount == "３錠")
+    assert(item.usage.usage == "分３　毎食後")
+    assert(item.usage.days == "５日分")
     val ctx = FormatContext(1)
     assert(item.format(1, ctx) == List(
       "１）カロナール錠３００ｍｇ　　　　　　　　３錠",
@@ -122,4 +120,10 @@ class FormatShohousenSpec extends AnyFunSuite:
     )
     val fmt = ff.format(1, FormatContext(3))
     assert(fmt == "１）カロナール錠３００ｍｇ　３錠\n　　分３　毎食後　５日分")
+  }
+
+  test("should parse one liner") {
+    val s = toZenkaku("ジルテック（１０）　１錠　分１朝食後　２８日分")
+    val f = NaifukuSimple.tryParseOneLine(s, List.empty)
+    assert(f.isDefined)
   }

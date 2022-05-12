@@ -1,11 +1,15 @@
 package dev.myclinic.scala.formatshohousen.naifuku
 
 import dev.myclinic.scala.formatshohousen.RegexPattern.*
+import dev.myclinic.scala.formatshohousen.FormatContext
+import dev.myclinic.scala.formatshohousen.FormatUtil
 
 object NaifukuUtil:
-  val drugPattern = raw"(.*$notSpace)$space+($digitsPeriod+$notSpace+).*".r
-  val usagePattern =
-    raw"$space+(分$digits.*$notSpace)$space+($digits+日分)$space*".r
+  val unit = "(?:錠|カプセル|ｇ|ｍｇ|包)"
+  val drugRegex = raw"(.*$notSpace)$space+($digitsPeriod+$unit$notSpace*)"
+  val drugPattern = s"$drugRegex$space*".r
+  val usageRegex = raw"(分$digits.*$notSpace)$space+($digits+日分)$space*"
+  val usagePattern = usageRegex.r
 
   def tryParseDrugLine(s: String): Option[DrugLine] =
     s match {
@@ -16,4 +20,24 @@ object NaifukuUtil:
   def tryParseUsageLine(s: String): Option[UsageLine] =
     s match {
       case usagePattern(usage, days) => Some(UsageLine(usage, days))
+      case _ => None
     }
+
+  def formatLine(
+      pre: String,
+      left: String,
+      right: String,
+      ctx: FormatContext
+  ): String =
+    val tabRem = ctx.tabPos - (pre.size + left.size)
+    (
+      if tabRem > 0 then Some(pre + left + (zenkakuSpace * tabRem) + right)
+      else None
+    ).filter(_.size <= ctx.lineSize)
+      .getOrElse(
+        FormatUtil.softSplitLine(
+          pre,
+          left + zenkakuSpace + right,
+          ctx.lineSize
+        )
+      )
