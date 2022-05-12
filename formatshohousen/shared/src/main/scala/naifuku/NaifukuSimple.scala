@@ -22,11 +22,15 @@ case class NaifukuSimple(
       formatLine(blankRep, usage, days + daysUnit, ctx)
     ).mkString("\n")
 
-  def formatLine(pre: String, left: String, right: String, ctx: FormatContext): String =
+  def formatLine(
+      pre: String,
+      left: String,
+      right: String,
+      ctx: FormatContext
+  ): String =
     val tabRem = ctx.tabPos - (pre.size + left.size)
     (
-      if tabRem > 0 then
-        Some(pre + left + (zenkakuSpace * tabRem) + right)
+      if tabRem > 0 then Some(pre + left + (zenkakuSpace * tabRem) + right)
       else None
     ).filter(_.size <= ctx.lineSize)
       .getOrElse(
@@ -50,12 +54,12 @@ object NaifukuSimple:
           ) =>
         Some(
           NaifukuSimple(
-            toZenkaku(name),
-            toZenkaku(amount),
-            toZenkaku(unit),
-            toZenkaku(usage),
-            toZenkaku(days),
-            toZenkaku(daysUnit)
+            name,
+            amount,
+            unit,
+            usage,
+            days,
+            daysUnit
           )
         )
       case _ => None

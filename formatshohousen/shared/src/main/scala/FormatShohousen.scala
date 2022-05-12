@@ -2,7 +2,7 @@ package dev.myclinic.scala.formatshohousen
 
 import dev.myclinic.scala.util.ZenkakuUtil
 import FormatUtil.{softNewline, softBlank, commandStart}
-import dev.myclinic.scala.formatshohousen.naifuku.NaifukuSimple
+import dev.myclinic.scala.formatshohousen.naifuku.*
 
 object FormatShohousen:
   val itemStartPattern = raw"(?m)^[0-9０-９]+[)）]".r
@@ -39,6 +39,7 @@ object FormatShohousen:
     val lead = subs.leadLine
     val more = subs.lines
     NaifukuSimple.tryParse(lead, more)
+      .orElse(NaifukuMulti.tryParse(lead, more))
       .getOrElse(FallbackFormatter(lead, more))
 
 
