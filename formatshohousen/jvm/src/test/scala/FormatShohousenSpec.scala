@@ -3,11 +3,10 @@ package dev.myclinic.scala.formatshohousen
 import org.scalatest.funsuite.AnyFunSuite
 import FormatShohousen.*
 import ShohouSample.*
-import dev.myclinic.scala.formatshohousen.naifuku.NaifukuSimple
+import dev.myclinic.scala.formatshohousen.naifuku.{NaifukuSimple, NaifukuMulti, NaifukuUtil}
+import dev.myclinic.scala.formatshohousen.gaiyou.{GaiyouShippu}
 import FormatUtil.*
-import dev.myclinic.scala.formatshohousen.naifuku.NaifukuUtil
 import dev.myclinic.scala.util.ZenkakuUtil.toZenkaku
-import dev.myclinic.scala.formatshohousen.naifuku.NaifukuMulti
 
 class FormatShohousenSpec extends AnyFunSuite:
   test("should split sample1 to item parts") {
@@ -143,6 +142,22 @@ class FormatShohousenSpec extends AnyFunSuite:
       |１）カロナール錠３００ｍｇ　　　　　　　　３錠
       |　　アンブロキソール錠１５ｍｇ　　　　　　３錠
       |　　分３　毎食後　　　　　　　　　　　　　５日分
+    """.stripMargin.trim
+    assert(fmt.format(1, ctx) == e)
+  }
+
+  test("should format GaiyouShippu") {
+    val s = """
+      |１）ロキソニンパップ１００ｍｇ　１０ｘ１４ｃｍ　４２枚
+      |　　１日１回患部に貼付
+    """.stripMargin.trim
+    val f = FormatShohousen.parseItemWith(s, GaiyouShippu.tryParse _)
+    assert(f.isDefined)
+    val fmt = f.get
+    val ctx = FormatContext(4)
+    val e = """
+      |１）ロキソニンパップ１００ｍｇ　１０ｘ１４ｃｍ　４２枚
+      |　　１日１回患部に貼付
     """.stripMargin.trim
     assert(fmt.format(1, ctx) == e)
   }
