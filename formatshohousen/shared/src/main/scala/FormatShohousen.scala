@@ -5,6 +5,8 @@ import FormatUtil.{softNewline, softBlank, commandStart}
 import dev.myclinic.scala.formatshohousen.naifuku.*
 import dev.myclinic.scala.formatshohousen.gaiyou.GaiyouShippu
 import dev.myclinic.scala.formatshohousen.tonpuku.TonpukuTimes
+import dev.myclinic.scala.formatshohousen.gaiyou.GaiyouCream
+import dev.myclinic.scala.formatshohousen.gaiyou.GaiyouDrop
 
 object FormatShohousen:
   val itemStartPattern = raw"(?m)^[0-9０-９]+[)）]".r
@@ -57,6 +59,10 @@ object FormatShohousen:
       .orElse(NaifukuSimple.tryParseOneLine(lead, more))
       .orElse(GaiyouShippu.tryParse(lead, more))
       .orElse(GaiyouShippu.tryParseOneLine(lead, more))
+      .orElse(GaiyouCream.tryParse(lead, more))
+      .orElse(GaiyouCream.tryParseOneLine(lead, more))
+      .orElse(GaiyouDrop.tryParse(lead, more))
+      .orElse(GaiyouDrop.tryParseOneLine(lead, more))
       .orElse(TonpukuTimes.tryParse(lead, more))
       .orElse(TonpukuTimes.tryParseOneLine(lead, more))
       .getOrElse(FallbackFormatter(lead, more))
