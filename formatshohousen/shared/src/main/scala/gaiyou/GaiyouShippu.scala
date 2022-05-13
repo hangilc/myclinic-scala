@@ -16,20 +16,32 @@ class GaiyouShippu(name: String, amount: String, usage: String) extends Formatte
 
 object GaiyouShippu:
   val unit = "(?:枚|パック)"
-  val drugPart = s"($drugNameRegex)$space+($digit+$unit)".r
-  val usagePart1 = s"(１日$digit+回.*)".r
-  val usagePart2 = s"(１回$digit+枚.*)".r
+  val drugPart = s"($drugNameRegex)$space+($digit+$unit)"
+  val drugPattern = drugPart.r
+  val usageStart1 = s"１日$digit+回"
+  val usageStart2 = s"１回$digit+枚"
+  val usageStart = s"(?:$usageStart1|$usageStart2)"
+  val usage = s"($usageStart(?:.*$notSpace)?)"
+  val usagePattern = s"$usage$space*".r
   def tryParse(lead: String, more: List[String]): Option[GaiyouShippu] =
     (lead match {
-      case drugPart(name, amount) => Some(name, amount)
+      case drugPattern(name, amount) => Some(name, amount)
       case _ => None
     }) .flatMap {
       case (name, amount) => 
         more.mkString(zenkakuSpace) match {
-          case usagePart1(usage) => Some(new GaiyouShippu(name, amount, usage))
-          case usagePart2(usage) => Some(new GaiyouShippu(name, amount, usage))
+          case usagePattern(usage) => Some(new GaiyouShippu(name, amount, usage))
           case _ => None
         }
+    }
+
+  val onelineRegex = s"$drugPart$space+$usage"
+  val onelinePattern = s"$onelineRegex$space*".r
+
+  def tryParseOneLine(lead: String, more: List[String]): Option[GaiyouShippu] =
+    (lead :: more).mkString(zenkakuSpace) match {
+      case onelinePattern(name, amount, usage) => Some(new GaiyouShippu(name, amount, usage))
+      case _ => None
     }
     
 

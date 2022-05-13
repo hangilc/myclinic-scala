@@ -55,6 +55,25 @@ object FormatUtil:
       moreLines.map(line => softSplitLine(preBlank, line, lineSize))
     lines.mkString
 
+  def formatTabLine(
+      pre: String,
+      left: String,
+      right: String,
+      ctx: FormatContext
+  ): String =
+    val tabRem = ctx.tabPos - (pre.size + left.size)
+    (
+      if tabRem > 0 then Some(pre + left + (zenkakuSpace * tabRem) + right)
+      else None
+    ).filter(_.size <= ctx.lineSize)
+      .getOrElse(
+        FormatUtil.softSplitLine(
+          pre,
+          left + zenkakuSpace + right,
+          ctx.lineSize
+        )
+      )
+
   def sequence[T](opts: List[Option[T]]): Option[List[T]] =
     opts match {
       case Nil => Some(List.empty)

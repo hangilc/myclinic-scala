@@ -4,6 +4,7 @@ import dev.myclinic.scala.util.ZenkakuUtil
 import FormatUtil.{softNewline, softBlank, commandStart}
 import dev.myclinic.scala.formatshohousen.naifuku.*
 import dev.myclinic.scala.formatshohousen.gaiyou.GaiyouShippu
+import dev.myclinic.scala.formatshohousen.tonpuku.TonpukuTimes
 
 object FormatShohousen:
   val itemStartPattern = raw"(?m)^[0-9０-９]+[)）]".r
@@ -55,6 +56,9 @@ object FormatShohousen:
       .orElse(NaifukuMulti.tryParse(lead, more))
       .orElse(NaifukuSimple.tryParseOneLine(lead, more))
       .orElse(GaiyouShippu.tryParse(lead, more))
+      .orElse(GaiyouShippu.tryParseOneLine(lead, more))
+      .orElse(TonpukuTimes.tryParse(lead, more))
+      .orElse(TonpukuTimes.tryParseOneLine(lead, more))
       .getOrElse(FallbackFormatter(lead, more))
 
   def parseItemWith(s: String, f: (String, List[String]) => Option[Formatter]): Option[Formatter] =

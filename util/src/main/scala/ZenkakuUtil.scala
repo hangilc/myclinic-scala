@@ -1,36 +1,26 @@
 package dev.myclinic.scala.util
 
+import scala.collection.immutable.NumericRange
+
 object ZenkakuUtil:
-  val alphaToZenkakuMap: Map[Char, Char] = Map(
-    '0' -> '０',
-    '1' -> '１',
-    '2' -> '２',
-    '3' -> '３',
-    '4' -> '４',
-    '5' -> '５',
-    '6' -> '６',
-    '7' -> '７',
-    '8' -> '８',
-    '9' -> '９',
+  val alphaToZenkakuMap: Map[Char, Char] = 
+    rangeMap('0' to '9', '０')
+      ++ rangeMap('a' to 'z', 'ａ')
+      ++ rangeMap('A' to 'Z', 'Ａ')
+      ++ Map(
     '.' -> '．',
     ' ' -> '　',
     '-' -> 'ー',
     '(' -> '（',
     ')' -> '）',
     ',' -> '、',
-  ) ++ Map.from(
-    ('a' to 'z').toList.zipWithIndex.map {
-      case (a, i) => {
-        a -> ('ａ' + i).toChar
-      }
-    }
-  ) ++ Map.from(
-    ('A' to 'Z').toList.zipWithIndex.map {
-      case (a, i) => {
-        a -> ('Ａ' + i).toChar
-      }
-    }
+    '%' -> '％'
   )
+
+  def rangeMap(range: NumericRange[Char], valueStart: Char): Map[Char, Char] = 
+    Map.from(range.toList.map(_.toChar).zipWithIndex.map {
+      case (a, i) => a -> (valueStart + i).toChar
+    })
 
   val zenkakuToAlphaMap = alphaToZenkakuMap.map(kv => (kv._2, kv._1))
 

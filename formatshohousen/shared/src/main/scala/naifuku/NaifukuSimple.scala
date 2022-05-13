@@ -19,11 +19,6 @@ case class NaifukuSimple(
     ).mkString("\n")
 
 object NaifukuSimple:
-  // val firstRegex = raw"(.*$notSpace)$space+($digitsPeriod+)($notSpace+)"
-  // val firstPattern = s"$firstRegex$space*".r
-  // val secondRegex = raw"$space+(分$digits.*$notSpace)$space+($digits+)(日分)$space*"
-  // val secondPattern = secondRegex.r
-
   def tryParse(h: String, ts: List[String]): Option[NaifukuSimple] =
     ts match {
       case List(t) =>
