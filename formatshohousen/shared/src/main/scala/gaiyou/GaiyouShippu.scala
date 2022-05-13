@@ -9,8 +9,9 @@ class GaiyouShippu(name: String, amount: String, usage: String) extends Formatte
   def format(index: Int, ctx: FormatContext): String =
     val (ipre, bpre) = FormatUtil.composePre(index, ctx)
     List(
-      FormatUtil.softSplitLine(ipre, )
-    )
+      FormatUtil.softSplitLine(ipre, s"$name$zenkakuSpace$amount", ctx.lineSize),
+      FormatUtil.softSplitLine(bpre, usage, ctx.lineSize)
+    ).mkString("\n")
 
 
 object GaiyouShippu:
