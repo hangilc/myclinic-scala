@@ -29,6 +29,9 @@ object FormatUtil:
     val w = preWidth(ctx.totalItems)
     (composeIndexRep(index, w), composeBlankRep(w))
 
+  def softSplitLine(prefix: String, line: String, ctx: FormatContext): String =
+    softSplitLine(prefix, line, ctx.lineSize)
+  
   def softSplitLine(
       prefix: String,
       line: String,

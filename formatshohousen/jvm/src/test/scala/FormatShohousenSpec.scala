@@ -8,6 +8,7 @@ import dev.myclinic.scala.formatshohousen.gaiyou.{GaiyouShippu}
 import FormatUtil.*
 import dev.myclinic.scala.util.ZenkakuUtil.toZenkaku
 import dev.myclinic.scala.formatshohousen.tonpuku.TonpukuTimes
+import dev.myclinic.scala.formatshohousen.tonpuku.TonpukuTimes2
 
 class FormatShohousenSpec extends AnyFunSuite:
   test("should split sample1 to item parts") {
@@ -175,4 +176,18 @@ class FormatShohousenSpec extends AnyFunSuite:
       |　　疼痛時　　　　　　　　　　　　　　　　１０回分
     """.stripMargin.trim
     assert(f.get.format(1, FormatContext(4)) == e)
+  }
+
+  test("should format TonpukuTimes2") {
+    val s = """
+      |４）カロナール（３００）
+      |　　１回１錠、頭痛時。１０回分    
+    """.stripMargin.trim
+    val f = FormatShohousen.parseItemWith(s, TonpukuTimes2.tryParse _)
+    assert(f.isDefined)
+    val e = """
+      |４）カロナール（３００）
+      |　　１回１錠、頭痛時。　　　　　　　　　　１０回分
+    """.stripMargin.trim
+    assert(f.get.format(4, FormatContext(4)) == e)
   }

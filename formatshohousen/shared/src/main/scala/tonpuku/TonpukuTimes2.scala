@@ -11,40 +11,31 @@ import dev.myclinic.scala.formatshohousen.FormatUtil
 
 class TonpukuTimes2(
   name: String,
-  amount: String,
   usage: String,
   times: String
 ) extends Formatter:
   def format(index: Int, ctx: FormatContext): String =
     val (ipre, bpre) = FormatUtil.composePre(index, ctx)
     List(
-      FormatUtil.formatTabLine(ipre, name, amount, ctx),
+      FormatUtil.softSplitLine(ipre, name, ctx),
       FormatUtil.formatTabLine(bpre, usage, times, ctx)
     ).mkString("\n")
 
 object TonpukuTimes2:
-  val unit = "(?:錠)"
-  val drugLine = s"($drugNameRegex)$space+((?:[一１]回)?$digit+$unit)"
-  val usage1 = s"$notSpace.*時.*$notSpace"
-  val usage2 = s"$notSpace.*時"
-  val usageLine = s"($usage1|$usage2)$space+($digit+回分)"
-  val drugLinePattern = s"$drugLine$space*".r
-  val usageLinePattern = s"$usageLine$space*".r
+  val drug = s".*$notSpace"
+  val amount = s"[１一]回$digit+(?:錠)"
+  val usage1 = s".*$amount.*時(?:.*$notSpace)?"
+  val usage2 = s".+時.*$amount(?:.*$notSpace)?"
+  val usage = s"$usage1|$usage2"
+  val times = s"$digit+回分"
+  val delim = "[。、]"
+  val sep = s"(?:(?:(?<=$delim)$space*)|$space+)"
+  val pattern = s"($drug)$space+($usage)$sep($times)$space*".r
 
   def tryParse(lead: String, more: List[String]): Option[TonpukuTimes2] =
-    (lead :: more) match {
-      case List(drugLinePattern(name, amount), usageLinePattern(usage, times)) =>
-        Some(new TonpukuTimes2(name, amount, usage, times))
-      case _ => None
-    }
-
-  val oneline = s"$drugLine$space+$usageLine"
-  val onelinePattern = s"$oneline$space*".r
-
-  def tryParseOneLine(lead: String, more: List[String]): Option[TonpukuTimes2] =
     (lead :: more).mkString(zenkakuSpace) match {
-      case onelinePattern(name, amount, usage, times) =>
-        Some(new TonpukuTimes2(name, amount, usage, times))
+      case pattern(name, usage, times) =>
+        Some(new TonpukuTimes2(name, usage, times))
       case _ => None
     }
 

@@ -7,6 +7,7 @@ import dev.myclinic.scala.formatshohousen.gaiyou.GaiyouShippu
 import dev.myclinic.scala.formatshohousen.tonpuku.TonpukuTimes
 import dev.myclinic.scala.formatshohousen.gaiyou.GaiyouCream
 import dev.myclinic.scala.formatshohousen.gaiyou.GaiyouDrop
+import dev.myclinic.scala.formatshohousen.tonpuku.TonpukuTimes2
 
 object FormatShohousen:
   val itemStartPattern = raw"(?m)^[0-9０-９]+[)）]".r
@@ -36,7 +37,8 @@ object FormatShohousen:
       .getOrElse("")
     val (moreLines, rest) =
       lines.drop(1).span(contLinePattern.matches(_))
-    val moreLinesStripped = moreLines.map(s => leadingSpaces.replaceFirstIn(s, ""))
+    val moreLinesStripped =
+      moreLines.map(s => leadingSpaces.replaceFirstIn(s, ""))
     val g: Map[String, List[String]] =
       rest.groupBy[String](s =>
         if s.startsWith(commandStart.toString) then "c" else "t"
@@ -65,9 +67,12 @@ object FormatShohousen:
       .orElse(GaiyouDrop.tryParseOneLine(lead, more))
       .orElse(TonpukuTimes.tryParse(lead, more))
       .orElse(TonpukuTimes.tryParseOneLine(lead, more))
+      .orElse(TonpukuTimes2.tryParse(lead, more))
       .getOrElse(FallbackFormatter(lead, more))
 
-  def parseItemWith(s: String, f: (String, List[String]) => Option[Formatter]): Option[Formatter] =
+  def parseItemWith(
+      s: String,
+      f: (String, List[String]) => Option[Formatter]
+  ): Option[Formatter] =
     val (lead, more) = prepareForFormat(s)
     f(lead, more)
-
