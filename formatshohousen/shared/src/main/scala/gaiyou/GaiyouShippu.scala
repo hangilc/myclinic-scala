@@ -15,7 +15,7 @@ class GaiyouShippu(name: String, amount: String, usage: String) extends Formatte
 
 
 object GaiyouShippu:
-  val unit = "(?:枚|パック)"
+  val unit = "(?:枚|パック|袋)"
   val drugPart = s"($drugNameRegex)$space+($digit+$unit)"
   val drugPattern = drugPart.r
   val usageStart1 = s"１日$digit+回"

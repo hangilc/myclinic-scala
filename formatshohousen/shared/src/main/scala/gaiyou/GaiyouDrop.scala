@@ -20,7 +20,8 @@ object GaiyouDrop:
   val drugPattern = drugPart.r
   val usageStart1 = s"１日$digit+回"
   val usageStart2 = s"１回$digit+(?:滴|ｇ|噴霧|吸入)"
-  val usageStart = s"(?:$usageStart1|$usageStart2)"
+  val usageStart3 = ".+時"
+  val usageStart = s"(?:$usageStart1|$usageStart2|$usageStart3)"
   val usage = s"($usageStart(?:.*$notSpace)?)"
   val usagePattern = s"$usage$space*".r
   def tryParse(lead: String, more: List[String]): Option[GaiyouDrop] =

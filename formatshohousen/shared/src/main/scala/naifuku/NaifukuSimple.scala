@@ -8,26 +8,29 @@ import dev.myclinic.scala.formatshohousen.FormatUtil
 
 case class NaifukuSimple(
     drug: DrugLine,
-    usage: UsageLine
+    usage: UsageLine,
+    more: List[String] = List.empty
 ) extends Formatter:
   def format(index: Int, ctx: FormatContext): String =
     val indexRep: String = FormatUtil.indexRep(index, ctx.totalItems)
     val blankRep: String = FormatUtil.blankRep(ctx.totalItems)
-    List(
+    (List(
       drug.format(indexRep, ctx),
       usage.format(blankRep, ctx)
-    ).mkString("\n")
+    ) ++ more.map(s => FormatUtil.softSplitLine(blankRep, s, ctx)))
+      .mkString("\n")
 
 object NaifukuSimple:
+  val daysPattern = s"$digit+日分".r
   def tryParse(h: String, ts: List[String]): Option[NaifukuSimple] =
-    ts match {
-      case List(t) =>
-        for
-          drug <- NaifukuUtil.tryParseDrugLine(h)
-          usage <- NaifukuUtil.tryParseUsageLine(t)
-        yield NaifukuSimple(drug, usage)
-      case _ => None
-    }
+    val (pre, post) = ts.span(s => !daysPattern.findFirstIn(s).isDefined)
+    for
+      last <- post.headOption
+      t = (pre :+ last).mkString(zenkakuSpace)
+      more = post.drop(1)
+      drug <- NaifukuUtil.tryParseDrugLine(h)
+      usage <- NaifukuUtil.tryParseUsageLine(t)
+    yield NaifukuSimple(drug, usage, more)
 
   val oneLinePattern =
     (NaifukuUtil.drugRegex + s"$space+" + NaifukuUtil.usageRegex).r
