@@ -23,7 +23,8 @@ object TonpukuTimes:
   val drugLine = s"($drugNameRegex)$space+((?:[一１]回)?$digit+$unit)"
   val usage1 = s"$notSpace.*時.*$notSpace"
   val usage2 = s"$notSpace.*時"
-  val usageLine = s"($usage1|$usage2)$space+($digit+回分)"
+  val usage3 = s"１日${digit}回(?:.*$notSpace)?"
+  val usageLine = s"($usage1|$usage2|$usage3)$space+($digit+回分)"
   val drugLinePattern = s"$drugLine$space*".r
   val usageLinePattern = s"$usageLine$space*".r
 

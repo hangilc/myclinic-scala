@@ -5,11 +5,11 @@ import dev.myclinic.scala.formatshohousen.FormatContext
 import dev.myclinic.scala.formatshohousen.FormatUtil
 
 object NaifukuUtil:
-  val unit = "(?:錠|カプセル|ｇ|ｍｇ|包|Ｔ)"
-  val drugRegex = raw"($drugNameRegex)$space+($digitOrPeriod+$unit$notSpace*)"
+  val unit = "(?:錠|カプセル|Ｃ|ｇ|ｍｇ|包|Ｔ|ｐ|Ｐ)"
+  val drugRegex = raw"($drugNameRegex)$space*($digitOrPeriod+$unit$notSpace*)"
   val drugPattern = s"$drugRegex$space*".r
-  val usageRegex = raw"(分$digit.*$notSpace)$space+($digit+日分)$space*"
-  val usagePattern = usageRegex.r
+  val usageRegex = raw"(分$digit.*$notSpace)$space+($digit+日分$notSpace*)"
+  val usagePattern = s"$usageRegex$space*".r
 
   def tryParseDrugLine(s: String): Option[DrugLine] =
     s match {

@@ -3,17 +3,14 @@ package dev.myclinic.scala.formatshohousen
 import dev.myclinic.scala.util.ZenkakuUtil
 import FormatUtil.{softNewline, softBlank, commandStart}
 import dev.myclinic.scala.formatshohousen.naifuku.*
-import dev.myclinic.scala.formatshohousen.gaiyou.GaiyouShippu
-import dev.myclinic.scala.formatshohousen.tonpuku.TonpukuTimes
-import dev.myclinic.scala.formatshohousen.gaiyou.GaiyouCream
-import dev.myclinic.scala.formatshohousen.gaiyou.GaiyouDrop
-import dev.myclinic.scala.formatshohousen.tonpuku.TonpukuTimes2
+import dev.myclinic.scala.formatshohousen.gaiyou.*
+import dev.myclinic.scala.formatshohousen.tonpuku.*
+import RegexPattern.*
 
 object FormatShohousen:
-  val itemStartPattern = raw"(?m)^[0-9０-９]+[)）]".r
-  val leadLinePattern = raw"[0-9０-９]+[)）]\s*(.*)".r
-  val contLinePattern = raw"^[ 　].*".r
-  val leadingSpaces = "^[ 　]+".r
+  val itemStartPattern = raw"(?m)^$digit+[)）][ 　\n]*".r
+  val contLinePattern = raw"^$space.*".r
+  val leadingSpaces = s"^$space+".r
 
   def splitToParts(s: String): List[String] =
     val src: String =
@@ -30,11 +27,9 @@ object FormatShohousen:
     }
 
   def splitToSubparts(p: String): Subparts =
-    val lines: List[String] = p.linesIterator.toList
-    val leadLine: String = lines.headOption
-      .flatMap(line => leadLinePattern.findPrefixMatchOf(line))
-      .map(m => m.group(1))
-      .getOrElse("")
+    val pp = itemStartPattern.replaceFirstIn(p, "")
+    val lines = pp.linesIterator.toList
+    val leadLine = lines.headOption.map(_.trim).getOrElse("")
     val (moreLines, rest) =
       lines.drop(1).span(contLinePattern.matches(_))
     val moreLinesStripped =
@@ -68,6 +63,8 @@ object FormatShohousen:
       .orElse(TonpukuTimes.tryParse(lead, more))
       .orElse(TonpukuTimes.tryParseOneLine(lead, more))
       .orElse(TonpukuTimes2.tryParse(lead, more))
+      .orElse(TonpukuTotal.tryParse(lead, more))
+      .orElse(MiscFormatter.tryParse(lead, more))
       .getOrElse(FallbackFormatter(lead, more))
 
   def parseItemWith(

@@ -15,11 +15,11 @@ class GaiyouDrop(name: String, amount: String, usage: String) extends Formatter:
 
 
 object GaiyouDrop:
-  val unit = "(?:ｍＬ|ｇ)"
+  val unit = "(?:ｍＬ|ｇ|ブリスター|瓶|個)"
   val drugPart = s"($drugNameRegex)$space+($digit+$unit)"
   val drugPattern = drugPart.r
   val usageStart1 = s"１日$digit+回"
-  val usageStart2 = s"１回$digit+(?:滴|ｇ)"
+  val usageStart2 = s"１回$digit+(?:滴|ｇ|噴霧|吸入)"
   val usageStart = s"(?:$usageStart1|$usageStart2)"
   val usage = s"($usageStart(?:.*$notSpace)?)"
   val usagePattern = s"$usage$space*".r

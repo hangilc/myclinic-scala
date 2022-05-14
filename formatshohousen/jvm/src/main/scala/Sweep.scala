@@ -5,7 +5,9 @@ import scala.io.Source
 object Sweep:
   def sweep(): Unit =
     val file = Source.fromFile("./work/shohou-delim.txt")
-    val text = file.getLines.mkString("\n")
+    val text = file.getLines.map(s => {
+      s.replace("ナゾネックス点鼻液５０μｇ５６噴霧用　５ｍｇ１０ｇ", "ナゾネックス点鼻液５０μｇ５６噴霧用　１瓶")
+    }).mkString("\n")
     file.close
     val items = text.split("DELIM\n")
     val (success, fail) = items.foldLeft((0, 0)) {
@@ -16,7 +18,8 @@ object Sweep:
       }
     }
     println(s"${success}/${success + fail}")
-    items.flatMap(item => FormatShohousen.splitToParts(item))
+    items
+      .flatMap(item => FormatShohousen.splitToParts(item))
       .find(s => {
         val f = FormatShohousen.parseItem(s)
         if f.isInstanceOf[FallbackFormatter] then

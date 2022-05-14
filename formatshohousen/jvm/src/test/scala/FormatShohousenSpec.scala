@@ -3,12 +3,16 @@ package dev.myclinic.scala.formatshohousen
 import org.scalatest.funsuite.AnyFunSuite
 import FormatShohousen.*
 import ShohouSample.*
-import dev.myclinic.scala.formatshohousen.naifuku.{NaifukuSimple, NaifukuMulti, NaifukuUtil}
+import dev.myclinic.scala.formatshohousen.naifuku.{
+  NaifukuSimple,
+  NaifukuMulti,
+  NaifukuUtil
+}
 import dev.myclinic.scala.formatshohousen.gaiyou.{GaiyouShippu}
 import FormatUtil.*
 import dev.myclinic.scala.util.ZenkakuUtil.toZenkaku
-import dev.myclinic.scala.formatshohousen.tonpuku.TonpukuTimes
-import dev.myclinic.scala.formatshohousen.tonpuku.TonpukuTimes2
+import dev.myclinic.scala.formatshohousen.tonpuku.*
+import dev.myclinic.scala.util.ZenkakuUtil
 
 class FormatShohousenSpec extends AnyFunSuite:
   test("should split sample1 to item parts") {
@@ -58,10 +62,12 @@ class FormatShohousenSpec extends AnyFunSuite:
     assert(item.usage.usage == "分３　毎食後")
     assert(item.usage.days == "５日分")
     val ctx = FormatContext(1)
-    assert(item.format(1, ctx) == List(
-      "１）カロナール錠３００ｍｇ　　　　　　　　３錠",
-      "　　分３　毎食後　　　　　　　　　　　　　５日分"
-    ).mkString("\n"))
+    assert(
+      item.format(1, ctx) == List(
+        "１）カロナール錠３００ｍｇ　　　　　　　　３錠",
+        "　　分３　毎食後　　　　　　　　　　　　　５日分"
+      ).mkString("\n")
+    )
   }
 
   test("should not split following line") {
@@ -191,3 +197,48 @@ class FormatShohousenSpec extends AnyFunSuite:
     """.stripMargin.trim
     assert(f.get.format(4, FormatContext(4)) == e)
   }
+
+  test("should format with NaifukuSimple") {
+    shouldFormat(
+      """
+      |３）メリスロン（６）　３Ｔ
+      |　　分３　毎食後　１４日分。      
+    """,
+      NaifukuSimple.tryParse _,
+      """
+      |３）メリスロン（６）　　　　　　　　　　　３Ｔ
+      |　　分３　毎食後　　　　　　　　　　　　　１４日分。      
+    """
+    )
+  }
+
+  test("should format with NaifukuTotal") {
+    shouldFormat(
+      """
+        |４）新レシカルボン座薬　１０個
+        |　　１回１個、便秘時
+      """,
+      TonpukuTotal.tryParse _,
+      """
+        |４）新レシカルボン座薬　　　　　　　　　　１０個
+        |　　１回１個、便秘時
+      """
+    )
+  }
+
+  def shouldFormat[F <: Formatter](
+      src: String,
+      parser: (String, List[String]) => Option[F],
+      exp: String,
+      proc: (F, FormatContext) => Unit = (_: F, _: FormatContext) => ()
+  ): Unit =
+    val s = src.stripMargin.trim
+    val m = "^([０-９]+)）".r.findFirstMatchIn(s)
+    assert(m.isDefined)
+    val index = ZenkakuUtil.toHankaku(m.get.group(1)).toInt
+    val f = FormatShohousen.parseItemWith(s, parser)
+    assert(f.isDefined)
+    val ff = f.get.asInstanceOf[F]
+    val ctx = FormatContext(index)
+    proc(ff, ctx)
+    assert(ff.format(index, ctx) == exp.stripMargin.trim)
