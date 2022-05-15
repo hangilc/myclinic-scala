@@ -37,5 +37,16 @@ object FormatUtil:
     val (pre, post) = lines.span(s => s.startsWith(zenkakuSpace))
     (pre.map(removeLeadingSpaces(_)), post)
 
+  def span[A, B](as: List[A], f: A => Option[B]): (List[B], List[A]) =
+    def iter(as: List[A], acc: List[B]): (List[B], List[A]) =
+      as match {
+        case Nil => (acc, List.empty)
+        case h :: t =>
+          f(h) match {
+            case Some(b) => iter(t, acc :+ b)
+            case None => (acc, as)
+          }
+      }
+    iter(as, List.empty)
 
 

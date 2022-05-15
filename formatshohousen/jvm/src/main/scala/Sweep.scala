@@ -20,6 +20,9 @@ object Sweep:
       val parts = FormatUtil.splitToParts(shohou)
       parts.foreach(part => {
         val (pre, post) = FormatUtil.splitToSubparts(part)
-        println((pre, post))
+        val item = Item.parse(pre)
+        println(item)
+        println(post)
+        println
       })
     })

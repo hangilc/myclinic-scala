@@ -3,12 +3,6 @@ package dev.myclinic.scala.formatshohousen
 import FormatPattern.*
 import FormatUtil.{softBlank, softNewline}
 
-case class Formatter(
-  left: String, right: String
-):
-  def format(pre: String, ctx: FormatContext): String =
-    ???
-
 object Formatter:
   def tabFormat(pre: String, left: String, right: String, ctx: FormatContext): String =
     val rightPadded: String =
