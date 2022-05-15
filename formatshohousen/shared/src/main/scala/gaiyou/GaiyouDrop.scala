@@ -19,7 +19,7 @@ object GaiyouDrop:
   val drugPart = s"($drugNameRegex)$space+($digit+$unit)"
   val drugPattern = drugPart.r
   val usageStart1 = s"１日$digit+回"
-  val usageStart2 = s"１回$digit+(?:滴|ｇ|噴霧|吸入)"
+  val usageStart2 = s"１回.*$digit+(?:滴|ｇ|噴霧|吸入)"
   val usageStart3 = ".+時"
   val usageStart = s"(?:$usageStart1|$usageStart2|$usageStart3)"
   val usage = s"($usageStart(?:.*$notSpace)?)"
