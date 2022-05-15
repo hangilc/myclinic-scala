@@ -3,15 +3,11 @@ package dev.myclinic.scala.formatshohousen
 import org.scalatest.funsuite.AnyFunSuite
 import FormatShohousen.*
 import ShohouSample.*
-import dev.myclinic.scala.formatshohousen.naifuku.{
-  NaifukuSimple,
-  NaifukuMulti,
-  NaifukuUtil
-}
-import dev.myclinic.scala.formatshohousen.gaiyou.{GaiyouShippu}
+import dev.myclinic.scala.formatshohousen.naifuku.*
+import dev.myclinic.scala.formatshohousen.gaiyou.*
+import dev.myclinic.scala.formatshohousen.tonpuku.*
 import FormatUtil.*
 import dev.myclinic.scala.util.ZenkakuUtil.toZenkaku
-import dev.myclinic.scala.formatshohousen.tonpuku.*
 import dev.myclinic.scala.util.ZenkakuUtil
 
 class FormatShohousenSpec extends AnyFunSuite:
@@ -226,13 +222,39 @@ class FormatShohousenSpec extends AnyFunSuite:
     )
   }
 
+  test("should format with NaifukuSimple (2)") {
+    shouldFormat(
+      """
+        |１）ツムラ（４３）六君子湯 7.5g
+        |　　分３　毎食後　５０日分
+      """,
+      NaifukuSimple.tryParse _,
+      """
+        |１）ツムラ（４３）六君子湯　　　　　　　　７．５ｇ
+        |　　分３　毎食後　　　　　　　　　　　　　５０日分
+      """
+    )
+  }
+
+  test("should format with Gaiyou online") {
+    val src =
+      """
+        |６）アドエア１００ディスカス２８吸入用　２８ブリスター
+        |　　１キット　１日２回（朝夕）吸入
+      """.stripMargin.trim
+    val s = FormatShohousen.convertToZenkaku(src.stripMargin.trim)
+    val h :: t = "^([０-９]+)）".r.replaceFirstIn(src, "").linesIterator.toList
+    val f = GaiyouDrop.tryParseOneLine(h, t)
+    assert(f.isDefined)
+  }
+
   def shouldFormat[F <: Formatter](
       src: String,
       parser: (String, List[String]) => Option[F],
       exp: String,
       proc: (F, FormatContext) => Unit = (_: F, _: FormatContext) => ()
   ): Unit =
-    val s = src.stripMargin.trim
+    val s = FormatShohousen.convertToZenkaku(src.stripMargin.trim)
     val m = "^([０-９]+)）".r.findFirstMatchIn(s)
     assert(m.isDefined)
     val index = ZenkakuUtil.toHankaku(m.get.group(1)).toInt

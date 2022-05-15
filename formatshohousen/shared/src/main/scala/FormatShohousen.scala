@@ -12,13 +12,14 @@ object FormatShohousen:
   val contLinePattern = raw"^$space.*".r
   val leadingSpaces = s"^$space+".r
 
-  def splitToParts(s: String): List[String] =
-    val src: String =
-      s.flatMap(c =>
-        if c == softNewline || c == softBlank then "" else c.toString
-      )
-      s.map(ZenkakuUtil.toZenkakuCharExcluding(commandStart))
+  def convertToZenkaku(s: String): String =
+    s.flatMap(c =>
+      if c == softNewline || c == softBlank then "" else c.toString
+    )
+    s.map(ZenkakuUtil.toZenkakuCharExcluding(commandStart))
 
+  def splitToParts(s: String): List[String] =
+    val src: String = convertToZenkaku(s)
     val starts: List[Int] =
       itemStartPattern.findAllMatchIn(src).toList.map(_.start)
     val ends = starts.drop(1) :+ s.size

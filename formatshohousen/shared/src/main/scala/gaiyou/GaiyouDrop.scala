@@ -18,7 +18,7 @@ class GaiyouDrop(name: String, amount: String, usage: String) extends Formatter:
     ).mkString("\n")
 
 object GaiyouDrop:
-  val unit = "(?:ｍＬ|ｇ|ブリスター|瓶|個)"
+  val unit = "(?:ｍＬ|ｇ|ブリスター|瓶|個|キット)"
   val amount = s"$digitOrPeriod+$unit$notSpace*"
   val drugPart = s"($drugNameRegex)$space+($amount)"
   val drugPattern = drugPart.r

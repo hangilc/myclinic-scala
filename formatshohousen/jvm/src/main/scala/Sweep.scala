@@ -21,7 +21,7 @@ object Sweep:
     items
       .flatMap(item => FormatShohousen.splitToParts(item))
       .find(s => {
-        val f = FormatShohousen.parseItem(s)
+        val f = FormatShohousen.parseItem(FormatShohousen.convertToZenkaku(s))
         if f.isInstanceOf[FallbackFormatter] then
           println(s)
           true
