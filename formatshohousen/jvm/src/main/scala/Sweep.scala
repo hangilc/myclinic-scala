@@ -7,7 +7,7 @@ object Sweep:
     val file = Source.fromFile("./work/shohou-sample.txt")
     val text = file.getLines.mkString("\n")
     file.close
-    FormatUtil.convertToZenkaku(text)
+    FormatUtil.prepareForFormat(text)
 
   def splitToShohou(text: String): List[String] =
     val delim = raw"\n\n+".r
@@ -21,8 +21,14 @@ object Sweep:
       parts.foreach(part => {
         val (pre, post) = FormatUtil.splitToSubparts(part)
         val item = Item.parse(pre)
+        val trails: List[String] = post.map(line => {
+          if line.startsWith("＠") then
+            FormatUtil.restoreCommandLine(line)
+          else line
+        })
+        println(part)
         println(item)
-        println(post)
+        println(trails)
         println
       })
     })

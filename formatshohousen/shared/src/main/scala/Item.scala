@@ -17,10 +17,17 @@ case class FallbackItem(
   lines: List[String]
 ) extends Item:
   def format(index: Int, ctx: FormatContext): List[String] =
-    ???
+    val irep = FormatUtil.indexRep(index, ctx.totalItems)
+    lines match {
+      case Nil => List(irep)
+      case List(a) => List(Formatter.softFormat(irep, a, ctx))
+      case h :: t => 
+        Formatter.softFormat(irep, a, ctx) ::
+          t.map(Formatter.softFormat(brep, _, ctx))
+    }
 
 object Item:
-  val unit = "(?:錠|カプセル|ｇ|ｍｇ|包|ｍＬ|ブリスター|瓶|個|キット|枚|パック|袋)"
+  val unit = "(?:錠|カプセル|ｇ|ｍｇ|包|ｍＬ|ブリスター|瓶|個|キット|枚|パック|袋|本)"
   val chunk = s"$notSpace(?:.*$notSpace)?"
   val days1 = s"$digit+日分"
   val days2 = s"$digit+日分"

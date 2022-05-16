@@ -23,6 +23,14 @@ object Formatter:
           lines ++ rightJustified(rightPadded, cw)
       convertToSoft(ss, pre.size)
 
+  def softFormat(pre: String, s: String, ctx: FormatContext): String =
+    val cw = ctx.lineSize - pre.size
+    val ss = splitAdjusting(s, cw)
+    val lead = pre + ss.headOption.getOrElse("") 
+    val more = ss.drop(1)
+    if more.isEmpty then lead
+    else lead + convertToSoft(more, pre.size)
+
   def convertToSoft(lines: List[String], preSize: Int): String =
     val bpre = zenkakuSpace * preSize
     val delim = softNewline + bpre

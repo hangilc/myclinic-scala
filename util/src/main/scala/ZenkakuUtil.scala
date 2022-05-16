@@ -14,7 +14,10 @@ object ZenkakuUtil:
     '(' -> '（',
     ')' -> '）',
     ',' -> '、',
-    '%' -> '％'
+    '%' -> '％',
+    '@' -> '＠',
+    ':' -> '：',
+    ';' -> '；',
   )
 
   def rangeMap(range: NumericRange[Char], valueStart: Char): Map[Char, Char] = 
