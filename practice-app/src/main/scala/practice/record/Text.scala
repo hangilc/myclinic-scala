@@ -31,23 +31,17 @@ class Text(origText: ModelText):
     ele(clear, e.ele)
 
 class TextDisp(text: ModelText):
-  import TextDisp.*
-
   val ele = createEle
 
   def createEle: HTMLElement =
     text.content match {
       case "" => div(innerText := "（空白）")
-      case c if shohouStartPattern.findFirstIn(c).isDefined =>
-        val shohou = shohouStartPattern.replaceFirstIn(c, "")
-        val html = shohouProlog + FormatUtil.renderForDisp(shohou)
-        div(innerHTML := html)
+      case c if FormatUtil.isShohou(c) =>
+        val shohou = FormatUtil.stripShohouProlog(c)
+        val rendered = FormatUtil.prependShohouProlog(FormatUtil.renderForDisp(shohou))
+        div(innerText := rendered)
       case c => div(innerText := c)
     }
-
-object TextDisp:
-  val shohouStartPattern = raw"^院外処方[ 　]*\nＲｐ）[ 　]*\n".r
-  val shohouProlog = "院外処方<br/>\nＲｐ）<br>\n"
 
 class TextEdit(
     text: ModelText,

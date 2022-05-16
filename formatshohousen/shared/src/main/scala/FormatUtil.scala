@@ -78,6 +78,18 @@ object FormatUtil:
       }
     iter(as, List.empty)
 
+  def zenkakuSpaceToHankakuSpace(s: String): String =
+    s.map {
+      case `zenkakuSpaceChar` => ' '
+      case c => c
+    }
+
+  def hankakuSpaceToZenkakuSpace(s: String): String =
+    s.map {
+      case ' ' => zenkakuSpaceChar
+      case c => c
+    }
+
   def renderForPrint(shohou: String): String =
     shohou.map {
       case `softNewlineChar` => '\n'
@@ -85,10 +97,28 @@ object FormatUtil:
       case c => c
     }
 
+  val lineWithLeadingBlanksPattern = raw"^($space+)($notSpace.*)".r
+
   def renderForDisp(shohou: String): String =
-    shohou.flatMap {
-      case `softNewlineChar` => "<br/>\n"
-      case `softBlankChar` => " "
-      case c => c.toString
-    }
+    shohou.map {
+      case `softNewlineChar` => '\n'
+      case `softBlankChar` => '　'
+      case c => c
+    }.linesIterator.toList.map {
+      case lineWithLeadingBlanksPattern(lead, follow) => lead + zenkakuSpaceToHankakuSpace(follow)
+      case line => zenkakuSpaceToHankakuSpace(line)
+    }.mkString("\n")
+
+  val shohouStartPattern = raw"^院外処方[ 　]*\nＲｐ）[ 　]*\n".r
+  val shohouProlog = "院外処方\nＲｐ）\n"
+
+  def isShohou(s: String): Boolean =
+    shohouStartPattern.findFirstIn(s).isDefined
+
+  def stripShohouProlog(s: String): String =
+    shohouStartPattern.replaceFirstIn(s, "")
+
+  def prependShohouProlog(s: String): String = 
+    shohouProlog + s
+
     
