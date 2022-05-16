@@ -14,10 +14,19 @@ object FormatUtil:
   val commandPrefixPattern = s"^＠.*?：".r
 
   def prepareForFormat(s: String): String =
-    s.flatMap(c =>
-      if c == softNewlineChar || c == softBlankChar then "" else c.toString
-    )
-    ZenkakuUtil.toZenkaku(s)
+    s.linesIterator
+      .map(line => {
+        if line.startsWith("@") then line
+        else
+          line.flatMap(c =>
+            c match {
+              case `softNewlineChar` => ""
+              case `softBlankChar`   => ""
+              case _               => ZenkakuUtil.toZenkakuChar(c).toString
+            }
+          )
+      })
+      .mkString("\n")
 
   def splitToParts(s: String): List[String] =
     val src: String = prepareForFormat(s)
@@ -31,18 +40,11 @@ object FormatUtil:
   def removeLeadingSpaces(s: String): String =
     leadingSpacesPattern.replaceFirstIn(s, "")
 
-  
   def splitToSubparts(p: String): (List[String], List[String]) =
     val pp = itemStartPattern.replaceFirstIn(p, zenkakuSpace)
     val lines = pp.linesIterator.toList
     val (pre, post) = lines.span(s => s.startsWith(zenkakuSpace))
     (pre.map(removeLeadingSpaces(_)), post)
-
-  def restoreCommandLine(line: String): String =
-    val mopt = commandPrefixPattern.findFirstIn(line)
-    mopt.fold(line)(m => {
-      ZenkakuUtil.toHankaku(m) + line.substring(m.size)
-    })
 
   def preWidth(totalItems: Int): Int = if totalItems < 10 then 1 else 2
 
@@ -57,7 +59,7 @@ object FormatUtil:
   def composeIndexRep(index: Int, w: Int): String =
     ZenkakuUtil.toZenkaku(String.format(s"%${w}d)", index))
 
-  def composeBlankRep(w: Int): String = 
+  def composeBlankRep(w: Int): String =
     zenkakuSpace * (w + 1)
 
   def composePre(index: Int, ctx: FormatContext): (String, String) =
@@ -71,9 +73,22 @@ object FormatUtil:
         case h :: t =>
           f(h) match {
             case Some(b) => iter(t, acc :+ b)
-            case None => (acc, as)
+            case None    => (acc, as)
           }
       }
     iter(as, List.empty)
 
+  def renderForPrint(shohou: String): String =
+    shohou.map {
+      case `softNewlineChar` => '\n'
+      case `softBlankChar` => '　'
+      case c => c
+    }
 
+  def renderForDisp(shohou: String): String =
+    shohou.flatMap {
+      case `softNewlineChar` => "<br/>\n"
+      case `softBlankChar` => " "
+      case c => c.toString
+    }
+    

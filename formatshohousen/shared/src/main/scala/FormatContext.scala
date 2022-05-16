@@ -4,4 +4,5 @@ case class FormatContext(
   totalItems: Int,
   tabPos: Int = 21,
   lineSize: Int = 31
-)
+):
+  def altTabPos: Int = tabPos - 2

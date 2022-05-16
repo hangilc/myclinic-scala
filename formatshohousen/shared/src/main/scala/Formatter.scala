@@ -4,18 +4,18 @@ import FormatPattern.*
 import FormatUtil.{softBlank, softNewline}
 
 object Formatter:
-  def tabFormat(pre: String, left: String, right: String, ctx: FormatContext): String =
+  def tabFormat(pre: String, left: String, right: String, tabPos: Int, lineSize: Int): String =
     if right.isEmpty then
-      softFormat(pre, left, ctx)
+      softFormat(pre, left, lineSize)
     else
       val rightPadded: String =
-        val padSize = ctx.lineSize - ctx.tabPos - right.size
+        val padSize = lineSize - tabPos - right.size
         right + (zenkakuSpace * padSize)
-      val rem = ctx.lineSize - (pre.size + left.size + rightPadded.size)
+      val rem = lineSize - (pre.size + left.size + rightPadded.size)
       if rem > 0 then
         pre + left + (zenkakuSpace * rem) + rightPadded
       else 
-        val cw = ctx.lineSize - pre.size
+        val cw = lineSize - pre.size
         val lines = splitAdjusting(pre + left, cw)
         val last = lines.last
         val rem = cw - (last.size + rightPadded.size)
@@ -26,8 +26,8 @@ object Formatter:
             lines ++ rightJustified(rightPadded, cw)
         convertToSoft(ss, pre.size)
 
-  def softFormat(pre: String, s: String, ctx: FormatContext): String =
-    val cw = ctx.lineSize - pre.size
+  def softFormat(pre: String, s: String, lineSize: Int): String =
+    val cw = lineSize - pre.size
     val ss = splitAdjusting(s, cw)
     val lead = pre + ss.headOption.getOrElse("") 
     val more = ss.drop(1)

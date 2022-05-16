@@ -18,7 +18,7 @@ case class DrugItem(
         d.format(pre, ctx)
     }
     val uline = usage.format(brep, ctx)
-    val mlines = more.map(m => Formatter.softFormat(brep, m, ctx))
+    val mlines = more.map(m => Formatter.softFormat(brep, m, ctx.lineSize))
     dlines ++ List(uline) ++ mlines
 
 case class FallbackItem(
@@ -28,10 +28,10 @@ case class FallbackItem(
     val (irep, brep) = FormatUtil.composePre(index, ctx)
     lines match {
       case Nil => List(irep)
-      case List(a) => List(Formatter.softFormat(irep, a, ctx))
+      case List(a) => List(Formatter.softFormat(irep, a, ctx.lineSize))
       case h :: t => 
-        Formatter.softFormat(irep, h, ctx) ::
-          t.map(Formatter.softFormat(brep, _, ctx))
+        Formatter.softFormat(irep, h, ctx.lineSize) ::
+          t.map(Formatter.softFormat(brep, _, ctx.lineSize))
     }
 
 object Item:
