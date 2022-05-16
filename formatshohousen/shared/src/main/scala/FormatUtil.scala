@@ -50,8 +50,19 @@ object FormatUtil:
     val w = preWidth(totalItems)
     composeIndexRep(index, w)
 
+  def blankRep(totalItems: Int): String =
+    val w = preWidth(totalItems)
+    composeBlankRep(w)
+
   def composeIndexRep(index: Int, w: Int): String =
     ZenkakuUtil.toZenkaku(String.format(s"%${w}d)", index))
+
+  def composeBlankRep(w: Int): String = 
+    zenkakuSpace * (w + 1)
+
+  def composePre(index: Int, ctx: FormatContext): (String, String) =
+    val w = preWidth(ctx.totalItems)
+    (composeIndexRep(index, w), composeBlankRep(w))
 
   def span[A, B](as: List[A], f: A => Option[B]): (List[B], List[A]) =
     def iter(as: List[A], acc: List[B]): (List[B], List[A]) =

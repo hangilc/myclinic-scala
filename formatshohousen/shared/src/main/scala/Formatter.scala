@@ -5,23 +5,26 @@ import FormatUtil.{softBlank, softNewline}
 
 object Formatter:
   def tabFormat(pre: String, left: String, right: String, ctx: FormatContext): String =
-    val rightPadded: String =
-      val padSize = (ctx.lineSize - ctx.tabPos - right.size).max(0)
-      right + (zenkakuSpace * padSize)
-    val rem = ctx.lineSize - (pre.size + left.size + rightPadded.size)
-    if rem > 0 then
-      pre + left + (zenkakuSpace * rem) + rightPadded
-    else 
-      val cw = ctx.lineSize - pre.size
-      val lines = splitAdjusting(pre + left, cw)
-      val last = lines.last
-      val rem = cw - (last.size + rightPadded.size)
-      val ss = 
-        if rem > 0 then 
-          lines.init :+ (last + (zenkakuSpace * rem) + rightPadded)
-        else
-          lines ++ rightJustified(rightPadded, cw)
-      convertToSoft(ss, pre.size)
+    if right.isEmpty then
+      softFormat(pre, left, ctx)
+    else
+      val rightPadded: String =
+        val padSize = ctx.lineSize - ctx.tabPos - right.size
+        right + (zenkakuSpace * padSize)
+      val rem = ctx.lineSize - (pre.size + left.size + rightPadded.size)
+      if rem > 0 then
+        pre + left + (zenkakuSpace * rem) + rightPadded
+      else 
+        val cw = ctx.lineSize - pre.size
+        val lines = splitAdjusting(pre + left, cw)
+        val last = lines.last
+        val rem = cw - (last.size + rightPadded.size)
+        val ss = 
+          if rem > 0 then 
+            lines.init :+ (last + (zenkakuSpace * rem) + rightPadded)
+          else
+            lines ++ rightJustified(rightPadded, cw)
+        convertToSoft(ss, pre.size)
 
   def softFormat(pre: String, s: String, ctx: FormatContext): String =
     val cw = ctx.lineSize - pre.size

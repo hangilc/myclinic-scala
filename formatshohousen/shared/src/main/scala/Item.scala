@@ -11,18 +11,26 @@ case class DrugItem(
   more: List[String]
 ) extends Item:
   def format(index: Int, ctx: FormatContext): List[String] =
-    ???
+    val (irep, brep) = FormatUtil.composePre(index, ctx)
+    val dlines: List[String] = drugs.zipWithIndex.map {
+      case (d, i) => 
+        val pre = if i == 0 then irep else brep
+        d.format(pre, ctx)
+    }
+    val uline = usage.format(brep, ctx)
+    val mlines = more.map(m => Formatter.softFormat(brep, m, ctx))
+    dlines ++ List(uline) ++ mlines
 
 case class FallbackItem(
   lines: List[String]
 ) extends Item:
   def format(index: Int, ctx: FormatContext): List[String] =
-    val irep = FormatUtil.indexRep(index, ctx.totalItems)
+    val (irep, brep) = FormatUtil.composePre(index, ctx)
     lines match {
       case Nil => List(irep)
       case List(a) => List(Formatter.softFormat(irep, a, ctx))
       case h :: t => 
-        Formatter.softFormat(irep, a, ctx) ::
+        Formatter.softFormat(irep, h, ctx) ::
           t.map(Formatter.softFormat(brep, _, ctx))
     }
 

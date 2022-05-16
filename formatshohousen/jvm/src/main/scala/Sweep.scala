@@ -26,8 +26,15 @@ object Sweep:
             FormatUtil.restoreCommandLine(line)
           else line
         })
+        val ctx = FormatContext(1)
         println(part)
-        println(item)
+        println(item.format(1, ctx).mkString("\n").map(c => {
+          c match {
+            case FormatUtil.softNewlineChar => '\n'
+            case FormatUtil.softBlankChar => '　'
+            case _ => c
+          }
+        }))
         println(trails)
         println
       })
