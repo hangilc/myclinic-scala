@@ -9,7 +9,7 @@ import dev.myclinic.scala.web.practiceapp.practice.PracticeBus
 import org.scalajs.dom.HTMLElement
 import dev.myclinic.scala.web.appbase.PrintDialog
 import dev.fujiwara.scala.drawer.PaperSize
-import dev.myclinic.scala.web.practiceapp.practice.formatshohousen.FormatShohousen
+import dev.myclinic.scala.formatshohousen.FormatShohousen
 
 class Text(origText: ModelText):
   val ele = div()
@@ -122,12 +122,13 @@ class TextEdit(
 
   def doFormatShohousen(): Unit =
     val c = text.content
-    val f = FormatShohousen.format(c)
-    println(("shohousen-format", f))
-    val t = text.copy(content = f)
-    // for
-    //   u <- Api.updateText(t)
-    // yield onDone(u)
+    val cc = raw"^院外処方[ 　]*\nＲｐ）[ 　]*\n".r.replaceFirstIn(c, "")
+    println(("cc", cc))
+    val f = FormatShohousen.format(cc)
+    val ff = "院外処方\nＲｐ）\n" + f
+    println(("shohousen", ff))
+    val t = text.copy(content = ff)
+    onDone(t)
 
 object Text:
   given Comp[Text] = _.ele

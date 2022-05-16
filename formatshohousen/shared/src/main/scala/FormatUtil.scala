@@ -9,7 +9,7 @@ object FormatUtil:
   val softBlankChar = '^'
   val softBlank = softBlankChar.toString
   val commandStartChar = '@'
-  val itemStartPattern = raw"(?m)^$digit+[）]$space*".r
+  val itemStartPattern = raw"(?:^|\n)$digit+[）]$space*".r
   val leadingSpacesPattern = s"^$space+".r
   val commandPrefixPattern = s"^＠.*?：".r
 
