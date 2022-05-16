@@ -174,6 +174,7 @@ object Modifiers:
   val flex = AssignCss((s, v) => s.setProperty("flex", v))
 
   val innerText = Assign[HTMLElement, String]((e, t) => e.innerText = t)
+  val innerHTML = Assign[HTMLElement, String]((e, t) => e.innerHTML = t)
 
   val href = Assign[HTMLAnchorElement, String]((e, a) => {
     val value = if a.isEmpty then "javascript:void(0)" else a

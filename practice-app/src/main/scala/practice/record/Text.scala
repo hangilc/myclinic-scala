@@ -10,6 +10,7 @@ import org.scalajs.dom.HTMLElement
 import dev.myclinic.scala.web.appbase.PrintDialog
 import dev.fujiwara.scala.drawer.PaperSize
 import dev.myclinic.scala.formatshohousen.FormatShohousen
+import dev.myclinic.scala.formatshohousen.FormatUtil
 
 class Text(origText: ModelText):
   val ele = div()
@@ -30,8 +31,23 @@ class Text(origText: ModelText):
     ele(clear, e.ele)
 
 class TextDisp(text: ModelText):
-  val c = if text.content.isEmpty then "（空白）" else text.content
-  val ele = div(innerText := c)
+  import TextDisp.*
+
+  val ele = createEle
+
+  def createEle: HTMLElement =
+    text.content match {
+      case "" => div(innerText := "（空白）")
+      case c if shohouStartPattern.findFirstIn(c).isDefined =>
+        val shohou = shohouStartPattern.replaceFirstIn(c, "")
+        val html = shohouProlog + FormatUtil.renderForDisp(shohou)
+        div(innerHTML := html)
+      case c => div(innerText := c)
+    }
+
+object TextDisp:
+  val shohouStartPattern = raw"^院外処方[ 　]*\nＲｐ）[ 　]*\n".r
+  val shohouProlog = "院外処方<br/>\nＲｐ）<br>\n"
 
 class TextEdit(
     text: ModelText,
@@ -123,10 +139,8 @@ class TextEdit(
   def doFormatShohousen(): Unit =
     val c = text.content
     val cc = raw"^院外処方[ 　]*\nＲｐ）[ 　]*\n".r.replaceFirstIn(c, "")
-    println(("cc", cc))
     val f = FormatShohousen.format(cc)
     val ff = "院外処方\nＲｐ）\n" + f
-    println(("shohousen", ff))
     val t = text.copy(content = ff)
     onDone(t)
 
