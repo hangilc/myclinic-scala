@@ -5,34 +5,50 @@ import FormatUtil.{softBlank, softNewline}
 
 object Formatter:
   def tabFormat(pre: String, left: String, right: String, tabPos: Int, lineSize: Int): String =
-    if right.isEmpty then
-      softFormat(pre, left, lineSize)
+    if right.isEmpty then softFormat(pre, left, lineSize)
     else
-      val rightPadded: String =
-        val padSize = lineSize - tabPos - right.size
-        right + (zenkakuSpace * padSize)
-      val rem = lineSize - (pre.size + left.size + rightPadded.size)
-      if rem > 0 then
-        pre + left + (zenkakuSpace * rem) + rightPadded
-      else 
-        val cw = lineSize - pre.size
-        val lines = splitAdjusting(pre + left, cw)
-        val last = lines.last
-        val rem = cw - (last.size + rightPadded.size)
-        val ss = 
-          if rem > 0 then 
-            lines.init :+ (last + (zenkakuSpace * rem) + rightPadded)
-          else
-            lines ++ rightJustified(rightPadded, cw)
-        convertToSoft(ss, pre.size)
+      val cw = lineSize - pre.size
+      val tpos = tabPos - pre.size
+      def fmt1(left: String): Option[String] =
+        val rem = tabPos - left.size
+        if rem > 0 then Some(left + zenkakuSpace * rem + right)
+        else None
+      def fmt2(left: String): Option[String] =
+        val rem = cw - left.size - right.size
+        if rem > 0 then Some(left + zenkakuSpace * rem + right)
+        else None
+      def iter(left: String, fmt: String => Option[String], cur: List[String]): List[String] =
+        fmt(left) match {
+          case None => 
+            val (pre, post) = splitAtAdjusting(left, cw)
+            iter(post, fmt, cur :+ pre)
+          case Some(s) => cur :+ s
+        }
+      val fmt: String => Option[String] =
+        if right.size <= lineSize - tabPos then fmt1 else fmt2
+      val bpre = FormatUtil.softBlank * pre.size
+      indent(pre, bpre, iter(left, fmt, List.empty)).mkString(softNewline)
 
   def softFormat(pre: String, s: String, lineSize: Int): String =
     val cw = lineSize - pre.size
-    val ss = splitAdjusting(s, cw)
-    val lead = pre + ss.headOption.getOrElse("") 
-    val more = ss.drop(1)
-    if more.isEmpty then lead
-    else lead + convertToSoft(more, pre.size)
+    def fmt(s: String): Option[String] =
+      if s.size <= cw then Some(s) else None
+    def iter(s: String, cur: List[String]): List[String] =
+      fmt(s) match {
+        case None =>
+          val (pre, post) = splitAtAdjusting(s, cw)
+          iter(post, cur :+ pre)
+        case Some(s) => cur :+ s
+      }
+    val bpre = FormatUtil.softBlank * pre.size
+    indent(pre, bpre, iter(s, List.empty)).mkString(softNewline)
+
+  def indent(pre1: String, pre2: String, lines: List[String]): List[String] =
+    lines match {
+      case Nil => List.empty
+      case h :: t =>
+        (pre1 + h) :: t.map(s => pre2 + s)
+    }
 
   def convertToSoft(lines: List[String], preSize: Int): String =
     val bpre = zenkakuSpace * preSize
