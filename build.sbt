@@ -1,9 +1,11 @@
+val ESVersion = org.scalajs.linker.interface.ESVersion
+
 ThisBuild / scalaVersion := "3.1.0"
 ThisBuild / version := "0.1.0-SNAPSHOT"
 ThisBuild / organization := "dev.myclinic.scala"
 ThisBuild / organizationName := "myclinic"
 ThisBuild / resolvers += Resolver.mavenLocal
-// scalaJSLinkerConfig ~= (_.withESFeatures(_.withESVersion(ESVersion.ES2018)))
+ThisBuild / scalaJSLinkerConfig ~= (_.withESFeatures(_.withESVersion(ESVersion.ES2018)))
 
 val mysqlVersion = "6.0.6"
 val http4sVersion = "0.23.3"

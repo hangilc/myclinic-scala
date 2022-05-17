@@ -43,7 +43,7 @@ class TextDisp(text: ModelText):
       case c => div(innerText := c)
     }
 
-class TextEdit(
+case class TextEdit(
     text: ModelText,
     onDone: ModelText => Unit,
     onCancel: () => Unit,
@@ -136,7 +136,8 @@ class TextEdit(
     val f = FormatShohousen.format(cc)
     val ff = "院外処方\nＲｐ）\n" + f
     val t = text.copy(content = ff)
-    onDone(t)
+    val te = this.copy(text = t)
+    this.ele.replaceBy(te.ele)
 
 object Text:
   given Comp[Text] = _.ele
