@@ -1,7 +1,7 @@
 package dev.myclinic.scala.formatshohousen
 
 import FormatPattern.*
-import FormatUtil.{softBlank, softNewline}
+import FormatUtil.{softBlank, softNewline, softSpace}
 
 object Formatter:
   def tabFormat(pre: String, left: String, right: String, tabPos: Int, lineSize: Int): String =
@@ -11,11 +11,11 @@ object Formatter:
       val tpos = tabPos - pre.size
       def fmt1(left: String): Option[String] =
         val rem = tabPos - left.size
-        if rem > 0 then Some(left + zenkakuSpace * rem + right)
+        if rem > 0 then Some(left + softPad(rem) + right)
         else None
       def fmt2(left: String): Option[String] =
         val rem = cw - left.size - right.size
-        if rem > 0 then Some(left + zenkakuSpace * rem + right)
+        if rem > 0 then Some(left + softPad(rem) + right)
         else None
       def iter(left: String, fmt: String => Option[String], cur: List[String]): List[String] =
         fmt(left) match {
@@ -42,6 +42,10 @@ object Formatter:
       }
     val bpre = FormatUtil.softBlank * pre.size
     indent(pre, bpre, iter(s, List.empty)).mkString(softNewline)
+
+  def softPad(size: Int): String =
+    if size == 0 then ""
+    else zenkakuSpace + (softSpace * (size - 1))
 
   def indent(pre1: String, pre2: String, lines: List[String]): List[String] =
     lines match {

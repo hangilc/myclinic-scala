@@ -8,6 +8,8 @@ object FormatUtil:
   val softNewline = softNewlineChar.toString
   val softBlankChar = '^'
   val softBlank = softBlankChar.toString
+  val softSpaceChar = '`'
+  val softSpace = softSpaceChar.toString
   val commandStartChar = '@'
   val itemStartPattern = raw"(?:^|\n)$digit+[）]$space*".r
   val leadingSpacesPattern = s"^$space+".r
@@ -22,6 +24,7 @@ object FormatUtil:
             c match {
               case `softNewlineChar` => ""
               case `softBlankChar`   => ""
+              case `softSpaceChar`   => ""
               case _               => ZenkakuUtil.toZenkakuChar(c).toString
             }
           )

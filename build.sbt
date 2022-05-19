@@ -5,7 +5,7 @@ ThisBuild / version := "0.1.0-SNAPSHOT"
 ThisBuild / organization := "dev.myclinic.scala"
 ThisBuild / organizationName := "myclinic"
 ThisBuild / resolvers += Resolver.mavenLocal
-ThisBuild / scalaJSLinkerConfig ~= (_.withESFeatures(_.withESVersion(ESVersion.ES2018)))
+// ThisBuild / scalaJSLinkerConfig ~= (_.withESFeatures(_.withESVersion(ESVersion.ES2018)))
 
 val mysqlVersion = "6.0.6"
 val http4sVersion = "0.23.3"
