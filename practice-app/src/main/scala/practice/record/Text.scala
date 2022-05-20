@@ -9,8 +9,7 @@ import dev.myclinic.scala.web.practiceapp.practice.PracticeBus
 import org.scalajs.dom.HTMLElement
 import dev.myclinic.scala.web.appbase.PrintDialog
 import dev.fujiwara.scala.drawer.PaperSize
-import dev.myclinic.scala.formatshohousen.FormatShohousen
-import dev.myclinic.scala.formatshohousen.FormatUtil
+import dev.myclinic.scala.formatshohousen.Shohou
 
 class Text(origText: ModelText):
   val ele = div()
@@ -39,9 +38,7 @@ class TextDisp(text: ModelText):
   def createContent: String = 
     text.content match {
       case "" => "（空白）"
-      case c if FormatUtil.isShohou(c) =>
-        val shohou = FormatUtil.stripShohouProlog(c)
-        FormatUtil.prependShohouProlog(FormatUtil.renderForDisp(shohou))
+      case c if Shohou.isShohou(c) => Shohou.formatForDisp(c)
       case c => c
     }
 
@@ -51,20 +48,11 @@ case class TextEdit(
     onCancel: () => Unit,
     onDelete: () => Unit
 ):
-  val ta = textarea(value := prepareContent(text.content), cls := "practice-text-edit-textarea")
+  val ta = textarea(value := text.content, cls := "practice-text-edit-textarea")
   val ele = div(
     ta,
     div(children := makeLinks)
   )
-  def hook(s: String): String =
-    if FormatUtil.isShohou(s) then
-      FormatUtil.mapContent(s.trim, FormatShohousen.format(_))
-    else s.trim
-
-  def prepareContent(orig: String): String =
-    if FormatUtil.isShohou(orig) then
-      FormatUtil.mapContent(orig, FormatUtil.renderForEdit(_))
-    else orig
 
   def makeLinks: List[HTMLElement] =
     List(
@@ -75,7 +63,7 @@ case class TextEdit(
       List(a("引継ぎコピー", onclick := (doCopyHikitsugi _))),
       List.empty
     ) ++ opt(
-      FormatUtil.isShohou(text.content),
+      Shohou.isShohou(text.content),
       List(shohouLink),
       List.empty
     ) ++ List(
@@ -91,14 +79,14 @@ case class TextEdit(
     pullDown.setBuilder(
       List(
         "処方箋発行" -> (doShohousen _),
-        "処方箋整形" -> (doFormatShohousen _),
+        //"処方箋整形" -> (doFormatShohousen _),
         "編集中表示" -> (() => ())
       )
     )
     pullDown.link
 
   def onEnter(): Unit =
-    val content = hook(ta.value)
+    val content = ta.value
     val t = new ModelText(text.textId, text.visitId, content)
     for
       _ <- Api.updateText(t)
@@ -142,14 +130,14 @@ case class TextEdit(
       val dlog = PrintDialog("処方箋印刷", ops, PaperSize.A5, "shohousen")
       dlog.open()
 
-  def doFormatShohousen(): Unit =
-    val c = text.content
-    val cc = raw"^院外処方[ 　]*\nＲｐ）[ 　]*\n".r.replaceFirstIn(c, "")
-    val f = FormatShohousen.format(cc)
-    val ff = "院外処方\nＲｐ）\n" + f
-    val t = text.copy(content = ff)
-    val te = this.copy(text = t)
-    this.ele.replaceBy(te.ele)
+  // def doFormatShohousen(): Unit =
+  //   val c = text.content
+  //   val cc = raw"^院外処方[ 　]*\nＲｐ）[ 　]*\n".r.replaceFirstIn(c, "")
+  //   val f = FormatShohousen.format(cc)
+  //   val ff = "院外処方\nＲｐ）\n" + f
+  //   val t = text.copy(content = ff)
+  //   val te = this.copy(text = t)
+  //   this.ele.replaceBy(te.ele)
 
 object Text:
   given Comp[Text] = _.ele

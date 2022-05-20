@@ -2,51 +2,49 @@ package dev.myclinic.scala.formatshohousen
 
 import FormatPattern.*
 
-trait Item:
-  def format(index: Int, ctx: FormatContext): List[String]
-  def formatForDisp(index: Int, ctx: FormatContext): List[String]
-
-case class DrugItem(
+case class Item(
   drugs: List[DrugPart],
-  usage: UsagePart,
+  usage: Option[UsagePart],
   more: List[String]
-) extends Item:
-  def format(index: Int, ctx: FormatContext): List[String] =
-    val (irep, brep) = FormatUtil.composePre(index, ctx)
-    val dlines: List[String] = drugs.zipWithIndex.map {
-      case (d, i) => 
-        val pre = if i == 0 then irep else brep
-        d.format(pre, ctx)
-    }
-    val uline = usage.format(brep, ctx)
-    val mlines = more.map(m => Formatter.softFormat(brep, m, ctx.lineSize))
-    dlines ++ List(uline) ++ mlines
+):
+  // def format(index: Int, ctx: FormatContext): List[String] =
+  //   val (irep, brep) = FormatUtil.composePre(index, ctx)
+  //   val dlines: List[String] = drugs.zipWithIndex.map {
+  //     case (d, i) => 
+  //       val pre = if i == 0 then irep else brep
+  //       d.format(pre, ctx)
+  //   }
+  //   val uline = usage.format(brep, ctx)
+  //   val mlines = more.map(m => Formatter.softFormat(brep, m, ctx.lineSize))
+  //   dlines ++ List(uline) ++ mlines
+  def formatForPrint(index: Int, ctx: FormatContext): List[String] =
+    ???
   
   def formatForDisp(index: Int, ctx: FormatContext): List[String] =
     val (ipre, bpre) = FormatUtil.composePre(index, ctx)
     val lines = 
       drugs.map(d => s"${d.name}$zenkakuSpace${d.amount}")
-        ++ List(s"${usage.usage}$zenkakuSpace${usage.daysTimes}")
+        ++ usage.fold(List.empty)(u => List(s"${u.usage}$zenkakuSpace${u.daysTimes}"))
         ++ more
     val blines = Formatter.breakLines(lines, ctx.lineSize - ipre.size)
     Formatter.indent(ipre, bpre, blines)
 
-case class FallbackItem(
-  lines: List[String]
-) extends Item:
-  def format(index: Int, ctx: FormatContext): List[String] =
-    val (irep, brep) = FormatUtil.composePre(index, ctx)
-    lines match {
-      case Nil => List(irep)
-      case List(a) => List(Formatter.softFormat(irep, a, ctx.lineSize))
-      case h :: t => 
-        Formatter.softFormat(irep, h, ctx.lineSize) ::
-          t.map(Formatter.softFormat(brep, _, ctx.lineSize))
-    }
+// case class FallbackItem(
+//   lines: List[String]
+// ) extends Item:
+//   def format(index: Int, ctx: FormatContext): List[String] =
+//     val (irep, brep) = FormatUtil.composePre(index, ctx)
+//     lines match {
+//       case Nil => List(irep)
+//       case List(a) => List(Formatter.softFormat(irep, a, ctx.lineSize))
+//       case h :: t => 
+//         Formatter.softFormat(irep, h, ctx.lineSize) ::
+//           t.map(Formatter.softFormat(brep, _, ctx.lineSize))
+//     }
 
-  def formatForDisp(index: Int, ctx: FormatContext): List[String] =
-    val (ipre, bpre) = FormatUtil.composePre(index, ctx)
-    val lines = 
+//   def formatForDisp(index: Int, ctx: FormatContext): List[String] =
+//     val (ipre, bpre) = FormatUtil.composePre(index, ctx)
+//     val lines = 
 
 object Item:
   val unit = "(?:錠|カプセル|ｇ|ｍｇ|包|ｍＬ|ブリスター|瓶|個|キット|枚|パック|袋|本)"
@@ -71,13 +69,14 @@ object Item:
 
   def parse(lines: List[String]): Item =
     val (drugs, rest) = FormatUtil.span(lines, parseDrugPart _)
-    rest match {
-      case h :: t if drugs.size > 0 =>
-        val usage = parseUsagePart(h).getOrElse(UsagePart(h, ""))
-        DrugItem(drugs, usage, t)
-      case _ => fallbackItem(lines)
+    val (usage, more) = rest match {
+      case r @ (h :: t) =>
+        parseUsagePart(h) match {
+          case Some(u) => (Some(u), t)
+          case None => (None, r)
+        }
+      case r => (None, r)
     }
-
-  def fallbackItem(lines: List[String]): Item = FallbackItem(lines)
+    Item(drugs, usage, more)
 
   
