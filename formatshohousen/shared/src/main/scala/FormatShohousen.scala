@@ -3,7 +3,9 @@ package dev.myclinic.scala.formatshohousen
 object FormatShohousen:
   def format(src: String): String =
     val zs = FormatUtil.prepareForFormat(src)
-    val parts = FormatUtil.splitToParts(zs)
+    val partsAndCommands = FormatUtil.splitToParts(zs).map(FormatUtil.parsePart)
+    val parts: List[Part] = partsAndCommands.map(_._1)
+    val commands: List[String] = partsAndCommands.map(_._2).flatten
     val ctx = FormatContext(parts.size)
     val (ls, cs, _) =
       parts.foldLeft((List.empty[String], List.empty[String], 1)) {
@@ -22,7 +24,3 @@ object FormatShohousen:
       }
     (ls ++ cs).mkString("\n")
 
-  def parseSubparts(part: String): (Item, List[String]) =
-    val (lines, trails) = FormatUtil.splitToSubparts(part)
-    val item = Item.parse(lines)
-    (item, trails)

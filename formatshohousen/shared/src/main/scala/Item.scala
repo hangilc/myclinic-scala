@@ -4,6 +4,7 @@ import FormatPattern.*
 
 trait Item:
   def format(index: Int, ctx: FormatContext): List[String]
+  def formatForDisp(index: Int, ctx: FormatContext): List[String]
 
 case class DrugItem(
   drugs: List[DrugPart],
@@ -20,6 +21,15 @@ case class DrugItem(
     val uline = usage.format(brep, ctx)
     val mlines = more.map(m => Formatter.softFormat(brep, m, ctx.lineSize))
     dlines ++ List(uline) ++ mlines
+  
+  def formatForDisp(index: Int, ctx: FormatContext): List[String] =
+    val (ipre, bpre) = FormatUtil.composePre(index, ctx)
+    val lines = 
+      drugs.map(d => s"${d.name}$zenkakuSpace${d.amount}")
+        ++ List(s"${usage.usage}$zenkakuSpace${usage.daysTimes}")
+        ++ more
+    val blines = Formatter.breakLines(lines, ctx.lineSize - ipre.size)
+    Formatter.indent(ipre, bpre, blines)
 
 case class FallbackItem(
   lines: List[String]
@@ -33,6 +43,10 @@ case class FallbackItem(
         Formatter.softFormat(irep, h, ctx.lineSize) ::
           t.map(Formatter.softFormat(brep, _, ctx.lineSize))
     }
+
+  def formatForDisp(index: Int, ctx: FormatContext): List[String] =
+    val (ipre, bpre) = FormatUtil.composePre(index, ctx)
+    val lines = 
 
 object Item:
   val unit = "(?:錠|カプセル|ｇ|ｍｇ|包|ｍＬ|ブリスター|瓶|個|キット|枚|パック|袋|本)"

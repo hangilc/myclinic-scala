@@ -47,6 +47,25 @@ object Formatter:
     if size == 0 then ""
     else zenkakuSpace + (softSpace * (size - 1))
 
+  def leadingZenkakuPattern = raw"^$zenkakuSpace+".r
+  def trailingZenkakuPattern = raw"$zenkakuSpace+$$".r
+
+  def zenkakuTrim(s: String): String =
+    val t = leadingZenkakuPattern.replaceFirstIn(s, "")
+    trailingZenkakuPattern.replaceFirstIn(t, "")
+
+  def breakLine(s: String, lineSize: Int): List[String] =
+    def iter(s: String, cur: List[String]): List[String] =
+      val t = zenkakuTrim(s)
+      if s.size <= lineSize then cur :+ t
+      else 
+        val (pre, post) = t.splitAt(lineSize)
+        iter(t, cur :+ pre)
+    iter(s, List.empty)
+
+  def breakLines(lines: List[String], lineSize: Int): List[String] =
+    lines.map(breakLine(_, lineSize)).flatten
+
   def indent(pre1: String, pre2: String, lines: List[String]): List[String] =
     lines match {
       case Nil => List.empty

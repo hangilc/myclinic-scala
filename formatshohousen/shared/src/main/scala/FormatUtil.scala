@@ -11,6 +11,8 @@ object FormatUtil:
   val softSpaceChar = '`'
   val softSpace = softSpaceChar.toString
   val commandStartChar = '@'
+  val commandStart = commandStartChar.toString
+  val localCommandStart = commandStart + "_"
   val itemStartPattern = raw"(?:^|\n)$digit+[）]$space*".r
   val leadingSpacesPattern = s"^$space+".r
   val commandPrefixPattern = s"^＠.*?：".r
@@ -43,11 +45,21 @@ object FormatUtil:
   def removeLeadingSpaces(s: String): String =
     leadingSpacesPattern.replaceFirstIn(s, "")
 
-  def splitToSubparts(p: String): (List[String], List[String]) =
-    val pp = itemStartPattern.replaceFirstIn(p, zenkakuSpace)
+  def parsePart(s: String): (Part, List[String]) =
+    val pp = itemStartPattern.replaceFirstIn(s, zenkakuSpace)
     val lines = pp.linesIterator.toList
     val (pre, post) = lines.span(s => s.startsWith(zenkakuSpace))
-    (pre.map(removeLeadingSpaces(_)), post)
+    val strippedLines = pre.map(removeLeadingSpaces(_))
+    val (cs, ts) = post.partition(_.startsWith(commandStart))
+    val (lcs, gcs) = cs.partition(_.startsWith(localCommandStart))
+    val item = Item.parse(strippedLines)
+    (Part(item, ts, lcs), gcs)
+
+  // def splitToSubparts(p: String): (List[String], List[String]) =
+  //   val pp = itemStartPattern.replaceFirstIn(p, zenkakuSpace)
+  //   val lines = pp.linesIterator.toList
+  //   val (pre, post) = lines.span(s => s.startsWith(zenkakuSpace))
+  //   (pre.map(removeLeadingSpaces(_)), post)
 
   def preWidth(totalItems: Int): Int = if totalItems < 10 then 1 else 2
 
