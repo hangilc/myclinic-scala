@@ -31,16 +31,18 @@ class Text(origText: ModelText):
     ele(clear, e.ele)
 
 class TextDisp(text: ModelText):
-  val ele = createEle
+  val ele = div(
+    innerText := createContent,
+    cls := "practice-text-disp"
+  )
 
-  def createEle: HTMLElement =
+  def createContent: String = 
     text.content match {
-      case "" => div(innerText := "（空白）")
+      case "" => "（空白）"
       case c if FormatUtil.isShohou(c) =>
         val shohou = FormatUtil.stripShohouProlog(c)
-        val rendered = FormatUtil.prependShohouProlog(FormatUtil.renderForDisp(shohou))
-        div(innerText := rendered)
-      case c => div(innerText := c)
+        FormatUtil.prependShohouProlog(FormatUtil.renderForDisp(shohou))
+      case c => c
     }
 
 case class TextEdit(
@@ -49,11 +51,20 @@ case class TextEdit(
     onCancel: () => Unit,
     onDelete: () => Unit
 ):
-  val ta = textarea(value := text.content, cls := "practice-text-edit-textarea")
+  val ta = textarea(value := prepareContent(text.content), cls := "practice-text-edit-textarea")
   val ele = div(
     ta,
     div(children := makeLinks)
   )
+  def hook(s: String): String =
+    if FormatUtil.isShohou(s) then
+      FormatUtil.mapContent(s.trim, FormatShohousen.format(_))
+    else s.trim
+
+  def prepareContent(orig: String): String =
+    if FormatUtil.isShohou(orig) then
+      FormatUtil.mapContent(orig, FormatUtil.renderForEdit(_))
+    else orig
 
   def makeLinks: List[HTMLElement] =
     List(
@@ -64,7 +75,7 @@ case class TextEdit(
       List(a("引継ぎコピー", onclick := (doCopyHikitsugi _))),
       List.empty
     ) ++ opt(
-      Text.isShohousen(text.content),
+      FormatUtil.isShohou(text.content),
       List(shohouLink),
       List.empty
     ) ++ List(
@@ -87,7 +98,8 @@ case class TextEdit(
     pullDown.link
 
   def onEnter(): Unit =
-    val t = new ModelText(text.textId, text.visitId, ta.value.trim)
+    val content = hook(ta.value)
+    val t = new ModelText(text.textId, text.visitId, content)
     for
       _ <- Api.updateText(t)
       up <- Api.getText(t.textId)
@@ -152,6 +164,3 @@ object Text:
       case None    => ""
       case Some(m) => s.substring(0, m.start)
     }
-
-  def isShohousen(s: String): Boolean =
-    s.startsWith("院外処方\nＲｐ）\n")

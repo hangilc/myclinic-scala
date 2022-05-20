@@ -97,20 +97,27 @@ object FormatUtil:
     shohou.map {
       case `softNewlineChar` => '\n'
       case `softBlankChar` => '　'
+      case `softSpaceChar` => '　'
       case c => c
     }
 
   val lineWithLeadingBlanksPattern = raw"^($space+)($notSpace.*)".r
 
   def renderForDisp(shohou: String): String =
-    shohou.map {
-      case `softNewlineChar` => '\n'
-      case `softBlankChar` => '　'
-      case c => c
-    }.linesIterator.toList.map {
-      case lineWithLeadingBlanksPattern(lead, follow) => lead + zenkakuSpaceToHankakuSpace(follow)
-      case line => zenkakuSpaceToHankakuSpace(line)
-    }.mkString("\n")
+    shohou.flatMap {
+      case `softNewlineChar` => "\n"
+      case `softBlankChar` => zenkakuSpace
+      case `softSpaceChar` => ""
+      case c => c.toString
+    }
+
+  def renderForEdit(shohou: String): String =
+    shohou.flatMap {
+      case `softNewlineChar` => ""
+      case `softBlankChar` => ""
+      case `softSpaceChar` => ""
+      case c => c.toString
+    }
 
   val shohouStartPattern = raw"^院外処方[ 　]*\nＲｐ）[ 　]*\n".r
   val shohouProlog = "院外処方\nＲｐ）\n"
@@ -123,5 +130,9 @@ object FormatUtil:
 
   def prependShohouProlog(s: String): String = 
     shohouProlog + s
+
+  def mapContent(s: String, f: String => String): String =
+    val c = stripShohouProlog(s)
+    prependShohouProlog(f(c))
 
     
