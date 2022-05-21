@@ -55,12 +55,6 @@ object FormatUtil:
     val item = Item.parse(strippedLines)
     (Part(item, ts, lcs), gcs)
 
-  // def splitToSubparts(p: String): (List[String], List[String]) =
-  //   val pp = itemStartPattern.replaceFirstIn(p, zenkakuSpace)
-  //   val lines = pp.linesIterator.toList
-  //   val (pre, post) = lines.span(s => s.startsWith(zenkakuSpace))
-  //   (pre.map(removeLeadingSpaces(_)), post)
-
   def preWidth(totalItems: Int): Int = if totalItems < 10 then 1 else 2
 
   def indexRep(index: Int, totalItems: Int): String =
@@ -92,44 +86,6 @@ object FormatUtil:
           }
       }
     iter(as, List.empty)
-
-  def zenkakuSpaceToHankakuSpace(s: String): String =
-    s.map {
-      case `zenkakuSpaceChar` => ' '
-      case c => c
-    }
-
-  def hankakuSpaceToZenkakuSpace(s: String): String =
-    s.map {
-      case ' ' => zenkakuSpaceChar
-      case c => c
-    }
-
-  def renderForPrint(shohou: String): String =
-    shohou.map {
-      case `softNewlineChar` => '\n'
-      case `softBlankChar` => '　'
-      case `softSpaceChar` => '　'
-      case c => c
-    }
-
-  val lineWithLeadingBlanksPattern = raw"^($space+)($notSpace.*)".r
-
-  def renderForDisp(shohou: String): String =
-    shohou.flatMap {
-      case `softNewlineChar` => "\n"
-      case `softBlankChar` => zenkakuSpace
-      case `softSpaceChar` => ""
-      case c => c.toString
-    }
-
-  def renderForEdit(shohou: String): String =
-    shohou.flatMap {
-      case `softNewlineChar` => ""
-      case `softBlankChar` => ""
-      case `softSpaceChar` => ""
-      case c => c.toString
-    }
 
   val shohouStartPattern = raw"^院外処方[ 　]*\nＲｐ）[ 　]*\n".r
   val shohouProlog = "院外処方\nＲｐ）\n"

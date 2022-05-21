@@ -8,3 +8,8 @@ case class Part(
   def formatForDisp(index: Int, ctx: FormatContext): List[String] =
     item.formatForDisp(index, ctx) ++ trails ++ commands
 
+  def formatForPrint(index: Int, ctx: FormatContext): List[String] =
+    item.formatForPrint(index, ctx) 
+      ++ Formatter.breakLines(trails, ctx.lineSize) 
+      ++ Formatter.breakLines(commands, ctx.lineSize)
+

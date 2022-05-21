@@ -11,7 +11,10 @@ case class Shohou(
     }) ++ commands).mkString("\n")
 
   def formatForPrint: String =
-    ???
+    val ctx = FormatContext(parts.size)
+     Shohou.prolog + ((parts.zipWithIndex.flatMap {
+      case (part, ord) => part.formatForPrint(ord+1, ctx)
+    }) ++ commands).mkString("\n")
 
 object Shohou:
   def formatForDisp(s: String): String =
