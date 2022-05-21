@@ -26,9 +26,9 @@ object Shohou:
   def parse(src: String): Shohou =
     val srcWithoutProlog: String = FormatUtil.stripShohouProlog(src)
     val zs = FormatUtil.prepareForFormat(srcWithoutProlog)
-    val partsAndCommands = FormatUtil.splitToParts(zs).map(FormatUtil.parsePart)
-    val parts: List[Part] = partsAndCommands.map(_._1)
-    val commands: List[String] = partsAndCommands.map(_._2).flatten
+    val partTmplsAndCommands = FormatUtil.splitToParts(zs).map(FormatUtil.parsePart)
+    val partTmpls: List[PartTemplate] = partTmplsAndCommands.map(_._1)
+    val commands: List[String] = partTmplsAndCommands.map(_._2).flatten
     Shohou(parts, commands)
 
   def isShohou(s: String): Boolean =

@@ -45,15 +45,14 @@ object FormatUtil:
   def removeLeadingSpaces(s: String): String =
     leadingSpacesPattern.replaceFirstIn(s, "")
 
-  def parsePart(s: String): (Part, List[String]) =
+  def parsePart(s: String): (PartTemplate, List[String]) =
     val pp = itemStartPattern.replaceFirstIn(s, zenkakuSpace)
     val lines = pp.linesIterator.toList
     val (pre, post) = lines.span(s => s.startsWith(zenkakuSpace))
     val strippedLines = pre.map(removeLeadingSpaces(_))
     val (cs, ts) = post.partition(_.startsWith(commandStart))
     val (lcs, gcs) = cs.partition(_.startsWith(localCommandStart))
-    val item = Item.parse(strippedLines)
-    (Part(item, ts, lcs), gcs)
+    (PartTemplate(strippedLines, ts, lcs), gcs)
 
   def preWidth(totalItems: Int): Int = if totalItems < 10 then 1 else 2
 
