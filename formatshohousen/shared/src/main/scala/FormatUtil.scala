@@ -41,12 +41,19 @@ object FormatUtil:
     leadingSpacesPattern.replaceFirstIn(s, "")
 
   def parsePart(s: String): (PartTemplate, List[String]) =
+    import dev.myclinic.scala.util.FunUtil.*
     val pp = itemStartPattern.replaceFirstIn(s, zenkakuSpace)
     val lines = pp.linesIterator.toList
     val (pre, post) = lines.span(s => s.startsWith(zenkakuSpace))
     val strippedLines = pre.map(removeLeadingSpaces(_))
     val (cs, ts) = post.partition(_.startsWith(commandStart))
     val (lcs, gcs) = cs.partition(_.startsWith(localCommandStart))
+      |> ((lcs: List[String], gcs: List[String]) => 
+        (
+          lcs.filter(lc => !lc.startsWith("@_comment:")),
+          gcs
+        )
+      )
     (PartTemplate(strippedLines, ts, lcs), gcs)
 
   def preWidth(totalItems: Int): Int = if totalItems < 10 then 1 else 2

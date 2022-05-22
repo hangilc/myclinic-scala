@@ -63,6 +63,7 @@ class PracticeMain:
       "日付別" -> (selectByDate _)
     )
   )
+  ui.shohouSampleLink(onclick := (searchShohouSample _))
 
   def formatPatient(patient: Patient): String =
     String.format(
@@ -107,7 +108,10 @@ class PracticeMain:
           }
         yield ()
     }
-
+  
+  def searchShohouSample(): Unit =
+    ShohouSampleDialog.open()
+    
   def selectFromRegistered(): Unit =
     for pairs <- PracticeService.listRegisteredPatient()
     yield
@@ -240,6 +244,8 @@ object PracticeService:
 
 class PracticeMainUI:
   val choice = PullDownLink("患者選択")
+  val shohouSampleLink = a
+  val wholeTextSearchLink = a
   val records = div
   val ele = div(cls := "practice-main")(
     header,
@@ -249,8 +255,8 @@ class PracticeMainUI:
   def header: HTMLElement = div(cls := "practice-header")(
     div("診察", cls := "practice-header-title"),
     choice.ele(cls := "practice-header-choice"),
-    a("登録薬剤"),
-    a("全文検索")
+    shohouSampleLink("登録薬剤"),
+    wholeTextSearchLink("全文検索")
   )
 
 class PracticeRight:

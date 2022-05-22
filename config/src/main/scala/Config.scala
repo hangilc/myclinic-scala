@@ -52,6 +52,10 @@ object Config extends ConfigCirce:
     finally
       reader.close()
 
+  def getShohouSamples: List[String] =
+    val file = dataDir.resolve("shohou-sample.txt")
+    Files.readString(file).split("\n\n").toList
+
 trait ConfigCirce:
   given Encoder[AdHocHolidayRange] = deriveEncoder[AdHocHolidayRange]
   given Decoder[AdHocHolidayRange] = deriveDecoder[AdHocHolidayRange]

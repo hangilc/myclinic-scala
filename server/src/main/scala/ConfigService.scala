@@ -17,7 +17,14 @@ import dev.myclinic.scala.model.jsoncodec.Implicits.{given}
 
 object ConfigService:
   val clinicInfo = Config.getClinicInfo
+  var shohouSamples: List[String] = Config.getShohouSamples
+  object stringText extends QueryParamDecoderMatcher[String]("text")
 
   def routes = HttpRoutes.of[IO] {
     case GET -> Root / "get-clinic-info" => Ok(clinicInfo)
+    case GET -> Root / "reload-shohou-samples" => 
+      shohouSamples = Config.getShohouSamples
+      Ok(true)
+    case GET -> Root / "search-shohou-samples" :? stringText(text) =>
+      Ok(shohouSamples.filter(_.contains(text)))
   }
