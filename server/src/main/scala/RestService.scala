@@ -32,6 +32,9 @@ object RestService extends DateTimeQueryParam with Publisher:
   object timeAt extends QueryParamDecoderMatcher[LocalTime]("at")
   object strName extends QueryParamDecoderMatcher[String]("name")
   object strRecipient extends QueryParamDecoderMatcher[String]("recipient")
+  object strText extends QueryParamDecoderMatcher[String]("text")
+  object strText1 extends QueryParamDecoderMatcher[String]("text1")
+  object strText2 extends QueryParamDecoderMatcher[String]("text2")
   object intFrom extends QueryParamDecoderMatcher[Int]("from")
   object intUntil extends QueryParamDecoderMatcher[Int]("until")
   object intAppointTimeId
@@ -179,6 +182,12 @@ object RestService extends DateTimeQueryParam with Publisher:
           appointTimeId
         ) =>
       Ok(Db.appointHistoryAt(appointTimeId))
+
+    case GET -> Root / "search-appoint-by-patient-name" :? strText(text) =>
+      Ok(Db.searchAppointByPatientName(text))
+
+    case GET -> Root / "search-appoint-by-patient-name2" :? strText1(text1) +& strText2(text2)=>
+      Ok(Db.searchAppointByPatientName2(text1, text2))
 
     case req @ POST -> Root / "post-hotline" =>
       val op =

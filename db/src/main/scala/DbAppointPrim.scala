@@ -139,3 +139,19 @@ object DbAppointPrim:
       select count(*) from appoint where appoint_time_id = ${appointTimeId}
     """.query[Int].unique
 
+  def searchAppointByPatientName(text: String): Query0[(Appoint, AppointTime)] =
+    val likeText = s"${text}%"
+    sql"""
+      select ap.*, at.* from 
+        appoint as ap inner join appoint_time as at on ap.appoint_time_id = at.appoint_time_id 
+      where ap.patient_name like $likeText order by at.date desc, at.from_time desc
+    """.query[(Appoint, AppointTime)]
+
+  def searchAppointByPatientName2(text1: String, text2: String): Query0[(Appoint, AppointTime)] =
+    val likeText = s"${text1}%${text2}%"
+    sql"""
+      select ap.*, at.* from 
+        appoint as ap inner join appoint_time as at on ap.appoint_time_id = at.appoint_time_id 
+      where ap.patient_name like $likeText order by at.date desc, at.from_time desc
+    """.query[(Appoint, AppointTime)]
+

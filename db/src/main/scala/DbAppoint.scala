@@ -262,3 +262,9 @@ trait DbAppoint extends Mysql:
         .compile
         .toList
     )
+
+  def searchAppointByPatientName(text: String): IO[List[(Appoint, AppointTime)]] =
+    mysql(Prim.searchAppointByPatientName(text).to[List])
+
+  def searchAppointByPatientName2(text1: String, text2: String): IO[List[(Appoint, AppointTime)]] =
+    mysql(Prim.searchAppointByPatientName2(text1, text2).to[List])

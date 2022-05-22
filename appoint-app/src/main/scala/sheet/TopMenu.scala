@@ -8,6 +8,7 @@ import dev.myclinic.scala.web.appoint.AppointHistoryWindow
 import scala.util.{Success, Failure}
 import org.scalajs.dom.MouseEvent
 import dev.myclinic.scala.util.DateUtil
+import dev.myclinic.scala.web.appoint.sheet.searchappointdialog.SearchAppointDialog
 
 class TopMenu(private var startDate: LocalDate):
   val onDateSelected = new LocalEventPublisher[LocalDate]
@@ -17,6 +18,7 @@ class TopMenu(private var startDate: LocalDate):
   val nextWeek = button
   val nextMonth = button
   val topMenuBox = span()
+  val searchAppointLink = a
   val thirdShot = a
   val menuIcon = Icons.menu
 
@@ -30,6 +32,7 @@ class TopMenu(private var startDate: LocalDate):
     nextWeek("次の週", ml := "0.5rem"),
     nextMonth("次の月", ml := "0.5rem"),
     topMenuBox(attr("id") := "top-menu-box")(
+      searchAppointLink("予約検索"),
       thirdShot("追加接種", mr := "14px"),
       menuIcon(Icons.defaultStyle)
     )
@@ -39,6 +42,7 @@ class TopMenu(private var startDate: LocalDate):
   thisWeek(onclick := (onThisWeekClick _))
   nextWeek(onclick := (() => advanceDays(7)))
   nextMonth(onclick := (() => advanceDays(28)))
+  searchAppointLink(onclick := (TopMenu.openSearchAppointDialog _))
   thirdShot(onclick := (TopMenu.openThirdShotDialog _))
   menuIcon(onclick := (onMenuClick _))
 
@@ -75,6 +79,9 @@ object TopMenu:
       case Success(_)  => ()
       case Failure(ex) => ShowMessage.showError(ex.getMessage)
     }
+
+  def openSearchAppointDialog(): Unit =
+    SearchAppointDialog.open()
 
 
 

@@ -108,8 +108,8 @@ class SearchForm[Src, D](
 ):
   val ui = new SearchFormElements[D]
   val ele = div(
-    ui.form,
-    ui.selection.ele
+    ui.form(cls := "domq-search-form-form"),
+    ui.selection.ele(cls := "domq-search-form-selection")
   )
   import Implicits.given
   val engine = new SearchFormEngine(

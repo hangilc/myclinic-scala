@@ -20,6 +20,10 @@ body {
   float: right;
 }
 
+#top-menu-box a {
+  margin-left: 6px;
+}
+
 .appoint-column {
   width: 160px;
   margin: 0 0.5rem;
@@ -125,5 +129,10 @@ body {
 
 .appoint-history {
   width: 400px;
+}
+
+.appoint-search-appoint-body .domq-search-form-selection {
+  width: 380px;
+  height: 300px;
 }
 

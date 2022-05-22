@@ -231,3 +231,9 @@
 .domq-selection-item.selected {
   background-color: #ccc;
 }
+
+/* Search Form *************************************************************/
+
+.domq-search-form-form {
+  margin-bottom: 4px;
+}
