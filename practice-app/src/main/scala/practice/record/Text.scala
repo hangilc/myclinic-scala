@@ -80,8 +80,7 @@ case class TextEdit(
     pullDown.setBuilder(
       List(
         "処方箋発行" -> (doShohousen _),
-        //"処方箋整形" -> (doFormatShohousen _),
-        "編集中表示" -> (() => ())
+        "編集中表示" -> (doViewShohousen _)
       )
     )
     pullDown.link
@@ -134,6 +133,14 @@ case class TextEdit(
       val dlog = PrintDialog("処方箋印刷", ops, PaperSize.A5, "shohousen")
       dlog.open()
 
+  def doViewShohousen(): Unit =
+    val c = FormatShohousen.parse(ta.value).formatForSave
+    val t = text.copy(content = c)
+    for
+      ops <- Api.shohousenDrawerText(t)
+    yield
+      val dlog = PrintDialog("処方箋表示", ops, PaperSize.A5, "shohousen")
+      dlog.open()
 
 object Text:
   given Comp[Text] = _.ele

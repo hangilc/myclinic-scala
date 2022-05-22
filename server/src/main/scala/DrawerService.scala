@@ -15,8 +15,9 @@ import io.circe.syntax._
 import dev.myclinic.scala.db.Db
 import dev.myclinic.scala.config.Config
 import dev.fujiwara.drawer.forms.shohousen.{ShohousenData, ShohousenDrawer}
+import dev.myclinic.scala.model.jsoncodec.Implicits.given
 import dev.fujiwara.dto.ClinicInfoDTO
-import dev.myclinic.scala.model.ClinicInfo
+import dev.myclinic.scala.model.{ClinicInfo, Text, Visit, Patient}
 import dev.myclinic.scala.formatshohousen.Shohou
 import dev.myclinic.scala.formatshohousen.FormatShohousen
 
@@ -32,18 +33,35 @@ object DrawerService:
         visit <- Db.getVisit(text.visitId)
         patient <- Db.getPatient(visit.patientId)
       yield
-        val data = new ShohousenData()
-        data.setClinicInfo(clinicInfoDTO(clinicInfo))
-        val c = FormatShohousen.parse(text.content).formatForPrint
-        data.setDrugs(c)
-        val drawer = new ShohousenDrawer()
-        drawer.init()
-        data.applyTo(drawer)
-        val ops = drawer.getOps()
-        val json = objectMapper.writeValueAsString(ops)
-        Response(body = fs2.Stream.emits(json.getBytes()),
-          headers = Headers(`Content-Type`(MediaType("application", "json"))))
+        val json = drawShohousen(text, visit, patient)
+        Response(
+          body = fs2.Stream.emits(json.getBytes()),
+          headers = Headers(`Content-Type`(MediaType("application", "json")))
+        )
+
+    case req @ POST -> Root / "shohousen-drawer-text" =>
+      for
+        text <- req.as[Text]
+        visit <- Db.getVisit(text.visitId)
+        patient <- Db.getPatient(visit.patientId)
+      yield
+        val json = drawShohousen(text, visit, patient)
+        Response(
+          body = fs2.Stream.emits(json.getBytes()),
+          headers = Headers(`Content-Type`(MediaType("application", "json")))
+        )
   }
+
+  def drawShohousen(text: Text, visit: Visit, patient: Patient): String =
+    val data = new ShohousenData()
+    data.setClinicInfo(clinicInfoDTO(clinicInfo))
+    val c = FormatShohousen.parse(text.content).formatForPrint
+    data.setDrugs(c)
+    val drawer = new ShohousenDrawer()
+    drawer.init()
+    data.applyTo(drawer)
+    val ops = drawer.getOps()
+    objectMapper.writeValueAsString(ops)
 
   def clinicInfoDTO(src: ClinicInfo): ClinicInfoDTO =
     val dto = new ClinicInfoDTO()

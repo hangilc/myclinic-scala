@@ -5,6 +5,8 @@ import io.circe.syntax._
 import dev.fujiwara.scala.drawer.Op
 import scala.concurrent.Future
 import dev.myclinic.scala.webclient.ParamsImplicits.given
+import dev.myclinic.scala.model.Text
+import dev.myclinic.scala.model.jsoncodec.Implicits.given
 
 object DrawerApi extends ApiBase:
   def baseUrl: String = "/api/"
@@ -12,3 +14,6 @@ object DrawerApi extends ApiBase:
   trait Api:
     def shohousenDrawer(textId: Int): Future[List[Op]] =
       get("shohousen-drawer", Params("text-id" -> textId))
+
+    def shohousenDrawerText(text: Text): Future[List[Op]] =
+      post("shohousen-drawer-text", Params(), text)
