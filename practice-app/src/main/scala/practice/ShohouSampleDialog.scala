@@ -6,13 +6,16 @@ import dev.fujiwara.domq.searchform.SearchForm
 import dev.myclinic.scala.webclient.{Api, global}
 
 object ShohouSampleDialog:
-  val searchForm = SearchForm[String, String](
-    identity,
-    identity,
-    Api.searchShohouSample _
-  )
 
   def open(): Unit =
+    val searchForm = SearchForm[String, String](
+      identity,
+      identity,
+      Api.searchShohouSample _
+    )
+    searchForm.onSelect(item => 
+      println(item)  
+    )
     val dlog = new ModalDialog3
     dlog.title(innerText := "登録薬剤検索")
     dlog.body(

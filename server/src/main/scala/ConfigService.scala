@@ -25,6 +25,6 @@ object ConfigService:
     case GET -> Root / "reload-shohou-samples" => 
       shohouSamples = Config.getShohouSamples
       Ok(true)
-    case GET -> Root / "search-shohou-samples" :? stringText(text) =>
+    case GET -> Root / "search-shohou-sample" :? stringText(text) =>
       Ok(shohouSamples.filter(_.contains(text)))
   }

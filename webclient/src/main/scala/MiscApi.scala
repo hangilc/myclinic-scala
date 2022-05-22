@@ -298,4 +298,4 @@ object MiscApi extends ApiBase:
       get("delete-text", Params("text-id" -> textId))
 
     def searchShohouSample(text: String): Future[List[String]] =
-      get("search-shohou-samples", Params("text" -> text))
+      get("search-shohou-sample", Params("text" -> text))
