@@ -1,14 +1,11 @@
 package dev.myclinic.scala.formatshohousen
 
-case class ShohouRaw(text: String)
+case class ShohouRaw(text: String) extends Shohou:
+    def formatForDisp: String = text
+    def formatForPrint: String = text
+    def formatForSave: String = text
 
 object ShohouRaw:
-  given shohouRawShohou: Shohou[ShohouRaw] with
-    def formatForDisp(s: ShohouRaw): String = s.text
-    def formatForPrint(s: ShohouRaw): String = s.text
-
-    def formatForSave(s: ShohouRaw): String = s.text
-
   val rawCommand = raw"(?:^|\n)@raw".r
 
   def tryParse(src: String): Option[ShohouRaw] =

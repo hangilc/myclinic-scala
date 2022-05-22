@@ -9,7 +9,7 @@ import dev.myclinic.scala.web.practiceapp.practice.PracticeBus
 import org.scalajs.dom.HTMLElement
 import dev.myclinic.scala.web.appbase.PrintDialog
 import dev.fujiwara.scala.drawer.PaperSize
-import dev.myclinic.scala.formatshohousen.Shohou
+import dev.myclinic.scala.formatshohousen.FormatShohousen
 
 class Text(origText: ModelText):
   val ele = div()
@@ -38,7 +38,7 @@ class TextDisp(text: ModelText):
   def createContent: String = 
     text.content match {
       case "" => "（空白）"
-      case c if Shohou.isShohou(c) => Shohou.formatForDisp(c)
+      case c if FormatShohousen.isShohou(c) => FormatShohousen.parse(c).formatForDisp
       case c => c
     }
 
@@ -63,7 +63,7 @@ case class TextEdit(
       List(a("引継ぎコピー", onclick := (doCopyHikitsugi _))),
       List.empty
     ) ++ opt(
-      Shohou.isShohou(text.content),
+      FormatShohousen.isShohou(text.content),
       List(shohouLink),
       List.empty
     ) ++ List(

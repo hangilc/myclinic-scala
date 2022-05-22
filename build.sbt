@@ -73,9 +73,6 @@ lazy val formatshohousen = crossProject(JSPlatform, JVMPlatform)
   .dependsOn(util)
   .settings(
     name := "formatshohousen",
-    libraryDependencies ++= Seq(
-      "co.fs2" %%% "fs2-core" % fs2Version,
-    )
   )
   .jvmSettings(
     libraryDependencies ++= Seq(
@@ -327,7 +324,6 @@ lazy val practiceApp = project
     libraryDependencies ++= Seq(
       "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion,
       "org.scala-js" %%% "scala-js-macrotask-executor" % macrotaskExecutorVersion,
-      "co.fs2" %%% "fs2-core" % fs2Version
     )
   )
 

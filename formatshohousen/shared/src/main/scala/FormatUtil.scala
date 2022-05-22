@@ -2,6 +2,7 @@ package dev.myclinic.scala.formatshohousen
 
 import dev.myclinic.scala.util.ZenkakuUtil
 import FormatPattern.*
+import dev.myclinic.scala.util.StringUtil
 
 object FormatUtil:
   val softNewlineChar = '~'
@@ -33,14 +34,8 @@ object FormatUtil:
       })
       .mkString("\n")
 
-  def splitToParts(s: String): List[String] =
-    val src: String = prepareForFormat(s)
-    val starts: List[Int] =
-      itemStartPattern.findAllMatchIn(src).toList.map(_.start)
-    val ends = starts.drop(1) :+ s.size
-    starts.zip(ends).map { case (start, end) =>
-      s.substring(start, end).strip
-    }
+  def splitToParts(s: String): (String, List[String]) =
+    StringUtil.cut(itemStartPattern, s)
 
   def removeLeadingSpaces(s: String): String =
     leadingSpacesPattern.replaceFirstIn(s, "")

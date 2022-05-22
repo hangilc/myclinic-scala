@@ -18,6 +18,7 @@ import dev.fujiwara.drawer.forms.shohousen.{ShohousenData, ShohousenDrawer}
 import dev.fujiwara.dto.ClinicInfoDTO
 import dev.myclinic.scala.model.ClinicInfo
 import dev.myclinic.scala.formatshohousen.Shohou
+import dev.myclinic.scala.formatshohousen.FormatShohousen
 
 object DrawerService:
   object intTextId extends QueryParamDecoderMatcher[Int]("text-id")
@@ -33,7 +34,7 @@ object DrawerService:
       yield
         val data = new ShohousenData()
         data.setClinicInfo(clinicInfoDTO(clinicInfo))
-        val c = Shohou.formatForPrint(text.content)
+        val c = FormatShohousen.parse(text.content).formatForPrint
         data.setDrugs(c)
         val drawer = new ShohousenDrawer()
         drawer.init()
