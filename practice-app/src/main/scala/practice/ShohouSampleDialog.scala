@@ -4,21 +4,28 @@ import dev.fujiwara.domq.ModalDialog3
 import dev.fujiwara.domq.all.{*, given}
 import dev.fujiwara.domq.searchform.SearchForm
 import dev.myclinic.scala.webclient.{Api, global}
+import dev.myclinic.scala.formatshohousen.FormatUtil
 
 object ShohouSampleDialog:
 
   def open(): Unit =
+    var index: Int = 0
+    def getIndex: String = 
+      index += 1
+      FormatUtil.indexRep(index, 5)
+    val ta = textarea
     val searchForm = SearchForm[String, String](
       identity,
       identity,
       Api.searchShohouSample _
     )
     searchForm.onSelect(item => 
-      println(item)  
+      ta.value = ta.value + getIndex + item + "\n"
     )
     val dlog = new ModalDialog3
     dlog.title(innerText := "登録薬剤検索")
     dlog.body(
+      ta(cls := "practice-shohou-sample-dialog-ta"),
       searchForm.ele
     )
     dlog.commands(
