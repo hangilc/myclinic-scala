@@ -155,3 +155,10 @@ object DbAppointPrim:
       where ap.patient_name like $likeText order by at.date desc, at.from_time desc
     """.query[(Appoint, AppointTime)]
 
+  def searchAppointByPatientId(patientId: Int): Query0[(Appoint, AppointTime)] =
+    sql"""
+      select ap.*, at.* from 
+        appoint as ap inner join appoint_time as at on ap.appoint_time_id = at.appoint_time_id 
+      where ap.patient_id = $patientId order by at.date desc, at.from_time desc
+    """.query[(Appoint, AppointTime)]
+

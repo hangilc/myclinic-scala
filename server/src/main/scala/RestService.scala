@@ -189,6 +189,9 @@ object RestService extends DateTimeQueryParam with Publisher:
     case GET -> Root / "search-appoint-by-patient-name2" :? strText1(text1) +& strText2(text2)=>
       Ok(Db.searchAppointByPatientName2(text1, text2))
 
+    case GET -> Root / "search-appoint-by-patient-id" :? intPatientId(patientId) =>
+      Ok(Db.searchAppointByPatientId(patientId))
+
     case req @ POST -> Root / "post-hotline" =>
       val op =
         for

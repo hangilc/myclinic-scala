@@ -34,11 +34,16 @@ object SearchAppointDialog:
     }
 
   def search(text: String): Future[List[Result]] =
-    val pat = "[ 　]+".r
-    val parts = pat.split(text)
-    if parts.size == 1 then
-      Api.searchAppointByPatientName(parts(0))
-    else if parts.size == 2 then
-      Api.searchAppointByPatientName2(parts(0), parts(1))
-    else Future.successful(List.empty)
+    val digits = raw"\d+".r
+    if digits.matches(text) then
+      val patientId = text.toInt
+      Api.searchAppointByPatientId(patientId)
+    else
+      val pat = "[ 　]+".r
+      val parts = pat.split(text)
+      if parts.size == 1 then
+        Api.searchAppointByPatientName(parts(0))
+      else if parts.size == 2 then
+        Api.searchAppointByPatientName2(parts(0), parts(1))
+      else Future.successful(List.empty)
 

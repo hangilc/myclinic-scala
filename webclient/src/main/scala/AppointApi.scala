@@ -109,3 +109,9 @@ object AppointApi extends ApiBase:
         "search-appoint-by-patient-name2",
         Params("text1" -> text1, "text2" -> text2)
       )
+
+    def searchAppointByPatientId(
+        patientId: Int
+    ): Future[List[(Appoint, AppointTime)]] =
+      get("search-appoint-by-patient-id", Params("patient-id" -> patientId))
+
