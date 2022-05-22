@@ -44,10 +44,14 @@ class SearchFormEngine[I, T, SearchResult, D, S](
       val text = inputProvider.getText(input)
       for result <- search(text)
       yield
-        selectionProvider.setItems(selection, result, toLabel, toValue)
+        //selectionProvider.setItems(selection, result, toLabel, toValue)
+        setItems(result)
         onSearchDone()
     }
   )
+
+  def setItems(result: List[SearchResult]): Unit =
+    selectionProvider.setItems(selection, result, toLabel, toValue)
 
   def selected: Option[D] = selectionProvider.selected(selection)
 
@@ -120,6 +124,7 @@ class SearchForm[Src, D](
     toLabel,
     toValue
   )
+  def initFocus: Unit = ui.input.focus()
   def selected: Option[D] = engine.selected
   def onSelect(handler: D => Unit): Unit =
     ui.selection.addSelectEventHandler(handler)
