@@ -71,3 +71,4 @@ object HokenRep:
     else if ((futanshaBangou / 1000) == 81137) then "マル親（負担なし）"
     else if ((futanshaBangou / 1000000) == 88) then "マル乳"
     else String.format("公費負担（%d）", futanshaBangou)
+

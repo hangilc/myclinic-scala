@@ -5,8 +5,11 @@ import dev.myclinic.scala.apputil.HokenUtil
 import dev.myclinic.scala.model.VisitEx
 import dev.myclinic.scala.web.practiceapp.practice.record.hoken.{Disp, Edit}
 import dev.myclinic.scala.model.HokenInfo
+import dev.myclinic.scala.webclient.{Api, global}
+import java.time.LocalDate
 
-class Hoken(hoken: HokenInfo):
+
+class Hoken(visitId: Int, patientId: Int, date: LocalDate, hoken: HokenInfo):
   val ele = div
   disp
 
@@ -16,5 +19,9 @@ class Hoken(hoken: HokenInfo):
     ele(d.ele)
 
   def edit: Unit =
-    val e = Edit(hoken)
-    ele(clear, e.ele)
+    for
+      shahoOpt <- Api.findAvailableShahokokuho(patientId, date)
+      koukikoureiOpt <- Api.findAvailableKoukikourei(patientId, date)
+      kouhiList <- Api.listAvailableKouhi(patientId, date)
+    yield 
+      Edit.open(shahoOpt, koukikoureiOpt, kouhiList)

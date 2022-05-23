@@ -51,7 +51,12 @@ class Record(visitEx: VisitEx):
   def composeRight(visitEx: VisitEx): HTMLElement =
     div(
       cls := "practice-visit-record-right",
-      new Hoken(visitEx.hoken).ele,
+      new Hoken(
+        visitEx.visitId,
+        visitEx.patientId,
+        visitEx.visitedAt.toLocalDate,
+        visitEx.hoken
+      ).ele,
       new Shinryou(visitEx).ele,
       new Drug(visitEx).ele,
       new Conduct(visitEx).ele,
@@ -67,4 +72,3 @@ object Record:
   given Comp[Record] = _.ele
   given Dispose[Record] =
     Dispose.nop[Record] + (_.title) + (_.texts) + (_.unsubs)
-
