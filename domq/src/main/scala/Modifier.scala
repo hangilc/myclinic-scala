@@ -39,6 +39,14 @@ object Modifiers:
   given Conversion[SVGElement, Modifier[HTMLElement]] with
     def apply(e: SVGElement): Modifier[HTMLElement] =
       Modifier[HTMLElement](ele => ele.appendChild(e))
+  given Conversion[Option[HTMLElement], Modifier[HTMLElement]] with
+    def apply(opt: Option[HTMLElement]): Modifier[HTMLElement] =
+      Modifier[HTMLElement](ele => 
+        opt match {
+          case Some(e) => ele.appendChild(e)
+          case None => ()
+        }  
+      )
 
   abstract class Assign[E, A]:
     def :=(a: A): Modifier[E]

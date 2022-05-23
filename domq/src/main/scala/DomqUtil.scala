@@ -11,7 +11,7 @@ object DomqUtil:
 
   private var nextIdValue: Int = 1
 
-  def genId(): String =
+  def genId: String =
     val id: String = s"domq-gen-id-${nextIdValue}"
     nextIdValue += 1
     id
