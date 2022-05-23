@@ -51,7 +51,7 @@ class Record(visitEx: VisitEx):
   def composeRight(visitEx: VisitEx): HTMLElement =
     div(
       cls := "practice-visit-record-right",
-      new Hoken(visitEx).ele,
+      new Hoken(visitEx.hoken).ele,
       new Shinryou(visitEx).ele,
       new Drug(visitEx).ele,
       new Conduct(visitEx).ele,
