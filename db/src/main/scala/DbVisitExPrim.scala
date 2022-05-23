@@ -153,10 +153,7 @@ object DbVisitExPrim:
     for
       visit <- DbVisitPrim.getVisit(visitId).unique
       patient <- DbPatientPrim.getPatient(visit.patientId).unique
-      shahokokuho <- optShahokokuho(visit.shahokokuhoId)
-      roujin <- optRoujin(visit.roujinId)
-      koukikourei <- optKoukikourei(visit.koukikoureiId)
-      kouhiList <- kouhiList(visit.kouhiIds)
+      hoken <- DbHokenPrim.getHokenInfo(visit)
       texts <- DbTextPrim.listTextForVisit(visitId)
       drugIds <- DbDrugPrim.listDrugIdForVisit(visitId)
       drugs <- listDrugEx(drugIds)
@@ -166,5 +163,4 @@ object DbVisitExPrim:
       conducts <- listConductEx(conductIds)
       charge <- DbChargePrim.getCharge(visitId).option
       payment <- DbPaymentPrim.findLastPayment(visitId).option
-    yield VisitEx(visit, patient, shahokokuho, roujin, koukikourei, kouhiList,
-    texts, drugs, shinryouList, conducts, charge, payment)
+    yield VisitEx(visit, patient, hoken, texts, drugs, shinryouList, conducts, charge, payment)

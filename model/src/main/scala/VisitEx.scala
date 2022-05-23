@@ -4,14 +4,7 @@ import java.time.LocalDateTime
 
 case class VisitEx(
     visitId: Int,
-    patientId: Int,
     visitedAt: LocalDateTime,
-    shahokokuhoId: Int,
-    roujinId: Int,
-    kouhi1Id: Int,
-    kouhi2Id: Int,
-    kouhi3Id: Int,
-    koukikoureiId: Int,
     attributesStore: Option[String],
     patient: Patient,
     hoken: HokenInfo,
@@ -22,17 +15,22 @@ case class VisitEx(
     chargeOption: Option[Charge] = None,
     lastPayment: Option[Payment] = None
 ):
+  def patientId: Int = patient.patientId
+  def shahokokuho: Option[Shahokokuho] = hoken.shahokokuho
+  def koukikourei: Option[Koukikourei] = hoken.koukikourei
+  def roujin: Option[Roujin] = hoken.roujin
+  def kouhiList: List[Kouhi] = hoken.kouhiList
   def toVisit: Visit =
     Visit(
       visitId,
       patientId,
       visitedAt,
-      shahokokuhoId,
-      roujinId,
-      kouhi1Id,
-      kouhi2Id,
-      kouhi3Id,
-      koukikoureiId,
+      hoken.shahokokuhoId,
+      hoken.roujinId,
+      hoken.kouhi1Id,
+      hoken.kouhi2Id,
+      hoken.kouhi3Id,
+      hoken.koukikoureiId,
       attributesStore
     )
 
@@ -50,14 +48,7 @@ object VisitEx:
   ): VisitEx =
     VisitEx(
       visit.visitId,
-      visit.patientId,
       visit.visitedAt,
-      visit.shahokokuhoId,
-      visit.roujinId,
-      visit.kouhi1Id,
-      visit.kouhi2Id,
-      visit.kouhi3Id,
-      visit.koukikoureiId,
       visit.attributesStore,
       patient,
       hoken,
@@ -74,7 +65,14 @@ case class HokenInfo(
     roujin: Option[Roujin] = None,
     koukikourei: Option[Koukikourei] = None,
     kouhiList: List[Kouhi] = List.empty
-)
+):
+  def shahokokuhoId: Int = shahokokuho.map(_.shahokokuhoId).getOrElse(0)
+  def roujinId: Int = roujin.map(_.roujinId).getOrElse(0)
+  def koukikoureiId: Int = koukikourei.map(_.koukikoureiId).getOrElse(0)
+  lazy val kouhiIds: List[Int] = kouhiList.map(_.kouhiId)
+  def kouhi1Id: Int = kouhiIds.applyOrElse(0, _ => 0)
+  def kouhi2Id: Int = kouhiIds.applyOrElse(1, _ => 0)
+  def kouhi3Id: Int = kouhiIds.applyOrElse(2, _ => 0)
 
 case class DrugEx(
     drugId: Int,

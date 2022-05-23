@@ -13,9 +13,8 @@ import java.time.temporal.ChronoUnit
 import java.util.regex.Pattern
 
 object DbHokenPrim:
-  def getHokenInfo(visitId: Int): ConnectionIO[HokenInfo] =
+  def getHokenInfo(visit: Visit): ConnectionIO[HokenInfo] =
     for
-      visit <- DbVisitPrim.getVisit(visitId).unique
       shahokokuho <- DbVisitExPrim.optShahokokuho(visit.shahokokuhoId)
       roujin <- DbVisitExPrim.optRoujin(visit.roujinId)
       koukikourei <- DbVisitExPrim.optKoukikourei(visit.koukikoureiId)
