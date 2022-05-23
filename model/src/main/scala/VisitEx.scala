@@ -14,10 +14,7 @@ case class VisitEx(
     koukikoureiId: Int,
     attributesStore: Option[String],
     patient: Patient,
-    shahokokuho: Option[Shahokokuho] = None,
-    roujin: Option[Roujin] = None,
-    koukikourei: Option[Koukikourei] = None,
-    kouhiList: List[Kouhi] = List.empty,
+    hoken: HokenInfo,
     texts: List[Text] = List.empty,
     drugs: List[DrugEx] = List.empty,
     shinryouList: List[ShinryouEx] = List.empty,
@@ -43,10 +40,7 @@ object VisitEx:
   def apply(
       visit: Visit,
       patient: Patient,
-      shahokokuho: Option[Shahokokuho],
-      roujin: Option[Roujin],
-      koukikourei: Option[Koukikourei],
-      kouhiList: List[Kouhi],
+      hoken: HokenInfo,
       texts: List[Text],
       drugs: List[DrugEx],
       shinryouList: List[ShinryouEx],
@@ -66,10 +60,7 @@ object VisitEx:
       visit.koukikoureiId,
       visit.attributesStore,
       patient,
-      shahokokuho,
-      roujin,
-      koukikourei,
-      kouhiList,
+      hoken,
       texts,
       drugs,
       shinryouList,
@@ -77,6 +68,13 @@ object VisitEx:
       chargeOption,
       lastPayment
     )
+
+case class HokenInfo(
+    shahokokuho: Option[Shahokokuho] = None,
+    roujin: Option[Roujin] = None,
+    koukikourei: Option[Koukikourei] = None,
+    kouhiList: List[Kouhi] = List.empty
+)
 
 case class DrugEx(
     drugId: Int,

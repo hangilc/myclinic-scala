@@ -196,5 +196,8 @@ trait Model extends DateTime with WaitStateCodec:
   given Encoder[FileInfo] = deriveEncoder[FileInfo]
   given Decoder[FileInfo] = deriveDecoder[FileInfo]
 
+  given Encoder[HokenInfo] = deriveEncoder[HokenInfo]
+  given Decoder[HokenInfo] = deriveDecoder[HokenInfo]
+
 
 
