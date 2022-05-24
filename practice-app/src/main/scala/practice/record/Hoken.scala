@@ -3,7 +3,7 @@ package dev.myclinic.scala.web.practiceapp.practice.record
 import dev.fujiwara.domq.all.{*, given}
 import dev.myclinic.scala.apputil.HokenUtil
 import dev.myclinic.scala.model.VisitEx
-import dev.myclinic.scala.web.practiceapp.practice.record.hoken.{Disp, Edit}
+import dev.myclinic.scala.web.practiceapp.practice.record.hoken.{Disp, EditDialog}
 import dev.myclinic.scala.model.HokenInfo
 import dev.myclinic.scala.webclient.{Api, global}
 import java.time.LocalDate
@@ -22,6 +22,8 @@ class Hoken(visitId: Int, patientId: Int, date: LocalDate, hoken: HokenInfo):
     for
       shahoOpt <- Api.findAvailableShahokokuho(patientId, date)
       koukikoureiOpt <- Api.findAvailableKoukikourei(patientId, date)
+      roujinOpt <- Api.findAvailableRoujin(patientId, date)
       kouhiList <- Api.listAvailableKouhi(patientId, date)
     yield 
-      Edit.open(shahoOpt, koukikoureiOpt, kouhiList)
+      val dlog = EditDialog(shahoOpt, koukikoureiOpt, roujinOpt, kouhiList, hoken, visitId)
+      dlog.open

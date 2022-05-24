@@ -6,8 +6,9 @@ import org.scalajs.dom.HTMLElement
 
 case class CheckLabel[T](value: T, labelString: String):
   val checkId = DomqUtil.genId
-  val check = Html.checkbox(id := checkId)
-  val label = Html.label(labelString, attr("for") := checkId)
+  val checkElement = Html.checkbox(id := checkId)
+  val labelElement = Html.label(labelString, attr("for") := checkId)
   def selected: Option[T] =
-    Option.when(check.checked)(value)
-  def wrap(wrapper: HTMLElement): HTMLElement = wrapper(check, label)
+    Option.when(checkElement.checked)(value)
+  def wrap(wrapper: HTMLElement): HTMLElement = wrapper(checkElement, labelElement)
+  def check: Unit = checkElement.checked = true

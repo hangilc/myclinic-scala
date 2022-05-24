@@ -215,6 +215,15 @@ case class Text(
     content: String
 )
 
+case class HokenIdSet(
+  shahokokuhoId: Int,
+  koukikoureiId: Int,
+  roujinId: Int,
+  kouhi1Id: Int,
+  kouhi2Id: Int,
+  kouhi3Id: Int
+)
+
 enum DrugCategory(val code: Int):
   case Naifuku extends DrugCategory(0)
   case Tonpuku extends DrugCategory(1)

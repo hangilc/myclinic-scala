@@ -55,6 +55,9 @@ trait Model extends DateTime with WaitStateCodec:
   given Encoder[Visit] = deriveEncoder[Visit]
   given Decoder[Visit] = deriveDecoder[Visit]
 
+  given Encoder[HokenIdSet] = deriveEncoder[HokenIdSet]
+  given Decoder[HokenIdSet] = deriveDecoder[HokenIdSet]
+
   given Encoder[Text] = deriveEncoder[Text]
   given Decoder[Text] = deriveDecoder[Text]
 
