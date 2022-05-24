@@ -31,8 +31,8 @@ case class Item(
           List(s"${u.usage}$zenkakuSpace${u.daysTimes}")
         )
         ++ more
-    val blines = Formatter.breakLines(lines, ctx.lineSize - ipre.size)
-    Formatter.indent(ipre, bpre, blines)
+    //val blines = Formatter.breakLines(lines, ctx.lineSize - ipre.size)
+    Formatter.indent(ipre, bpre, lines)
 
 object Item:
   val unit = "(?:錠|カプセル|ｇ|ｍｇ|包|ｍＬ|ブリスター|瓶|個|キット|枚|パック|袋|本)"

@@ -23,8 +23,8 @@ object Edit:
     dlog.title(innerText := "保険選択")
     dlog.body(
       eleOf(shahoCheck),
-      eleOf(koukikoureiCheck),
-      children := kouhiChecks.map(_.wrap(div))
+      eleOf(koukikoureiCheck) //,
+      //kouhiChecks.map(_.wrap(div))
     )
     dlog.commands(
       button("キャンセル", onclick := (_ => dlog.close()))

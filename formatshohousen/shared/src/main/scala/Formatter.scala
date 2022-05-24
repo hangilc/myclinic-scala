@@ -14,10 +14,10 @@ object Formatter:
   def breakLine(s: String, lineSize: Int): List[String] =
     def iter(s: String, cur: List[String]): List[String] =
       val t = zenkakuTrim(s)
-      if s.size <= lineSize then cur :+ t
+      if t.size <= lineSize then cur :+ t
       else 
         val (pre, post) = t.splitAt(lineSize)
-        iter(t, cur :+ pre)
+        iter(post, cur :+ pre)
     iter(s, List.empty)
 
   def breakLines(lines: List[String], lineSize: Int): List[String] =

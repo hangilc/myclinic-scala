@@ -47,6 +47,9 @@ object Modifiers:
           case None => ()
         }  
       )
+  given Conversion[List[HTMLElement], Modifier[HTMLElement]] with
+    def apply(eles: List[HTMLElement]): Modifier[HTMLElement] =
+      Modifier[HTMLElement](ele => eles.foreach(e => ele.appendChild(e)))
 
   abstract class Assign[E, A]:
     def :=(a: A): Modifier[E]
