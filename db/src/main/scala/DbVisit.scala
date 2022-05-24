@@ -38,4 +38,7 @@ trait DbVisit extends Mysql:
 
   def listVisitIdByPatientReverse(patientId: Int, offset: Int, count: Int): IO[List[Int]] =
     mysql(Prim.listVisitIdByPatientReverse(patientId, offset, count))
+
+  def updateHokenIds(visitId: Int, hokenIdSet: HokenIdSet): IO[AppEvent] =
+    mysql(Prim.updateHokenIds(visitId, hokenIdSet))
     

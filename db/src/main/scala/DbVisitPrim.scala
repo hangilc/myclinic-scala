@@ -41,6 +41,36 @@ object DbVisitPrim:
       event <- DbEventPrim.logVisitCreated(entered)
     yield (event, entered)
 
+  def updateVisit(visit: Visit): ConnectionIO[(AppEvent, Visit)] =
+    val op = sql"""
+      update visit set patient_id = ${visit.patientId}, v_datetime = ${visit.visitedAt}, 
+        shahokokuho_id = ${visit.shahokokuhoId}, roujin_id = ${visit.roujinId},
+        kouhi_1_id = ${visit.kouhi1Id}, kouhi_2_id = ${visit.kouhi2Id}, kouhi_3_id = ${visit.kouhi3Id}, 
+        koukikourei_id = ${visit.koukikoureiId}, attributes = ${visit.attributesStore}
+        where visit_id = ${visit.visitId}
+    """
+    for
+      affected <- op.update.run
+      _ = if affected != 1 then throw new RuntimeException("update visit failed")
+      updated <- getVisit(visit.visitId).unique
+      event <- DbEventPrim.logVisitUpdated(updated)
+    yield (event, updated)
+
+  def updateHokenIds(visitId: Int, hokenIdSet: HokenIdSet): ConnectionIO[AppEvent] =
+    for
+      visit <- getVisit(visitId).unique
+      newVisit = visit.copy(
+        shahokokuhoId = hokenIdSet.shahokokuhoId,
+        koukikoureiId = hokenIdSet.koukikoureiId,
+        roujinId = hokenIdSet.roujinId,
+        kouhi1Id = hokenIdSet.kouhi1Id,
+        kouhi2Id = hokenIdSet.kouhi2Id,
+        kouhi3Id = hokenIdSet.kouhi3Id
+      )
+      result <- updateVisit(newVisit)
+      (event, updated) = result
+    yield event
+
   def countByShahokokuho(shahokokuhoId: Int): ConnectionIO[Int] =
     sql"""
       select count(*) from visit where shahokokuho_id = ${shahokokuhoId}

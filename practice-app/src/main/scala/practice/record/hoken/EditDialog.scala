@@ -5,6 +5,7 @@ import dev.fujiwara.domq.all.{*, given}
 import dev.myclinic.scala.model.*
 import dev.myclinic.scala.apputil.HokenUtil.Ext.*
 import org.scalajs.dom.HTMLElement
+import dev.myclinic.scala.webclient.{Api, global}
 
 class EditDialog(
     shahoOpt: Option[Shahokokuho],
@@ -71,4 +72,7 @@ class EditDialog(
       kouhi2Id = kouhiChecks.applyOption(1).flatMap(c => c.selected).map(h => h.kouhiId).getOrElse(0),
       kouhi3Id = kouhiChecks.applyOption(2).flatMap(c => c.selected).map(h => h.kouhiId).getOrElse(0),
     )
-    println(idSet)
+    for
+      _ <- Api.updateHokenIds(visitId, idSet)
+    yield ()
+    

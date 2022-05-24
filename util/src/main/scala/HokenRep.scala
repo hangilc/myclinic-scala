@@ -26,7 +26,8 @@ object HokenRep:
       .filter(_.isDefined)
       .map(_.get)
       .map(kouhiRep(_))
-    terms.toList.mkString("・")
+    if terms.isEmpty then "自費"
+    else terms.toList.mkString("・")
 
   def shahokokuhoRep(
       shahokokuhoHokenshaBangou: Int,
