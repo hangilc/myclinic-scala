@@ -26,22 +26,22 @@ class EditDialog(
 
   for
     c <- shahokokuhoCheck
-    h <- shahoOpt
+    h <- current.shahokokuho
   yield if h.shahokokuhoId == c.value.shahokokuhoId then c.check
 
   for
     c <- koukikoureiCheck
-    h <- koukikoureiOpt
+    h <- current.koukikourei
   yield if h.koukikoureiId == c.value.koukikoureiId then c.check
 
   for
     c <- roujinCheck
-    h <- roujinOpt
+    h <- current.roujin
   yield if h.roujinId == c.value.roujinId then c.check
 
   kouhiChecks.foreach(c =>
     val kouhiId = c.value.kouhiId
-    if kouhiList.find(k => k.kouhiId == kouhiId).isDefined then c.check
+    if current.kouhiList.find(k => k.kouhiId == kouhiId).isDefined then c.check
   )
 
   val dlog = new ModalDialog3()
