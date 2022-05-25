@@ -18,6 +18,9 @@ trait DbKizaiMaster extends Mysql:
   def getKizaiMaster(kizaicode: Int, at: LocalDate): IO[KizaiMaster] =
     mysql(Prim.getKizaiMaster(kizaicode, at).unique)
 
+  def findKizaiMasterByName(name: String, at: LocalDate): IO[Option[KizaiMaster]] =
+    mysql(Prim.getKizaiMasterByName(name, at).option)
+
   def batchResolveKizaiMaster(kizaicodes: List[Int], at: LocalDate): IO[Map[Int, KizaiMaster]] =
     val op = kizaicodes.map(code => Prim.getKizaiMaster(code, at).unique)
       .sequence
