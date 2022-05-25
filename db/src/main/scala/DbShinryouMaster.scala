@@ -42,3 +42,7 @@ trait DbShinryouMaster extends Mysql:
       (${m.shinryoucode}, ${m.name}, ${m.tensuuStore}, ${m.tensuuShikibetsu}, ${m.shuukeisaki},
       ${m.houkatsukensa}, ${m.oushinkubun}, ${m.kensagroup}, ${m.validFrom}, ${m.validUpto})
     """.update.run.void)
+
+  def findShinryouMasterByName(name: String, at: LocalDate): IO[Option[ShinryouMaster]] =
+    mysql(Prim.getShinryouMasterByName(name, at).option)
+

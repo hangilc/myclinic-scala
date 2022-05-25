@@ -21,3 +21,9 @@ object DbShinryouMasterPrim:
       select * from shinryoukoui_master_arch where shinryoucode = ${shinryoucode}
         and valid_from <= ${at} and (${at} <= valid_upto or valid_upto = '0000-00-00')
     """.query[ShinryouMaster]
+
+  def getShinryouMasterByName(name: String, at: LocalDate): Query0[ShinryouMaster] =
+    sql"""
+      select * from shinryoukoui_master_arch where name = ${name}
+        and valid_from <= ${at} and (${at} <= valid_upto or valid_upto = '0000-00-00')
+    """.query[ShinryouMaster]
