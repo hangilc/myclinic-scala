@@ -253,6 +253,12 @@ object RestService extends DateTimeQueryParam with Publisher:
     case GET -> Root / "get-patient-all-hoken" :? intPatientId(patientId) =>
       Ok(Db.getPatientAllHoken(patientId))
 
+    case req @ POST -> Root / "batch-resolve-shinryoucode-by-name" :? dateAt(at) =>
+      for
+        names <- req.as[List[String]]
+        codes <- names.map(name => Helper.findShinryouMasterByName(name, at)).sequence
+      yield ???
+
   } <+> PatientService.routes <+> VisitService.routes <+> MiscService.routes
     <+> ConfigService.routes <+> FileService.routes
     <+> DrawerService.routes
