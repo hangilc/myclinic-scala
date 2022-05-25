@@ -121,9 +121,9 @@ button {
 }
 
 .practice-shinryou-regular-panel {
-  width: 430px;
+  /* width: 430px; */
   display: grid;
-  grid-template-columns: 50% 50%;
+  grid-template-columns: 190px 260px;
   margin: 10px 0;
 }
 

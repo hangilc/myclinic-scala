@@ -1,6 +1,7 @@
 package dev.myclinic.scala.web.practiceapp.practice.record
 
 import dev.fujiwara.domq.all.{*, given}
+import dev.myclinic.scala.webclient.{Api, global}
 
 case class ShinryouMenu():
   val auxMenu = PullDownLink("その他")
@@ -11,14 +12,20 @@ case class ShinryouMenu():
     auxMenu.ele
   )
 
-  def auxMenuItems: List[(String, () => Unit)] = 
+  def auxMenuItems: List[(String, () => Unit)] =
     List(
       "検査" -> (() => ()),
       "検索入力" -> (() => ()),
       "重複削除" -> (() => ()),
-      "全部コピー" -> (() => ()),
+      "全部コピー" -> (() => ())
     )
 
   def doRegular(): Unit =
-    val dlog = new RegularDialog()
-    dlog.open
+    for regulars <- Api.getShinryouRegular()
+    yield
+      val dlog = new RegularDialog(
+        regulars("left"),
+        regulars("right"),
+        regulars("bottom")
+      )
+      dlog.open
