@@ -7,7 +7,7 @@ case class ShinryouMenu():
   auxMenu.setBuilder(auxMenuItems)
 
   val ele = div(
-    a("[診療行為]"),
+    a("[診療行為]", onclick := (doRegular _)),
     auxMenu.ele
   )
 
@@ -18,3 +18,7 @@ case class ShinryouMenu():
       "重複削除" -> (() => ()),
       "全部コピー" -> (() => ()),
     )
+
+  def doRegular(): Unit =
+    val dlog = new RegularDialog()
+    dlog.open
