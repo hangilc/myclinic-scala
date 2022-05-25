@@ -11,6 +11,8 @@ import io.circe.generic.semiauto._
 import io.circe.Encoder
 import io.circe.Decoder
 import com.typesafe.scalalogging.Logger
+import _root_.java.io.File
+import cats.instances.try_
 
 object Config extends ConfigCirce:
   val logger = Logger(getClass.getName)
@@ -55,6 +57,20 @@ object Config extends ConfigCirce:
   def getShohouSamples: List[String] =
     val file = dataDir.resolve("shohou-sample.txt")
     Files.readString(file).split("\n\n").toList
+
+  def getShinryouRegular: Map[String, List[String]] =
+    val file = dataDir.resolve("shinryou-regular.yaml").toFile
+    readYaml[Map[String, List[String]]](file)
+
+  def readYaml[T: Decoder](file: File): T =
+    val reader: _root_.java.io.Reader = _root_.java.io.FileReader(file)
+    try
+      parser.parse(reader).flatMap(_.as[T]).getOrElse(
+        throw new RuntimeException("Failed to read: " + file.toString)
+      )
+    finally
+      reader.close()
+    
 
 trait ConfigCirce:
   given Encoder[AdHocHolidayRange] = deriveEncoder[AdHocHolidayRange]
