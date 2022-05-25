@@ -13,11 +13,13 @@ import io.circe.Decoder
 import com.typesafe.scalalogging.Logger
 import _root_.java.io.File
 import cats.instances.try_
+import scala.io.Source
 
 object Config extends ConfigCirce:
   val logger = Logger(getClass.getName)
   val config = new java.Config()
   val dataDir = Path.of(System.getenv("MYCLINIC_DATA_DIR"))
+  val configDir = dataDir.resolve("config")
 
   def getClinicInfo: ClinicInfo =
     val jc = config.getClinicInfo()
@@ -61,6 +63,17 @@ object Config extends ConfigCirce:
   def getShinryouRegular: Map[String, List[String]] =
     val file = dataDir.resolve("shinryou-regular.yaml").toFile
     readYaml[Map[String, List[String]]](file)
+
+  def getMasterNameMap: MasterNameMap =
+    import MasterNameMap.linePattern as pat
+    val src: Source = Source.fromFile(configDir.resolve("master-name.txt").toFile, "UTF-8")
+    try
+      val map = src.getLines.map(line => line match {
+        case pat(kind, name, idString) => Some(kind, name, idString.toInt)
+        case _ => None
+      }).collect({ case Some(a) => a}).toList.groupMap(_.head)(_.tail)
+      MasterNameMap(map)
+    finally src.close()
 
   def readYaml[T: Decoder](file: File): T =
     val reader: _root_.java.io.Reader = _root_.java.io.FileReader(file)
