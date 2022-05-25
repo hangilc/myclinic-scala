@@ -13,7 +13,10 @@ class RecordsWrapper:
   val records: CompSortList[Record] = new CompSortList[Record](ele)
 
   val unsubscribers = List(
-    PracticeBus.navPageChanged.subscribe(page => startPage(page))
+    PracticeBus.navPageChanged.subscribe(page => startPage(page)),
+    PracticeBus.hokenInfoChanged.subscribe {
+      case (visitId, hokenInfo) => onHokenInfoChanged(visitId, hokenInfo)
+    }
   )
 
   def dispose: Unit = 
@@ -39,10 +42,16 @@ class RecordsWrapper:
             for ex <- Api.getVisitEx(visitId)
             yield
               val rec = new Record(ex)
+              println(("rec", rec))
               records += rec
           }))
         yield ()
     }
+
+  def findRecord(visitId: Int): Option[Record] = records.find(_.visitId == visitId)
+
+  def onHokenInfoChanged(visitId: Int, hoken: HokenInfo): Unit =
+    findRecord(visitId).foreach(_.onHokenInfoChanged(hoken))
 
 object RecordsWrapper:
   given Dispose[RecordsWrapper] = _.dispose

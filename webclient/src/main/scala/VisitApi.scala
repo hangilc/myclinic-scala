@@ -27,3 +27,6 @@ object VisitApi extends ApiBase:
 
     def updateHokenIds(visitId: Int, hokenIdSet: HokenIdSet): Future[Boolean] =
       post("update-hoken-ids", Params("visit-id" -> visitId), hokenIdSet)
+
+    def getHokenInfo(visitId: Int): Future[HokenInfo] =
+      get("get-hoken-info", Params("visit-id" -> visitId))

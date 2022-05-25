@@ -6,6 +6,7 @@ import dev.myclinic.scala.model.*
 import dev.myclinic.scala.apputil.HokenUtil.Ext.*
 import org.scalajs.dom.HTMLElement
 import dev.myclinic.scala.webclient.{Api, global}
+import dev.myclinic.scala.web.practiceapp.practice.PracticeBus
 
 class EditDialog(
     shahoOpt: Option[Shahokokuho],
@@ -74,5 +75,8 @@ class EditDialog(
     )
     for
       _ <- Api.updateHokenIds(visitId, idSet)
-    yield ()
+      newHoken <- Api.getHokenInfo(visitId)
+    yield 
+      PracticeBus.hokenInfoChanged.publish(visitId, newHoken)
+      dlog.close()
     

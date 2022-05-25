@@ -55,4 +55,7 @@ object VisitService extends Publisher:
           _ <- publish(event)
         yield true
       Ok(op)
+
+    case GET -> Root / "get-hoken-info" :? intVisitId(visitId) =>
+      Ok(Db.getHokenInfo(visitId))
   }

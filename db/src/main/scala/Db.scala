@@ -30,6 +30,7 @@ object Db
     with DbConductKizai
     with DbCharge
     with DbPayment
+    with DbHoken
     with DbShahokokuho
     with DbRoujin
     with DbKoukikourei

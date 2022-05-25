@@ -17,6 +17,7 @@ import dev.myclinic.scala.web.practiceapp.practice.PracticeBus
 class Record(visitEx: VisitEx):
   val title = new Title(visitEx)
   val textsWrapper = div
+  val hokenWrapper = div
   val texts: CompAppendList[Text] = CompAppendList[Text](textsWrapper)
   val textMenu = TextMenu()
   textMenu.newText.subscribe(_ => doNewText())
@@ -32,6 +33,7 @@ class Record(visitEx: VisitEx):
     )
   )
   texts.set(visitEx.texts.map(Text(_)))
+  updateHoken(visitEx.hoken)
 
   def doNewText(): Unit =
     val editor = TextEnter(visitEx.visitId)
@@ -48,15 +50,20 @@ class Record(visitEx: VisitEx):
 
   def visitId: Int = visitEx.visitId
 
+  def createHoken(hokenInfo: HokenInfo): Hoken = new Hoken(
+    visitEx.visitId,
+    visitEx.patientId,
+    visitEx.visitedAt.toLocalDate,
+    hokenInfo
+  )
+
+  def updateHoken(hoken: HokenInfo): Unit =
+    hokenWrapper(clear, createHoken(hoken).ele)
+
   def composeRight(visitEx: VisitEx): HTMLElement =
     div(
       cls := "practice-visit-record-right",
-      new Hoken(
-        visitEx.visitId,
-        visitEx.patientId,
-        visitEx.visitedAt.toLocalDate,
-        visitEx.hoken
-      ).ele,
+      hokenWrapper,
       new Shinryou(visitEx).ele,
       new Drug(visitEx).ele,
       new Conduct(visitEx).ele,
@@ -66,6 +73,9 @@ class Record(visitEx: VisitEx):
   def onTextEntered(text: ModelText): Unit =
     val t = Text(text)
     texts.append(t)
+
+  def onHokenInfoChanged(newHoken: HokenInfo): Unit =
+    updateHoken(newHoken)
 
 object Record:
   given Ordering[Record] = Ordering.by[Record, Int](r => r.visitId).reverse

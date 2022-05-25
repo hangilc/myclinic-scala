@@ -20,3 +20,9 @@ object DbHokenPrim:
       koukikourei <- DbVisitExPrim.optKoukikourei(visit.koukikoureiId)
       kouhiList <- DbVisitExPrim.kouhiList(visit.kouhiIds)
     yield HokenInfo(shahokokuho, roujin, koukikourei, kouhiList)
+
+  def getHokenInfo(visitId: Int): ConnectionIO[HokenInfo] =
+    for
+      visit <- DbVisitPrim.getVisit(visitId).unique
+      hokenInfo <- getHokenInfo(visit)
+    yield hokenInfo
