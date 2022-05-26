@@ -24,8 +24,20 @@ object DbShinryouPrim:
       select shinryou_id from visit_shinryou where visit_id = ${visitId} order by shinryou_id
     """.query[Int].to[List]
 
-  def enterShinryou(shinryou: Shinryou): ConnectionIO[(Shinryou, AppEvent)] =
+  def getShinryou(shinryouId: Int): Query0[Shinryou] =
     sql"""
-      insert into visit_shinryou
+      select * from visit_shinryou where shinryou_id = ${shinryouId}
+    """.query[Shinryou]
+
+  def enterShinryou(shinryou: Shinryou): ConnectionIO[(AppEvent, Shinryou)] =
+    val op = sql"""
+      insert into visit_shinryou set visit_id = ${shinryou.visitId}, 
+        shinryoucode = ${shinryou.shinryoucode}
     """
+    for
+      shinryouId <- op.update.withUniqueGeneratedKeys[Int]("shinryou_id")
+      entered <- getShinryou(shinryouId).unique
+      event <- DbEventPrim.logShinryouCreated(entered)
+    yield (event, entered)
+
     

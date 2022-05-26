@@ -4,7 +4,7 @@ import dev.fujiwara.domq.all.{*, given}
 import dev.myclinic.scala.webclient.{Api, global}
 import java.time.LocalDate
 
-case class ShinryouMenu(at: LocalDate):
+case class ShinryouMenu(at: LocalDate, visitId: Int):
   val auxMenu = PullDownLink("その他")
   auxMenu.setBuilder(auxMenuItems)
 
@@ -28,6 +28,7 @@ case class ShinryouMenu(at: LocalDate):
         regulars("left"),
         regulars("right"),
         regulars("bottom"),
-        at
+        at,
+        visitId
       )
       dlog.open

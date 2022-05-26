@@ -33,3 +33,5 @@ object DbShinryouMasterPrim:
       select shinryoucode from shinryoukoui_master_arch where name = ${name}
         and valid_from <= ${at} and (${at} <= valid_upto or valid_upto = '0000-00-00')
     """.query[Int]
+
+  

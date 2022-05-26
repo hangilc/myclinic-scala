@@ -16,7 +16,8 @@ class RecordsWrapper:
     PracticeBus.navPageChanged.subscribe(page => startPage(page)),
     PracticeBus.hokenInfoChanged.subscribe {
       case (visitId, hokenInfo) => onHokenInfoChanged(visitId, hokenInfo)
-    }
+    },
+    PracticeBus.shinryouEntered.subscribe(onShinryouEntered _)
   )
 
   def dispose: Unit = 
@@ -53,6 +54,9 @@ class RecordsWrapper:
   def onHokenInfoChanged(visitId: Int, hoken: HokenInfo): Unit =
     findRecord(visitId).foreach(_.onHokenInfoChanged(hoken))
 
+  def onShinryouEntered(shinryou: ShinryouEx): Unit =
+    findRecord(shinryou.visitId).foreach(_.onShinryouEntered(shinryou))
+  
 object RecordsWrapper:
   given Dispose[RecordsWrapper] = _.dispose
 

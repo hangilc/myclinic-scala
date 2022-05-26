@@ -43,7 +43,7 @@ object MasterService extends DateTimeQueryParam:
         ) +& dateAt(at) =>
       Ok(Db.getShinryouMaster(shinryoucode, at))
 
-    case req @ POST -> Root / "batch-get-shinryou-master" :? dateAt(at) =>
+    case req @ POST -> Root / "batch-resolve-shinryou-master" :? dateAt(at) =>
       Ok(for
         codes <- req.as[List[Int]]
         map <- Db.batchResolveShinryouMaster(codes, at)

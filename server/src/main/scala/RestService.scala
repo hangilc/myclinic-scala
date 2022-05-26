@@ -273,6 +273,27 @@ object RestService extends DateTimeQueryParam with Publisher:
         yield Map(names.zip(codes): _*)
       Ok(op)
 
+    case req @ POST -> Root / "enter-shinryou" =>
+      val op =
+        for
+          shinryou <- req.as[Shinryou]
+          result <- Db.enterShinryou(shinryou)
+          (event, entered) = result
+          _ <- publish(event)
+        yield entered
+      Ok(op)
+
+    case req @ POST -> Root / "batch-enter-shinryou" :? intVisitId(visitId) =>
+      val op =
+        for
+          codes <- req.as[List[Int]]
+          pairs <- Db.batchEnterShinryou(visitId, codes)
+          events = pairs.map(_.head)
+          entered = pairs.map(_(1))
+          _ <- events.map(publish(_)).sequence_
+        yield entered
+      Ok(op)
+
   } <+> PatientService.routes <+> VisitService.routes <+> MiscService.routes
     <+> ConfigService.routes <+> FileService.routes
     <+> DrawerService.routes

@@ -299,3 +299,9 @@ object MiscApi extends ApiBase:
 
     def searchShohouSample(text: String): Future[List[String]] =
       get("search-shohou-sample", Params("text" -> text))
+
+    def enterShinryou(shinryou: Shinryou): Future[Shinryou] =
+      post("enter-shinryou", Params(), shinryou)
+
+    def batchEnterShinryou(visitId: Int, shinryoucodes: List[Int]): Future[List[Shinryou]] =
+      post("batch-enter-shinryou", Params("visit-id" -> visitId), shinryoucodes)

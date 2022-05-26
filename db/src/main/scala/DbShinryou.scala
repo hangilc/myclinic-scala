@@ -21,3 +21,18 @@ trait DbShinryou extends Mysql:
 
   def listShinryouForVisit(visitId: Int): IO[List[Shinryou]] =
     mysql(Prim.listShinryouForVisit(visitId))
+
+  def enterShinryou(shinryou: Shinryou): IO[(AppEvent, Shinryou)] =
+    mysql(Prim.enterShinryou(shinryou))
+
+  def batchEnterShinryou(
+      visitId: Int,
+      shinryoucodes: List[Int]
+  ): IO[List[(AppEvent, Shinryou)]] =
+    val op =
+      for
+        pairs <- shinryoucodes
+          .map(code => Prim.enterShinryou(Shinryou(0, visitId, code)))
+          .sequence
+      yield pairs
+    mysql(op)

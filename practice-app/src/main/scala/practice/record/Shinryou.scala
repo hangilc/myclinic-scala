@@ -2,10 +2,13 @@ package dev.myclinic.scala.web.practiceapp.practice.record
 
 import dev.fujiwara.domq.all.{*, given}
 import dev.myclinic.scala.apputil.HokenUtil
-import dev.myclinic.scala.model.VisitEx
+import dev.myclinic.scala.model.ShinryouEx
 
-class Shinryou(visit: VisitEx):
-  val ele = div(
-    children := visit.shinryouList.map(s => div(s.master.name))
-  )
+case class Shinryou(shinryou: ShinryouEx):
+  val ele = div(shinryou.master.name)
+
+object Shinryou:
+  given Comp[Shinryou] = _.ele
+  given Ordering[Shinryou] = Ordering.by(_.shinryou.shinryoucode)
+  given Dispose[Shinryou] = _ => ()
 

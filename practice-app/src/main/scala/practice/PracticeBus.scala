@@ -29,5 +29,6 @@ object PracticeBus:
   val visitsPerPage: Int = 10
 
   val textEntered = LocalEventPublisher[Text]
+  val shinryouEntered = LocalEventPublisher[ShinryouEx]
 
   val hokenInfoChanged = LocalEventPublisher[(VisitId, HokenInfo)]
