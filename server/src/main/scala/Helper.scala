@@ -14,6 +14,8 @@ object Helper:
       Db.findShinryouMasterByName(name, at)
 
   def findShinryoucodeByName(name: String, at: LocalDate): IO[Option[Int]] =
-    ???
+    val mapCode: Int = ConfigService.masterNameMap.shinryou.applyOrElse(name, _ => 0)
+    if mapCode > 0 then IO.pure(Some(mapCode))
+    else
+      Db.findShinryoucodeByName(name, at)
 
-    

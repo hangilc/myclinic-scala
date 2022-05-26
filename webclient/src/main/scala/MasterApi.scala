@@ -27,9 +27,15 @@ object MasterApi extends ApiBase:
       : Future[Map[Int, ShinryouMaster]] =
         post("batch-resolve-shinryou-master", Params("at" -> at), shinryoucodes)
 
+    def batchResolveShinryoucodeByName(names: List[String], at: LocalDate): Future[Map[String, Int]] =
+      post("batch-resolve-shinryoucode-by-name", Params("at"-> at), names)
+
     def getKizaiMaster(kizaicode: Int, at: LocalDate): Future[KizaiMaster] =
       get("get-kizai-master", Params("kizaicode" -> kizaicode, "at" -> at))
 
     def batchResolveKizaiMaster(kizaicodes: List[Int], at: LocalDate)
       : Future[Map[Int, KizaiMaster]] =
         post("batch-resolve-kizai-master", Params("at" -> at), kizaicodes)
+
+
+

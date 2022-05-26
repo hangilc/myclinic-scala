@@ -186,10 +186,14 @@ object RestService extends DateTimeQueryParam with Publisher:
     case GET -> Root / "search-appoint-by-patient-name" :? strText(text) =>
       Ok(Db.searchAppointByPatientName(text))
 
-    case GET -> Root / "search-appoint-by-patient-name2" :? strText1(text1) +& strText2(text2)=>
+    case GET -> Root / "search-appoint-by-patient-name2" :? strText1(
+          text1
+        ) +& strText2(text2) =>
       Ok(Db.searchAppointByPatientName2(text1, text2))
 
-    case GET -> Root / "search-appoint-by-patient-id" :? intPatientId(patientId) =>
+    case GET -> Root / "search-appoint-by-patient-id" :? intPatientId(
+          patientId
+        ) =>
       Ok(Db.searchAppointByPatientId(patientId))
 
     case req @ POST -> Root / "post-hotline" =>
@@ -247,17 +251,27 @@ object RestService extends DateTimeQueryParam with Publisher:
     case GET -> Root / "get-visit-patient" :? intVisitId(visitId) =>
       Ok(Db.getVisitPatient(visitId))
 
-    case GET -> Root / "get-patient-hoken" :? intPatientId(patientId) +& dateAt(at) =>
+    case GET -> Root / "get-patient-hoken" :? intPatientId(patientId) +& dateAt(
+          at
+        ) =>
       Ok(Db.getPatientHoken(patientId, at))
 
     case GET -> Root / "get-patient-all-hoken" :? intPatientId(patientId) =>
       Ok(Db.getPatientAllHoken(patientId))
 
-    case req @ POST -> Root / "batch-resolve-shinryoucode-by-name" :? dateAt(at) =>
-      for
-        names <- req.as[List[String]]
-        codes <- names.map(name => Helper.findShinryouMasterByName(name, at)).sequence
-      yield ???
+    case req @ POST -> Root / "batch-resolve-shinryoucode-by-name" :? dateAt(
+          at
+        ) =>
+      val op =
+        for
+          names <- req.as[List[String]]
+          codes <-
+            names
+              .map(name => Helper.findShinryoucodeByName(name, at))
+              .sequence
+              .map(opts => opts.map(_.getOrElse(9)))
+        yield Map(names.zip(codes): _*)
+      Ok(op)
 
   } <+> PatientService.routes <+> VisitService.routes <+> MiscService.routes
     <+> ConfigService.routes <+> FileService.routes

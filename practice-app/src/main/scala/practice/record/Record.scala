@@ -64,7 +64,7 @@ class Record(visitEx: VisitEx):
     div(
       cls := "practice-visit-record-right",
       hokenWrapper,
-      new ShinryouMenu().ele,
+      new ShinryouMenu(visitEx.visitedAt.toLocalDate).ele,
       new Shinryou(visitEx).ele,
       new Drug(visitEx).ele,
       new Conduct(visitEx).ele,

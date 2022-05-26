@@ -27,6 +27,15 @@ trait DbShinryouMaster extends Mysql:
       .map(items => Map(items.map(m => (m.shinryoucode, m)): _*))
     mysql(op)
 
+  // def batchResolveShinryoucodeByName(names: List[String], at: LocalDate): IO[Map[String, Int]] =
+  //   val op =
+  //     for codes <-
+  //       names.map(name => Prim.getShinryoucodeByName(name, at).option)
+  //         .sequence
+  //         .map(opts => opts.map(_.getOrElse(0)))
+  //     yield Map(names.zip(codes): _*)
+  //   mysql(op)
+
   def setShinryouMasterValidUpto(validUpto: LocalDate): IO[Int] =
     mysql(sql"""
       update shinryoukoui_master_arch set valid_upto = ${validUpto} 

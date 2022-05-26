@@ -23,4 +23,9 @@ object DbShinryouPrim:
     sql"""
       select shinryou_id from visit_shinryou where visit_id = ${visitId} order by shinryou_id
     """.query[Int].to[List]
+
+  def enterShinryou(shinryou: Shinryou): ConnectionIO[(Shinryou, AppEvent)] =
+    sql"""
+      insert into visit_shinryou
+    """
     
