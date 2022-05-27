@@ -25,6 +25,9 @@ trait DbShinryou extends Mysql:
   def enterShinryou(shinryou: Shinryou): IO[(AppEvent, Shinryou)] =
     mysql(Prim.enterShinryou(shinryou))
 
+  def getShinryou(shinryouId: Int): IO[Shinryou] =
+    mysql(Prim.getShinryou(shinryouId).unique)
+
   def batchEnterShinryou(
       visitId: Int,
       shinryoucodes: List[Int]

@@ -269,7 +269,7 @@ object RestService extends DateTimeQueryParam with Publisher:
             names
               .map(name => Helper.findShinryoucodeByName(name, at))
               .sequence
-              .map(opts => opts.map(_.getOrElse(9)))
+              .map(opts => opts.map(_.getOrElse(0)))
         yield Map(names.zip(codes): _*)
       Ok(op)
 
@@ -296,4 +296,4 @@ object RestService extends DateTimeQueryParam with Publisher:
 
   } <+> PatientService.routes <+> VisitService.routes <+> MiscService.routes
     <+> ConfigService.routes <+> FileService.routes
-    <+> DrawerService.routes
+    <+> DrawerService.routes <+> MasterService.routes

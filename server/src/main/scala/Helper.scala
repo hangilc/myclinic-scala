@@ -4,6 +4,7 @@ import dev.myclinic.scala.db.Db
 import dev.myclinic.scala.model.*
 import java.time.LocalDate
 import cats.effect.IO
+import cats.data.OptionT
 
 object Helper:
   def findShinryouMasterByName(name: String, at: LocalDate): IO[Option[ShinryouMaster]] =
@@ -14,8 +15,10 @@ object Helper:
       Db.findShinryouMasterByName(name, at)
 
   def findShinryoucodeByName(name: String, at: LocalDate): IO[Option[Int]] =
-    val mapCode: Int = ConfigService.masterNameMap.shinryou.applyOrElse(name, _ => 0)
-    if mapCode > 0 then IO.pure(Some(mapCode))
-    else
-      Db.findShinryoucodeByName(name, at)
+    val opt: OptionT[IO, Int] = 
+      OptionT.fromOption[IO](ConfigService.masterNameMap.shinryou.get(name))
+        .flatMap(code => OptionT(Db.findShinryouMaster(code, at)))
+        .map(_.shinryoucode)
+        .orElse(OptionT(Db.findShinryoucodeByName(name, at)))
+    opt.value
 

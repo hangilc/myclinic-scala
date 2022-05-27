@@ -43,7 +43,6 @@ class RecordsWrapper:
             for ex <- Api.getVisitEx(visitId)
             yield
               val rec = new Record(ex)
-              println(("rec", rec))
               records += rec
           }))
         yield ()
