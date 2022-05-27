@@ -82,6 +82,7 @@ object Config extends ConfigCirce:
         MasterTransitionRule.parse(s) match {
           case Some(kind, r) => kind match {
             case "S" => m.copy(shinryou = m.shinryou.extend(r))
+            case "K" => m.copy(kizai = m.kizai.extend(r))
             case _ => m
           }
           case None => m

@@ -4,7 +4,8 @@ import java.time.LocalDate
 import dev.myclinic.scala.util.DateUtil.given
 
 case class MasterTransition(
-  shinryou: MasterTransitionRules = MasterTransitionRules()
+  shinryou: MasterTransitionRules = MasterTransitionRules(),
+  kizai: MasterTransitionRules = MasterTransitionRules()
 )
 
 case class MasterTransitionRules(

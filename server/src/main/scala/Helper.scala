@@ -23,3 +23,13 @@ object Helper:
         .orElse(OptionT(Db.findShinryoucodeByName(name, at)))
     opt.value
 
+  def findKizaicodeByName(name: String, at: LocalDate): IO[Option[Int]] =
+    val opt: OptionT[IO, Int] = 
+      OptionT.fromOption[IO](ConfigService.masterNameMap.kizai.get(name))
+        .map(code => ConfigService.masterTransition.kizai.transit(code, at))
+        .flatMap(code => OptionT(Db.findKizaiMaster(code, at)))
+        .map(_.kizaicode)
+        .orElse(OptionT(Db.findKizaicodeByName(name, at)))
+    opt.value
+
+
