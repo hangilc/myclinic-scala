@@ -11,7 +11,7 @@ object ShowMessage:
     val b = button("OK")
     val m: Modal = Modal(
       title,
-      div(msg),
+      div(innerText := msg),
       div(b)
     )
     b(onclick := (() => m.close()))
@@ -21,7 +21,7 @@ object ShowMessage:
     val b = button("OK")
     val m: Modal = Modal(
       "エラー",
-      div(color := "red")(msg),
+      div(color := "red", innerText := msg),
       div(b)
     )
     b(onclick := (() => m.close()))

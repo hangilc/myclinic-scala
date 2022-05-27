@@ -28,8 +28,6 @@ class RegularDialog(
     val names: List[String] = panel.selected
     for map <- Api.batchResolveShinryoucodeByName(names, at)
     yield
-      println(("map", map))
-      ???
       val unresolved = (map.collect {
         case (name, code) if code == 0 => name
       }).toList

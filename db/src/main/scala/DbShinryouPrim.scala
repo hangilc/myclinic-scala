@@ -18,7 +18,7 @@ object DbShinryouPrim:
     sql"""
       select * from visit_shinryou where visit_id = ${visitId} order by shinryou_id
     """.query[Shinryou].to[List]
-    
+
   def listShinryouIdForVisit(visitId: Int): ConnectionIO[List[Int]] =
     sql"""
       select shinryou_id from visit_shinryou where visit_id = ${visitId} order by shinryou_id
@@ -35,9 +35,11 @@ object DbShinryouPrim:
         shinryoucode = ${shinryou.shinryoucode}
     """
     for
+      visit <- DbVisitPrim.getVisit(shinryou.visitId).unique
+      _ <- DbShinryouMasterPrim
+        .getShinryouMaster(shinryou.shinryoucode, visit.visitedAt.toLocalDate)
+        .unique
       shinryouId <- op.update.withUniqueGeneratedKeys[Int]("shinryou_id")
       entered <- getShinryou(shinryouId).unique
       event <- DbEventPrim.logShinryouCreated(entered)
     yield (event, entered)
-
-    

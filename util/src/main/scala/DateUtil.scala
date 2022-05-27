@@ -5,6 +5,7 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.time.temporal.ChronoUnit.DAYS
 import java.time.DayOfWeek.*
+import math.Ordered.orderingToOrdered
 
 object DateUtil:
 
@@ -86,6 +87,8 @@ object DateUtil:
       case Some(upto) => !d.isAfter(upto)
     }
 
+  given Ordering[LocalDate] = _ compareTo _
+  given Conversion[LocalDate, Ordered[LocalDate]] = orderingToOrdered(_)
 
   
 
