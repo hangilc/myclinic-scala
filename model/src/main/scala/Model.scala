@@ -199,6 +199,7 @@ case class Visit(
     }
   def futanWariOverride: Option[Int] =
     attributes.futanWari
+  def visitedDate: LocalDate = visitedAt.toLocalDate
 
 object Visit:
   given Encoder[VisitAttributes] = deriveEncoder[VisitAttributes]

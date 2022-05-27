@@ -179,6 +179,51 @@ object DbEventPrim:
   def logShinryouDeleted(a: Shinryou): ConnectionIO[AppEvent] =
     enterAppEvent("shinryou", DELETED, a.asJson.toString)
 
+  def logConductShinryouCreated(a: ConductShinryou): ConnectionIO[AppEvent] =
+    enterAppEvent("conductShinryou", CREATED, a.asJson.toString)
+
+  def logConductShinryouUpdated(a: ConductShinryou): ConnectionIO[AppEvent] =
+    enterAppEvent("conductShinryou", UPDATED, a.asJson.toString)
+
+  def logConductShinryouDeleted(a: ConductShinryou): ConnectionIO[AppEvent] =
+    enterAppEvent("conductShinryou", DELETED, a.asJson.toString)
+
+  def logConductCreated(a: Conduct): ConnectionIO[AppEvent] =
+    enterAppEvent("conduct", CREATED, a.asJson.toString)
+
+  def logConductUpdated(a: Conduct): ConnectionIO[AppEvent] =
+    enterAppEvent("conduct", UPDATED, a.asJson.toString)
+
+  def logConductDeleted(a: Conduct): ConnectionIO[AppEvent] =
+    enterAppEvent("conduct", DELETED, a.asJson.toString)
+
+  def logConductDrugCreated(a: ConductDrug): ConnectionIO[AppEvent] =
+    enterAppEvent("conductDrug", CREATED, a.asJson.toString)
+
+  def logConductDrugUpdated(a: ConductDrug): ConnectionIO[AppEvent] =
+    enterAppEvent("conductDrug", UPDATED, a.asJson.toString)
+
+  def logConductDrugDeleted(a: ConductDrug): ConnectionIO[AppEvent] =
+    enterAppEvent("conductDrug", DELETED, a.asJson.toString)
+
+  def logConductKizaiCreated(a: ConductKizai): ConnectionIO[AppEvent] =
+    enterAppEvent("conductKizai", CREATED, a.asJson.toString)
+
+  def logConductKizaiUpdated(a: ConductKizai): ConnectionIO[AppEvent] =
+    enterAppEvent("conductKizai", UPDATED, a.asJson.toString)
+
+  def logConductKizaiDeleted(a: ConductKizai): ConnectionIO[AppEvent] =
+    enterAppEvent("conductKizai", DELETED, a.asJson.toString)
+
+  def logGazouLabelCreated(a: GazouLabel): ConnectionIO[AppEvent] =
+    enterAppEvent("gazouLabel", CREATED, a.asJson.toString)
+
+  def logGazouLabelUpdated(a: GazouLabel): ConnectionIO[AppEvent] =
+    enterAppEvent("gazouLabel", UPDATED, a.asJson.toString)
+
+  def logGazouLabelDeleted(a: GazouLabel): ConnectionIO[AppEvent] =
+    enterAppEvent("gazouLabel", DELETED, a.asJson.toString)
+
 
 
 

@@ -29,3 +29,22 @@ object DbConductKizaiPrim:
         order by $cConductKizaiId
     """.query[Int].to[List]
 
+  def getConductKizai(conductKizaiId: Int): Query0[ConductKizai] =
+    sql"""
+      select * from visit_conduct_kizai where id = ${conductKizaiId}
+    """.query[ConductKizai]
+
+  def enterConductKizai(ck: ConductKizai): ConnectionIO[(AppEvent, ConductKizai)] =
+    val op = sql"""
+      insert int visit_conduct_kizai set visit_conduct_id = ${ck.conductId},
+        kizaicode = ${ck.kizaicode}, amount = ${ck.amount}
+    """
+    for
+      conduct <- DbConductPrim.getConduct(ck.conductId).unique
+      visit <- DbVisitPrim.getVisit(conduct.visitId).unique
+      _ <- DbKizaiMasterPrim.getKizaiMaster(ck.kizaicode, visit.visitedDate).unique
+      id <- op.update.withUniqueGeneratedKeys[Int]("id")
+      entered <- getConductKizai(id).unique
+      event <- DbEventPrim.logConductKizaiCreated(entered)
+    yield (event, entered)
+

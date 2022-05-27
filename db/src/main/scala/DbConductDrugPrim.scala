@@ -28,3 +28,19 @@ object DbConductDrugPrim:
       select $cConductDrugId from $tConductDrug where $cConductId = ${conductId} 
       order by $cConductDrugId
     """.query[Int].to[List]
+
+  def getConductDrug(conductDrugId: Int): Query0[ConductDrug] =
+    sql"""
+      select * from visit_conduct_drug where id = ${conductDrugId}
+    """.query[ConductDrug]
+
+  def enterConductDrug(cd: ConductDrug): ConnectionIO[(AppEvent, ConductDrug)] =
+    val op = sql"""
+      insert into visit_conduct_drug set visit_conduct_id = ${cd.conductId},
+        iyakuhincode = ${cd.iyakuhincode}, amount = ${cd.amount}
+    """
+    for
+      id <- op.update.withUniqueGeneratedKeys[Int]("id")
+      entered <- getConductDrug(id).unique
+      event <- DbEventPrim.logConductDrugCreated(entered)
+    yield (event, entered)

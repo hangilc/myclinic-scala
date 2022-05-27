@@ -14,3 +14,12 @@ object DbGazouLabelPrim:
     sql"""
       select * from visit_gazou_label where visit_conduct_id = ${conductId}
     """.query[GazouLabel]
+
+  def enterGazouLabel(gl: GazouLabel): ConnectionIO[AppEvent] =
+    val op = sql"""
+      insert into gazou_label set visit_conduct_id = ${gl.conductId}, label = ${gl.label}
+    """
+    for
+      _ <- op.update.run
+      event <- DbEventPrim.logGazouLabelCreated(gl)
+    yield event
