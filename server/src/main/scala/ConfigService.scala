@@ -20,6 +20,7 @@ object ConfigService:
   var shohouSamples: List[String] = Config.getShohouSamples
   lazy val shinryouRegular: Map[String, List[String]] = Config.getShinryouRegular
   lazy val masterNameMap = Config.getMasterNameMap
+  lazy val masterTransition = Config.getMasterTransition
   object stringText extends QueryParamDecoderMatcher[String]("text")
 
   def routes = HttpRoutes.of[IO] {

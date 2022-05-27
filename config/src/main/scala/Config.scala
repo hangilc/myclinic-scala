@@ -75,6 +75,20 @@ object Config extends ConfigCirce:
       MasterNameMap(map)
     finally src.close()
 
+  def getMasterTransition: MasterTransition =
+    val src: Source = Source.fromFile(configDir.resolve("master-map.txt").toFile, "UTF-8")
+    try
+      src.getLines.foldLeft(MasterTransition())((m, s) =>
+        MasterTransitionRule.parse(s) match {
+          case Some(kind, r) => kind match {
+            case "S" => m.copy(shinryou = m.shinryou.extend(r))
+            case _ => m
+          }
+          case None => m
+        }
+      )
+    finally src.close()
+
   def readYaml[T: Decoder](file: File): T =
     val reader: _root_.java.io.Reader = _root_.java.io.FileReader(file)
     try
