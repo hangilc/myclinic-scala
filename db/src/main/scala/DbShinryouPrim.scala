@@ -43,3 +43,5 @@ object DbShinryouPrim:
       entered <- getShinryou(shinryouId).unique
       event <- DbEventPrim.logShinryouCreated(entered)
     yield (event, entered)
+
+

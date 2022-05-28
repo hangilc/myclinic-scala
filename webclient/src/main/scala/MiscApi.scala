@@ -30,7 +30,8 @@ object MiscApi extends ApiBase:
     def hotlineBeep(recipient: String): Future[Boolean] =
       get("hotline-beep", Params("recipient" -> recipient))
 
-    def listTodaysHotline(): Future[List[AppEvent]] = // (appEventId, HotlineCreated)
+    def listTodaysHotline()
+        : Future[List[AppEvent]] = // (appEventId, HotlineCreated)
       get("list-todays-hotline", Params())
 
     def listWqueue(): Future[List[Wqueue]] =
@@ -48,18 +49,33 @@ object MiscApi extends ApiBase:
     def findWqueue(visitId: Int): Future[Option[Wqueue]] =
       get("find-wqueue", Params("visit-id" -> visitId))
 
-    def updateWqueue(wq: Wqueue): Future[Boolean] = post("update-wqueue", Params(), wq)
+    def updateWqueue(wq: Wqueue): Future[Boolean] =
+      post("update-wqueue", Params(), wq)
 
     def getVisitPatient(visitId: Int): Future[(Int, Visit, Patient)] =
       get("get-visit-patient", Params("visit-id" -> visitId))
 
     def getPatientHoken(patientId: Int, at: LocalDate): Future[
-      (Int, Patient, List[Shahokokuho], List[Koukikourei], List[Roujin], List[Kouhi])
+      (
+          Int,
+          Patient,
+          List[Shahokokuho],
+          List[Koukikourei],
+          List[Roujin],
+          List[Kouhi]
+      )
     ] =
       get("get-patient-hoken", Params("patient-id" -> patientId, "at" -> at))
 
     def getPatientAllHoken(patientId: Int): Future[
-      (Int, Patient, List[Shahokokuho], List[Koukikourei], List[Roujin], List[Kouhi])
+      (
+          Int,
+          Patient,
+          List[Shahokokuho],
+          List[Koukikourei],
+          List[Roujin],
+          List[Kouhi]
+      )
     ] =
       get("get-patient-all-hoken", Params("patient-id" -> patientId))
 
@@ -206,8 +222,14 @@ object MiscApi extends ApiBase:
     def listRecentVisit(offset: Int, count: Int): Future[List[Visit]] =
       get("list-recent-visit", Params("offset" -> offset, "count" -> count))
 
-    def listRecentVisitFull(offset: Int, count: Int): Future[List[(Visit, Patient)]] =
-      get("list-recent-visit-full", Params("offset" -> offset, "count" -> count))
+    def listRecentVisitFull(
+        offset: Int,
+        count: Int
+    ): Future[List[(Visit, Patient)]] =
+      get(
+        "list-recent-visit-full",
+        Params("offset" -> offset, "count" -> count)
+      )
 
     def listVisitByDate(at: LocalDate): Future[List[Visit]] =
       get("list-visit-by-date", Params("at" -> at))
@@ -286,7 +308,8 @@ object MiscApi extends ApiBase:
     ): Future[Option[(Int, LocalDate, LocalDate)]] =
       get("get-covid-2nd-shot-data", Params("patient-id" -> patientId))
 
-    def getText(textId: Int): Future[Text] = get("get-text", Params("text-id" -> textId))
+    def getText(textId: Int): Future[Text] =
+      get("get-text", Params("text-id" -> textId))
 
     def enterText(text: Text): Future[Text] =
       post("enter-text", Params(), text)
@@ -303,5 +326,13 @@ object MiscApi extends ApiBase:
     def enterShinryou(shinryou: Shinryou): Future[Shinryou] =
       post("enter-shinryou", Params(), shinryou)
 
-    def batchEnterShinryou(visitId: Int, shinryoucodes: List[Int]): Future[List[Shinryou]] =
+    def batchEnterShinryou(
+        visitId: Int,
+        shinryoucodes: List[Int]
+    ): Future[List[Shinryou]] =
       post("batch-enter-shinryou", Params("visit-id" -> visitId), shinryoucodes)
+
+    def batchEnterShinryouConduct(
+        req: CreateShinryouConductRequest
+    ): Future[(List[Int], List[Int])] =
+      post("batch-enter-shinryou-conduct", Params(), req)

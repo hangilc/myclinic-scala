@@ -202,5 +202,11 @@ trait Model extends DateTime with WaitStateCodec:
   given Encoder[HokenInfo] = deriveEncoder[HokenInfo]
   given Decoder[HokenInfo] = deriveDecoder[HokenInfo]
 
+  given Encoder[CreateConductRequest] = deriveEncoder[CreateConductRequest]
+  given Decoder[CreateConductRequest] = deriveDecoder[CreateConductRequest]
+
+  given Encoder[CreateShinryouConductRequest] = deriveEncoder[CreateShinryouConductRequest]
+  given Decoder[CreateShinryouConductRequest] = deriveDecoder[CreateShinryouConductRequest]
+
 
 

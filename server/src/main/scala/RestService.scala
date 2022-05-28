@@ -21,6 +21,7 @@ import dev.myclinic.scala.model.jsoncodec.Implicits.given
 import org.http4s.websocket.WebSocketFrame.Text
 import dev.myclinic.scala.appoint.admin.AppointAdmin
 import java.time.LocalDateTime
+import doobie.free.resultset
 
 object RestService extends DateTimeQueryParam with Publisher:
 
@@ -287,11 +288,22 @@ object RestService extends DateTimeQueryParam with Publisher:
       val op =
         for
           codes <- req.as[List[Int]]
-          pairs <- Db.batchEnterShinryou(visitId, codes)
-          events = pairs.map(_.head)
-          entered = pairs.map(_(1))
-          _ <- events.map(publish(_)).sequence_
-        yield entered
+          shinryouList = codes.map(c => Shinryou(0, visitId, c))
+          req = CreateShinryouConductRequest(shinryouList)
+          result <- Db.batchCreateShinryouConduct(req)
+          (events, shinryouIds, _) = result
+          _ <- publishAll(events)
+        yield shinryouIds
+      Ok(op)
+
+    case req @ POST -> Root / "batch-enter-shinryou-conduct" =>
+      val op =
+        for
+          createReq <- req.as[CreateShinryouConductRequest]
+          result <- Db.batchCreateShinryouConduct(createReq)
+          (events, shinryouIds, conductIds) = result
+          _ <- publishAll(events)
+        yield (shinryouIds, conductIds)
       Ok(op)
 
   } <+> PatientService.routes <+> VisitService.routes <+> MiscService.routes

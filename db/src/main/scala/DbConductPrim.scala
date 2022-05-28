@@ -81,3 +81,13 @@ object DbConductPrim:
         .sequence
       _ = events ++= kizaiEvents
     yield (events.toList, conductId)
+
+  def createConduct(req: CreateConductRequest): ConnectionIO[(List[AppEvent], ConductId)] =
+    createConduct(
+      req.visitId,
+      req.kind,
+      req.labelOption,
+      req.shinryouList,
+      req.drugs,
+      req.kizaiList
+    )

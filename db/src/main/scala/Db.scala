@@ -253,3 +253,7 @@ object Db
       order by visit.visit_id desc limit ${limit} offset ${offset}
     """.query[(Visit, Patient)].to[List]
     mysql(op)
+
+  def batchCreateShinryouConduct(req: CreateShinryouConductRequest):
+    IO[(List[AppEvent], List[Int], List[Int])] =
+      mysql(DbPrim.batchEnterShinryouConduct(req))
