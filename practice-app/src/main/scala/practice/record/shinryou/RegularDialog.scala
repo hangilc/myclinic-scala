@@ -34,10 +34,11 @@ class RegularDialog(
       if unresolved.isEmpty then
         val codes = map.values.toList
         for
-          entered <- Api.batchEnterShinryou(visitId, codes)
+          shinryouIds <- Api.batchEnterShinryou(visitId, codes)
           masterMap <- Api.batchResolveShinryouMaster(codes, at)
+          shinryouList <- Api.batchGetShinryou(shinryouIds)
         yield
-          entered.foreach(s => 
+          shinryouList.foreach(s => 
             val master = masterMap(s.shinryoucode)
             PracticeBus.shinryouEntered.publish(ShinryouEx(s, master))
           )

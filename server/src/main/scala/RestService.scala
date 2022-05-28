@@ -274,6 +274,14 @@ object RestService extends DateTimeQueryParam with Publisher:
         yield Map(names.zip(codes): _*)
       Ok(op)
 
+    case req @ POST -> Root / "batch-get-shinryou" =>
+      val op =
+        for 
+          shinryouIds <- req.as[List[Int]]
+          shinryouList <- Db.batchGetShinryou(shinryouIds)
+        yield shinryouList
+      Ok(op)
+
     case req @ POST -> Root / "enter-shinryou" =>
       val op =
         for

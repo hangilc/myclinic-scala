@@ -329,8 +329,11 @@ object MiscApi extends ApiBase:
     def batchEnterShinryou(
         visitId: Int,
         shinryoucodes: List[Int]
-    ): Future[List[Shinryou]] =
+    ): Future[List[Int]] =
       post("batch-enter-shinryou", Params("visit-id" -> visitId), shinryoucodes)
+
+    def batchGetShinryou(shinryouIds: List[Int]): Future[List[Shinryou]] =
+      post("batch-get-shinryou", Params(), shinryouIds)
 
     def batchEnterShinryouConduct(
         req: CreateShinryouConductRequest
