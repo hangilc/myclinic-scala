@@ -45,6 +45,8 @@ object RestService extends DateTimeQueryParam with Publisher:
   object intOffset extends QueryParamDecoderMatcher[Int]("offset")
   object intVisitId extends QueryParamDecoderMatcher[Int]("visit-id")
   object intPatientId extends QueryParamDecoderMatcher[Int]("patient-id")
+  object intShinryouId extends QueryParamDecoderMatcher[Int]("shinryou-id")
+  object intConductId extends QueryParamDecoderMatcher[Int]("conduct-id")
 
   case class UserError(message: String) extends Exception
 
@@ -316,6 +318,12 @@ object RestService extends DateTimeQueryParam with Publisher:
           _ <- publishAll(events)
         yield (shinryouIds, conductIds)
       Ok(op)
+
+    case GET -> Root / "get-shinryou-ex" :? intShinryouId(shinryouId) =>
+      Ok(Db.getShinryouEx(shinryouId))
+
+    case GET -> Root / "get-conduct-ex" :? intConductId(conductId) =>
+      Ok(Db.getConductEx(conductId))
 
   } <+> PatientService.routes <+> VisitService.routes <+> MiscService.routes
     <+> ConfigService.routes <+> FileService.routes

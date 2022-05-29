@@ -3,9 +3,9 @@ package dev.myclinic.scala.web.practiceapp.practice.record
 import dev.myclinic.scala.model.{
   Text as ModelText,
   Shinryou as ModelShinryou,
-  Drug as _,
-  Conduct as _,
-  Payment as _,
+  Drug as ModelDrug_,
+  Conduct as ModelConduct,
+  Payment as ModelPayment,
   *
 }
 import dev.fujiwara.domq.all.{*, given}
@@ -22,8 +22,10 @@ class Record(visitEx: VisitEx):
   val textsWrapper = div
   val hokenWrapper = div
   val shinryouWrapper = div
+  val conductWrapper = div
   val texts: CompAppendList[Text] = CompAppendList[Text](textsWrapper)
   val shinryouList: CompSortList[Shinryou] = CompSortList[Shinryou](shinryouWrapper)
+  val conductList: CompAppendList[Conduct] = CompAppendList[Conduct](conductWrapper)
   val textMenu = TextMenu()
   textMenu.newText.subscribe(_ => doNewText())
   val ele = div(cls := "practice-visit")(
@@ -38,8 +40,9 @@ class Record(visitEx: VisitEx):
     )
   )
   texts.set(visitEx.texts.map(Text(_)))
-  shinryouList.set(visitEx.shinryouList.map(s => Shinryou(s)))
   updateHoken(visitEx.hoken)
+  shinryouList.set(visitEx.shinryouList.map(s => Shinryou(s)))
+  conductList.set(visitEx.conducts.map(c => Conduct(c)))
 
   def doNewText(): Unit =
     val editor = TextEnter(visitEx.visitId)
@@ -73,7 +76,7 @@ class Record(visitEx: VisitEx):
       new ShinryouMenu(visitEx.visitedAt.toLocalDate, visitId).ele,
       shinryouWrapper,
       new Drug(visitEx).ele,
-      new Conduct(visitEx).ele,
+      conductWrapper,
       new Payment(visitEx).ele
     )
 
@@ -86,6 +89,9 @@ class Record(visitEx: VisitEx):
     
   def onShinryouEntered(entered: ShinryouEx): Unit =
     shinryouList.insert(Shinryou(entered))
+
+  def onConductEntered(entered: ConductEx): Unit =
+    conductList.append(Conduct(entered))
 
 object Record:
   given Ordering[Record] = Ordering.by[Record, Int](r => r.visitId).reverse

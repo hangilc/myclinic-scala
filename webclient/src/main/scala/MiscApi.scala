@@ -339,3 +339,9 @@ object MiscApi extends ApiBase:
         req: CreateShinryouConductRequest
     ): Future[(List[Int], List[Int])] =
       post("batch-enter-shinryou-conduct", Params(), req)
+
+    def getShinryouEx(shinryouId: Int): Future[ShinryouEx] =
+      get("get-shinryou-ex", Params("shinryou-id" -> shinryouId))
+
+    def getConductEx(conductId: Int): Future[ConductEx] =
+      get("get-conduct-ex", Params("conduct-id" -> conductId))

@@ -17,7 +17,8 @@ class RecordsWrapper:
     PracticeBus.hokenInfoChanged.subscribe {
       case (visitId, hokenInfo) => onHokenInfoChanged(visitId, hokenInfo)
     },
-    PracticeBus.shinryouEntered.subscribe(onShinryouEntered _)
+    PracticeBus.shinryouEntered.subscribe(onShinryouEntered _),
+    PracticeBus.conductEntered.subscribe(onConductEntered _)
   )
 
   def dispose: Unit = 
@@ -55,6 +56,9 @@ class RecordsWrapper:
 
   def onShinryouEntered(shinryou: ShinryouEx): Unit =
     findRecord(shinryou.visitId).foreach(_.onShinryouEntered(shinryou))
+  
+  def onConductEntered(conduct: ConductEx): Unit =
+    findRecord(conduct.visitId).foreach(_.onConductEntered(conduct))
   
 object RecordsWrapper:
   given Dispose[RecordsWrapper] = _.dispose

@@ -61,7 +61,13 @@ class RegularDialog(
     yield result match {
       case Left(msg) => ShowMessage.showError(msg)
       case Right(shinryouIds, conductIds) =>
-        println(("entered", shinryouIds, conductIds))
+        for
+          shinryouList <- shinryouIds.map(Api.getShinryouEx(_)).sequence
+          conductList <- conductIds.map(Api.getConductEx(_)).sequence
+        yield 
+          shinryouList.foreach(PracticeBus.shinryouEntered.publish(_))
+          conductList.foreach(PracticeBus.conductEntered.publish(_))
+          dlog.close()
     }
 
   def kotsuenReq: Future[Either[String, CreateConductRequest]] =

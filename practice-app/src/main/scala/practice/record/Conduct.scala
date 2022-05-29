@@ -5,12 +5,8 @@ import dev.myclinic.scala.model.VisitEx
 import dev.myclinic.scala.model.ConductEx
 import dev.myclinic.scala.apputil.ConductUtil
 
-class Conduct(visit: VisitEx):
-  val ele = div()
-
-  visit.conducts.foreach(conduct => {
-    ele(div(innerText := rep(conduct)))
-  })
+class Conduct(c: ConductEx):
+  val ele = div(innerText := rep(c))
 
   def rep(c: ConductEx): String =
     (List(
@@ -23,3 +19,7 @@ class Conduct(visit: VisitEx):
       c.drugs.map(d => "* " + ConductUtil.conductDrugRep(d)) ++
       c.kizaiList.map(k => "* " + ConductUtil.conductKizaiRep(k))
       ).mkString("\n")
+
+object Conduct:
+  given Comp[Conduct] = _.ele
+  given Dispose[Conduct] = _ => ()
