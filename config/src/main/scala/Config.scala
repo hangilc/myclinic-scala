@@ -64,6 +64,10 @@ object Config extends ConfigCirce:
     val file = dataDir.resolve("shinryou-regular.yaml").toFile
     readYaml[Map[String, List[String]]](file)
 
+  def getShinryouKensa: Map[String, List[String]] =
+    val file = dataDir.resolve("shinryou-kensa.yaml").toFile
+    readYaml[Map[String, List[String]]](file)
+
   def getMasterNameMap: MasterNameMap =
     import MasterNameMap.linePattern as pat
     val src: Source = Source.fromFile(configDir.resolve("master-name.txt").toFile, "UTF-8")

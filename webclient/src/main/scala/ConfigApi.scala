@@ -8,4 +8,10 @@ object ConfigApi extends ApiBase:
 
   trait Api:
     def getShinryouRegular(): Future[Map[String, List[String]]] =
-      get("get-shinryou-regular", Params())
+      get("get-shinryou-regular", Params())    
+
+    def getShinryouKensa(): Future[Map[String, List[String]]] =
+      get("get-shinryou-kensa", Params())
+
+
+      

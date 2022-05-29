@@ -19,6 +19,7 @@ object ConfigService:
   val clinicInfo = Config.getClinicInfo
   var shohouSamples: List[String] = Config.getShohouSamples
   lazy val shinryouRegular: Map[String, List[String]] = Config.getShinryouRegular
+  lazy val shinryouKensa: Map[String, List[String]] = Config.getShinryouKensa
   lazy val masterNameMap = Config.getMasterNameMap
   lazy val masterTransition = Config.getMasterTransition
   object stringText extends QueryParamDecoderMatcher[String]("text")
@@ -31,4 +32,8 @@ object ConfigService:
     case GET -> Root / "search-shohou-sample" :? stringText(text) =>
       Ok(shohouSamples.filter(_.contains(text)))
     case GET -> Root/ "get-shinryou-regular" => Ok(shinryouRegular)
+    case GET -> Root/ "get-shinryou-kensa" => Ok(shinryouKensa)
   }
+
+
+  

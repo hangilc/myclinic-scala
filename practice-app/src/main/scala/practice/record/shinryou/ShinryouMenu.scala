@@ -15,7 +15,7 @@ case class ShinryouMenu(at: LocalDate, visitId: Int):
 
   def auxMenuItems: List[(String, () => Unit)] =
     List(
-      "検査" -> (() => ()),
+      "検査" -> (doKensa _),
       "検索入力" -> (() => ()),
       "重複削除" -> (() => ()),
       "全部コピー" -> (() => ())
@@ -31,4 +31,11 @@ case class ShinryouMenu(at: LocalDate, visitId: Int):
         at,
         visitId
       )
+      dlog.open
+
+  def doKensa(): Unit =
+    for
+      config <- Api.getShinryouKensa()
+    yield
+      val dlog = KensaDialog(config)
       dlog.open
