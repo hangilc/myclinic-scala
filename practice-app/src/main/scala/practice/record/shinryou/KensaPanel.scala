@@ -25,5 +25,7 @@ final case class KensaPanel(config: Map[String, List[String]]):
 
   def clear: Unit = clearChecks(checks)
 
+  def selected: List[String] = listSelected(checks)
+
 
 

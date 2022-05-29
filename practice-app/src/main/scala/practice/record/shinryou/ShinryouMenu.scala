@@ -37,5 +37,5 @@ case class ShinryouMenu(at: LocalDate, visitId: Int):
     for
       config <- Api.getShinryouKensa()
     yield
-      val dlog = KensaDialog(config)
+      val dlog = KensaDialog(config, at, visitId)
       dlog.open

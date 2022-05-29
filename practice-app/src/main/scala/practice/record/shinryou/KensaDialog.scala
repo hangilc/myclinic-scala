@@ -1,15 +1,24 @@
 package dev.myclinic.scala.web.practiceapp.practice.record.shinryou
 
 import dev.fujiwara.domq.all.{*, given}
+import cats.data.EitherT
+import dev.myclinic.scala.webclient.{Api, global}
+import java.time.LocalDate
+import cats.syntax.all.*
+import dev.myclinic.scala.web.practiceapp.practice.PracticeBus
 
-case class KensaDialog(config: Map[String, List[String]]):
+case class KensaDialog(
+    config: Map[String, List[String]],
+    at: LocalDate,
+    visitId: Int
+):
   val panel = KensaPanel(config)
   val dlog = new ModalDialog3()
   dlog.title("検査入力")
   dlog.body(panel.ele)
   dlog.commands(
     button("セット検査", onclick := (() => panel.checkPreset)),
-    button("入力"),
+    button("入力", onclick := (onEnter _)),
     button("クリア", onclick := (() => panel.clear)),
     button("キャンセル", onclick := (() => dlog.close()))
   )
@@ -17,3 +26,23 @@ case class KensaDialog(config: Map[String, List[String]]):
   def open: Unit =
     dlog.open()
 
+  def onEnter(): Unit =
+    val names = panel.selected
+    val op =
+      for
+        shinryouReqs <- EitherT(
+          RequestHelper.composeShinryouReqs(names, at, visitId)
+        )
+        result <- EitherT.right(RequestHelper.batchEnter(shinryouReqs))
+        (shinryouIds, _) = result
+        shinryouList <- EitherT.right(
+          shinryouIds.map(Api.getShinryouEx(_)).sequence
+        )
+      yield
+        shinryouList.foreach(PracticeBus.shinryouEntered.publish(_))
+        dlog.close()
+    for result <- op.value
+    yield result match {
+      case Left(msg) => ShowMessage.showError(msg)
+      case Right(_) => ()
+    }

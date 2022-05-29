@@ -5,6 +5,8 @@ import scala.concurrent.Future
 import dev.myclinic.scala.webclient.{Api, global}
 import dev.myclinic.scala.model.*
 import cats.data.EitherT
+import cats.*
+import cats.syntax.all.*
 
 object RequestHelper:
 
@@ -19,6 +21,13 @@ object RequestHelper:
         s"${name} のコードをみつけられませんでした。"
       )
     yield Shinryou(0, visitId, shinryoucode)).value
+
+  def composeShinryouReqs(
+      names: List[String],
+      at: LocalDate,
+      visitId: Int
+  ): Future[Either[String, List[Shinryou]]] =
+    names.map(shinryou(_, at, visitId)).sequence.map(_.sequence)
 
   def conductShinryouReq(
       name: String,
@@ -42,3 +51,13 @@ object RequestHelper:
         s"${name} のコードをみつけられませんでした。"
       )
     yield ConductKizai(0, 0, kizaicode, amount)).value
+
+  def batchEnter(
+      shinryouList: List[Shinryou] = List.empty,
+      conductList: List[CreateConductRequest] = List.empty
+  ): Future[(List[Int], List[Int])] =
+    val req = CreateShinryouConductRequest(shinryouList, conductList)
+    for
+      result <- Api.batchEnterShinryouConduct(req)
+      (shinryouIds, conductIds) = result
+    yield (shinryouIds, conductIds)
