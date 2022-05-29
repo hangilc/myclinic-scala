@@ -8,9 +8,9 @@ case class KensaDialog(config: Map[String, List[String]]):
   dlog.title("検査入力")
   dlog.body(panel.ele)
   dlog.commands(
-    button("セット検査"),
+    button("セット検査", onclick := (() => panel.checkPreset)),
     button("入力"),
-    button("クリア"),
+    button("クリア", onclick := (() => panel.clear)),
     button("キャンセル", onclick := (() => dlog.close()))
   )
 

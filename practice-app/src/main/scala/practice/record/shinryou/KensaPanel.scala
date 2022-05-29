@@ -1,21 +1,29 @@
 package dev.myclinic.scala.web.practiceapp.practice.record.shinryou
 
 import dev.fujiwara.domq.all.{*, given}
-import PanelHelper.{toElement, makeChecks, collectChecks, listSelected}
+import PanelHelper.{toElement, makeChecks, collectChecks, listSelected, clearChecks}
 
 final case class KensaPanel(config: Map[String, List[String]]):
+  val leftChecks: List[CheckLabel[String] | Unit] =
+    makeChecks(config("left"))
+
+  val rightChecks: List[CheckLabel[String] | Unit] =
+    makeChecks(config("right"))
+
+  val checks: List[CheckLabel[String]] = collectChecks(leftChecks ++ rightChecks)
+
   val ele = div(
     cls := "practice-shinryou-kensa-panel",
     div(cls := "practice-shinryou-kensa-panel-left", leftChecks.map(toElement _)),
     div(cls := "practice-shinryou-kensa-panel-right", rightChecks.map(toElement _))
   )
 
-  def leftChecks: List[CheckLabel[String] | Unit] =
-    makeChecks(config("left"))
+  val preset: Set[String] = Set(config("preset"): _*)
 
-  def rightChecks: List[CheckLabel[String] | Unit] =
-    makeChecks(config("right"))
+  def checkPreset: Unit =
+    checks.filter(check => preset.contains(check.value)).foreach(_.check)
 
-  val preset: List[String] = config("preset")
+  def clear: Unit = clearChecks(checks)
+
 
 

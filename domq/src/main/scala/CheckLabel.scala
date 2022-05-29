@@ -12,3 +12,4 @@ case class CheckLabel[T](value: T, labelString: String):
     Option.when(checkElement.checked)(value)
   def wrap(wrapper: HTMLElement): HTMLElement = wrapper(checkElement, labelElement)
   def check: Unit = checkElement.checked = true
+  def uncheck: Unit = checkElement.checked = false

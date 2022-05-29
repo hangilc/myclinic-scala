@@ -30,3 +30,5 @@ object PanelHelper:
 
   def listSelected(checks: List[CheckLabel[String]]): List[String] =
     checks.map(_.selected).collect { case Some(name) => name }
+
+  def clearChecks(checks: List[CheckLabel[String]]): Unit = checks.foreach(_.uncheck)
