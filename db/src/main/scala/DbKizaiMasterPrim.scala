@@ -26,4 +26,7 @@ object DbKizaiMasterPrim:
         and valid_from <= ${at} and (${at} <= valid_upto or valid_upto = '0000-00-00')
     """.query[KizaiMaster]
 
+  def findKizaicodeByName(name: String, at: LocalDate): Query0[Int] =
+    getKizaiMasterByName(name, at).map(_.kizaicode)
+
 

@@ -15,6 +15,7 @@ import dev.fujiwara.domq.CompSortList
 import dev.fujiwara.domq.CompSortList.given
 import org.scalajs.dom.HTMLElement
 import dev.myclinic.scala.web.practiceapp.practice.PracticeBus
+import dev.myclinic.scala.web.practiceapp.practice.record.shinryou.ShinryouMenu
 
 class Record(visitEx: VisitEx):
   val title = new Title(visitEx)

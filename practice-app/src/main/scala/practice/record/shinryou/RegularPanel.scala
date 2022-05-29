@@ -1,4 +1,4 @@
-package dev.myclinic.scala.web.practiceapp.practice.record
+package dev.myclinic.scala.web.practiceapp.practice.record.shinryou
 
 import dev.fujiwara.domq.all.{*, given}
 import org.scalajs.dom.HTMLElement

@@ -260,6 +260,9 @@ object RestService extends DateTimeQueryParam with Publisher:
     case GET -> Root / "get-patient-all-hoken" :? intPatientId(patientId) =>
       Ok(Db.getPatientAllHoken(patientId))
 
+    case GET -> Root / "resolve-shinryoucode-by-name" :? strName(name) +& dateAt(at) =>
+      Ok(Helper.findShinryoucodeByName(name, at))
+
     case req @ POST -> Root / "batch-resolve-shinryoucode-by-name" :? dateAt(
           at
         ) =>

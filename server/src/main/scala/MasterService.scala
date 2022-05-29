@@ -25,6 +25,7 @@ object MasterService extends DateTimeQueryParam:
   object intVisitId extends QueryParamDecoderMatcher[Int]("visit-id")
   object intConductId extends QueryParamDecoderMatcher[Int]("conduct-id")
   object dateAt extends QueryParamDecoderMatcher[LocalDate]("at")
+  object strName extends QueryParamDecoderMatcher[String]("name")
 
   def routes = HttpRoutes.of[IO] {
     case GET -> Root / "get-iyakuhin-master" :? intIyakuhincode(
@@ -53,6 +54,9 @@ object MasterService extends DateTimeQueryParam:
           kizaicode
         ) +& dateAt(at) =>
       Ok(Db.getKizaiMaster(kizaicode, at))
+
+    case GET -> Root / "find-kizaicode-by-name" :? strName(name) +& dateAt(at) =>
+      Ok(Db.findKizaicodeByName(name, at))
 
     case req @ POST -> Root / "batch-get-kizai-master" :? dateAt(at) =>
       Ok(for

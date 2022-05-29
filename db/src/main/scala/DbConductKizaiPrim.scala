@@ -36,7 +36,7 @@ object DbConductKizaiPrim:
 
   def enterConductKizai(ck: ConductKizai): ConnectionIO[(AppEvent, ConductKizai)] =
     val op = sql"""
-      insert int visit_conduct_kizai set visit_conduct_id = ${ck.conductId},
+      insert into visit_conduct_kizai set visit_conduct_id = ${ck.conductId},
         kizaicode = ${ck.kizaicode}, amount = ${ck.amount}
     """
     for

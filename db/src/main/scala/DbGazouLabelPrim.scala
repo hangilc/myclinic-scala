@@ -17,7 +17,7 @@ object DbGazouLabelPrim:
 
   def enterGazouLabel(gl: GazouLabel): ConnectionIO[AppEvent] =
     val op = sql"""
-      insert into gazou_label set visit_conduct_id = ${gl.conductId}, label = ${gl.label}
+      insert into visit_gazou_label set visit_conduct_id = ${gl.conductId}, label = ${gl.label}
     """
     for
       _ <- op.update.run

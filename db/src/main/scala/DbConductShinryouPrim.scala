@@ -32,7 +32,7 @@ object DbConductShinryouPrim:
 
   def getConductShinryou(conductShinryouId: Int): Query0[ConductShinryou] =
     sql"""
-      select * from visit_conudct_shinryou where id = ${conductShinryouId}
+      select * from visit_conduct_shinryou where id = ${conductShinryouId}
     """.query[ConductShinryou]
 
   def enterConductShinryou(cs: ConductShinryou): ConnectionIO[(AppEvent, ConductShinryou)] =

@@ -1,4 +1,4 @@
-package dev.myclinic.scala.web.practiceapp.practice.record
+package dev.myclinic.scala.web.practiceapp.practice.record.shinryou
 
 import dev.fujiwara.domq.all.{*, given}
 import dev.myclinic.scala.webclient.{Api, global}
@@ -8,6 +8,13 @@ import dev.myclinic.scala.model.ShinryouEx
 import dev.myclinic.scala.model.CreateConductRequest
 import dev.myclinic.scala.model.ConductKind
 import dev.myclinic.scala.model.ConductShinryou
+import dev.myclinic.scala.model.Shinryou
+import scala.concurrent.Future
+import dev.myclinic.scala.model.ConductKizai
+import cats.*
+import cats.implicits.*
+import cats.data.EitherT
+import dev.myclinic.scala.model.CreateShinryouConductRequest
 
 class RegularDialog(
     leftNames: List[String],
@@ -28,41 +35,47 @@ class RegularDialog(
     dlog.open()
 
   def onEnter(): Unit =
-    val (names, kotsuen): (List[String], Option[Boolean]) =
-      panel.selected.foldLeft[(List[String], Boolean)]((List.empty, false)) { case ((n, k), name) =>
-        name match {
-          case "骨塩定量" => (n, true)
-          case _      => (n :+ name, k)
-        }
+    val (names, kotsuen): (List[String], Boolean) =
+      panel.selected.foldLeft[(List[String], Boolean)]((List.empty, false)) {
+        case ((n, k), name) =>
+          name match {
+            case "骨塩定量" => (n, true)
+            case _      => (n :+ name, k)
+          }
       }
-    for map <- Api.batchResolveShinryoucodeByName(names, at)
-    yield
-      val unresolved = (map.collect {
-        case (name, code) if code == 0 => name
-      }).toList
-      if unresolved.isEmpty then
-        val codes = map.values.toList
-        for
-          shinryouIds <- Api.batchEnterShinryou(visitId, codes)
-          masterMap <- Api.batchResolveShinryouMaster(codes, at)
-          shinryouList <- Api.batchGetShinryou(shinryouIds)
-        yield
-          shinryouList.foreach(s =>
-            val master = masterMap(s.shinryoucode)
-            PracticeBus.shinryouEntered.publish(ShinryouEx(s, master))
-          )
-          dlog.close()
-      else
-        val msg = "以下の診療行為のコードを取得できませんでした。\n" +
-          unresolved.mkString("\n")
-        ShowMessage.showError(msg)
+    val op = (for
+      shinryouList <- EitherT[Future, String, List[Shinryou]](
+        names
+          .map(name => RequestHelper.shinryou(name, at, visitId))
+          .sequence
+          .map(_.sequence)
+      )
+      conductOption <-
+        if kotsuen then EitherT(kotsuenReq).map(Some(_))
+        else EitherT.rightT[Future, String](None)
+      req = CreateShinryouConductRequest(shinryouList, conductOption.toList)
+      enterResult <- EitherT.right(Api.batchEnterShinryouConduct(req))
+      (shinryouIds, conductIds) = enterResult
+    yield (shinryouIds, conductIds)).value
+    for result <- op
+    yield result match {
+      case Left(msg) => ShowMessage.showError(msg)
+      case Right(shinryouIds, conductIds) =>
+        println(("entered", shinryouIds, conductIds))
+    }
 
-  def kotsuenReq: CreateConductRequest =
-    val shinryouName = "骨塩定量ＭＤ法"
-    val kizaiName = "四ツ切"
-    CreateConductRequest(
+  def kotsuenReq: Future[Either[String, CreateConductRequest]] =
+    (for
+      shinryou <- EitherT(
+        RequestHelper.conductShinryouReq("骨塩定量ＭＤ法", at)
+      )
+      kizai <- EitherT(
+        RequestHelper.conductKizaiReq("四ツ切", 1, at)
+      )
+    yield CreateConductRequest(
       visitId,
       ConductKind.Gazou.code,
-      Some("骨塩定量に使用")
-    )
-
+      Some("骨塩定量に使用"),
+      shinryouList = List(shinryou),
+      kizaiList = List(kizai)
+    )).value

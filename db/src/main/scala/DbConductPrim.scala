@@ -69,15 +69,15 @@ object DbConductPrim:
       }
       _ = createLabelEventOption.foreach(events += _)
       shinryouEvents <- shinryouList
-        .map(cs => DbConductShinryouPrim.enterConductShinryou(cs).map(_.head))
+        .map(cs => DbConductShinryouPrim.enterConductShinryou(cs.copy(conductId = conductId)).map(_.head))
         .sequence
       _ = events ++= shinryouEvents
       drugEvents <- drugs
-        .map(cd => DbConductDrugPrim.enterConductDrug(cd).map(_.head))
+        .map(cd => DbConductDrugPrim.enterConductDrug(cd.copy(conductId = conductId)).map(_.head))
         .sequence
       _ = events ++= drugEvents
       kizaiEvents <- kizaiList
-        .map(ck => DbConductKizaiPrim.enterConductKizai(ck).map(_.head))
+        .map(ck => DbConductKizaiPrim.enterConductKizai(ck.copy(conductId = conductId)).map(_.head))
         .sequence
       _ = events ++= kizaiEvents
     yield (events.toList, conductId)
