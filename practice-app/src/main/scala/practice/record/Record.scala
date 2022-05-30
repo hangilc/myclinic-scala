@@ -16,6 +16,7 @@ import dev.fujiwara.domq.CompSortList.given
 import org.scalajs.dom.HTMLElement
 import dev.myclinic.scala.web.practiceapp.practice.PracticeBus
 import dev.myclinic.scala.web.practiceapp.practice.record.shinryou.ShinryouMenu
+import dev.myclinic.scala.web.practiceapp.practice.record.conduct.ConductMenu
 
 class Record(visitEx: VisitEx):
   val title = new Title(visitEx)
@@ -76,6 +77,7 @@ class Record(visitEx: VisitEx):
       new ShinryouMenu(visitEx.visitedAt.toLocalDate, visitId).ele,
       shinryouWrapper,
       new Drug(visitEx).ele,
+      ConductMenu().ele,
       conductWrapper,
       new Payment(visitEx).ele
     )
