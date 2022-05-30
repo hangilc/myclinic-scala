@@ -7,7 +7,8 @@ import dev.fujiwara.domq.Modifiers.{*, given}
 import scala.language.implicitConversions
 import org.scalajs.dom.MouseEvent
 import org.scalajs.dom.{document, window}
-import org.scalajs.dom.ClientRect
+//import org.scalajs.dom.ClientRect
+import org.scalajs.dom.DOMRect
 import org.scalajs.dom.Event
 
 class ContextMenu:
@@ -43,7 +44,8 @@ class ContextMenu:
   def calcPlacement(
       clickX: Double,
       clickY: Double,
-      rect: ClientRect,
+      rect: DOMRect,
+      //rect: ClientRect,
       windowWidth: Double,
       windowHeight: Double
   ): (Double, Double) = ContextMenu.calcPlacement(
@@ -110,7 +112,8 @@ object ContextMenu:
   def calcPlacement(
       refX: Double,
       refY: Double,
-      menuRect: ClientRect,
+      menuRect: DOMRect,
+      //menuRect: ClientRect,
       viewWidth: Double,
       viewHeight: Double
   ): (Double, Double) =
@@ -121,7 +124,8 @@ object ContextMenu:
 
   def calcPlacementX(
       refX: Double,
-      menuRect: ClientRect,
+      menuRect: DOMRect,
+      // menuRect: ClientRect,
       viewWidth: Double
   ): Double =
     val right = refX + menuRect.width
@@ -130,7 +134,8 @@ object ContextMenu:
 
   def calcPlacementY(
       refY: Double,
-      menuRect: ClientRect,
+      menuRect: DOMRect,
+      // menuRect: ClientRect,
       viewHeight: Double
   ): Double =
     val bottom = refY + menuRect.height

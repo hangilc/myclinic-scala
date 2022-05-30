@@ -34,4 +34,12 @@ object DbShinryouMasterPrim:
         and valid_from <= ${at} and (${at} <= valid_upto or valid_upto = '0000-00-00')
     """.query[Int]
 
+  def searchShinryouMaster(text: String, at: LocalDate): Query0[ShinryouMaster] =
+    val search = s"%${text}%"
+    sql"""
+      select * from shinryoukoui_master_arch where name like ${search}
+        and valid_from <= ${at} 
+        and (valid_upto = '0000-00-00' or ${at} <= valid_upto)
+    """.query[ShinryouMaster]
+
   

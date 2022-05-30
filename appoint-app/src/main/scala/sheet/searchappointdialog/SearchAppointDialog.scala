@@ -13,9 +13,8 @@ object SearchAppointDialog:
   type Result = (Appoint, AppointTime)
 
   def open(): Unit =
-    val searchForm = SearchForm[Result, Result](
+    val searchForm = SearchForm[Result](
       toLabel _,
-      identity,
       search _
     )
     searchForm.onSelect(r =>

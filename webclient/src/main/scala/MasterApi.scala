@@ -43,5 +43,8 @@ object MasterApi extends ApiBase:
       : Future[Map[Int, KizaiMaster]] =
         post("batch-resolve-kizai-master", Params("at" -> at), kizaicodes)
 
+    def searchShinryouMaster(text: String, at: LocalDate): Future[List[ShinryouMaster]] =
+      get("search-shinryou-master", Params("text" -> text, "at" -> at))
+
 
 

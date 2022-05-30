@@ -58,3 +58,6 @@ trait DbShinryouMaster extends Mysql:
   def findShinryoucodeByName(name: String, at: LocalDate): IO[Option[Int]] =
     mysql(Prim.getShinryoucodeByName(name, at).option)
 
+  def searchShinryouMaster(text: String, at: LocalDate): IO[List[ShinryouMaster]] =
+    mysql(Prim.searchShinryouMaster(text, at).to[List])
+

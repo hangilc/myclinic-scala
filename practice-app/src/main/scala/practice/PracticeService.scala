@@ -141,9 +141,8 @@ class PracticeMain:
   def selectBySearchPatient(): Unit =
     val d = new ModalDialog3
     val search =
-      new SearchForm[Patient, Patient](
+      new SearchForm[Patient](
         formatPatient _,
-        identity,
         Api.searchPatient(_).map(_._2)
       )
     d.title("患者検索")

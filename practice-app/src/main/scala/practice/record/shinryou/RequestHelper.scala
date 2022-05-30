@@ -61,3 +61,9 @@ object RequestHelper:
       result <- Api.batchEnterShinryouConduct(req)
       (shinryouIds, conductIds) = result
     yield (shinryouIds, conductIds)
+
+  def enterShinryou(shinryou: Shinryou): Future[Int] =
+    for
+      result <- batchEnter(List(shinryou), List.empty)
+      (shinryouIds, _) = result
+    yield shinryouIds.head

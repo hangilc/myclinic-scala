@@ -14,8 +14,7 @@ object ShohouSampleDialog:
       index += 1
       FormatUtil.indexRep(index, 5)
     val ta = textarea
-    val searchForm = SearchForm[String, String](
-      identity,
+    val searchForm = SearchForm[String](
       identity,
       Api.searchShohouSample _
     )
