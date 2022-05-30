@@ -30,6 +30,9 @@ object MasterApi extends ApiBase:
     def resolveShinryoucodeByName(name: String, at: LocalDate): Future[Option[Int]] =
       get("resolve-shinryoucode-by-name", Params("name" -> name, "at" -> at))
 
+    def resolveShinryoucode(shinryoucode: Int, at: LocalDate): Future[Option[Int]] =
+      get("resolve-shinryoucode", Params("shinryoucode" -> shinryoucode, "at" -> at))
+
     def batchResolveShinryoucodeByName(names: List[String], at: LocalDate): Future[Map[String, Int]] =
       post("batch-resolve-shinryoucode-by-name", Params("at"-> at), names)
 

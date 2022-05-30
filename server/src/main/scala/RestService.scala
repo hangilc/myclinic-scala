@@ -46,6 +46,7 @@ object RestService extends DateTimeQueryParam with Publisher:
   object intVisitId extends QueryParamDecoderMatcher[Int]("visit-id")
   object intPatientId extends QueryParamDecoderMatcher[Int]("patient-id")
   object intShinryouId extends QueryParamDecoderMatcher[Int]("shinryou-id")
+  object intShinryoucode extends QueryParamDecoderMatcher[Int]("shinryoucode")
   object intConductId extends QueryParamDecoderMatcher[Int]("conduct-id")
 
   case class UserError(message: String) extends Exception
@@ -264,6 +265,9 @@ object RestService extends DateTimeQueryParam with Publisher:
 
     case GET -> Root / "resolve-shinryoucode-by-name" :? strName(name) +& dateAt(at) =>
       Ok(Helper.findShinryoucodeByName(name, at))
+
+    case GET -> Root / "resolve-shinryoucode" :? intShinryoucode(shinryoucode) +& dateAt(at) =>
+      Ok(Helper.resolveShinryoucode(shinryoucode, at))
 
     case req @ POST -> Root / "batch-resolve-shinryoucode-by-name" :? dateAt(
           at

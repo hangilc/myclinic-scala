@@ -6,6 +6,7 @@ import java.time.LocalDate
 import cats.syntax.all.*
 import dev.myclinic.scala.web.practiceapp.practice.PracticeBus
 import dev.myclinic.scala.model.Shinryou
+import cats.data.EitherT
 
 case class ShinryouMenu(at: LocalDate, visitId: Int):
   val auxMenu = PullDownLink("その他")
@@ -53,24 +54,38 @@ case class ShinryouMenu(at: LocalDate, visitId: Int):
         (List.empty[Shinryou], Set.empty[Int])
       ) { case ((dups, shinryoucodes), shinryou) =>
         val code = shinryou.shinryoucode
-        if shinryoucodes.contains(code) then
-          (dups :+ shinryou, shinryoucodes
-        )
+        if shinryoucodes.contains(code) then (dups :+ shinryou, shinryoucodes)
         else (dups, shinryoucodes + code)
       }
-      _ <- dups.map(shinryou => Api.deleteShinryou(shinryou.shinryouId)).sequence
-    yield 
-      dups.foreach(PracticeBus.shinryouDeleted.publish(_))
+      _ <- dups
+        .map(shinryou => Api.deleteShinryou(shinryou.shinryouId))
+        .sequence
+    yield dups.foreach(PracticeBus.shinryouDeleted.publish(_))
 
   def doCopyAll(): Unit =
     PracticeBus.copyTarget match {
       case None => ShowMessage.showError("コピー先をみつけられません。")
-      case Some(targetVisitId) if targetVisitId == visitId => 
-        ShowMessage.showError("同じ診察にコピーはできません。") 
-      case Some(targetVisitId) => 
+      case Some(targetVisitId) if targetVisitId == visitId =>
+        ShowMessage.showError("同じ診察にコピーはできません。")
+      case Some(targetVisitId) =>
+        val op = 
+          for
+            visit <- EitherT.right(Api.getVisit(visitId))
+            srcShinryouList <- EitherT.right(Api.listShinryouForVisit(visitId))
+            shinryoucodes <- srcShinryouList
+              .map(_.shinryoucode)
+              .map(RequestHelper.resolveShinryoucode(_, at))
+              .sequence
+            enterResult <- EitherT.right(RequestHelper.batchEnter(
+              shinryoucodes.map(Shinryou(0, targetVisitId, _))
+            ))
+            (dstShinryouIds, _) = enterResult
+            dstShinryouExList <- EitherT.right(dstShinryouIds.map(Api.getShinryouEx(_)).sequence)
+          yield dstShinryouExList.foreach(PracticeBus.shinryouEntered.publish(_))
         for
-          visit <- Api.getVisit(visitId)
-          srcShinryouList <- Api.listShinryouForVisit(visitId)
-          shinryoucodes <- Api.resolveShinryou
-        yield ???
+          result <- op.value
+        yield result match {
+          case Left(msg) => ShowMessage.showError(msg)
+          case Right(_) => ()
+        }
     }
