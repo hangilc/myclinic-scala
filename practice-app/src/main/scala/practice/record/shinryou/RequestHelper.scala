@@ -14,32 +14,20 @@ object RequestHelper:
       name: String,
       at: LocalDate,
       visitId: Int
-  ): EitherT[Future, String, Shinryou] =
-    for
+  ): Future[Either[String, Shinryou]] =
+    (for
       shinryoucode <- EitherT.fromOptionF(
         Api.resolveShinryoucodeByName(name, at),
         s"${name} のコードをみつけられませんでした。"
       )
-    yield Shinryou(0, visitId, shinryoucode)
-
-  // def shinryou(
-  //     name: String,
-  //     at: LocalDate,
-  //     visitId: Int
-  // ): Future[Either[String, Shinryou]] =
-  //   (for
-  //     shinryoucode <- EitherT.fromOptionF(
-  //       Api.resolveShinryoucodeByName(name, at),
-  //       s"${name} のコードをみつけられませんでした。"
-  //     )
-  //   yield Shinryou(0, visitId, shinryoucode)).value
+    yield Shinryou(0, visitId, shinryoucode)).value
 
   def composeShinryouReqs(
       names: List[String],
       at: LocalDate,
       visitId: Int
-  ): EitherT[Future, String, List[Shinryou]] =
-    names.map(shinryou(_, at, visitId)).sequence
+  ): Future[Either[String, List[Shinryou]]] =
+    names.map(shinryou(_, at, visitId)).sequence.map(_.sequence)
 
   def conductShinryouReq(
       name: String,
@@ -55,11 +43,11 @@ object RequestHelper:
   def resolveShinryoucode(
       shinryoucode: Int,
       at: LocalDate
-  ): EitherT[Future, String, Int] =
+  ): Future[Either[String, Int]] =
     EitherT.fromOptionF(
       Api.resolveShinryoucode(shinryoucode, at),
       s"有効な診療コードを見つけられませんでした。（${shinryoucode}）"
-    )
+    ).value
 
   def conductKizaiReq(
       name: String,
