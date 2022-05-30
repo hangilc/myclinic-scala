@@ -91,3 +91,31 @@ case class ShinryouMenu(at: LocalDate, visitId: Int):
           case Right(_) => ()
         }
     }
+
+  def doCopyAllTry(): Unit =
+    PracticeBus.copyTarget match {
+      case None => ShowMessage.showError("コピー先をみつけられません。")
+      case Some(targetVisitId) if targetVisitId == visitId =>
+        ShowMessage.showError("同じ診察にコピーはできません。")
+      case Some(targetVisitId) =>
+        val op =
+          for
+            visit <- EitherT.right[String](Api.getVisit(visitId))
+            targetAt = visit.visitedDate
+            srcShinryouList <- EitherT.right(Api.listShinryouForVisit(visitId))
+            srcShinryoucodes = srcShinryouList.map(_.shinryoucode)
+            dstShinryoucodes <- srcShinryoucodes
+              .map(code => EitherT(RequestHelper.resolveShinryoucode(code, targetAt)))
+              .sequence
+            dstShinryouReqs = dstShinryoucodes.map(code => Shinryou(0, targetVisitId, code))
+            enterResult <- EitherT.right(RequestHelper.batchEnter(dstShinryouReqs, List.empty))
+            (dstShinryouIds, _) = enterResult
+            dstShinryouExList <- EitherT.right(dstShinryouIds.map(Api.getShinryouEx(_)).sequence)
+          yield dstShinryouExList.foreach(PracticeBus.shinryouEntered.publish(_))
+        for
+          result <- op.value
+        yield result match {
+          case Left(msg) => ShowMessage.showError(msg)
+          case Right(_) => ()
+        }
+    }
