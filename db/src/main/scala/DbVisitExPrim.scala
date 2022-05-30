@@ -52,6 +52,12 @@ object DbVisitExPrim:
   def listShinryouEx(shinryouIds: List[Int]): ConnectionIO[List[ShinryouEx]] =
     shinryouIds.map(getShinryouEx(_).unique).sequence
 
+  def listShinryouExForVisit(visitId: Int): ConnectionIO[List[ShinryouEx]] =
+    for
+      shinryouIds <- DbShinryouPrim.listShinryouIdForVisit(visitId)
+      shinryouExList <- listShinryouEx(shinryouIds)
+    yield shinryouExList
+
   def getConductDrugEx(conductDrugId: Int): Query0[ConductDrugEx] =
     (sql"""
       select d.*, m.* from visit_conduct_drug as d inner join visit_conduct as c 
@@ -157,8 +163,7 @@ object DbVisitExPrim:
       texts <- DbTextPrim.listTextForVisit(visitId)
       drugIds <- DbDrugPrim.listDrugIdForVisit(visitId)
       drugs <- listDrugEx(drugIds)
-      shinryouIds <- DbShinryouPrim.listShinryouIdForVisit(visitId)
-      shinryouList <- listShinryouEx(shinryouIds)
+      shinryouList <- listShinryouExForVisit(visitId)
       conductIds <- DbConductPrim.listConductIdForVisit(visitId)
       conducts <- listConductEx(conductIds)
       charge <- DbChargePrim.getCharge(visitId).option

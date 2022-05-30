@@ -26,6 +26,12 @@ trait DbVisitEx extends Mysql:
   def getShinryouEx(shinryouId: Int): IO[ShinryouEx] =
     mysql(DbVisitExPrim.getShinryouEx(shinryouId).unique)
 
+  def listShinryouEx(shinryouIds: List[Int]): IO[List[ShinryouEx]] =
+    mysql(DbVisitExPrim.listShinryouEx(shinryouIds))
+
+  def listShinryouExForVisit(visitId: Int): IO[List[ShinryouEx]] =
+    mysql(DbVisitExPrim.listShinryouExForVisit(visitId))
+
   def getConductDrugEx(conductDrugId: Int): IO[ConductDrugEx] =
     mysql(DbVisitExPrim.getConductDrugEx(conductDrugId).unique)
 

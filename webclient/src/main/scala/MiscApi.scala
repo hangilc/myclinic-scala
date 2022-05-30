@@ -343,5 +343,8 @@ object MiscApi extends ApiBase:
     def getShinryouEx(shinryouId: Int): Future[ShinryouEx] =
       get("get-shinryou-ex", Params("shinryou-id" -> shinryouId))
 
+    def listShinryouExForVisit(visitId: Int): Future[List[ShinryouEx]] =
+      get("list-shinryou-ex-for-visit", Params("visit-id" -> visitId))
+
     def getConductEx(conductId: Int): Future[ConductEx] =
       get("get-conduct-ex", Params("conduct-id" -> conductId))

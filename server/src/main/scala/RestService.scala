@@ -322,6 +322,9 @@ object RestService extends DateTimeQueryParam with Publisher:
     case GET -> Root / "get-shinryou-ex" :? intShinryouId(shinryouId) =>
       Ok(Db.getShinryouEx(shinryouId))
 
+    case GET -> Root / "list-shinryou-ex-for-visit" :? intVisitId(visitId) =>
+      Ok(Db.listShinryouExForVisit(visitId))
+
     case GET -> Root / "get-conduct-ex" :? intConductId(conductId) =>
       Ok(Db.getConductEx(conductId))
 

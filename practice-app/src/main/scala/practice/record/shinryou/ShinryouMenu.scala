@@ -17,7 +17,7 @@ case class ShinryouMenu(at: LocalDate, visitId: Int):
     List(
       "検査" -> (doKensa _),
       "検索入力" -> (doSearch _),
-      "重複削除" -> (() => ()),
+      "重複削除" -> (doDeleteDuplicate _),
       "全部コピー" -> (() => ())
     )
 
@@ -43,3 +43,12 @@ case class ShinryouMenu(at: LocalDate, visitId: Int):
   def doSearch(): Unit =
     val dlog = SearchDialog(at, visitId)
     dlog.open
+
+  def doDeleteDuplicate(): Unit =
+    for
+      shinryouList <- Api.listShinryouForVisit(visitId)
+    yield
+      val (shinryouIds, _) = shinryouList.foldLeft((Set.empty[Int], Set.empty[Int])) {
+        case ((shinryouIds, shinryoucodes), shinryou) =>
+          ???
+      }
