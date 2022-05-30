@@ -34,8 +34,7 @@ case class ShinryouMenu(at: LocalDate, visitId: Int):
       dlog.open
 
   def doKensa(): Unit =
-    for
-      config <- Api.getShinryouKensa()
+    for config <- Api.getShinryouKensa()
     yield
       val dlog = KensaDialog(config, at, visitId)
       dlog.open
@@ -47,8 +46,14 @@ case class ShinryouMenu(at: LocalDate, visitId: Int):
   def doDeleteDuplicate(): Unit =
     for
       shinryouList <- Api.listShinryouForVisit(visitId)
-    yield
-      val (shinryouIds, _) = shinryouList.foldLeft((Set.empty[Int], Set.empty[Int])) {
-        case ((shinryouIds, shinryoucodes), shinryou) =>
-          ???
+      (shinryouIds, _) = shinryouList.foldLeft(
+        (Set.empty[Int], Set.empty[Int])
+      ) { case ((shinryouIds, shinryoucodes), shinryou) =>
+        val code = shinryou.shinryoucode
+        if shinryoucodes.contains(code) then
+          (shinryouIds + shinryou.shinryouId, shinryoucodes
+        )
+        else (shinryouIds, shinryoucodes + code)
       }
+      _ <- Api.deleteShinryou
+    yield ()
