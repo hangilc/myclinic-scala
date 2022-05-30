@@ -335,7 +335,8 @@ object MiscApi extends ApiBase:
     def batchGetShinryou(shinryouIds: List[Int]): Future[List[Shinryou]] =
       post("batch-get-shinryou", Params(), shinryouIds)
 
-    def deleteShinryou(shinryouId: Int): 
+    def deleteShinryou(shinryouId: Int): Future[Boolean] =
+      get("delete-shinryou", Params("shinryou-id" -> shinryouId))
 
     def batchEnterShinryouConduct(
         req: CreateShinryouConductRequest

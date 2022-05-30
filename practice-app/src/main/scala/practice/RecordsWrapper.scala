@@ -18,6 +18,7 @@ class RecordsWrapper:
       case (visitId, hokenInfo) => onHokenInfoChanged(visitId, hokenInfo)
     },
     PracticeBus.shinryouEntered.subscribe(onShinryouEntered _),
+    PracticeBus.shinryouDeleted.subscribe(onShinryouDeleted _),
     PracticeBus.conductEntered.subscribe(onConductEntered _)
   )
 
@@ -56,6 +57,9 @@ class RecordsWrapper:
 
   def onShinryouEntered(shinryou: ShinryouEx): Unit =
     findRecord(shinryou.visitId).foreach(_.onShinryouEntered(shinryou))
+
+  def onShinryouDeleted(shinryou: Shinryou): Unit =
+    findRecord(shinryou.visitId).foreach(_.onShinryouDeleted(shinryou))
   
   def onConductEntered(conduct: ConductEx): Unit =
     findRecord(conduct.visitId).foreach(_.onConductEntered(conduct))

@@ -3,6 +3,8 @@ package dev.myclinic.scala.web.practiceapp.practice.record.shinryou
 import dev.fujiwara.domq.all.{*, given}
 import dev.myclinic.scala.webclient.{Api, global}
 import java.time.LocalDate
+import cats.syntax.all.*
+import dev.myclinic.scala.web.practiceapp.practice.PracticeBus
 
 case class ShinryouMenu(at: LocalDate, visitId: Int):
   val auxMenu = PullDownLink("その他")
@@ -55,5 +57,6 @@ case class ShinryouMenu(at: LocalDate, visitId: Int):
         )
         else (shinryouIds, shinryoucodes + code)
       }
-      _ <- Api.deleteShinryou
-    yield ()
+      _ <- shinryouIds.toList.map(Api.deleteShinryou(_)).sequence
+    yield 
+      shinryouList.foreach(PracticeBus.shinryouDeleted.publish(_))

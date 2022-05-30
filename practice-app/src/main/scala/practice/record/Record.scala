@@ -90,6 +90,9 @@ class Record(visitEx: VisitEx):
   def onShinryouEntered(entered: ShinryouEx): Unit =
     shinryouList.insert(Shinryou(entered))
 
+  def onShinryouDeleted(deleted: ModelShinryou): Unit =
+    shinryouList.remove(_.shinryou.shinryouId == deleted.shinryouId)
+
   def onConductEntered(entered: ConductEx): Unit =
     conductList.append(Conduct(entered))
 
