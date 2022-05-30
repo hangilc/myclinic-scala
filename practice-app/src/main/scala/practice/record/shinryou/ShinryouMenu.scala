@@ -68,24 +68,36 @@ case class ShinryouMenu(at: LocalDate, visitId: Int):
       case Some(targetVisitId) if targetVisitId == visitId =>
         ShowMessage.showError("同じ診察にコピーはできません。")
       case Some(targetVisitId) =>
-        val op = 
+        val op =
           for
             visit <- EitherT.right(Api.getVisit(visitId))
+            targetAt = visit.visitedDate
             srcShinryouList <- EitherT.right(Api.listShinryouForVisit(visitId))
-            shinryoucodes <- srcShinryouList
-              .map(_.shinryoucode)
-              .map(RequestHelper.resolveShinryoucode(_, at))
+            srcShinryoucodes = srcShinryouList.map(_.shinryoucode)
+            dstShinryoucodes <- srcShinryoucodes
+              .map(RequestHelper.resolveShinryoucode(_, targetAt))
               .sequence
-            enterResult <- EitherT.right(RequestHelper.batchEnter(
-              shinryoucodes.map(Shinryou(0, targetVisitId, _))
-            ))
-            (dstShinryouIds, _) = enterResult
-            dstShinryouExList <- EitherT.right(dstShinryouIds.map(Api.getShinryouEx(_)).sequence)
-          yield dstShinryouExList.foreach(PracticeBus.shinryouEntered.publish(_))
-        for
-          result <- op.value
-        yield result match {
-          case Left(msg) => ShowMessage.showError(msg)
-          case Right(_) => ()
-        }
+            dstShinryouReqs = dstShinryoucodes.map(code => Shinryou(0, targetVisitId, code))
+            enterResult <- Either.right(RequestHelper.batchEnter(dstShinryouReqs, List.empty))
+          yield ()
+        //   for
+        //     visit <- EitherT.right(Api.getVisit(visitId))
+        //     srcShinryouList <- EitherT.right(Api.listShinryouForVisit(visitId))
+        //     shinryoucodes <- srcShinryouList
+        //       .map(_.shinryoucode)
+        //       .map(RequestHelper.resolveShinryoucode(_, at))
+        //       .sequence
+        //     enterResult <- EitherT.right(RequestHelper.batchEnter(
+        //       shinryoucodes.map(Shinryou(0, targetVisitId, _))
+        //     ))
+        //     (dstShinryouIds, _) = enterResult
+        //     dstShinryouExList <- EitherT.right(dstShinryouIds.map(Api.getShinryouEx(_)).sequence)
+        //   yield dstShinryouExList.foreach(PracticeBus.shinryouEntered.publish(_))
+        // for
+        //   result <- op.value
+        // yield result match {
+        //   case Left(msg) => ShowMessage.showError(msg)
+        //   case Right(_) => ()
+        // }
+        ???
     }
