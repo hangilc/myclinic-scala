@@ -5,6 +5,7 @@ import dev.myclinic.scala.webclient.{Api, global}
 import java.time.LocalDate
 import cats.syntax.all.*
 import dev.myclinic.scala.web.practiceapp.practice.PracticeBus
+import dev.myclinic.scala.model.Shinryou
 
 case class ShinryouMenu(at: LocalDate, visitId: Int):
   val auxMenu = PullDownLink("その他")
@@ -48,15 +49,15 @@ case class ShinryouMenu(at: LocalDate, visitId: Int):
   def doDeleteDuplicate(): Unit =
     for
       shinryouList <- Api.listShinryouForVisit(visitId)
-      (shinryouIds, _) = shinryouList.foldLeft(
-        (Set.empty[Int], Set.empty[Int])
-      ) { case ((shinryouIds, shinryoucodes), shinryou) =>
+      (dups, _) = shinryouList.foldLeft(
+        (List.empty[Shinryou], Set.empty[Int])
+      ) { case ((dups, shinryoucodes), shinryou) =>
         val code = shinryou.shinryoucode
         if shinryoucodes.contains(code) then
-          (shinryouIds + shinryou.shinryouId, shinryoucodes
+          (dups :+ shinryou, shinryoucodes
         )
-        else (shinryouIds, shinryoucodes + code)
+        else (dups, shinryoucodes + code)
       }
-      _ <- shinryouIds.toList.map(Api.deleteShinryou(_)).sequence
+      _ <- dups.map(shinryou => Api.deleteShinryou(shinryou.shinryouId)).sequence
     yield 
-      shinryouList.foreach(PracticeBus.shinryouDeleted.publish(_))
+      dups.foreach(PracticeBus.shinryouDeleted.publish(_))

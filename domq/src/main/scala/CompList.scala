@@ -14,7 +14,7 @@ class CompListBase[C](
   def list: List[C] = comps
 
   def remove(pred: C => Boolean): Unit =
-    val (pre, post) = comps.span(pred(_))
+    val (pre, post) = comps.span(!pred(_))
     if !post.isEmpty then
       val c = post.head
       remove(comp.ele(c))
