@@ -43,3 +43,6 @@ trait DbShinryou extends Mysql:
           .sequence
       yield pairs
     mysql(op)
+
+  def deleteShinryou(shinryouId: Int): IO[AppEvent] =
+    mysql(Prim.deleteShinryou(shinryouId))

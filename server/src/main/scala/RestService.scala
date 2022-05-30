@@ -325,6 +325,14 @@ object RestService extends DateTimeQueryParam with Publisher:
     case GET -> Root / "list-shinryou-ex-for-visit" :? intVisitId(visitId) =>
       Ok(Db.listShinryouExForVisit(visitId))
 
+    case GET -> Root / "delete-shinryou" :? intShinryouId(shinryouId) =>
+      val op = 
+        for
+          event <- Db.deleteShinryou(shinryouId)
+          _ <- publish(event)
+        yield true
+      Ok(op)
+
     case GET -> Root / "get-conduct-ex" :? intConductId(conductId) =>
       Ok(Db.getConductEx(conductId))
 
