@@ -7,13 +7,6 @@ import cats.effect.IO
 import cats.data.OptionT
 
 object Helper:
-  // def findShinryouMasterByName(name: String, at: LocalDate): IO[Option[ShinryouMaster]] =
-  //   val mapCode: Int = ConfigService.masterNameMap.shinryou.applyOrElse(name, _ => 0)
-  //   if mapCode > 0 then
-  //     Db.findShinryouMaster(mapCode, at)
-  //   else
-  //     Db.findShinryouMasterByName(name, at)
-
   def findShinryoucodeByName(name: String, at: LocalDate): IO[Option[Int]] =
     val opt: OptionT[IO, Int] = 
       OptionT.fromOption[IO](ConfigService.masterNameMap.shinryou.get(name))

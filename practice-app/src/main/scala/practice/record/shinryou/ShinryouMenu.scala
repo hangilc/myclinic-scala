@@ -21,7 +21,7 @@ case class ShinryouMenu(at: LocalDate, visitId: Int):
       "検査" -> (doKensa _),
       "検索入力" -> (doSearch _),
       "重複削除" -> (doDeleteDuplicate _),
-      "全部コピー" -> (() => ())
+      "全部コピー" -> (doCopyAll _)
     )
 
   def doRegular(): Unit =
@@ -61,3 +61,16 @@ case class ShinryouMenu(at: LocalDate, visitId: Int):
       _ <- dups.map(shinryou => Api.deleteShinryou(shinryou.shinryouId)).sequence
     yield 
       dups.foreach(PracticeBus.shinryouDeleted.publish(_))
+
+  def doCopyAll(): Unit =
+    PracticeBus.copyTarget match {
+      case None => ShowMessage.showError("コピー先をみつけられません。")
+      case Some(targetVisitId) if targetVisitId == visitId => 
+        ShowMessage.showError("同じ診察にコピーはできません。") 
+      case Some(targetVisitId) => 
+        for
+          visit <- Api.getVisit(visitId)
+          srcShinryouList <- Api.listShinryouForVisit(visitId)
+          shinryoucodes <- Api.resolveShinryou
+        yield ???
+    }
