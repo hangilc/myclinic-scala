@@ -1,8 +1,9 @@
 package dev.myclinic.scala.web.practiceapp.practice.record.conduct
 
 import dev.fujiwara.domq.all.{*, given}
+import java.time.LocalDate
 
-case class ConductMenu():
+case class ConductMenu(at: LocalDate, visitId: Int):
   val link = PullDownLink("処置")
   link.setBuilder(menuItems)
   val workarea = div
@@ -16,6 +17,6 @@ case class ConductMenu():
     )
 
   def doXp(): Unit =
-    val w = XpWidget()
+    val w = XpWidget(at, visitId, _.close())
     workarea.prepend(w.ele)
 

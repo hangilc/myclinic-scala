@@ -17,6 +17,7 @@ import org.scalajs.dom.HTMLElement
 import dev.myclinic.scala.web.practiceapp.practice.PracticeBus
 import dev.myclinic.scala.web.practiceapp.practice.record.shinryou.ShinryouMenu
 import dev.myclinic.scala.web.practiceapp.practice.record.conduct.ConductMenu
+import java.time.LocalDate
 
 class Record(visitEx: VisitEx):
   val title = new Title(visitEx)
@@ -58,6 +59,7 @@ class Record(visitEx: VisitEx):
     PracticeBus.textEntered.subscribe(onTextEntered _)
   )
 
+  def at: LocalDate = visitEx.visitedAt.toLocalDate
   def visitId: Int = visitEx.visitId
 
   def createHoken(hokenInfo: HokenInfo): Hoken = new Hoken(
@@ -77,7 +79,7 @@ class Record(visitEx: VisitEx):
       new ShinryouMenu(visitEx.visitedAt.toLocalDate, visitId).ele,
       shinryouWrapper,
       new Drug(visitEx).ele,
-      ConductMenu().ele,
+      ConductMenu(at, visitId).ele,
       conductWrapper,
       new Payment(visitEx).ele
     )
