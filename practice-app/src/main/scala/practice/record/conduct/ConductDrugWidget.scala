@@ -63,7 +63,7 @@ case class ConductDrugWidget(
     ele.remove()
 
   def doEnter(): Unit =
-    for
+    val op = for
       master <- EitherT.fromEither[Future](getMaster)
       amount <- EitherT.fromEither[Future](getAmount)
       kind = getKind
@@ -76,10 +76,18 @@ case class ConductDrugWidget(
         shinryouList = shinryouOption.toList,
         drugs = List(conductDrug)
       )
-      result <- EitherT.right(RequestHelper.batchEnter(conductList = List(createConductReq)))
+      result <- EitherT.right(
+        RequestHelper.batchEnter(conductList = List(createConductReq))
+      )
       (_, List(conductId)) = result
       conductEx <- EitherT.right(Api.getConductEx(conductId))
     yield PracticeBus.conductEntered.publish(conductEx)
+    for
+      result <- op.value
+    yield result match {
+      case Left(msg) => ShowMessage.showError(msg)
+      case Right(_) => ele.remove()
+    }
 
   def getMaster: Either[String, IyakuhinMaster] =
     Either.fromOption(master, "医薬品が選択されていません。")
