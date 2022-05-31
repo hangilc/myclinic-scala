@@ -33,3 +33,6 @@ trait DbIyakuhinMaster extends Mysql:
       update iyakuhin_master_arch set valid_upto = ${validUpto} 
       where valid_upto = '0000-00-00'
     """.update.run)
+
+  def searchIyakuhinMaster(text: String, at: LocalDate): IO[List[IyakuhinMaster]] =
+    mysql(Prim.searchIyakuhinMaster(text, at).to[List])

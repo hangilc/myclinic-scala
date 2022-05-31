@@ -12,11 +12,15 @@ case class ConductMenu(at: LocalDate, visitId: Int):
   def menuItems: List[(String, () => Unit)] =
     List(
       "Ｘ線検査追加" -> (doXp _),
-      "注射追加" -> (() => ()),
+      "注射追加" -> (doConductDrug _),
       "全部コピー" -> (() => ()),
     )
 
   def doXp(): Unit =
     val w = XpWidget(at, visitId, _.close())
+    workarea.prepend(w.ele)
+
+  def doConductDrug(): Unit =
+    val w = ConductDrugWidget(at, visitId, _.close())
     workarea.prepend(w.ele)
 

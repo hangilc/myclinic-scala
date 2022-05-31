@@ -85,4 +85,7 @@ object MasterService extends DateTimeQueryParam:
 
     case GET -> Root / "search-shinryou-master" :? strText(text) +& dateAt(at) =>
       Ok(Db.searchShinryouMaster(text, at))
+
+    case GET -> Root / "search-iyakuhin-master" :? strText(text) +& dateAt(at) =>
+      Ok(Db.searchIyakuhinMaster(text, at))
   }

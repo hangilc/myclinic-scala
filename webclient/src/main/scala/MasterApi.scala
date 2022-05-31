@@ -49,5 +49,8 @@ object MasterApi extends ApiBase:
     def searchShinryouMaster(text: String, at: LocalDate): Future[List[ShinryouMaster]] =
       get("search-shinryou-master", Params("text" -> text, "at" -> at))
 
+    def searchIyakuhinMaster(text: String, at: LocalDate): Future[List[IyakuhinMaster]] =
+      get("search-iyakuhin-master", Params("text" -> text, "at" -> at))
+
 
 
