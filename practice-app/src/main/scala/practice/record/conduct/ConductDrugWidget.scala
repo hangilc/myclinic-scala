@@ -13,28 +13,31 @@ import dev.myclinic.scala.model.IyakuhinMaster
 import scala.util.Try
 import scala.concurrent.Future
 import dev.myclinic.scala.model.ConductShinryou
+import dev.myclinic.scala.model.ConductDrug
 
 case class ConductDrugWidget(
     at: LocalDate,
     visitId: Int,
     onDone: ConductDrugWidget => Unit
 ):
-  private var master: Option[IyakuhinMaster] = None 
+  private var master: Option[IyakuhinMaster] = None
   val nameSpan = span
   val amountInput = input
   val unitSpan = span
-  val kindGroup = RadioGroup[ConductKind](List(
-    "皮下・筋肉" -> ConductKind.HikaChuusha,
-    "静注" -> ConductKind.JoumyakuChuusha,
-    "その他" -> ConductKind.OtherChuusha
-  ))
+  val kindGroup = RadioGroup[ConductKind](
+    List(
+      "皮下・筋肉" -> ConductKind.HikaChuusha,
+      "静注" -> ConductKind.JoumyakuChuusha,
+      "その他" -> ConductKind.OtherChuusha
+    )
+  )
   val searchForm = new SearchForm[IyakuhinMaster](
     _.name,
     text => Api.searchIyakuhinMaster(text, at)
   )
-  searchForm.onSelect(m => 
+  searchForm.onSelect(m =>
     master = Some(m)
-    nameSpan(innerText := m.name) 
+    nameSpan(innerText := m.name)
     unitSpan(innerText := m.unit)
   )
   val ele = div(
@@ -51,7 +54,7 @@ case class ConductDrugWidget(
     kindGroup.ele,
     div(
       button("入力", onclick := (doEnter _)),
-      button("キャンセル", onclick := (close _))  
+      button("キャンセル", onclick := (close _))
     ),
     searchForm.ele
   )
@@ -64,9 +67,19 @@ case class ConductDrugWidget(
       master <- EitherT.fromEither[Future](getMaster)
       amount <- EitherT.fromEither[Future](getAmount)
       kind = getKind
+      conductDrug = ConductDrug(0, 0, master.iyakuhincode, amount)
       shinryouOption <- EitherT(getShinryou)
-      
-    yield ???
+      createConductReq = CreateConductRequest(
+        visitId,
+        kind.code,
+        None,
+        shinryouList = shinryouOption.toList,
+        drugs = List(conductDrug)
+      )
+      result <- EitherT.right(RequestHelper.batchEnter(conductList = List(createConductReq)))
+      (_, List(conductId)) = result
+      conductEx <- EitherT.right(Api.getConductEx(conductId))
+    yield PracticeBus.conductEntered.publish(conductEx)
 
   def getMaster: Either[String, IyakuhinMaster] =
     Either.fromOption(master, "医薬品が選択されていません。")
@@ -78,7 +91,7 @@ case class ConductDrugWidget(
 
   def getShinryou: Future[Either[String, Option[ConductShinryou]]] =
     getKind match {
-      case ConductKind.HikaChuusha => 
+      case ConductKind.HikaChuusha =>
         EitherT(RequestHelper.conductShinryouReq("皮下筋注", at)).map(Some(_)).value
       case ConductKind.JoumyakuChuusha =>
         EitherT(RequestHelper.conductShinryouReq("静注", at)).map(Some(_)).value
