@@ -5,7 +5,7 @@ import ElementQ.{*, given}
 import org.scalajs.dom.HTMLElement
 
 case class CheckLabel[T](value: T, labelString: String):
-  val checkId = DomqUtil.genId
+  val checkId = GenSym.genSym
   val checkElement = Html.checkbox(id := checkId)
   val labelElement = Html.label(labelString, attr("for") := checkId)
   def selected: Option[T] =

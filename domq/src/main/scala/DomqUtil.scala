@@ -7,14 +7,14 @@ import org.scalajs.dom.HTMLElement
 import scala.scalajs.js.typedarray.ArrayBuffer
 
 object DomqUtil:
-  def alert(msg: String): Unit = js.Dynamic.global.alert(msg)
+  // def alert(msg: String): Unit = js.Dynamic.global.alert(msg)
 
-  private var nextIdValue: Int = 1
+  // private var nextIdValue: Int = 1
 
-  def genId: String =
-    val id: String = s"domq-gen-id-${nextIdValue}"
-    nextIdValue += 1
-    id
+  // def genId: String =
+  //   val id: String = s"domq-gen-id-${nextIdValue}"
+  //   nextIdValue += 1
+  //   id
 
   def dataURLtoArrayBuffer(dataURL: String): ArrayBuffer =
     val bs = org.scalajs.dom.window.atob(dataURL.substring(dataURL.indexOf(",") + 1))

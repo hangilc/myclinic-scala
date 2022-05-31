@@ -30,3 +30,4 @@ object all:
   type CheckLabel[T] = dev.fujiwara.domq.CheckLabel[T]
   val CheckLabel = dev.fujiwara.domq.CheckLabel
   type SearchForm[D] = dev.fujiwara.domq.searchform.SearchForm[D]
+  val RadioGroup = dev.fujiwara.domq.RadioGroup
