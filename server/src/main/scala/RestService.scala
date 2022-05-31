@@ -264,7 +264,7 @@ object RestService extends DateTimeQueryParam with Publisher:
       Ok(Db.getPatientAllHoken(patientId))
 
     case GET -> Root / "resolve-shinryoucode-by-name" :? strName(name) +& dateAt(at) =>
-      Ok(Helper.findShinryoucodeByName(name, at))
+      Ok(Helper.resolveShinryoucodeByName(name, at))
 
     case GET -> Root / "resolve-shinryoucode" :? intShinryoucode(shinryoucode) +& dateAt(at) =>
       Ok(Helper.resolveShinryoucode(shinryoucode, at))
@@ -277,7 +277,7 @@ object RestService extends DateTimeQueryParam with Publisher:
           names <- req.as[List[String]]
           codes <-
             names
-              .map(name => Helper.findShinryoucodeByName(name, at))
+              .map(name => Helper.resolveShinryoucodeByName(name, at))
               .sequence
               .map(opts => opts.map(_.getOrElse(0)))
         yield Map(names.zip(codes): _*)

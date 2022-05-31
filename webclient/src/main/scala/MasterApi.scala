@@ -16,6 +16,12 @@ object MasterApi extends ApiBase:
     def getIyakuhinMaster(iyakuhincode: Int, at: LocalDate): Future[IyakuhinMaster] =
       get("get-iyakuhin-master", Params("iyakuhincode" -> iyakuhincode, "at" -> at))
 
+    def findIyakuhinMaster(iyakuhincode: Int, at: LocalDate): Future[Option[IyakuhinMaster]] =
+      get("find-iyakuhin-master", Params("iyakuhincode" -> iyakuhincode, "at" -> at))
+
+    def resolveIyakuhincode(iyakuhincode: Int, at: LocalDate): Future[Option[Int]] =
+      findIyakuhinMaster(iyakuhincode, at).map(_.map(_.iyakuhincode))
+
     def batchResolveIyakuhinMaster(iyakuhincodes: List[Int], at: LocalDate)
       : Future[Map[Int, IyakuhinMaster]] =
         post("batch-resolve-iyakuhin-master", Params("at" -> at), iyakuhincodes)
@@ -40,7 +46,10 @@ object MasterApi extends ApiBase:
       get("get-kizai-master", Params("kizaicode" -> kizaicode, "at" -> at))
 
     def resolveKizaicodeByName(name: String, at: LocalDate): Future[Option[Int]] =
-      get("find-kizaicode-by-name", Params("name" -> name, "at" -> at))
+      get("resolve-kizaicode-by-name", Params("name" -> name, "at" -> at))
+
+    def resolveKizaicode(kizaicode: Int, at: LocalDate): Future[Option[Int]] =
+      get("resolve-kizaicode", Params("kizaicode" -> kizaicode, "at" -> at))
 
     def batchResolveKizaiMaster(kizaicodes: List[Int], at: LocalDate)
       : Future[Map[Int, KizaiMaster]] =

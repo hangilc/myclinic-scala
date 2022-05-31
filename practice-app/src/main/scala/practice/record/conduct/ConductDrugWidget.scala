@@ -1,7 +1,8 @@
 package dev.myclinic.scala.web.practiceapp.practice.record.conduct
 
 import dev.fujiwara.domq.all.{*, given}
-import dev.myclinic.scala.web.practiceapp.practice.record.shinryou.RequestHelper
+import dev.myclinic.scala.web.practiceapp.practice.record.CodeResolver
+import dev.myclinic.scala.web.practiceapp.practice.record.CreateHelper
 import cats.data.EitherT
 import cats.syntax.all.*
 import java.time.LocalDate
@@ -68,7 +69,7 @@ case class ConductDrugWidget(
       amount <- EitherT.fromEither[Future](getAmount)
       kind = getKind
       conductDrug = ConductDrug(0, 0, master.iyakuhincode, amount)
-      shinryouOption <- EitherT(getShinryou)
+      shinryouOption <- getShinryou
       createConductReq = CreateConductRequest(
         visitId,
         kind.code,
@@ -76,11 +77,9 @@ case class ConductDrugWidget(
         shinryouList = shinryouOption.toList,
         drugs = List(conductDrug)
       )
-      result <- EitherT.right(
-        RequestHelper.batchEnter(conductList = List(createConductReq))
+      conductEx <- EitherT.right(
+        CreateHelper.enterConduct(createConductReq)
       )
-      (_, List(conductId)) = result
-      conductEx <- EitherT.right(Api.getConductEx(conductId))
     yield PracticeBus.conductEntered.publish(conductEx)
     for
       result <- op.value
@@ -97,11 +96,15 @@ case class ConductDrugWidget(
 
   def getKind: ConductKind = kindGroup.selected
 
-  def getShinryou: Future[Either[String, Option[ConductShinryou]]] =
+  def getShinryou: EitherT[Future, String, Option[ConductShinryou]] =
     getKind match {
       case ConductKind.HikaChuusha =>
-        EitherT(RequestHelper.conductShinryouReq("皮下筋注", at)).map(Some(_)).value
+        for
+          cs <- CreateHelper.conductShinryouReqByName("皮下筋注", at)
+        yield Some(cs)
       case ConductKind.JoumyakuChuusha =>
-        EitherT(RequestHelper.conductShinryouReq("静注", at)).map(Some(_)).value
-      case _ => EitherT.rightT[Future, String](None).value
+        for
+          cs <- CreateHelper.conductShinryouReqByName("静注", at)
+        yield Some(cs)
+      case _ => EitherT.rightT[Future, String](None)
     }

@@ -34,6 +34,11 @@ object MasterService extends DateTimeQueryParam:
         ) +& dateAt(at) =>
       Ok(Db.getIyakuhinMaster(iyakuhincode, at))
 
+    case GET -> Root / "find-iyakuhin-master" :? intIyakuhincode(
+          iyakuhincode
+        ) +& dateAt(at) =>
+      Ok(Db.findIyakuhinMaster(iyakuhincode, at))
+
     case req @ POST -> Root / "batch-get-iyakuhin-master" :? dateAt(at) =>
       Ok(for
         codes <- req.as[List[Int]]
@@ -56,8 +61,11 @@ object MasterService extends DateTimeQueryParam:
         ) +& dateAt(at) =>
       Ok(Db.getKizaiMaster(kizaicode, at))
 
-    case GET -> Root / "find-kizaicode-by-name" :? strName(name) +& dateAt(at) =>
-      Ok(Db.findKizaicodeByName(name, at))
+    case GET -> Root / "resolve-kizaicode-by-name" :? strName(name) +& dateAt(at) =>
+      Ok(Helper.resolveKizaicodeByName(name, at))
+
+    case GET -> Root / "resolve-kizaicode" :? intKizaicode(kizaicode) +& dateAt(at) =>
+      Ok(Helper.resolveKizaicode(kizaicode, at))
 
     case req @ POST -> Root / "batch-get-kizai-master" :? dateAt(at) =>
       Ok(for

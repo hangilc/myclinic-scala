@@ -19,6 +19,9 @@ trait DbIyakuhinMaster extends Mysql:
   def getIyakuhinMaster(iyakuhincode: Int, at: LocalDate): IO[IyakuhinMaster] =
     mysql(Prim.getIyakuhinMaster(iyakuhincode, at).unique)
 
+  def findIyakuhinMaster(iyakuhincode: Int, at: LocalDate): IO[Option[IyakuhinMaster]] =
+    mysql(Prim.getIyakuhinMaster(iyakuhincode, at).option)
+
   def findIyakuhinMasterByName(name: String, at: LocalDate): IO[Option[IyakuhinMaster]] =
     mysql(Prim.getIyakuhinMasterByName(name, at).option)
 

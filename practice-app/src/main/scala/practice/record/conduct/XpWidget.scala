@@ -1,7 +1,8 @@
 package dev.myclinic.scala.web.practiceapp.practice.record.conduct
 
 import dev.fujiwara.domq.all.{*, given}
-import dev.myclinic.scala.web.practiceapp.practice.record.shinryou.RequestHelper
+import dev.myclinic.scala.web.practiceapp.practice.record.CodeResolver
+import dev.myclinic.scala.web.practiceapp.practice.record.CreateHelper
 import cats.data.EitherT
 import cats.syntax.all.*
 import java.time.LocalDate
@@ -37,17 +38,16 @@ case class XpWidget(at: LocalDate, visitId: Int, onDone: XpWidget => Unit):
   def doEnter: Unit =
     val label = labelSelect.value
     val film = filmSelect.value
-    val op = for
-      shinryou1 <- EitherT(RequestHelper.conductShinryouReq("単純撮影", at))
-      shinryou2 <- EitherT(RequestHelper.conductShinryouReq("単純撮影診断", at))
-      kizai <- EitherT(RequestHelper.conductKizaiReq(film, 1.0, at))
-      creq = CreateConductRequest(visitId, ConductKind.Gazou.code, Some(label),
-        shinryouList = List(shinryou1, shinryou2),
-        kizaiList = List(kizai))
-      enterResult <- EitherT.right(RequestHelper.batchEnter(conductList = List(creq)))
-      (_, conductIds) = enterResult
-      conductEx <- EitherT.right(Api.getConductEx(conductIds(0)))
-    yield PracticeBus.conductEntered.publish(conductEx)
+    val op = 
+      for
+        shinryou1 <- CreateHelper.conductShinryouReqByName("単純撮影", at)
+        shinryou2 <- CreateHelper.conductShinryouReqByName("単純撮影診断", at)
+        kizai <- CreateHelper.conductKizaiReqByName(film, 1.0, at)
+        creq = CreateConductRequest(visitId, ConductKind.Gazou.code, Some(label),
+          shinryouList = List(shinryou1, shinryou2),
+          kizaiList = List(kizai))
+        conductEx <- EitherT.right(CreateHelper.enterConduct(creq))
+      yield PracticeBus.conductEntered.publish(conductEx)
     for
       result <- op.value
     yield result match {

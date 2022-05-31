@@ -7,7 +7,7 @@ import cats.effect.IO
 import cats.data.OptionT
 
 object Helper:
-  def findShinryoucodeByName(name: String, at: LocalDate): IO[Option[Int]] =
+  def resolveShinryoucodeByName(name: String, at: LocalDate): IO[Option[Int]] =
     ConfigService.masterNameMap.shinryou.get(name).fold(
       Db.findShinryoucodeByName(name, at)
     )(
@@ -17,15 +17,6 @@ object Helper:
           .value
     )
 
-
-    // val opt: OptionT[IO, Int] = 
-    //   OptionT.fromOption[IO](ConfigService.masterNameMap.shinryou.get(name))
-    //     .map(code => ConfigService.masterTransition.shinryou.transit(code, at))
-    //     .flatMap(code => OptionT(Db.findShinryouMaster(code, at)))
-    //     .map(_.shinryoucode)
-    //     .orElse(OptionT(Db.findShinryoucodeByName(name, at)))
-    // opt.value
-
   def resolveShinryoucode(shinryoucode: Int, at: LocalDate): IO[Option[Int]] =
     val code: Int = ConfigService.masterTransition.shinryou.transit(shinryoucode, at)
     val opt = 
@@ -34,13 +25,22 @@ object Helper:
       yield master.shinryoucode
     opt.value
 
-  def findKizaicodeByName(name: String, at: LocalDate): IO[Option[Int]] =
-    val opt: OptionT[IO, Int] = 
-      OptionT.fromOption[IO](ConfigService.masterNameMap.kizai.get(name))
-        .map(code => ConfigService.masterTransition.kizai.transit(code, at))
-        .flatMap(code => OptionT(Db.findKizaiMaster(code, at)))
-        .map(_.kizaicode)
-        .orElse(OptionT(Db.findKizaicodeByName(name, at)))
+  def resolveKizaicodeByName(name: String, at: LocalDate): IO[Option[Int]] =
+    ConfigService.masterNameMap.kizai.get(name).fold(
+      Db.findKizaicodeByName(name, at)
+    )(
+      nameCode =>
+        OptionT(resolveKizaicode(nameCode, at))
+          .orElse(OptionT(Db.findKizaicodeByName(name, at)))
+          .value
+    )
+
+  def resolveKizaicode(kizaicode: Int, at: LocalDate): IO[Option[Int]] =
+    val code: Int = ConfigService.masterTransition.kizai.transit(kizaicode, at)
+    val opt = 
+      for
+        master <- OptionT(Db.findKizaiMaster(code, at))
+      yield master.kizaicode
     opt.value
 
 
