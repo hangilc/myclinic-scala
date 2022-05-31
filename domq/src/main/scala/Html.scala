@@ -1,19 +1,5 @@
 package dev.fujiwara.domq
 
-// import org.scalajs.dom.document
-// import org.scalajs.dom.HTMLElement
-// import org.scalajs.dom.HTMLImageElement
-// import org.scalajs.dom.HTMLInputElement
-// import org.scalajs.dom.HTMLOptionElement
-// import org.scalajs.dom.HTMLSelectElement
-// import org.scalajs.dom.HTMLAnchorElement
-// import org.scalajs.dom.HTMLButtonElement
-// import org.scalajs.dom.HTMLFormElement
-// import org.scalajs.dom.HTMLLabelElement
-// import org.scalajs.dom.HTMLUListElement
-// import org.scalajs.dom.HTMLLIElement
-// import org.scalajs.dom.HTMLSpanElement
-// import org.scalajs.dom.HTMLTextAreaElement
 import org.scalajs.dom.*
 import dev.fujiwara.domq.ElementQ.*
 import dev.fujiwara.domq.Modifiers.*
@@ -46,8 +32,9 @@ object Html:
 
   def inputText = input(attr("type") := "text")
   def checkbox = input(attr("type") := "checkbox")
-  def radio(radioName: String, radioValue: String) = input(
-    attr("type") := "radio",
-    name := radioName,
-    value := radioValue)
+  def radio = input(attr("type") := "radio")
+  // def radio(radioName: String, radioValue: String) = input(
+  //   attr("type") := "radio",
+  //   name := radioName,
+  //   value := radioValue)
   def img = create[HTMLImageElement]("img")

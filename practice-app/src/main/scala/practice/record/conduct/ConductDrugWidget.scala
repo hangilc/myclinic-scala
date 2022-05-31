@@ -16,12 +16,24 @@ case class ConductDrugWidget(
     visitId: Int,
     onDone: ConductDrugWidget => Unit
 ):
+  val nameSpan = span
+  val amountInput = input
+  val unitSpan = span
   val searchForm = new SearchForm[IyakuhinMaster](
     _.name,
     text => Api.searchIyakuhinMaster(text, at)
   )
   val ele = div(
     div("注射処置入力"),
+    div(
+      span("薬剤名称"),
+      nameSpan
+    ),
+    div(
+      span("用量"),
+      amountInput,
+      unitSpan
+    ),
     searchForm.ele
   )
 
