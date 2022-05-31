@@ -26,11 +26,11 @@ class KoukikoureiForm:
     ),
     span("被保険者番号") -> eHihokenshaBangou,
     span("負担割") -> eFutanWariForm(
-      radio("futanwari", "1")(checked := true),
+      radio(name := "futanwari", value := "1")(checked := true),
       "１割",
-      radio("futanwari", "2"),
+      radio(name := "futanwari", value := "2"),
       "２割",
-      radio("futanwari", "3"),
+      radio(name := "futanwari", value := "3"),
       "３割"
     ),
     span("期限開始") -> eValidFrom.ele,

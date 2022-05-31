@@ -1,9 +1,13 @@
 package dev.fujiwara.domq
 
-import dev.fujiwara.domq.all.{*, given}
+import Html.{*, given}
+import Modifiers.{*, given}
+import ElementQ.{*, given}
 import org.scalajs.dom.HTMLInputElement
 
 case class RadioLabel[T](name: String, value: T, label: String):
-  val labelElement = span(Modifiers.innerText := label, Modifiers.name := "")
-  val radioElement: HTMLInputElement = radio
+  val labelElement = span(innerText := label)
+  val radioElement = radio(Modifiers.name := name)
+
+  def checked: Boolean = radioElement.checked
 

@@ -87,8 +87,8 @@ object PatientEdit:
           firstNameYomiInput(width := "100px", ml := "4px", placeholder := "めい")
         ),
         span("性別") -> div(
-          radio("sex", "M"), span("男"),
-          radio("sex", "F"), span("女")
+          radio(name := "sex", value := "M"), span("男"),
+          radio(name := "sex", value := "F"), span("女")
         ),
         span("生年月日") -> birthdayInput.ele,
         span("住所") -> addressInput,

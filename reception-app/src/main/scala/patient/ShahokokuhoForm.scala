@@ -33,13 +33,13 @@ class ShahokokuhoForm:
     ),
     span("枝番") -> eEdaban,
     span("本人・家族") -> eHonninForm(
-      radio("honnin", "1"), "本人",
-      radio("honnin", "0")( checked := true ), "家族"
+      radio(name := "honnin", value := "1"), "本人",
+      radio(name := "honnin", value := "0")( checked := true ), "家族"
     ),
     span("高齢") -> eKoureiForm(
-      radio("kourei", "0")(checked := true), "高齢でない",
-      radio("kourei", "2"), "２割",
-      radio("kourei", "3"), "３割"
+      radio(name := "kourei", value := "0")(checked := true), "高齢でない",
+      radio(name := "kourei", value := "2"), "２割",
+      radio(name := "kourei", value := "3"), "３割"
     ),
     span("期限開始") -> eValidFrom.ele,
     span("期限終了") -> eValidUpto.ele
