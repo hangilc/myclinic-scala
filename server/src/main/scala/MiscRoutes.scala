@@ -382,4 +382,12 @@ object MiscService extends DateTimeQueryParam with Publisher:
         yield true
       Ok(op)
 
+    case req @ POST -> Root / "enter-payment" =>
+      val op =
+        for
+          payment <- req.as[Payment]
+          event <- Db.enterPayment(payment)
+          _ <- publish(event)
+        yield true
+      Ok(op)
   }

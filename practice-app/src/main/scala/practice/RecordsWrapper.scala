@@ -22,6 +22,7 @@ class RecordsWrapper:
     PracticeBus.conductEntered.subscribe(onConductEntered _),
     PracticeBus.conductDeleted.subscribe(onConductDeleted _),
     PracticeBus.chargeUpdated.subscribe(onChargeUpdated _),
+    PracticeBus.paymentEntered.subscribe(onPaymentEntered _),
   )
 
   def dispose: Unit = 
@@ -71,6 +72,9 @@ class RecordsWrapper:
 
   def onChargeUpdated(charge: Charge) =
     findRecord(charge.visitId).foreach(_.onChargeUpdated(charge))
+  
+  def onPaymentEntered(payment: Payment) =
+    findRecord(payment.visitId).foreach(_.onPaymentEntered(payment))
   
 object RecordsWrapper:
   given Dispose[RecordsWrapper] = _.dispose

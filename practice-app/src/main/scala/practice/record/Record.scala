@@ -108,6 +108,10 @@ class Record(visitEx: VisitEx):
   def onChargeUpdated(updated: Charge): Unit =
     payment.onChargeUpdated(updated)
 
+  def onPaymentEntered(entered: ModelPayment): Unit =
+    payment.onPaymentEntered(entered)
+
+
 object Record:
   given Ordering[Record] = Ordering.by[Record, Int](r => r.visitId).reverse
   given Comp[Record] = _.ele

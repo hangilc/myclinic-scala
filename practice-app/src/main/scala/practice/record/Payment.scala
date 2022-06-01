@@ -19,3 +19,7 @@ case class Payment(
     chargeOption = Some(newCharge)
     disp()
 
+  def onPaymentEntered(payment: ModelPayment): Unit =
+    paymentOption = Some(payment)
+    disp()
+

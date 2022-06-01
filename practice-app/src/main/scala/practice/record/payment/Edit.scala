@@ -4,6 +4,7 @@ import dev.fujiwara.domq.all.{*, given}
 import dev.myclinic.scala.model.*
 import dev.myclinic.scala.webclient.{Api, global}
 import dev.myclinic.scala.web.practiceapp.practice.PracticeBus
+import java.time.LocalDateTime
 
 case class Edit(
     chargeOption: Option[Charge],
@@ -26,7 +27,7 @@ case class Edit(
     ),
     div(
       cls := "practice-widget-commands",
-      a("未収に"),
+      a("未収に", onclick := (doNoPayment _)),
       a("領収書PDF"),
       button("入力", onclick := (doEnter _)),
       button("キャンセル", onclick := (doCancel _))
@@ -44,4 +45,12 @@ case class Edit(
           updated <- Api.updateChargeValue(visitId, newCharge)
         yield PracticeBus.chargeUpdated.publish(updated)
     }
+
+  def doNoPayment(): Unit =
+    val pay = Payment(visitId, 0, LocalDateTime.now())
+    for
+      _ <- Api.enterPayment(pay)
+    yield
+      PracticeBus.paymentEntered.publish(pay)
+      
 

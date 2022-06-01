@@ -357,3 +357,6 @@ object MiscApi extends ApiBase:
 
     def updateChargeValue(visitId: Int, chargeValue: Int): Future[Charge] =
       get("update-charge-value", Params("visit-id" -> visitId, "charge-value" -> chargeValue))
+
+    def enterPayment(payment: Payment): Future[Boolean] =
+      post("enter-payment", Params(), payment)
