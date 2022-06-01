@@ -40,21 +40,21 @@ object Config extends ConfigCirce:
 
   def paperScanDir(patientId: Int): String =
     val d = Path.of(scanDir, patientId.toString)
-    if !Files.exists(d) then
-      d.toFile.mkdirs
+    if !Files.exists(d) then d.toFile.mkdirs
     d.toString
 
-  def adHocHolidayRanges: List[AdHocHolidayRange] = 
+  def adHocHolidayRanges: List[AdHocHolidayRange] =
     val file = dataDir.resolve("adhoc-holidays.yaml").toFile
     val reader: _root_.java.io.Reader = _root_.java.io.FileReader(file)
     try
-      parser.parse(reader).flatMap(_.as[List[AdHocHolidayRange]])
+      parser
+        .parse(reader)
+        .flatMap(_.as[List[AdHocHolidayRange]])
         .getOrElse({
           logger.error("Failed to read AdHocholidayRange")
           List.empty
         })
-    finally
-      reader.close()
+    finally reader.close()
 
   def getShohouSamples: List[String] =
     val file = dataDir.resolve("shohou-sample.txt")
@@ -70,25 +70,34 @@ object Config extends ConfigCirce:
 
   def getMasterNameMap: MasterNameMap =
     import MasterNameMap.linePattern as pat
-    val src: Source = Source.fromFile(configDir.resolve("master-name.txt").toFile, "UTF-8")
+    val src: Source =
+      Source.fromFile(configDir.resolve("master-name.txt").toFile, "UTF-8")
     try
-      val map = src.getLines.map(line => line match {
-        case pat(kind, name, idString) => Some(kind, name, idString.toInt)
-        case _ => None
-      }).collect({ case Some(a) => a}).toList.groupMap(_.head)(_.tail)
+      val map = src.getLines
+        .map(line =>
+          line match {
+            case pat(kind, name, idString) => Some(kind, name, idString.toInt)
+            case _                         => None
+          }
+        )
+        .collect({ case Some(a) => a })
+        .toList
+        .groupMap(_.head)(_.tail)
       MasterNameMap(map)
     finally src.close()
 
   def getMasterTransition: MasterTransition =
-    val src: Source = Source.fromFile(configDir.resolve("master-map.txt").toFile, "UTF-8")
+    val src: Source =
+      Source.fromFile(configDir.resolve("master-map.txt").toFile, "UTF-8")
     try
       src.getLines.foldLeft(MasterTransition())((m, s) =>
         MasterTransitionRule.parse(s) match {
-          case Some(kind, r) => kind match {
-            case "S" => m.copy(shinryou = m.shinryou.extend(r))
-            case "K" => m.copy(kizai = m.kizai.extend(r))
-            case _ => m
-          }
+          case Some(kind, r) =>
+            kind match {
+              case "S" => m.copy(shinryou = m.shinryou.extend(r))
+              case "K" => m.copy(kizai = m.kizai.extend(r))
+              case _   => m
+            }
           case None => m
         }
       )
@@ -96,23 +105,28 @@ object Config extends ConfigCirce:
 
   def getStampInfo(name: String): StampInfo =
     val file: File = configDir.resolve(s"stamp-data/${name}.yml").toFile
-    readYaml[StampInfo](file)
+    val stampInfo: StampInfo = readYaml[StampInfo](file)
+    if !Path.of(stampInfo.imageFile).isAbsolute then
+      val absPath = configDir
+        .resolve("stamp-data")
+        .resolve(Path.of(stampInfo.imageFile))
+        .toAbsolutePath()
+        .toString()
+      stampInfo.copy(imageFile = absPath)
+    else stampInfo
 
   def readYaml[T: Decoder](file: File): T =
     val reader: _root_.java.io.Reader = _root_.java.io.FileReader(file)
     try
-      parser.parse(reader).flatMap(_.as[T]).getOrElse(
-        throw new RuntimeException("Failed to read: " + file.toString)
-      )
-    finally
-      reader.close()
-    
+      parser
+        .parse(reader)
+        .flatMap(_.as[T])
+        .getOrElse(
+          throw new RuntimeException("Failed to read: " + file.toString)
+        )
+    finally reader.close()
 
 trait ConfigCirce:
   given Encoder[AdHocHolidayRange] = deriveEncoder[AdHocHolidayRange]
   given Decoder[AdHocHolidayRange] = deriveDecoder[AdHocHolidayRange]
   given Decoder[StampInfo] = deriveDecoder[StampInfo]
-
-
-
-  
