@@ -5,6 +5,7 @@ import dev.myclinic.scala.model.{ShinryouMaster, Shinryou}
 import dev.myclinic.scala.webclient.{Api, global}
 import java.time.LocalDate
 import dev.myclinic.scala.web.practiceapp.practice.PracticeBus
+import dev.myclinic.scala.web.practiceapp.practice.record.CreateHelper
 
 case class SearchDialog(at: LocalDate, visitId: Int):
   val form = new SearchForm[ShinryouMaster](
@@ -26,8 +27,7 @@ case class SearchDialog(at: LocalDate, visitId: Int):
     form.selected.foreach(master => {
       val shinryou = Shinryou(0, visitId, master.shinryoucode)
       for
-        shinryouId <- RequestHelper.enterShinryou(shinryou)
-        shinryouEx <- Api.getShinryouEx(shinryouId)
+        shinryouEx <- CreateHelper.enterShinryou(shinryou)
       yield
         PracticeBus.shinryouEntered.publish(shinryouEx)
     })

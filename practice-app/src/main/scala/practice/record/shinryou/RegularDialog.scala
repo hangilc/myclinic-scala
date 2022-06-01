@@ -15,6 +15,8 @@ import cats.*
 import cats.implicits.*
 import cats.data.EitherT
 import dev.myclinic.scala.model.CreateShinryouConductRequest
+import dev.myclinic.scala.web.practiceapp.practice.record.CreateHelper
+
 
 class RegularDialog(
     leftNames: List[String],
@@ -44,14 +46,9 @@ class RegularDialog(
           }
       }
     val op = (for
-      shinryouList <- EitherT[Future, String, List[Shinryou]](
-        names
-          .map(name => RequestHelper.shinryou(name, at, visitId))
-          .sequence
-          .map(_.sequence)
-      )
+      shinryouList <- names.map(name => CreateHelper.shinryouReqByName(name, at, visitId)).sequence
       conductOption <-
-        if kotsuen then EitherT(kotsuenReq).map(Some(_))
+        if kotsuen then kotsuenReq.map(Some(_))
         else EitherT.rightT[Future, String](None)
       req = CreateShinryouConductRequest(shinryouList, conductOption.toList)
       enterResult <- EitherT.right(Api.batchEnterShinryouConduct(req))
@@ -70,18 +67,17 @@ class RegularDialog(
           dlog.close()
     }
 
-  def kotsuenReq: Future[Either[String, CreateConductRequest]] =
-    (for
-      shinryou <- EitherT(
-        RequestHelper.conductShinryouReq("骨塩定量ＭＤ法", at)
-      )
-      kizai <- EitherT(
-        RequestHelper.conductKizaiReq("四ツ切", 1, at)
-      )
-    yield CreateConductRequest(
+  def kotsuenReq: EitherT[Future, String, CreateConductRequest] =
+    for
+      shinryou <- CreateHelper.conductShinryouReqByName("骨塩定量ＭＤ法", at)
+      kizai <- CreateHelper.conductKizaiReqByName("四ツ切", 1, at)
+    yield 
+      CreateConductRequest(
       visitId,
       ConductKind.Gazou.code,
       Some("骨塩定量に使用"),
       shinryouList = List(shinryou),
       kizaiList = List(kizai)
-    )).value
+    )
+
+    

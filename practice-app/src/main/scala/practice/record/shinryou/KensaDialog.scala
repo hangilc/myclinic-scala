@@ -32,16 +32,9 @@ case class KensaDialog(
     val names = panel.selected
     val op =
       for
-        shinryouReqs <- EitherT(
-          RequestHelper.composeShinryouReqs(names, at, visitId)
-        )
-        result <- EitherT.right(RequestHelper.batchEnter(shinryouReqs))
-        (shinryouIds, _) = result
-        shinryouList <- EitherT.right(
-          shinryouIds.map(Api.getShinryouEx(_)).sequence
-        )
+        shinryouExList <- CreateHelper.batchEnterShinryouByName(names, at, visitId)
       yield
-        shinryouList.foreach(PracticeBus.shinryouEntered.publish(_))
+        shinryouExList.foreach(PracticeBus.shinryouEntered.publish(_))
         dlog.close()
     for result <- op.value
     yield result match {

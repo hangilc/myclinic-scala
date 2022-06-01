@@ -5,6 +5,8 @@ import dev.myclinic.scala.webclient.{Api, global}
 import java.time.LocalDate
 import cats.syntax.all.*
 import dev.myclinic.scala.web.practiceapp.practice.PracticeBus
+import dev.myclinic.scala.web.practiceapp.practice.record.CreateHelper
+import dev.myclinic.scala.web.practiceapp.practice.record.CodeResolver
 import dev.myclinic.scala.model.Shinryou
 import cats.data.EitherT
 import scala.concurrent.Future
@@ -75,20 +77,21 @@ case class ShinryouMenu(at: LocalDate, visitId: Int):
             targetAt = visit.visitedDate
             srcShinryouList <- EitherT.right(Api.listShinryouForVisit(visitId))
             srcShinryoucodes = srcShinryouList.map(_.shinryoucode)
-            dstShinryoucodes <- EitherT(srcShinryoucodes
-              .map(RequestHelper.resolveShinryoucode(_, targetAt))
+            dstShinryoucodes <- srcShinryoucodes
+              .map(CodeResolver.resolveShinryoucode(_, targetAt))
               .sequence
-              .map(_.sequence))
-            dstShinryouReqs = dstShinryoucodes.map(code => Shinryou(0, targetVisitId, code))
-            enterResult <- EitherT.right(RequestHelper.batchEnter(dstShinryouReqs, List.empty))
-            (dstShinryouIds, _) = enterResult
-            dstShinryouExList <- EitherT.right(dstShinryouIds.map(Api.getShinryouEx(_)).sequence)
-          yield dstShinryouExList.foreach(PracticeBus.shinryouEntered.publish(_))
-        for
-          result <- op.value
+            dstShinryouReqs = dstShinryoucodes.map(code =>
+              Shinryou(0, targetVisitId, code)
+            )
+            dstShinryouExList <- EitherT.right(
+              CreateHelper.batchEnterShinryou(dstShinryouReqs)
+            )
+          yield dstShinryouExList.foreach(
+            PracticeBus.shinryouEntered.publish(_)
+          )
+        for result <- op.value
         yield result match {
           case Left(msg) => ShowMessage.showError(msg)
-          case Right(_) => ()
+          case Right(_)  => ()
         }
     }
-

@@ -8,7 +8,8 @@ import cats.syntax.all.*
 import scala.concurrent.Future
 import dev.myclinic.scala.webclient.{Api, global}
 import dev.myclinic.scala.model.*
-import dev.myclinic.scala.web.practiceapp.practice.record.shinryou.RequestHelper
+import dev.myclinic.scala.web.practiceapp.practice.record.CodeResolver
+import dev.myclinic.scala.web.practiceapp.practice.record.CreateHelper
 
 case class ConductMenu(at: LocalDate, visitId: Int):
   val link = PullDownLink("処置")
@@ -32,29 +33,48 @@ case class ConductMenu(at: LocalDate, visitId: Int):
     workarea.prepend(w.ele)
 
   def doCopyAll(): Unit =
+    val op =
+      for
+        targetVisitId <- EitherT
+          .fromOption[Future](PracticeBus.copyTarget, "コピー先をみつけられませんでした。")
+        srcConductIds <- EitherT.right(
+          Api.listConductForVisit(visitId).map(_.map(_.conductId))
+        )
+        srcConductExList <- EitherT.right(srcConductIds.map(cid => Api.getConductEx(cid)).sequence)
+        reqs <- srcConductExList.map(c => dstConductReq(c, targetVisitId)).sequence
+        dstConductExList <- EitherT.right(CreateHelper.batchEnterConduct(reqs))
+      yield dstConductExList.foreach(PracticeBus.conductEntered.publish(_))
     for
-      targetVisitId <- EitherT
-        .fromOption[Future](PracticeBus.copyTarget, "コピー先をみつけられませんでした。")
-      srcConductIds <- EitherT.right(
-        Api.listConductForVisit(visitId).map(_.map(_.conductId))
-      )
-      srcConductExList <- EitherT.right(
-        srcConductIds.map(cid => Api.getConductEx(cid)).sequence
-      )
-    yield ???
+      result <- op.value
+    yield result match {
+      case Left(msg) => ShowMessage.showError(msg)
+      case Right(_) => ()
+    }
 
-  def dstConductReq(src: ConductEx, targetVisitId: Int): CreateConductRequest =
-    def toShinryou(s: ConductShinryouEx): ConductShinryou =
-      ConductShinryou(0, 0, s.shinryoucode)
-    def toDrug(s: ConductDrugEx): ConductDrug =
-      ConductDrug(0, 0, s.iyakuhincode, s.amount)
-    def toKizai(s: ConductKizaiEx): ConductKizai =
-      ConductKizai(0, 0, s.kizaicode, s.amount)
-    CreateConductRequest(
+  def dstConductReq(
+      src: ConductEx,
+      targetVisitId: Int
+  ): EitherT[Future, String, CreateConductRequest] =
+    def toShinryou(
+        s: ConductShinryouEx
+    ): EitherT[Future, String, ConductShinryou] =
+      for newcode <- CodeResolver.resolveShinryoucode(s.shinryoucode, at)
+      yield ConductShinryou(0, 0, newcode)
+    def toDrug(s: ConductDrugEx): EitherT[Future, String, ConductDrug] =
+      for newcode <- CodeResolver.resolveIyakuhincode(s.iyakuhincode, at)
+      yield ConductDrug(0, 0, newcode, s.amount)
+    def toKizai(s: ConductKizaiEx): EitherT[Future, String, ConductKizai] =
+      for newcode <- CodeResolver.resolveKizaicode(s.kizaicode, at)
+      yield ConductKizai(0, 0, newcode, s.amount)
+    for
+      shinryouList <- src.shinryouList.map(toShinryou _).sequence
+      drugList <- src.drugs.map(toDrug _).sequence
+      kizaiList <- src.kizaiList.map(toKizai _).sequence
+    yield CreateConductRequest(
       targetVisitId,
       src.kind.code,
       src.gazouLabel,
-      src.shinryouList.map(toShinryou _),
-      src.drugs.map(toDrug _),
-      src.kizaiList.map(toKizai _)
+      shinryouList,
+      drugList,
+      kizaiList
     )
