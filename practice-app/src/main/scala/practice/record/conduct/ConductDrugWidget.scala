@@ -22,6 +22,7 @@ case class ConductDrugWidget(
     onDone: ConductDrugWidget => Unit
 ):
   private var master: Option[IyakuhinMaster] = None
+  val cssPre = "practice-enter-conduct-drug-widget"
   val nameSpan = span
   val amountInput = input
   val unitSpan = span
@@ -41,23 +42,23 @@ case class ConductDrugWidget(
     nameSpan(innerText := m.name)
     unitSpan(innerText := m.unit)
   )
-  val ele = div(
-    div("注射処置入力"),
+  val ele = div(cls := s"practice-widget ${cssPre}",
+    div(cls := "practice-widget-title", "注射処置入力"),
     div(
       span("薬剤名称"),
-      nameSpan
+      nameSpan(cls := s"${cssPre}-name-label-span")
     ),
-    div(
+    div(cls := s"$cssPre-amount",
       span("用量"),
-      amountInput,
-      unitSpan
+      amountInput(cls := s"$cssPre-amount-input"),
+      unitSpan(cls := s"$cssPre-amount-unit")
     ),
-    kindGroup.ele,
-    div(
+    kindGroup.ele(cls := s"$cssPre-kind-group"),
+    div(cls := "practice-widget-commands",
       button("入力", onclick := (doEnter _)),
       button("キャンセル", onclick := (close _))
     ),
-    searchForm.ele
+    searchForm.ele(cls := s"$cssPre-search")
   )
 
   def close(): Unit =

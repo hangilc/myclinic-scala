@@ -6,9 +6,10 @@ import dev.myclinic.scala.webclient.{Api, global}
 import dev.myclinic.scala.web.practiceapp.practice.PracticeBus
 
 case class Edit(c: ConductEx):
-  val ele = div(
+  val ele = div(cls := "practice-widget",
+    div(cls := "practice-widget-title", "処置編集"),
     div(innerText := ConductHelper.rep(c)),
-    div(
+    div(cls := "practice-widget-commands",
       button("削除", onclick := (onDelete _)),
         button ("キャンセル", onclick := (onCancel _))
     )

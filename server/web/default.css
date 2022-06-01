@@ -57,3 +57,12 @@ textarea:focus {
   border-radius: 4px;
   border: 2px solid var(--primary-color);
 }
+
+select {
+  font-size: 1rem;
+  padding: 3px;
+}
+
+select + select {
+  margin-left: 6px;
+}

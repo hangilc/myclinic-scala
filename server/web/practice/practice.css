@@ -184,3 +184,25 @@ button {
   margin-top: 6px;
   text-align: right;
 }
+
+.practice-enter-conduct-drug-widget-search {
+  margin-top: 6px;
+}
+
+.practice-enter-conduct-drug-widget-name-label-span {
+  margin-left: 6px;
+}
+
+.practice-enter-conduct-drug-widget-amount-input {
+  margin-left: 6px;
+  width: 4rem;
+}
+
+.practice-enter-conduct-drug-widget-amount-unit {
+  margin-left: 6px;
+}
+
+.practice-enter-conduct-drug-widget-kind-group > span + span{
+  margin-left: 10px;
+}
+

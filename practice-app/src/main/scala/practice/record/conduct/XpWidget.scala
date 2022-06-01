@@ -14,9 +14,9 @@ import dev.myclinic.scala.web.practiceapp.practice.PracticeBus
 case class XpWidget(at: LocalDate, visitId: Int, onDone: XpWidget => Unit):
   val labelSelect = select
   val filmSelect = select
-  val ele = div(
-    div("Ｘ線検査入力"),
-    div(
+  val ele = div(cls := "practice-widget",
+    div(cls := "practice-widget-title", "Ｘ線検査入力"),
+    div(cls := "practice-conduct-enter-xp-form",
       labelSelect(
         option("胸部単純Ｘ線"),
         option("腹部単純Ｘ線")
@@ -26,7 +26,7 @@ case class XpWidget(at: LocalDate, visitId: Int, onDone: XpWidget => Unit):
         option("四ツ切")
       )
     ),
-    div(
+    div(cls := "practice-widget-commands",
       button("入力", onclick := (() => doEnter)),
       button("キャンセル", onclick := (close _))
     )
