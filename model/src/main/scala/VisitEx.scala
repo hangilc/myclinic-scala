@@ -107,7 +107,9 @@ case class ShinryouEx(
     visitId: Int,
     shinryoucode: Int,
     master: ShinryouMaster
-)
+):
+  def toShinryou: Shinryou =
+    Shinryou(shinryouId, visitId, shinryoucode)
 
 object ShinryouEx:
   def apply(shinryou: Shinryou, master: ShinryouMaster): ShinryouEx =
