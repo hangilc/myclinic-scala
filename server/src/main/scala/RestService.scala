@@ -48,6 +48,7 @@ object RestService extends DateTimeQueryParam with Publisher:
   object intShinryouId extends QueryParamDecoderMatcher[Int]("shinryou-id")
   object intShinryoucode extends QueryParamDecoderMatcher[Int]("shinryoucode")
   object intConductId extends QueryParamDecoderMatcher[Int]("conduct-id")
+  object intChargeValue extends QueryParamDecoderMatcher[Int]("charge-value")
 
   case class UserError(message: String) extends Exception
 
@@ -346,6 +347,15 @@ object RestService extends DateTimeQueryParam with Publisher:
           events <- Db.deleteConductEx(conductId)
           _ <- publishAll(events)
         yield true
+      Ok(op)
+
+    case GET -> Root / "update-charge-value" :? intVisitId(visitId) +& intChargeValue(chargeValue) =>
+      val op =
+        for
+          result <- Db.updateChargeValue(visitId, chargeValue)
+          (event, updated) = result
+          _ <- publish(event)
+        yield updated
       Ok(op)
 
   } <+> PatientService.routes <+> VisitService.routes <+> MiscService.routes

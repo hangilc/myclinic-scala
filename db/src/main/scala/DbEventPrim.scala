@@ -224,6 +224,15 @@ object DbEventPrim:
   def logGazouLabelDeleted(a: GazouLabel): ConnectionIO[AppEvent] =
     enterAppEvent("gazouLabel", DELETED, a.asJson.toString)
 
+  def logChargeCreated(a: Charge): ConnectionIO[AppEvent] =
+    enterAppEvent("charge", CREATED, a.asJson.toString)
+
+  def logChargeUpdated(a: Charge): ConnectionIO[AppEvent] =
+    enterAppEvent("charge", UPDATED, a.asJson.toString)
+
+  def logChargeDeleted(a: Charge): ConnectionIO[AppEvent] =
+    enterAppEvent("charge", DELETED, a.asJson.toString)
+
 
 
 

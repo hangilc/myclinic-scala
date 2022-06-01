@@ -103,6 +103,14 @@ button {
   color: red;
 }
 
+.practice-under-payment {
+  color: orange;
+}
+
+.practice-over-payment {
+  color: blue;
+}
+
 .practice-text-edit-textarea,
 .practice-enter-text-textarea {
   width: 100%;
@@ -204,5 +212,9 @@ button {
 
 .practice-enter-conduct-drug-widget-kind-group > span + span{
   margin-left: 10px;
+}
+
+.practice-record-payment-disp > span + span {
+  margin-left: 6px;
 }
 

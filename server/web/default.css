@@ -24,6 +24,14 @@ a:hover {
   background-color: #eee
 }
 
+a + a {
+  margin-left: 6px;
+}
+
+a + button {
+  margin-left: 6px;
+}
+
 button + button {
   margin-left: 0.3em;
 }

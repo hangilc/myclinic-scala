@@ -21,3 +21,6 @@ trait DbCharge extends Mysql:
 
   def findCharge(visitId: Int): IO[Option[Charge]] =
     mysql(Prim.getCharge(visitId).option)
+
+  def updateChargeValue(visitId: Int, chargeValue: Int): IO[(AppEvent, Charge)] =
+    mysql(Prim.updateChargeValue(visitId, chargeValue))

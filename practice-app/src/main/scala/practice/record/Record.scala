@@ -82,7 +82,7 @@ class Record(visitEx: VisitEx):
       new Drug(visitEx).ele,
       ConductMenu(at, visitId).ele,
       conductWrapper,
-      new Payment(visitEx).ele
+      new Payment(visitEx.chargeOption, visitEx.lastPayment, visitId).ele
     )
 
   def onTextEntered(text: ModelText): Unit =
