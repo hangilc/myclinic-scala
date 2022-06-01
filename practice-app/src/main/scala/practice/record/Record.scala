@@ -26,6 +26,7 @@ class Record(visitEx: VisitEx):
   val hokenWrapper = div
   val shinryouWrapper = div
   val conductWrapper = div
+  val payment = Payment(visitEx.chargeOption, visitEx.lastPayment, visitEx.visitId)
   val texts: CompAppendList[Text] = CompAppendList[Text](textsWrapper)
   val shinryouList: CompSortList[Shinryou] = CompSortList[Shinryou](shinryouWrapper)
   val conductList: CompAppendList[Conduct] = CompAppendList[Conduct](conductWrapper)
@@ -82,7 +83,7 @@ class Record(visitEx: VisitEx):
       new Drug(visitEx).ele,
       ConductMenu(at, visitId).ele,
       conductWrapper,
-      new Payment(visitEx.chargeOption, visitEx.lastPayment, visitId).ele
+      payment.ele
     )
 
   def onTextEntered(text: ModelText): Unit =
@@ -103,6 +104,9 @@ class Record(visitEx: VisitEx):
 
   def onConductDeleted(deleted: ModelConduct): Unit =
     conductList.remove(c => c.conduct.conductId == deleted.conductId)
+
+  def onChargeUpdated(updated: Charge): Unit =
+    payment.onChargeUpdated(updated)
 
 object Record:
   given Ordering[Record] = Ordering.by[Record, Int](r => r.visitId).reverse

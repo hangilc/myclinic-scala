@@ -3,6 +3,7 @@ package dev.myclinic.scala.web.practiceapp.practice.record.payment
 import dev.fujiwara.domq.all.{*, given}
 import dev.myclinic.scala.model.*
 import dev.myclinic.scala.webclient.{Api, global}
+import dev.myclinic.scala.web.practiceapp.practice.PracticeBus
 
 case class Edit(
     chargeOption: Option[Charge],
@@ -20,6 +21,9 @@ case class Edit(
       div(span("現在の請求額", span(chargeOption.fold("0")(_.charge.toString) + "円"))),
       div(span("変更後請求額"), newChargeInput, "円")
     ),
+    paymentOption.map(pay => 
+      div(span("最終徴収額"), span(pay.amount.toString + "円"))
+    ),
     div(
       cls := "practice-widget-commands",
       a("未収に"),
@@ -36,6 +40,8 @@ case class Edit(
     newChargeInput.value.toIntOption match {
       case None => ShowMessage.showError("変更後請求額の入力が不適切です。")
       case Some(newCharge) => 
-        ShowMessage.showError("Not implemented")
+        for
+          updated <- Api.updateChargeValue(visitId, newCharge)
+        yield PracticeBus.chargeUpdated.publish(updated)
     }
 

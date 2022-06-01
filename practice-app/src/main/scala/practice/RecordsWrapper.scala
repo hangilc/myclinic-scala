@@ -20,7 +20,8 @@ class RecordsWrapper:
     PracticeBus.shinryouEntered.subscribe(onShinryouEntered _),
     PracticeBus.shinryouDeleted.subscribe(onShinryouDeleted _),
     PracticeBus.conductEntered.subscribe(onConductEntered _),
-    PracticeBus.conductDeleted.subscribe(onConductDeleted _)
+    PracticeBus.conductDeleted.subscribe(onConductDeleted _),
+    PracticeBus.chargeUpdated.subscribe(onChargeUpdated _),
   )
 
   def dispose: Unit = 
@@ -67,6 +68,9 @@ class RecordsWrapper:
   
   def onConductDeleted(conduct: Conduct): Unit =
     findRecord(conduct.visitId).foreach(_.onConductDeleted(conduct))
+
+  def onChargeUpdated(charge: Charge) =
+    findRecord(charge.visitId).foreach(_.onChargeUpdated(charge))
   
 object RecordsWrapper:
   given Dispose[RecordsWrapper] = _.dispose
