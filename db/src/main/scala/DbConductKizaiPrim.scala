@@ -48,3 +48,17 @@ object DbConductKizaiPrim:
       event <- DbEventPrim.logConductKizaiCreated(entered)
     yield (event, entered)
 
+  def deleteConductKizai(conductKizaiId: Int): ConnectionIO[AppEvent] =
+    val op = sql"""
+      delete from visit_conduct_kizai where id = ${conductKizaiId}
+    """
+    for
+      kizai <- getConductKizai(conductKizaiId).unique
+      affected <- op.update.run
+      _ = if affected != 1 then
+        throw new RuntimeException(
+          s"Failed to delete conduct kizai: ${conductKizaiId}"
+        )
+      event <- DbEventPrim.logConductKizaiDeleted(kizai)
+    yield event
+

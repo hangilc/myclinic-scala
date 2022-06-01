@@ -340,6 +340,14 @@ object RestService extends DateTimeQueryParam with Publisher:
     case GET -> Root / "get-conduct-ex" :? intConductId(conductId) =>
       Ok(Db.getConductEx(conductId))
 
+    case GET -> Root / "delete-conduct-ex" :? intConductId(conductId) =>
+      val op = 
+        for
+          events <- Db.deleteConductEx(conductId)
+          _ <- publishAll(events)
+        yield true
+      Ok(op)
+
   } <+> PatientService.routes <+> VisitService.routes <+> MiscService.routes
     <+> ConfigService.routes <+> FileService.routes
     <+> DrawerService.routes <+> MasterService.routes

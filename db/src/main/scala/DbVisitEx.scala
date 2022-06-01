@@ -52,3 +52,6 @@ trait DbVisitEx extends Mysql:
 
   def batchGetVisitEx(visitIds: List[Int]): IO[List[VisitEx]] =
     mysql(visitIds.map(visitId => DbVisitExPrim.getVisitEx(visitId)).sequence)
+
+  def deleteConductEx(conductId: Int): IO[List[AppEvent]] =
+    mysql(DbVisitExPrim.deleteConductEx(conductId))

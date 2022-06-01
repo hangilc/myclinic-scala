@@ -118,8 +118,8 @@ object DbVisitExPrim:
   def getConductEx(conductId: Int): ConnectionIO[ConductEx] =
     for
       conduct <- DbConductPrim.getConduct(conductId).unique
+      gazouLabel <- DbGazouLabelPrim.getGazouLabel(conductId).option
       drugIds <- DbConductDrugPrim.listConductDrugIdForConduct(conductId)
-      gazouLabel <- DbGazouLabelPrim.findGazouLabel(conductId).option
       drugs <- listConductDrugEx(drugIds)
       shinryouIds <- DbConductShinryouPrim.listConductShinryouIdForConduct(
         conductId
@@ -128,6 +128,19 @@ object DbVisitExPrim:
       kizaiIds <- DbConductKizaiPrim.listConductKizaiIdForConduct(conductId)
       kizaiList <- listConductKizaiEx(kizaiIds)
     yield ConductEx(conduct, gazouLabel.map(_.label), drugs, shinryouList, kizaiList)
+
+  def deleteConductEx(conductId: Int): ConnectionIO[List[AppEvent]] =
+    for
+      conduct <- DbConductPrim.getConduct(conductId).unique
+      labelEventList <- DbGazouLabelPrim.tryDeleteGazouLabel(conductId).map(_.toList)
+      drugIds <- DbConductDrugPrim.listConductDrugIdForConduct(conductId)
+      drugEvents <- drugIds.map(id => DbConductDrugPrim.deleteConductDrug(id)).sequence
+      shinryouIds <- DbConductShinryouPrim.listConductShinryouIdForConduct(conductId)
+      shinryouEvents <- shinryouIds.map(id => DbConductShinryouPrim.deleteConductShinryou(id)).sequence
+      kizaiIds <- DbConductKizaiPrim.listConductKizaiIdForConduct(conductId)
+      kizaiEvents <- kizaiIds.map(id => DbConductKizaiPrim.deleteConductKizai(id)).sequence
+      conductEvent <- DbConductPrim.deleteConduct(conductId)
+    yield labelEventList ++ drugEvents ++ shinryouEvents ++ kizaiEvents :+ conductEvent
 
   def listConductEx(conductIds: List[Int]): ConnectionIO[List[ConductEx]] =
     conductIds.map(getConductEx(_)).sequence
@@ -169,3 +182,5 @@ object DbVisitExPrim:
       charge <- DbChargePrim.getCharge(visitId).option
       payment <- DbPaymentPrim.findLastPayment(visitId).option
     yield VisitEx(visit, patient, hoken, texts, drugs, shinryouList, conducts, charge, payment)
+
+

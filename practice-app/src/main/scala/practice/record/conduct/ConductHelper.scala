@@ -1,13 +1,9 @@
-package dev.myclinic.scala.web.practiceapp.practice.record
+package dev.myclinic.scala.web.practiceapp.practice.record.conduct
 
-import dev.fujiwara.domq.all.{*, given}
-import dev.myclinic.scala.model.VisitEx
-import dev.myclinic.scala.model.ConductEx
+import dev.myclinic.scala.model.*
 import dev.myclinic.scala.apputil.ConductUtil
 
-class Conduct(c: ConductEx):
-  val ele = div(innerText := rep(c))
-
+object ConductHelper:
   def rep(c: ConductEx): String =
     (List(
       s"[${c.kind.rep}]"
@@ -20,6 +16,3 @@ class Conduct(c: ConductEx):
       c.kizaiList.map(k => "* " + ConductUtil.conductKizaiRep(k))
       ).mkString("\n")
 
-object Conduct:
-  given Comp[Conduct] = _.ele
-  given Dispose[Conduct] = _ => ()

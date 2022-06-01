@@ -17,6 +17,7 @@ import org.scalajs.dom.HTMLElement
 import dev.myclinic.scala.web.practiceapp.practice.PracticeBus
 import dev.myclinic.scala.web.practiceapp.practice.record.shinryou.ShinryouMenu
 import dev.myclinic.scala.web.practiceapp.practice.record.conduct.ConductMenu
+import dev.myclinic.scala.web.practiceapp.practice.record.conduct.Conduct
 import java.time.LocalDate
 
 class Record(visitEx: VisitEx):
@@ -99,6 +100,9 @@ class Record(visitEx: VisitEx):
 
   def onConductEntered(entered: ConductEx): Unit =
     conductList.append(Conduct(entered))
+
+  def onConductDeleted(deleted: ModelConduct): Unit =
+    conductList.remove(c => c.conduct.conductId == deleted.conductId)
 
 object Record:
   given Ordering[Record] = Ordering.by[Record, Int](r => r.visitId).reverse

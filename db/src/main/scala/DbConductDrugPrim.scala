@@ -17,7 +17,9 @@ object DbConductDrugPrim:
   private val tConductDrug = Fragment.const("visit_conduct_drug")
   private val cConductDrugId = Fragment.const("id")
   private val cConductId = Fragment.const("visit_conduct_id")
-  def listConductDrugForConduct(conductId: Int): ConnectionIO[List[ConductDrug]] =
+  def listConductDrugForConduct(
+      conductId: Int
+  ): ConnectionIO[List[ConductDrug]] =
     sql"""
       select * from $tConductDrug where $cConductId = ${conductId} 
       order by $cConductDrugId
@@ -44,3 +46,21 @@ object DbConductDrugPrim:
       entered <- getConductDrug(id).unique
       event <- DbEventPrim.logConductDrugCreated(entered)
     yield (event, entered)
+
+  def deleteConductDrug(conductDrugId: Int): ConnectionIO[AppEvent] =
+    val op = sql"""
+      delete from visit_conduct_drug where id = ${conductDrugId}
+    """
+    for
+      drug <- getConductDrug(conductDrugId).unique
+      affected <- op.update.run
+      _ = if affected != 1 then
+        throw new RuntimeException(
+          s"Failed to delete conduct drug: ${conductDrugId}"
+        )
+      event <- DbEventPrim.logConductDrugDeleted(drug)
+    yield event
+
+
+
+    

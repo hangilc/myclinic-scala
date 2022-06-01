@@ -126,7 +126,9 @@ case class ConductEx(
     drugs: List[ConductDrugEx] = List.empty,
     shinryouList: List[ConductShinryouEx] = List.empty,
     kizaiList: List[ConductKizaiEx] = List.empty
-)
+):
+  def toConduct: Conduct =
+    Conduct(conductId, visitId, kind.code)
 
 object ConductEx:
   def apply(

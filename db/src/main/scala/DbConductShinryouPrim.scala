@@ -48,3 +48,19 @@ object DbConductShinryouPrim:
       entered <- getConductShinryou(id).unique
       event <- DbEventPrim.logConductShinryouCreated(entered)
     yield (event, entered)
+
+  def deleteConductShinryou(conductShinryouId: Int): ConnectionIO[AppEvent] =
+    val op = sql"""
+      delete from visit_conduct_shinryou where id = ${conductShinryouId}
+    """
+    for
+      shinryou <- getConductShinryou(conductShinryouId).unique
+      affected <- op.update.run
+      _ = if affected != 1 then
+        throw new RuntimeException(
+          s"Failed to delete conduct shinryou: ${conductShinryouId}"
+        )
+      event <- DbEventPrim.logConductShinryouDeleted(shinryou)
+    yield event
+
+

@@ -91,3 +91,14 @@ object DbConductPrim:
       req.drugs,
       req.kizaiList
     )
+
+  def deleteConduct(conductId: Int): ConnectionIO[AppEvent] =
+    val op = sql"""
+      delete from visit_conduct where id = ${conductId}
+    """
+    for
+      conduct <- getConduct(conductId).unique
+      affected <- op.update.run
+      _ = if affected != 1 then throw new RuntimeException(s"Failed to delete conduct: ${conductId}")
+      event <- DbEventPrim.logConductDeleted(conduct)
+    yield event

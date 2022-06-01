@@ -351,3 +351,6 @@ object MiscApi extends ApiBase:
 
     def getConductEx(conductId: Int): Future[ConductEx] =
       get("get-conduct-ex", Params("conduct-id" -> conductId))
+
+    def deleteConductEx(conductId: Int): Future[Boolean] =
+      get("delete-conduct-ex", Params("conduct-id" -> conductId))
