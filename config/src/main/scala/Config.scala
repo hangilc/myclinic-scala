@@ -94,6 +94,10 @@ object Config extends ConfigCirce:
       )
     finally src.close()
 
+  def getStampInfo(name: String): StampInfo =
+    val file: File = configDir.resolve(s"stamp-data/${name}.yml").toFile
+    readYaml[StampInfo](file)
+
   def readYaml[T: Decoder](file: File): T =
     val reader: _root_.java.io.Reader = _root_.java.io.FileReader(file)
     try
@@ -107,6 +111,7 @@ object Config extends ConfigCirce:
 trait ConfigCirce:
   given Encoder[AdHocHolidayRange] = deriveEncoder[AdHocHolidayRange]
   given Decoder[AdHocHolidayRange] = deriveDecoder[AdHocHolidayRange]
+  given Decoder[StampInfo] = deriveDecoder[StampInfo]
 
 
 
