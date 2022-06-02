@@ -74,7 +74,7 @@ lazy val formatshohousen = crossProject(JSPlatform, JVMPlatform)
   .in(file("formatshohousen"))
   .dependsOn(util)
   .settings(
-    name := "formatshohousen",
+    name := "formatshohousen"
   )
   .jvmSettings(
     libraryDependencies ++= Seq(
@@ -180,6 +180,7 @@ lazy val server = project
     javalib,
     config,
     drawerJVM,
+    drawerformJVM,
     formatshohousenJVM
   )
   .settings(
@@ -286,6 +287,7 @@ lazy val receptionApp = project
     appbase,
     appUtilJS,
     drawerJS,
+    drawerformJS,
     kanjidateJS,
     dateinput
   )
@@ -325,7 +327,7 @@ lazy val practiceApp = project
       (rootDir.value / "server" / "web" / "practice" / "scalajs"),
     libraryDependencies ++= Seq(
       "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion,
-      "org.scala-js" %%% "scala-js-macrotask-executor" % macrotaskExecutorVersion,
+      "org.scala-js" %%% "scala-js-macrotask-executor" % macrotaskExecutorVersion
     )
   )
 
@@ -384,7 +386,7 @@ lazy val javalib = project
       "com.fasterxml.jackson.dataformat" % "jackson-dataformat-yaml" % jacksonVersion,
       "com.fasterxml.jackson.dataformat" % "jackson-dataformat-xml" % jacksonVersion,
       "com.itextpdf" % "itextpdf" % "5.5.13.1",
-      "com.itextpdf" % "kernel" % "7.1.10",
+      "com.itextpdf" % "kernel" % "7.1.10"
     )
   )
 
@@ -443,8 +445,14 @@ val drawerJS = drawer.js
 lazy val drawerform = crossProject(JVMPlatform, JSPlatform)
   .crossType(CrossType.Full)
   .in(file("drawerform"))
+  .dependsOn(model)
   .settings(
-    name := "drawerform"
+    name := "drawerform",
+    libraryDependencies ++= Seq(
+      "io.circe" %%% "circe-core" % circeVersion,
+      "io.circe" %%% "circe-generic" % circeVersion,
+      "io.circe" %%% "circe-parser" % circeVersion
+    )
   )
   .jsConfigure(_ enablePlugins TzdbPlugin)
   .jsSettings(
@@ -459,6 +467,9 @@ lazy val drawerform = crossProject(JVMPlatform, JSPlatform)
       "dev.fujiwara" % "drawer" % "1.0.0-SNAPSHOT"
     )
   )
+
+val drawerformJVM = drawerform.jvm
+val drawerformJS = drawerform.js
 
 lazy val dateinput = project
   .in(file("dateinput"))

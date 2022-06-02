@@ -6,6 +6,7 @@ import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.{Modal, Table, ErrorBox}
 import scala.language.implicitConversions
 import dev.myclinic.scala.model.*
+import dev.myclinic.scala.drawerform.receipt.ReceiptDrawerData
 import dev.myclinic.scala.web.appbase.{PrintDialog}
 import dev.myclinic.scala.webclient.Api
 import dev.myclinic.scala.apputil.HokenUtil

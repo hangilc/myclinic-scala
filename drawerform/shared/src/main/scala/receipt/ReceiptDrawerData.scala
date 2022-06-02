@@ -1,9 +1,10 @@
-package dev.myclinic.scala.model
+package dev.myclinic.scala.drawerform.receipt
 
 import io.circe.*
 import io.circe.syntax.*
 import io.circe.parser.*
 import io.circe.generic.semiauto._
+import dev.myclinic.scala.model.Patient
 
 case class ReceiptDrawerData(
   var patientName: String = "",

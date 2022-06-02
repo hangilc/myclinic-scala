@@ -23,6 +23,7 @@ import dev.myclinic.scala.model.jsoncodec.Implicits.given
 import dev.myclinic.java.{Config => ConfigJava, HoukatsuKensa}
 import dev.myclinic.scala.rcpt.RcptVisit
 import dev.myclinic.scala.config.Config
+import dev.myclinic.scala.drawerform.receipt.ReceiptDrawerData
 
 object MiscService extends DateTimeQueryParam with Publisher:
   object dateDate extends QueryParamDecoderMatcher[LocalDate]("date")
