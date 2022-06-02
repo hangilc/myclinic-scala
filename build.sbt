@@ -42,6 +42,8 @@ lazy val root = project
     domq,
     drawerJS,
     drawerJVM,
+    drawerformJS,
+    drawerformJVM,
     formatshohousenJS,
     formatshohousenJVM,
     holidayjpJS,
@@ -437,6 +439,26 @@ lazy val drawer = crossProject(JVMPlatform, JSPlatform)
 
 val drawerJVM = drawer.jvm
 val drawerJS = drawer.js
+
+lazy val drawerform = crossProject(JVMPlatform, JSPlatform)
+  .crossType(CrossType.Full)
+  .in(file("drawerform"))
+  .settings(
+    name := "drawerform"
+  )
+  .jsConfigure(_ enablePlugins TzdbPlugin)
+  .jsSettings(
+    scalaJSUseMainModuleInitializer := false,
+    zonesFilter := { (z: String) => z == "Asia/Tokyo" },
+    libraryDependencies ++= Seq(
+      "io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion
+    )
+  )
+  .jvmSettings(
+    libraryDependencies ++= Seq(
+      "dev.fujiwara" % "drawer" % "1.0.0-SNAPSHOT"
+    )
+  )
 
 lazy val dateinput = project
   .in(file("dateinput"))
