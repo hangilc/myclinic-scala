@@ -445,7 +445,7 @@ val drawerJS = drawer.js
 lazy val drawerform = crossProject(JVMPlatform, JSPlatform)
   .crossType(CrossType.Full)
   .in(file("drawerform"))
-  .dependsOn(model)
+  .dependsOn(model, kanjidate)
   .settings(
     name := "drawerform",
     libraryDependencies ++= Seq(
