@@ -200,7 +200,7 @@ lazy val server = project
 lazy val webclient = project
   .in(file("webclient"))
   .enablePlugins(ScalaJSPlugin)
-  .dependsOn(modelJS, utilJS, drawerJS)
+  .dependsOn(modelJS, utilJS, drawerJS, drawerformJS)
   .settings(
     name := "webclient",
     scalaJSUseMainModuleInitializer := false,
@@ -385,8 +385,6 @@ lazy val javalib = project
       "com.fasterxml.jackson.core" % "jackson-annotations" % jacksonVersion,
       "com.fasterxml.jackson.dataformat" % "jackson-dataformat-yaml" % jacksonVersion,
       "com.fasterxml.jackson.dataformat" % "jackson-dataformat-xml" % jacksonVersion,
-      "com.itextpdf" % "itextpdf" % "5.5.13.1",
-      "com.itextpdf" % "kernel" % "7.1.10"
     )
   )
 

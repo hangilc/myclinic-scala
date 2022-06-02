@@ -50,6 +50,8 @@ object DrawerService:
           body = fs2.Stream.emits(json.getBytes()),
           headers = Headers(`Content-Type`(MediaType("application", "json")))
         )
+
+      
   }
 
   def drawShohousen(text: Text, visit: Visit, patient: Patient): String =

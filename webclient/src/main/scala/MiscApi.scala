@@ -11,6 +11,7 @@ import dev.myclinic.scala.webclient.ParamsImplicits.{given}
 import scala.language.implicitConversions
 import dev.fujiwara.scala.drawer.Op
 import scala.scalajs.js.typedarray.ArrayBuffer
+import dev.myclinic.scala.drawerform.receipt.ReceiptDrawerData
 
 object MiscApi extends ApiBase:
   def baseUrl: String = "/api/"
