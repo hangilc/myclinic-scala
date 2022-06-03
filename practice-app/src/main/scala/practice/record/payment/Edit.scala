@@ -5,6 +5,8 @@ import dev.myclinic.scala.model.*
 import dev.myclinic.scala.webclient.{Api, global}
 import dev.myclinic.scala.web.practiceapp.practice.PracticeBus
 import java.time.LocalDateTime
+import dev.myclinic.scala.drawerform.receipt.ReceiptDrawerData
+import java.time.LocalDate
 
 case class Edit(
     chargeOption: Option[Charge],
@@ -28,7 +30,7 @@ case class Edit(
     div(
       cls := "practice-widget-commands",
       a("未収に", onclick := (doNoPayment _)),
-      a("領収書PDF"),
+      a("領収書PDF", onclick := (doReceiptPdf _)),
       button("入力", onclick := (doEnter _)),
       button("キャンセル", onclick := (doCancel _))
     )
@@ -52,5 +54,15 @@ case class Edit(
       _ <- Api.enterPayment(pay)
     yield
       PracticeBus.paymentEntered.publish(pay)
+
+  def doReceiptPdf(): Unit =
+    for
+      visit <- Api.getVisit(visitId)
+      patient <- Api.getPatient(visit.patientId)
+      data = ReceiptDrawerData.create(patient, meisai, visit, LocalDate.now())
+      ops <- Api.drawReceipt(data)
+    yield
+      Api.createPdfFile(ops, "A5_Landscape")
+      
       
 

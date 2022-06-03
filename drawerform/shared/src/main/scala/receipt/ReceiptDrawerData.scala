@@ -64,7 +64,7 @@ object ReceiptDrawerData:
   given Encoder[ReceiptDrawerData] = deriveEncoder[ReceiptDrawerData]
   given Decoder[ReceiptDrawerData] = deriveDecoder[ReceiptDrawerData]
 
-  def apply(patient: Patient, meisai: Meisai, visit: Visit,
+  def create(patient: Patient, meisai: Meisai, visit: Visit,
     issueDate: LocalDate): ReceiptDrawerData =
     val data = new ReceiptDrawerData()
     data.setPatient(patient)

@@ -20,9 +20,16 @@ import dev.fujiwara.dto.ClinicInfoDTO
 import dev.myclinic.scala.model.{ClinicInfo, Text, Visit, Patient}
 import dev.myclinic.scala.formatshohousen.Shohou
 import dev.myclinic.scala.formatshohousen.FormatShohousen
+import dev.fujiwara.drawer.pdf.PdfPrinter
+import dev.fujiwara.scala.drawer.Op
+import java.io.OutputStream
+import java.io.FileOutputStream
+import scala.collection.JavaConverters.*
+import dev.fujiwara.scala.drawer.ToJavaOp
 
 object DrawerService:
   object intTextId extends QueryParamDecoderMatcher[Int]("text-id")
+  object strPaperSize extends QueryParamDecoderMatcher[String]("paper-size") 
   val clinicInfo = Config.getClinicInfo
   val objectMapper = dev.fujiwara.drawer.op.JsonCodec.createMapper()
 
@@ -50,6 +57,19 @@ object DrawerService:
           body = fs2.Stream.emits(json.getBytes()),
           headers = Headers(`Content-Type`(MediaType("application", "json")))
         )
+
+    case req @ POST -> Root / "create-pdf-file" :? strPaperSize(paperSize) =>
+      val op = 
+        for
+          ops <- req.as[List[Op]]
+        yield
+          val printer = new PdfPrinter(paperSize)
+          val outStream = new FileOutputStream("out.pdf")
+          try 
+            printer.print(List(ops.map(ToJavaOp.convert(_)).asJava).asJava, outStream)
+            true
+          finally outStream.close()
+      Ok(op)
   }
 
   def drawShohousen(text: Text, visit: Visit, patient: Patient): String =

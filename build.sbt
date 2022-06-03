@@ -200,7 +200,7 @@ lazy val server = project
 lazy val webclient = project
   .in(file("webclient"))
   .enablePlugins(ScalaJSPlugin)
-  .dependsOn(modelJS, utilJS, drawerJS)
+  .dependsOn(modelJS, utilJS, drawerJS, drawerformJS)
   .settings(
     name := "webclient",
     scalaJSUseMainModuleInitializer := false,

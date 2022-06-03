@@ -49,7 +49,6 @@ object Op:
 
   given Decoder[Op] = new Decoder[Op]:
     def apply(c: HCursor): Decoder.Result[Op] =
-      println("enter-op-decoder")
       val iter = c.values.get.iterator
       iter.next
         .as[String]
