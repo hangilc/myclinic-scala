@@ -28,3 +28,17 @@ object DrawerApi extends ApiBase:
         Params("paper-size" -> paperSize, "file-name" -> fileName),
         ops
       )
+
+    def stampPdf(
+        inFileName: String,
+        outFileName: String,
+        stampName: String
+    ): Future[Boolean] =
+      get(
+        "stamp-pdf",
+        Params(
+          "in-file" -> inFileName,
+          "out-file" -> outFileName,
+          "stamp" -> stampName
+        )
+      )

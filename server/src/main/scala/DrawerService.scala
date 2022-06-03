@@ -26,11 +26,16 @@ import java.io.OutputStream
 import java.io.FileOutputStream
 import scala.collection.JavaConverters.*
 import dev.fujiwara.scala.drawer.ToJavaOp
+import dev.myclinic.scala.config.StampInfo
+import dev.fujiwara.drawer.pdf.Stamper
 
 object DrawerService:
   object intTextId extends QueryParamDecoderMatcher[Int]("text-id")
   object strPaperSize extends QueryParamDecoderMatcher[String]("paper-size")
   object strFileName extends QueryParamDecoderMatcher[String]("file-name")
+  object strInFile extends QueryParamDecoderMatcher[String]("in-file")
+  object strOutFile extends QueryParamDecoderMatcher[String]("out-file")
+  object strStamp extends QueryParamDecoderMatcher[String]("stamp")
 
   val clinicInfo = Config.getClinicInfo
   val objectMapper = dev.fujiwara.drawer.op.JsonCodec.createMapper()
@@ -77,6 +82,21 @@ object DrawerService:
             true
           finally outStream.close()
       Ok(op)
+
+    case GET -> Root / "stamp-pdf" :? strInFile(inFile) +& strOutFile(outFile) +& strStamp(stamp) =>
+      val stampInfo: StampInfo = Config.getStampInfo(stamp)
+      val opt = new Stamper.StamperOption()
+      opt.scale = stampInfo.scale
+      opt.xPos = stampInfo.xPos
+      opt.yPos = stampInfo.yPos
+      opt.stampCenterRelative = stampInfo.isImageCenterRelative
+      val dir = Config.portalTmpDir
+      val srcFile = dir.resolve(inFile).toString
+      val dstFile = dir.resolve(outFile).toString
+      val stamper: Stamper = new Stamper()
+      stamper.putStamp(srcFile, stampInfo.imageFile, dstFile, opt)
+      Ok(true)
+
   }
 
   def drawShohousen(text: Text, visit: Visit, patient: Patient): String =
