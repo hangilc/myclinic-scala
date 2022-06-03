@@ -1,26 +1,32 @@
 package dev.myclinic.scala.web.practiceapp.practice
 
 import dev.fujiwara.domq.LocalEventPublisher
+import dev.fujiwara.domq.CachingEventPublisher
 import org.scalajs.dom.HTMLElement
 import dev.myclinic.scala.model.*
+import scala.concurrent.Future
+import dev.myclinic.scala.webclient.global
 
 object PracticeBus:
   val addRightWidgetRequest = LocalEventPublisher[HTMLElement]
 
   type VisitId = Int
 
-  private var currentPatientStore: Option[Patient] = None
-  private var currentVisitIdStore: Option[Int] = None
-  private var currentTempVisitIdStore: Option[Int] = None
-  def currentPatient: Option[Patient] = currentPatientStore
-  def currentVisitId: Option[Int] = currentVisitIdStore
-  def currentTempVisitId: Option[Int] = currentTempVisitIdStore
-  val patientChanged = LocalEventPublisher[Option[Patient]]
-  val visitIdChanged = LocalEventPublisher[Option[VisitId]]
-  val tempVisitIdChanged = LocalEventPublisher[Option[VisitId]]
-  patientChanged.subscribe(currentPatientStore = _)
-  visitIdChanged.subscribe(currentVisitIdStore = _)
-  tempVisitIdChanged.subscribe(currentTempVisitIdStore = _)
+  val practiceFinishing = LocalEventPublisher[Int]
+  val patientVisitChanged = new CachingEventPublisher[PatientVisitState](NoSelection):
+    override def publishFuture(newState: PatientVisitState): Future[Unit] =
+      currentValue match {
+        case Practicing(_, visitId) => 
+          for 
+            _ <- practiceFinishing.publishFuture(visitId)
+            _ <- super.publishFuture(newState)
+          yield ()
+        case _ => super.publishFuture(newState)
+      }
+  val tempVisitIdChanged = CachingEventPublisher[Option[Int]](None)
+  def currentPatient: Option[Patient] = patientVisitChanged.currentValue.patientOption
+  def currentVisitId: Option[Int] = patientVisitChanged.currentValue.visitIdOption
+  def currentTempVisitId: Option[Int] = tempVisitIdChanged.currentValue
   def copyTarget: Option[VisitId] = currentVisitId orElse currentTempVisitId
 
   val navPageChanged = LocalEventPublisher[Int]

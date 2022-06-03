@@ -16,12 +16,7 @@ object PatientManip:
     a("画像一覧")
   )
 
-  PracticeBus.patientChanged.subscribe {
-    case None => ele(displayNone)
-    case Some(_) => ele(displayDefault)
-  }
-
-  PracticeBus.visitIdChanged.subscribe {
-    case None => cashierButton(disabled := true)
-    case Some(_) => cashierButton(disabled := false)
+  PracticeBus.patientVisitChanged.subscribe {
+    case NoSelection | Browsing(_) => ele(displayNone)
+    case Practicing(_, _) => ele(displayDefault)
   }

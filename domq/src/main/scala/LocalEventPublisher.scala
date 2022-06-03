@@ -22,3 +22,13 @@ case class LocalEventUnsubscriber(proc: () => Unit):
 
 object LocalEventUnsubscriber:
   given Dispose[LocalEventUnsubscriber] = _.unsubscribe
+
+class CachingEventPublisher[T](private var cache: T) extends LocalEventPublisher[T]:
+  override def publishFuture(t: T): Future[Unit] =
+    cache = t
+    super.publishFuture(t)
+
+  def currentValue: T = cache
+
+object CachingEventPublisher:
+  def apply[T](t: T): CachingEventPublisher[T] = new CachingEventPublisher(t)
