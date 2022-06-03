@@ -67,6 +67,9 @@ object Main extends IOApp:
       yield resp
   }
 
+  val portalTmpStaticService = fileService[IO](
+    FileService.Config(System.getenv("MYCLINIC_PORTAL_TMP_DIR"), "/")
+  )
   val staticService = fileService[IO](FileService.Config("./web", "/"))
   val deployTestService: HttpRoutes[IO] =
     if Files.exists(java.nio.file.Path.of("./deploy")) then
@@ -99,6 +102,7 @@ object Main extends IOApp:
           "/api" -> RestService.routes,
           "/ws" -> ws(topic),
           "/deploy" -> deployTestService,
+          "/portal-tmp" -> portalTmpStaticService,
           "/" -> staticService
         ).orNotFound
       )
@@ -134,6 +138,6 @@ object Main extends IOApp:
       _ <- IO {
         ClinicOperation.setAdHocHolidayRanges(Config.adHocHolidayRanges)
       }
-      _ <- IO{ logger.info("Starting server.") }
+      _ <- IO { logger.info("Starting server.") }
       exitCode <- buildServer(topic, port, sslContextOption)
     yield exitCode
