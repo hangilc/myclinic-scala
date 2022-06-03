@@ -115,6 +115,9 @@ object Config extends ConfigCirce:
       stampInfo.copy(imageFile = absPath)
     else stampInfo
 
+  def portalTmpDir: Path =
+    Path.of(System.getenv("MYCLINIC_PORTAL_TMP_DIR"))
+
   def readYaml[T: Decoder](file: File): T =
     val reader: _root_.java.io.Reader = _root_.java.io.FileReader(file)
     try

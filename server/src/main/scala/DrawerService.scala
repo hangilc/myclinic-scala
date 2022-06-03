@@ -64,7 +64,8 @@ object DrawerService:
           ops <- req.as[List[Op]]
         yield
           val printer = new PdfPrinter(paperSize)
-          val outStream = new FileOutputStream("out.pdf")
+          val outPath = Config.portalTmpDir.resolve("out.pdf")
+          val outStream = new FileOutputStream(outPath.toString)
           try 
             printer.print(List(ops.map(ToJavaOp.convert(_)).asJava).asJava, outStream)
             true

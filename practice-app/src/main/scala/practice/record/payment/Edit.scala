@@ -62,7 +62,7 @@ case class Edit(
       data = ReceiptDrawerData.create(patient, meisai, visit, LocalDate.now())
       ops <- Api.drawReceipt(data)
     yield
-      Api.createPdfFile(ops, "A5_Landscape")
+      Api.createPdfFile(ops, "A6_Landscape")
       
       
 
