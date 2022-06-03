@@ -29,7 +29,9 @@ import dev.fujiwara.scala.drawer.ToJavaOp
 
 object DrawerService:
   object intTextId extends QueryParamDecoderMatcher[Int]("text-id")
-  object strPaperSize extends QueryParamDecoderMatcher[String]("paper-size") 
+  object strPaperSize extends QueryParamDecoderMatcher[String]("paper-size")
+  object strFileName extends QueryParamDecoderMatcher[String]("file-name")
+
   val clinicInfo = Config.getClinicInfo
   val objectMapper = dev.fujiwara.drawer.op.JsonCodec.createMapper()
 
@@ -58,16 +60,20 @@ object DrawerService:
           headers = Headers(`Content-Type`(MediaType("application", "json")))
         )
 
-    case req @ POST -> Root / "create-pdf-file" :? strPaperSize(paperSize) =>
-      val op = 
-        for
-          ops <- req.as[List[Op]]
+    case req @ POST -> Root / "create-pdf-file" :? strPaperSize(
+          paperSize
+        ) +& strFileName(fileName) =>
+      val op =
+        for ops <- req.as[List[Op]]
         yield
           val printer = new PdfPrinter(paperSize)
-          val outPath = Config.portalTmpDir.resolve("out.pdf")
+          val outPath = Config.portalTmpDir.resolve(fileName)
           val outStream = new FileOutputStream(outPath.toString)
-          try 
-            printer.print(List(ops.map(ToJavaOp.convert(_)).asJava).asJava, outStream)
+          try
+            printer.print(
+              List(ops.map(ToJavaOp.convert(_)).asJava).asJava,
+              outStream
+            )
             true
           finally outStream.close()
       Ok(op)

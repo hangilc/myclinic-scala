@@ -7,6 +7,8 @@ import dev.myclinic.scala.web.practiceapp.practice.PracticeBus
 import java.time.LocalDateTime
 import dev.myclinic.scala.drawerform.receipt.ReceiptDrawerData
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import org.scalajs.dom.window
 
 case class Edit(
     chargeOption: Option[Charge],
@@ -15,6 +17,9 @@ case class Edit(
     meisai: Meisai
 ):
   val newChargeInput = input
+  val timeStampFormatter: DateTimeFormatter =
+    DateTimeFormatter.ofPattern("uuuuMMdd-HHmm")
+
   val ele = div(
     cls := "practice-widget",
     div(cls := "practice-widget-title", innerText := "請求額の変更"),
@@ -56,13 +61,16 @@ case class Edit(
       PracticeBus.paymentEntered.publish(pay)
 
   def doReceiptPdf(): Unit =
+    val issuedAt = LocalDateTime.now()
+    val timestamp = timeStampFormatter.format(issuedAt)
     for
       visit <- Api.getVisit(visitId)
       patient <- Api.getPatient(visit.patientId)
-      data = ReceiptDrawerData.create(patient, meisai, visit, LocalDate.now())
+      data = ReceiptDrawerData.create(patient, meisai, visit, issuedAt.toLocalDate)
       ops <- Api.drawReceipt(data)
+      fileName = s"Receipt-${patient.patientId}-${timestamp}"
+      _ <- Api.createPdfFile(ops, "A6_Landscape", fileName + ".pdf")
     yield
-      Api.createPdfFile(ops, "A6_Landscape")
+      val url = "/portal-tmp/" + fileName + ".pdf"
+      window.open(url, "_blank")
       
-      
-

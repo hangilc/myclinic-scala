@@ -18,5 +18,13 @@ object DrawerApi extends ApiBase:
     def shohousenDrawerText(text: Text): Future[List[Op]] =
       post("shohousen-drawer-text", Params(), text)
 
-    def createPdfFile(ops: List[Op], paperSize: String): Future[Boolean] =
-      post("create-pdf-file", Params("paper-size" -> paperSize), ops)
+    def createPdfFile(
+        ops: List[Op],
+        paperSize: String,
+        fileName: String
+    ): Future[Boolean] =
+      post(
+        "create-pdf-file",
+        Params("paper-size" -> paperSize, "file-name" -> fileName),
+        ops
+      )
