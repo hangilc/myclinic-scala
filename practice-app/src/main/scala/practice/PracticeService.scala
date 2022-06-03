@@ -24,6 +24,7 @@ class PracticeService extends SideMenuService:
   override def getElements = List(left.ele, right.ele)
   left.ele(
     new PatientDisplay().ele,
+    PatientManip.ele,
     new Nav().ele,
     new RecordsWrapper().ele,
     new Nav().ele
