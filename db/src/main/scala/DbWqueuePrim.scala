@@ -60,6 +60,13 @@ object DbWqueuePrim:
       event <- DbEventPrim.logWqueueUpdated(wq)
     yield event
 
+  def changeWqueueState(visitId: Int, newWaitState: WaitState): ConnectionIO[(AppEvent, Wqueue)] =
+    for
+      wq <- getWqueue(visitId).unique
+      newWq = wq.copy(waitState = newWaitState)
+      event <- updateWqueue(newWq)
+    yield (event, newWq)
+
   def listWqueue(): Query0[Wqueue] =
     sql"""
       select visit_id, wait_state from wqueue order by visit_id

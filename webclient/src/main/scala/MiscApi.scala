@@ -53,6 +53,9 @@ object MiscApi extends ApiBase:
     def updateWqueue(wq: Wqueue): Future[Boolean] =
       post("update-wqueue", Params(), wq)
 
+    def changeWqueueState(visitId: Int, newState: WaitState): Future[Wqueue] =
+      get("change-wqueue-state", Params("visit-id" -> visitId, "wqueue-state" -> newState.code))
+
     def getVisitPatient(visitId: Int): Future[(Int, Visit, Patient)] =
       get("get-visit-patient", Params("visit-id" -> visitId))
 

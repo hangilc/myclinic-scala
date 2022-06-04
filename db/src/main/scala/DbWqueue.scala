@@ -21,3 +21,6 @@ trait DbWqueue extends Mysql:
 
   def updateWqueue(wq: Wqueue): IO[AppEvent] =
     mysql(DbWqueuePrim.updateWqueue(wq))
+
+  def changeWqueueState(visitId: Int, newState: WaitState): IO[(AppEvent, Wqueue)] =
+    mysql(DbWqueuePrim.changeWqueueState(visitId, newState))

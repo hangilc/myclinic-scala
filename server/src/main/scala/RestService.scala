@@ -49,6 +49,7 @@ object RestService extends DateTimeQueryParam with Publisher:
   object intShinryoucode extends QueryParamDecoderMatcher[Int]("shinryoucode")
   object intConductId extends QueryParamDecoderMatcher[Int]("conduct-id")
   object intChargeValue extends QueryParamDecoderMatcher[Int]("charge-value")
+  object intWqueueState extends QueryParamDecoderMatcher[Int]("wqueue-state")
 
   case class UserError(message: String) extends Exception
 
@@ -233,6 +234,16 @@ object RestService extends DateTimeQueryParam with Publisher:
           event <- Db.updateWqueue(wq)
           _ <- publish(event)
         yield true
+      Ok(op)
+
+    case GET -> Root / "change-wqueue-state" :? intVisitId(visitId) +& intWqueueState(newStateCode) =>
+      val newState = WaitState.fromCode(newStateCode)
+      val op =
+        for
+          result <- Db.changeWqueueState(visitId, newState)
+          (event, wq) = result
+          _ <- publish(event)
+        yield wq
       Ok(op)
 
     case req @ POST -> Root / "enter-patient" =>

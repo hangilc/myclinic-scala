@@ -31,17 +31,13 @@ class PracticeService extends SideMenuService:
   )
 
   PracticeBus.addRightWidgetRequest.subscribe(ele => right.ele(ele))
-  PracticeBus.patientChanged.subscribe(onPatientChanged _)
+  PracticeBus.practiceFinishing.subscribe(visitId => Api.changeWqueueState(visitId, WaitState.WaitReExam))
 
   val itemsPerPage = PracticeBus.visitsPerPage
   def calcNumPages(total: Int): Int =
     (total + itemsPerPage - 1) / itemsPerPage
 
-  def onPatientChanged(patientOpt: Option[Patient]): Unit =
-    patientOpt match {
-      case None          => endPatient
-      case Some(patient) => startPatient(patient)
-    }
+  PracticeBus.patientVisitChanged.subscribe(state => startPatient(state.patientOption))
 
   def startPatient(patient: Patient): Unit =
     for
