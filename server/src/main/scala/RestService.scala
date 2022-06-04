@@ -369,6 +369,25 @@ object RestService extends DateTimeQueryParam with Publisher:
         yield updated
       Ok(op)
 
+    case GET -> Root / "set-charge-value" :? intVisitId(visitId) +& intChargeValue(chargeValue) =>
+      val op =
+        for
+          result <- Db.setChargeValue(visitId, chargeValue)
+          (event, updated) = result
+          _ <- publish(event)
+        yield updated
+      Ok(op)
+
+    case GET -> Root / "enter-charge-value" :? intVisitId(visitId) +& intChargeValue(chargeValue) =>
+      val op =
+        for
+          result <- Db.enterChargeValue(visitId, chargeValue)
+          (event, updated) = result
+          _ <- publish(event)
+        yield updated
+      Ok(op)
+
+
   } <+> PatientService.routes <+> VisitService.routes <+> MiscService.routes
     <+> ConfigService.routes <+> FileService.routes
     <+> DrawerService.routes <+> MasterService.routes

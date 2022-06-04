@@ -4,10 +4,12 @@ import dev.fujiwara.domq.all.{*, given}
 import dev.myclinic.scala.model.Meisai
 import org.scalajs.dom.HTMLFormElement
 import dev.fujiwara.domq.Html
+import dev.myclinic.scala.webclient.{Api, global}
 
-case class CashierDialog(meisai: Meisai):
+case class CashierDialog(meisai: Meisai, visitId: Int):
   private var chargeValue: Int = meisai.charge
   val formWrapper = div
+  val chargeWrapper = span
   val enterButton = button
   val cancelButton = button
   val dlog = new ModalDialog3()
@@ -16,7 +18,7 @@ case class CashierDialog(meisai: Meisai):
     div(innerText := detail),
       div (innerText := summary),
     div(
-      span(chargeValueText),
+      chargeWrapper(chargeValueText),
       a("変更", onclick := (doChange _))
     ),
     formWrapper(displayNone)
@@ -25,6 +27,9 @@ case class CashierDialog(meisai: Meisai):
     enterButton("入力", onclick := (doEnter _)),
     cancelButton("キャンセル", onclick := (() => dlog.close()))
   )
+
+  def updateUI(): Unit =
+    chargeWrapper(clear, chargeValueText)
 
   def detail: String =
     meisai.items
@@ -35,7 +40,7 @@ case class CashierDialog(meisai: Meisai):
     s"総点：${meisai.totalTen}点、負担割：${meisai.futanWari}割"
 
   def chargeValueText: String =
-    s"請求額：${meisai.charge}円"
+    s"請求額：${chargeValue}円"
 
   def doChange(): Unit =
     val form = CashierDialog.ChangeForm()
@@ -44,6 +49,7 @@ case class CashierDialog(meisai: Meisai):
         case Left(msg) => ShowMessage.showError(msg)
         case Right(value) =>
           chargeValue = value
+          updateUI()
           formWrapper(displayNone, clear)
           enterButton(enabled := true)
       }
@@ -54,12 +60,16 @@ case class CashierDialog(meisai: Meisai):
       enterButton(enabled := true)
       ()
     ))
-    formWrapper(clear, form.ele)
+    formWrapper(clear, form.ele(cls := "practice-cashier-dialog-change-form"))
     formWrapper(displayDefault)
     enterButton(disabled := true)
     
   def doEnter(): Unit =
-    ()
+    for
+      entered <- Api.enterChargeValue(visitId, chargeValue)
+    yield 
+      dlog.close()
+      ???
 
   def open(): Unit =
     dlog.open()

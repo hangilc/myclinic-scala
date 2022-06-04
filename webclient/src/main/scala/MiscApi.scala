@@ -54,7 +54,10 @@ object MiscApi extends ApiBase:
       post("update-wqueue", Params(), wq)
 
     def changeWqueueState(visitId: Int, newState: WaitState): Future[Wqueue] =
-      get("change-wqueue-state", Params("visit-id" -> visitId, "wqueue-state" -> newState.code))
+      get(
+        "change-wqueue-state",
+        Params("visit-id" -> visitId, "wqueue-state" -> newState.code)
+      )
 
     def getVisitPatient(visitId: Int): Future[(Int, Visit, Patient)] =
       get("get-visit-patient", Params("visit-id" -> visitId))
@@ -360,7 +363,22 @@ object MiscApi extends ApiBase:
       get("delete-conduct-ex", Params("conduct-id" -> conductId))
 
     def updateChargeValue(visitId: Int, chargeValue: Int): Future[Charge] =
-      get("update-charge-value", Params("visit-id" -> visitId, "charge-value" -> chargeValue))
+      get(
+        "update-charge-value",
+        Params("visit-id" -> visitId, "charge-value" -> chargeValue)
+      )
+
+    def setChargeValue(visitId: Int, chargeValue: Int): Future[Charge] =
+      get(
+        "set-charge-value",
+        Params("visit-id" -> visitId, "charge-value" -> chargeValue)
+      )
+
+    def enterChargeValue(visitId: Int, chargeValue: Int): Future[Charge] =
+      get(
+        "enter-charge-value",
+        Params("visit-id" -> visitId, "charge-value" -> chargeValue)
+      )
 
     def enterPayment(payment: Payment): Future[Boolean] =
       post("enter-payment", Params(), payment)
