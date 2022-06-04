@@ -12,13 +12,13 @@ object PracticeBus:
 
   type VisitId = Int
 
-  val practiceFinishing = LocalEventPublisher[Int]
+  val patientFinished = LocalEventPublisher[Unit]
   val patientVisitChanged = new CachingEventPublisher[PatientVisitState](NoSelection):
     override def publishFuture(newState: PatientVisitState): Future[Unit] =
       currentValue match {
-        case Practicing(_, visitId) => 
+        case Browsing(_) | Practicing(_, _) => 
           for 
-            _ <- practiceFinishing.publishFuture(visitId)
+            _ <- patientFinished.publishFuture(())
             _ <- super.publishFuture(newState)
           yield ()
         case _ => super.publishFuture(newState)
