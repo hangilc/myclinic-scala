@@ -61,7 +61,7 @@ object DocTypeRow:
     val select: Selection[(String, String)] = new Selection[(String, String)]
     select.clear()
     select.addAll(defaultItems, _._1, identity)
-    select.addSelectEventHandler(s => onSelect.publishFuture(Some(s)))
+    select.addSelectEventHandler(s => onSelect.publish(Some(s)))
     val ele = div(
       select.ele,
       div(cancelLink("キャンセル"))

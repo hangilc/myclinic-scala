@@ -13,9 +13,9 @@ class LocalEventPublisher[T]:
   def subscribeFuture(handler: T => Future[Unit]): LocalEventUnsubscriber =
     subscribers = subscribers :+ handler
     LocalEventUnsubscriber(() => subscribers = subscribers.filter(_ != handler))
-  def publishFuture(t: T): Future[Unit] = 
+  def publish(t: T): Future[Unit] = 
     Future.traverse(subscribers)(s => s(t)).map(_ => ())
-  def publish(t: T): Unit = publishFuture(t)
+  def publish_(t: T): Unit = publish(t)
 
 case class LocalEventUnsubscriber(proc: () => Unit):
   def unsubscribe: Unit = proc()
@@ -24,9 +24,9 @@ object LocalEventUnsubscriber:
   given Dispose[LocalEventUnsubscriber] = _.unsubscribe
 
 class CachingEventPublisher[T](private var cache: T) extends LocalEventPublisher[T]:
-  override def publishFuture(t: T): Future[Unit] =
+  override def publish(t: T): Future[Unit] =
     cache = t
-    super.publishFuture(t)
+    super.publish(t)
 
   def currentValue: T = cache
 

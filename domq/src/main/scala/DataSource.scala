@@ -26,12 +26,12 @@ class LocalDataSource[T](init: T) extends DataSource[T]:
 
   def triggerUpdate(): Unit =
     assert(!deletedFlag)
-    onUpdatePublisher.publishFuture(cur)
+    onUpdatePublisher.publish(cur)
 
   def delete(): Unit =
     assert(!deletedFlag)
     deletedFlag = true
-    onDeletePublisher.publishFuture(cur)
+    onDeletePublisher.publish(cur)
 
   def isDeleted: Boolean = deletedFlag
 

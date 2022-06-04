@@ -12,16 +12,24 @@ object PracticeBus:
 
   type VisitId = Int
 
-  val patientVisitChanged = CachingEventPublisher[PatientVisitState](NoSelection)
+  private var pvState: PatientVisitState = NoSelection
+
+  val patientVisitChanging = LocalEventPublisher[PatientVisitState]
+  val patientVisitChanged = LocalEventPublisher[PatientVisitState]
   val tempVisitIdChanged = CachingEventPublisher[Option[Int]](None)
-  def currentPatient: Option[Patient] = patientVisitChanged.currentValue.patientOption
-  def currentVisitId: Option[Int] = patientVisitChanged.currentValue.visitIdOption
+  def currentPatient: Option[Patient] = pvState.patientOption
+  def currentVisitId: Option[Int] = pvState.visitIdOption
   def currentTempVisitId: Option[Int] = tempVisitIdChanged.currentValue
   def copyTarget: Option[VisitId] = currentVisitId orElse currentTempVisitId
 
-  def setPatientVisit(state: PatientVisitState): Future[Unit] =
-    val cur = patientVisitChanged.currentValue
-
+  def setPatientVisitState(newState: PatientVisitState): Future[Unit] =
+    for 
+      _ <- patientVisitChanging.publish(pvState)
+      _ <- tempVisitIdChanged.publish(None)
+      _ = pvState = newState
+      _ <- patientVisitChanged.publish(pvState)
+    yield ()
+    
   val navPageChanged = LocalEventPublisher[Int]
   val navSettingChanged = LocalEventPublisher[(Int, Int)]
 

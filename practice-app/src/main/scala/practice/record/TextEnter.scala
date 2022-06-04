@@ -12,7 +12,7 @@ class TextEnter(visitId: Int):
     ta(cls := "practice-enter-text-textarea"),
     div(
       button("入力", onclick := (doEnter _)),
-      button("キャンセル", onclick := (() => onDone.publish(())))
+      button("キャンセル", onclick := (() => onDone.publish_(())))
     )
   )
 

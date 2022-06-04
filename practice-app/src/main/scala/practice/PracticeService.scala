@@ -31,23 +31,30 @@ class PracticeService extends SideMenuService:
   )
 
   PracticeBus.addRightWidgetRequest.subscribe(ele => right.ele(ele))
-  PracticeBus.practiceFinishing.subscribe(visitId => Api.changeWqueueState(visitId, WaitState.WaitReExam))
+  PracticeBus.patientVisitChanging.subscribe(state =>
+    state match {
+      case Practicing(_, visitId) =>
+        Api.changeWqueueState(visitId, WaitState.WaitReExam)
+      case _ => Future.successful(())
+    }
+  )
 
-  val itemsPerPage = PracticeBus.visitsPerPage
   def calcNumPages(total: Int): Int =
+    val itemsPerPage = PracticeBus.visitsPerPage
     (total + itemsPerPage - 1) / itemsPerPage
 
-  PracticeBus.patientVisitChanged.subscribe(state => startPatient(state.patientOption))
-
-  def startPatient(patient: Patient): Unit =
-    for
-      total <- Api.countVisitByPatient(patient.patientId)
-      numPages = calcNumPages(total)
-    yield
-      PracticeBus.navSettingChanged.publish(0, numPages)
-      PracticeBus.navPageChanged.publish(0)
-
-  def endPatient: Unit = ()
+  PracticeBus.patientVisitChanged.subscribe(state =>
+    PracticeBus.currentPatient match {
+      case None => PracticeBus.navSettingChanged.publish(0, 0)
+      case Some(patient) =>
+        for
+          total <- Api.countVisitByPatient(patient.patientId)
+          numPages = calcNumPages(total)
+        yield
+          PracticeBus.navSettingChanged.publish(0, numPages)
+          PracticeBus.navPageChanged.publish(0)
+    }
+  )
 
 class PracticeMain:
   val ui = new PracticeMainUI
@@ -74,41 +81,9 @@ class PracticeMain:
     for visit <- Api.startVisit(patient.patientId, LocalDateTime.now())
     yield println(visit)
 
-  private def startPatient(patient: Patient, visitId: Option[Int] = None): Future[Unit] =
-    for
-      _ <- suspendVisit
-      _ <- endPatient
-    yield
-      PracticeBus.tempVisitIdChanged.publish(None)
-      PracticeBus.visitIdChanged.publish(None)
-      PracticeBus.patientChanged.publish(Some(patient))
-
-  private def endPatient: Future[Unit] =
-    PracticeBus.currentPatient match {
-      case None => Future.successful(())
-      case Some(patient) =>
-        PracticeBus.tempVisitIdChanged.publishFuture(None)
-        PracticeBus.visitIdChanged.publishFuture(None)
-        PracticeBus.patientChanged.publishFuture(None)
-    }
-
-  private def suspendVisit: Future[Unit] =
-    PracticeBus.currentVisitId match {
-      case None => Future.successful(())
-      case Some(visitId) => 
-        for
-          wqOpt <- Api.findWqueue(visitId)
-          _ <- wqOpt match {
-            case None => Future.successful(())
-            case Some(wq) => 
-              Api.updateWqueue(wq.copy(waitState = WaitState.WaitReExam))
-          }
-        yield ()
-    }
-  
   def searchShohouSample(): Unit =
     ShohouSampleDialog.open()
-    
+
   def selectFromRegistered(): Unit =
     for pairs <- PracticeService.listRegisteredPatient()
     yield
@@ -126,7 +101,9 @@ class PracticeMain:
               d.close()
               pair match {
                 case (patient, visit) =>
-                  startPatient(patient, Some(visit.visitId))
+                  PracticeBus.setPatientVisitState(
+                    Practicing(patient, visit.visitId)
+                  )
               }
             )
           )
@@ -158,9 +135,7 @@ class PracticeMain:
         "選択",
         onclick := (() => {
           d.close()
-          search.selected.foreach(patient =>
-            startPatient(patient, None)
-          )
+          search.selected.foreach(patient => PracticeBus.setPatientVisitState(Browsing(patient)))
         })
       ),
       button("閉じる", onclick := (() => d.close()))
@@ -212,9 +187,7 @@ class PracticeMain:
         "選択",
         onclick := (() => {
           d.close()
-          selection.marked.foreach(patient =>
-            startPatient(patient, None)
-          )
+          selection.marked.foreach(patient => PracticeBus.setPatientVisitState(Browsing(patient)))
         })
       ),
       button("キャンセル", onclick := (() => d.close()))
@@ -226,7 +199,7 @@ class PracticeMain:
 
   def selectByDate(): Unit =
     val widget = new SelectPatientByDateWidget()
-    widget.patientSelected.subscribe(patient => startPatient(patient, None))
+    widget.patientSelected.subscribe(patient => PracticeBus.setPatientVisitState(Browsing(patient)))
     PracticeBus.addRightWidgetRequest.publish(widget.ele)
 
 object PracticeService:

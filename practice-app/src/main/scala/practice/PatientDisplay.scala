@@ -10,7 +10,7 @@ class PatientDisplay:
     nameSpan
   )
 
-  val unsubscribe = PracticeBus.patientChanged.subscribe(optPatient => optPatient match {
+  val unsubscribe = PracticeBus.patientVisitChanged.subscribe(state => state.patientOption match {
     case Some(patient) => 
       nameSpan(innerText := Helper.formatPatient(patient))
       ele(displayDefault)
