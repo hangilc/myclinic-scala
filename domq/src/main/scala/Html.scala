@@ -16,7 +16,7 @@ object Html:
   def h5 = create[HTMLElement]("h5")
   def h6 = create[HTMLElement]("h6")
   def a = create[HTMLAnchorElement]("a")(href := "")
-  def button = create[HTMLButtonElement]("button")
+  def button = create[HTMLButtonElement]("button")(attr("type") := "button")
   def p = create[HTMLElement]("p")
   def form = create[HTMLFormElement]("form")(
     onsubmit := (_ => ())
