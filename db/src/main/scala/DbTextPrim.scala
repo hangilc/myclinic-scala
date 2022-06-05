@@ -55,3 +55,20 @@ object DbTextPrim:
       _ = if affected != 1 then throw new RuntimeException(s"Failed to delete text: ${textId}")
       event <- DbEventPrim.logTextDeleted(t)
     yield event
+
+  def searchTextGlobally(text: String): Query0[Text] =
+    val like = s"%${text}%"
+    sql"""
+      select * from visit_text where content like ${like} order by text_id desc
+    """.query[Text]
+
+  def searchTextForPatient(text: String, patientId: Int): Query0[Text] =
+    val like = s"%${text}%"
+    sql"""
+      select t.* from visit_text t inner join visit v on t.visit_id = v.visit_id
+        where v.patient_id = ${patientId} and content like ${like} order by text_id desc
+    """.query[Text]
+
+
+
+

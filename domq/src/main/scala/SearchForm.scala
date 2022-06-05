@@ -78,7 +78,7 @@ object Implicits:
 
 class SearchFormElementsBase[D]:
   val input: HTMLInputElement = inputText
-  val button: HTMLButtonElement = Html.button("検索")
+  val button: HTMLButtonElement = Html.button("検索", attr("type") := "submit")
   val selection: Selection[D] = new Selection[D]
 
 class SearchFormBase[Src, D](
@@ -128,26 +128,4 @@ class SearchForm[D](
   def onSelect(handler: D => Unit): Unit =
     ui.selection.addSelectEventHandler(handler)
 
-// class SearchForm[Src, D](
-//     toLabel: Src => String,
-//     toValue: Src => D,
-//     search: String => Future[List[Src]]
-// ):
-//   val ui = new SearchFormElements[D]
-//   val ele = div(
-//     ui.form(cls := "domq-search-form-form"),
-//     ui.selection.ele(cls := "domq-search-form-selection")
-//   )
-//   import Implicits.given
-//   val engine = new SearchFormEngine(
-//     ui.input,
-//     ui.form,
-//     ui.selection,
-//     search,
-//     toLabel,
-//     toValue
-//   )
-//   def initFocus: Unit = ui.input.focus()
-//   def selected: Option[D] = engine.selected
-//   def onSelect(handler: D => Unit): Unit =
-//     ui.selection.addSelectEventHandler(handler)
+    

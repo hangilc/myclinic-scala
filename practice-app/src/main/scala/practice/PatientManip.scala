@@ -6,6 +6,7 @@ import dev.myclinic.scala.webclient.{Api, global}
 import dev.myclinic.scala.model.WaitState
 import java.time.LocalDateTime
 import scala.concurrent.Future
+import dev.myclinic.scala.web.practiceapp.practice.patientmanip.SearchTextDialog
 
 object PatientManip:
   val cashierButton = button
@@ -16,7 +17,7 @@ object PatientManip:
     cashierButton("会計", onclick := (doCashier _)),
     button("患者終了", onclick := (doEndPatient _)),
     a("診察登録", onclick := (doRegisterPractice _)),
-    a("文章検索"),
+    a("文章検索", onclick := (doSearchText _)),
     a("画像保存"),
     a("画像一覧")
   )
@@ -30,6 +31,12 @@ object PatientManip:
       ele(displayDefault)
       cashierButton(enabled := true)
   }
+
+  def doSearchText(): Unit =
+    PracticeBus.currentPatient.foreach(patient =>
+      val dlog = SearchTextDialog(patient.patientId)
+      dlog.open()
+    )
 
   def doRegisterPractice(): Unit =
     PracticeBus.currentPatient.foreach(patient =>

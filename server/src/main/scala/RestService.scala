@@ -387,6 +387,12 @@ object RestService extends DateTimeQueryParam with Publisher:
         yield updated
       Ok(op)
 
+    case GET -> Root / "search-text-globally" :? strText(text) =>
+      Ok(Db.searchTextGlobally(text))
+
+    case GET -> Root / "search-text-for-patient" :? strText(text) +& intPatientId(patientId) =>
+      Ok(Db.searchTextForPatient(text, patientId))
+
 
   } <+> PatientService.routes <+> VisitService.routes <+> MiscService.routes
     <+> ConfigService.routes <+> FileService.routes
