@@ -18,11 +18,8 @@ case class Practicing(patient: Patient, visitId: Int) extends PatientVisitState:
   def patientOption: Option[Patient] = Some(patient)
   def visitIdOption: Option[Int] = Some(visitId)
 
-object PatientVisitState:
-  type T = PatientVisitState
-  private var hooks: Map[(T, T), () => Unit] = Map()
+case class PracticeDone(patient: Patient, visitId: Int) extends PatientVisitState:
+  def patientOption: Option[Patient] = Some(patient)
+  def visitIdOption: Option[Int] = Some(visitId)
 
-  def setHook(from: T, to: T, h: () => Unit): Unit =
-    hooks += ((from, to), h) 
 
-  def hook(from: T, to: T): () => Unit = hooks((from, to))

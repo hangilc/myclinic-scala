@@ -6,7 +6,7 @@ import org.scalajs.dom.HTMLFormElement
 import dev.fujiwara.domq.Html
 import dev.myclinic.scala.webclient.{Api, global}
 
-case class CashierDialog(meisai: Meisai, visitId: Int):
+case class CashierDialog(meisai: Meisai, visitId: Int, onDone: () => Unit):
   private var chargeValue: Int = meisai.charge
   val formWrapper = div
   val chargeWrapper = span
@@ -69,7 +69,7 @@ case class CashierDialog(meisai: Meisai, visitId: Int):
       entered <- Api.enterChargeValue(visitId, chargeValue)
     yield 
       dlog.close()
-      ???
+      onDone()
 
   def open(): Unit =
     dlog.open()

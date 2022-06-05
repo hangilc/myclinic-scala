@@ -32,6 +32,8 @@ object PatientManip:
     PracticeBus.currentVisitId.foreach(visitId =>
       for meisai <- Api.getMeisai(visitId)
       yield
-        val dlog = CashierDialog(meisai)
+        val dlog = CashierDialog(meisai, visitId, () =>
+          
+        )
         dlog.open()
     )

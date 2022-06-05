@@ -14,7 +14,7 @@ object PracticeBus:
 
   private var pvState: PatientVisitState = NoSelection
 
-  val patientVisitChanging = LocalEventPublisher[PatientVisitState]
+  val patientVisitChanging = LocalEventPublisher[(PatientVisitState, PatientVisitState)]
   val patientVisitChanged = LocalEventPublisher[PatientVisitState]
   val tempVisitIdChanged = CachingEventPublisher[Option[Int]](None)
   def currentPatient: Option[Patient] = pvState.patientOption
@@ -24,7 +24,7 @@ object PracticeBus:
 
   def setPatientVisitState(newState: PatientVisitState): Future[Unit] =
     for 
-      _ <- patientVisitChanging.publish(pvState)
+      _ <- patientVisitChanging.publish((pvState, newState))
       _ <- tempVisitIdChanged.publish(None)
       _ = pvState = newState
       _ <- patientVisitChanged.publish(pvState)
