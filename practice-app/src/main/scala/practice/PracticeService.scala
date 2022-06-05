@@ -42,27 +42,10 @@ class PracticeService extends SideMenuService:
     (total + itemsPerPage - 1) / itemsPerPage
 
   PracticeBus.patientVisitChanged.subscribe {
-    case NoSelection =>
-      PracticeBus.navSettingChanged.publish(0, 0)
-      PracticeBus.navPageChanged.publish(0)
-    case Browsing(patient)      => startPatientRecords(patient)
-    case Practicing(patient, _) => startPatientRecords(patient)
+    case NoSelection | Browsing(_) | Practicing(_, _) =>
+      RecordsHelper.refreshRecords(0)
     case _ => Future.successful(())
   }
-
-  def startPatientRecords(patient: Patient): Future[Unit] =
-    for
-      total <- Api.countVisitByPatient(patient.patientId)
-      numPages = calcNumPages(total)
-      _ <- PracticeBus.navSettingChanged.publish(0, numPages)
-      _ <- PracticeBus.navPageChanged.publish(0)
-    yield ()
-
-  def clearPatientRecords(): Future[Unit] =
-    for
-      _ <- PracticeBus.navSettingChanged.publish(0, 0)
-      _ <- PracticeBus.navPageChanged.publish(0)
-    yield ()
 
 class PracticeMain:
   val ui = new PracticeMainUI

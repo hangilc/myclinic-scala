@@ -4,6 +4,8 @@ import dev.fujiwara.domq.all.{*, given}
 import dev.myclinic.scala.web.practiceapp.practice.patientmanip.CashierDialog
 import dev.myclinic.scala.webclient.{Api, global}
 import dev.myclinic.scala.model.WaitState
+import java.time.LocalDateTime
+import scala.concurrent.Future
 
 object PatientManip:
   val cashierButton = button
@@ -13,7 +15,7 @@ object PatientManip:
     attr("id") := "practice-patient-manip",
     cashierButton("会計", onclick := (doCashier _)),
     button("患者終了", onclick := (doEndPatient _)),
-    a("診察登録"),
+    a("診察登録", onclick := (doRegisterPractice _)),
     a("文章検索"),
     a("画像保存"),
     a("画像一覧")
@@ -28,6 +30,14 @@ object PatientManip:
       ele(displayDefault)
       cashierButton(enabled := true)
   }
+
+  def doRegisterPractice(): Unit =
+    PracticeBus.currentPatient.foreach(patient =>
+      for
+        _ <- Api.startVisit(patient.patientId, LocalDateTime.now())
+        _ <- RecordsHelper.refreshRecords(PracticeBus.navPageChanged.currentValue)
+      yield ()
+    )
 
   def doEndPatient(): Unit =
     PracticeBus.setPatientVisitState(NoSelection)

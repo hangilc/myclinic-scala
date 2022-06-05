@@ -31,7 +31,7 @@ object PracticeBus:
       _ <- patientVisitChanged.publish(pvState)
     yield ()
     
-  val navPageChanged = LocalEventPublisher[Int]
+  val navPageChanged = CachingEventPublisher[Int](0)
   val navSettingChanged = LocalEventPublisher[(Int, Int)]
 
   val visitsPerPage: Int = 10
