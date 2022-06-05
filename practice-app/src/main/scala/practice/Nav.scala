@@ -8,32 +8,31 @@ class Nav:
   var total = 0
   var page = 0
   val eDisp = span()
-  val ele = div(displayNone, cls := "practice-nav",
+  val ele = div(
+    displayNone,
+    cls := "practice-nav",
     a("最初", onclick := (() => gotoPage(0))),
     a("前へ", onclick := (() => gotoPage(page - 1))),
     a("次へ", onclick := (() => gotoPage(page + 1))),
     a("最後", onclick := (() => gotoPage(total - 1))),
-    eDisp,
+    eDisp
   )
   updateDisp()
 
-  val unsubscribers = List(
-    PracticeBus.navSettingChanged.subscribe {
-      case (newPage, newTotal) => 
-        setTotal(newTotal)
-        setPage(newPage)
-        updateDisp()
-    },
-    PracticeBus.navPageChanged.subscribe(newPage => 
-      setPage(newPage)
-      updateDisp()
-    )
+  PracticeBus.navSettingChanged.subscribe { case (newPage, newTotal) =>
+    setTotal(newTotal)
+    setPage(newPage)
+    updateDisp()
+  }
+  PracticeBus.navPageChanged.subscribe(newPage =>
+    setPage(newPage)
+    updateDisp()
   )
 
   def setTotal(value: Int): Unit =
     total = value
 
-  def setPage(value: Int): Unit = 
+  def setPage(value: Int): Unit =
     page = value
 
   private def gotoPage(p: Int): Unit =
@@ -44,7 +43,6 @@ class Nav:
 
   private def updateDisp(): Unit =
     if total > 1 then
-      eDisp(innerText := s"[${page+1}/${total}]")
+      eDisp(innerText := s"[${page + 1}/${total}]")
       ele(displayDefault)
-    else
-      ele(displayNone)
+    else ele(displayNone)

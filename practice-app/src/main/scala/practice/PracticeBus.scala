@@ -17,6 +17,7 @@ object PracticeBus:
   val patientVisitChanging = LocalEventPublisher[(PatientVisitState, PatientVisitState)]
   val patientVisitChanged = LocalEventPublisher[PatientVisitState]
   val tempVisitIdChanged = CachingEventPublisher[Option[Int]](None)
+  def currentPatientVisitState: PatientVisitState = pvState
   def currentPatient: Option[Patient] = pvState.patientOption
   def currentVisitId: Option[Int] = pvState.visitIdOption
   def currentTempVisitId: Option[Int] = tempVisitIdChanged.currentValue

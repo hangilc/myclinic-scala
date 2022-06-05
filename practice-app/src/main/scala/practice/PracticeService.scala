@@ -41,18 +41,28 @@ class PracticeService extends SideMenuService:
     val itemsPerPage = PracticeBus.visitsPerPage
     (total + itemsPerPage - 1) / itemsPerPage
 
-  PracticeBus.patientVisitChanged.subscribe(state =>
-    PracticeBus.currentPatient match {
-      case None => PracticeBus.navSettingChanged.publish(0, 0)
-      case Some(patient) =>
-        for
-          total <- Api.countVisitByPatient(patient.patientId)
-          numPages = calcNumPages(total)
-        yield
-          PracticeBus.navSettingChanged.publish(0, numPages)
-          PracticeBus.navPageChanged.publish(0)
-    }
-  )
+  PracticeBus.patientVisitChanged.subscribe {
+    case NoSelection =>
+      PracticeBus.navSettingChanged.publish(0, 0)
+      PracticeBus.navPageChanged.publish(0)
+    case Browsing(patient)      => startPatientRecords(patient)
+    case Practicing(patient, _) => startPatientRecords(patient)
+    case _ => Future.successful(())
+  }
+
+  def startPatientRecords(patient: Patient): Future[Unit] =
+    for
+      total <- Api.countVisitByPatient(patient.patientId)
+      numPages = calcNumPages(total)
+      _ <- PracticeBus.navSettingChanged.publish(0, numPages)
+      _ <- PracticeBus.navPageChanged.publish(0)
+    yield ()
+
+  def clearPatientRecords(): Future[Unit] =
+    for
+      _ <- PracticeBus.navSettingChanged.publish(0, 0)
+      _ <- PracticeBus.navPageChanged.publish(0)
+    yield ()
 
 class PracticeMain:
   val ui = new PracticeMainUI
@@ -83,7 +93,7 @@ class PracticeMain:
     ShohouSampleDialog.open()
 
   def selectFromRegistered(): Unit =
-    for pairs <- PracticeService.listRegisteredPatient()
+    for pairs <- PracticeService.listRegisteredPatientForPractice
     yield
       val sel = Selection[(Patient, Visit)]
       sel.clear()
@@ -133,7 +143,9 @@ class PracticeMain:
         "選択",
         onclick := (() => {
           d.close()
-          search.selected.foreach(patient => PracticeBus.setPatientVisitState(Browsing(patient)))
+          search.selected.foreach(patient =>
+            PracticeBus.setPatientVisitState(Browsing(patient))
+          )
         })
       ),
       button("閉じる", onclick := (() => d.close()))
@@ -185,7 +197,9 @@ class PracticeMain:
         "選択",
         onclick := (() => {
           d.close()
-          selection.marked.foreach(patient => PracticeBus.setPatientVisitState(Browsing(patient)))
+          selection.marked.foreach(patient =>
+            PracticeBus.setPatientVisitState(Browsing(patient))
+          )
         })
       ),
       button("キャンセル", onclick := (() => d.close()))
@@ -197,7 +211,9 @@ class PracticeMain:
 
   def selectByDate(): Unit =
     val widget = new SelectPatientByDateWidget()
-    widget.patientSelected.subscribe(patient => PracticeBus.setPatientVisitState(Browsing(patient)))
+    widget.patientSelected.subscribe(patient =>
+      PracticeBus.setPatientVisitState(Browsing(patient))
+    )
     PracticeBus.addRightWidgetRequest.publish(widget.ele)
 
 object PracticeService:
@@ -208,6 +224,19 @@ object PracticeService:
       val p = patientMap(v.patientId)
       (p, v)
     )
+
+  def isForPractice(wstate: WaitState): Boolean =
+    wstate == WaitState.WaitExam || wstate == WaitState.WaitReExam
+
+  def listRegisteredPatientForPractice: Future[List[(Patient, Visit)]] =
+    for (gen, wqList, visitMap, patientMap) <- Api.listWqueueFull()
+    yield wqList
+      .filter(wq => isForPractice(wq.waitState))
+      .map(wq =>
+        val v = visitMap(wq.visitId)
+        val p = patientMap(v.patientId)
+        (p, v)
+      )
 
 class PracticeMainUI:
   val choice = PullDownLink("患者選択")
