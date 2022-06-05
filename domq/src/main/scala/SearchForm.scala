@@ -9,6 +9,7 @@ import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits.global
 import org.scalajs.dom.HTMLInputElement
 import org.scalajs.dom.HTMLButtonElement
 import org.scalajs.dom.HTMLFormElement
+import org.scalajs.dom.HTMLElement
 
 trait InputProvider[I]:
   def getText(input: I): String
@@ -16,26 +17,15 @@ trait InputProvider[I]:
 trait TriggerProvider[T]:
   def onSearch(t: T, cb: () => Unit): Unit
 
-trait SelectionProvider[S, T]:
-  def setItems[Src](
-      s: S,
-      items: List[Src],
-      toLabel: Src => String,
-      toValue: Src => T
-  ): Unit
-  def selected(s: S): Option[T]
-
-class SearchFormEngine[I, T, SearchResult, D, S](
-    input: I,
-    trigger: T,
-    selection: S,
-    search: String => Future[List[SearchResult]],
-    toLabel: SearchResult => String,
-    toValue: SearchResult => D
+class SearchFormEngine[Input, Trigger, T](
+    input: Input,
+    trigger: Trigger,
+    selection: Selection[T],
+    search: String => Future[List[T]],
+    toElement: T => HTMLElement
 )(using
-    inputProvider: InputProvider[I],
-    triggerProvider: TriggerProvider[T],
-    selectionProvider: SelectionProvider[S, D]
+    inputProvider: InputProvider[Input],
+    triggerProvider: TriggerProvider[Trigger]
 ):
   var onSearchDone: () => Unit = () => ()
   triggerProvider.onSearch(
@@ -44,16 +34,16 @@ class SearchFormEngine[I, T, SearchResult, D, S](
       val text = inputProvider.getText(input)
       for result <- search(text)
       yield
-        //selectionProvider.setItems(selection, result, toLabel, toValue)
         setItems(result)
         onSearchDone()
     }
   )
 
-  def setItems(result: List[SearchResult]): Unit =
-    selectionProvider.setItems(selection, result, toLabel, toValue)
+  def setItems(result: List[T]): Unit =
+    selection.clear()
+    selection.addAll(result.map(v => (toElement(v), v)))
 
-  def selected: Option[D] = selectionProvider.selected(selection)
+  def selected: Option[T] = selection.marked
 
 object Implicits:
   given InputProvider[HTMLInputElement] with
@@ -64,29 +54,17 @@ object Implicits:
   given TriggerProvider[HTMLFormElement] with
     def onSearch(form: HTMLFormElement, cb: () => Unit): Unit =
       form(onsubmit := cb)
-  given [D]: SelectionProvider[Selection[D], D] with
-    def setItems[Src](
-        s: Selection[D],
-        items: List[Src],
-        toLabel: Src => String,
-        toValue: Src => D
-    ): Unit =
-      s.clear()
-      s.addAll(items, toLabel, toValue)
-    def selected(s: Selection[D]): Option[D] =
-      s.marked
 
-class SearchFormElementsBase[D]:
+class SearchFormElementsBase[T]:
   val input: HTMLInputElement = inputText
   val button: HTMLButtonElement = Html.button("検索", attr("type") := "submit")
-  val selection: Selection[D] = new Selection[D]
+  val selection: Selection[T] = new Selection[T]
 
-class SearchFormBase[Src, D](
-    toLabel: Src => String,
-    toValue: Src => D,
-    search: String => Future[List[Src]]
+class SearchFormBase[T](
+    toElement: T => HTMLElement,
+    search: String => Future[List[T]]
 ):
-  val ui = new SearchFormElementsBase[D]
+  val ui = new SearchFormElementsBase[T]
   val ele = div(
     div(ui.input, ui.button),
     ui.selection.ele
@@ -97,19 +75,18 @@ class SearchFormBase[Src, D](
     ui.button,
     ui.selection,
     search,
-    toLabel,
-    toValue
+    toElement
   )
-  def selected: Option[D] = engine.selected
+  def selected: Option[T] = engine.selected
 
-class SearchFormElements[D] extends SearchFormElementsBase[D]:
+class SearchFormElements[T] extends SearchFormElementsBase[T]:
   val form = Html.form(input, button)
 
-class SearchForm[D](
-    toLabel: D => String,
-    search: String => Future[List[D]]
+class SearchForm[T](
+    toElement: T => HTMLElement,
+    search: String => Future[List[T]]
 ):
-  val ui = new SearchFormElements[D]
+  val ui = new SearchFormElements[T]
   val ele = div(
     ui.form(cls := "domq-search-form-form"),
     ui.selection.ele(cls := "domq-search-form-selection")
@@ -120,12 +97,9 @@ class SearchForm[D](
     ui.form,
     ui.selection,
     search,
-    toLabel,
-    identity
+    toElement
   )
   def initFocus: Unit = ui.input.focus()
-  def selected: Option[D] = engine.selected
-  def onSelect(handler: D => Unit): Unit =
+  def selected: Option[T] = engine.selected
+  def onSelect(handler: T => Unit): Unit =
     ui.selection.addSelectEventHandler(handler)
-
-    
