@@ -12,7 +12,7 @@ object PatientManip:
     displayNone,
     attr("id") := "practice-patient-manip",
     cashierButton("会計", onclick := (doCashier _)),
-    button("患者終了"),
+    button("患者終了", onclick := (doEndPatient _)),
     a("診察登録"),
     a("文章検索"),
     a("画像保存"),
@@ -28,6 +28,9 @@ object PatientManip:
       ele(displayDefault)
       cashierButton(enabled := true)
   }
+
+  def doEndPatient(): Unit =
+    PracticeBus.setPatientVisitState(NoSelection)
 
   def doCashier(): Unit =
     PracticeBus.currentPatientVisitState match {
