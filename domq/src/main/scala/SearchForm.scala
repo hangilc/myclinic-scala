@@ -103,3 +103,16 @@ class SearchForm[T](
   def selected: Option[T] = engine.selected
   def onSelect(handler: T => Unit): Unit =
     ui.selection.addSelectEventHandler(handler)
+
+object SearchForm:
+  def withToElement[T](
+      toElement: T => HTMLElement,
+      search: String => Future[List[T]]
+  ): SearchForm[T] =
+    new SearchForm(toElement, search)
+
+  def apply[T](
+      toLabel: T => String,
+      search: String => Future[List[T]]
+  ): SearchForm[T] =
+    new SearchForm(t => div(innerText := toLabel(t)), search)
