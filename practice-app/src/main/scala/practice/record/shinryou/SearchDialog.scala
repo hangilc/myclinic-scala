@@ -9,7 +9,7 @@ import dev.myclinic.scala.web.practiceapp.practice.record.CreateHelper
 
 case class SearchDialog(at: LocalDate, visitId: Int):
   val form = new SearchForm[ShinryouMaster](
-    _.name,
+    master => div(innerText := master.name),
     text => Api.searchShinryouMaster(text, at)
   )
   val dlog = new ModalDialog3()

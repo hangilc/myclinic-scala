@@ -34,7 +34,7 @@ case class ConductDrugWidget(
     )
   )
   val searchForm = new SearchForm[IyakuhinMaster](
-    _.name,
+    master => div(innerText := master.name),
     text => Api.searchIyakuhinMaster(text, at)
   )
   searchForm.onSelect(m =>

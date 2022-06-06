@@ -1,9 +1,6 @@
 package dev.myclinic.scala.web.reception.patient
 
-import dev.fujiwara.domq.ElementQ.{*, given}
-import dev.fujiwara.domq.Html.{*, given}
-import dev.fujiwara.domq.Modifiers.{*, given}
-import dev.fujiwara.domq.{Icons, Form, ErrorBox, Modifier, Selection}
+import dev.fujiwara.domq.all.{*, given}
 import scala.language.implicitConversions
 import scala.util.{Success, Failure}
 import org.scalajs.dom.{HTMLElement, HTMLInputElement}
@@ -24,7 +21,7 @@ class SearchPatientBlock(
   var disp: Option[PatientDisp] = None
   val result =
     Selection[Patient](
-      patients.map(patient => itemRep(patient) -> patient),
+      patients.map(patient => (div(innerText := itemRep(patient)), patient)),
       onSelect(_)
     )
   val eDisp: HTMLElement = div()

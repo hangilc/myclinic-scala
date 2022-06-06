@@ -55,7 +55,7 @@ class PatientSearch(ui: PatientSearch.UI):
         else if patients.size == 0 then ()
         else
           searchResult.clear()
-          searchResult.addAll(patients, formatter, identity)
+          searchResult.addAll(patients, formatter)
           searchResult.ele.show
           searchResult.ele.scrollToTop
 

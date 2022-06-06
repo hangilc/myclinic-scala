@@ -226,3 +226,22 @@ button {
   width: 4rem;
 }
 
+.practice-search-text-for-patient-item {
+  font-size: 80%;
+  border: 1px solid gray;
+  padding: 10px;
+}
+
+.practice-search-text-for-patient-item > select {
+  width: 360px;
+}
+
+* + .practice-search-text-for-patient-item {
+  margin-top: 10px;
+}
+
+.practice-search-text-for-patient-item > .visited-at {
+  font-weight: bold;
+  color: green;
+}
+

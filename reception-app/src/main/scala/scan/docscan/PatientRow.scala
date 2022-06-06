@@ -58,7 +58,7 @@ object PatientRow:
     var onSelect: Patient => Unit = _ => ()
     var onCancel: () => Unit = () => ()
     val search = new SearchForm[Patient](
-      formatPatient _,
+      patient => div(innerText := formatPatient(patient)),
       text => Api.searchPatient(text).map(_._2)
     )
     def formatPatient(patient: Patient): String =

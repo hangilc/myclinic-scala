@@ -38,7 +38,7 @@ object SearchAppointDialog:
       button("閉じる", onclick := (_ => dlog.close()))
     )
     dlog.open()
-    searchForm.initFocus
+    searchForm.initFocus()
 
   def toLabel(r: Result): String =
     r match {

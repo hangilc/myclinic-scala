@@ -56,18 +56,20 @@ object DbTextPrim:
       event <- DbEventPrim.logTextDeleted(t)
     yield event
 
-  def searchTextGlobally(text: String): Query0[Text] =
+  def searchTextGlobally(text: String): Query0[(Text, Visit, Patient)] =
     val like = s"%${text}%"
     sql"""
-      select * from visit_text where content like ${like} order by text_id desc
-    """.query[Text]
+      select t.*, v.*, p.* from visit_text as t inner join visit v on t.visit_id = v.visit_id 
+        inner join patient as p on v.patient_id = p.patient_id
+        where content like ${like} order by text_id desc
+    """.query[(Text, Visit, Patient)]
 
-  def searchTextForPatient(text: String, patientId: Int): Query0[Text] =
+  def searchTextForPatient(text: String, patientId: Int): Query0[(Text, Visit)] =
     val like = s"%${text}%"
     sql"""
-      select t.* from visit_text t inner join visit v on t.visit_id = v.visit_id
+      select t.*, v.* from visit_text as t inner join visit as v on t.visit_id = v.visit_id
         where v.patient_id = ${patientId} and content like ${like} order by text_id desc
-    """.query[Text]
+    """.query[(Text, Visit)]
 
 
 

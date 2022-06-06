@@ -78,9 +78,9 @@ class PracticeMain:
   def selectFromRegistered(): Unit =
     for pairs <- PracticeService.listRegisteredPatientForPractice
     yield
-      val sel = Selection[(Patient, Visit)]
+      val sel = Selection[(Patient, Visit)]()
       sel.clear()
-      sel.addAll(pairs, pair => formatPatient(pair._1), identity)
+      sel.addAll(pairs, pair => formatPatient(pair._1))
       val d = new ModalDialog3
       d.title("受付患者選択")
       d.body(sel.ele(cls := "practice-select-from-registered-selection"))
@@ -107,7 +107,7 @@ class PracticeMain:
     val d = new ModalDialog3
     val search =
       new SearchForm[Patient](
-        formatPatient _,
+        patient => div(innerText := formatPatient(patient)),
         Api.searchPatient(_).map(_._2)
       )
     d.title("患者検索")
@@ -140,7 +140,7 @@ class PracticeMain:
     var offset = 0
     val count = 20
     val d = new ModalDialog3
-    val selection = new Selection[Patient]
+    val selection = new Selection[(Visit, Patient)]
     val formatter: (Visit, Patient) => String = (visit, patient) =>
       String.format(
         "%04d %s [%s]",
@@ -152,7 +152,7 @@ class PracticeMain:
       for result <- Api.listRecentVisitFull(offset, count)
       yield
         selection.clear()
-        selection.addAll(result, formatter.tupled, _._2)
+        selection.addAll(result, formatter.tupled)
     d.body(
       selection.ele,
       div(
@@ -180,8 +180,8 @@ class PracticeMain:
         "選択",
         onclick := (() => {
           d.close()
-          selection.marked.foreach(patient =>
-            PracticeBus.setPatientVisitState(Browsing(patient))
+          selection.marked.foreach(visitPatient =>
+            PracticeBus.setPatientVisitState(Browsing(visitPatient(1)))
           )
         })
       ),

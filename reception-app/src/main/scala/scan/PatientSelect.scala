@@ -40,7 +40,7 @@ class PatientSelect(ui: PatientSelect.UI, onSelectCallback: Patient => Unit):
         (gen, patients) <- Api.searchPatient(text)
       yield 
         result.clear()
-        result.addAll(patients, formatPatient _, identity)
+        result.addAll(patients, formatPatient _)
 
   private def onTodaysPatients(): Unit =
     for
@@ -49,7 +49,7 @@ class PatientSelect(ui: PatientSelect.UI, onSelectCallback: Patient => Unit):
     yield
       val patients = visits.map(visit => patientMap(visit.patientId))
       result.clear()
-      result.addAll(patients, formatPatient _, identity)
+      result.addAll(patients, formatPatient _)
 
   private def formatPatient(patient: Patient): String =
     String.format("%04d %s", patient.patientId, patient.fullName())

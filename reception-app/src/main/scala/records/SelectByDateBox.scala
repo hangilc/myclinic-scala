@@ -1,11 +1,7 @@
 package dev.myclinic.scala.web.reception.records
 
 import dev.myclinic.scala.web.appbase.SideMenuService
-import dev.fujiwara.domq.ElementQ.{*, given}
-import dev.fujiwara.domq.Html.{*, given}
-import dev.fujiwara.domq.Modifiers.{*, given}
-import dev.fujiwara.domq.{Icons, ShowMessage, PullDown, PullDownMenu, Selection}
-import scala.language.implicitConversions
+import dev.fujiwara.domq.all.{*, given}
 import dev.fujiwara.dateinput.DateInput
 import org.scalajs.dom.{HTMLElement, HTMLInputElement}
 import scala.concurrent.Future
@@ -63,6 +59,6 @@ class SelectByDateBox(cb: Patient => Unit):
     items.foreach {
       case (visit, patient) => 
         val label = String.format("(%04d) %s", patient.patientId, patient.fullName(""))
-        selection.add(patient, _ => label, identity)
+        selection.add(div(innerText := label), patient)
     }
     

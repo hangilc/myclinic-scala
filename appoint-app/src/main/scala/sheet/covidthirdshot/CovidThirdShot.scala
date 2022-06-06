@@ -25,7 +25,7 @@ class CovidThirdShot(val ui: CovidThirdShot.UI):
           onSelect(patients.head)
         else
           ui.searchResult.clear()
-          ui.searchResult.addAll(patients, formatOption, identity)
+          ui.searchResult.addAll(patients, formatOption)
           ui.searchResult.ele.show
           ui.eSearchInput.value = ""
 
@@ -53,7 +53,7 @@ object CovidThirdShot:
   class UI:
     val eSearchFrom = form
     val eSearchInput = inputText
-    val searchResult = Selection[Patient]
+    val searchResult = Selection[Patient]()
     val eDisp = div
     val ele = div(
       eSearchFrom(mb := "6px")(

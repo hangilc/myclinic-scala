@@ -148,7 +148,7 @@ object MakeAppointDialog:
             ui.searchResult.clear()
             val toLabel: Patient => String = patient =>
               s"(${patient.patientId}) ${patient.fullName()}"
-            ui.searchResult.addAll(patients, toLabel, identity)
+            ui.searchResult.addAll(patients, toLabel)
             ui.showSearchResult()
 
     def value: String = ui.input.value

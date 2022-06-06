@@ -74,7 +74,7 @@ object ScannerRow:
 
     def setDevices(list: List[ScannerDevice]): Unit =
       select.clear()
-      select.addAll(list, formatter, identity)
+      select.addAll(list, formatter)
 
     private def onUnselect(): Unit =
       select.unselect()

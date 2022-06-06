@@ -41,10 +41,10 @@ trait DbText extends Mysql:
   def deleteText(textId: Int): IO[AppEvent] =
     mysql(DbTextPrim.deleteText(textId))
 
-  def searchTextGlobally(text: String): IO[List[Text]] =
+  def searchTextGlobally(text: String): IO[List[(Text, Visit, Patient)]] =
     mysql(DbTextPrim.searchTextGlobally(text).to[List])
 
-  def searchTextForPatient(text: String, patientId: Int): IO[List[Text]] =
+  def searchTextForPatient(text: String, patientId: Int): IO[List[(Text, Visit)]] =
     mysql(DbTextPrim.searchTextForPatient(text, patientId).to[List])
 
 
