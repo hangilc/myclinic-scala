@@ -13,3 +13,11 @@ object StringUtil:
     }
     (pre, chunks)
 
+  def collectIndexIter(t: String, start: Int, searchText: String, acc: List[Int]): List[Int] =
+    val i = t.indexOf(searchText, start)
+    if i < 0 then acc
+    else collectIndexIter(t, i + searchText.size, searchText, acc :+ i)
+
+  def collectIndex(t: String, searchText: String): List[Int] =
+    collectIndexIter(t, 0, searchText, List.empty)
+

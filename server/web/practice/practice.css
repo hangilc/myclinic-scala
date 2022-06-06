@@ -246,3 +246,6 @@ button {
   color: green;
 }
 
+.practice-search-text-for-patient-item .content > span.match {
+  color: red;
+}
