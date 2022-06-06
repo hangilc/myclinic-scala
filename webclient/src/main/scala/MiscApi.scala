@@ -383,10 +383,28 @@ object MiscApi extends ApiBase:
     def enterPayment(payment: Payment): Future[Boolean] =
       post("enter-payment", Params(), payment)
 
-    def searchTextGlobally(text: String): Future[List[(Text, Visit, Patient)]] =
-      get("search-text-globally", Params("text" -> text))
+    def searchTextGlobally(
+        text: String,
+        limit: Int,
+        offset: Int
+    ): Future[List[(Text, Visit, Patient)]] =
+      get(
+        "search-text-globally",
+        Params("text" -> text, "limit" -> limit, "offset" -> offset)
+      )
 
-    def searchTextForPatient(text: String, patientId: Int): Future[List[(Text, Visit)]] =
-      get("search-text-for-patient", Params("text" -> text, "patient-id" -> patientId))
-
-
+    def searchTextForPatient(
+        text: String,
+        patientId: Int,
+        limit: Int,
+        offset: Int
+    ): Future[List[(Text, Visit)]] =
+      get(
+        "search-text-for-patient",
+        Params(
+          "text" -> text,
+          "patient-id" -> patientId,
+          "limit" -> limit,
+          "offset" -> offset
+        )
+      )

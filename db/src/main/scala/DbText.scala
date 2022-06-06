@@ -20,15 +20,20 @@ trait DbText extends Mysql:
     """.query[Int].unique)
 
   def batchGetText(visitIds: List[Int]): IO[Map[Int, List[Text]]] =
-    mysql(visitIds.map(visitId => {
-      for
-       texts <- Prim.listTextForVisit(visitId)
-      yield (visitId, texts)
-    }).sequence).map(list => list.foldLeft(Map.empty[Int, List[Text]])(
-      (m, e) => e match {
-        case (visitId, texts) => m + (visitId -> texts)
-      }
-    ))
+    mysql(
+      visitIds
+        .map(visitId => {
+          for texts <- Prim.listTextForVisit(visitId)
+          yield (visitId, texts)
+        })
+        .sequence
+    ).map(list =>
+      list.foldLeft(Map.empty[Int, List[Text]])((m, e) =>
+        e match {
+          case (visitId, texts) => m + (visitId -> texts)
+        }
+      )
+    )
 
   def getText(textId: Int): IO[Text] = mysql(DbTextPrim.getText(textId).unique)
 
@@ -41,11 +46,27 @@ trait DbText extends Mysql:
   def deleteText(textId: Int): IO[AppEvent] =
     mysql(DbTextPrim.deleteText(textId))
 
-  def searchTextGlobally(text: String): IO[List[(Text, Visit, Patient)]] =
-    mysql(DbTextPrim.searchTextGlobally(text).to[List])
+  def searchTextGlobally(
+      text: String,
+      limit: Int,
+      offset: Int
+  ): IO[List[(Text, Visit, Patient)]] =
+    mysql(DbTextPrim.searchTextGlobally(text, limit, offset).to[List])
 
-  def searchTextForPatient(text: String, patientId: Int): IO[List[(Text, Visit)]] =
-    mysql(DbTextPrim.searchTextForPatient(text, patientId).to[List])
+  def countSearchTextGlobally(text: String): IO[Int] =
+    mysql(DbTextPrim.countSearchTextGlobally(text))
 
+  def searchTextForPatient(
+      text: String,
+      patientId: Int,
+      limit: Int,
+      offset: Int
+  ): IO[List[(Text, Visit)]] =
+    mysql(
+      DbTextPrim
+        .searchTextForPatient(text, patientId, limit: Int, offset: Int)
+        .to[List]
+    )
 
-  
+  def countSearchTextForPatient(text: String, patientId: Int): IO[Int] =
+    mysql(DbTextPrim.countSearchTextForPatient(text, patientId))

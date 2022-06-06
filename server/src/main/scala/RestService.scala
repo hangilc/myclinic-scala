@@ -236,7 +236,9 @@ object RestService extends DateTimeQueryParam with Publisher:
         yield true
       Ok(op)
 
-    case GET -> Root / "change-wqueue-state" :? intVisitId(visitId) +& intWqueueState(newStateCode) =>
+    case GET -> Root / "change-wqueue-state" :? intVisitId(
+          visitId
+        ) +& intWqueueState(newStateCode) =>
       val newState = WaitState.fromCode(newStateCode)
       val op =
         for
@@ -275,10 +277,14 @@ object RestService extends DateTimeQueryParam with Publisher:
     case GET -> Root / "get-patient-all-hoken" :? intPatientId(patientId) =>
       Ok(Db.getPatientAllHoken(patientId))
 
-    case GET -> Root / "resolve-shinryoucode-by-name" :? strName(name) +& dateAt(at) =>
+    case GET -> Root / "resolve-shinryoucode-by-name" :? strName(
+          name
+        ) +& dateAt(at) =>
       Ok(Helper.resolveShinryoucodeByName(name, at))
 
-    case GET -> Root / "resolve-shinryoucode" :? intShinryoucode(shinryoucode) +& dateAt(at) =>
+    case GET -> Root / "resolve-shinryoucode" :? intShinryoucode(
+          shinryoucode
+        ) +& dateAt(at) =>
       Ok(Helper.resolveShinryoucode(shinryoucode, at))
 
     case req @ POST -> Root / "batch-resolve-shinryoucode-by-name" :? dateAt(
@@ -297,7 +303,7 @@ object RestService extends DateTimeQueryParam with Publisher:
 
     case req @ POST -> Root / "batch-get-shinryou" =>
       val op =
-        for 
+        for
           shinryouIds <- req.as[List[Int]]
           shinryouList <- Db.batchGetShinryou(shinryouIds)
         yield shinryouList
@@ -342,7 +348,7 @@ object RestService extends DateTimeQueryParam with Publisher:
       Ok(Db.listShinryouExForVisit(visitId))
 
     case GET -> Root / "delete-shinryou" :? intShinryouId(shinryouId) =>
-      val op = 
+      val op =
         for
           event <- Db.deleteShinryou(shinryouId)
           _ <- publish(event)
@@ -353,14 +359,16 @@ object RestService extends DateTimeQueryParam with Publisher:
       Ok(Db.getConductEx(conductId))
 
     case GET -> Root / "delete-conduct-ex" :? intConductId(conductId) =>
-      val op = 
+      val op =
         for
           events <- Db.deleteConductEx(conductId)
           _ <- publishAll(events)
         yield true
       Ok(op)
 
-    case GET -> Root / "update-charge-value" :? intVisitId(visitId) +& intChargeValue(chargeValue) =>
+    case GET -> Root / "update-charge-value" :? intVisitId(
+          visitId
+        ) +& intChargeValue(chargeValue) =>
       val op =
         for
           result <- Db.updateChargeValue(visitId, chargeValue)
@@ -369,7 +377,9 @@ object RestService extends DateTimeQueryParam with Publisher:
         yield updated
       Ok(op)
 
-    case GET -> Root / "set-charge-value" :? intVisitId(visitId) +& intChargeValue(chargeValue) =>
+    case GET -> Root / "set-charge-value" :? intVisitId(
+          visitId
+        ) +& intChargeValue(chargeValue) =>
       val op =
         for
           result <- Db.setChargeValue(visitId, chargeValue)
@@ -378,7 +388,9 @@ object RestService extends DateTimeQueryParam with Publisher:
         yield updated
       Ok(op)
 
-    case GET -> Root / "enter-charge-value" :? intVisitId(visitId) +& intChargeValue(chargeValue) =>
+    case GET -> Root / "enter-charge-value" :? intVisitId(
+          visitId
+        ) +& intChargeValue(chargeValue) =>
       val op =
         for
           result <- Db.enterChargeValue(visitId, chargeValue)
@@ -387,12 +399,24 @@ object RestService extends DateTimeQueryParam with Publisher:
         yield updated
       Ok(op)
 
-    case GET -> Root / "search-text-globally" :? strText(text) =>
-      Ok(Db.searchTextGlobally(text))
+    case GET -> Root / "search-text-globally" :? strText(text) +& intLimit(
+          limit
+        ) +& intOffset(offset) =>
+      Ok(Db.searchTextGlobally(text, limit, offset))
 
-    case GET -> Root / "search-text-for-patient" :? strText(text) +& intPatientId(patientId) =>
-      Ok(Db.searchTextForPatient(text, patientId))
+    case GET -> Root / "count-search-text-globally" :? strText(text) =>
+      Ok(Db.countSearchTextGlobally(text))
 
+    case GET -> Root / "search-text-for-patient" :? strText(
+          text
+        ) +& intPatientId(patientId)
+        +& intLimit(limit) +& intOffset(offset) =>
+      Ok(Db.searchTextForPatient(text, patientId, limit, offset))
+
+    case GET -> Root / "count-search-text-for-patient" :? strText(
+          text
+        ) +& intPatientId(patientId) =>
+      Ok(Db.countSearchTextForPatient(text, patientId))
 
   } <+> PatientService.routes <+> VisitService.routes <+> MiscService.routes
     <+> ConfigService.routes <+> FileService.routes

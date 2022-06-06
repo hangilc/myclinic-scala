@@ -56,20 +56,35 @@ object DbTextPrim:
       event <- DbEventPrim.logTextDeleted(t)
     yield event
 
-  def searchTextGlobally(text: String): Query0[(Text, Visit, Patient)] =
+  def searchTextGlobally(text: String, limit: Int, offset: Int): Query0[(Text, Visit, Patient)] =
     val like = s"%${text}%"
     sql"""
       select t.*, v.*, p.* from visit_text as t inner join visit v on t.visit_id = v.visit_id 
         inner join patient as p on v.patient_id = p.patient_id
-        where content like ${like} order by text_id desc
+        where content like ${like} order by text_id desc limit ${limit} offset ${offset}
     """.query[(Text, Visit, Patient)]
 
-  def searchTextForPatient(text: String, patientId: Int): Query0[(Text, Visit)] =
+  def countSearchTextGlobally(text: String): ConnectionIO[Int] =
+    val like = s"%${text}%"
+    sql"""
+      select count(*) from visit_text where content like ${like} 
+    """.query[Int].unique
+
+  def searchTextForPatient(text: String, patientId: Int, limit: Int, offset: Int): Query0[(Text, Visit)] =
     val like = s"%${text}%"
     sql"""
       select t.*, v.* from visit_text as t inner join visit as v on t.visit_id = v.visit_id
         where v.patient_id = ${patientId} and content like ${like} order by text_id desc
+        limit ${limit} offset ${offset}
     """.query[(Text, Visit)]
+
+  def countSearchTextForPatient(text: String, patientId: Int): ConnectionIO[Int] =
+    val like = s"%${text}%"
+    sql"""
+      select count(*) from visit_text as t inner join visit as v on t.visit_id = v.visit_id
+        where v.patient_id = ${patientId} and content like ${like}
+    """.query[Int].unique
+
 
 
 

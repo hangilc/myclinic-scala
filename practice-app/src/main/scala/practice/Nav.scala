@@ -46,3 +46,7 @@ class Nav:
       eDisp(innerText := s"[${page + 1}/${total}]")
       ele(displayDefault)
     else ele(displayNone)
+
+object Nav:
+  def calcNumPages(total: Int, itemsPerPage: Int): Int =
+    (total + itemsPerPage - 1) / itemsPerPage
