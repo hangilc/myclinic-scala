@@ -21,6 +21,7 @@ case class SearchTextDialog(patientId: Int):
   )
   form.ui.form(button("閉じる", onclick := (close _)))
   val dlog = new ModalDialog3()
+  dlog.content(cls := "practice-search-text-for-patient")
   dlog.title(innerText := "文章検索")
   dlog.body(form.ele)
 
@@ -42,5 +43,5 @@ object SearchTextDialog:
     def formatVisitedAt(at: LocalDateTime): String =
       KanjiDate.dateToKanji(
         at.toLocalDate,
-        formatYoubi = y => s"（$y）"
+        formatYoubi = info => s"（${info.youbi}）"
       ) + KanjiDate.timeToKanji(at.toLocalTime)

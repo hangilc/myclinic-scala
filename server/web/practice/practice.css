@@ -232,8 +232,9 @@ button {
   padding: 10px;
 }
 
-.practice-search-text-for-patient-item > select {
+.practice-search-text-for-patient .domq-selection {
   width: 360px;
+  height: 460px;
 }
 
 * + .practice-search-text-for-patient-item {
