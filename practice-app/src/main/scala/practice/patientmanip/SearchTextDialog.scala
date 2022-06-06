@@ -18,11 +18,10 @@ case class SearchTextDialog(patientId: Int):
     result => Item.apply.tupled(result).ele,
     text =>
       if text.trim.isEmpty then Future.successful(List.empty)
-      else 
-        for
-          textVisits <- Api.searchTextForPatient(text.trim, patientId)
-        yield textVisits.map {
-          case (t, v) => (t, v, text)
+      else
+        for textVisits <- Api.searchTextForPatient(text.trim, patientId)
+        yield textVisits.map { case (t, v) =>
+          (t, v, text)
         }
   )
   form.ui.form(button("閉じる", onclick := (close _)))
@@ -46,9 +45,32 @@ object SearchTextDialog:
       div(cls := "content", innerHTML := mark(text.content))
     )
 
+    def formatContentIter(
+        t: String,
+        start: Int,
+        iStart: List[Int],
+        acc: List[String]
+    ): List[String] =
+      iStart match {
+        case Nil => acc :+ formatOther(t.substring(start, t.size))
+        case i :: tail => 
+          formatContentIter(t, i + searchText.size, tail, 
+            acc ++ List(
+              formatOther(t.substring(start, i)),
+              formatMatch _, t.substring(i, i + searchText.size))
+            )
+          )
+      }
+
+    def formatOther(t: String): String =
+      ???
+
+    def formatMatch(t: String): String =
+      ???
+
     def formatConetnt(content: String): String =
       val is = StringUtil.collectIndex(content, searchText)
-      
+      val parts = formatContentIter(content, 0, is, List.empty)
 
     def mark(content: String): String =
       content
@@ -60,7 +82,3 @@ object SearchTextDialog:
         at.toLocalDate,
         formatYoubi = info => s"（${info.youbi}）"
       ) + KanjiDate.timeToKanji(at.toLocalTime)
-
-  
-
-
