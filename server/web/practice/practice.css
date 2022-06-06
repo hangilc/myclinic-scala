@@ -246,6 +246,12 @@ button {
   color: green;
 }
 
+.practice-search-text-for-patient-item .content {
+  white-space: pre-wrap;
+}
+
 .practice-search-text-for-patient-item .content > span.match {
   color: red;
 }
+
+

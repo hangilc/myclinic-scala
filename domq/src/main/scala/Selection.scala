@@ -83,7 +83,7 @@ class Selection[T](using modifier: SelectionModifier):
     items.foreach(_.unmark())
 
 object Selection:
-  def apply[T]() = new Selection[T]
+  def apply[T](): Selection[T] = new Selection[T]
   def apply[T](
       items: List[(HTMLElement, T)] = List.empty,
       onSelect: T => Unit = ((_: T) => ())

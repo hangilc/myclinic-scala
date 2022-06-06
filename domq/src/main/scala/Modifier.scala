@@ -18,6 +18,7 @@ import org.scalajs.dom.KeyboardEvent
 import org.scalajs.dom.HTMLButtonElement
 import org.scalajs.dom.SVGElement
 import org.scalajs.dom.HTMLTextAreaElement
+import org.scalajs.dom.Node
 
 trait Modifier[-E]:
   def modify(e: E): Unit
@@ -33,9 +34,9 @@ object Modifiers:
         val t = document.createTextNode(s)
         e.appendChild(t)
       })
-  given Conversion[HTMLElement, Modifier[HTMLElement]] with
-    def apply(e: HTMLElement): Modifier[HTMLElement] =
-      Modifier[HTMLElement](ele => ele.appendChild(e))
+  given Conversion[Node, Modifier[HTMLElement]] with
+    def apply(e: Node): Modifier[HTMLElement] =
+      Modifier[Node](ele => ele.appendChild(e))
   given Conversion[SVGElement, Modifier[HTMLElement]] with
     def apply(e: SVGElement): Modifier[HTMLElement] =
       Modifier[HTMLElement](ele => ele.appendChild(e))
@@ -77,7 +78,7 @@ object Modifiers:
 
   val clear: Modifier[HTMLElement] = (e => e.innerHTML = "")
 
-  val children = Assign[HTMLElement, List[HTMLElement]]((e, list) => {
+  val children = Assign[HTMLElement, List[Node]]((e, list) => {
     list.foreach(e.appendChild(_))
   })
 

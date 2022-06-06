@@ -1,6 +1,7 @@
 package dev.myclinic.scala.web.practiceapp.practice.patientmanip
 
 import dev.fujiwara.domq.all.{*, given}
+import dev.fujiwara.domq.Html
 import dev.myclinic.scala.model.Text
 import dev.myclinic.scala.model.Visit
 import scala.concurrent.Future
@@ -8,6 +9,7 @@ import dev.myclinic.scala.webclient.{Api, global}
 import dev.fujiwara.kanjidate.KanjiDate
 import java.time.LocalDateTime
 import dev.myclinic.scala.util.StringUtil
+import org.scalajs.dom.Node
 
 case class SearchTextDialog(patientId: Int):
   import SearchTextDialog.Item
@@ -42,40 +44,35 @@ object SearchTextDialog:
     val ele = div(
       cls := "practice-search-text-for-patient-item",
       div(cls := "visited-at", formatVisitedAt(visit.visitedAt)),
-      div(cls := "content", innerHTML := mark(text.content))
+      div(cls := "content", children := formatContent(text.content))
     )
 
     def formatContentIter(
         t: String,
         start: Int,
         iStart: List[Int],
-        acc: List[String]
-    ): List[String] =
+        acc: List[Node]
+    ): List[Node] =
       iStart match {
         case Nil => acc :+ formatOther(t.substring(start, t.size))
         case i :: tail => 
           formatContentIter(t, i + searchText.size, tail, 
             acc ++ List(
               formatOther(t.substring(start, i)),
-              formatMatch _, t.substring(i, i + searchText.size))
+              formatMatch(t.substring(i, i + searchText.size))
             )
           )
       }
 
-    def formatOther(t: String): String =
-      ???
+    def formatOther(t: String): Node =
+      Html.text(t)
 
-    def formatMatch(t: String): String =
-      ???
+    def formatMatch(t: String): Node =
+      span(cls := "match", t)
 
-    def formatConetnt(content: String): String =
-      val is = StringUtil.collectIndex(content, searchText)
-      val parts = formatContentIter(content, 0, is, List.empty)
-
-    def mark(content: String): String =
-      content
-        .replaceAll(searchText, s"<span class='match'>$searchText</span>")
-        .replaceAll("\n", "<br />")
+    def formatContent(content: String): List[Node] =
+      val iStart: List[Int] = StringUtil.collectIndex(content, searchText)
+      formatContentIter(content, 0, iStart, List.empty)
 
     def formatVisitedAt(at: LocalDateTime): String =
       KanjiDate.dateToKanji(

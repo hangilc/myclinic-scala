@@ -33,8 +33,6 @@ object Html:
   def inputText = input(attr("type") := "text")
   def checkbox = input(attr("type") := "checkbox")
   def radio = input(attr("type") := "radio")
-  // def radio(radioName: String, radioValue: String) = input(
-  //   attr("type") := "radio",
-  //   name := radioName,
-  //   value := radioValue)
   def img = create[HTMLImageElement]("img")
+
+  def text(data: String) = document.createTextNode(data)
