@@ -10,6 +10,7 @@ import dev.fujiwara.kanjidate.KanjiDate
 import java.time.LocalDateTime
 import dev.myclinic.scala.util.StringUtil
 import org.scalajs.dom.Node
+import org.scalajs.dom.HTMLElement
 
 case class SearchTextDialog(patientId: Int):
   import SearchTextDialog.Item
@@ -79,3 +80,10 @@ object SearchTextDialog:
         at.toLocalDate,
         formatYoubi = info => s"（${info.youbi}）"
       ) + KanjiDate.timeToKanji(at.toLocalTime)
+
+  case class NavUI(): 
+    val gotoFirstLink: HTMLElement = div()
+    val gotoPrevLink: HTMLElement = a("<")
+    val gotoNextLink: HTMLElement = a(">")
+    val gotoLastLink: HTMLElement = div()
+    
