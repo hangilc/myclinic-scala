@@ -12,6 +12,7 @@ import dev.myclinic.scala.util.StringUtil
 import org.scalajs.dom.Node
 import org.scalajs.dom.HTMLElement
 import dev.fujiwara.domq.SearchFormPaging
+import dev.fujiwara.domq.SearchFormPagingConfig
 import dev.fujiwara.domq.SearchFormPaging.given
 import dev.fujiwara.domq.SelectionConfig
 
@@ -19,6 +20,8 @@ case class SearchTextDialog(patientId: Int):
   import SearchTextDialog.{Item, NavUI}
   given SelectionConfig with
     override def itemCssClass: Option[String] = None
+  given SearchFormPagingConfig with
+    override def searchTextInputCssClass = Some("search-text-input")
   val navUI = NavUI()
   val form = new SearchFormPaging[(Text, Visit, String)](
     text => Api.countSearchTextForPatient(text, patientId),
@@ -95,5 +98,5 @@ object SearchTextDialog:
     val gotoPrevLink = Some(a("<"))
     val gotoNextLink = Some(a(">"))
     val gotoLastLink = None
-    val infoSpan = Some(span)
-    val ele = div(gotoPrevLink.get, infoSpan.get, gotoNextLink.get)
+    val infoWrapper = Some(span)
+    val ele = div(cls := "nav", gotoPrevLink.get, infoWrapper.get, gotoNextLink.get)

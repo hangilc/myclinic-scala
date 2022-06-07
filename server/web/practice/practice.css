@@ -226,6 +226,18 @@ button {
   width: 4rem;
 }
 
+.practice-search-text-for-patient .domq-selection {
+  margin-top: 6px;
+}
+
+.practice-search-text-for-patient .search-text-input {
+  padding: 4px;
+}
+
+.practice-search-text-for-patient .nav {
+  margin: 4px 0;
+}
+
 .practice-search-text-for-patient-item {
   font-size: 80%;
   border: 1px solid gray;

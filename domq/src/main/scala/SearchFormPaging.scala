@@ -9,6 +9,7 @@ import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits.global
 
 trait SearchFormPagingConfig:
   def itemsPerPage: Int = 10
+  def searchTextInputCssClass: Option[String] = None
 
 case class SearchFormPaging[T](
     countApi: String => Future[Int],
@@ -23,7 +24,7 @@ case class SearchFormPaging[T](
   val engine = Nav(navUI)
   private var searchText: String = ""
   val ele = div(
-    form(input, button("検索")),
+    form(input(cls := config.searchTextInputCssClass), button("検索")),
     navUI.ele,
     selection.ele
   )
@@ -37,6 +38,7 @@ case class SearchFormPaging[T](
       yield
         selection.clear()
         selection.addAll(result.map(t => (render(t), t)))
+        selection.scrollToTop()
   }
 
   def initFocus(): Unit = input.focus()

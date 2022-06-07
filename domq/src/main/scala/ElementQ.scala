@@ -140,7 +140,7 @@ object ElementQ:
         result = cs.item(i).asInstanceOf[HTMLElement] :: result
       result
     
-    def scrollToTop: Unit =
+    def scrollToTop(): Unit =
       ele.scrollTop = 0
 
   extension (s: HTMLSelectElement)

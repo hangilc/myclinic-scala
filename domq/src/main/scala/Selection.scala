@@ -1,8 +1,9 @@
 package dev.fujiwara.domq
 
-import dev.fujiwara.domq.all.{*, given}
+import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Modifiers
-import dev.fujiwara.domq.Modifiers.given
+import dev.fujiwara.domq.Modifiers.{*, given}
+import dev.fujiwara.domq.Html.{*, given}
 import scala.language.implicitConversions
 import org.scalajs.dom.HTMLElement
 
@@ -15,12 +16,14 @@ case class SelectionItem[T](ele: HTMLElement, value: T)(using modifier: Selectio
 
 trait SelectionConfig:
   def itemCssClass: Option[String] = Some(SelectionConfig.defaultItemCssClass)
+  def selectionCssClass: Option[String] = Some(SelectionConfig.defaultSelectionCssClass)
 
 object SelectionConfig:
   val defaultItemCssClass: String = "domq-selection-item"
+  val defaultSelectionCssClass: String = "domq-selection"
 
-class Selection[T](using modifier: SelectionConfig):
-  val ele = div(cls := "domq-selection")
+class Selection[T](using config: SelectionConfig):
+  val ele = div(cls := config.selectionCssClass)
   private val selectEventPublisher = LocalEventPublisher[T]
   private val unselectEventPublisher = LocalEventPublisher[Unit]
   private var items: List[SelectionItem[T]] = List.empty
@@ -70,6 +73,8 @@ class Selection[T](using modifier: SelectionConfig):
 
   def marked: Option[T] = markedValue
 
+  def scrollToTop(): Unit = ele.scrollToTop()
+
   private def onItemClick(item: SelectionItem[T]): Unit =
     selectItem(item)
 
@@ -84,11 +89,11 @@ class Selection[T](using modifier: SelectionConfig):
     items.foreach(_.unmark())
 
 object Selection:
-  def apply[T](): Selection[T] = new Selection[T]
+  def apply[T]()(using SelectionConfig): Selection[T] = new Selection[T]
   def apply[T](
       items: List[(HTMLElement, T)] = List.empty,
       onSelect: T => Unit = ((_: T) => ())
-  ): Selection[T] =
+  )(using SelectionConfig): Selection[T] =
     val sel = Selection[T]()
     sel.addAll(items)
     sel.addSelectEventHandler(onSelect)

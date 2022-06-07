@@ -1,9 +1,6 @@
 package dev.myclinic.scala.web.reception.scan
 
-import dev.fujiwara.domq.ElementQ.{*, given}
-import dev.fujiwara.domq.Html.{*, given}
-import dev.fujiwara.domq.Modifiers.{*, given}
-import dev.fujiwara.domq.{Selection}
+import dev.fujiwara.domq.all.{*, given}
 import scala.language.implicitConversions
 import dev.myclinic.scala.model.Patient
 import org.scalajs.dom.{HTMLInputElement, HTMLElement}
@@ -57,7 +54,7 @@ class PatientSearch(ui: PatientSearch.UI):
           searchResult.clear()
           searchResult.addAll(patients, formatter)
           searchResult.ele.show
-          searchResult.ele.scrollToTop
+          searchResult.ele.scrollToTop()
 
   private def formatPatient(patient: Patient): String =
     String.format("(%04d) %s", patient.patientId, patient.fullName())

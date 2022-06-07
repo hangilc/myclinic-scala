@@ -10,7 +10,7 @@ trait NavUI:
   def gotoPrevLink: Option[HTMLElement]
   def gotoNextLink: Option[HTMLElement]
   def gotoLastLink: Option[HTMLElement]
-  def infoSpan: Option[HTMLElement]
+  def infoWrapper: Option[HTMLElement]
   def ele: HTMLElement
 
 class Nav(ui: NavUI):
@@ -21,7 +21,7 @@ class Nav(ui: NavUI):
   ui.gotoNextLink.foreach(_(onclick := (() => engine.gotoNext())))
   ui.gotoLastLink.foreach(_(onclick := (() => engine.gotoLast())))
   ui.ele(displayNone)
-  engine.onInfoChanged(info => ui.infoSpan.foreach(_(clear, info)))
+  engine.onInfoChanged(info => ui.infoWrapper.foreach(_(clear, info)))
   engine.onPagingChanged(isPaging => 
     if isPaging then ui.ele(displayDefault) else ui.ele(displayNone)  
   )
