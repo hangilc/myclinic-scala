@@ -2,6 +2,7 @@ package dev.fujiwara.domq
 
 import dev.fujiwara.domq.all.{*, given}
 import dev.fujiwara.domq.Modifiers
+import dev.fujiwara.domq.Modifiers.given
 import scala.language.implicitConversions
 import org.scalajs.dom.HTMLElement
 

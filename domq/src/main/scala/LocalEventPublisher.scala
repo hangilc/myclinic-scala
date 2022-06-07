@@ -18,10 +18,10 @@ class LocalEventPublisher[T]:
   def publish_(t: T): Unit = publish(t)
 
 case class LocalEventUnsubscriber(proc: () => Unit):
-  def unsubscribe: Unit = proc()
+  def unsubscribe(): Unit = proc()
 
 object LocalEventUnsubscriber:
-  given Dispose[LocalEventUnsubscriber] = _.unsubscribe
+  given Dispose[LocalEventUnsubscriber] = _.unsubscribe()
 
 class CachingEventPublisher[T](private var cache: T) extends LocalEventPublisher[T]:
   override def publish(t: T): Future[Unit] =

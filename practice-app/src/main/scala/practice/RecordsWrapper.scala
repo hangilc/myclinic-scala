@@ -26,7 +26,7 @@ class RecordsWrapper:
   )
 
   def dispose: Unit = 
-    unsubscribers.foreach(_.unsubscribe)
+    unsubscribers.foreach(_.unsubscribe())
     clearRecords
 
   def clearRecords: Unit =
