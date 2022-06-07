@@ -383,6 +383,9 @@ object MiscApi extends ApiBase:
     def enterPayment(payment: Payment): Future[Boolean] =
       post("enter-payment", Params(), payment)
 
+    def countSearchTextGlobally(text: String): Future[Int] =
+      get("count-search-text-globally", Params("text" -> text))
+
     def searchTextGlobally(
         text: String,
         limit: Int,
@@ -392,6 +395,9 @@ object MiscApi extends ApiBase:
         "search-text-globally",
         Params("text" -> text, "limit" -> limit, "offset" -> offset)
       )
+
+    def countSearchTextForPatient(text: String, patientId: Int): Future[Int] =
+      get("count-search-text-for-patient", Params("text" -> text, "patient-id" -> patientId))
 
     def searchTextForPatient(
         text: String,

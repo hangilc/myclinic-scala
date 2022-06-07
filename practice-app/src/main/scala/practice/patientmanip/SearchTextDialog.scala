@@ -11,23 +11,29 @@ import java.time.LocalDateTime
 import dev.myclinic.scala.util.StringUtil
 import org.scalajs.dom.Node
 import org.scalajs.dom.HTMLElement
+import dev.fujiwara.domq.SearchFormPaging
+import dev.fujiwara.domq.SearchFormPaging.given
 
 case class SearchTextDialog(patientId: Int):
-  import SearchTextDialog.Item
+  import SearchTextDialog.{Item, NavUI}
   import dev.fujiwara.domq.SelectionModifier
   given SelectionModifier with
     override def itemCssClass: Option[String] = None
-  val form = new SearchForm[(Text, Visit, String)](
-    result => Item.apply.tupled(result).ele,
-    text =>
-      if text.trim.isEmpty then Future.successful(List.empty)
-      else
-        for textVisits <- Api.searchTextForPatient(text.trim, patientId)
-        yield textVisits.map { case (t, v) =>
-          (t, v, text)
-        }
+  val navUI = NavUI()
+  val form = new SearchFormPaging[(Text, Visit, String)](
+    text => Api.countSearchTextForPatient(text, patientId),
+    (text, limit, offset) => {
+      for
+        textVisits <- Api
+          .searchTextForPatient(text.trim, patientId, limit, offset)
+      yield textVisits.map { case (t, v) =>
+        (t, v, text)
+      }
+    },
+    (text, visit, searchText) => Item(text, visit, searchText).ele,
+    navUI
   )
-  form.ui.form(button("閉じる", onclick := (close _)))
+  form.form(button("閉じる", onclick := (close _)))
   val dlog = new ModalDialog3()
   dlog.content(cls := "practice-search-text-for-patient")
   dlog.title(innerText := "文章検索")
@@ -56,8 +62,11 @@ object SearchTextDialog:
     ): List[Node] =
       iStart match {
         case Nil => acc :+ formatOther(t.substring(start, t.size))
-        case i :: tail => 
-          formatContentIter(t, i + searchText.size, tail, 
+        case i :: tail =>
+          formatContentIter(
+            t,
+            i + searchText.size,
+            tail,
             acc ++ List(
               formatOther(t.substring(start, i)),
               formatMatch(t.substring(i, i + searchText.size))
@@ -81,9 +90,10 @@ object SearchTextDialog:
         formatYoubi = info => s"（${info.youbi}）"
       ) + KanjiDate.timeToKanji(at.toLocalTime)
 
-  case class NavUI(): 
-    val gotoFirstLink: HTMLElement = div()
-    val gotoPrevLink: HTMLElement = a("<")
-    val gotoNextLink: HTMLElement = a(">")
-    val gotoLastLink: HTMLElement = div()
-    
+  case class NavUI( ) extends dev.fujiwara.domq.NavUI:
+    val gotoFirstLink = None
+    val gotoPrevLink = Some(a("<"))
+    val gotoNextLink = Some(a(">"))
+    val gotoLastLink = None
+    val infoSpan = Some(span)
+    val ele = div(gotoPrevLink.get, infoSpan.get, gotoNextLink.get)
