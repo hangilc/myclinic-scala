@@ -6,20 +6,20 @@ import dev.fujiwara.domq.Modifiers.given
 import scala.language.implicitConversions
 import org.scalajs.dom.HTMLElement
 
-case class SelectionItem[T](ele: HTMLElement, value: T)(using modifier: SelectionModifier):
+case class SelectionItem[T](ele: HTMLElement, value: T)(using modifier: SelectionConfig):
   def mark(): Unit = ele(cls := "selected")
   def unmark(): Unit = ele(cls :- "selected")
   def isMarked: Boolean = ele.classList.contains("selected")
 
   modifier.itemCssClass.foreach(itemClass => ele(cls := itemClass))
 
-trait SelectionModifier:
-  def itemCssClass: Option[String] = Some(SelectionModifier.defaultItemCssClass)
+trait SelectionConfig:
+  def itemCssClass: Option[String] = Some(SelectionConfig.defaultItemCssClass)
 
-object SelectionModifier:
+object SelectionConfig:
   val defaultItemCssClass: String = "domq-selection-item"
 
-class Selection[T](using modifier: SelectionModifier):
+class Selection[T](using modifier: SelectionConfig):
   val ele = div(cls := "domq-selection")
   private val selectEventPublisher = LocalEventPublisher[T]
   private val unselectEventPublisher = LocalEventPublisher[Unit]
@@ -94,5 +94,5 @@ object Selection:
     sel.addSelectEventHandler(onSelect)
     sel
 
-  given SelectionModifier = new SelectionModifier{}
+  given SelectionConfig = new SelectionConfig{}
 

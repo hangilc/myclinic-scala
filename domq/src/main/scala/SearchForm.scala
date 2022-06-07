@@ -10,7 +10,7 @@ import org.scalajs.dom.HTMLInputElement
 import org.scalajs.dom.HTMLButtonElement
 import org.scalajs.dom.HTMLFormElement
 import org.scalajs.dom.HTMLElement
-import dev.fujiwara.domq.SelectionModifier
+import dev.fujiwara.domq.SelectionConfig
 import dev.fujiwara.domq.Selection.given
 
 trait InputProvider[I]:
@@ -57,7 +57,7 @@ object Implicits:
     def onSearch(form: HTMLFormElement, cb: () => Unit): Unit =
       form(onsubmit := cb)
 
-class SearchFormElementsBase[T](using SelectionModifier):
+class SearchFormElementsBase[T](using SelectionConfig):
   val input: HTMLInputElement = inputText
   val button: HTMLButtonElement = Html.button("検索", attr("type") := "submit")
   val selection: Selection[T] = new Selection[T]
@@ -65,7 +65,7 @@ class SearchFormElementsBase[T](using SelectionModifier):
 class SearchFormBase[T](
     toElement: T => HTMLElement,
     search: String => Future[List[T]]
-)(using SelectionModifier):
+)(using SelectionConfig):
   val ui = new SearchFormElementsBase[T]
   val ele = div(
     div(ui.input, ui.button),
@@ -81,14 +81,14 @@ class SearchFormBase[T](
   )
   def selected: Option[T] = engine.selected
 
-class SearchFormElements[T](using SelectionModifier)
+class SearchFormElements[T](using SelectionConfig)
     extends SearchFormElementsBase[T]:
   val form = Html.form(input, button)
 
 class SearchForm[T](
     toElement: T => HTMLElement,
     search: String => Future[List[T]]
-)(using SelectionModifier):
+)(using SelectionConfig):
   val ui = new SearchFormElements[T]
   val ele = div(
     ui.form(cls := "domq-search-form-form"),
@@ -108,13 +108,13 @@ class SearchForm[T](
     ui.selection.addSelectEventHandler(handler)
 
 object SearchForm:
-  def withToElement[T](using SelectionModifier)(
+  def withToElement[T](using SelectionConfig)(
       toElement: T => HTMLElement,
       search: String => Future[List[T]]
   ): SearchForm[T] =
     new SearchForm(toElement, search)
 
-  def apply[T](using SelectionModifier)(
+  def apply[T](using SelectionConfig)(
       toLabel: T => String,
       search: String => Future[List[T]]
   ): SearchForm[T] =

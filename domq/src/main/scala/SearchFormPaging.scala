@@ -15,7 +15,7 @@ case class SearchFormPaging[T](
     fetchApi: (String, Int, Int) => Future[List[T]],
     render: T => HTMLElement,
     navUI: NavUI
-)(using config: SearchFormPagingConfig):
+)(using config: SearchFormPagingConfig, selectionConfig: SelectionConfig):
   val form = Html.form
   val input = Html.input
   val button = Html.button(attr("type") := "submit")

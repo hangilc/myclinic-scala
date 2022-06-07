@@ -13,11 +13,11 @@ import org.scalajs.dom.Node
 import org.scalajs.dom.HTMLElement
 import dev.fujiwara.domq.SearchFormPaging
 import dev.fujiwara.domq.SearchFormPaging.given
+import dev.fujiwara.domq.SelectionConfig
 
 case class SearchTextDialog(patientId: Int):
   import SearchTextDialog.{Item, NavUI}
-  import dev.fujiwara.domq.SelectionModifier
-  given SelectionModifier with
+  given SelectionConfig with
     override def itemCssClass: Option[String] = None
   val navUI = NavUI()
   val form = new SearchFormPaging[(Text, Visit, String)](
