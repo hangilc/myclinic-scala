@@ -2,6 +2,7 @@ package dev.myclinic.scala.web.practiceapp.practice.patientmanip
 
 import dev.fujiwara.domq.all.{*, given}
 import dev.fujiwara.domq.Html
+import org.scalajs.dom.FormData
 
 case class PatientImageUploadIdalog():
   val form = Html.form
@@ -27,12 +28,22 @@ case class PatientImageUploadIdalog():
     )
   )
   dlog.commands(
-    button("アップロード"),
+    button("アップロード", onclick := (doSubmit _)),
     button("キャンセル", onclick := (() => dlog.close()))
   )
 
   def open(): Unit =
     dlog.open()
+
+  def doSubmit(): Unit =
+    if fileInput.files.length == 1 then
+      val file = fileInput.files.item(0)
+      val formData = new FormData()
+      formData.append("uploadfile", file)
+      val init = new org.scalajs.dom.RequestInit{}
+      init.method = org.scalajs.dom.HttpMethod.POST
+      init.body = formData
+      org.scalajs.dom.fetch("/api/upload", init)
 
   def tagExample(tag: String): Unit =
     ???
