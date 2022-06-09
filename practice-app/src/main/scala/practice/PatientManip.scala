@@ -7,6 +7,7 @@ import dev.myclinic.scala.model.WaitState
 import java.time.LocalDateTime
 import scala.concurrent.Future
 import dev.myclinic.scala.web.practiceapp.practice.patientmanip.SearchTextDialog
+import dev.myclinic.scala.web.practiceapp.practice.patientmanip.PatientImageUploadIdalog
 
 object PatientManip:
   val cashierButton = button
@@ -18,7 +19,7 @@ object PatientManip:
     button("患者終了", onclick := (doEndPatient _)),
     a("診察登録", onclick := (doRegisterPractice _)),
     a("文章検索", onclick := (doSearchText _)),
-    a("画像保存"),
+    a("画像保存", onclick := (doImageUpload _)),
     a("画像一覧")
   )
 
@@ -31,6 +32,10 @@ object PatientManip:
       ele(displayDefault)
       cashierButton(enabled := true)
   }
+
+  def doImageUpload(): Unit =
+    val dlog = PatientImageUploadIdalog()
+    dlog.open()
 
   def doSearchText(): Unit =
     PracticeBus.currentPatient.foreach(patient =>

@@ -1,11 +1,7 @@
 package dev.myclinic.scala.web.reception.records
 
 import dev.myclinic.scala.web.appbase.SideMenuService
-import dev.fujiwara.domq.ElementQ.{*, given}
-import dev.fujiwara.domq.Html.{*, given}
-import dev.fujiwara.domq.Modifiers.{*, given}
-import dev.fujiwara.domq.{Icons, ShowMessage, PullDown, PullDownMenu, Selection}
-import scala.language.implicitConversions
+import dev.fujiwara.domq.all.{*, given}
 import org.scalajs.dom.{HTMLElement, HTMLInputElement}
 import scala.concurrent.Future
 import org.scalajs.dom.MouseEvent
