@@ -1,12 +1,13 @@
 package dev.myclinic.scala.server
 
 import cats.*
-import cats.syntax.*
+import cats.syntax.all.*
 import cats.effect.*
 import org.http4s._
 import org.http4s.dsl.io._
 import org.http4s.implicits._
 import org.http4s.headers._
+import org.http4s.multipart.*
 import org.http4s.circe._
 import org.http4s.circe.CirceEntityEncoder._
 import org.http4s.circe.CirceEntityDecoder._
@@ -59,19 +60,33 @@ object FileService extends DateTimeQueryParam with Publisher:
         .map(_ => true)
     )
 
+  private def sanitizeFileName(fileName: String): String =
+    import dev.myclinic.scala.util.FunUtil.*
+    def ensureNoParentDir(s: String): String =
+      if s.startsWith("../") || s.contains("/../") then 
+        throw new RuntimeException("Invalid file name (including parent dir).")
+      s
+    def ensureNoParentDirWindows(s: String): String =
+      if s.startsWith("..\\") || s.contains("\\..\\") then 
+        throw new RuntimeException("Invalid file name (including parent dir).")
+      s
+    fileName
+      |> ensureNoParentDir _
+      |> ensureNoParentDirWindows _
+
   def routes(using topic: Topic[IO, WebSocketFrame]) = HttpRoutes.of[IO] {
     case req @ POST -> Root / "save-patient-image" :? intPatientId(
           patientId
         ) +& strFileName(fileName) =>
       val loc =
-        new java.io.File(Config.paperScanDir(patientId), fileName).getPath
+        new java.io.File(Config.paperScanDir(patientId), sanitizeFileName(fileName)).getPath
       saveToFile(req, Path(loc))
 
     case GET -> Root / "rename-patient-image" :? intPatientId(patientId)
         +& strSrc(src) +& strDst(dst) =>
       val dir = Config.paperScanDir(patientId)
-      val srcLoc = Path(new java.io.File(dir, src).getPath)
-      val dstLoc = Path(new java.io.File(dir, dst).getPath)
+      val srcLoc = Path(new java.io.File(dir, sanitizeFileName(src)).getPath)
+      val dstLoc = Path(new java.io.File(dir, sanitizeFileName(dst)).getPath)
       val op =
         fs2.io.file
           .Files[IO]
@@ -82,7 +97,7 @@ object FileService extends DateTimeQueryParam with Publisher:
     case GET -> Root / "delete-patient-image" :? intPatientId(patientId)
         +& strFileName(fileName) =>
       val dir = Config.paperScanDir(patientId)
-      val loc = Path(new java.io.File(dir, fileName).getPath)
+      val loc = Path(new java.io.File(dir, sanitizeFileName(fileName)).getPath)
       val op =
         fs2.io.file.Files[IO].delete(loc).map(_ => true)
       Ok(op)
@@ -101,7 +116,7 @@ object FileService extends DateTimeQueryParam with Publisher:
       
     case GET -> Root / "get-patient-image" :? intPatientId(patientId) +& strFileName(fileName) =>
       val dir = Config.paperScanDir(patientId)
-      val loc = Path(new java.io.File(dir, fileName).getPath)
+      val loc = Path(new java.io.File(dir, sanitizeFileName(fileName)).getPath)
       val mediaType: MediaType = 
         if fileName.endsWith(".pdf") then MediaType.application.pdf
         else MediaType.image.jpeg
@@ -112,5 +127,14 @@ object FileService extends DateTimeQueryParam with Publisher:
     case GET -> Root / "get-covid-2nd-shot-data" :? intPatientId(patientId) =>
       val data = covid2ndShotMap.get(patientId)
       Ok(data)
+
+    case req @ POST -> Root / "upload-patient-image" :? intPatientId(patientId) +& strFileName(fileName) =>
+      val dir = Config.paperScanDir(patientId)
+      val loc = Path(new java.io.File(dir, sanitizeFileName(fileName)).getPath)
+        req.decode[Multipart[IO]] {
+          m => 
+            println(m)
+            Ok(m.parts.size)
+        }
 
   }

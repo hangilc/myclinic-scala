@@ -6,6 +6,7 @@ import org.scalajs.dom.FormData
 
 case class PatientImageUploadIdalog():
   val form = Html.form
+  form.target = "/api/upload-patient-image"
   val tagInput = input
   val tagPullDown = PullDown.pullDownLink("例", List(
     "画像" -> (() => tagExample("image")),
@@ -24,7 +25,7 @@ case class PatientImageUploadIdalog():
       tagPullDown
     ),
     form(
-      fileInput(attr("type") := "file")
+      fileInput(attr("type") := "file", name := "uploadfile")
     )
   )
   dlog.commands(
@@ -43,7 +44,7 @@ case class PatientImageUploadIdalog():
       val init = new org.scalajs.dom.RequestInit{}
       init.method = org.scalajs.dom.HttpMethod.POST
       init.body = formData
-      org.scalajs.dom.fetch("/api/upload", init)
+      org.scalajs.dom.fetch("/api/upload-patient-image?patient-id=4593&file-name=test.jpg", init)
 
   def tagExample(tag: String): Unit =
     ???
