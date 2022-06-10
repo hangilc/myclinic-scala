@@ -15,7 +15,7 @@ import io.circe._
 import io.circe.syntax._
 import fs2.concurrent.Topic
 import org.http4s.websocket.WebSocketFrame
-import fs2.Chunk
+import fs2.*
 import scodec.bits.ByteVector
 import fs2.io.file.Path
 import fs2.io.file.CopyFlags
@@ -27,47 +27,61 @@ import dev.myclinic.scala.model.jsoncodec.Implicits.{given}
 import java.time.LocalDate
 import java.io.File
 import scala.io.Source
+import org.typelevel.ci.CIString
 
 object FileService extends DateTimeQueryParam with Publisher:
   object intPatientId extends QueryParamDecoderMatcher[Int]("patient-id")
   object strFileName extends QueryParamDecoderMatcher[String]("file-name")
   object strSrc extends QueryParamDecoderMatcher[String]("src")
   object strDst extends QueryParamDecoderMatcher[String]("dst")
+  object strDir extends QueryParamDecoderMatcher[String]("dir")
 
   val covid2ndShotMap: Map[Int, (Int, LocalDate, LocalDate)] =
     var map: Map[Int, (Int, LocalDate, LocalDate)] = Map.empty
     val pat = """(\d+)\s+(\d+)\s+([0-9-]+)\s+([0-9-]+)""".r
     val file = new File(System.getenv("MYCLINIC_DATA"), "covid-2nd-shots.txt")
-    for
-      line <- Source.fromFile(file).getLines.map(_.trim)
-    do line match {
-      case pat(pPatientId, pAge, pSecondShot, pThirdShotDue) =>
-        val patientId = pPatientId.toInt
-        val age = pAge.toInt
-        val secondShot = LocalDate.parse(pSecondShot)
-        val thirdShotDue = LocalDate.parse(pThirdShotDue)
-        map = map + (patientId -> (age, secondShot, thirdShotDue))
-      case _ => System.err.println(s"Invalid 2nd shot data: %{line}")
-    }
+    for line <- Source.fromFile(file).getLines.map(_.trim) do
+      line match {
+        case pat(pPatientId, pAge, pSecondShot, pThirdShotDue) =>
+          val patientId = pPatientId.toInt
+          val age = pAge.toInt
+          val secondShot = LocalDate.parse(pSecondShot)
+          val thirdShotDue = LocalDate.parse(pThirdShotDue)
+          map = map + (patientId -> (age, secondShot, thirdShotDue))
+        case _ => System.err.println(s"Invalid 2nd shot data: %{line}")
+      }
     map
 
   private def saveToFile(req: Request[IO], path: Path): IO[Response[IO]] =
-    Ok(
-      req.body
-        .through(fs2.io.file.Files[IO].writeAll(path))
-        .compile
-        .drain
-        .map(_ => true)
-    )
+    Ok(saveToFile(req.body, path).compile.drain.map(_ => true))
+  // Ok(
+  //   req.body
+  //     .through(fs2.io.file.Files[IO].writeAll(path))
+  //     .compile
+  //     .drain
+  //     .map(_ => true)
+  // )
+
+  private def saveToFile(
+      sin: Stream[IO, Byte],
+      path: Path
+  ): Stream[IO, Nothing] =
+    sin.through(fs2.io.file.Files[IO].writeAll(path))
+
+  private def resolveDir(dir: String): Path =
+    dir match {
+      case "scan-dir" => Path.fromNioPath(Config.paperScanRoot)
+      case _ => throw new RuntimeException("Cannot resolve dir: " + dir)
+    }
 
   private def sanitizeFileName(fileName: String): String =
     import dev.myclinic.scala.util.FunUtil.*
     def ensureNoParentDir(s: String): String =
-      if s.startsWith("../") || s.contains("/../") then 
+      if s.startsWith("../") || s.contains("/../") then
         throw new RuntimeException("Invalid file name (including parent dir).")
       s
     def ensureNoParentDirWindows(s: String): String =
-      if s.startsWith("..\\") || s.contains("\\..\\") then 
+      if s.startsWith("..\\") || s.contains("\\..\\") then
         throw new RuntimeException("Invalid file name (including parent dir).")
       s
     fileName
@@ -79,7 +93,10 @@ object FileService extends DateTimeQueryParam with Publisher:
           patientId
         ) +& strFileName(fileName) =>
       val loc =
-        new java.io.File(Config.paperScanDir(patientId), sanitizeFileName(fileName)).getPath
+        new java.io.File(
+          Config.paperScanDir(patientId),
+          sanitizeFileName(fileName)
+        ).getPath
       saveToFile(req, Path(loc))
 
     case GET -> Root / "rename-patient-image" :? intPatientId(patientId)
@@ -106,18 +123,28 @@ object FileService extends DateTimeQueryParam with Publisher:
       val dir = Config.paperScanDir(patientId)
       val loc = Path(new java.io.File(dir).getPath)
       val op =
-        fs2.io.file.Files[IO].list(loc).evalMap(path => 
-          fs2.io.file.Files[IO].getBasicFileAttributes(path).map(attr => 
-            val ctime = FileInfo.fromTimestamp(attr.creationTime)
-            FileInfo(path.fileName.toString, ctime, attr.size)
+        fs2.io.file
+          .Files[IO]
+          .list(loc)
+          .evalMap(path =>
+            fs2.io.file
+              .Files[IO]
+              .getBasicFileAttributes(path)
+              .map(attr =>
+                val ctime = FileInfo.fromTimestamp(attr.creationTime)
+                FileInfo(path.fileName.toString, ctime, attr.size)
+              )
           )
-        ).compile.toList
+          .compile
+          .toList
       Ok(op)
-      
-    case GET -> Root / "get-patient-image" :? intPatientId(patientId) +& strFileName(fileName) =>
+
+    case GET -> Root / "get-patient-image" :? intPatientId(
+          patientId
+        ) +& strFileName(fileName) =>
       val dir = Config.paperScanDir(patientId)
       val loc = Path(new java.io.File(dir, sanitizeFileName(fileName)).getPath)
-      val mediaType: MediaType = 
+      val mediaType: MediaType =
         if fileName.endsWith(".pdf") then MediaType.application.pdf
         else MediaType.image.jpeg
       val op =
@@ -128,13 +155,12 @@ object FileService extends DateTimeQueryParam with Publisher:
       val data = covid2ndShotMap.get(patientId)
       Ok(data)
 
-    case req @ POST -> Root / "upload-patient-image" :? intPatientId(patientId) +& strFileName(fileName) =>
-      val dir = Config.paperScanDir(patientId)
-      val loc = Path(new java.io.File(dir, sanitizeFileName(fileName)).getPath)
-        req.decode[Multipart[IO]] {
-          m => 
-            println(m)
-            Ok(m.parts.size)
-        }
-
+    case req @ POST -> Root / "upload-file" :? strDir(dir) =>
+      val dirPath = resolveDir(dir)
+      req.decode[Multipart[IO]] { m =>
+        Stream.emits(m.parts).covary[IO].flatMap(part => 
+          val filename: String = sanitizeFileName(part.filename.get)
+          saveToFile(part.body, dirPath / filename)
+        ).compile.drain.flatMap(_ => Ok(true))
+      }
   }

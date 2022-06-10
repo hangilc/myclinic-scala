@@ -38,8 +38,12 @@ object Config extends ConfigCirce:
 
   private lazy val scanDir: String = System.getenv("MYCLINIC_PAPER_SCAN_DIR")
 
+  def paperScanRoot: Path =
+    Path.of(scanDir)
+
   def paperScanDir(patientId: Int): String =
-    val d = Path.of(scanDir, patientId.toString)
+    val d = paperScanRoot.resolve(patientId.toString)
+    // val d = Path.of(scanDir, patientId.toString)
     if !Files.exists(d) then d.toFile.mkdirs
     d.toString
 

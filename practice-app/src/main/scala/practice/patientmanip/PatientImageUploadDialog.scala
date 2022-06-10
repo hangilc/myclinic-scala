@@ -25,7 +25,7 @@ case class PatientImageUploadIdalog():
       tagPullDown
     ),
     form(
-      fileInput(attr("type") := "file", name := "uploadfile")
+      fileInput(attr("type") := "file", name := "uploadfile", attr("multiple") := "")
     )
   )
   dlog.commands(
@@ -37,14 +37,17 @@ case class PatientImageUploadIdalog():
     dlog.open()
 
   def doSubmit(): Unit =
-    if fileInput.files.length == 1 then
-      val file = fileInput.files.item(0)
-      val formData = new FormData()
-      formData.append("uploadfile", file)
-      val init = new org.scalajs.dom.RequestInit{}
-      init.method = org.scalajs.dom.HttpMethod.POST
-      init.body = formData
-      org.scalajs.dom.fetch("/api/upload-patient-image?patient-id=4593&file-name=test.jpg", init)
+    val formData = new FormData()
+    val files = fileInput.files
+    files.zipWithIndex.map {
+      case (f, i) => 
+        val fn = s"file-${i+1}"
+        formData.append(s"uploadfile-${i+1}", f, fn)
+    }
+    val init = new org.scalajs.dom.RequestInit{}
+    init.method = org.scalajs.dom.HttpMethod.POST
+    init.body = formData
+    org.scalajs.dom.fetch("/api/upload-file?dir=scan-dir", init)
 
   def tagExample(tag: String): Unit =
     ???
