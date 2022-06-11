@@ -3,8 +3,11 @@ package dev.myclinic.scala.web.practiceapp.practice.patientmanip
 import dev.fujiwara.domq.all.{*, given}
 import dev.fujiwara.domq.Html
 import org.scalajs.dom.FormData
+import dev.myclinic.scala.webclient.{Api, global}
+import scala.util.Success
+import scala.util.Failure
 
-case class PatientImageUploadIdalog():
+case class PatientImageUploadIdalog(patientId: Int):
   val form = Html.form
   form.target = "/api/upload-patient-image"
   val tagInput = input
@@ -44,10 +47,10 @@ case class PatientImageUploadIdalog():
         val fn = s"file-${i+1}"
         formData.append(s"uploadfile-${i+1}", f, fn)
     }
-    val init = new org.scalajs.dom.RequestInit{}
-    init.method = org.scalajs.dom.HttpMethod.POST
-    init.body = formData
-    org.scalajs.dom.fetch("/api/upload-file?dir=scan-dir", init)
+    Api.uploadPatientImage(patientId, formData).onComplete {
+      case Success(_) => dlog.close()
+      case Failure(ex) => ShowMessage.showError(ex.toString)
+    }
 
   def tagExample(tag: String): Unit =
     ???

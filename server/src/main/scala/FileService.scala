@@ -163,4 +163,18 @@ object FileService extends DateTimeQueryParam with Publisher:
           saveToFile(part.body, dirPath / filename)
         ).compile.drain.flatMap(_ => Ok(true))
       }
+
+    case req @ POST -> Root / "upload-patient-image" :? intPatientId(patientId) =>
+      val nioDirPath = java.nio.file.Path.of(Config.paperScanDir(patientId))
+      if !java.nio.file.Files.exists(nioDirPath) && !nioDirPath.toFile.mkdirs then
+        throw new RuntimeException("Cannot make patient image directory.")
+      val dirPath = Path.fromNioPath(nioDirPath)
+      req.decode[Multipart[IO]] { m =>
+        Stream.emits(m.parts).covary[IO].flatMap(part => 
+          val filename: String = sanitizeFileName(part.filename.get)
+          saveToFile(part.body, dirPath / filename)
+        ).compile.drain.flatMap(_ => Ok(true))
+      }
+      
+
   }

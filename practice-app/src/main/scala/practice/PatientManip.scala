@@ -34,8 +34,10 @@ object PatientManip:
   }
 
   def doImageUpload(): Unit =
-    val dlog = PatientImageUploadIdalog()
-    dlog.open()
+    PracticeBus.currentPatient.map(_.patientId).foreach(patientId => 
+      val dlog = PatientImageUploadIdalog(patientId)
+      dlog.open()
+    )
 
   def doSearchText(): Unit =
     PracticeBus.currentPatient.foreach(patient =>
