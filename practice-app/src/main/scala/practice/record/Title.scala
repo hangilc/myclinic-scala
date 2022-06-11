@@ -9,6 +9,7 @@ import dev.myclinic.scala.web.practiceapp.practice.{PracticeBus, NavUtil}
 import dev.myclinic.scala.webclient.{Api, global}
 import scala.util.Success
 import scala.util.Failure
+import dev.myclinic.scala.practiceapp.practice.record.title.RcptDetailDialog
 
 class Title(visit: VisitEx):
   import Title as Helper
@@ -25,7 +26,7 @@ class Title(visit: VisitEx):
       "この診察を削除" -> (doDeleteVisit _),
       "暫定診察に設定" -> (setTempVisitId _),
       "暫定診察の解除" -> (() => { PracticeBus.tempVisitIdChanged.publish(None); () }),
-      "診療明細" -> (() => ()),
+      "診療明細" -> (doRcptDetail _),
       "負担割オーバーライド" -> (() => ()),
       "未収リストへ" -> (() => ())
     )
@@ -42,6 +43,13 @@ class Title(visit: VisitEx):
     if visit.visitId == currentVisitId then ele(cls := "current-visit")
   )
   adaptToTempVisitId(PracticeBus.currentTempVisitId)
+
+  def doRcptDetail(): Unit =
+    for
+      meisai <- Api.getMeisai(visit.visitId)
+    yield
+      val dlog = RcptDetailDialog(meisai)
+      dlog.open()
 
   def doDeleteVisit(): Unit =
     val visitId = visit.visitId
