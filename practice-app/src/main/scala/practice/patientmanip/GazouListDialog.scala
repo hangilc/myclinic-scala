@@ -3,6 +3,7 @@ package dev.myclinic.scala.web.practiceapp.practice.patientmanip
 import dev.fujiwara.domq.all.{*, given}
 import dev.fujiwara.domq.Html
 import dev.myclinic.scala.model.FileInfo
+import dev.myclinic.scala.util.FileUtil
 
 case class GazouListDialog(patientId: Int, files: List[FileInfo]):
   val display = div
@@ -24,8 +25,12 @@ case class GazouListDialog(patientId: Int, files: List[FileInfo]):
 
   def doSelect(fname: String): Unit =
     val url = s"/api/patient-image?patient-id=${patientId}&file-name=${fname}"
-    val img = Html.img
-    img.src = url
-    display(clear, img)
+    if FileUtil.findFileExtension(fname) == Some("pdf") then
+      val link = a("別のタブで開く", href := url, attr("target") := "_blank")
+      display(clear, link)
+    else
+      val img = Html.img
+      img.src = url
+      display(clear, img)
 
 
