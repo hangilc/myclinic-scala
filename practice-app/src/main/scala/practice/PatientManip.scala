@@ -8,6 +8,7 @@ import java.time.LocalDateTime
 import scala.concurrent.Future
 import dev.myclinic.scala.web.practiceapp.practice.patientmanip.SearchTextDialog
 import dev.myclinic.scala.web.practiceapp.practice.patientmanip.PatientImageUploadIdalog
+import dev.myclinic.scala.web.practiceapp.practice.patientmanip.GazouListDialog
 
 object PatientManip:
   val cashierButton = button
@@ -20,7 +21,7 @@ object PatientManip:
     a("診察登録", onclick := (doRegisterPractice _)),
     a("文章検索", onclick := (doSearchText _)),
     a("画像保存", onclick := (doImageUpload _)),
-    a("画像一覧")
+    a("画像一覧", onclick := (doGazouList _))
   )
 
   PracticeBus.patientVisitChanged.subscribe {
@@ -32,6 +33,15 @@ object PatientManip:
       ele(displayDefault)
       cashierButton(enabled := true)
   }
+
+  def doGazouList(): Unit =
+    PracticeBus.currentPatient.map(_.patientId).foreach(patientId => 
+      for
+        files <- Api.listPatientImage(patientId)
+      yield
+        val dlog = GazouListDialog(patientId, files)
+        dlog.open()
+    )
 
   def doImageUpload(): Unit =
     PracticeBus.currentPatient.map(_.patientId).foreach(patientId => 
