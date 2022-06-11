@@ -6,6 +6,9 @@ import org.scalajs.dom.FormData
 import dev.myclinic.scala.webclient.{Api, global}
 import scala.util.Success
 import scala.util.Failure
+import dev.myclinic.scala.util.FileUtil
+import java.time.LocalDateTime
+import dev.myclinic.scala.util.PatientImageUtil
 
 case class PatientImageUploadIdalog(patientId: Int):
   val form = Html.form
@@ -40,11 +43,13 @@ case class PatientImageUploadIdalog(patientId: Int):
     dlog.open()
 
   def doSubmit(): Unit =
+    val at = LocalDateTime.now()
     val formData = new FormData()
     val files = fileInput.files
     files.zipWithIndex.map {
       case (f, i) => 
-        val fn = s"file-${i+1}"
+        val ext = FileUtil.findFileExtension(f.name).get
+        val fn = PatientImageUtil.composeFileName(patientId, tag, at, i+1, ext)
         formData.append(s"uploadfile-${i+1}", f, fn)
     }
     Api.uploadPatientImage(patientId, formData).onComplete {
@@ -53,4 +58,10 @@ case class PatientImageUploadIdalog(patientId: Int):
     }
 
   def tagExample(tag: String): Unit =
-    ???
+    tagInput.value = tag
+
+  def tag: String =
+    tagInput.value match {
+      case "" => "image"
+      case (t) => t
+    }
