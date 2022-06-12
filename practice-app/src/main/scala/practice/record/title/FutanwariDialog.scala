@@ -12,7 +12,8 @@ case class FutanwariDialog(visit: Visit, onChange: (FutanwariDialog => Unit)):
   dlog.body(
     div(
       "変更後負担割：",
-      input(cls := "practice-futanwari-override-dialog-input"),
+      input(cls := "practice-futanwari-override-dialog-input",
+        value := visit.futanWariOverride.map(_.toString).getOrElse("")),
       "割"
     )
   )
