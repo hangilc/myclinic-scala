@@ -10,6 +10,7 @@ import dev.myclinic.scala.webclient.{Api, global}
 import scala.util.Success
 import scala.util.Failure
 import dev.myclinic.scala.practiceapp.practice.record.title.RcptDetailDialog
+import dev.myclinic.scala.web.practiceapp.practice.record.title.FutanwariDialog
 
 class Title(visit: VisitEx):
   import Title as Helper
@@ -27,7 +28,7 @@ class Title(visit: VisitEx):
       "暫定診察に設定" -> (setTempVisitId _),
       "暫定診察の解除" -> (() => { PracticeBus.tempVisitIdChanged.publish(None); () }),
       "診療明細" -> (doRcptDetail _),
-      "負担割オーバーライド" -> (() => ()),
+      "負担割オーバーライド" -> (doFutanwari _),
       "未収リストへ" -> (() => ())
     )
   )
@@ -43,6 +44,15 @@ class Title(visit: VisitEx):
     if visit.visitId == currentVisitId then ele(cls := "current-visit")
   )
   adaptToTempVisitId(PracticeBus.currentTempVisitId)
+
+  def doFutanwari(): Unit =
+    val dlog = FutanwariDialog(visit.toVisit, dlog => 
+      dlog.close()
+      for
+        vex <- Api.getVisitEx(visit.visitId)
+      yield PracticeBus.visitUpdated.publish(vex)
+    )
+    dlog.open()
 
   def doRcptDetail(): Unit =
     for

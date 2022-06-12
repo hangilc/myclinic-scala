@@ -58,4 +58,14 @@ object VisitService extends Publisher:
 
     case GET -> Root / "get-hoken-info" :? intVisitId(visitId) =>
       Ok(Db.getHokenInfo(visitId))
+
+    case req @ POST -> Root / "update-visit" =>
+      val op =
+        for
+          visit <- req.as[Visit]
+          event <- Db.updateVisit(visit)
+          _ <- publish(event)
+        yield true
+      Ok(op)
+
   }

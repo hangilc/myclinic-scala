@@ -23,6 +23,7 @@ class RecordsWrapper:
     PracticeBus.conductDeleted.subscribe(onConductDeleted _),
     PracticeBus.chargeUpdated.subscribe(onChargeUpdated _),
     PracticeBus.paymentEntered.subscribe(onPaymentEntered _),
+    PracticeBus.visitUpdated.subscribe(onVisitUpdated _)
   )
 
   def dispose: Unit = 
@@ -54,6 +55,9 @@ class RecordsWrapper:
     }
 
   def findRecord(visitId: Int): Option[Record] = records.find(_.visitId == visitId)
+
+  def onVisitUpdated(visitEx: VisitEx): Unit =
+    findRecord(visitEx.visitId).foreach(or => records.replace(or, Record(visitEx)))
 
   def onHokenInfoChanged(visitId: Int, hoken: HokenInfo): Unit =
     findRecord(visitId).foreach(_.onHokenInfoChanged(hoken))

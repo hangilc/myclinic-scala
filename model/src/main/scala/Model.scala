@@ -172,7 +172,13 @@ object Wqueue:
 
 case class VisitAttributes(
     val futanWari: Option[Int] = None
-)
+):
+  def asStore: Option[String] = 
+    if futanWari.isEmpty then None
+    else Some(this.asJson.toString)
+
+object VisitAttributes:
+  given Encoder[VisitAttributes] = deriveEncoder[VisitAttributes]
 
 case class Visit(
     visitId: Int,

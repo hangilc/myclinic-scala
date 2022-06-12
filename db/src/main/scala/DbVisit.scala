@@ -41,4 +41,7 @@ trait DbVisit extends Mysql:
 
   def updateHokenIds(visitId: Int, hokenIdSet: HokenIdSet): IO[AppEvent] =
     mysql(Prim.updateHokenIds(visitId, hokenIdSet))
+
+  def updateVisit(visit: Visit): IO[AppEvent] =
+    mysql(Prim.updateVisit(visit).map(_._1))
     
