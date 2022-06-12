@@ -527,3 +527,17 @@ object FileInfo:
   def fromTimestamp(ts: FiniteDuration): LocalDateTime =
     epoch.plusSeconds(ts.toSeconds)
 
+case class Disease(
+  diseaseId: Int,
+  patientId: Int,
+  shoubyoumeicode: Int,
+  startDate: LocalDate,
+  end_date: ValidUpto,
+  endReason: String
+)
+
+case class DiseaseAdj(
+  diseaseAdjId: Int,
+  diseaseId: Int,
+  shuushokugocode: Int
+)

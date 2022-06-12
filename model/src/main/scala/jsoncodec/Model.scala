@@ -208,5 +208,17 @@ trait Model extends DateTime with WaitStateCodec:
   given Encoder[CreateShinryouConductRequest] = deriveEncoder[CreateShinryouConductRequest]
   given Decoder[CreateShinryouConductRequest] = deriveDecoder[CreateShinryouConductRequest]
 
+  given Encoder[Disease] = deriveEncoder[Disease]
+  given Decoder[Disease] = deriveDecoder[Disease]
+
+  given Encoder[DiseaseAdj] = deriveEncoder[DiseaseAdj]
+  given Decoder[DiseaseAdj] = deriveDecoder[DiseaseAdj]
+
+  given Encoder[ByoumeiMaster] = deriveEncoder[ByoumeiMaster]
+  given Decoder[ByoumeiMaster] = deriveDecoder[ByoumeiMaster]
+
+  given Encoder[ShuushokugoMaster] = deriveEncoder[ShuushokugoMaster]
+  given Decoder[ShuushokugoMaster] = deriveDecoder[ShuushokugoMaster]
+
 
 

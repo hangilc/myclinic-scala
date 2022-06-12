@@ -38,7 +38,8 @@ object Db
     with DbIyakuhinMaster
     with DbShinryouMaster
     with DbKizaiMaster
-    with DbVisitEx:
+    with DbVisitEx
+    with DbDisease:
 
   def deleteVisit(visitId: Int): IO[List[AppEvent]] =
     def check(chk: Int => IO[Int], err: String): EitherT[IO, String, Unit] =
@@ -75,7 +76,10 @@ object Db
       wqEventOpt <- DbWqueuePrim.tryDeleteWqueue(payment.visitId)
     yield List(paymentEvent) ++ wqEventOpt.toList)
 
-  def startVisit(patientId: Int, at: LocalDateTime): IO[(Visit, List[AppEvent])] =
+  def startVisit(
+      patientId: Int,
+      at: LocalDateTime
+  ): IO[(Visit, List[AppEvent])] =
     val date = at.toLocalDate
     mysql(
       for
@@ -247,13 +251,19 @@ object Db
       yield (gen, patient, shahokokuho, koukikourei, roujin, kouhi)
     mysql(op)
 
-  def listRecentVisitFull(offset: Int, limit: Int): IO[List[(Visit, Patient)]] = 
+  def listRecentVisitFull(offset: Int, limit: Int): IO[List[(Visit, Patient)]] =
     val op = sql"""
       select visit.*, patient.* from visit inner join patient on visit.patient_id = patient.patient_id
       order by visit.visit_id desc limit ${limit} offset ${offset}
     """.query[(Visit, Patient)].to[List]
     mysql(op)
 
-  def batchCreateShinryouConduct(req: CreateShinryouConductRequest):
-    IO[(List[AppEvent], List[Int], List[Int])] =
-      mysql(DbPrim.batchEnterShinryouConduct(req))
+  def batchCreateShinryouConduct(
+      req: CreateShinryouConductRequest
+  ): IO[(List[AppEvent], List[Int], List[Int])] =
+    mysql(DbPrim.batchEnterShinryouConduct(req))
+
+  def listCurrentDiseaseEx(
+      patientId: Int
+  ): IO[List[(Disease, ByoumeiMaster, List[(DiseaseAdj, ShuushokugoMaster)])]] =
+    mysql(DbPrim.listCurrentDiseaseEx(patientId))

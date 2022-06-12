@@ -397,7 +397,10 @@ object MiscApi extends ApiBase:
       )
 
     def countSearchTextForPatient(text: String, patientId: Int): Future[Int] =
-      get("count-search-text-for-patient", Params("text" -> text, "patient-id" -> patientId))
+      get(
+        "count-search-text-for-patient",
+        Params("text" -> text, "patient-id" -> patientId)
+      )
 
     def searchTextForPatient(
         text: String,
@@ -414,3 +417,8 @@ object MiscApi extends ApiBase:
           "offset" -> offset
         )
       )
+
+    def listCurrentDiseaseEx(patientId: Int): Future[
+      List[(Disease, ByoumeiMaster, List[(DiseaseAdj, ShuushokugoMaster)])]
+    ] =
+      get("list-current-disease-ex", Params("patient-id" -> patientId))

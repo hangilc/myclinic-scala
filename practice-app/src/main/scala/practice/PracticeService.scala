@@ -245,4 +245,6 @@ class PracticeRight:
   def ele = ui.ele
 
 class PracticeRightUI:
-  val ele = div(cls := "practice-right-column")
+  val ele = div(cls := "practice-right-column",
+    Disease.ele
+  )
