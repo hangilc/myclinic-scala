@@ -34,5 +34,6 @@ object Html:
   def checkbox = input(attr("type") := "checkbox")
   def radio = input(attr("type") := "radio")
   def img = create[HTMLImageElement]("img")
+  def hr = create[HTMLHRElement]("hr")
 
   def text(data: String) = document.createTextNode(data)

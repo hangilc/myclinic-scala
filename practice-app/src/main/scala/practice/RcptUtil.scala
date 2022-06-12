@@ -8,18 +8,31 @@ import dev.myclinic.scala.model.MeisaiSectionData
 object RcptUtil:
   def rcptDetail(meisai: Meisai): HTMLElement =
     div(
-      meisai.items.map(itemEle _)
+      meisai.items.map(detailItemEle _),
+      hr(cls := "practice-rcpt-detail-hr"),
+      detailSummary(meisai)
     )
 
-  def itemEle(data: MeisaiSectionData): HTMLElement =
+  private def detailItemEle(data: MeisaiSectionData): HTMLElement =
     div(
       div(data.section.label),
-      data.entries.map(entry => 
+      data.entries.map(entry =>
         div(
-        div(entry.label),
-        div(s"${entry.tanka} x ${entry.count}"),
-        div(s"${entry.tanka * entry.count}")
+          cls := "practice-rcpt-detail-item",
+          div(entry.label, cls := "practice-rcpt-detail-item-label"),
+          div(
+            s"${entry.tanka}x${entry.count}",
+            cls := "practice-rcpt-detail-item-tanka-count"
+          ),
+          div(
+            s"${entry.tanka * entry.count}",
+            cls := "practice-rcpt-detail-item-total"
+          )
         )
       )
     )
 
+  private def detailSummary(meisai: Meisai): HTMLElement =
+    val t =
+      s"総点：${meisai.totalTen}点、負担割：${meisai.futanWari}割、自己負担：${meisai.charge}円"
+    div(t, cls := "practice-rcpt-detail-summary")

@@ -266,4 +266,27 @@ button {
   color: red;
 }
 
+.practice-rcpt-detail-item-label,  
+.practice-rcpt-detail-item-tanka-count,
+.practice-rcpt-detail-item-total {
+  display: inline-block
+}
+
+.practice-rcpt-detail-item-label {
+  max-width: 14rem;
+  margin-left: 1rem;
+}
+
+.practice-rcpt-detail-item-tanka-count {
+  width: 4rem;
+  text-align: right;
+  float: right;
+}
+
+.practice-rcpt-detail-item-total {
+  width: 4rem;
+  text-align: right;
+  float: right;
+}
+
 
