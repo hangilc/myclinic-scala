@@ -46,3 +46,15 @@ object PracticeBus:
   val visitUpdated = LocalEventPublisher[VisitEx]
 
   val hokenInfoChanged = LocalEventPublisher[(VisitId, HokenInfo)]
+
+  private var mishuuList: List[VisitId] = List.empty
+  def addMishuu(visitId: Int): Future[Unit] = 
+    if mishuuList.contains(visitId) then Future.successful(())
+    else
+      mishuuList = (mishuuList :+ visitId).sorted
+      mishuuListChanged.publish(mishuuList)
+  def clearMishuuList(): Future[Unit] =
+    mishuuList = List.empty
+    mishuuListChanged.publish(mishuuList)
+  val mishuuListChanged = LocalEventPublisher[List[VisitId]]
+  

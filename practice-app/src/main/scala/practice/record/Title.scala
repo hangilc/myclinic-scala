@@ -29,7 +29,7 @@ class Title(visit: VisitEx):
       "暫定診察の解除" -> (() => { PracticeBus.tempVisitIdChanged.publish(None); () }),
       "診療明細" -> (doRcptDetail _),
       "負担割オーバーライド" -> (doFutanwari _),
-      "未収リストへ" -> (() => ())
+      "未収リストへ" -> (doAddToMishuu _)
     )
   )
   val ele = div(
@@ -44,6 +44,10 @@ class Title(visit: VisitEx):
     if visit.visitId == currentVisitId then ele(cls := "current-visit")
   )
   adaptToTempVisitId(PracticeBus.currentTempVisitId)
+
+  def doAddToMishuu(): Unit =
+    PracticeBus.addMishuu(visit.visitId)
+    ShowMessage.showMessage("未収リストに追加しました。")
 
   def doFutanwari(): Unit =
     val dlog = FutanwariDialog(visit.toVisit, dlog => 

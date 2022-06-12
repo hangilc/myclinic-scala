@@ -1,9 +1,10 @@
 package dev.myclinic.scala.web.practiceapp.practice.record.title
 
-import dev.fujiwara.domq.all.{*, given}
 import dev.fujiwara.domq.Html
+import dev.fujiwara.domq.all.{_, given}
 import dev.myclinic.scala.model.*
-import dev.myclinic.scala.webclient.{Api, global}
+import dev.myclinic.scala.webclient.Api
+import dev.myclinic.scala.webclient.global
 
 case class FutanwariDialog(visit: Visit, onChange: (FutanwariDialog => Unit)):
   val input = Html.input
