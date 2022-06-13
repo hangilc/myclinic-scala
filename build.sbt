@@ -53,6 +53,8 @@ lazy val root = project
     kanjidateJVM,
     modelJS,
     modelJVM,
+    myclinicutilJS,
+    myclinicutilJVM,
     practiceApp,
     rcpt,
     receptionApp,
@@ -85,6 +87,17 @@ lazy val formatshohousen = crossProject(JSPlatform, JVMPlatform)
 
 val formatshohousenJS = formatshohousen.js
 val formatshohousenJVM = formatshohousen.jvm
+
+lazy val myclinicutil = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Full)
+  .in(file("myclinic-util"))
+  .dependsOn(model)
+  .settings(
+    name := "myclinicutil"
+  )
+
+val myclinicutilJS = myclinicutil.js
+val myclinicutilJVM = myclinicutil.jvm
 
 lazy val model = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Pure)
@@ -317,7 +330,8 @@ lazy val practiceApp = project
     drawerJS,
     kanjidateJS,
     dateinput,
-    formatshohousenJS
+    formatshohousenJS,
+    myclinicutilJS
   )
   .settings(
     name := "myclinic-practice",

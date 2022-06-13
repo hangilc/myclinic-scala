@@ -370,7 +370,9 @@ case class ByoumeiMaster(
 case class ShuushokugoMaster(
   shuushokugocode: Int,
   name: String
-)
+):
+  def isPrefix: Boolean =
+    shuushokugocode < 8000
 
 trait PatientIdProvider[T]:
   def getPatientId(t: T): Int

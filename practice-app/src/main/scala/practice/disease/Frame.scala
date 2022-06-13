@@ -25,7 +25,8 @@ case class Frame(patientId: Int):
       body(clear, c.ele)
 
   def add(): Unit =
-    ()
+    val c = Add(patientId)
+    body(clear, c.ele)
 
   def tenki(): Unit =
     ()
