@@ -254,6 +254,16 @@ object MiscApi extends ApiBase:
         Params("patient-id" -> patientId, "offset" -> offset, "count" -> count)
       )
 
+    def listVisitByPatientReverse(
+        patientId: Int,
+        offset: Int,
+        count: Int
+    ): Future[List[Visit]] =
+      get(
+        "list-visit-by-patient-reverse",
+        Params("patient-id" -> patientId, "offset" -> offset, "count" -> count)
+      )
+
     def listVisitIdByPatient(
         patientId: Int,
         offset: Int,

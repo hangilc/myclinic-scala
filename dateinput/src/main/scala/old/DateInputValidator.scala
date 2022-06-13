@@ -1,4 +1,4 @@
-package dev.fujiwara.dateinput
+package dev.fujiwara.dateinput.old
 
 import cats.data.ValidatedNec
 import cats.implicits.*

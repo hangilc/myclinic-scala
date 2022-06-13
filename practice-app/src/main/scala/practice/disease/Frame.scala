@@ -25,8 +25,12 @@ case class Frame(patientId: Int):
       body(clear, c.ele)
 
   def add(): Unit =
-    val c = Add(patientId)
-    body(clear, c.ele)
+    for
+      visits <- Api.listVisitByPatientReverse(patientId, 0, 10)
+    yield
+      val dates = visits.map(_.visitedAt.toLocalDate)
+      val c = Add(patientId, dates)
+      body(clear, c.ele)
 
   def tenki(): Unit =
     ()

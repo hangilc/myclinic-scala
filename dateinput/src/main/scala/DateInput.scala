@@ -1,75 +1,35 @@
 package dev.fujiwara.dateinput
 
+import java.time.LocalDate
+import org.scalajs.dom.HTMLElement
 import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
-import dev.fujiwara.domq.{Icons, FloatingElement, Geometry}
-import dev.fujiwara.kanjidate.KanjiDate
-import dev.fujiwara.kanjidate.KanjiDate.Gengou
-import org.scalajs.dom.{HTMLElement, HTMLInputElement}
-import scala.language.implicitConversions
-import cats.*
-import cats.syntax.*
-import cats.implicits.*
-import cats.data.Validated.{validNec, invalidNec, condNec}
-import cats.data.ValidatedNec
-import java.time.LocalDate
-import scala.util.Try
-import scala.util.Failure
-import scala.util.Success
-import cats.data.Validated.Valid
-import cats.data.Validated.Invalid
-import org.scalajs.dom.MouseEvent
-import org.scalajs.dom.KeyboardEvent
-import org.scalajs.dom.Event
+import dev.fujiwara.kanjidate.KanjiDate.DateInfo
 
-class DateInput(gengouList: List[Gengou] = Gengou.list,
-    onEnter: LocalDate => Unit = _ => (),
-    onChange: LocalDate => Unit = _ => (),
-    showYoubi: Boolean = false):
-  val eInput: HTMLInputElement = inputText(placeholder := "例:平成30年12月23日")
-  val eCalendar = Icons.calendar
-  val ele: HTMLElement = div(cls := "domq-date-input-wrapper")(
-    form(eInput(cls := "domq-date-input"), onsubmit := (onSubmit _)),
-    eCalendar(
-      Icons.defaultStyle,
-      onclick := (openPicker _)
-    )
+
+case class DateInput(init: LocalDate)(using config: DateInputConfig):
+  val d = DateInfo(init)
+  val ele = config.wrapper(cls := config.cssPrefix,
+    span(config.nenFormatter(d), cls := config.cssClass("nen")),
+    span(config.monthFormatter(d), cls := config.cssClass("month")),
+    span(config.dayFormatter(d), cls := config.cssClass("day")),
   )
 
-  private def onSubmit(): Unit = {
-    validate() match {
-      case Valid(d) => onEnter(d)
-      case Invalid(_) => ()
-    }
-  }
+object DateInput:
+  given defaultConfig: DateInputConfig = new DateInputConfig:
+    def wrapper: HTMLElement = div
+    def nenFormatter(d: DateInfo): String = s"${d.gengou}${d.nen}年"
+    def monthFormatter(d: DateInfo): String = s"${d.month}月"
+    def dayFormatter(d: DateInfo): String = s"${d.day}日"
+    val cssPrefix: String = "dateinput"
 
-  def setDate(date: LocalDate): Unit =
-    val t = KanjiDate.dateToKanji(date, formatYoubi = info => {
-      if showYoubi then s"（${info.youbi}）"
-      else ""
-    })
-    eInput(value := t)
+trait DateInputConfig:
+  def wrapper: HTMLElement
+  def nenFormatter(d: DateInfo): String
+  def monthFormatter(d: DateInfo): String
+  def dayFormatter(d: DateInfo): String
+  def cssPrefix: String
 
-  def locatePicker(f: FloatingElement): Unit =
-    val r = Geometry.getRect(eCalendar)
-    val p = r.leftTop
-    f.leftTop = p
-
-  def openPicker(event: MouseEvent): Unit =
-    val a = validate().asEither match {
-      case Right(d) => d
-      case Left(_) => LocalDate.now()
-    }
-    new DatePicker(d => {
-      setDate(d)
-      onChange(d)
-    }, (locatePicker _)).open(event, a.getYear, a.getMonthValue)
-
-  def validate(): DateInputValidator.Result[LocalDate] =
-    DateInputValidator.validateDateInput(eInput.value)
-
-  def validateOption(): DateInputValidator.Result[Option[LocalDate]] =
-    if eInput.value.isEmpty then validNec(None)
-    else DateInputValidator.validateDateInput(eInput.value).map(Some(_))
+  def cssClass(ident: String): String = s"${cssPrefix}-${ident}"
 

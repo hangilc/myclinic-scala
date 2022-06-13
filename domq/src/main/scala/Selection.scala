@@ -98,6 +98,11 @@ object Selection:
     sel.addAll(items)
     sel.addSelectEventHandler(onSelect)
     sel
+  def apply[T](values: List[T], render: T => HTMLElement, onSelect: T => Unit): Selection[T] =
+    val sel = Selection[T]()
+    sel.addAll(values.map(v => (render(v), v)))
+    sel.addSelectEventHandler(onSelect)
+    sel
 
   given SelectionConfig = new SelectionConfig{}
 

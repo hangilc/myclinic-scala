@@ -4,7 +4,7 @@ import dev.fujiwara.domq.all.{*, given}
 import dev.myclinic.scala.apputil.HokenUtil
 import dev.myclinic.scala.model.VisitEx
 import dev.myclinic.scala.apputil.DrugUtil
-import dev.fujiwara.dateinput.ZenkakuUtil
+import dev.myclinic.scala.util.ZenkakuUtil
 
 class Drug(visit: VisitEx):
   val ele = div()

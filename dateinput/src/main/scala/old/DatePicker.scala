@@ -1,4 +1,4 @@
-package dev.fujiwara.dateinput
+package dev.fujiwara.dateinput.old
 
 import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
