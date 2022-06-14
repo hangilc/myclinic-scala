@@ -26,7 +26,7 @@ class JsMain(using EventFetcher):
     _ <- ui.hotline.init()
     _ <- JsMain.fetcher.start()
   yield
-    ()
+    StartUp.run(this)
 
   private def sideMenuItems: List[(String, SideMenuProcs => SideMenuService)] =
     List(

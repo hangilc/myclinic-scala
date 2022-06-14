@@ -32,6 +32,9 @@ class PracticeService extends SideMenuService:
     new Nav().ele
   )
 
+  override def init(): Future[Unit] =
+    StartUpPractice.run(this)
+
   PracticeBus.addRightWidgetRequest.subscribe(ele => right.ele(ele))
   PracticeBus.patientVisitChanging.subscribe {
     case (Practicing(_, visitId), NoSelection) =>
