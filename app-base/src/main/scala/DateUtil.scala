@@ -17,7 +17,9 @@ object DateUtil:
         "入力",
         onclick := (() => {
           DateParser.parse(input.value) match {
-            case Some(d) => handler(Some(d))
+            case Some(d) => 
+              dlog.close()
+              handler(Some(d))
             case _       => ShowMessage.showError("入力が不適切です。\n例：R3.4.12")
           }
         })
@@ -30,4 +32,5 @@ object DateUtil:
         })
       )
     )
+    dlog.open()
 

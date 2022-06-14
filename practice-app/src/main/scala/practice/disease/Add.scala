@@ -17,15 +17,15 @@ case class Add(patientId: Int, visitDates: List[LocalDate]):
     cls := "practice-disease-add",
     div("名称：", nameSpan),
     div(
-      startDateSpan(cls := "start-date"), onclick := (doStartDateClick _),
-      a("変更", onclick := (doManualStartDate _))  
+      startDateSpan(cls := "start-date", onclick := (doStartDateClick _)),
+      a("変更", onclick := (doManualStartDate _))
     ),
     startDateWorkarea
   )
   updateStartDateUI()
 
   def doManualStartDate(): Unit =
-    AppDateUtil.getDateByDialog("開始日入力", onDateSelect _)
+    AppDateUtil.getDateByDialog("開始日入力", _.foreach(onDateSelect _))
 
   def doStartDateClick(): Unit =
     val select = dateSelect
