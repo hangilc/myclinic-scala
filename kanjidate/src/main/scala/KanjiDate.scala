@@ -69,6 +69,9 @@ object KanjiDate:
     def findByName(name: String): Option[Gengou] =
       Gengou.values.find(_.name == name)
 
+    def findByAlphaChar(ch: Char): Option[Gengou] =
+      Gengou.values.find(_.alpha.charAt(0) == ch)
+
     def gengouToYear(g: Gengou, nen: Int): Int =
       g.startDate.getYear + nen - 1
 

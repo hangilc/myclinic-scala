@@ -2,18 +2,21 @@ package dev.fujiwara.dateinput
 
 import java.time.LocalDate
 import org.scalajs.dom.HTMLElement
-import dev.fujiwara.domq.ElementQ.{*, given}
-import dev.fujiwara.domq.Html.{*, given}
-import dev.fujiwara.domq.Modifiers.{*, given}
-import dev.fujiwara.kanjidate.KanjiDate.DateInfo
-
+import dev.fujiwara.domq.all.{*, given}
+import dev.fujiwara.domq.Html
+import dev.fujiwara.kanjidate.KanjiDate.{DateInfo, Gengou}
+import cats.syntax.all.*
+import scala.util.Try
+import scala.util.Success
+import scala.util.Failure
 
 case class DateInput(init: LocalDate)(using config: DateInputConfig):
   val d = DateInfo(init)
-  val ele = config.wrapper(cls := config.cssPrefix,
+  val ele = config.wrapper(
+    cls := config.cssPrefix,
     span(config.nenFormatter(d), cls := config.cssClass("nen")),
     span(config.monthFormatter(d), cls := config.cssClass("month")),
-    span(config.dayFormatter(d), cls := config.cssClass("day")),
+    span(config.dayFormatter(d), cls := config.cssClass("day"))
   )
 
 object DateInput:
@@ -32,4 +35,3 @@ trait DateInputConfig:
   def cssPrefix: String
 
   def cssClass(ident: String): String = s"${cssPrefix}-${ident}"
-

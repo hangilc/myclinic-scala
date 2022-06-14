@@ -5,6 +5,7 @@ import dev.myclinic.scala.model.*
 import dev.myclinic.scala.myclinicutil.DiseaseUtil
 import java.time.LocalDate
 import dev.fujiwara.kanjidate.KanjiDate
+import dev.myclinic.scala.web.appbase.{DateUtil as AppDateUtil}
 
 case class Add(patientId: Int, visitDates: List[LocalDate]):
   private var startDate: LocalDate =
@@ -15,10 +16,16 @@ case class Add(patientId: Int, visitDates: List[LocalDate]):
   val ele = div(
     cls := "practice-disease-add",
     div("名称：", nameSpan),
-    div(startDateSpan(cls := "start-date"), onclick := (doStartDateClick _)),
+    div(
+      startDateSpan(cls := "start-date"), onclick := (doStartDateClick _),
+      a("変更", onclick := (doManualStartDate _))  
+    ),
     startDateWorkarea
   )
   updateStartDateUI()
+
+  def doManualStartDate(): Unit =
+    AppDateUtil.getDateByDialog("開始日入力", onDateSelect _)
 
   def doStartDateClick(): Unit =
     val select = dateSelect
