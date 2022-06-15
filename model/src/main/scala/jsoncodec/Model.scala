@@ -220,5 +220,8 @@ trait Model extends DateTime with WaitStateCodec:
   given Encoder[ShuushokugoMaster] = deriveEncoder[ShuushokugoMaster]
   given Decoder[ShuushokugoMaster] = deriveDecoder[ShuushokugoMaster]
 
+  given Encoder[DiseaseEnterData] = deriveEncoder[DiseaseEnterData]
+  given Decoder[DiseaseEnterData] = deriveDecoder[DiseaseEnterData]
+
 
 

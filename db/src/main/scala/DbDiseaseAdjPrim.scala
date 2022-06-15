@@ -18,3 +18,20 @@ object DbDiseaseAdjPrim:
     sql"""
       select * from disease_adj where disease_id = ${diseaseId} order by disease_adj_id
     """.query[DiseaseAdj]
+  
+  def getDiseaseAdj(diseaseAdjId: Int): Query0[DiseaseAdj] =
+    sql"""
+      select * from disease_adj where disease_adj_id = ${diseaseAdjId}
+    """.query[DiseaseAdj]
+
+  def enterDiseaseAdj(diseaseId: Int, shuushokugocode: Int): ConnectionIO[(Int, AppEvent)] =
+    val op = sql"""
+      insert into disease_adj (disease_id, shuushokugocode) 
+      values (${diseaseId}, ${shuushokugocode})
+    """
+    for
+      adjId <- op.update.withUniqueGeneratedKeys[Int]("disease_adj_id")
+      adj <- getDiseaseAdj(adjId).unique
+      event <- DbEventPrim.logDiseaseAdjCreated(adj)
+    yield (adjId, event)
+

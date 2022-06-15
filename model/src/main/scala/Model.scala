@@ -553,3 +553,10 @@ case class DiseaseAdj(
     diseaseId: Int,
     shuushokugocode: Int
 )
+
+case class DiseaseEnterData(
+  patientId: Int,
+  byoumeicode: Int,
+  startDate: LocalDate,
+  adjCodes: List[Int]
+)

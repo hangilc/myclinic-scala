@@ -277,8 +277,18 @@ object Db
       adjCodes: List[Int]
   ): IO[(Int, List[AppEvent])] =
     val op = for
-      enterResult <- DbDiseasePrim.enterDisease(patientId, byoumeicode, 
-        startDate, ValidUpto(None), DiseaseEndReason.NotEnded.code)
+      enterResult <- DbDiseasePrim.enterDisease(
+        patientId,
+        byoumeicode,
+        startDate,
+        ValidUpto(None),
+        DiseaseEndReason.NotEnded.code
+      )
       (diseaseId, enterEvent) = enterResult
-    yield (diseaseId, ???)
+      adjEvents <- adjCodes
+        .map(code =>
+          DbDiseaseAdjPrim.enterDiseaseAdj(diseaseId, code).map(_._2)
+        )
+        .sequence
+    yield (diseaseId, List(enterEvent) ++ adjEvents)
     mysql(op)

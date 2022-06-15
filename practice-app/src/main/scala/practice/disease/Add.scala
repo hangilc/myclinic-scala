@@ -44,7 +44,7 @@ case class Add(
     ),
     startDateWorkarea,
     div(
-      button("入力"),
+      button("入力", onclick := (doEnter _)),
       a("の疑い"),
       a("修飾語削除")
     ),
@@ -53,6 +53,24 @@ case class Add(
     searchForm.ui.selection.ele
   )
   updateStartDateUI()
+
+  def doEnter(): Unit =
+    cur.byoumei match {
+      case None => ShowMessage.showError("病名が選択されていません。")
+      case Some(bm) => 
+        val data = DiseaseEnterData(
+          patientId,
+          bm.shoubyoumeicode,
+          startDate,
+          cur.adjList.map(_.shuushokugocode)
+        )
+        for
+          diseaseId <- Api.enterDiseaseEx(data)
+          entered <- Api.getDiseaseFull(diseaseId)
+        yield 
+          cur = Add.Current()
+          updateNameUI()
+    }
 
   def doSelect(d: SearchType): Unit =
     d match {

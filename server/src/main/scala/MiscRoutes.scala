@@ -143,7 +143,7 @@ object MiscService extends DateTimeQueryParam with Publisher:
     case GET -> Root / "start-visit" :? intPatientId(patientId) +& atDateTime(
           at
         ) =>
-      val op =  
+      val op =
         for
           result <- Db.startVisit(patientId, at)
           (visit, events) = result
@@ -313,7 +313,9 @@ object MiscService extends DateTimeQueryParam with Publisher:
         Db.listRecentVisit(offset, count)
       )
 
-    case GET -> Root / "list-recent-visit-full" :? intOffset(offset) +& intCount(
+    case GET -> Root / "list-recent-visit-full" :? intOffset(
+          offset
+        ) +& intCount(
           count
         ) =>
       Ok(
@@ -358,12 +360,12 @@ object MiscService extends DateTimeQueryParam with Publisher:
         result <- Db.batchGetVisitEx(visitIds)
       yield result)
 
-    case GET -> Root / "get-text" :? intTextId(textId) => 
+    case GET -> Root / "get-text" :? intTextId(textId) =>
       val op = Db.getText(textId)
       Ok(op)
 
     case req @ POST -> Root / "enter-text" =>
-      val op = 
+      val op =
         for
           text <- req.as[Text]
           result <- Db.enterText(text)
@@ -404,7 +406,23 @@ object MiscService extends DateTimeQueryParam with Publisher:
     case GET -> Root / "search-byoumei-master" :? strText(text) +& dateAt(at) =>
       Ok(Db.searchByoumeiMaster(text, at))
 
-    case GET -> Root / "search-shuushokugo-master" :? strText(text) +& dateAt(at) =>
+    case GET -> Root / "search-shuushokugo-master" :? strText(text) +& dateAt(
+          at
+        ) =>
       Ok(Db.searchShuushokugoMaster(text, at))
+
+    case req @ POST -> Root / "enter-disease-ex" =>
+      val op = for
+        data <- req.as[DiseaseEnterData]
+        result <- Db.enterDiseaseEx(
+          data.patientId,
+          data.byoumeicode,
+          data.startDate,
+          data.adjCodes
+        )
+        (diseaseId, events) = result
+        _ <- publishAll(events)
+      yield diseaseId
+      Ok(op)
 
   }
