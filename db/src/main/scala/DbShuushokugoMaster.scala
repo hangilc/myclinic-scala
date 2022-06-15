@@ -18,3 +18,6 @@ trait DbShuushokugoMaster extends Mysql:
   
   def findShuushokugoMasterByName(name: String): IO[Option[ShuushokugoMaster]] =
     mysql(Prim.getShuushokugoMasterByName(name).option)
+
+  def searchShuushokugoMaster(text: String): IO[List[ShuushokugoMaster]] =
+    mysql(Prim.searchShuushokugoMaster(text).to[List])

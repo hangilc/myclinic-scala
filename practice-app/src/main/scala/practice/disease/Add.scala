@@ -53,9 +53,8 @@ case class Add(patientId: Int, visitDates: List[LocalDate]):
   def doSearch(text: String): Future[List[SearchType]] =
     searchKind.selected match {
       case SearchKind.Byoumei => Api.searchByoumeiMaster(text, startDate)
-      case SearchKind.Shuushokugo => ???
+      case SearchKind.Shuushokugo => Api.searchShuushokugoMaster(text)
     }
-    
 
   def doManualStartDate(): Unit =
     AppDateUtil.getDateByDialog("開始日入力", _.foreach(onDateSelect _))

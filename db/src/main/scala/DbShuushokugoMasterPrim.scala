@@ -18,3 +18,9 @@ object DbShuushokugoMasterPrim:
     sql"""
       select * from shuushokugo_master where name = ${name}
     """.query[ShuushokugoMaster]
+
+  def searchShuushokugoMaster(text: String): Query0[ShuushokugoMaster] =
+    val like = s"%${text}%"
+    sql"""
+      select * from shuushokugo_master where name like ${like} order by name
+    """.query[ShuushokugoMaster]
