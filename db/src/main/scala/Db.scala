@@ -292,3 +292,8 @@ object Db
         .sequence
     yield (diseaseId, List(enterEvent) ++ adjEvents)
     mysql(op)
+
+  def getDiseaseEx(
+      diseaseId: Int
+  ): IO[(Disease, ByoumeiMaster, List[(DiseaseAdj, ShuushokugoMaster)])] =
+    mysql(DbPrim.getDiseaseEx(diseaseId))

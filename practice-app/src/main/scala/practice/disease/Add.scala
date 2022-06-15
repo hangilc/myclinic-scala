@@ -45,14 +45,28 @@ case class Add(
     startDateWorkarea,
     div(
       button("入力", onclick := (doEnter _)),
-      a("の疑い"),
-      a("修飾語削除")
+      a("の疑い", onclick := (doSusp _)),
+      a("修飾語削除", onclick := (doDelAdj _))
     ),
     searchKind.ele,
     searchForm.ui.form(a("例"), onclick := (doExamples _)),
     searchForm.ui.selection.ele
   )
   updateStartDateUI()
+  doExamples()
+
+  def doSusp(): Unit =
+    for
+      m <- Api.resolveShuushokugoMasterByName("の疑い", startDate)
+    yield 
+      m.foreach(adj => 
+        cur = cur.addAdj(adj)
+        updateNameUI()  
+      )
+
+  def doDelAdj(): Unit =
+    cur = cur.copy(adjList = List.empty)
+    updateNameUI()
 
   def doEnter(): Unit =
     cur.byoumei match {
@@ -66,7 +80,6 @@ case class Add(
         )
         for
           diseaseId <- Api.enterDiseaseEx(data)
-          entered <- Api.getDiseaseFull(diseaseId)
         yield 
           cur = Add.Current()
           updateNameUI()
@@ -90,10 +103,7 @@ case class Add(
             .map(name => Api.resolveShuushokugoMasterByName(name, startDate).map(_.get))
             .sequence
         yield
-          cur = cur.copy(
-            byoumei = bOpt.orElse(cur.byoumei),
-            adjList = cur.adjList ++ adjList
-          )
+          cur = cur.setByoumei(bOpt).addAdjList(adjList)
           updateNameUI()
     }
 
@@ -149,3 +159,15 @@ object Add:
   ):
     def label: String =
       DiseaseUtil.diseaseNameOf(byoumei, adjList)
+    def setByoumei(bOpt: Option[ByoumeiMaster]): Current =
+      bOpt match {
+        case None => this
+        case Some(b) => this.copy(byoumei = Some(b))
+      }
+
+    def addAdj(m: ShuushokugoMaster): Current = 
+      if adjList.contains(m) then this
+      else this.copy(adjList = adjList :+ m)
+    
+    def addAdjList(ms: List[ShuushokugoMaster]) : Current =
+      ms.foldLeft(this)((acc, m) => acc.addAdj(m))

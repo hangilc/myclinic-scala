@@ -430,7 +430,7 @@ object RestService extends DateTimeQueryParam with Publisher:
         ) +& dateAt(at) =>
       Ok(Helper.resolveByoumeicode(byoumeicode, at))
 
-    case GET -> Root / "resolve-shuushoku-master-by-name" :? strName(
+    case GET -> Root / "resolve-shuushokugo-master-by-name" :? strName(
           name
         ) +& dateAt(at) =>
       Ok(Helper.resolveShuushokugoMasterByName(name, at))

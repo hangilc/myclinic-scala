@@ -40,6 +40,7 @@ object MiscService extends DateTimeQueryParam with Publisher:
       extends QueryParamDecoderMatcher[Int]("koukikourei-id")
   object intKouhiId extends QueryParamDecoderMatcher[Int]("kouhi-id")
   object intTextId extends QueryParamDecoderMatcher[Int]("text-id")
+  object intDiseaseId extends QueryParamDecoderMatcher[Int]("disease-id")
   object strText extends QueryParamDecoderMatcher[String]("text")
 
   given houkatsuKensa: HoukatsuKensa = (new ConfigJava).getHoukatsuKensa
@@ -424,5 +425,8 @@ object MiscService extends DateTimeQueryParam with Publisher:
         _ <- publishAll(events)
       yield diseaseId
       Ok(op)
+
+    case GET -> Root / "get-disease-ex" :? intDiseaseId(diseaseId) =>
+      Ok(Db.getDiseaseEx(diseaseId))
 
   }
