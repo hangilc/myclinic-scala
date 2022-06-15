@@ -25,3 +25,15 @@ object DbDiseasePrim:
       order by start_date
     """.query[Disease]
 
+  def enterDisease(patientId: Int, shoubyoumeicode: Int, startDate: LocalDate, 
+    endDate: ValidUpto, endReason: String): ConnectionIO[(Int, AppEvent)] =
+      val op = sql"""
+        insert into disease (patient_id, shoubyoumeicode, start_date, end_date, end_reason)
+        values (${patientId}, ${shoubyoumeicode}, ${startDate}, ${endDate}, ${endReason})
+      """
+      for
+        diseaseId <- op.update.withUniqueGeneratedKeys[Int]("disease_id")
+        disease <- getDisease(diseaseId).unique
+        event <- DbEventPrim.logDiseaseCreated(disease)
+      yield (diseaseId, event)
+

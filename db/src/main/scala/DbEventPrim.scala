@@ -233,6 +233,24 @@ object DbEventPrim:
   def logChargeDeleted(a: Charge): ConnectionIO[AppEvent] =
     enterAppEvent("charge", DELETED, a.asJson.toString)
 
+  def logDiseaseCreated(a: Disease): ConnectionIO[AppEvent] =
+    enterAppEvent("disease", CREATED, a.asJson.toString)
+
+  def logDiseaseUpdated(a: Disease): ConnectionIO[AppEvent] =
+    enterAppEvent("disease", UPDATED, a.asJson.toString)
+
+  def logDiseaseDeleted(a: Disease): ConnectionIO[AppEvent] =
+    enterAppEvent("disease", DELETED, a.asJson.toString)
+
+  def logDiseaseAdjCreated(a: DiseaseAdj): ConnectionIO[AppEvent] =
+    enterAppEvent("diseaseAdj", CREATED, a.asJson.toString)
+
+  def logDiseaseAdjUpdated(a: DiseaseAdj): ConnectionIO[AppEvent] =
+    enterAppEvent("diseaseAdj", UPDATED, a.asJson.toString)
+
+  def logDiseaseAdjDeleted(a: DiseaseAdj): ConnectionIO[AppEvent] =
+    enterAppEvent("diseaseAdj", DELETED, a.asJson.toString)
+
 
 
 

@@ -79,17 +79,17 @@ object AppointTime:
         rest: List[T]
     ): (List[T], List[T]) =
       (reversedRun, rest) match {
-        case (h :: t, rh :: rt) if acc(h).isAdjacentTo(acc(rh)) => (rh :: reversedRun, rt)
+        case (h :: t, rh :: rt) if acc(h).isAdjacentTo(acc(rh)) =>
+          (rh :: reversedRun, rt)
         case _ => (reversedRun, rest)
       }
     def loop(reversedRun: List[T], rest: List[T]): (List[T], List[T]) =
       val (rr, r) = extendOne(reversedRun, rest)
-      if rr.head == reversedRun.head then
-        (rr.reverse, r)
+      if rr.head == reversedRun.head then (rr.reverse, r)
       else loop(rr, r)
     ts match {
       case h :: t => loop(List(h), t)
-      case _ => (List.empty, ts)
+      case _      => (List.empty, ts)
     }
 
   given Ordering[AppointTime] = Ordering.by(a => (a.date, a.fromTime))
@@ -173,7 +173,7 @@ object Wqueue:
 case class VisitAttributes(
     val futanWari: Option[Int] = None
 ):
-  def asStore: Option[String] = 
+  def asStore: Option[String] =
     if futanWari.isEmpty then None
     else Some(this.asJson.toString)
 
@@ -223,12 +223,12 @@ case class Text(
 )
 
 case class HokenIdSet(
-  shahokokuhoId: Int,
-  koukikoureiId: Int,
-  roujinId: Int,
-  kouhi1Id: Int,
-  kouhi2Id: Int,
-  kouhi3Id: Int
+    shahokokuhoId: Int,
+    koukikoureiId: Int,
+    roujinId: Int,
+    kouhi1Id: Int,
+    kouhi2Id: Int,
+    kouhi3Id: Int
 )
 
 enum DrugCategory(val code: Int):
@@ -259,10 +259,10 @@ case class Shinryou(
 )
 
 enum ConductKind(val code: Int, val rep: String):
-    case HikaChuusha extends ConductKind(0, "皮下・筋肉注射")
-    case JoumyakuChuusha extends ConductKind(1, "静脈注射")
-    case OtherChuusha extends ConductKind(2, "その他の注射")
-    case Gazou extends ConductKind(3, "画像")
+  case HikaChuusha extends ConductKind(0, "皮下・筋肉注射")
+  case JoumyakuChuusha extends ConductKind(1, "静脈注射")
+  case OtherChuusha extends ConductKind(2, "その他の注射")
+  case Gazou extends ConductKind(3, "画像")
 
 object ConductKind:
   def fromCode(kind: Int): ConductKind =
@@ -296,8 +296,8 @@ case class ConductKizai(
 )
 
 case class GazouLabel(
-  conductId: Int,
-  label: String
+    conductId: Int,
+    label: String
 )
 
 case class Charge(
@@ -363,13 +363,13 @@ case class KizaiMaster(
   def kingaku: Double = kingakuStore.toDouble
 
 case class ByoumeiMaster(
-  shoubyoumeicode: Int,
-  name: String
+    shoubyoumeicode: Int,
+    name: String
 )
 
 case class ShuushokugoMaster(
-  shuushokugocode: Int,
-  name: String
+    shuushokugocode: Int,
+    name: String
 ):
   def isPrefix: Boolean =
     shuushokugocode < 8000
@@ -406,9 +406,11 @@ object Shahokokuho:
     def getValidFrom(t: Shahokokuho) = t.validFrom
     def getValidUpto(t: Shahokokuho) = t.validUpto
   given PatientIdProvider[Shahokokuho] = _.patientId
-  given RepProvider[Shahokokuho] = t => HokenRep.shahokokuhoRep(
-    t.hokenshaBangou, t.koureiFutanWari
-  )
+  given RepProvider[Shahokokuho] = t =>
+    HokenRep.shahokokuhoRep(
+      t.hokenshaBangou,
+      t.koureiFutanWari
+    )
 
 case class Roujin(
     roujinId: Int,
@@ -529,17 +531,25 @@ object FileInfo:
   def fromTimestamp(ts: FiniteDuration): LocalDateTime =
     epoch.plusSeconds(ts.toSeconds)
 
+enum DiseaseEndReason(val code: String):
+  case NotEnded extends DiseaseEndReason("N")
+  case Cured extends DiseaseEndReason("C")
+  case Stopped extends DiseaseEndReason("S")
+  case Dead extends DiseaseEndReason("D")
+
 case class Disease(
-  diseaseId: Int,
-  patientId: Int,
-  shoubyoumeicode: Int,
-  startDate: LocalDate,
-  end_date: ValidUpto,
-  endReason: String
-)
+    diseaseId: Int,
+    patientId: Int,
+    shoubyoumeicode: Int,
+    startDate: LocalDate,
+    end_date: ValidUpto,
+    endReasonStore: String
+):
+  def endReason: DiseaseEndReason =
+    DiseaseEndReason.values.find(_.code == endReasonStore).get
 
 case class DiseaseAdj(
-  diseaseAdjId: Int,
-  diseaseId: Int,
-  shuushokugocode: Int
+    diseaseAdjId: Int,
+    diseaseId: Int,
+    shuushokugocode: Int
 )

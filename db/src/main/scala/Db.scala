@@ -269,3 +269,16 @@ object Db
       patientId: Int
   ): IO[List[(Disease, ByoumeiMaster, List[(DiseaseAdj, ShuushokugoMaster)])]] =
     mysql(DbPrim.listCurrentDiseaseEx(patientId))
+
+  def enterDiseaseEx(
+      patientId: Int,
+      byoumeicode: Int,
+      startDate: LocalDate,
+      adjCodes: List[Int]
+  ): IO[(Int, List[AppEvent])] =
+    val op = for
+      enterResult <- DbDiseasePrim.enterDisease(patientId, byoumeicode, 
+        startDate, ValidUpto(None), DiseaseEndReason.NotEnded.code)
+      (diseaseId, enterEvent) = enterResult
+    yield (diseaseId, ???)
+    mysql(op)
