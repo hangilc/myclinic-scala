@@ -18,6 +18,12 @@ import java.time.temporal.ChronoUnit
 trait DbByoumeiMaster extends Mysql:
   import DbByoumeiMasterPrim as Prim
 
+  def findByoumeiMaster(shoubyoumeicode: Int, at: LocalDate): IO[Option[ByoumeiMaster]] =
+    mysql(Prim.getByoumeiMaster(shoubyoumeicode, at).option)
+
+  def getByoumeiMaster(shoubyoumeicode: Int, at: LocalDate): IO[ByoumeiMaster] =
+    mysql(Prim.getByoumeiMaster(shoubyoumeicode, at).unique)
+
   def findByoumeiMasterByName(name: String, at: LocalDate): IO[Option[ByoumeiMaster]] =
     mysql(Prim.getByoumeiMasterByName(name, at).option)
 

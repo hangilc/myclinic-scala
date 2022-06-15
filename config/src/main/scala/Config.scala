@@ -1,21 +1,23 @@
 package dev.myclinic.scala.config
 
-import dev.myclinic.java
-import dev.myclinic.scala.model.ClinicInfo
-import _root_.java.nio.file.Path
-import _root_.java.nio.file.Files
-import dev.myclinic.scala.clinicop.AdHocHolidayRange
-import io.circe.yaml.parser
-import io.circe.syntax.*
-import io.circe.generic.semiauto._
-import io.circe.Encoder
-import io.circe.Decoder
-import com.typesafe.scalalogging.Logger
 import _root_.java.io.File
+import _root_.java.nio.file.Files
+import _root_.java.nio.file.Path
 import cats.instances.try_
-import scala.io.Source
-import io.circe.HCursor
+import com.typesafe.scalalogging.Logger
+import dev.myclinic.java
+import dev.myclinic.scala.clinicop.AdHocHolidayRange
+import dev.myclinic.scala.model.ClinicInfo
+import dev.myclinic.scala.model.DiseaseExample
+import io.circe.Decoder
 import io.circe.Decoder.Result
+import io.circe.Encoder
+import io.circe.HCursor
+import io.circe.generic.semiauto._
+import io.circe.syntax.*
+import io.circe.yaml.parser
+
+import scala.io.Source
 
 object Config extends ConfigCirce:
   val logger = Logger(getClass.getName)
@@ -100,8 +102,11 @@ object Config extends ConfigCirce:
         MasterTransitionRule.parse(s) match {
           case Some(kind, r) =>
             kind match {
+              case "Y" => m.copy(yakuzai = m.yakuzai.extend(r))
               case "S" => m.copy(shinryou = m.shinryou.extend(r))
               case "K" => m.copy(kizai = m.kizai.extend(r))
+              case "D" => m.copy(byoumei = m.byoumei.extend(r))
+              case "A" => m.copy(shuushokugo = m.shuushokugo.extend(r))
               case _   => m
             }
           case None => m
@@ -127,10 +132,10 @@ object Config extends ConfigCirce:
   def getDiseaseExample: List[DiseaseExample] =
     val file: File = configDir.resolve(s"disease-example.yml").toFile
     given Decoder[String | List[String]] with
-        def apply(c: HCursor): Result[String | List[String]] =
-          c.as[String].orElse(c.as[List[String]])
+      def apply(c: HCursor): Result[String | List[String]] =
+        c.as[String].orElse(c.as[List[String]])
     readYaml[List[Map[String, String | List[String]]]](file)
-        .map(m => DiseaseExample.fromMap(m))
+      .map(m => DiseaseExample.fromMap(m))
 
   def readYaml[T: Decoder](file: File): T =
     val reader: _root_.java.io.Reader = _root_.java.io.FileReader(file)

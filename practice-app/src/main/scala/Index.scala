@@ -16,6 +16,7 @@ import dev.myclinic.scala.web.appbase.MockSideMenuService
 import dev.myclinic.scala.web.appbase.HotlineBlock
 import dev.myclinic.scala.webclient.global
 import dev.myclinic.scala.web.appbase.PageLayout1
+import dev.myclinic.scala.web.practiceapp.practice.disease.Frame
 
 class JsMain(using EventFetcher):
   val ui = new PageLayout1("practice", "reception")
@@ -25,6 +26,7 @@ class JsMain(using EventFetcher):
   for 
     _ <- ui.hotline.init()
     _ <- JsMain.fetcher.start()
+    _ <- Frame.init()
   yield
     StartUp.run(this)
 

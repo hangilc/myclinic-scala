@@ -15,9 +15,27 @@ import org.http4s.Header.ToRaw.Primitive
 
 trait DbShuushokugoMaster extends Mysql:
   import DbShuushokugoMasterPrim as Prim
-  
-  def findShuushokugoMasterByName(name: String): IO[Option[ShuushokugoMaster]] =
-    mysql(Prim.getShuushokugoMasterByName(name).option)
 
-  def searchShuushokugoMaster(text: String): IO[List[ShuushokugoMaster]] =
-    mysql(Prim.searchShuushokugoMaster(text).to[List])
+  def findShuushokugoMaster(
+      shuushokugocode: Int,
+      at: LocalDate
+  ): IO[Option[ShuushokugoMaster]] =
+    mysql(Prim.getShuushokugoMaster(shuushokugocode, at).option)
+
+  def getShuushokugoMaster(
+      shuushokugocode: Int,
+      at: LocalDate
+  ): IO[ShuushokugoMaster] =
+    mysql(Prim.getShuushokugoMaster(shuushokugocode, at).unique)
+
+  def findShuushokugoMasterByName(
+      name: String,
+      at: LocalDate
+  ): IO[Option[ShuushokugoMaster]] =
+    mysql(Prim.getShuushokugoMasterByName(name, at).option)
+
+  def searchShuushokugoMaster(
+      text: String,
+      at: LocalDate
+  ): IO[List[ShuushokugoMaster]] =
+    mysql(Prim.searchShuushokugoMaster(text, at).to[List])

@@ -9,22 +9,31 @@ import dev.myclinic.scala.web.appbase.{DateUtil as AppDateUtil}
 import dev.myclinic.scala.webclient.{Api, global}
 import org.scalajs.dom.HTMLElement
 import scala.concurrent.Future
+import cats.syntax.all.*
 
-case class Add(patientId: Int, visitDates: List[LocalDate]):
+case class Add(
+    patientId: Int,
+    visitDates: List[LocalDate],
+    examples: List[DiseaseExample]
+):
   private var startDate: LocalDate =
     visitDates.headOption.getOrElse(LocalDate.now())
+  private var cur: Add.Current = Add.Current()
   val nameSpan = span
   val startDateSpan = span
   val startDateWorkarea = div
-  type SearchType = ByoumeiMaster | ShuushokugoMaster
+  type SearchType = ByoumeiMaster | ShuushokugoMaster | DiseaseExample
   val searchForm: SearchForm[SearchType] =
-    SearchForm.withToElement[SearchType](searchElement _, doSearch _)
+    SearchForm[SearchType](searchElement _, doSearch _)
+  searchForm.onSelect(doSelect _)
   enum SearchKind:
     case Byoumei, Shuushokugo
-  val searchKind = RadioGroup[SearchKind](List(
-    "病名" -> SearchKind.Byoumei,
-    "修飾語" -> SearchKind.Shuushokugo
-  ))
+  val searchKind = RadioGroup[SearchKind](
+    List(
+      "病名" -> SearchKind.Byoumei,
+      "修飾語" -> SearchKind.Shuushokugo
+    )
+  )
   searchKind.check(SearchKind.Byoumei)
   val ele = div(
     cls := "practice-disease-add",
@@ -40,21 +49,51 @@ case class Add(patientId: Int, visitDates: List[LocalDate]):
       a("修飾語削除")
     ),
     searchKind.ele,
-    searchForm.ui.form(a("例")),
+    searchForm.ui.form(a("例"), onclick := (doExamples _)),
     searchForm.ui.selection.ele
   )
   updateStartDateUI()
 
-  def searchElement(d: SearchType): HTMLElement =
+  def doSelect(d: SearchType): Unit =
     d match {
-      case m: ByoumeiMaster     => div(m.name)
-      case m: ShuushokugoMaster => div(m.name)
+      case m: ByoumeiMaster =>
+        cur = cur.copy(byoumei = Some(m))
+        updateNameUI()
+      case m: ShuushokugoMaster =>
+        if !cur.adjList.contains(m) then
+          cur = cur.copy(adjList = cur.adjList :+ m)
+          updateNameUI()
+      case e: DiseaseExample =>
+        for
+          bOpt <- e.byoumei.fold(Future.successful(None))(name =>
+            Api.resolveByoumeiMasterByName(name, startDate)
+          )
+          adjList <- (e.preAdjList ++ e.postAdjList)
+            .map(name => Api.resolveShuushokugoMasterByName(name, startDate).map(_.get))
+            .sequence
+        yield
+          cur = cur.copy(
+            byoumei = bOpt.orElse(cur.byoumei),
+            adjList = cur.adjList ++ adjList
+          )
+          updateNameUI()
+    }
+
+  def doExamples(): Unit =
+    searchForm.ui.selection.clear()
+    searchForm.ui.selection.addAll(examples, searchElement _)
+
+  def searchElement(d: SearchType): String =
+    d match {
+      case m: ByoumeiMaster     => m.name
+      case m: ShuushokugoMaster => m.name
+      case e: DiseaseExample    => e.label
     }
 
   def doSearch(text: String): Future[List[SearchType]] =
     searchKind.selected match {
-      case SearchKind.Byoumei => Api.searchByoumeiMaster(text, startDate)
-      case SearchKind.Shuushokugo => Api.searchShuushokugoMaster(text)
+      case SearchKind.Byoumei     => Api.searchByoumeiMaster(text, startDate)
+      case SearchKind.Shuushokugo => Api.searchShuushokugoMaster(text, startDate)
     }
 
   def doManualStartDate(): Unit =
@@ -71,6 +110,9 @@ case class Add(patientId: Int, visitDates: List[LocalDate]):
   def updateStartDateUI(): Unit =
     startDateSpan(innerText := formatDate(startDate))
 
+  def updateNameUI(): Unit =
+    nameSpan(innerText := cur.label)
+
   def formatDate(d: LocalDate): String =
     KanjiDate.dateToKanji(d)
 
@@ -81,3 +123,11 @@ case class Add(patientId: Int, visitDates: List[LocalDate]):
       sel.ele.remove()
     )
     sel
+
+object Add:
+  case class Current(
+      byoumei: Option[ByoumeiMaster] = None,
+      adjList: List[ShuushokugoMaster] = List.empty
+  ):
+    def label: String =
+      DiseaseUtil.diseaseNameOf(byoumei, adjList)

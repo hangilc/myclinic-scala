@@ -2,6 +2,8 @@ package dev.myclinic.scala.web.practiceapp.practice.disease
 
 import dev.fujiwara.domq.all.{*, given}
 import dev.myclinic.scala.webclient.{Api, global}
+import scala.concurrent.Future
+import dev.myclinic.scala.model.DiseaseExample
 
 case class Frame(patientId: Int):
   val body = div
@@ -29,7 +31,7 @@ case class Frame(patientId: Int):
       visits <- Api.listVisitByPatientReverse(patientId, 0, 10)
     yield
       val dates = visits.map(_.visitedAt.toLocalDate)
-      val c = Add(patientId, dates)
+      val c = Add(patientId, dates, Frame.examples)
       body(clear, c.ele)
 
   def tenki(): Unit =
@@ -37,3 +39,12 @@ case class Frame(patientId: Int):
 
   def edit(): Unit =
     ()
+
+object Frame:
+  var examples: List[DiseaseExample] = List.empty
+
+  def init(): Future[Unit] =
+    for
+      ex <- Api.listDiseaseExample()
+    yield examples = ex
+

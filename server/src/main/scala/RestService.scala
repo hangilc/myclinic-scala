@@ -47,6 +47,8 @@ object RestService extends DateTimeQueryParam with Publisher:
   object intPatientId extends QueryParamDecoderMatcher[Int]("patient-id")
   object intShinryouId extends QueryParamDecoderMatcher[Int]("shinryou-id")
   object intShinryoucode extends QueryParamDecoderMatcher[Int]("shinryoucode")
+  object intByoumeicode extends QueryParamDecoderMatcher[Int]("byoumeicode")
+  object intShuushokugocode extends QueryParamDecoderMatcher[Int]("shuushokugocode")
   object intConductId extends QueryParamDecoderMatcher[Int]("conduct-id")
   object intChargeValue extends QueryParamDecoderMatcher[Int]("charge-value")
   object intWqueueState extends QueryParamDecoderMatcher[Int]("wqueue-state")
@@ -417,6 +419,26 @@ object RestService extends DateTimeQueryParam with Publisher:
           text
         ) +& intPatientId(patientId) =>
       Ok(Db.countSearchTextForPatient(text, patientId))
+
+    case GET -> Root / "resolve-byoumei-master-by-name" :? strName(
+          name
+        ) +& dateAt(at) =>
+      Ok(Helper.resolveByoumeiMasterByName(name, at))
+
+    case GET -> Root / "resolve-byoumeicode" :? intByoumeicode(
+          byoumeicode
+        ) +& dateAt(at) =>
+      Ok(Helper.resolveByoumeicode(byoumeicode, at))
+
+    case GET -> Root / "resolve-shuushoku-master-by-name" :? strName(
+          name
+        ) +& dateAt(at) =>
+      Ok(Helper.resolveShuushokugoMasterByName(name, at))
+
+    case GET -> Root / "resolve-shuushokugocode" :? intShuushokugocode(
+          shuushokugocode
+        ) +& dateAt(at) =>
+      Ok(Helper.resolveShuushokugocode(shuushokugocode, at))
 
   } <+> PatientService.routes <+> VisitService.routes <+> MiscService.routes
     <+> ConfigService.routes <+> FileService.routes

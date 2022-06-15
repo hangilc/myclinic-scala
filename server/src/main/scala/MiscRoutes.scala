@@ -404,7 +404,7 @@ object MiscService extends DateTimeQueryParam with Publisher:
     case GET -> Root / "search-byoumei-master" :? strText(text) +& dateAt(at) =>
       Ok(Db.searchByoumeiMaster(text, at))
 
-    case GET -> Root / "search-shuushokugo-master" :? strText(text) =>
-      Ok(Db.searchShuushokugoMaster(text))
+    case GET -> Root / "search-shuushokugo-master" :? strText(text) +& dateAt(at) =>
+      Ok(Db.searchShuushokugoMaster(text, at))
 
   }
