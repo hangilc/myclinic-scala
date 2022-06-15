@@ -9,9 +9,12 @@ import dev.myclinic.scala.myclinicutil.DiseaseUtil
 import org.scalajs.dom.HTMLLabelElement
 import dev.fujiwara.dateinput.EditableDate
 import math.Ordering.Implicits.infixOrderingOps
+import dev.myclinic.scala.webclient.{Api, global}
+import cats.syntax.all.*
 
 case class Tenki(
-    list: List[(Disease, ByoumeiMaster, List[(DiseaseAdj, ShuushokugoMaster)])]
+    list: List[(Disease, ByoumeiMaster, List[(DiseaseAdj, ShuushokugoMaster)])],
+    onDone: Tenki => Unit
 ):
   import Tenki.Item
   val curWrapper = div
@@ -36,7 +39,7 @@ case class Tenki(
       a("先月末")
     ),
     endReasonGroup.ele,
-    button("入力")
+    button("入力", onclick := (doEnter _))
   )
   currents.list.foreach(
     _.checkLabel.addOnInputListener(_ =>
@@ -55,6 +58,18 @@ case class Tenki(
 
   def updateUI(): Unit =
     endDateEle.set(endDate)
+
+  def endReason: DiseaseEndReason =
+    endReasonGroup.selected
+
+  def doEnter(): Unit =
+    val diseaseIds = currents.list.map(_.checkLabel.selected).collect {
+      case Some((diseaseId, _)) => diseaseId
+    }
+    val reason: DiseaseEndReason = endReason
+    for
+      _ <- diseaseIds.map(diseaseId => Api.endDisease(diseaseId, endDate, reason)).sequence_
+    yield onDone(this)
 
 object Tenki:
   case class Item(label: String, diseaseId: Int, startDate: LocalDate):
