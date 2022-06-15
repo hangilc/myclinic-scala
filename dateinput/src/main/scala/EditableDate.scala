@@ -8,6 +8,10 @@ case class EditableDate(var date: LocalDate, title: String)(using formatter: Dat
   val ele = span(cls := "cursor-pointer", onclick := (doEdit _))
   updateUI()
 
+  def set(newValue: LocalDate): Unit =
+    date = newValue
+    updateUI()
+
   def updateUI(): Unit =
     ele(innerText := formatter.format(date))
 

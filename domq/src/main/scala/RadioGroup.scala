@@ -22,5 +22,8 @@ case class RadioGroup[T](
   def check(value: T): Unit =
     radioLabels.find(_.value == value).foreach(_.check())
 
+  def addOnInputListener(listener: RadioLabel[T] => Unit): Unit =
+    radioLabels.foreach(_.addOnInputListener(listener))
+
 object RadioGroup:
   def createName: String = GenSym.genSym

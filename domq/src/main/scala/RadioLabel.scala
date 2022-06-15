@@ -5,6 +5,7 @@ import Modifiers.{*, given}
 import ElementQ.{*, given}
 import org.scalajs.dom.HTMLInputElement
 import org.scalajs.dom.HTMLElement
+import org.scalajs.dom.Event
 
 case class RadioLabel[T](name: String, value: T, label: String, wrapper: HTMLElement = span):
   val id: String = GenSym.genSym
@@ -14,4 +15,6 @@ case class RadioLabel[T](name: String, value: T, label: String, wrapper: HTMLEle
 
   def checked: Boolean = radioElement.checked
   def check(): Unit = radioElement.checked = true
+  def addOnInputListener(listener: RadioLabel[T] => Unit): Unit =
+    radioElement(oninput := (_ => listener(this)))
 

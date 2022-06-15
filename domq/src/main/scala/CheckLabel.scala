@@ -14,6 +14,8 @@ case class CheckLabel[T](value: T, labelStuffer: HTMLLabelElement => Unit):
   def wrap(wrapper: HTMLElement): HTMLElement = wrapper(checkElement, labelElement)
   def check: Unit = checkElement.checked = true
   def uncheck: Unit = checkElement.checked = false
+  def addOnInputListener(listener: CheckLabel[T] => Unit): Unit =
+    checkElement(oninput := (_ => listener(this)))
 
 object CheckLabel:
   def apply[T](value: T, labelString: String): CheckLabel[T] =
