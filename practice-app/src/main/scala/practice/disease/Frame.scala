@@ -35,7 +35,11 @@ case class Frame(patientId: Int):
       body(clear, c.ele)
 
   def tenki(): Unit =
-    ()
+    for
+      list <- Api.listCurrentDiseaseEx(patientId)
+    yield
+      val c = Tenki(list)
+      body(clear, c.ele)
 
   def edit(): Unit =
     ()

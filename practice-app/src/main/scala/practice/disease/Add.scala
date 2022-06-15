@@ -5,11 +5,11 @@ import dev.myclinic.scala.model.*
 import dev.myclinic.scala.myclinicutil.DiseaseUtil
 import java.time.LocalDate
 import dev.fujiwara.kanjidate.KanjiDate
-import dev.myclinic.scala.web.appbase.{DateUtil as AppDateUtil}
 import dev.myclinic.scala.webclient.{Api, global}
 import org.scalajs.dom.HTMLElement
 import scala.concurrent.Future
 import cats.syntax.all.*
+import dev.fujiwara.dateinput.ManualInput
 
 case class Add(
     patientId: Int,
@@ -125,7 +125,7 @@ case class Add(
     }
 
   def doManualStartDate(): Unit =
-    AppDateUtil.getDateByDialog("開始日入力", _.foreach(onDateSelect _))
+    ManualInput.getDateByDialog("開始日入力", _.foreach(onDateSelect _))
 
   def doStartDateClick(): Unit =
     val select = dateSelect

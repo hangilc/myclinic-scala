@@ -54,6 +54,11 @@ case class CompAppendList[C](val wrapper: HTMLElement)(using
     cs.foreach(append _)
 
 object CompAppendList:
+  def apply[C](wrapper: HTMLElement, cs: List[C])(using Comp[C], Dispose[C]): CompAppendList[C] =
+    val cl = new CompAppendList(wrapper)
+    cl.set(cs)
+    cl
+    
   given [C](using comp: Comp[C], disposer: Dispose[C]): Dispose[CompAppendList[C]]
     with
     def dispose(t: CompAppendList[C]): Unit = t.clear
