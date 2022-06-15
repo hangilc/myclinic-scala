@@ -12,6 +12,18 @@ case class EditableDate(var date: LocalDate, title: String)(using formatter: Dat
     date = newValue
     updateUI()
 
+  def incDays(days: Int): Unit =
+    date = date.plusDays(days)
+    updateUI()
+
+  def incMonths(months: Int): Unit =
+    date = date.plusMonths(months)
+    updateUI()
+
+  def incYears(years: Int): Unit =
+    date = date.plusYears(years)
+    updateUI()
+
   def updateUI(): Unit =
     ele(innerText := formatter.format(date))
 

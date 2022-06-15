@@ -11,6 +11,7 @@ import dev.fujiwara.dateinput.EditableDate
 import math.Ordering.Implicits.infixOrderingOps
 import dev.myclinic.scala.webclient.{Api, global}
 import cats.syntax.all.*
+import org.scalajs.dom.MouseEvent
 
 case class Tenki(
     list: List[(Disease, ByoumeiMaster, List[(DiseaseAdj, ShuushokugoMaster)])],
@@ -20,8 +21,8 @@ case class Tenki(
   val curWrapper = div
   val currents: CompAppendList[Item] =
     CompAppendList[Item](curWrapper, list.map(Item.apply.tupled(_)))
-  private var endDate = LocalDate.now()
-  val endDateEle = EditableDate(endDate, "終了日")
+  val endDateEle = EditableDate(LocalDate.now(), "終了日")
+  def endDate: LocalDate = endDateEle.date
   val endReasonGroup = RadioGroup[DiseaseEndReason](
     List(
       "治癒" -> DiseaseEndReason.Cured,
@@ -33,17 +34,17 @@ case class Tenki(
     curWrapper,
     div(endDateEle.ele, Icons.calendar(cls := "cursor-pointer")),
     div(
-      a("週"),
-      a("今日"),
-      a("月末"),
-      a("先月末")
+      a("週", onclick := (doWeek _)),
+      a("今日", onclick := (doToday _)),
+      a("月末", onclick := (doEndOfMonth _)),
+      a("先月末", onclick := (doEndOfLastMonth _))
     ),
     endReasonGroup.ele,
     button("入力", onclick := (doEnter _))
   )
   currents.list.foreach(
     _.checkLabel.addOnInputListener(_ =>
-      endDate = (currents.list
+      val endDate: LocalDate = (currents.list
         .foldLeft(None: Option[LocalDate])((acc, item) =>
           (acc, item.checkLabel.selected) match {
             case (None, s)    => s.map(_._2)
@@ -52,12 +53,24 @@ case class Tenki(
           }
         ))
         .getOrElse(LocalDate.now())
-      updateUI()
+      endDateEle.set(endDate)
     )
   )
 
-  def updateUI(): Unit =
-    endDateEle.set(endDate)
+  def doWeek(event: MouseEvent): Unit =
+    if event.shiftKey then
+      endDateEle.incDays(-7)
+    else
+      endDateEle.incDays(7)
+
+  def doToday(): Unit =
+    endDateEle.set(LocalDate.now())
+
+  def doEndOfMonth(): Unit =
+    endDateEle.set(endDate.withDayOfMonth(1).plusMonths(1).plusDays(-1))
+
+  def doEndOfLastMonth(): Unit =
+    endDateEle.set(LocalDate.now().withDayOfMonth(1).plusDays(-1))
 
   def endReason: DiseaseEndReason =
     endReasonGroup.selected
