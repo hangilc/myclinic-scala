@@ -31,8 +31,9 @@ object ConfigService:
       Ok(true)
     case GET -> Root / "search-shohou-sample" :? stringText(text) =>
       Ok(shohouSamples.filter(_.contains(text)))
-    case GET -> Root/ "get-shinryou-regular" => Ok(shinryouRegular)
-    case GET -> Root/ "get-shinryou-kensa" => Ok(shinryouKensa)
+    case GET -> Root / "get-shinryou-regular" => Ok(shinryouRegular)
+    case GET -> Root / "get-shinryou-kensa" => Ok(shinryouKensa)
+    case GET -> Root / "list-disease-example" => Ok(Config.getDiseaseExample)
   }
 
 

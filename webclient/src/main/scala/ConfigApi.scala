@@ -1,6 +1,7 @@
 package dev.myclinic.scala.webclient
 
 import scala.concurrent.Future
+import dev.myclinic.scala.model.*
 
 object ConfigApi extends ApiBase:
 
@@ -12,6 +13,9 @@ object ConfigApi extends ApiBase:
 
     def getShinryouKensa(): Future[Map[String, List[String]]] =
       get("get-shinryou-kensa", Params())
+
+    def listDiseaseExample(): Future[List[DiseaseExample]] =
+      get("list-disease-example", Params())
 
 
       

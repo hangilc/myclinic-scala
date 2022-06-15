@@ -1,4 +1,8 @@
-package dev.myclinic.scala.config
+package dev.myclinic.scala.model
+
+import io.circe.generic.semiauto._
+import io.circe.Encoder
+import io.circe.Decoder
 
 case class DiseaseExample(
   byoumei: Option[String] = None,
@@ -25,3 +29,6 @@ object DiseaseExample:
       getStringList("pre-adj-list"),
       getStringList("adj-list")
     )
+
+  given Encoder[DiseaseExample] = deriveEncoder[DiseaseExample]
+  given Decoder[DiseaseExample] = deriveDecoder[DiseaseExample]

@@ -40,7 +40,8 @@ case class Add(patientId: Int, visitDates: List[LocalDate]):
       a("修飾語削除")
     ),
     searchKind.ele,
-    searchForm.ele
+    searchForm.ui.form(a("例")),
+    searchForm.ui.selection.ele
   )
   updateStartDateUI()
 
