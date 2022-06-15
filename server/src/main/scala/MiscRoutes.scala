@@ -27,7 +27,7 @@ import dev.myclinic.scala.drawerform.receipt.ReceiptDrawerData
 
 object MiscService extends DateTimeQueryParam with Publisher:
   object dateDate extends QueryParamDecoderMatcher[LocalDate]("date")
-  object atDate extends QueryParamDecoderMatcher[LocalDate]("at")
+  object dateAt extends QueryParamDecoderMatcher[LocalDate]("at")
   object atDateTime extends QueryParamDecoderMatcher[LocalDateTime]("at")
   object intVisitId extends QueryParamDecoderMatcher[Int]("visit-id")
   object intOffset extends QueryParamDecoderMatcher[Int]("offset")
@@ -40,6 +40,7 @@ object MiscService extends DateTimeQueryParam with Publisher:
       extends QueryParamDecoderMatcher[Int]("koukikourei-id")
   object intKouhiId extends QueryParamDecoderMatcher[Int]("kouhi-id")
   object intTextId extends QueryParamDecoderMatcher[Int]("text-id")
+  object strText extends QueryParamDecoderMatcher[String]("text")
 
   given houkatsuKensa: HoukatsuKensa = (new ConfigJava).getHoukatsuKensa
 
@@ -152,37 +153,37 @@ object MiscService extends DateTimeQueryParam with Publisher:
 
     case GET -> Root / "find-available-shahokokuho" :? intPatientId(
           patientId
-        ) +& atDate(at) =>
+        ) +& dateAt(at) =>
       Ok(Db.findAvailableShahokokuho(patientId, at))
 
     case GET -> Root / "list-available-shahokokuho" :? intPatientId(
           patientId
-        ) +& atDate(at) =>
+        ) +& dateAt(at) =>
       Ok(Db.listAvailableShahokokuho(patientId, at))
 
     case GET -> Root / "find-available-roujin" :? intPatientId(
           patientId
-        ) +& atDate(at) =>
+        ) +& dateAt(at) =>
       Ok(Db.findAvailableRoujin(patientId, at))
 
     case GET -> Root / "list-available-roujin" :? intPatientId(
           patientId
-        ) +& atDate(at) =>
+        ) +& dateAt(at) =>
       Ok(Db.listAvailableRoujin(patientId, at))
 
     case GET -> Root / "find-available-koukikourei" :? intPatientId(
           patientId
-        ) +& atDate(at) =>
+        ) +& dateAt(at) =>
       Ok(Db.findAvailableKoukikourei(patientId, at))
 
     case GET -> Root / "list-available-koukikourei" :? intPatientId(
           patientId
-        ) +& atDate(at) =>
+        ) +& dateAt(at) =>
       Ok(Db.listAvailableKoukikourei(patientId, at))
 
     case GET -> Root / "list-available-kouhi" :? intPatientId(
           patientId
-        ) +& atDate(at) =>
+        ) +& dateAt(at) =>
       Ok(Db.listAvailableKouhi(patientId, at))
 
     case GET -> Root / "list-shahokokuho" :? intPatientId(patientId) =>
@@ -319,7 +320,7 @@ object MiscService extends DateTimeQueryParam with Publisher:
         Db.listRecentVisitFull(offset, count)
       )
 
-    case GET -> Root / "list-visit-by-date" :? atDate(at) =>
+    case GET -> Root / "list-visit-by-date" :? dateAt(at) =>
       Ok(Db.listVisitByDate(at))
 
     case GET -> Root / "count-visit-by-patient" :? intPatientId(patientId) =>
@@ -399,4 +400,8 @@ object MiscService extends DateTimeQueryParam with Publisher:
 
     case GET -> Root / "list-current-disease-ex" :? intPatientId(patientId) =>
       Ok(Db.listCurrentDiseaseEx(patientId))
+
+    case GET -> Root / "search-byoumei-master" :? strText(text) +& dateAt(at) =>
+      Ok(Db.searchByoumeiMaster(text, at))
+
   }

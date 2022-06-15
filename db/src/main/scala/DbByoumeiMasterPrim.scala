@@ -15,3 +15,12 @@ object DbByoumeiMasterPrim:
         and valid_from <= ${at} 
         and (valid_upto = '0000-00-00' or valid_upto >= ${at})
     """.query[ByoumeiMaster]
+
+  def searchByoumeiMaster(text: String, at: LocalDate): Query0[ByoumeiMaster] =
+    val like = s"%${text}%"
+    sql"""
+      select * from shoubyoumei_master_arch where name like ${like}
+      and valid_from <= ${at}
+      and (valid_upto = '0000-00-00' or valid_upto >= ${at})
+      order by name
+    """.query[ByoumeiMaster]

@@ -39,7 +39,9 @@ object Db
     with DbShinryouMaster
     with DbKizaiMaster
     with DbVisitEx
-    with DbDisease:
+    with DbDisease
+    with DbByoumeiMaster
+    with DbShuushokugoMaster:
 
   def deleteVisit(visitId: Int): IO[List[AppEvent]] =
     def check(chk: Int => IO[Int], err: String): EitherT[IO, String, Unit] =

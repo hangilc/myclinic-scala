@@ -20,3 +20,6 @@ trait DbByoumeiMaster extends Mysql:
 
   def findByoumeiMasterByName(name: String, at: LocalDate): IO[Option[ByoumeiMaster]] =
     mysql(Prim.getByoumeiMasterByName(name, at).option)
+
+  def searchByoumeiMaster(text: String, at: LocalDate): IO[List[ByoumeiMaster]] =
+    mysql(Prim.searchByoumeiMaster(text, at).to[List])
