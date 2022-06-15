@@ -14,6 +14,8 @@ import com.typesafe.scalalogging.Logger
 import _root_.java.io.File
 import cats.instances.try_
 import scala.io.Source
+import io.circe.HCursor
+import io.circe.Decoder.Result
 
 object Config extends ConfigCirce:
   val logger = Logger(getClass.getName)
@@ -121,6 +123,14 @@ object Config extends ConfigCirce:
 
   def portalTmpDir: Path =
     Path.of(System.getenv("MYCLINIC_PORTAL_TMP_DIR"))
+
+  def getDiseaseExample: List[DiseaseExample] =
+    val file: File = configDir.resolve(s"disease-example.yml").toFile
+    given Decoder[String | List[String]] with
+        def apply(c: HCursor): Result[String | List[String]] =
+          c.as[String].orElse(c.as[List[String]])
+    readYaml[List[Map[String, String | List[String]]]](file)
+        .map(m => DiseaseExample.fromMap(m))
 
   def readYaml[T: Decoder](file: File): T =
     val reader: _root_.java.io.Reader = _root_.java.io.FileReader(file)
