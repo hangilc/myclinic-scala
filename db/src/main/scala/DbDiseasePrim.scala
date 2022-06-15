@@ -25,15 +25,35 @@ object DbDiseasePrim:
       order by start_date
     """.query[Disease]
 
-  def enterDisease(patientId: Int, shoubyoumeicode: Int, startDate: LocalDate, 
-    endDate: ValidUpto, endReason: String): ConnectionIO[(Int, AppEvent)] =
-      val op = sql"""
+  def enterDisease(
+      patientId: Int,
+      shoubyoumeicode: Int,
+      startDate: LocalDate,
+      endDate: ValidUpto,
+      endReason: String
+  ): ConnectionIO[(Int, AppEvent)] =
+    val op = sql"""
         insert into disease (patient_id, shoubyoumeicode, start_date, end_date, end_reason)
         values (${patientId}, ${shoubyoumeicode}, ${startDate}, ${endDate}, ${endReason})
       """
-      for
-        diseaseId <- op.update.withUniqueGeneratedKeys[Int]("disease_id")
-        disease <- getDisease(diseaseId).unique
-        event <- DbEventPrim.logDiseaseCreated(disease)
-      yield (diseaseId, event)
+    for
+      diseaseId <- op.update.withUniqueGeneratedKeys[Int]("disease_id")
+      disease <- getDisease(diseaseId).unique
+      event <- DbEventPrim.logDiseaseCreated(disease)
+    yield (diseaseId, event)
 
+  def endDisease(
+      diseaseId: Int,
+      endDate: LocalDate,
+      endReason: String
+  ): ConnectionIO[AppEvent] =
+    val op = sql"""
+      update disease set end_date = ${endDate}, end_reason = ${endReason} 
+      where disease_id = ${diseaseId}
+    """
+    for
+      affected <- op.update.run
+      _ = if affected != 1 then throw new RuntimeException(s"Failed to update disease: ${diseaseId}")
+      updated <- getDisease(diseaseId).unique
+      event <- DbEventPrim.logDiseaseUpdated(updated)
+    yield event

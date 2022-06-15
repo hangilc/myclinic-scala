@@ -28,6 +28,7 @@ import dev.myclinic.scala.drawerform.receipt.ReceiptDrawerData
 object MiscService extends DateTimeQueryParam with Publisher:
   object dateDate extends QueryParamDecoderMatcher[LocalDate]("date")
   object dateAt extends QueryParamDecoderMatcher[LocalDate]("at")
+  object dateEnd extends QueryParamDecoderMatcher[LocalDate]("end-date")
   object atDateTime extends QueryParamDecoderMatcher[LocalDateTime]("at")
   object intVisitId extends QueryParamDecoderMatcher[Int]("visit-id")
   object intOffset extends QueryParamDecoderMatcher[Int]("offset")
@@ -42,6 +43,7 @@ object MiscService extends DateTimeQueryParam with Publisher:
   object intTextId extends QueryParamDecoderMatcher[Int]("text-id")
   object intDiseaseId extends QueryParamDecoderMatcher[Int]("disease-id")
   object strText extends QueryParamDecoderMatcher[String]("text")
+  object strEndReason extends QueryParamDecoderMatcher[String]("end-reason")
 
   given houkatsuKensa: HoukatsuKensa = (new ConfigJava).getHoukatsuKensa
 
@@ -428,5 +430,15 @@ object MiscService extends DateTimeQueryParam with Publisher:
 
     case GET -> Root / "get-disease-ex" :? intDiseaseId(diseaseId) =>
       Ok(Db.getDiseaseEx(diseaseId))
+
+    case GET -> Root / "end-disease" :? intDiseaseId(diseaseId) +& dateEnd(
+          endDate
+        ) +& strEndReason(endReason) =>
+      val op = 
+        for
+          event <- Db.endDisease(diseaseId, endDate, endReason)
+          _ <- publish(event)
+        yield true
+      Ok(op)
 
   }

@@ -440,3 +440,17 @@ object MiscApi extends ApiBase:
         diseaseId: Int
     ): Future[(Disease, ByoumeiMaster, List[(DiseaseAdj, ShuushokugoMaster)])] =
       get("get-disease-ex", Params("disease-id" -> diseaseId))
+
+    def endDisease(
+        diseaseId: Int,
+        endDate: LocalDate,
+        endReason: DiseaseEndReason
+    ): Future[Boolean] =
+      get(
+        "end-disease",
+        Params(
+          "disease-id" -> diseaseId,
+          "end-date" -> endDate,
+          "end-reason" -> endReason.code
+        )
+      )

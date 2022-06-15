@@ -16,3 +16,6 @@ import java.util.regex.Pattern
 trait DbDisease extends Mysql:
   def listCurrentDisease(patientId: Int): IO[List[Disease]] =
     mysql(DbDiseasePrim.listCurrentDisease(patientId).to[List])
+
+  def endDisease(diseaseId: Int, endDate: LocalDate, endReason: String): IO[AppEvent] =
+    mysql(DbDiseasePrim.endDisease(diseaseId, endDate, endReason))
