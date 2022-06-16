@@ -406,6 +406,9 @@ object MiscService extends DateTimeQueryParam with Publisher:
     case GET -> Root / "list-current-disease-ex" :? intPatientId(patientId) =>
       Ok(Db.listCurrentDiseaseEx(patientId))
 
+    case GET -> Root / "list-disease-ex" :? intPatientId(patientId) =>
+      Ok(Db.listDiseaseEx(patientId))
+
     case GET -> Root / "search-byoumei-master" :? strText(text) +& dateAt(at) =>
       Ok(Db.searchByoumeiMaster(text, at))
 

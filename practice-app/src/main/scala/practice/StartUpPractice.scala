@@ -8,6 +8,6 @@ object StartUpPractice:
   def run(service: PracticeService): Future[Unit] =
     val frame = Frame(5366)
     service.right.ele(frame.ele(displayDefault))
-    frame.tenki()
+    frame.edit()
     Future.successful(())
 

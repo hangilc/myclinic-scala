@@ -60,6 +60,26 @@ object DbPrim:
       }).sequence
     yield result
 
+  def listDiseaseEx(
+        patientId: Int
+    ): ConnectionIO[
+      List[(Disease, ByoumeiMaster, List[(DiseaseAdj, ShuushokugoMaster)])]
+    ] =
+      val diseaseOp = sql"""
+          select d.*, m.* from disease as d inner join shoubyoumei_master_arch as m 
+          on d.shoubyoumeicode = m.shoubyoumeicode and m.valid_from <= d.start_date
+          and (m.valid_upto = '0000-00-00' or d.start_date <= m.valid_upto)
+          where d.patient_id = ${patientId}
+          order by d.start_date
+      """.query[(Disease, ByoumeiMaster)]
+      for
+        dlist <- diseaseOp.to[List]
+        result <- (dlist.map { case (d, bm) =>
+          listDiseaseAdjEx(d.diseaseId)
+            .map(adjList => (d, bm, adjList))
+        }).sequence
+      yield result
+
   def getDiseaseEx(diseaseId: Int): ConnectionIO[
     (Disease, ByoumeiMaster, List[(DiseaseAdj, ShuushokugoMaster)])
   ] =
@@ -74,3 +94,4 @@ object DbPrim:
       (disease, bMaster) = dex
       adjEx <- listDiseaseAdjEx(disease.diseaseId)
     yield (disease, bMaster, adjEx)
+

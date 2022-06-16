@@ -270,6 +270,11 @@ object Db
   ): IO[List[(Disease, ByoumeiMaster, List[(DiseaseAdj, ShuushokugoMaster)])]] =
     mysql(DbPrim.listCurrentDiseaseEx(patientId))
 
+  def listDiseaseEx(
+      patientId: Int
+  ): IO[List[(Disease, ByoumeiMaster, List[(DiseaseAdj, ShuushokugoMaster)])]] =
+    mysql(DbPrim.listDiseaseEx(patientId))
+
   def enterDiseaseEx(
       patientId: Int,
       byoumeicode: Int,

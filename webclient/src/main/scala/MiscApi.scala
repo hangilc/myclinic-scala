@@ -433,6 +433,11 @@ object MiscApi extends ApiBase:
     ] =
       get("list-current-disease-ex", Params("patient-id" -> patientId))
 
+    def listDiseaseEx(patientId: Int): Future[
+      List[(Disease, ByoumeiMaster, List[(DiseaseAdj, ShuushokugoMaster)])]
+    ] =
+      get("list-disease-ex", Params("patient-id" -> patientId))
+
     def enterDiseaseEx(data: DiseaseEnterData): Future[Int] =
       post("enter-disease-ex", Params(), data)
 

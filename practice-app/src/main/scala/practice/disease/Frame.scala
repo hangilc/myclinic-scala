@@ -42,7 +42,11 @@ case class Frame(patientId: Int):
       body(clear, c.ele)
 
   def edit(): Unit =
-    ()
+    for
+      list <- Api.listDiseaseEx(patientId)
+    yield
+      val c = Edit(list, _ => edit())
+      body(clear, c.ele)
 
 object Frame:
   var examples: List[DiseaseExample] = List.empty
