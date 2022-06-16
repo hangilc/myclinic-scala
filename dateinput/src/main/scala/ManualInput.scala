@@ -1,7 +1,7 @@
 package dev.fujiwara.dateinput
 
 import dev.fujiwara.domq.all.{*, given}
-import dev.fujiwara.domq.Html
+import dev.fujiwara.domq.{Html, DataInputDialog}
 import dev.fujiwara.kanjidate.DateParser
 
 import java.time.LocalDate
@@ -9,44 +9,49 @@ import dev.fujiwara.kanjidate.KanjiDate
 
 object ManualInput:
   def getDateByDialog(
-      onEnter: Option[LocalDate] => Unit,
-  )(using config: ManualInputConfig): Unit =
-    val input = Html.input
-    val dlog = new ModalDialog3()
-    dlog.title(config.title)
-    dlog.body(
-      input(cls := "width-8rem", value := formatValue),
-      placeholder := "R3.4.12"
-    )
-    dlog.commands(
-      button("入力", onclick := (doEnter _)),
-      button("キャンセル", onclick := (() => dlog.close()))
-    )
-    dlog.open()
+      onEnter: LocalDate => Unit,
+      init: Option[LocalDate] = None,
+      title: String = "日付の入力",
+      check: LocalDate => Either[String, LocalDate] = Right(_)
+  ): Unit =
+    val dlog =
+      DataInputDialog[LocalDate](title, formatInitValue(init), convertToDate _, onEnter)
+    def convertToDate(src: String): Either[String, LocalDate] =
+      for
+        parsed <-
+          if src.isEmpty then Left("日付が入力されていません。")
+          else DateParser.parse(src).toRight("入力が不適切です。")
+        checked <- check(parsed)
+      yield checked
 
-    def doEnter(): Unit =
-      val src = input.value.trim
-      (for
+  def getDateOptionByDialog(
+      onEnter: Option[LocalDate] => Unit,
+      init: Option[LocalDate] = None,
+      title: String = "日付の入力",
+      check: Option[LocalDate] => Either[String, Option[LocalDate]] = Right(_)
+  ): Unit =
+    val dlog = DataInputDialog[Option[LocalDate]](
+      title,
+      formatInitValue(init),
+      convertToDate _,
+      onEnter
+    )
+    def convertToDate(src: String): Either[String, Option[LocalDate]] =
+      for
         parsed <-
           if src.isEmpty then Right(None)
-          else DateParser.parse(src).toRight("入力が不適切です。").map(Option(_))
-        checked <- config.check(parsed)
-      yield checked).fold(msg => ShowMessage.showError(msg), onEnter)
+          else DateParser.parse(src).toRight("入力が不適切です。").map(Some(_))
+        checked <- check(parsed)
+      yield checked
 
-    def formatValue: String =
-      config.init match {
-        case None => ""
-        case Some(d) =>
-          KanjiDate.dateToKanji(
-            d,
-            formatYear = (info => s"${info.gengouAlphaChar}${info.nen}."),
-            formatMonth = (info => s"${info.month}."),
-            formatDay = (info => s"${info.day}")
-          )
-      }
-
-  case class ManualInputConfig(
-    title: String,
-    init: Option[LocalDate],
-    check: Option[LocalDate] => Either[String, Option[LocalDate]] 
-  )
+  private def formatInitValue(init: Option[LocalDate]): String =
+    init match {
+      case None => ""
+      case Some(d) =>
+        KanjiDate.dateToKanji(
+          d,
+          formatYear = (info => s"${info.gengouAlphaChar}${info.nen}."),
+          formatMonth = (info => s"${info.month}."),
+          formatDay = (info => s"${info.day}")
+        )
+    }
