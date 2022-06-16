@@ -7,7 +7,7 @@ import dev.fujiwara.kanjidate.KanjiDate
 
 case class Edit(
     list: List[(Disease, ByoumeiMaster, List[(DiseaseAdj, ShuushokugoMaster)])],
-    onDone: Edit => Unit
+    onDone: (Disease, ByoumeiMaster, List[(DiseaseAdj, ShuushokugoMaster)]) => Unit
 ):
   import Edit.{Item, Disp}
   val disp = Disp()
@@ -20,8 +20,15 @@ case class Edit(
   )
   val ele = div(
     disp.ele,
+    div(button("編集", onclick := (doEdit _))),
     selection.ele
   )
+
+  def doEdit(): Unit =
+    for
+      d <- disp.disease
+      m <- disp.byoumeiMaster
+    yield onDone(d, m, disp.adjList)
 
 object Edit:
   case class Item(
