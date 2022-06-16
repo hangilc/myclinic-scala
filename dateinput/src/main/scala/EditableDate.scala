@@ -3,10 +3,20 @@ package dev.fujiwara.dateinput
 import java.time.LocalDate
 
 import dev.fujiwara.domq.all.{*, given}
+import ManualInput.ManualInputConfig
 
 case class EditableDate(var date: LocalDate, title: String)(using
-    formatter: DateFormatConfig
+    formatter: DateFormatConfig,
+    manualInputConfig: ManualInputConfig
 ):
+  val modifiedManualInputConfig: ManualInputConfig =
+    manualInputConfig.copy(
+      check = _ match {
+        case None  => Left("入力されていません。")
+        case d @ _ => manualInputConfig.check(d)
+      }
+    )
+
   val ele = span(cls := "cursor-pointer", onclick := (doEdit _))
   updateUI()
 
@@ -30,24 +40,20 @@ case class EditableDate(var date: LocalDate, title: String)(using
     ele(innerText := formatter.format(date))
 
   def doEdit(): Unit =
-    ManualInput.getDateByDialog(
-      title,
-      dateOpt =>
-        dateOpt match {
-          case None => ()
-          case Some(d) =>
-            date = d
-            updateUI()
-        },
-      Some(date)
-    )
+    ManualInput.getDateByDialog(dateOpt =>
+      dateOpt match {
+        case None => () // cannot happen because of check
+        case Some(d) =>
+          date = d
+          updateUI()
+      }
+    )(using modifiedManualInputConfig)
 
 case class EditableOptionalDate(
     var dateOption: Option[LocalDate],
-    title: String,
     blankLabel: String,
     blankSuggest: Option[LocalDate]
-)(using formatter: DateFormatConfig):
+)(using formatter: DateFormatConfig, manualInputConfig: ManualInputConfig):
   val ele = span(cls := "cursor-pointer", onclick := (doEdit _))
   updateUI()
 
@@ -75,12 +81,14 @@ case class EditableOptionalDate(
 
   def updateUI(): Unit =
     val s =
-      dateOption.map(date => formatter.format(date)).getOrElse(blankString)
+      dateOption.map(date => formatter.format(date)).getOrElse(blankLabel)
     ele(innerText := s)
 
   def doEdit(): Unit =
+    val mconfig = manualInputConfig.copy(
+      init = 
+    )
     ManualInput.getDateByDialog(
-      title,
       dateOpt =>
         dateOpt match {
           case None => ()
@@ -88,5 +96,4 @@ case class EditableOptionalDate(
             date = d
             updateUI()
         },
-      blankSuggest
     )
