@@ -11,7 +11,8 @@ object ManualInput:
   def getDateByDialog(
       title: String,
       handler: Option[LocalDate] => Unit,
-      init: Option[LocalDate] = None
+      init: Option[LocalDate] = None,
+      acceptNone: Boolean = false
   ): Unit =
     val input = Html.input
     val dlog = new ModalDialog3()
