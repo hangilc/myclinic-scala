@@ -5,3 +5,14 @@
 .vertical-align-middle {
     vertical-align: middle;
 }
+
+.grid-disp {
+    display: grid;
+    grid-template-columns: auto 1fr;
+  }
+  
+.grid-disp *:nth-child(odd) {
+text-align: right;
+}
+  
+  

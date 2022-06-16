@@ -531,18 +531,18 @@ object FileInfo:
   def fromTimestamp(ts: FiniteDuration): LocalDateTime =
     epoch.plusSeconds(ts.toSeconds)
 
-enum DiseaseEndReason(val code: String):
-  case NotEnded extends DiseaseEndReason("N")
-  case Cured extends DiseaseEndReason("C")
-  case Stopped extends DiseaseEndReason("S")
-  case Dead extends DiseaseEndReason("D")
+enum DiseaseEndReason(val code: String, val label: String):
+  case NotEnded extends DiseaseEndReason("N", "継続")
+  case Cured extends DiseaseEndReason("C", "治癒")
+  case Stopped extends DiseaseEndReason("S", "中止")
+  case Dead extends DiseaseEndReason("D", "死亡")
 
 case class Disease(
     diseaseId: Int,
     patientId: Int,
     shoubyoumeicode: Int,
     startDate: LocalDate,
-    end_date: ValidUpto,
+    endDate: ValidUpto,
     endReasonStore: String
 ):
   def endReason: DiseaseEndReason =
