@@ -42,6 +42,20 @@ object DbDiseasePrim:
       event <- DbEventPrim.logDiseaseCreated(disease)
     yield (diseaseId, event)
 
+  def updateDisease(d: Disease): ConnectionIO[AppEvent] =
+    val op = sql"""
+        update disease set shoubyoumeicode = ${d.shoubyoumeicode}, 
+        start_date = ${d.startDate}, end_date = ${d.endDate}, end_reason = ${d.endReasonStore})
+        where disease_id = ${d.diseaseId}
+      """
+    for
+      affected <- op.update.run
+      _ = if affected != 1 then throw new RuntimeException(s"Failed to update disease: ${d.diseaseId}")
+      updated <- getDisease(d.diseaseId).unique
+      event <- DbEventPrim.logDiseaseUpdated(updated)
+    yield event
+
+
   def endDisease(
       diseaseId: Int,
       endDate: LocalDate,

@@ -35,3 +35,15 @@ object DbDiseaseAdjPrim:
       event <- DbEventPrim.logDiseaseAdjCreated(adj)
     yield (adjId, event)
 
+  def deleteDiseaseAdj(diseaseAdjId: Int): ConnectionIO[AppEvent] =
+    val op = sql"""
+      delete from disease_adj where disease_adj_id = ${diseaseAdjId}
+    """
+    for
+      deleted <- getDiseaseAdj(diseaseAdjId).unique
+      affected <- op.update.run
+      _ = if affected != 1 then throw new RuntimeException(s"Failed to delete disease_adj: ${diseaseAdjId}")
+      event <- DbEventPrim.logDiseaseAdjDeleted(deleted)
+    yield event
+
+

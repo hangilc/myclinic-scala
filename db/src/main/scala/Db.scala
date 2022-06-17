@@ -302,3 +302,37 @@ object Db
       diseaseId: Int
   ): IO[(Disease, ByoumeiMaster, List[(DiseaseAdj, ShuushokugoMaster)])] =
     mysql(DbPrim.getDiseaseEx(diseaseId))
+
+  def updateDiseaseEx(
+      disease: Disease,
+      shuushokugocodes: List[Int]
+  ): IO[List[AppEvent]] =
+    val op =
+      for
+        updateEvent <- DbDiseasePrim.updateDisease(disease)
+        curAdjList <- DbDiseaseAdjPrim
+          .listDiseaseAdj(disease.diseaseId)
+          .to[List]
+        curAdjCodes <- curAdjList
+          .map(adj =>
+            DbShuushokugoMasterPrim
+              .getShuushokugoMaster(adj.shuushokugocode, disease.startDate)
+              .map(_.shuushokugocode)
+              .unique
+          )
+          .sequence
+        adjEvents <-
+          if shuushokugocodes == curAdjCodes then
+            List.empty[AppEvent].pure[ConnectionIO]
+          else
+            val delEvents = curAdjList.map(adj =>
+              DbDiseaseAdjPrim.deleteDiseaseAdj(adj.diseaseAdjId)
+            )
+            val createEvents = shuushokugocodes.map(code =>
+              DbDiseaseAdjPrim
+                .enterDiseaseAdj(disease.diseaseId, code)
+                .map(_._2)
+            )
+            (delEvents ++ createEvents).sequence
+      yield List(updateEvent) ++ adjEvents
+    mysql(op)
