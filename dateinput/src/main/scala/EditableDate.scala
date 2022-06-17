@@ -1,22 +1,15 @@
 package dev.fujiwara.dateinput
 
 import java.time.LocalDate
+import dev.fujiwara.kanjidate.KanjiDate
 
 import dev.fujiwara.domq.all.{*, given}
-import ManualInput.ManualInputConfig
 
-case class EditableDate(var date: LocalDate, title: String)(using
-    formatter: DateFormatConfig,
-    manualInputConfig: ManualInputConfig
+case class EditableDate(
+    var date: LocalDate,
+    formatter: LocalDate => String = (d => KanjiDate.dateToKanji(d)),
+    title: String = "日付の入力"
 ):
-  val modifiedManualInputConfig: ManualInputConfig =
-    manualInputConfig.copy(
-      check = _ match {
-        case None  => Left("入力されていません。")
-        case d @ _ => manualInputConfig.check(d)
-      }
-    )
-
   val ele = span(cls := "cursor-pointer", onclick := (doEdit _))
   updateUI()
 
@@ -37,21 +30,14 @@ case class EditableDate(var date: LocalDate, title: String)(using
     updateUI()
 
   def updateUI(): Unit =
-    ele(innerText := formatter.format(date))
+    ele(innerText := formatter(date))
 
   def doEdit(): Unit =
-    ManualInput.getDateByDialog(dateOpt =>
-      dateOpt match {
-        case None => () // cannot happen because of check
-        case Some(d) =>
-          date = d
-          updateUI()
-      }
-    )(using modifiedManualInputConfig)
+    ManualInput.getDateByDialog(set _, init = Some(date), title = title)
 
 case class EditableOptionalDate(
     var dateOption: Option[LocalDate],
-    blankLabel: String,
+    formatter: Option[LocalDate] => String,
     blankSuggest: Option[LocalDate]
 )(using formatter: DateFormatConfig, manualInputConfig: ManualInputConfig):
   val ele = span(cls := "cursor-pointer", onclick := (doEdit _))
@@ -86,7 +72,7 @@ case class EditableOptionalDate(
 
   def doEdit(): Unit =
     val mconfig = manualInputConfig.copy(
-      init = 
+      init =
     )
     ManualInput.getDateByDialog(
       dateOpt =>
