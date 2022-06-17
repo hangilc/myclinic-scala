@@ -38,8 +38,8 @@ case class EditableDate(
 case class EditableOptionalDate(
     var dateOption: Option[LocalDate],
     formatter: Option[LocalDate] => String,
-    blankSuggest: Option[LocalDate]
-)(using formatter: DateFormatConfig, manualInputConfig: ManualInputConfig):
+    title: String = "日付の入力"
+):
   val ele = span(cls := "cursor-pointer", onclick := (doEdit _))
   updateUI()
 
@@ -66,20 +66,7 @@ case class EditableOptionalDate(
     )
 
   def updateUI(): Unit =
-    val s =
-      dateOption.map(date => formatter.format(date)).getOrElse(blankLabel)
-    ele(innerText := s)
+    ele(innerText := formatter(dateOption))
 
   def doEdit(): Unit =
-    val mconfig = manualInputConfig.copy(
-      init =
-    )
-    ManualInput.getDateByDialog(
-      dateOpt =>
-        dateOpt match {
-          case None => ()
-          case Some(d) =>
-            date = d
-            updateUI()
-        },
-    )
+    ManualInput.getDateOptionByDialog(set _, dateOption, title)

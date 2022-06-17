@@ -14,8 +14,7 @@ object ManualInput:
       title: String = "日付の入力",
       check: LocalDate => Either[String, LocalDate] = Right(_)
   ): Unit =
-    val dlog =
-      DataInputDialog[LocalDate](title, formatInitValue(init), convertToDate _, onEnter)
+    DataInputDialog[LocalDate](title, formatInitValue(init), convertToDate _, onEnter).open()
     def convertToDate(src: String): Either[String, LocalDate] =
       for
         parsed <-
@@ -24,18 +23,20 @@ object ManualInput:
         checked <- check(parsed)
       yield checked
 
+
   def getDateOptionByDialog(
       onEnter: Option[LocalDate] => Unit,
       init: Option[LocalDate] = None,
       title: String = "日付の入力",
       check: Option[LocalDate] => Either[String, Option[LocalDate]] = Right(_)
   ): Unit =
-    val dlog = DataInputDialog[Option[LocalDate]](
+    DataInputDialog[Option[LocalDate]](
       title,
       formatInitValue(init),
       convertToDate _,
       onEnter
-    )
+    ).open()
+
     def convertToDate(src: String): Either[String, Option[LocalDate]] =
       for
         parsed <-
