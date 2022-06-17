@@ -444,4 +444,14 @@ object MiscService extends DateTimeQueryParam with Publisher:
         yield true
       Ok(op)
 
+    case req @ POST -> Root / "update-disease-ex" =>
+      val op = 
+        for
+          body <- req.as[(Disease, List[Int])]
+          (disease, shuushokugocodes) = body
+          events <- Db.updateDiseaseEx(disease, shuushokugocodes)
+          _ <- publishAll(events)
+        yield true
+      Ok(op)
+
   }

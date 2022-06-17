@@ -44,16 +44,16 @@ case class Frame(patientId: Int):
     yield
       val c = Edit(
         list,
-        (disease, master, adjList) => modify(disease, master, adjList)
+        (disease, master, adjList) => modify(disease, master, adjList.map(_(1)))
       )
       body(clear, c.ele)
 
   def modify(
       disease: Disease,
       master: ByoumeiMaster,
-      adjList: List[(DiseaseAdj, ShuushokugoMaster)]
+      shuushokugoMasters: List[ShuushokugoMaster]
   ): Unit =
-    val c = Modify(disease, master, adjList, Frame.examples)
+    val c = Modify(disease, master, shuushokugoMasters, Frame.examples, current _)
     body(clear, c.ele)
 
 object Frame:

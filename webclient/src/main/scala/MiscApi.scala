@@ -459,3 +459,6 @@ object MiscApi extends ApiBase:
           "end-reason" -> endReason.code
         )
       )
+
+    def updateDiseaseEx(disease: Disease, shuushokugocodes: List[Int]): Future[Boolean] =
+      post("update-disease-ex", Params(), (disease, shuushokugocodes))

@@ -5,12 +5,15 @@ import dev.fujiwara.domq.all.{*, given}
 import dev.fujiwara.domq.SelectProxy
 import dev.fujiwara.dateinput.EditableDate
 import dev.fujiwara.dateinput.EditableOptionalDate
+import dev.myclinic.scala.myclinicutil.DiseaseUtil
+import dev.myclinic.scala.webclient.{Api, global}
 
 case class Modify(
-    disease: Disease,
+    var disease: Disease,
     byoumeiMaster: ByoumeiMaster,
-    adjList: List[(DiseaseAdj, ShuushokugoMaster)],
-    examples: List[DiseaseExample]
+    var shuushokugoMasters: List[ShuushokugoMaster],
+    examples: List[DiseaseExample],
+    onDone: () => Unit
 ):
   val nameSpan = span
   val startDateEdit = EditableDate(disease.startDate, title = "開始日")
@@ -39,6 +42,12 @@ case class Modify(
     ),
     search.ele
   )
+  updateNameUI()
 
   def doEnter(): Unit =
-    ???
+    for
+      _ <- Api.updateDiseaseEx(disease, shuushokugoMasters.map(_.shuushokugocode))
+    yield onDone()
+
+  def updateNameUI(): Unit =
+    nameSpan(innerText := DiseaseUtil.diseaseNameOf(byoumeiMaster, shuushokugoMasters))
