@@ -7,7 +7,7 @@ import dev.fujiwara.domq.all.{*, given}
 
 case class EditableDate(
     var date: LocalDate,
-    formatter: LocalDate => String = (d => KanjiDate.dateToKanji(d)),
+    formatter: LocalDate => String = EditableDate.defaultFormatter,
     title: String = "日付の入力"
 ):
   val ele = span(cls := "cursor-pointer", onclick := (doEdit _))
@@ -35,9 +35,14 @@ case class EditableDate(
   def doEdit(): Unit =
     ManualInput.getDateByDialog(set _, init = Some(date), title = title)
 
+object EditableDate:
+  val defaultFormatter: LocalDate => String =
+    d => KanjiDate.dateToKanji(d)
+
 case class EditableOptionalDate(
     var dateOption: Option[LocalDate],
-    formatter: Option[LocalDate] => String,
+    formatter: LocalDate => String = EditableDate.defaultFormatter,
+    nullFormatter: () => String = () => "",
     title: String = "日付の入力"
 ):
   val ele = span(cls := "cursor-pointer", onclick := (doEdit _))
@@ -65,8 +70,14 @@ case class EditableOptionalDate(
       updateUI()
     )
 
+  private def format(opt: Option[LocalDate]): String =
+    opt match {
+      case None => nullFormatter()
+      case Some(d) => formatter(d)
+    }
+
   def updateUI(): Unit =
-    ele(innerText := formatter(dateOption))
+    ele(innerText := format(dateOption))
 
   def doEdit(): Unit =
     ManualInput.getDateOptionByDialog(set _, dateOption, title)
