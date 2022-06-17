@@ -9,7 +9,8 @@ import dev.fujiwara.dateinput.EditableOptionalDate
 case class Modify(
     disease: Disease,
     byoumeiMaster: ByoumeiMaster,
-    adjList: List[(DiseaseAdj, ShuushokugoMaster)]
+    adjList: List[(DiseaseAdj, ShuushokugoMaster)],
+    examples: List[DiseaseExample]
 ):
   val nameSpan = span
   val startDateEdit = EditableDate(disease.startDate, title = "開始日")
@@ -22,6 +23,7 @@ case class Modify(
     DiseaseEndReason.values.toList,
     (opt, reason) => opt(reason.label)
   )
+  val search = Search(() => startDateEdit.date, examples)
   val ele = div(
     div("名前：", nameSpan),
     div(startDateEdit.ele),
@@ -34,7 +36,8 @@ case class Modify(
       a("修飾語削除"),
       a("終了日クリア"),
       a("削除")
-    )
+    ),
+    search.ele
   )
 
   def doEnter(): Unit =

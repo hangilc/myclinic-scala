@@ -53,7 +53,7 @@ case class Frame(patientId: Int):
       master: ByoumeiMaster,
       adjList: List[(DiseaseAdj, ShuushokugoMaster)]
   ): Unit =
-    val c = Modify(disease, master, adjList)
+    val c = Modify(disease, master, adjList, Frame.examples)
     body(clear, c.ele)
 
 object Frame:
