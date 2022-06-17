@@ -125,7 +125,7 @@ case class Add(
     }
 
   def doManualStartDate(): Unit =
-    ManualInput.getDateByDialog("開始日入力", _.foreach(onDateSelect _))
+    ManualInput.getDateByDialog(onDateSelect _, init = Some(startDate), title = "開始日入力")
 
   def doStartDateClick(): Unit =
     val select = dateSelect

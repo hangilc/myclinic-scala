@@ -21,7 +21,7 @@ case class Tenki(
   val curWrapper = div
   val currents: CompAppendList[Item] =
     CompAppendList[Item](curWrapper, list.map(Item.apply.tupled(_)))
-  val endDateEle = EditableDate(LocalDate.now(), "終了日")
+  val endDateEle = EditableDate(LocalDate.now(), title = "終了日")
   def endDate: LocalDate = endDateEle.date
   val endReasonGroup = RadioGroup[DiseaseEndReason](
     List(
