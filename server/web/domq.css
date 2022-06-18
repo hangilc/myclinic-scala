@@ -10,7 +10,14 @@
 
 /* Date Input ***********************************************************/
 
-.domq-date-input-wrapper {
+.domq-date-input .domq-calendar-icon {
+  position: relative;
+  top: -0.15rem;
+  margin-left: 6px;
+  cursor: pointer;
+}
+
+/* .domq-date-input-wrapper {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -57,8 +64,8 @@
 }
 
 .domq-date-picker-date-box.current {
-  background-color: #ffa700;
-}
+  background-color: #ffa700; 
+} */
 
 /* Icons *****************************************************************/
 

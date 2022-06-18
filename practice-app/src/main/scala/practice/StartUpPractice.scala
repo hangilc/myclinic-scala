@@ -7,8 +7,9 @@ import scala.language.implicitConversions
 
 object StartUpPractice:
   def run(service: PracticeService): Future[Unit] =
-    val frame = Frame(5366)
-    service.right.ele(frame.ele(displayDefault))
-    frame.edit()
+    val e = div(
+      dev.fujiwara.dateinput.DateInput(Some(java.time.LocalDate.now())).ele
+    )
+    service.right.ui.ele(e)
     Future.successful(())
 

@@ -91,15 +91,15 @@ object Main extends IOApp:
     builder
       .withHttpWebSocketApp(websocketBuilder =>
         Router(
-          "/appoint" -> HttpRoutes.of[IO] { case GET -> Root =>
-            PermanentRedirect(Location(uri"/appoint/"))
-          },
-          "/reception" -> HttpRoutes.of[IO] { case GET -> Root =>
-            PermanentRedirect(Location(uri"/reception/"))
-          },
-          "/practice" -> HttpRoutes.of[IO] { case GET -> Root =>
-            PermanentRedirect(Location(uri"/practice/"))
-          },
+          // "/appoint" -> HttpRoutes.of[IO] { case GET -> Root =>
+          //   PermanentRedirect(Location(uri"/appoint/"))
+          // },
+          // "/reception" -> HttpRoutes.of[IO] { case GET -> Root =>
+          //   PermanentRedirect(Location(uri"/reception/"))
+          // },
+          // "/practice" -> HttpRoutes.of[IO] { case GET -> Root =>
+          //   PermanentRedirect(Location(uri"/practice/"))
+          // },
           "/api" -> RestService.routes,
           "/ws" -> ws(topic, websocketBuilder),
           "/deploy" -> deployTestService,

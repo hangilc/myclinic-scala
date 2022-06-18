@@ -1,38 +1,32 @@
 package dev.fujiwara.dateinput
 
 import java.time.LocalDate
-import org.scalajs.dom.HTMLElement
-import dev.fujiwara.domq.all.{*, given}
-import dev.fujiwara.domq.Html
-import dev.fujiwara.kanjidate.KanjiDate.{DateInfo, Gengou}
-import cats.syntax.all.*
-import scala.util.Try
-import scala.util.Success
-import scala.util.Failure
-import scala.language.implicitConversions
 
-case class DateInput(init: LocalDate)(using config: DateInputConfig):
-  val d = DateInfo(init)
-  val ele = config.wrapper(
-    cls := config.cssPrefix,
-    span(config.nenFormatter(d), cls := config.cssClass("nen")),
-    span(config.monthFormatter(d), cls := config.cssClass("month")),
-    span(config.dayFormatter(d), cls := config.cssClass("day"))
+import dev.fujiwara.domq.all.{*, given}
+import scala.language.implicitConversions
+import dev.fujiwara.kanjidate.KanjiDate
+
+case class DateInput(
+    private var init: Option[LocalDate] = None,
+    formatter: LocalDate => String = DateInput.defaultFormatter,
+    nullFormatter: () => String = () => "",
+    title: String = "日付の入力"
+):
+  val dateEdit =
+    EditableOptionalDate(init, formatter = formatter, title = title)
+  val ele = div(
+    cls := "domq-date-input",
+    dateEdit.ele,
+    Icons.calendar(cls := "domq-calendar-icon", onclick := (doCalendar _))
   )
 
+  def value: Option[LocalDate] = dateEdit.dateOption
+  def set(value: Option[LocalDate]) = dateEdit.set(value)
+
+  private def doCalendar(): Unit =
+    val picker = DatePicker()
+    picker.open()
+
 object DateInput:
-  given defaultConfig: DateInputConfig = new DateInputConfig:
-    def wrapper: HTMLElement = div
-    def nenFormatter(d: DateInfo): String = s"${d.gengou}${d.nen}年"
-    def monthFormatter(d: DateInfo): String = s"${d.month}月"
-    def dayFormatter(d: DateInfo): String = s"${d.day}日"
-    val cssPrefix: String = "dateinput"
-
-trait DateInputConfig:
-  def wrapper: HTMLElement
-  def nenFormatter(d: DateInfo): String
-  def monthFormatter(d: DateInfo): String
-  def dayFormatter(d: DateInfo): String
-  def cssPrefix: String
-
-  def cssClass(ident: String): String = s"${cssPrefix}-${ident}"
+  val defaultFormatter: LocalDate => String =
+    d => KanjiDate.dateToKanji(d)
