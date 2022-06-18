@@ -336,3 +336,12 @@ object Db
             (delEvents ++ createEvents).sequence
       yield List(updateEvent) ++ adjEvents
     mysql(op)
+
+  def deleteDiseaseEx(diseaseId: Int): IO[List[AppEvent]] =
+    val op =
+      for
+        adjIds <- DbDiseaseAdjPrim.listDiseaseAdj(diseaseId).map(_.diseaseAdjId).to[List]
+        diseaseEvent <- DbDiseasePrim.deleteDisease(diseaseId)
+        adjEvents <- adjIds.map(adjId => DbDiseaseAdjPrim.deleteDiseaseAdj(adjId)).sequence
+      yield List(diseaseEvent) ++ adjEvents
+    mysql(op)

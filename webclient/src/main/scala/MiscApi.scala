@@ -462,3 +462,6 @@ object MiscApi extends ApiBase:
 
     def updateDiseaseEx(disease: Disease, shuushokugocodes: List[Int]): Future[Boolean] =
       post("update-disease-ex", Params(), (disease, shuushokugocodes))
+
+    def deleteDiseaseEx(diseaseId: Int): Future[Boolean] =
+      get("delete-disease-ex", Params("disease-id" -> diseaseId))

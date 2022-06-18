@@ -12,6 +12,7 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.temporal.ChronoUnit
 import scala.math.Ordered.orderingToOrdered
+import scala.runtime.IntRef
 
 object DbDiseasePrim:
   def getDisease(diseaseId: Int): Query0[Disease] =
@@ -71,3 +72,15 @@ object DbDiseasePrim:
       updated <- getDisease(diseaseId).unique
       event <- DbEventPrim.logDiseaseUpdated(updated)
     yield event
+
+  def deleteDisease(diseaseId: Int): ConnectionIO[AppEvent] =
+    val op = sql"""
+      delete from disease where disease_id = ${diseaseId}
+    """
+    for
+      disease <- getDisease(diseaseId).unique
+      affected <- op.update.run
+      _ = if affected != 1 then throw new RuntimeException(s"Failed to delete disease: ${diseaseId}.")
+      event <- DbEventPrim.logDiseaseDeleted(disease)
+    yield event
+

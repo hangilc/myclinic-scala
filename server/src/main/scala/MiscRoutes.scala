@@ -454,4 +454,13 @@ object MiscService extends DateTimeQueryParam with Publisher:
         yield true
       Ok(op)
 
+    case GET -> Root / "delete-disease-ex" :? intDiseaseId(diseaseId) =>
+      val op = 
+        for
+          events <- Db.deleteDiseaseEx(diseaseId)
+          _ <- publishAll(events)
+        yield true
+      Ok(op)
+
+
   }
