@@ -2,6 +2,7 @@ package dev.myclinic.scala.web.reception.scan.docscan
 
 import dev.fujiwara.domq.all.{*, given}
 import dev.fujiwara.domq.InPlaceEdit
+import scala.language.implicitConversions
 
 class DocTypeRow(using ds: DataSources):
   import DocTypeRow.*

@@ -7,6 +7,7 @@ import dev.myclinic.scala.webclient.{Api, global}
 import dev.myclinic.scala.model.Patient
 import dev.myclinic.scala.model.Visit
 import scala.concurrent.Future
+import scala.language.implicitConversions
 
 class SelectPatientByDateWidget:
   import SelectPatientByDateWidget as Helper

@@ -7,6 +7,7 @@ import scala.concurrent.Future
 import dev.myclinic.scala.webclient.ParamsImplicits.given
 import dev.myclinic.scala.model.Text
 import dev.myclinic.scala.model.jsoncodec.Implicits.given
+import scala.language.implicitConversions
 
 object DrawerApi extends ApiBase:
   def baseUrl: String = "/api/"

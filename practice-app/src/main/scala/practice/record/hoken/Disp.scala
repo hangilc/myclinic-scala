@@ -4,6 +4,7 @@ import dev.fujiwara.domq.all.{*, given}
 import dev.fujiwara.domq.LocalEventPublisher
 import dev.myclinic.scala.model.*
 import dev.myclinic.scala.apputil.HokenUtil
+import scala.language.implicitConversions
 
 class Disp(hoken: HokenInfo):
   val onClick = LocalEventPublisher[Unit]

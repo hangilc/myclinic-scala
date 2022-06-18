@@ -4,6 +4,7 @@ import dev.myclinic.scala.model.*
 import dev.fujiwara.domq.all.{*, given}
 import dev.myclinic.scala.webclient.{Api, global}
 import dev.myclinic.scala.web.practiceapp.practice.PracticeBus
+import scala.language.implicitConversions
 
 case class Edit(shinryou: ShinryouEx):
   val ele = div(cls := "practice-widget",

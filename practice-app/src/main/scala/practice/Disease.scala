@@ -3,6 +3,7 @@ package dev.myclinic.scala.web.practiceapp.practice
 import dev.fujiwara.domq.all.{*, given}
 import dev.myclinic.scala.webclient.{Api, global}
 import dev.myclinic.scala.web.practiceapp.practice.disease.Frame
+import scala.language.implicitConversions
 
 object Disease:
   val ele = div()

@@ -2,6 +2,7 @@ package dev.myclinic.scala.web.appbase
 
 import org.scalajs.dom.HTMLElement
 import dev.fujiwara.domq.all.{*, given}
+import scala.language.implicitConversions
 
 object CompList:
   def append[C](list: List[C], c: C, wrapper: HTMLElement)(using

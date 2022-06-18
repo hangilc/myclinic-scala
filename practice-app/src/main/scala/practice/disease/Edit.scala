@@ -4,6 +4,7 @@ import dev.fujiwara.domq.all.{*, given}
 import dev.myclinic.scala.model.*
 import dev.myclinic.scala.myclinicutil.DiseaseUtil
 import dev.fujiwara.kanjidate.KanjiDate
+import scala.language.implicitConversions
 
 case class Edit(
     list: List[(Disease, ByoumeiMaster, List[(DiseaseAdj, ShuushokugoMaster)])],

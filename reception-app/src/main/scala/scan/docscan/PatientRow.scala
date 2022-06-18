@@ -8,6 +8,8 @@ import dev.fujiwara.domq.searchform.SearchForm
 import dev.myclinic.scala.model.Patient
 import dev.myclinic.scala.webclient.{Api, global}
 import scala.concurrent.Future
+import scala.language.implicitConversions
+import scala.language.implicitConversions
 
 class PatientRow(using ds: DataSources):
   import PatientRow.*

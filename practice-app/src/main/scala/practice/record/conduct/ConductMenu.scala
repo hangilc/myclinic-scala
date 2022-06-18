@@ -10,6 +10,7 @@ import dev.myclinic.scala.webclient.{Api, global}
 import dev.myclinic.scala.model.*
 import dev.myclinic.scala.web.practiceapp.practice.record.CodeResolver
 import dev.myclinic.scala.web.practiceapp.practice.record.CreateHelper
+import scala.language.implicitConversions
 
 case class ConductMenu(at: LocalDate, visitId: Int):
   val link = PullDownLink("処置")

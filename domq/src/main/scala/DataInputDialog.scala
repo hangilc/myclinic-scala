@@ -3,6 +3,7 @@ package dev.fujiwara.domq
 import ElementQ.{*, given}
 import Html.{*, given}
 import Modifiers.{*, given}
+import scala.language.implicitConversions
 
 case class DataInputDialog[T](
     title: String,

@@ -6,6 +6,7 @@ import ElementQ.{*, given}
 import org.scalajs.dom.HTMLInputElement
 import org.scalajs.dom.HTMLElement
 import org.scalajs.dom.Event
+import scala.language.implicitConversions
 
 case class RadioLabel[T](name: String, value: T, label: String, wrapper: HTMLElement = span):
   val id: String = GenSym.genSym

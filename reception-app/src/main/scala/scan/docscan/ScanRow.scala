@@ -9,6 +9,7 @@ import scala.util.Failure
 import dev.myclinic.scala.model.ScannerDevice
 import scala.concurrent.Future
 import scala.scalajs.js.typedarray.ArrayBuffer
+import scala.language.implicitConversions
 
 class ScanRow(using ds: DataSources):
   import ScanRow.*

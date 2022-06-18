@@ -3,6 +3,7 @@ package dev.myclinic.scala.web.practiceapp.practice
 import dev.fujiwara.domq.all.{*, given}
 import org.scalajs.dom.HTMLElement
 import dev.myclinic.scala.web.practiceapp.practice.PracticeBus
+import scala.language.implicitConversions
 
 class Nav:
   var total = 0

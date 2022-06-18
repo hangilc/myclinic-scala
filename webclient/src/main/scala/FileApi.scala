@@ -5,6 +5,7 @@ import scala.concurrent.Future
 import org.scalajs.dom.RequestInit
 import org.scalajs.dom.HttpMethod
 import ParamsImplicits.given
+import scala.language.implicitConversions
 
 object FileApi extends FetchBase:
   def baseUrl = "/api/"

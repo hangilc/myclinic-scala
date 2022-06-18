@@ -15,6 +15,7 @@ import dev.fujiwara.domq.SearchFormPaging
 import dev.fujiwara.domq.SearchFormPagingConfig
 import dev.fujiwara.domq.SearchFormPaging.given
 import dev.fujiwara.domq.SelectionConfig
+import scala.language.implicitConversions
 
 case class SearchTextDialog(patientId: Int):
   import SearchTextDialog.{Item, NavUI}

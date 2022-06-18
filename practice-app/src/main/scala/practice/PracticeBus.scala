@@ -6,6 +6,7 @@ import org.scalajs.dom.HTMLElement
 import dev.myclinic.scala.model.*
 import scala.concurrent.Future
 import dev.myclinic.scala.webclient.global
+import scala.language.implicitConversions
 
 object PracticeBus:
   val addRightWidgetRequest = LocalEventPublisher[HTMLElement]
@@ -47,14 +48,14 @@ object PracticeBus:
 
   val hokenInfoChanged = LocalEventPublisher[(VisitId, HokenInfo)]
 
-  private var mishuuList: List[VisitId] = List.empty
-  def addMishuu(visitId: Int): Future[Unit] = 
-    if mishuuList.contains(visitId) then Future.successful(())
+  private var mishuuList: List[(Visit, Patient, Meisai)] = List.empty
+  val mishuuListChanged = LocalEventPublisher[List[(Visit, Patient, Meisai)]]
+  def addMishuu(visit: Visit, patient: Patient, meisai: Meisai): Future[Unit] = 
+    if mishuuList.contains((visit, patient, meisai)) then Future.successful(())
     else
-      mishuuList = (mishuuList :+ visitId).sorted
+      mishuuList = (mishuuList :+ (visit, patient, meisai)).sortBy((v, _, _) => v.visitId)
       mishuuListChanged.publish(mishuuList)
   def clearMishuuList(): Future[Unit] =
     mishuuList = List.empty
     mishuuListChanged.publish(mishuuList)
-  val mishuuListChanged = LocalEventPublisher[List[VisitId]]
   

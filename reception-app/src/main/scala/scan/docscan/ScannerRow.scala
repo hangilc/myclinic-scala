@@ -7,6 +7,7 @@ import org.scalajs.dom.HTMLAnchorElement
 import org.scalajs.dom.HTMLSpanElement
 import cats.*
 import cats.syntax.all.*
+import scala.language.implicitConversions
 
 class ScannerRow(using ds: DataSources):
   import ScannerRow.*

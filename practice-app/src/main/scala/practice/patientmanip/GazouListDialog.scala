@@ -4,6 +4,7 @@ import dev.fujiwara.domq.all.{*, given}
 import dev.fujiwara.domq.Html
 import dev.myclinic.scala.model.FileInfo
 import dev.myclinic.scala.util.FileUtil
+import scala.language.implicitConversions
 
 case class GazouListDialog(patientId: Int, files: List[FileInfo]):
   val display = div

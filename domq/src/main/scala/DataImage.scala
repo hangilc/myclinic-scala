@@ -10,12 +10,15 @@ import scala.scalajs.js.typedarray.ArrayBuffer
 
 object DataImage:
   def apply(data: ArrayBuffer, mimeType: String): HTMLImageElement =
+    val propBag: BlobPropertyBag = new BlobPropertyBag{}
+    propBag.`type` = mimeType
     val blob = 
       new Blob(
         js.Array(data),
-        new BlobPropertyBag {
-          override val `type`: js.UndefOr[String] = mimeType
-        }
+        propBag
+        // new BlobPropertyBag {
+        //   override var `type`: js.UndefOr[String] = mimeType
+        // }
       )
     DataImage(blob)
 

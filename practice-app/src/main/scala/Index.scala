@@ -17,6 +17,7 @@ import dev.myclinic.scala.web.appbase.HotlineBlock
 import dev.myclinic.scala.webclient.global
 import dev.myclinic.scala.web.appbase.PageLayout1
 import dev.myclinic.scala.web.practiceapp.practice.disease.Frame
+import scala.language.implicitConversions
 
 class JsMain(using EventFetcher):
   val ui = new PageLayout1("practice", "reception")

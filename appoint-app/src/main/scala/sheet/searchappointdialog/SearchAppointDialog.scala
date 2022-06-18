@@ -8,6 +8,7 @@ import dev.fujiwara.kanjidate.KanjiDate
 import scala.concurrent.Future
 import dev.myclinic.scala.webclient.{Api, global}
 import dev.myclinic.scala.web.appoint.sheet.AppointKind
+import scala.language.implicitConversions
 
 object SearchAppointDialog:
   type Result = (Appoint, AppointTime)

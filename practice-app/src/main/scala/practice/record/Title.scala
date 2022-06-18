@@ -11,6 +11,7 @@ import scala.util.Success
 import scala.util.Failure
 import dev.myclinic.scala.practiceapp.practice.record.title.RcptDetailDialog
 import dev.myclinic.scala.web.practiceapp.practice.record.title.FutanwariDialog
+import scala.language.implicitConversions
 
 class Title(visit: VisitEx):
   import Title as Helper
@@ -46,8 +47,12 @@ class Title(visit: VisitEx):
   adaptToTempVisitId(PracticeBus.currentTempVisitId)
 
   def doAddToMishuu(): Unit =
-    PracticeBus.addMishuu(visit.visitId)
-    ShowMessage.showMessage("未収リストに追加しました。")
+    for
+      patient <- Api.getPatient(visit.patientId)
+      meisai <- Api.getMeisai(visit.visitId)
+    yield 
+      PracticeBus.addMishuu(visit.toVisit, patient, meisai)
+      ShowMessage.showMessage("未収リストに追加しました。")
 
   def doFutanwari(): Unit =
     val dlog = FutanwariDialog(visit.toVisit, dlog => 

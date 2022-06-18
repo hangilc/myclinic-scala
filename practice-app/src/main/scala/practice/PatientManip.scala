@@ -9,6 +9,7 @@ import scala.concurrent.Future
 import dev.myclinic.scala.web.practiceapp.practice.patientmanip.SearchTextDialog
 import dev.myclinic.scala.web.practiceapp.practice.patientmanip.PatientImageUploadIdalog
 import dev.myclinic.scala.web.practiceapp.practice.patientmanip.GazouListDialog
+import scala.language.implicitConversions
 
 object PatientManip:
   val cashierButton = button

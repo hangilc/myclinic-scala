@@ -18,6 +18,7 @@ import dev.fujiwara.domq.DomqUtil
 import dev.myclinic.scala.web.appbase.{EventFetcher}
 import dev.myclinic.scala.web.appbase.SyncedDataSource
 import dev.myclinic.scala.web.appbase.ElementEvent.*
+import scala.language.implicitConversions
 
 class HokenList(patientId: Int)(using EventFetcher):
   import HokenList.*

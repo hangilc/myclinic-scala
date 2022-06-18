@@ -2,6 +2,7 @@ package dev.myclinic.scala.web.reception.scan.docscan
 
 import dev.fujiwara.domq.all.{*, given}
 import scala.concurrent.Future
+import scala.language.implicitConversions
 
 class UploadRow(reqClose: () => Unit)(using ds: DataSources):
   import UploadRow.*

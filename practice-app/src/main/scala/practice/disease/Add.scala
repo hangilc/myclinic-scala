@@ -10,6 +10,7 @@ import org.scalajs.dom.HTMLElement
 import scala.concurrent.Future
 import cats.syntax.all.*
 import dev.fujiwara.dateinput.ManualInput
+import scala.language.implicitConversions
 
 case class Add(
     patientId: Int,

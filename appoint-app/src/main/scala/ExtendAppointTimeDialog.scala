@@ -9,6 +9,7 @@ import dev.myclinic.scala.validator.AppointTimeValidator
 import dev.myclinic.scala.validator.AppointTimeValidator.{*, given}
 import dev.myclinic.scala.webclient.Api
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.language.implicitConversions
 
 class ExtendAppointTimeDialog(
     ui: ExtendAppointTimeDialog.UI,

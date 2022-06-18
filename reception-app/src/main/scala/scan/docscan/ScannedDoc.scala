@@ -13,6 +13,7 @@ import scala.util.Failure
 import scala.concurrent.Promise
 import dev.fujiwara.domq.DataImage
 import dev.myclinic.scala.model.ScannerDevice
+import scala.language.implicitConversions
 
 class ScannedDoc(scannedFile: String, origIndex: Int)(using ds: DataSources):
   import ScannedDoc.*

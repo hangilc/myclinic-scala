@@ -1,6 +1,7 @@
 package dev.myclinic.scala.web.reception.scan.docscan
 
 import dev.fujiwara.domq.all.{*, given}
+import scala.language.implicitConversions
 
 class Row:
   val title = div

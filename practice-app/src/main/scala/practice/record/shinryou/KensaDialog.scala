@@ -8,6 +8,7 @@ import cats.syntax.all.*
 import dev.myclinic.scala.web.practiceapp.practice.PracticeBus
 import dev.myclinic.scala.web.practiceapp.practice.record.CodeResolver
 import dev.myclinic.scala.web.practiceapp.practice.record.CreateHelper
+import scala.language.implicitConversions
 
 case class KensaDialog(
     config: Map[String, List[String]],

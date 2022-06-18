@@ -4,6 +4,7 @@ import ElementQ.{*, given}
 import Html.{*, given}
 import Modifiers.{*, given}
 import org.scalajs.dom.HTMLOptionElement
+import scala.language.implicitConversions
 
 case class SelectProxy[T](
     items: List[T],

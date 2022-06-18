@@ -5,6 +5,7 @@ import dev.myclinic.scala.model.Meisai
 import org.scalajs.dom.HTMLFormElement
 import dev.fujiwara.domq.Html
 import dev.myclinic.scala.webclient.{Api, global}
+import scala.language.implicitConversions
 
 case class CashierDialog(meisai: Meisai, visitId: Int, onDone: () => Unit):
   private var chargeValue: Int = meisai.charge

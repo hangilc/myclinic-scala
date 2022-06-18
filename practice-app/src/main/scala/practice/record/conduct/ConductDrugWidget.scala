@@ -15,6 +15,7 @@ import scala.util.Try
 import scala.concurrent.Future
 import dev.myclinic.scala.model.ConductShinryou
 import dev.myclinic.scala.model.ConductDrug
+import scala.language.implicitConversions
 
 case class ConductDrugWidget(
     at: LocalDate,

@@ -9,6 +9,7 @@ import dev.myclinic.scala.drawerform.receipt.ReceiptDrawerData
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import org.scalajs.dom.window
+import scala.language.implicitConversions
 
 case class Edit(
     chargeOption: Option[Charge],

@@ -153,7 +153,7 @@ object FileService extends DateTimeQueryParam with Publisher:
 
     case req @ GET -> Root / "patient-image" :? intPatientId(patientId) +& strFileName(fileName) =>
       val file = Path(Config.paperScanDir(patientId)) / sanitizeFileName(fileName)
-      StaticFile.fromFile(file.toNioPath.toFile, Some(req)).getOrElse(Response(Status.NotFound))
+      StaticFile.fromPath(file, Some(req)).getOrElse(Response(Status.NotFound))
 
     case GET -> Root / "get-covid-2nd-shot-data" :? intPatientId(patientId) =>
       val data = covid2ndShotMap.get(patientId)

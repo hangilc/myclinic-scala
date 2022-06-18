@@ -15,6 +15,7 @@ import scala.scalajs.js
 import dev.myclinic.scala.model.Patient
 import org.scalajs.dom.MouseEvent
 import dev.myclinic.scala.web.reception.scan.FutureCallbacks
+import scala.language.implicitConversions
 
 object ScannedItem:
   class UI:

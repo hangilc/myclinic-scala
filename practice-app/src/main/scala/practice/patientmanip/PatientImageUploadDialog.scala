@@ -9,6 +9,7 @@ import scala.util.Failure
 import dev.myclinic.scala.util.FileUtil
 import java.time.LocalDateTime
 import dev.myclinic.scala.util.PatientImageUtil
+import scala.language.implicitConversions
 
 case class PatientImageUploadIdalog(patientId: Int):
   val form = Html.form

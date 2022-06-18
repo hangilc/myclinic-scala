@@ -2,6 +2,7 @@ package dev.myclinic.scala.web.practiceapp.practice.record.shinryou
 
 import dev.fujiwara.domq.all.{*, given}
 import PanelHelper.{toElement, makeChecks, collectChecks, listSelected, clearChecks}
+import scala.language.implicitConversions
 
 final case class KensaPanel(config: Map[String, List[String]]):
   val leftChecks: List[CheckLabel[String] | Unit] =

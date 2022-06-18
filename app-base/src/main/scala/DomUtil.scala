@@ -2,6 +2,7 @@ package dev.myclinic.scala.web.appbase
 
 import org.scalajs.dom.{HTMLElement, document}
 import dev.fujiwara.domq.all.{*, given}
+import scala.language.implicitConversions
 
 object DomUtil:
   private lazy val store: HTMLElement = 

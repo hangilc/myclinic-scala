@@ -6,6 +6,7 @@ import ElementQ.{*, given}
 import Html.{*, given}
 import Modifiers.{*, given}
 import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits.global
+import scala.language.implicitConversions
 
 trait SearchFormPagingConfig:
   def itemsPerPage: Int = 10

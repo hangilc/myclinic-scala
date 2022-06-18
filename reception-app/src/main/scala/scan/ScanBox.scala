@@ -1,6 +1,7 @@
 package dev.myclinic.scala.web.reception.scan
 
 import dev.fujiwara.domq.all.{*, given}
+import scala.language.implicitConversions
 
 class ScanBox:
   val title = div

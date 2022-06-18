@@ -8,6 +8,7 @@ import scala.util.Failure
 import dev.myclinic.scala.webclient.global
 import cats.*
 import cats.syntax.all.*
+import scala.language.implicitConversions
 
 class ScannedRow(using ds: DataSources):
   val row = new Row

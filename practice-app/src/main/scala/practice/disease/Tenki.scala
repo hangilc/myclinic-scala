@@ -12,6 +12,7 @@ import math.Ordering.Implicits.infixOrderingOps
 import dev.myclinic.scala.webclient.{Api, global}
 import cats.syntax.all.*
 import org.scalajs.dom.MouseEvent
+import scala.language.implicitConversions
 
 case class Tenki(
     list: List[(Disease, ByoumeiMaster, List[(DiseaseAdj, ShuushokugoMaster)])],

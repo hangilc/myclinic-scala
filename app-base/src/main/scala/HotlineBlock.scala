@@ -13,6 +13,7 @@ import org.scalajs.dom.HTMLElement
 import org.scalajs.dom.HTMLInputElement
 import org.scalajs.dom.HTMLTextAreaElement
 import dev.myclinic.scala.model.Patient
+import scala.language.implicitConversions
 
 class HotlineBlock(sendAs: String, sendTo: String)(using fetcher: EventFetcher):
   val ui = new HotlineBlockUI

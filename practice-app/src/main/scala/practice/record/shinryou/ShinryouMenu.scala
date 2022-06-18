@@ -10,6 +10,7 @@ import dev.myclinic.scala.web.practiceapp.practice.record.CodeResolver
 import dev.myclinic.scala.model.Shinryou
 import cats.data.EitherT
 import scala.concurrent.Future
+import scala.language.implicitConversions
 
 case class ShinryouMenu(at: LocalDate, visitId: Int):
   val auxMenu = PullDownLink("その他")

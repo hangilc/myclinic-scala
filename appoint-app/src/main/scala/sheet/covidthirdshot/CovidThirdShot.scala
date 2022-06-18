@@ -8,6 +8,7 @@ import java.time.LocalDate
 import dev.fujiwara.kanjidate.KanjiDate
 import dev.myclinic.scala.util.DateUtil
 import scala.util.{Try, Success, Failure}
+import scala.language.implicitConversions
 
 class CovidThirdShot(val ui: CovidThirdShot.UI):
   ui.eSearchFrom(onsubmit := (onSearchSubmit _))

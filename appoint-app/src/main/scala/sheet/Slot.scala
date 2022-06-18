@@ -7,6 +7,7 @@ import dev.myclinic.scala.web.appoint.sheet.appointdialog.EditAppointDialog
 import org.scalajs.dom.MouseEvent
 import org.scalajs.dom.HTMLElement
 import dev.myclinic.scala.web.appoint.CustomEvents
+import scala.language.implicitConversions
 
 case class Slot(dsrc: SyncedDataSource2[Appoint, AppointTime]):
   def appoint: Appoint = dsrc.data._1

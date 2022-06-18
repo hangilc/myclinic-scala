@@ -5,6 +5,7 @@ import dev.fujiwara.domq.all.{_, given}
 import dev.myclinic.scala.model.*
 import dev.myclinic.scala.webclient.Api
 import dev.myclinic.scala.webclient.global
+import scala.language.implicitConversions
 
 case class FutanwariDialog(visit: Visit, onChange: (FutanwariDialog => Unit)):
   val input = Html.input

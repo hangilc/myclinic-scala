@@ -3,6 +3,7 @@ package dev.myclinic.scala.web.practiceapp.practice.record.shinryou
 import dev.fujiwara.domq.all.{*, given}
 import org.scalajs.dom.HTMLElement
 import PanelHelper.{toElement, makeChecks, collectChecks, listSelected}
+import scala.language.implicitConversions
 
 case class RegularPanel(
     leftNames: List[String],

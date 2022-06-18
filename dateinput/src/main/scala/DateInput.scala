@@ -9,6 +9,7 @@ import cats.syntax.all.*
 import scala.util.Try
 import scala.util.Success
 import scala.util.Failure
+import scala.language.implicitConversions
 
 case class DateInput(init: LocalDate)(using config: DateInputConfig):
   val d = DateInfo(init)

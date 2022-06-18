@@ -3,6 +3,7 @@ package dev.fujiwara.domq
 import Modifiers.{*, given}
 import ElementQ.{*, given}
 import org.scalajs.dom.{HTMLElement, HTMLLabelElement}
+import scala.language.implicitConversions
 
 case class CheckLabel[T](value: T, labelStuffer: HTMLLabelElement => Unit):
   val checkId = GenSym.genSym

@@ -7,6 +7,7 @@ import scala.concurrent.Future
 import dev.myclinic.scala.webclient.Api
 import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
 import dev.myclinic.scala.web.reception.scan.ScanBox
+import scala.language.implicitConversions
 
 class PatientImages:
   val box = new ScanBox

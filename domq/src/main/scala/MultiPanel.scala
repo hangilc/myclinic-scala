@@ -5,6 +5,7 @@ import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
 import org.scalajs.dom.HTMLElement
+import scala.language.implicitConversions
 
 
 trait MultiPanelCapability[Id]:

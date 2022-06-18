@@ -19,6 +19,7 @@ import dev.myclinic.scala.web.practiceapp.practice.record.shinryou.ShinryouMenu
 import dev.myclinic.scala.web.practiceapp.practice.record.conduct.ConductMenu
 import dev.myclinic.scala.web.practiceapp.practice.record.conduct.Conduct
 import java.time.LocalDate
+import scala.language.implicitConversions
 
 class Record(visitEx: VisitEx):
   val title = new Title(visitEx)

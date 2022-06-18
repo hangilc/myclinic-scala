@@ -6,6 +6,7 @@ import dev.myclinic.scala.webclient.{Api, global}
 import java.time.LocalDate
 import dev.myclinic.scala.web.practiceapp.practice.PracticeBus
 import dev.myclinic.scala.web.practiceapp.practice.record.CreateHelper
+import scala.language.implicitConversions
 
 case class SearchDialog(at: LocalDate, visitId: Int):
   val form = new SearchForm[ShinryouMaster](

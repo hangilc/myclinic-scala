@@ -12,6 +12,7 @@ import org.scalajs.dom.HTMLFormElement
 import org.scalajs.dom.HTMLElement
 import dev.fujiwara.domq.SelectionConfig
 import dev.fujiwara.domq.Selection.given
+import scala.language.implicitConversions
 
 trait InputProvider[I]:
   def getText(input: I): String

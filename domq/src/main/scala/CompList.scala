@@ -5,6 +5,7 @@ import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.TypeClasses.{Comp, Dispose}
 import scala.math.Ordered.orderingToOrdered
+import scala.language.implicitConversions
 
 class CompListBase[C](
     remove: HTMLElement => Unit = _.remove()

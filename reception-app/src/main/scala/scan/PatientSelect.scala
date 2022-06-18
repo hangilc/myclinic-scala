@@ -7,6 +7,7 @@ import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
 
 import dev.myclinic.scala.apputil.ModelExt.*
 import java.time.LocalDate
+import scala.language.implicitConversions
 
 class PatientSelect(ui: PatientSelect.UI, onSelectCallback: Patient => Unit):
   val m = Modal("患者選択", ui.body, ui.commands)

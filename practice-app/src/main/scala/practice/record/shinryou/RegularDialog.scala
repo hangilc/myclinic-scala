@@ -16,7 +16,7 @@ import cats.implicits.*
 import cats.data.EitherT
 import dev.myclinic.scala.model.CreateShinryouConductRequest
 import dev.myclinic.scala.web.practiceapp.practice.record.CreateHelper
-
+import scala.language.implicitConversions
 
 class RegularDialog(
     leftNames: List[String],

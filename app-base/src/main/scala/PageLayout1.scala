@@ -1,6 +1,7 @@
 package dev.myclinic.scala.web.appbase
 
 import dev.fujiwara.domq.all.{*, given}
+import scala.language.implicitConversions
 
 class PageLayout1(hotlineSendAs: String, hotlineSendTo: String)(using EventFetcher):
   val banner = div

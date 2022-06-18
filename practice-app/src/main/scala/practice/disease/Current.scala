@@ -3,6 +3,7 @@ package dev.myclinic.scala.web.practiceapp.practice.disease
 import dev.fujiwara.domq.all.{_, given}
 import dev.myclinic.scala.model.*
 import dev.myclinic.scala.myclinicutil.DiseaseUtil
+import scala.language.implicitConversions
 
 case class Current(list: List[(Disease, ByoumeiMaster, List[(DiseaseAdj, ShuushokugoMaster)])]):
   val ele = div(

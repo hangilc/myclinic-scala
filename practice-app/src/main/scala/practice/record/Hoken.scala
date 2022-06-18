@@ -7,7 +7,7 @@ import dev.myclinic.scala.web.practiceapp.practice.record.hoken.{Disp, EditDialo
 import dev.myclinic.scala.model.HokenInfo
 import dev.myclinic.scala.webclient.{Api, global}
 import java.time.LocalDate
-
+import scala.language.implicitConversions
 
 class Hoken(visitId: Int, patientId: Int, date: LocalDate, hoken: HokenInfo):
   val ele = div

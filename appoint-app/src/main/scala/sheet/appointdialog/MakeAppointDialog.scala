@@ -9,6 +9,7 @@ import scala.scalajs.js
 import scala.util.{Success, Failure}
 import dev.myclinic.scala.validator.AppointValidator
 import scala.concurrent.Future
+import scala.language.implicitConversions
 
 class MakeAppointDialog(
     ui: MakeAppointDialog.UI,

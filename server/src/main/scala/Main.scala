@@ -35,6 +35,7 @@ import scala.concurrent.duration.DurationInt
 import com.typesafe.scalalogging.Logger
 import dev.myclinic.scala.clinicop.ClinicOperation
 import dev.myclinic.scala.config.Config
+import org.http4s.server.websocket.WebSocketBuilder2
 
 object Main extends IOApp:
   val logger = Logger(getClass.getName)
@@ -46,7 +47,7 @@ object Main extends IOApp:
     ): IO[Unit] =
       topic.publish1(Text(text)) >> IO.pure(())
 
-  def ws(topic: Topic[IO, WebSocketFrame]) = HttpRoutes.of[IO] {
+  def ws(topic: Topic[IO, WebSocketFrame], websocketBuilder: WebSocketBuilder2[IO]) = HttpRoutes.of[IO] {
     case GET -> Root / "events" =>
       for
         eventId <- Db.currentEventId()
@@ -63,7 +64,7 @@ object Main extends IOApp:
             case Text(t, _) => IO.delay(println(t))
             case f          => IO.delay(println(s"Unknown type: $f"))
           }
-        resp <- WebSocketBuilder[IO].build(toClient, fromClient)
+        resp <- websocketBuilder.build(toClient, fromClient)
       yield resp
   }
 
@@ -82,13 +83,13 @@ object Main extends IOApp:
       sslContextOption: Option[SSLContext]
   ) =
     given Topic[IO, WebSocketFrame] = topic
-    var builder = BlazeServerBuilder[IO](global)
+    var builder = BlazeServerBuilder[IO]
       .withSocketReuseAddress(true)
       .bindHttp(port, "0.0.0.0")
     if sslContextOption.isDefined then
       builder = builder.withSslContext(sslContextOption.get)
     builder
-      .withHttpApp(
+      .withHttpWebSocketApp(websocketBuilder =>
         Router(
           "/appoint" -> HttpRoutes.of[IO] { case GET -> Root =>
             PermanentRedirect(Location(uri"/appoint/"))
@@ -100,7 +101,7 @@ object Main extends IOApp:
             PermanentRedirect(Location(uri"/practice/"))
           },
           "/api" -> RestService.routes,
-          "/ws" -> ws(topic),
+          "/ws" -> ws(topic, websocketBuilder),
           "/deploy" -> deployTestService,
           "/portal-tmp" -> portalTmpStaticService,
           "/" -> staticService

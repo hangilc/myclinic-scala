@@ -6,6 +6,7 @@ import dev.myclinic.scala.webclient.{Api, global}
 import scala.concurrent.Future
 import java.time.LocalDate
 import cats.syntax.all.*
+import scala.language.implicitConversions
 
 case class Search(
     startDateRef: () => LocalDate,

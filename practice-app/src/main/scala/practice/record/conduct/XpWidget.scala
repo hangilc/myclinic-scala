@@ -10,6 +10,7 @@ import dev.myclinic.scala.webclient.{Api, global}
 import dev.myclinic.scala.model.CreateConductRequest
 import dev.myclinic.scala.model.ConductKind
 import dev.myclinic.scala.web.practiceapp.practice.PracticeBus
+import scala.language.implicitConversions
 
 case class XpWidget(at: LocalDate, visitId: Int, onDone: XpWidget => Unit):
   val labelSelect = select

@@ -11,6 +11,7 @@ import dev.myclinic.scala.web.appbase.PrintDialog
 import dev.fujiwara.scala.drawer.PaperSize
 import dev.myclinic.scala.formatshohousen.FormatShohousen
 import dev.myclinic.scala.formatshohousen.Shohou
+import scala.language.implicitConversions
 
 class Text(origText: ModelText):
   val ele = div()

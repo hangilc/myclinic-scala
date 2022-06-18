@@ -1,6 +1,6 @@
 val ESVersion = org.scalajs.linker.interface.ESVersion
 
-ThisBuild / scalaVersion := "3.1.2"
+ThisBuild / scalaVersion := "3.1.3"
 ThisBuild / version := "0.1.0-SNAPSHOT"
 ThisBuild / organization := "dev.myclinic.scala"
 ThisBuild / organizationName := "myclinic"
@@ -8,20 +8,21 @@ ThisBuild / resolvers += Resolver.mavenLocal
 // ThisBuild / scalaJSLinkerConfig ~= (_.withESFeatures(_.withESVersion(ESVersion.ES2018)))
 
 val mysqlVersion = "6.0.6"
-val http4sVersion = "0.23.3"
+val http4sVersion = "0.23.12"
 val doobieVersion = "1.0.0-RC2"
-val circeVersion = "0.14.1"
-val scalaJavaTimeVersion = "2.3.0"
-val scalaJSDomVersion = "2.1.0"
-val catsVersion = "2.7.0"
+val circeVersion = "0.14.2"
+val circeYamlVersion = "0.14.1"
+val scalaJavaTimeVersion = "2.4.0"
+val scalaJSDomVersion = "2.2.0"
+val catsVersion = "2.8.0"
 val macrotaskExecutorVersion = "1.0.0"
-val jacksonVersion = "2.13.1"
+val jacksonVersion = "2.13.3"
 val slf4jVersion = "1.7.25"
-val fs2Version = "3.2.6"
+val fs2Version = "3.2.8"
 val scalaLoggingVersion = "3.9.4"
 val scalaTestVersion = "3.2.10"
 
-ThisBuild / scalacOptions ++= Seq("-deprecation", "-encoding", "UTF-8")
+ThisBuild / scalacOptions ++= Seq("-deprecation", "-encoding", "UTF-8", "-feature")
 ThisBuild / javacOptions ++= Seq("-encoding", "UTF-8")
 
 val rootDir = ThisBuild / baseDirectory
@@ -409,7 +410,7 @@ lazy val config = project
     name := "config",
     libraryDependencies ++= Seq(
       "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion,
-      "io.circe" %% "circe-yaml" % circeVersion
+      "io.circe" %% "circe-yaml" % circeYamlVersion
     )
   )
 

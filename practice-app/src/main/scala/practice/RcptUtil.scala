@@ -4,6 +4,7 @@ import dev.fujiwara.domq.all.{*, given}
 import org.scalajs.dom.HTMLElement
 import dev.myclinic.scala.model.Meisai
 import dev.myclinic.scala.model.MeisaiSectionData
+import scala.language.implicitConversions
 
 object RcptUtil:
   def rcptDetail(meisai: Meisai): HTMLElement =

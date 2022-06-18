@@ -4,6 +4,7 @@ import dev.fujiwara.domq.all.{*, given}
 import dev.myclinic.scala.webclient.{Api, global}
 import scala.concurrent.Future
 import dev.myclinic.scala.model.*
+import scala.language.implicitConversions
 
 case class Frame(patientId: Int):
   val body = div

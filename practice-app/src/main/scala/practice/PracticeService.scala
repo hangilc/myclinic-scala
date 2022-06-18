@@ -18,6 +18,7 @@ import scala.concurrent.Future
 import scala.quoted.FromExpr.NoneFromExpr
 import scala.util.Failure
 import scala.util.Success
+import scala.language.implicitConversions
 
 class PracticeService extends SideMenuService:
   val left = new PracticeMain
@@ -249,5 +250,6 @@ class PracticeRight:
 
 class PracticeRightUI:
   val ele = div(cls := "practice-right-column",
-    Disease.ele
+    Disease.ele,
+    Mishuu.ele
   )

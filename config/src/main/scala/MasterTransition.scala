@@ -2,6 +2,7 @@ package dev.myclinic.scala.config
 
 import java.time.LocalDate
 import dev.myclinic.scala.util.DateUtil.given
+import scala.language.implicitConversions
 
 case class MasterTransition(
   shinryou: MasterTransitionRules = MasterTransitionRules(),

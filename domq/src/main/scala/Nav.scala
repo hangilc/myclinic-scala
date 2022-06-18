@@ -4,6 +4,7 @@ import org.scalajs.dom.HTMLElement
 import ElementQ.{*, given}
 import Html.{*, given}
 import Modifiers.{*, given}
+import scala.language.implicitConversions
 
 trait NavUI:
   def gotoFirstLink: Option[HTMLElement]

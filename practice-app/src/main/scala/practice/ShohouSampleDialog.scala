@@ -5,6 +5,7 @@ import dev.fujiwara.domq.all.{*, given}
 import dev.fujiwara.domq.searchform.SearchForm
 import dev.myclinic.scala.webclient.{Api, global}
 import dev.myclinic.scala.formatshohousen.FormatUtil
+import scala.language.implicitConversions
 
 object ShohouSampleDialog:
 

@@ -3,6 +3,7 @@ package dev.myclinic.scala.web.practiceapp.practice.record.payment
 import dev.fujiwara.domq.all.{*, given}
 import dev.myclinic.scala.model.*
 import dev.myclinic.scala.webclient.{Api, global}
+import scala.language.implicitConversions
 
 case class Disp(chargeOption: Option[Charge], paymentOption: Option[Payment], visitId: Int):
   val cssPre = "practice-record-payment-disp"

@@ -7,6 +7,7 @@ import dev.fujiwara.dateinput.EditableDate
 import dev.fujiwara.dateinput.EditableOptionalDate
 import dev.myclinic.scala.myclinicutil.DiseaseUtil
 import dev.myclinic.scala.webclient.{Api, global}
+import scala.language.implicitConversions
 
 case class Modify(
     var disease: Disease,

@@ -3,6 +3,7 @@ package dev.myclinic.scala.practiceapp.practice.record.title
 import dev.fujiwara.domq.all.{*, given}
 import dev.myclinic.scala.model.Meisai
 import dev.myclinic.scala.practiceapp.practice.RcptUtil
+import scala.language.implicitConversions
 
 case class RcptDetailDialog(meisai: Meisai):
   val dlog = new ModalDialog3()

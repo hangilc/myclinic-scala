@@ -4,6 +4,7 @@ import Html.{*, given}
 import Modifiers.{*, given}
 import ElementQ.{*, given}
 import org.scalajs.dom.HTMLElement
+import scala.language.implicitConversions
 
 case class RadioGroup[T](
     items: List[(String, T)],
