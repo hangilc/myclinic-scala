@@ -111,6 +111,13 @@ object Absolute:
       dragTarget.style.left = s"${e.clientX + dragTargetOffsetX}px"
       dragTarget.style.top = s"${e.clientY + dragTargetOffsetY}px"
 
+  private val undragEventHandler: scala.scalajs.js.Function1[MouseEvent, Unit] = e =>
+    if dragTarget != null then
+      dragTarget = null
+      document.body.removeEventListener("mousemove", dragEventHandler)
+      document.body.removeEventListener("mouseup", undragEventHandler)
+      println("drag released")
+
 
   def enableDrag(e: HTMLElement, dragArea: HTMLElement): Unit =
     dragArea.addEventListener("mousedown", (event: MouseEvent) => {
@@ -119,12 +126,9 @@ object Absolute:
       dragTargetOffsetX = parseInt(style.left) - event.clientX.toInt 
       dragTargetOffsetY = parseInt(style.top) - event.clientY.toInt 
       document.body.addEventListener("mousemove", dragEventHandler)
+      document.body.addEventListener("mouseup", undragEventHandler)
     })
 
-    dragArea.addEventListener("mouseup", (e: MouseEvent) => {
-      dragTarget = null
-      document.body.removeEventListener("mousemove", dragEventHandler)
-    })
 
 
 
