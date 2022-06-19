@@ -6,7 +6,8 @@ import org.scalajs.dom.Element
 object Viewport:
   private def root: Element = document.documentElement
 
-  def width: Int = root.clientWidth
-  def height: Int = root.clientHeight
-  def offsetLeft: Double = root.scrollLeft
-  def offsetTop: Double = root.scrollTop
+  // def width: Int = root.clientWidth
+  def width: Int = root.getBoundingClientRect().width.toInt
+  def height: Int = root.getBoundingClientRect().height.toInt
+  def offsetLeft: Int = root.scrollLeft.toInt
+  def offsetTop: Int = root.scrollTop.toInt

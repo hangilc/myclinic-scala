@@ -44,6 +44,7 @@ object Absolute:
 
   def setRightOf(e: HTMLElement, right: Double): Unit =
     val left = right - outerWidthOf(e) - marginLeftOf(e) - marginRightOf(e)
+    println(("right", right))
     e.style.left = s"${left}px"
 
   def setBottomOf(e: HTMLElement, bottom: Double): Unit =
