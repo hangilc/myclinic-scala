@@ -116,7 +116,6 @@ object Absolute:
       dragTarget = null
       document.body.removeEventListener("mousemove", dragEventHandler)
       document.body.removeEventListener("mouseup", undragEventHandler)
-      println("drag released")
 
 
   def enableDrag(e: HTMLElement, dragArea: HTMLElement): Unit =
@@ -128,6 +127,24 @@ object Absolute:
       document.body.addEventListener("mousemove", dragEventHandler)
       document.body.addEventListener("mouseup", undragEventHandler)
     })
+
+  def openWithScreen(e: HTMLElement, locator: HTMLElement => Unit): () => Unit =
+    val zIndexScreen = ZIndexManager.alloc()
+    val zIndexElement = ZIndexManager.alloc()
+    val screen = div(cls := "domq-screen", zIndex := zIndexScreen)
+
+    def close(): Unit = 
+      e.remove()
+      screen.remove()
+      ZIndexManager.release(zIndexElement)
+      ZIndexManager.release(zIndexScreen)
+
+    e(css(_.visibility = "hidden"), zIndex := zIndexElement)
+    document.body(screen(onclick := (close _)))
+    document.body(e)
+    locator(e)
+    e(css(_.visibility = "visible"))
+    (close _)
 
 
 

@@ -15,13 +15,9 @@ object StartUpPractice:
     e.id = "e"
     e.style.border = "10px solid orange"
     Absolute.positionAbsolute(e, 500, 400)
-    document.body(e)
-    println(Absolute.leftOf(b))
-    println(b.scrollWidth)
     Absolute.setLeftOf(e, Absolute.leftOf(b) + b.getBoundingClientRect().width)
     Absolute.setBottomOf(e, Absolute.topOf(b) + b.scrollHeight)
-    // Absolute.ensureInViewOffsetting(e, 10)
-    Absolute.ensureInViewFlipping(e, Absolute.leftOf(b), Absolute.topOf(b))
     Absolute.enableDrag(e, e)
+    Absolute.openWithScreen(e, e => Absolute.ensureInViewFlipping(e, Absolute.leftOf(b), Absolute.topOf(b)))
     Future.successful(())
 
