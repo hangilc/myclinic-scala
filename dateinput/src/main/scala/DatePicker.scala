@@ -7,12 +7,15 @@ import org.scalajs.dom.HTMLElement
 import java.time.LocalDate
 import scala.collection.mutable.ListBuffer
 import dev.fujiwara.dateinput.datepicker.*
+import dev.fujiwara.kanjidate.KanjiDate.Gengou
 
 case class DatePicker():
+  val yearDisp = YearDisp(Gengou.Reiwa, 4)
+  val monthDisp = MonthDisp(6)
   val datesTab = div
   val ele = div(
     div(
-
+      yearDisp.ele, monthDisp.ele
     ),
     datesTab(cls := "domq-date-picker-dates-tab"),
     css(_.position = "absolute")

@@ -1,3 +1,7 @@
+.domq-display-inline-block {
+  display: inline-block;
+}
+
 /* Form ****************************************************************/
 
 .domq-form-value .input-group {
@@ -22,6 +26,22 @@
   grid-template-columns: 1.5rem 1.5rem 1.5rem 1.5rem 1.5rem 1.5rem 1.5rem;
   margin-top: 6px;
   margin-right: 0.5rem;
+}
+
+.domq-date-picker-year-disp .domq-icon {
+  width: 1rem;
+  height: 1rem;
+  position: relative;
+  top: -2px;
+  cursor: pointer;
+}
+
+.domq-date-picker-year-disp .domq-icon-chevron-left {
+  left: 2px;
+}
+
+.domq-date-picker-year-disp .domq-icon-chevron-right {
+  left: -3px;
 }
 
 

@@ -80,6 +80,43 @@ object Icons:
       )
     )
 
+  // Based from Heroicons
+  // <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>  
+  def chevronDown: HTMLElement =
+    makeIcon(
+      List(
+        "M19 9l-7 7-7-7"
+      )
+    )
+  
+  // Based from Heroicons
+  // <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+  def chevronLeft: HTMLElement =
+    makeIcon(
+      List(
+        "M15 19l-7-7 7-7"
+      )
+    )
+  
+  // Based from Heroicons
+  // <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+  def chevronRight: HTMLElement =
+    makeIcon(
+      List(
+        "M9 5l7 7-7 7"
+      )
+    )
+  
+  // Based from Heroicons
+  // <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>  // src: https://github.com/tailwindlabs/heroicons
+  def chevronUp: HTMLElement =
+    makeIcon(
+      List(
+        "M5 15l7-7 7 7"
+      )
+    )
+  
+
   def circle: HTMLElement =
     makeIcon(
       List(
