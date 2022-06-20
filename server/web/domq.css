@@ -33,6 +33,10 @@
   border-radius: 6px;
 }
 
+.domq-date-picker .year-nen {
+  white-space: nowrap;
+}
+
 .domq-date-picker-dates-tab {
   display: grid;
   grid-template-columns: 1.5rem 1.5rem 1.5rem 1.5rem 1.5rem 1.5rem 1.5rem;
@@ -71,6 +75,7 @@
   top: -1px;
   stroke: light-gray;
   cursor: pointer;
+  margin-left: 6px;
 }
 
 .domq-date-picker-date-box {
@@ -78,11 +83,11 @@
 }
 
 .domq-date-picker-date-box.init-date {
-  background-color: orange;
+  background-color: #ffe7bf;
 }
 
 .domq-date-picker-date-box.init-date-equiv {
-  background-color: green;
+  background-color: #dcdcdc;
 }
 
 /* .domq-date-input-wrapper {
