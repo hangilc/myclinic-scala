@@ -3,6 +3,7 @@ package dev.fujiwara.kanjidate
 import java.time.{LocalDate, LocalTime}
 import scala.Ordered.orderingToOrdered
 import java.time.DayOfWeek
+import java.time.temporal.ChronoUnit
 
 object KanjiDate:
 
@@ -37,6 +38,10 @@ object KanjiDate:
     val minute = formatMinute(info.minute)
     val second = formatSecond(info.second)
     s"${hour}${minute}${second}"
+
+  def lastDayOfMonth(year: Int, month: Int): LocalDate =
+    val nextMonthFirst = LocalDate.of(year, month, 1).plus(1, ChronoUnit.MONTHS)
+    nextMonthFirst.minus(1, ChronoUnit.DAYS)
 
   enum Gengou(val name: String, val alpha: String, val startDate: LocalDate):
     case Meiji extends Gengou("明治", "Meiji", LocalDate.of(1873, 1, 1))

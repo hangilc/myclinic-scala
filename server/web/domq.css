@@ -2,6 +2,10 @@
   display: inline-block;
 }
 
+.domq-user-select-none {
+  user-select: none;
+}
+
 /* Form ****************************************************************/
 
 .domq-form-value .input-group {
@@ -52,6 +56,14 @@
   margin-left: 10px;
 }
 
+.domq-date-picker .year-nen .domq-icon-cog {
+  width: 1rem;
+  height: 1rem;
+  position: relative;
+  top: -1px;
+  stroke: light-gray;
+  cursor: pointer;
+}
 
 /* .domq-date-input-wrapper {
   display: flex;

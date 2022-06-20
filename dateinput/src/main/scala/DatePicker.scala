@@ -8,6 +8,7 @@ import java.time.LocalDate
 import scala.collection.mutable.ListBuffer
 import dev.fujiwara.dateinput.datepicker.*
 import dev.fujiwara.kanjidate.KanjiDate.Gengou
+import dev.fujiwara.kanjidate.KanjiDate
 
 case class DatePicker(init: Option[LocalDate]):
   private val (initGengou: Gengou, initNen: Int, initMonth: Int) =
@@ -16,21 +17,43 @@ case class DatePicker(init: Option[LocalDate]):
       val (g, n) = Gengou.dateToGengou(d).get
       (g, n, d.getMonthValue)
     ).get
+  private val initDay: Option[Int] = init.map(_.getDayOfMonth)
   val yearDisp = YearDisp(initGengou, initNen)
   val monthDisp = MonthDisp(initMonth)
   val datesTab = div
-  val ele = div(
-    div(
-      yearDisp.ele, monthDisp.ele
+  val ele = div(cls := "domq-date-picker domq-user-select-none",
+    div(cls := "year-nen",
+      yearDisp.ele, monthDisp.ele, Icons.cog(cls := "domq-icon-cog")
     ),
     datesTab(cls := "domq-date-picker-dates-tab"),
     css(_.position = "absolute")
   )
+  yearDisp.onChangeYear(doChangeYear _)
+  monthDisp.onChangeMonth(doChangeMonth _)
 
   def open(locator: HTMLElement => Unit): Unit =
     var cur: LocalDate = init.getOrElse(LocalDate.now()) 
     stuffDates(cur.getYear, cur.getMonthValue)
     Absolute.openWithScreen(ele, locator)
+
+  private def doChangeYear(newYear: Int): Unit =
+    val tmpDay = initDay.getOrElse(1)
+    val d = tmpDay.min(KanjiDate.lastDayOfMonth(newYear, monthDisp.month).getDayOfMonth)
+    val (g, n) = Gengou.dateToGengou(LocalDate.of(newYear, monthDisp.month, d)).get
+    yearDisp.set(g, n)
+    stuffDates(yearDisp.year, monthDisp.month)
+
+  private def doChangeMonth(newMonth: Int): Unit =
+    val diff = newMonth - monthDisp.month
+    val (targetYear, targetMonth) = 
+      val t = LocalDate.of(yearDisp.year, monthDisp.month, 1).plusMonths(diff)
+      (t.getYear, t.getMonthValue)
+    val tmpDay = initDay.getOrElse(1)
+    val d = tmpDay.min(KanjiDate.lastDayOfMonth(targetYear, targetMonth).getDayOfMonth)
+    val (g, n) = Gengou.dateToGengou(LocalDate.of(targetYear, targetMonth, d)).get
+    yearDisp.set(g, n)
+    monthDisp.set(targetMonth)
+    stuffDates(yearDisp.year, monthDisp.month)
 
   private def stuffDates(year: Int, month: Int): Unit =
     datesTab(clear)
