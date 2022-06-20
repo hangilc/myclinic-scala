@@ -33,3 +33,6 @@ object all:
   type SearchForm[D] = dev.fujiwara.domq.searchform.SearchForm[D]
   val SearchForm = dev.fujiwara.domq.searchform.SearchForm
   val RadioGroup = dev.fujiwara.domq.RadioGroup
+  val Absolute = dev.fujiwara.domq.Absolute
+
+
