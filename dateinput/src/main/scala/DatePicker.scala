@@ -11,6 +11,7 @@ import dev.fujiwara.kanjidate.KanjiDate.Gengou
 import dev.fujiwara.kanjidate.KanjiDate
 
 case class DatePicker(init: Option[LocalDate]):
+  private val dateSelectedPublisher = new LocalEventPublisher[LocalDate]
   private val (initGengou: Gengou, initNen: Int, initMonth: Int) =
     init.orElse(Some(LocalDate.now()))
     .map(d => 
@@ -30,11 +31,15 @@ case class DatePicker(init: Option[LocalDate]):
   )
   yearDisp.onChangeYear(doChangeYear _)
   monthDisp.onChangeMonth(doChangeMonth _)
+  var close: () => Unit = () => ()
+
+  def onDateSelected(handler: LocalDate => Unit): Unit =
+    dateSelectedPublisher.subscribe(handler)
 
   def open(locator: HTMLElement => Unit): Unit =
     var cur: LocalDate = init.getOrElse(LocalDate.now()) 
     stuffDates(cur.getYear, cur.getMonthValue)
-    Absolute.openWithScreen(ele, locator)
+    close = Absolute.openWithScreen(ele, locator)
 
   private def doChangeYear(newYear: Int): Unit =
     val tmpDay = initDay.getOrElse(1)
@@ -67,17 +72,22 @@ case class DatePicker(init: Option[LocalDate]):
     val end = start.plusMonths(1)
     var d = start
     val buf = ListBuffer[LocalDate]()
+    val tmpDay = initDay.map(_.min(KanjiDate.lastDayOfMonth(year, month).getDayOfMonth))
     while d.isBefore(end) do
       buf.addOne(d)
       d = d.plusDays(1)
     buf.toList.map(d => {
-      div(d.getDayOfMonth.toString)(
+      val e = div(d.getDayOfMonth.toString)(
         cls := "domq-date-picker-date-box",
         onclick := (() => onDayClick(d)),
         attr("data-date") := d.getDayOfMonth.toString
       )
+      if Some(d) == init then e(cls := "init-date")
+      else if Some(d.getDayOfMonth) == tmpDay then e(cls := "init-date-equiv")
+      e
     })
 
   private def onDayClick(d: LocalDate): Unit =
-    ()
+    close()
+    dateSelectedPublisher.publish(d)
 

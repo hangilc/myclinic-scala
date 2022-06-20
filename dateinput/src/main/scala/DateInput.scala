@@ -27,6 +27,9 @@ case class DateInput(
 
   private def doCalendar(): Unit =
     val picker = DatePicker(dateEdit.dateOption)
+    picker.onDateSelected(d => 
+      dateEdit.set(Some(d))
+    )
     // Absolute.enableDrag(picker.ele, picker.ele)
     def locate(e: HTMLElement): Unit =
       Absolute.setLeftOf(e, Absolute.rightOf(icon) + 6)
