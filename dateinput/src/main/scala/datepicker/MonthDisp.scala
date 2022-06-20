@@ -2,6 +2,7 @@ package dev.fujiwara.dateinput.datepicker
 
 import dev.fujiwara.domq.all.{*, given}
 import scala.language.implicitConversions
+import java.time.LocalDate
 
 case class MonthDisp(var month: Int):
   val monthSpan = span
@@ -15,3 +16,4 @@ case class MonthDisp(var month: Int):
 
   def updateUI(): Unit =
     monthSpan(innerText := s"${month}月")
+

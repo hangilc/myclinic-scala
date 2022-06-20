@@ -9,9 +9,15 @@ import scala.collection.mutable.ListBuffer
 import dev.fujiwara.dateinput.datepicker.*
 import dev.fujiwara.kanjidate.KanjiDate.Gengou
 
-case class DatePicker():
-  val yearDisp = YearDisp(Gengou.Reiwa, 4)
-  val monthDisp = MonthDisp(6)
+case class DatePicker(init: Option[LocalDate]):
+  private val (initGengou: Gengou, initNen: Int, initMonth: Int) =
+    init.orElse(Some(LocalDate.now()))
+    .map(d => 
+      val (g, n) = Gengou.dateToGengou(d).get
+      (g, n, d.getMonthValue)
+    ).get
+  val yearDisp = YearDisp(initGengou, initNen)
+  val monthDisp = MonthDisp(initMonth)
   val datesTab = div
   val ele = div(
     div(
@@ -21,9 +27,9 @@ case class DatePicker():
     css(_.position = "absolute")
   )
 
-  def open(init: Option[LocalDate], locator: HTMLElement => Unit): Unit =
-    val init = LocalDate.now()
-    stuffDates(init.getYear, init.getMonthValue)
+  def open(locator: HTMLElement => Unit): Unit =
+    var cur: LocalDate = init.getOrElse(LocalDate.now()) 
+    stuffDates(cur.getYear, cur.getMonthValue)
     Absolute.openWithScreen(ele, locator)
 
   private def stuffDates(year: Int, month: Int): Unit =

@@ -75,6 +75,10 @@ object KanjiDate:
     def gengouToYear(g: Gengou, nen: Int): Int =
       g.startDate.getYear + nen - 1
 
+    def dateToGengou(d: LocalDate): Option[(Gengou, Int)] =
+      val w = Wareki.fromDate(d)
+      w.map(w => (w.gengou, w.nen))
+
   case class Wareki(gengou: Gengou, nen: Int)
 
   object Wareki:
