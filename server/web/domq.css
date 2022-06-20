@@ -28,20 +28,28 @@
   margin-right: 0.5rem;
 }
 
-.domq-date-picker-year-disp .domq-icon {
+.domq-date-picker-year-disp .domq-icon,
+.domq-date-picker-month-disp .domq-icon {
   width: 1rem;
   height: 1rem;
   position: relative;
   top: -2px;
   cursor: pointer;
+  stroke: orange;
 }
 
-.domq-date-picker-year-disp .domq-icon-chevron-left {
+.domq-date-picker-year-disp .domq-icon-chevron-left,
+.domq-date-picker-month-disp .domq-icon-chevron-left {
   left: 2px;
 }
 
-.domq-date-picker-year-disp .domq-icon-chevron-right {
+.domq-date-picker-year-disp .domq-icon-chevron-right,
+.domq-date-picker-month-disp .domq-icon-chevron-right {
   left: -3px;
+}
+
+.domq-date-picker.month-disp {
+  margin-left: 10px;
 }
 
 

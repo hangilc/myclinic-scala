@@ -21,7 +21,7 @@ case class DatePicker():
     css(_.position = "absolute")
   )
 
-  def open(locator: HTMLElement => Unit): Unit =
+  def open(init: Option[LocalDate], locator: HTMLElement => Unit): Unit =
     val init = LocalDate.now()
     stuffDates(init.getYear, init.getMonthValue)
     Absolute.openWithScreen(ele, locator)
