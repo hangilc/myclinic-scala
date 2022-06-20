@@ -8,92 +8,98 @@ import scala.language.implicitConversions
 import org.scalajs.dom.MouseEvent
 
 object Absolute:
-  def positionAbsolute(e: HTMLElement, width: Int, height: Int): HTMLElement =
-    e(css(style =>
-      style.position = "absolute"
-      style.width = s"${width}px"
-      style.height = s"${height}px"
-    ))
-    e
+  def position(e: HTMLElement): HTMLElement =
+    e(css(_.position = "absolute"))
 
   def leftOf(e: HTMLElement): Double =
-    e.getBoundingClientRect().left + Viewport.offsetLeft
+    e.getBoundingClientRect().left + window.scrollX
 
   def topOf(e: HTMLElement): Double =
-    e.getBoundingClientRect().top + Viewport.offsetTop
+    e.getBoundingClientRect().top + window.scrollY
 
   def rightOf(e: HTMLElement): Double =
-    leftOf(e) + e.scrollWidth
+    e.getBoundingClientRect().right + window.scrollX
 
   def bottomOf(e: HTMLElement): Double =
-    topOf(e) + e.scrollHeight
+    e.getBoundingClientRect().bottom + window.scrollY
 
   def setLeftOf(e: HTMLElement, left: Double): Unit =
-    e.style.left = s"${left - Viewport.offsetLeft}px"
-
-  def setTopOf(e: HTMLElement, top: Double): Unit =
-    e.style.top = s"${top - Viewport.offsetTop}px"
-
-  def setRightOf(e: HTMLElement, right: Double): Unit =
-    val left = right - outerWidthOf(e) - marginLeftOf(e) - marginRightOf(e)
     e.style.left = s"${left}px"
 
-  def setBottomOf(e: HTMLElement, bottom: Double): Unit =
-    val top = bottom - outerHeightOf(e) - marginTopOf(e) - marginBottomOf(e)
+  def setTopOf(e: HTMLElement, top: Double): Unit =
     e.style.top = s"${top}px"
 
-  def outerWidthOf(e: HTMLElement): Int =
-    e.getBoundingClientRect().width.toInt
-
-  def outerHeightOf(e: HTMLElement): Int =
-    e.getBoundingClientRect().height.toInt
-
-  def marginLeftOf(e: HTMLElement): Int =
-    parseInt(window.getComputedStyle(e).marginLeft)
-
-  def marginTopOf(e: HTMLElement): Int =
-    parseInt(window.getComputedStyle(e).marginTop)
-
-  def marginRightOf(e: HTMLElement): Int =
-    parseInt(window.getComputedStyle(e).marginRight)
-
-  def marginBottomOf(e: HTMLElement): Int =
-    parseInt(window.getComputedStyle(e).marginBottom)
-
-  private def parseInt(s: String): Int =
-    val pat = raw"^\d+".r
-    pat.findFirstIn(s).map(_.toInt).getOrElse(0)
-
-  def ensureHorizInViewOffsetting(e: HTMLElement, extra: Int): Unit =
+  def setRightOf(e: HTMLElement, right: Double): Unit =
+    val marginLeft = marginLeftOf(e)
+    val marginRight = marginRightOf(e)
     val r = e.getBoundingClientRect()
-    if r.right > (Viewport.width - extra) then
-      val viewRight = Viewport.offsetLeft + Viewport.width
-      setRightOf(e, viewRight - extra)
+    val w = r.width + marginLeft + marginRight
+    e.style.left = s"${right - w}px"
+
+  def setBottomOf(e: HTMLElement, bottom: Double): Unit =
+    val marginTop = marginTopOf(e)
+    val marginBottom = marginBottomOf(e)
+    val r = e.getBoundingClientRect()
+    val h = r.height + marginTop + marginBottom
+    e.style.top = s"${bottom - h}px"
+
+  def marginLeftOf(e: HTMLElement): Double =
+    parseDouble(window.getComputedStyle(e).marginLeft)
+
+  def marginTopOf(e: HTMLElement): Double =
+    parseDouble(window.getComputedStyle(e).marginTop)
+
+  def marginRightOf(e: HTMLElement): Double =
+    parseDouble(window.getComputedStyle(e).marginRight)
+
+  def marginBottomOf(e: HTMLElement): Double =
+    parseDouble(window.getComputedStyle(e).marginBottom)
+
+  private def parseDouble(s: String): Double =
+    val pat = raw"^\d+(\.\d+)?".r
+    pat.findFirstIn(s).map(_.toDouble).getOrElse(0)
+
+  def viewportWidth: Double = document.documentElement.getBoundingClientRect().width
+  
+  def viewportHeight: Double = document.documentElement.getBoundingClientRect().height
+
+  def viewportExt: (Double, Double) =
+    val r = document.documentElement.getBoundingClientRect()
+    (r.width, r.height)
+
+  def viewportOffsetLeft: Double = window.scrollX
+
+  def viewportOffsetTop: Double = window.scrollY
+
+  def ensureHorizInViewOffsetting(e: HTMLElement, extra: Double): Unit =
+    val r = e.getBoundingClientRect()
+    if r.right > (viewportWidth - extra) then
+      setRightOf(e, viewportOffsetLeft + viewportWidth - extra)
     else if r.left < 0 then
-      setLeftOf(e, extra)
+      setLeftOf(e, window.scrollX + extra)
       
-  def ensureVertInViewOffsetting(e: HTMLElement, extra: Int): Unit =
+  def ensureVertInViewOffsetting(e: HTMLElement, extra: Double): Unit =
     val r = e.getBoundingClientRect()
-    if r.bottom > (Viewport.height - extra) then
-      val viewBottom = Viewport.offsetTop + Viewport.height
+    if r.bottom > (viewportHeight - extra) then
+      val viewBottom = viewportOffsetTop + viewportHeight
       setBottomOf(e, viewBottom - extra)
     else if r.top < 0 then
-      setTopOf(e, extra)
+      setTopOf(e, window.scrollY + extra)
 
-  def ensureInViewOffsetting(e: HTMLElement, extra: Int): Unit =
+  def ensureInViewOffsetting(e: HTMLElement, extra: Double): Unit =
     ensureHorizInViewOffsetting(e, extra)
     ensureVertInViewOffsetting(e, extra)
 
   def ensureHorizInViewFlipping(e: HTMLElement, pivot: Double): Unit =
     val r = e.getBoundingClientRect()
-    if r.right > Viewport.width then
+    if r.right > viewportWidth then
       setRightOf(e, pivot)
     else if r.left < 0 then
       setLeftOf(e, pivot)
 
   def ensureVertInViewFlipping(e: HTMLElement, pivot: Double): Unit =
     val r = e.getBoundingClientRect()
-    if r.bottom > Viewport.height then
+    if r.bottom > viewportHeight then
       setBottomOf(e, pivot)
     else if r.top < 0 then
       setTopOf(e, pivot)
@@ -103,8 +109,8 @@ object Absolute:
     ensureVertInViewFlipping(e, ypivot)
 
   private var dragTarget: HTMLElement = null
-  private var dragTargetOffsetX: Int = 0
-  private var dragTargetOffsetY: Int = 0
+  private var dragTargetOffsetX: Double = 0
+  private var dragTargetOffsetY: Double = 0
 
   private val dragEventHandler: scala.scalajs.js.Function1[MouseEvent, Unit] = e =>
     if dragTarget != null then
@@ -122,8 +128,8 @@ object Absolute:
     dragArea.addEventListener("mousedown", (event: MouseEvent) => {
       val style = window.getComputedStyle(e)
       dragTarget = e
-      dragTargetOffsetX = parseInt(style.left) - event.clientX.toInt 
-      dragTargetOffsetY = parseInt(style.top) - event.clientY.toInt 
+      dragTargetOffsetX = parseDouble(style.left) - event.clientX
+      dragTargetOffsetY = parseDouble(style.top) - event.clientY 
       document.body.addEventListener("mousemove", dragEventHandler)
       document.body.addEventListener("mouseup", undragEventHandler)
     })

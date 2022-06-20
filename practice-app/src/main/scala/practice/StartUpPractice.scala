@@ -8,7 +8,7 @@ import dev.fujiwara.dateinput.DateInput
 
 object StartUpPractice:
   def run(service: PracticeService): Future[Unit] =
-    import dev.fujiwara.domq.{Absolute, Viewport}
+    import dev.fujiwara.domq.{Absolute}
     import org.scalajs.dom.document
     val dateInput = DateInput()
     service.right.ui.ele(dateInput.ele)

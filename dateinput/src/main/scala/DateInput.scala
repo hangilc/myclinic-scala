@@ -32,9 +32,9 @@ case class DateInput(
     )
     // Absolute.enableDrag(picker.ele, picker.ele)
     def locate(e: HTMLElement): Unit =
-      Absolute.setLeftOf(e, Absolute.leftOf(icon) + 6)
-      Absolute.setTopOf(e, Absolute.topOf(icon) + 6)
-      //Absolute.ensureInViewOffsetting(e, 10)
+      Absolute.setLeftOf(e, Absolute.rightOf(icon) + 4)
+      Absolute.setBottomOf(e, Absolute.topOf(icon) - 4)
+      Absolute.ensureInViewOffsetting(e, 10)
     picker.open(locate)
 
 object DateInput:
