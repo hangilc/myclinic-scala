@@ -2,6 +2,8 @@ package dev.myclinic.scala.validator
 
 import cats.data.Validated
 import cats.data.Validated.*
+import java.time.LocalDate
+import math.Ordering.Implicits.infixOrderingOps
 
 object ValidatorUtil:
   def isPositive[E](value: Int, e: E): Validated[List[E], Int] =
@@ -25,6 +27,12 @@ object ValidatorUtil:
 
   def condValid[E, T](cond: Boolean, valid: T, err: E): Validated[List[E], T] = 
     if cond then Valid(valid) else Invalid(List(err))
+
+  def isConsistentDateRange[E](validFrom: LocalDate, validUpto: Option[LocalDate], err: E): Validated[List[E], Unit] =
+    validUpto match {
+      case None => Valid(())
+      case Some(d) => condValid(validFrom <= d, (), err)
+    }
 
   trait ValidationError:
     def message: String
