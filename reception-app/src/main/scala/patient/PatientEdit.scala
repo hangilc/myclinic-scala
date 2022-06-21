@@ -8,6 +8,7 @@ import org.scalajs.dom.HTMLElement
 import dev.myclinic.scala.validator.PatientValidator
 import dev.myclinic.scala.webclient.{Api, global}
 import scala.util.{Success, Failure}
+import scala.language.implicitConversions
 
 class PatientEdit(ui: PatientEdit.UI, patient: Patient):
   val ele = ui.ele
@@ -57,7 +58,7 @@ object PatientEdit:
     ui.ele.qSelector(s"input[type=radio][name=sex][value=${patient.sex.code}]").foreach(
       e => e.asInstanceOf[HTMLInputElement].checked = true
     )
-    ui.birthdayInput.setDate(patient.birthday)
+    ui.birthdayInput.set(Some(patient.birthday))
     ui.addressInput.value = patient.address
     ui.phoneInput.value = patient.phone
 
@@ -115,8 +116,8 @@ object PatientFormValidator:
       validateFirstName(ui.firstNameInput.value),
       validateLastNameYomi(ui.lastNameYomiInput.value),
       validateFirstNameYomi(ui.firstNameYomiInput.value),
-      validateSex(SexValidator.validateSexInput(ui.sexValue)),
-      validateBirthday(ui.birthdayInput.validate(), _.message),
+      validateSexInput(ui.sexValue),
+      validateBirthday(ui.birthdayInput.value),
       validateAddress(ui.addressInput.value),
       validatePhone(ui.phoneInput.value)
     ).asEither
@@ -130,8 +131,8 @@ object PatientFormValidator:
       validateFirstName(ui.firstNameInput.value),
       validateLastNameYomi(ui.lastNameYomiInput.value),
       validateFirstNameYomi(ui.firstNameYomiInput.value),
-      validateSex(SexValidator.validateSexInput(ui.sexValue)),
-      validateBirthday(ui.birthdayInput.validate(), _.message),
+      validateSexInput(ui.sexValue),
+      validateBirthday(ui.birthdayInput.value),
       validateAddress(ui.addressInput.value),
       validatePhone(ui.phoneInput.value)
     ).asEither
