@@ -44,8 +44,8 @@ class KouhiForm:
       validatePatientId(patientId),
       validateFutanshaBangou(eFutanshaBangou.value),
       validateJukyuushaBangou(eJukyuushaBangou.value),
-      validateValidFrom(eValidFrom.value.fold(invalidNec(NoValidFrom))(validNec(_)), _.message),
-      validateValidUpto(validNec[KouhiError, ValidUpto](ValidUpto(eValidUpto.value)), _.message)
+      validateValidFrom(eValidFrom.value),
+      eValidUpto.value
     )
 
   def validateForUpdate(
@@ -55,10 +55,10 @@ class KouhiForm:
     import cats.data.Validated.*
     import KouhiValidator.*
     KouhiValidator.validateKouhiForUpdate(
-      kouhiId,
+      validateKouhiIdForUpdate(kouhiId),
       validatePatientId(patientId),
       validateFutanshaBangou(eFutanshaBangou.value),
       validateJukyuushaBangou(eJukyuushaBangou.value),
-      validateValidFrom(eValidFrom.value.fold(invalidNec(NoValidFrom))(validNec(_)), _.message),
-      validateValidUpto(validNec[KouhiError, ValidUpto](ValidUpto(eValidUpto.value)), _.message)
+      validateValidFrom(eValidFrom.value),
+      eValidUpto.value
     )
