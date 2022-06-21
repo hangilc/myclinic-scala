@@ -32,36 +32,33 @@ class KouhiForm:
   def setData(data: Kouhi): Unit =
     eFutanshaBangou.value = data.futansha.toString
     eJukyuushaBangou.value = data.jukyuusha.toString
-    eValidFrom.eInput.value = KanjiDate.dateToKanji(data.validFrom)
-    eValidUpto.eInput.value =
-      data.validUpto.value.fold("")(KanjiDate.dateToKanji(_))
+    eValidFrom.set(data.validFrom)
+    eValidUpto.set(data.validUpto.value)
 
   def validateForEnter(
       patientId: Int
   ): KouhiValidator.Result[Kouhi] =
+    import cats.data.Validated.*
+    import KouhiValidator.*
     KouhiValidator.validateKouhiForEnter(
       validatePatientId(patientId),
       validateFutanshaBangou(eFutanshaBangou.value),
       validateJukyuushaBangou(eJukyuushaBangou.value),
-      validateValidFrom(eValidFrom.validate(), _.message),
-      validateValidUpto(
-        eValidUpto.validateOption().map(ValidUpto(_)),
-        _.message
-      )
+      validateValidFrom(eValidFrom.value.fold(invalidNec(NoValidFrom))(validNec(_)), _.message),
+      validateValidUpto(validNec[KouhiError, ValidUpto](ValidUpto(eValidUpto.value)), _.message)
     )
 
   def validateForUpdate(
       kouhiId: Int,
       patientId: Int
   ): KouhiValidator.Result[Kouhi] =
+    import cats.data.Validated.*
+    import KouhiValidator.*
     KouhiValidator.validateKouhiForUpdate(
       kouhiId,
       validatePatientId(patientId),
       validateFutanshaBangou(eFutanshaBangou.value),
       validateJukyuushaBangou(eJukyuushaBangou.value),
-      validateValidFrom(eValidFrom.validate(), _.message),
-      validateValidUpto(
-        eValidUpto.validateOption().map(ValidUpto(_)),
-        _.message
-      )
+      validateValidFrom(eValidFrom.value.fold(invalidNec(NoValidFrom))(validNec(_)), _.message),
+      validateValidUpto(validNec[KouhiError, ValidUpto](ValidUpto(eValidUpto.value)), _.message)
     )

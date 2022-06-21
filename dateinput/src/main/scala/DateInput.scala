@@ -23,7 +23,9 @@ case class DateInput(
   )
 
   def value: Option[LocalDate] = dateEdit.dateOption
-  def set(value: Option[LocalDate]) = dateEdit.set(value)
+  def set(value: Option[LocalDate]): Unit = dateEdit.set(value)
+  def set(value: LocalDate): Unit = set(Some(value))
+  def unset(): Unit = set(None)
 
   private def doCalendar(): Unit =
     val picker = DatePicker(dateEdit.dateOption)

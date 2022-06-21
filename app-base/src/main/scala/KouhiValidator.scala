@@ -29,6 +29,8 @@ object KouhiValidator:
   case class InvalidValidFrom[E](err: NonEmptyChain[E], messageOf: E => String)
       extends KouhiError:
     def message: String = err.toList.map("（期限開始）" + messageOf(_)).mkString("\n")
+  object NoValidFrom extends KouhiError:
+    def message: String = "期限開始が入力されていません。"
   case class InvalidValidUpto[E](err: NonEmptyChain[E], messageOf: E => String)
       extends KouhiError:
     def message: String = err.toList.map("（期限終了）" + messageOf(_)).mkString("\n")
