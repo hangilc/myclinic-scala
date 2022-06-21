@@ -23,6 +23,9 @@ object ValidatorUtil:
       case None => Invalid(List(e))
     }
 
+  def condValid[E, T](cond: Boolean, valid: T, err: E): Validated[List[E], T] = 
+    if cond then Valid(valid) else Invalid(List(err))
+
   trait ValidationError:
     def message: String
 

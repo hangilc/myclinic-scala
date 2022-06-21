@@ -7,13 +7,15 @@ import cats.data.Validated.*
 import cats.implicits.*
 import dev.myclinic.scala.model.{Koukikourei, ValidUpto}
 import java.time.LocalDate
+import cats.data.Validated
 import cats.data.Validated.Valid
 import cats.data.Validated.Invalid
 import scala.util.{Try, Success, Failure}
+import dev.myclinic.scala.validator.ValidatorUtil.*
 
 object KoukikoureiValidator:
-  sealed trait KoukikoureiError:
-    def message: String
+  sealed trait KoukikoureiError extends ValidationError
+
   object NonPositiveKoukikoureiId extends KoukikoureiError:
     def message: String = "Zero koukikourei-id"
   object NonPositivePatientId extends KoukikoureiError:
@@ -28,28 +30,16 @@ object KoukikoureiValidator:
     def message: String = "被保険者番号が正の整数でありません。"
   object InvalidFutanWari extends KoukikoureiError:
     def message: String = "Invalid futan-wari value (should be 1, 2, or 3"
-  case class InvalidValidFrom[E](err: NonEmptyChain[E], messageOf: E => String)
-      extends KoukikoureiError:
-    def message: String = err.toList.map("（期限開始）" + messageOf(_)).mkString("\n")
-  case class InvalidValidUpto[E](err: NonEmptyChain[E], messageOf: E => String)
-      extends KoukikoureiError:
-    def message: String = err.toList.map("（期限終了）" + messageOf(_)).mkString("\n")
+  object EmptyValidFrom extends KoukikoureiError:
+    def message: String = "期限開始日が入力されていません。"
 
-  type Result[T] = ValidatedNec[KoukikoureiError, T]
-
-  extension [T](r: Result[T])
-    def asEither: Either[String, T] =
-      r match {
-        case Valid(t) => Right(t)
-        case Invalid(err) =>
-          Left(err.toList.map(_.message).mkString("\n"))
-      }
+  type Result[T] = Validated[List[KoukikoureiError], T]
 
   def validateKoukikoureiIdForUpdate(value: Int): Result[Int] =
-    condNec(value > 0, value, NonPositiveKoukikoureiId)
+    condValid(value > 0, value, NonPositiveKoukikoureiId)
 
   def validatePatientId(patientId: Int): Result[Int] =
-    condNec(patientId > 0, patientId, NonPositivePatientId)
+    condValid(patientId > 0, patientId, NonPositivePatientId)
 
   def validateHokenshaBangou(src: String): Result[String] =
     Try(src.toInt) match {

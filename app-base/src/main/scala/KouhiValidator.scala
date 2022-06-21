@@ -32,11 +32,8 @@ object KouhiValidator:
     def message: String = "受給者番号が整数でありません。"
   object NonPositiveJukyuushaBangou extends KouhiError:
     def message: String = "受給者番号が正の整数でありません。"
-  case class InvalidValidFrom[E](err: NonEmptyChain[E], messageOf: E => String)
-      extends KouhiError:
-    def message: String = err.toList.map("（期限開始）" + messageOf(_)).mkString("\n")
   object EmptyValidFrom extends KouhiError:
-    def message: String = "期限開始が入力されていません。"
+    def message: String = "期限開始日が入力されていません。"
 
   type Result[T] = Validated[List[KouhiError], T]
 
