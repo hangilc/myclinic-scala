@@ -2,7 +2,7 @@ package dev.myclinic.scala.validator
 
 import cats.*
 import cats.syntax.*
-import cats.data.{ValidatedNec, NonEmptyChain}
+import cats.data.Validated
 import cats.data.Validated.*
 import cats.implicits.*
 import dev.myclinic.scala.model.{Patient, Sex}
@@ -12,10 +12,10 @@ import java.time.LocalDate
 import cats.data.Validated.Valid
 import cats.data.Validated.Invalid
 import scala.quoted.Type
+import dev.myclinic.scala.validator.ValidatorUtil.*
 
 object PatientValidator:
-  sealed trait PatientError:
-    def message: String
+  sealed trait PatientError extends ValidationError
 
   object NonZeroPatientIdError extends PatientError:
     def message: String = "Non-zero patient-id"
@@ -29,45 +29,30 @@ object PatientValidator:
     def message: String = "姓のよみが入力されていません。"
   object EmptyLastNameYomiError extends PatientError:
     def message: String = "名のよみが入力されていません。"
-  case class SexError(error: NonEmptyChain[SexValidator.SexError])
-      extends PatientError:
-    def message: String = error.toList.map(_.message).mkString("\n")
-  case class BirthdayError[E](error: NonEmptyChain[E], messageOf: E => String)
-      extends PatientError:
-    def message: String = error.toList.map("（生年月日）" + messageOf(_)).mkString("\n")
+  case class SexError(sexError: List[SexValidator.SexError]) extends PatientError:
+    def message: String = sexError(0).message
+  object EmptyBirthday extends PatientError:
+    def message: String = "生年月日が入力されていません。"
 
-  type Result[T] = ValidatedNec[PatientError, T]
-
-  extension [T](r: Result[T])
-    def asEither: Either[String, T] = Validators.toEither(r, _.message)
+  type Result[T] = Validated[List[PatientError], T]
 
   def validatePatientIdForUpdate(patientId: Int): Result[Int] =
-    condNec(patientId != 0, patientId, ZeroPatientIdError)
+    condValid(patientId != 0, patientId, ZeroPatientIdError)
   def validateLastName(input: String): Result[String] =
-    nonEmpty(input, EmptyLastNameError)
+    isNotEmpty(input, EmptyLastNameError)
   def validateFirstName(input: String): Result[String] =
-    nonEmpty(input, EmptyFirstNameError)
+    isNotEmpty(input, EmptyFirstNameError)
   def validateLastNameYomi(input: String): Result[String] =
-    nonEmpty(input, EmptyLastNameYomiError)
+    isNotEmpty(input, EmptyLastNameYomiError)
   def validateFirstNameYomi(input: String): Result[String] =
-    nonEmpty(input, EmptyFirstNameYomiError)
-  def validateSex(result: SexValidator.Result[Sex]): Result[Sex] =
-    result match {
-      case Valid(sex)   => validNec(sex)
-      case Invalid(err) => invalidNec(SexError(err))
-    }
-  def validateBirthday[E](
-      result: ValidatedNec[E, LocalDate],
-      messageOf: E => String
-  ): Result[LocalDate] =
-    result match {
-      case Valid(sex)   => validNec(sex)
-      case Invalid(err) => invalidNec(BirthdayError(err, messageOf))
-    }
-  def validateAddress(input: String): Result[String] =
-    validNec(if input == null then "" else input)
-  def validatePhone(input: String): Result[String] =
-    validNec(if input == null then "" else input)
+    isNotEmpty(input, EmptyFirstNameYomiError)
+  def validateSexInput(input: Option[String]): Result[Sex] =
+    SexValidator.validateSexInput(input).leftMap(err => List(SexError(err)))
+  def validateSex(sex: Sex): Result[Sex] = Valid(sex)
+  def validateBirthday(dateOption: Option[LocalDate]): Result[LocalDate] =
+    isSome(dateOption, EmptyBirthday)
+  def validateAddress(input: String): Result[String] = Valid(input)
+  def validatePhone(input: String): Result[String] = Valid(input)
 
   def validatePatientForEnter(
       lastNameResult: Result[String],
@@ -80,7 +65,7 @@ object PatientValidator:
       phoneResult: Result[String]
   ): Result[Patient] =
     (
-      validNec(0),
+      Valid(0),
       lastNameResult,
       firstNameResult,
       lastNameYomiResult,
@@ -90,7 +75,7 @@ object PatientValidator:
       addressResult,
       phoneResult
     )
-      .mapN(Patient.apply)
+      .mapN(Patient.apply _)
 
   def validatePatientForUpdate(
       patientIdResult: Result[Int],
@@ -114,4 +99,4 @@ object PatientValidator:
       addressResult,
       phoneResult
     )
-      .mapN(Patient.apply)
+      .mapN(Patient.apply _)

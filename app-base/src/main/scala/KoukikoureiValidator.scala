@@ -61,27 +61,33 @@ object KoukikoureiValidator:
   def validateValidFrom(dateOption: Option[LocalDate]): Result[LocalDate] =
     isSome(dateOption, EmptyValidFrom)
 
+  def validateValidUpto(dateOption: Option[LocalDate]): Result[ValidUpto] =
+    Valid(ValidUpto(dateOption))
+
   def validateKoukikourei(
-      koukikoureiId: Int,
-      patientId: Int,
-      hokenshaBangou: String,
-      hihokenshaBangou: String,
-      futanWari: Int,
-      validFrom: LocalDate,
-      validUpto: ValidUpto
+      koukikoureiIdResult: Result[Int],
+      patientIdResult: Result[Int],
+      hokenshaBangouResult: Result[String],
+      hihokenshaBangouResult: Result[String],
+      futanWariResult: Result[Int],
+      validFromResult: Result[LocalDate],
+      validUptoResult: Result[ValidUpto]
   ): Result[Koukikourei] =
-    isConsistentDateRange(validFrom, validUpto.value, InconsistentDateRange)
-      .andThen(_ =>
-        Valid(
-          Koukikourei(
-            koukikoureiId,
-            patientId,
-            hokenshaBangou,
-            hihokenshaBangou,
-            futanWari,
-            validFrom,
-            validUpto
-          )
+    (
+      koukikoureiIdResult,
+      patientIdResult,
+      hokenshaBangouResult,
+      hihokenshaBangouResult,
+      futanWariResult,
+      validFromResult,
+      validUptoResult
+    ).mapN(Koukikourei.apply _)
+      .andThen(k =>
+        isConsistentDateRange(
+          k.validFrom,
+          k.validUpto.value,
+          k,
+          InconsistentDateRange
         )
       )
 
@@ -93,31 +99,12 @@ object KoukikoureiValidator:
       validFromResult: Result[LocalDate],
       validUptoResult: Result[ValidUpto]
   ): Result[Koukikourei] =
-    (
-      validNec(0),
+    validateKoukikourei(
+      Valid(0),
       patientIdResult,
       hokenshaBangouResult,
       hihokenshaBangouResult,
       futanWariResult,
       validFromResult,
       validUptoResult
-    ).mapN(validateKoukikourei _)
-
-  def validateKoukikoureiForUpdate(
-      koukikoureiId: Int,
-      patientIdResult: Result[Int],
-      hokenshaBangouResult: Result[String],
-      hihokenshaBangouResult: Result[String],
-      futanWariResult: Result[Int],
-      validFromResult: Result[LocalDate],
-      validUptoResult: Result[ValidUpto]
-  ): Result[Koukikourei] =
-    (
-      validateKoukikoureiIdForUpdate(koukikoureiId),
-      patientIdResult,
-      hokenshaBangouResult,
-      hihokenshaBangouResult,
-      futanWariResult,
-      validFromResult,
-      validUptoResult
-    ).mapN(validateKoukikourei _)
+    )

@@ -79,10 +79,8 @@ class NewPatientBlock(onClose: (NewPatientBlock => Unit)):
       PatientValidator.validateFirstName(eFirstNameInput.value),
       PatientValidator.validateLastNameYomi(eLastNameYomiInput.value),
       PatientValidator.validateFirstNameYomi(eFirstNameYomiInput.value),
-      PatientValidator.validateSex(
-        SexValidator.validateSexInput(eSexInput.getCheckedRadioValue("sex"))
-      ),
-      PatientValidator.validateBirthday(eBirthdayInput.validate(), _.message),
+      PatientValidator.validateSexInput(eSexInput.getCheckedRadioValue("sex")),
+      PatientValidator.validateBirthday(eBirthdayInput.value),
       PatientValidator.validateAddress(eAddressInput.value),
       PatientValidator.validatePhone(ePhoneInput.value)
     )

@@ -42,38 +42,31 @@ class KoukikoureiForm:
     eHokenshaBangou.value = data.hokenshaBangou.toString
     eHihokenshaBangou.value = data.hihokenshaBangou
     eFutanWariForm.setRadioGroupValue("futanwari", data.futanWari.toString)
-    eValidFrom.eInput.value = KanjiDate.dateToKanji(data.validFrom)
-    eValidUpto.eInput.value =
-      data.validUpto.value.fold("")(KanjiDate.dateToKanji(_))
+    eValidFrom.set(Some(data.validFrom))
+    eValidUpto.set(data.validUpto.value)
 
   def validateForEnter(
       patientId: Int
-  ): KoukikoureiValidator.Result[Koukikourei] =
-    KoukikoureiValidator.validateKoukikoureiForEnter(
+  ): Result[Koukikourei] =
+    validateKoukikoureiForEnter(
       validatePatientId(patientId),
       validateHokenshaBangou(eHokenshaBangou.value),
       validateHihokenshaBangou(eHihokenshaBangou.value),
       validateFutanWari(eFutanWariForm.getCheckedRadioValue("futanwari")),
-      validateValidFrom(eValidFrom.validate(), _.message),
-      validateValidUpto(
-        eValidUpto.validateOption().map(ValidUpto(_)),
-        _.message
-      )
+      validateValidFrom(eValidFrom.value),
+      validateValidUpto(eValidUpto.value)
     )
 
   def validateForUpdate(
       koukikoureiId: Int,
       patientId: Int
-  ): KoukikoureiValidator.Result[Koukikourei] =
-    KoukikoureiValidator.validateKoukikoureiForUpdate(
-      koukikoureiId,
+  ): Result[Koukikourei] =
+    validateKoukikourei(
+      validateKoukikoureiIdForUpdate(koukikoureiId),
       validatePatientId(patientId),
       validateHokenshaBangou(eHokenshaBangou.value),
       validateHihokenshaBangou(eHihokenshaBangou.value),
       validateFutanWari(eFutanWariForm.getCheckedRadioValue("futanwari")),
-      validateValidFrom(eValidFrom.validate(), _.message),
-      validateValidUpto(
-        eValidUpto.validateOption().map(ValidUpto(_)),
-        _.message
-      )
+      validateValidFrom(eValidFrom.value),
+      validateValidUpto(eValidUpto.value)
     )
