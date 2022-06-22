@@ -16,6 +16,7 @@ import scala.util.Failure
 import java.time.LocalDate
 import cats.data.Validated.Valid
 import cats.data.Validated.Invalid
+import scala.language.implicitConversions
 
 class SelectByDateBox(cb: Patient => Unit):
   val selection = Selection[Patient](onSelect = cb)
