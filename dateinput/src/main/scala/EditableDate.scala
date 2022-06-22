@@ -35,6 +35,7 @@ class EditableDate(
   private def doClick(): Unit =
     val dlog = DateInputDialog(date)
     dlog.onEnter(d => simulateChange(_ => d))
+    dlog.open()
 
 class EditableDateOption(
     var initialValue: Option[LocalDate],
@@ -67,4 +68,5 @@ class EditableDateOption(
   private def doClick(): Unit =
     val dlog = DateOptionInputDialog(dateOption)
     dlog.onEnter(d => simulateChange(_ => d))
+    dlog.open()
 
