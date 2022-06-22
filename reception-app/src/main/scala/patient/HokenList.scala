@@ -33,7 +33,7 @@ class HokenList(patientId: Int)(using EventFetcher):
       eListAll(
         onchange := (onListAllChange _)
       ),
-      span("過去の保険も含める  ")
+      span("過去の保険も含める")
     )
   )
   private val list: CompSortList[Item] = new CompSortList[Item](eDisp)
@@ -47,19 +47,19 @@ class HokenList(patientId: Int)(using EventFetcher):
   addUpdatedAllListener[Roujin]
   onListAllChange()
 
-  private def isValidNow[T](t: T)(using 
-      periodProvider: EffectivePeriodProvider[T],
+  private def isValidNow[T](t: T)(using
+      periodProvider: EffectivePeriodProvider[T]
   ): Boolean =
     periodProvider.isValidAt(t, LocalDate.now())
 
-  private def isToBeShown[T](t: T)(using 
-      periodProvider: EffectivePeriodProvider[T],
+  private def isToBeShown[T](t: T)(using
+      periodProvider: EffectivePeriodProvider[T]
   ): Boolean =
     isListingAll || isValidNow(t)
 
   private def isInList[T](t: T)(using
-    ModelSymbol[T],
-    DataId[T] 
+      ModelSymbol[T],
+      DataId[T]
   ): Boolean =
     val id = HokenId(t)
     list.list.find(_.id == id).isDefined
@@ -78,7 +78,7 @@ class HokenList(patientId: Int)(using EventFetcher):
           val gen = event.appEventId
           val item = Item(gen, created)
           list.insert(item)
-      })
+    })
 
   private def addUpdatedAllListener[T](using
       modelSymbol: ModelSymbol[T],
@@ -91,9 +91,9 @@ class HokenList(patientId: Int)(using EventFetcher):
       val updated = event.dataAs[T]
       if patientIdProvider.getPatientId(updated) == patientId then
         if isToBeShown(updated) then
-          if !isInList(updated) then list.insert(Item(event.appEventId, updated))
-        else 
-          if isInList(updated) then list.remove(_.id == HokenId(updated))
+          if !isInList(updated) then
+            list.insert(Item(event.appEventId, updated))
+        else if isInList(updated) then list.remove(_.id == HokenId(updated))
     })
 
   private def isListingAll: Boolean = eListAll.checked
@@ -212,90 +212,90 @@ object HokenList:
     }
     rep + s"（${from}${upto}）"
 
-  // def shahokokuhoRep(shahokokuho: Shahokokuho): String =
-  //   HokenRep.shahokokuhoRep(
-  //     shahokokuho.hokenshaBangou,
-  //     shahokokuho.koureiFutanWari
-  //   )
+// def shahokokuhoRep(shahokokuho: Shahokokuho): String =
+//   HokenRep.shahokokuhoRep(
+//     shahokokuho.hokenshaBangou,
+//     shahokokuho.koureiFutanWari
+//   )
 
-  // def roujinRep(roujin: Roujin): String = HokenRep.roujinRep(roujin.futanWari)
+// def roujinRep(roujin: Roujin): String = HokenRep.roujinRep(roujin.futanWari)
 
-  // def koukikoureiRep(koukikourei: Koukikourei): String =
-  //   HokenRep.koukikoureiRep(koukikourei.futanWari)
+// def koukikoureiRep(koukikourei: Koukikourei): String =
+//   HokenRep.koukikoureiRep(koukikourei.futanWari)
 
-  // def kouhiRep(kouhi: Kouhi): String = HokenRep.kouhiRep(kouhi.futansha)
+// def kouhiRep(kouhi: Kouhi): String = HokenRep.kouhiRep(kouhi.futansha)
 
-  // abstract class ItemBase[T](ds: SyncedDataSource[T])(using
-  //     fetcher: EventFetcher,
-  //     dataId: DataId[T],
-  //     modelSymbol: ModelSymbol[T]
-  // ) extends Item:
-  //   def validFrom: LocalDate
-  //   def validUpto: Option[LocalDate]
-  //   def rep: String
-  //   def currentData: T = ds.data
-  //   def currentGen: Int = ds.gen
-  //   def id = HokenId(currentData)
-  //   def onDelete(handler: () => Unit): Unit =
-  //     ds.onDelete(handler)
+// abstract class ItemBase[T](ds: SyncedDataSource[T])(using
+//     fetcher: EventFetcher,
+//     dataId: DataId[T],
+//     modelSymbol: ModelSymbol[T]
+// ) extends Item:
+//   def validFrom: LocalDate
+//   def validUpto: Option[LocalDate]
+//   def rep: String
+//   def currentData: T = ds.data
+//   def currentGen: Int = ds.gen
+//   def id = HokenId(currentData)
+//   def onDelete(handler: () => Unit): Unit =
+//     ds.onDelete(handler)
 
-  //   val ui = new ItemUI
-  //   updateUI()
-  //   ds.onDelete(() => ele.remove())
-  //   ds.onUpdate(() => updateUI())
-  //   ds.startSync(ele)
-  //   def ele = ui.ele
-  //   def updateUI(): Unit = ui.label.innerText =
-  //     makeLabel(rep, validFrom, validUpto)
+//   val ui = new ItemUI
+//   updateUI()
+//   ds.onDelete(() => ele.remove())
+//   ds.onUpdate(() => updateUI())
+//   ds.startSync(ele)
+//   def ele = ui.ele
+//   def updateUI(): Unit = ui.label.innerText =
+//     makeLabel(rep, validFrom, validUpto)
 
-  // class ShahokokuhoItem(ds: SyncedDataSource[Shahokokuho])(using
-  //     EventFetcher
-  // ) extends ItemBase[Shahokokuho](ds):
-  //   def validFrom = currentData.validFrom
-  //   def validUpto = currentData.validUptoOption
-  //   def rep = shahokokuhoRep(currentData)
+// class ShahokokuhoItem(ds: SyncedDataSource[Shahokokuho])(using
+//     EventFetcher
+// ) extends ItemBase[Shahokokuho](ds):
+//   def validFrom = currentData.validFrom
+//   def validUpto = currentData.validUptoOption
+//   def rep = shahokokuhoRep(currentData)
 
-  //   ui.icon(onclick := (() => {
-  //     CustomEvents.addShahokokuhoSubblock
-  //       .trigger(ele, (currentGen, currentData))
-  //   }))
+//   ui.icon(onclick := (() => {
+//     CustomEvents.addShahokokuhoSubblock
+//       .trigger(ele, (currentGen, currentData))
+//   }))
 
-  // class KoukikoureiItem(ds: SyncedDataSource[Koukikourei])(using
-  //     EventFetcher,
-  //     DataId[Koukikourei],
-  //     ModelSymbol[Koukikourei]
-  // ) extends ItemBase[Koukikourei](ds):
-  //   def validFrom = currentData.validFrom
-  //   def validUpto = currentData.validUptoOption
-  //   def rep = koukikoureiRep(currentData)
+// class KoukikoureiItem(ds: SyncedDataSource[Koukikourei])(using
+//     EventFetcher,
+//     DataId[Koukikourei],
+//     ModelSymbol[Koukikourei]
+// ) extends ItemBase[Koukikourei](ds):
+//   def validFrom = currentData.validFrom
+//   def validUpto = currentData.validUptoOption
+//   def rep = koukikoureiRep(currentData)
 
-  //   ui.icon(onclick := (() => {
-  //     CustomEvents.addKoukikoureiSubblock
-  //       .trigger(ele, (currentGen, currentData))
-  //   }))
+//   ui.icon(onclick := (() => {
+//     CustomEvents.addKoukikoureiSubblock
+//       .trigger(ele, (currentGen, currentData))
+//   }))
 
-  // class RoujinItem(ds: SyncedDataSource[Roujin])(using
-  //     EventFetcher,
-  //     DataId[Koukikourei],
-  //     ModelSymbol[Koukikourei]
-  // ) extends ItemBase[Roujin](ds):
-  //   def validFrom = currentData.validFrom
-  //   def validUpto = currentData.validUptoOption
-  //   def rep = roujinRep(currentData)
+// class RoujinItem(ds: SyncedDataSource[Roujin])(using
+//     EventFetcher,
+//     DataId[Koukikourei],
+//     ModelSymbol[Koukikourei]
+// ) extends ItemBase[Roujin](ds):
+//   def validFrom = currentData.validFrom
+//   def validUpto = currentData.validUptoOption
+//   def rep = roujinRep(currentData)
 
-  //   ui.icon(onclick := (() => {
-  //     CustomEvents.addRoujinSubblock.trigger(ele, (currentGen, currentData))
-  //   }))
+//   ui.icon(onclick := (() => {
+//     CustomEvents.addRoujinSubblock.trigger(ele, (currentGen, currentData))
+//   }))
 
-  // class KouhiItem(ds: SyncedDataSource[Kouhi])(using
-  //     EventFetcher,
-  //     DataId[Koukikourei],
-  //     ModelSymbol[Koukikourei]
-  // ) extends ItemBase[Kouhi](ds):
-  //   def validFrom = currentData.validFrom
-  //   def validUpto = currentData.validUptoOption
-  //   def rep = kouhiRep(currentData)
+// class KouhiItem(ds: SyncedDataSource[Kouhi])(using
+//     EventFetcher,
+//     DataId[Koukikourei],
+//     ModelSymbol[Koukikourei]
+// ) extends ItemBase[Kouhi](ds):
+//   def validFrom = currentData.validFrom
+//   def validUpto = currentData.validUptoOption
+//   def rep = kouhiRep(currentData)
 
-  //   ui.icon(onclick := (() => {
-  //     CustomEvents.addKouhiSubblock.trigger(ele, (currentGen, currentData))
-  //   }))
+//   ui.icon(onclick := (() => {
+//     CustomEvents.addKouhiSubblock.trigger(ele, (currentGen, currentData))
+//   }))

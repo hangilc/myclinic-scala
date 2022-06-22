@@ -32,7 +32,7 @@ class CompListBase[C](
       disposer.dispose(oldC)
       comps = pre ++ (newC :: post.tail)
 
-  def clear: Unit =
+  def clear(): Unit =
     comps.foreach(c => {
       val e = comp.ele(c)
       remove(e)
@@ -51,7 +51,7 @@ case class CompAppendList[C](val wrapper: HTMLElement)(using
   def +=(c: C): Unit = append(c)
 
   def set(cs: List[C]): Unit =
-    clear
+    clear()
     cs.foreach(append _)
 
 object CompAppendList:
@@ -62,7 +62,7 @@ object CompAppendList:
     
   given [C](using comp: Comp[C], disposer: Dispose[C]): Dispose[CompAppendList[C]]
     with
-    def dispose(t: CompAppendList[C]): Unit = t.clear
+    def dispose(t: CompAppendList[C]): Unit = t.clear()
 
 case class CompSortList[C: Ordering](val wrapper: HTMLElement)(
   using comp: Comp[C],
@@ -77,10 +77,11 @@ case class CompSortList[C: Ordering](val wrapper: HTMLElement)(
   def +=(c: C): Unit = insert(c)
 
   def set(cs: List[C]): Unit =
+    clear()
     cs.foreach(insert _)
 
   def setSorted(cs: List[C]): Unit =
-    clear
+    clear()
     cs.foreach(c => wrapper(comp.ele(c)))
     comps = cs
 
