@@ -5,7 +5,8 @@ import dev.myclinic.scala.model.Patient
 import dev.fujiwara.dateinput.{DateInput, DateOptionInput}
 import org.scalajs.dom.HTMLInputElement
 import org.scalajs.dom.HTMLElement
-import dev.myclinic.scala.validator.PatientValidator
+import dev.myclinic.scala.web.appbase.PatientValidator
+import dev.myclinic.scala.web.appbase.SexValidator
 import dev.myclinic.scala.webclient.{Api, global}
 import scala.util.{Success, Failure}
 import scala.language.implicitConversions
@@ -110,7 +111,6 @@ object PatientFormValidator:
   
   def validateForEnter(ui: PatientFormUI): Either[String, Patient] =
     import PatientValidator.*
-    import dev.myclinic.scala.validator.SexValidator
     validatePatientForEnter(
       validateLastName(ui.lastNameInput.value),
       validateFirstName(ui.firstNameInput.value),
@@ -124,7 +124,6 @@ object PatientFormValidator:
 
   def validateForUpdate(patientId: Int, ui: PatientFormUI): Either[String, Patient] =
     import PatientValidator.*
-    import dev.myclinic.scala.validator.SexValidator
     validatePatientForUpdate(
       validatePatientIdForUpdate(patientId),
       validateLastName(ui.lastNameInput.value),

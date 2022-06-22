@@ -84,6 +84,17 @@ object KanjiDate:
       val w = Wareki.fromDate(d)
       w.map(w => (w.gengou, w.nen))
 
+  case class Seireki():
+    def name = "西暦"
+
+  type Era = Gengou | Seireki
+
+  def eraName(era: Era): String = 
+    era match {
+      case g: Gengou => g.name
+      case s: Seireki => s.name
+    }
+
   case class Wareki(gengou: Gengou, nen: Int)
 
   object Wareki:
@@ -94,7 +105,8 @@ object KanjiDate:
 
   class DateInfo(date: LocalDate):
     lazy val warekiOption: Option[Wareki] = Wareki.fromDate(date)
-    def gengou: String = warekiOption.map(_.gengou.name).getOrElse("西暦")
+    def era: Era = warekiOption.fold[Era](Seireki())(_.gengou)
+    def gengou: String = eraName(era)
     def nen: Int = warekiOption.map(_.nen).getOrElse(year)
     def year: Int = date.getYear
     def month: Int = date.getMonthValue

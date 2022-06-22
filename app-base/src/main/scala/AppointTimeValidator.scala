@@ -1,10 +1,10 @@
-package dev.myclinic.scala.validator
+package dev.myclinic.scala.web.appbase
 
 import cats.data.ValidatedNec
 import cats.implicits.*
 import dev.myclinic.scala.model.AppointTime
 import cats.data.Validated.{validNec, invalidNec, condNec}
-import dev.myclinic.scala.validator.Validators.*
+import Validators.*
 import java.time.{LocalDate, LocalTime}
 
 object AppointTimeValidator:

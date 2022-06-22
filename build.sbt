@@ -249,7 +249,8 @@ lazy val appbase = project
     webclient,
     validatorJS,
     drawerJS,
-    kanjidateJS
+    kanjidateJS,
+    validatorJS
   )
   .settings(
     name := "myclinic-appbase",
@@ -487,7 +488,7 @@ val drawerformJS = drawerform.js
 lazy val dateinput = project
   .in(file("dateinput"))
   .enablePlugins(ScalaJSPlugin)
-  .dependsOn(domq, kanjidateJS)
+  .dependsOn(domq, kanjidateJS, validatorJS)
   .settings(
     name := "dateinput",
     scalaJSUseMainModuleInitializer := false,

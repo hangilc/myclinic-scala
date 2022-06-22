@@ -102,6 +102,18 @@
   background-color: #dcdcdc;
 }
 
+.domq-date-input-form-gengou {
+  margin-right: 1px;
+}
+
+.domq-date-input-form-nen, 
+.domq-date-input-form-month, 
+.domq-date-input-form-day {
+  width: 1.5rem;
+  margin-left: 4px;
+  margin-right: 2px;
+}
+
 /* .domq-date-input-wrapper {
   display: flex;
   flex-wrap: wrap;

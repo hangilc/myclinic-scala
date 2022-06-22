@@ -1,12 +1,11 @@
-package dev.myclinic.scala.validator
+package dev.myclinic.scala.web.appbase
 
 import cats.implicits.*
 import dev.myclinic.scala.model.Patient
 import dev.myclinic.scala.model.Sex
 import cats.data.Validated
 import cats.data.Validated.*
-import ValidatorUtil.*
-import scala.collection.View.Empty
+import dev.fujiwara.validator.ValidatorUtil.*
 
 object SexValidator:
   sealed class SexError(msg: String) extends ValidationError:

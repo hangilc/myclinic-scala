@@ -10,7 +10,7 @@ import dev.myclinic.scala.webclient.Api
 import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
 
 import dev.myclinic.scala.model.{Patient, Appoint}
-import dev.myclinic.scala.validator.AppointValidator
+import dev.myclinic.scala.web.appbase.AppointValidator
 import scala.util.Success
 import scala.util.Failure
 import cats.data.Validated.Valid

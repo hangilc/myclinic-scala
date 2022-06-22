@@ -10,8 +10,8 @@ import dev.myclinic.scala.model.{Patient}
 import dev.myclinic.scala.webclient.Api
 import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
 
-import dev.myclinic.scala.validator.AppointValidator
-import dev.myclinic.scala.validator.AppointValidator.given
+import dev.myclinic.scala.web.appbase.AppointValidator
+import dev.myclinic.scala.web.appbase.AppointValidator.given
 import dev.myclinic.scala.web.appoint.sheet.appointdialog.ValuePart
 import dev.myclinic.scala.web.appoint.sheet.appointdialog.{SearchResult => BaseSearchResult}
 

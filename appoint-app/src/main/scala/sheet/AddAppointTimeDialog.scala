@@ -5,8 +5,8 @@ import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.Html._
 import dev.fujiwara.domq.{Modal, Form, ErrorBox}
 import scala.language.implicitConversions
-import dev.myclinic.scala.validator.AppointTimeValidator
-import dev.myclinic.scala.validator.AppointTimeValidator.{given}
+import dev.myclinic.scala.web.appbase.AppointTimeValidator
+import dev.myclinic.scala.web.appbase.AppointTimeValidator.{given}
 import java.time.LocalDate
 import dev.myclinic.scala.webclient.Api
 import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._

@@ -16,11 +16,11 @@ import dev.myclinic.scala.webclient.Api
 import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
 
 import scala.concurrent.Future
-import dev.myclinic.scala.validator.AppointTimeValidator
+import dev.myclinic.scala.web.appbase.AppointTimeValidator
 import dev.myclinic.scala.web.appoint.Misc
 import cats.data.ValidatedNec
 import cats.data.Validated.{validNec, invalidNec, condNec, Valid, Invalid}
-import dev.myclinic.scala.validator.Validators
+import dev.myclinic.scala.web.appbase.Validators
 import java.time.LocalTime
 import scala.math.Ordered.orderingToOrdered
 import dev.myclinic.scala.web.appbase.EventFetcher

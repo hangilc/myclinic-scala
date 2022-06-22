@@ -35,5 +35,6 @@ object all:
   val SearchForm = dev.fujiwara.domq.searchform.SearchForm
   val RadioGroup = dev.fujiwara.domq.RadioGroup
   val Absolute = dev.fujiwara.domq.Absolute
+  val SelectProxy = dev.fujiwara.domq.SelectProxy
 
 

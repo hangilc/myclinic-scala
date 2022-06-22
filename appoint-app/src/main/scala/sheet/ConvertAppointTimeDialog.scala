@@ -7,7 +7,7 @@ import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
 import scala.language.implicitConversions
 import dev.myclinic.scala.webclient.Api
-import dev.myclinic.scala.validator.AppointTimeValidator.{*, given}
+import dev.myclinic.scala.web.appbase.AppointTimeValidator.{*, given}
 import cats.syntax.*
 
 class ConvertAppointTimeDialog(appointTime: AppointTime):

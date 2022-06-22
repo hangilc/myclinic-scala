@@ -5,8 +5,8 @@ import dev.myclinic.scala.model.AppointTime
 import java.time.LocalTime
 import scala.util.{Try, Success, Failure}
 import dev.myclinic.scala.util.DateUtil
-import dev.myclinic.scala.validator.AppointTimeValidator
-import dev.myclinic.scala.validator.AppointTimeValidator.{*, given}
+import dev.myclinic.scala.web.appbase.AppointTimeValidator
+import dev.myclinic.scala.web.appbase.AppointTimeValidator.{*, given}
 import dev.myclinic.scala.webclient.Api
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.language.implicitConversions

@@ -12,8 +12,8 @@ import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
 import dev.myclinic.scala.model.{Patient, Appoint}
 import scala.util.Success
 import scala.util.Failure
-import dev.myclinic.scala.validator.AppointValidator
-import dev.myclinic.scala.validator.AppointValidator.given
+import dev.myclinic.scala.web.appbase.AppointValidator
+import dev.myclinic.scala.web.appbase.AppointValidator.given
 import scala.concurrent.Future
 import dev.myclinic.scala.web.appoint.sheet.appointdialog.{
   ValuePart,

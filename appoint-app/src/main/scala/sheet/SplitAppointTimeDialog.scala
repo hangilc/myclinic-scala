@@ -10,6 +10,7 @@ import dev.myclinic.scala.webclient.Api
 import dev.myclinic.scala.web.appoint.Misc
 import java.time.LocalTime
 import scala.math.Ordered.orderingToOrdered
+import dev.myclinic.scala.web.appbase.Validators
 
 class SplitAppointTimeDialog(appointTime: AppointTime):
   def open(): Unit =
@@ -55,7 +56,6 @@ class SplitAppointTimeDialog(appointTime: AppointTime):
   object SplitValidator:
     import cats.data.ValidatedNec
     import cats.data.Validated.{validNec, invalidNec, condNec}
-    import dev.myclinic.scala.validator.Validators
 
     sealed trait SplitError(val label: String)
     object EmptyInputError extends SplitError("分割時刻が入力されていません。")

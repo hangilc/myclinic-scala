@@ -1,4 +1,4 @@
-package dev.myclinic.scala.validator
+package dev.myclinic.scala.web.appbase
 
 import cats.data.{ValidatedNec, NonEmptyChain}
 import cats.data.Validated.*

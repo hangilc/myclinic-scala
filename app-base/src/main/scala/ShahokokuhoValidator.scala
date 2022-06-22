@@ -10,7 +10,7 @@ import java.time.LocalDate
 import cats.data.Validated
 import cats.data.Validated.*
 import scala.util.{Try, Success, Failure}
-import dev.myclinic.scala.validator.ValidatorUtil.*
+import dev.fujiwara.validator.ValidatorUtil.*
 
 object ShahokokuhoValidator:
 
@@ -19,7 +19,7 @@ object ShahokokuhoValidator:
     def message: String = msg
 
   enum ErrorGroup(name: String):
-    import dev.myclinic.scala.validator.ValidatorUtil.ErrorMessages.*
+    import dev.fujiwara.validator.ValidatorUtil.ErrorMessages.*
     def apply(msg: String): ShahokokuhoError =
       new ShahokokuhoError(this, msg)
     def empty: ShahokokuhoError = apply(isEmptyErrorMessage(name))

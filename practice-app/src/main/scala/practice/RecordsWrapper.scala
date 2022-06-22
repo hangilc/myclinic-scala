@@ -31,7 +31,7 @@ class RecordsWrapper:
     clearRecords
 
   def clearRecords: Unit =
-    records.clear
+    records.clear()
 
   def startPage(page: Int): Unit =
     ele(clear)

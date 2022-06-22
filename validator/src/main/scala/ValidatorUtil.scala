@@ -1,4 +1,4 @@
-package dev.myclinic.scala.validator
+package dev.fujiwara.validator
 
 import cats.data.Validated
 import cats.data.Validated.*

@@ -7,7 +7,7 @@ import dev.myclinic.scala.web.appoint.Misc
 import org.scalajs.dom.Event
 import scala.scalajs.js
 import scala.util.{Success, Failure}
-import dev.myclinic.scala.validator.AppointValidator
+import dev.myclinic.scala.web.appbase.AppointValidator
 import scala.concurrent.Future
 import scala.language.implicitConversions
 

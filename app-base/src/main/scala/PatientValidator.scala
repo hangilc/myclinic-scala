@@ -1,4 +1,4 @@
-package dev.myclinic.scala.validator
+package dev.myclinic.scala.web.appbase
 
 import cats.*
 import cats.syntax.*
@@ -6,13 +6,12 @@ import cats.data.Validated
 import cats.data.Validated.*
 import cats.implicits.*
 import dev.myclinic.scala.model.{Patient, Sex}
-import dev.myclinic.scala.validator.Validators.*
-import dev.myclinic.scala.validator.SexValidator
+import Validators.*
 import java.time.LocalDate
 import cats.data.Validated.Valid
 import cats.data.Validated.Invalid
 import scala.quoted.Type
-import dev.myclinic.scala.validator.ValidatorUtil.*
+import dev.fujiwara.validator.ValidatorUtil.*
 
 object PatientValidator:
   sealed trait PatientError extends ValidationError

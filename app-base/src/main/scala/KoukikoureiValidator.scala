@@ -11,7 +11,7 @@ import cats.data.Validated
 import cats.data.Validated.Valid
 import cats.data.Validated.Invalid
 import scala.util.{Try, Success, Failure}
-import dev.myclinic.scala.validator.ValidatorUtil.*
+import dev.fujiwara.validator.ValidatorUtil.*
 
 object KoukikoureiValidator:
   sealed trait KoukikoureiError(msg: String) extends ValidationError:

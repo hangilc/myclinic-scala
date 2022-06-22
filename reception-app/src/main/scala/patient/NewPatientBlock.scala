@@ -12,7 +12,7 @@ import org.scalajs.dom.MouseEvent
 import dev.myclinic.scala.webclient.Api
 import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
 
-import dev.myclinic.scala.validator.{PatientValidator, SexValidator}
+import dev.myclinic.scala.web.appbase.{PatientValidator, SexValidator}
 import dev.myclinic.scala.model.{Sex, Patient}
 import dev.fujiwara.kanjidate.KanjiDate.Gengou
 import dev.fujiwara.dateinput.{DateInput, DateOptionInput}
