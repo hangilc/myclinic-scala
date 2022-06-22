@@ -20,7 +20,8 @@ import scala.language.implicitConversions
 
 class SelectByDateBox(cb: Patient => Unit):
   val selection = Selection[Patient](onSelect = cb)
-  val dateInput = DateInput(onEnter = (listDate _), onChange = (listDate _), showYoubi = true)
+  val dateInput = DateInput()
+  dateInput.onChange(listDate _)
   val ele = div(cls := "records-select-by-date-box")(
     div("日付別", cls := "title"),
     dateInput.ele,
@@ -34,10 +35,11 @@ class SelectByDateBox(cb: Patient => Unit):
 
   def init(): Future[Unit] =
     val today = LocalDate.now()
-    dateInput.setDate(today)
+    dateInput.set(Some(today))
     listDate(today)
 
   def advance(f: LocalDate => LocalDate): Unit =
+    dateInput.changeDate(f)
     dateInput.validate() match {
       case Valid(d) => 
         val dd = f(d)

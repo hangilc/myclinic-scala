@@ -5,6 +5,48 @@ import dev.fujiwara.kanjidate.KanjiDate
 
 import dev.fujiwara.domq.all.{*, given}
 
+class EditableDateBase(
+  private var dateOption: Option[LocalDate],
+  formatter: Option[LocalDate] => String,
+  title: String
+):
+  private val onChangePublisher = new LocalEventPublisher[Option[LocalDate]]
+
+  val ele = span(cls := "domq-editable-date", onclick := (doEdit _))
+  updateUI()
+
+  def optionValue: Option[LocalDate] = dateOption
+
+  def set(newValue: Option[LocalDate]): Unit =
+    dateOption = newValue
+    updateUI()
+    onChangePublisher.publish(dateOption)
+
+  def onChange(handler: Option[LocalDate] => Unit): Unit =
+    onChangePublisher.subscribe(handler)
+
+  private def updateUI(): Unit =
+    ele(innerText := formatter(dateOption))
+
+  private def doEdit(): Unit =
+    ManualInput.getDateOptionByDialog(set _, dateOption, title)
+
+class EditableDate(init: LocalDate, formatter: LocalDate => String, title: String)
+  extends EditableDateBase(Some(init), dateOption => {
+    dateOption match {
+      case None => ""
+      case Some(d) => formatter(d)
+    }
+  }, title):
+  def onChange(handler: LocalDate => Unit): Unit =
+    super.onChange(dateOption => dateOption match {
+      case Some(d) => handler(d)
+      case None => ()
+    })
+
+  def set(value: LocalDate): Unit =
+    super.set(Some(value))
+
 case class EditableDate(
     var date: LocalDate,
     formatter: LocalDate => String = EditableDate.defaultFormatter,
@@ -45,6 +87,7 @@ case class EditableOptionalDate(
     nullFormatter: () => String = () => "",
     title: String = "日付の入力"
 ):
+  private val onChangePublisher = new LocalEventPublisher[Option[LocalDate]]
   val ele = span(cls := "cursor-pointer", onclick := (doEdit _))
   updateUI()
 
@@ -52,23 +95,24 @@ case class EditableOptionalDate(
     dateOption = newValue
     updateUI()
 
-  def incDays(days: Int): Unit =
+  def onChange(handler: Option[LocalDate] => Unit): Unit =
+    onChangePublisher.subscribe(handler)
+
+  def changeDate(f: LocalDate => LocalDate): Unit =
     dateOption.foreach(date =>
-      dateOption = Some(date.plusDays(days))
+      dateOption = Some(f(date))
       updateUI()
+      onChangePublisher.publish(Some(date))  
     )
+
+  def incDays(days: Int): Unit =
+    changeDate(_.plusDays(days))
 
   def incMonths(months: Int): Unit =
-    dateOption.foreach(date =>
-      dateOption = Some(date.plusMonths(months))
-      updateUI()
-    )
+    changeDate(_.plusMonths(months))
 
   def incYears(years: Int): Unit =
-    dateOption.foreach(date =>
-      dateOption = Some(date.plusYears(years))
-      updateUI()
-    )
+    changeDate(_.plusYears(years))
 
   private def format(opt: Option[LocalDate]): String =
     opt match {
@@ -80,4 +124,7 @@ case class EditableOptionalDate(
     ele(innerText := format(dateOption))
 
   def doEdit(): Unit =
-    ManualInput.getDateOptionByDialog(set _, dateOption, title)
+    ManualInput.getDateOptionByDialog(dateOption => {
+      set(dateOption)
+      onChangePublisher.publish(dateOption)
+    }, dateOption, title)

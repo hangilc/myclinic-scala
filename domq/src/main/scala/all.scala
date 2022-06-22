@@ -6,6 +6,7 @@ object all:
   export Modifiers.{*, given}
   export TypeClasses.{*, given}
   export Selection.given
+  val Html = dev.fujiwara.domq.Html
   val Modal = dev.fujiwara.domq.Modal
   type ModalDialog3 = dev.fujiwara.domq.ModalDialog3
   type Selection[T] = dev.fujiwara.domq.Selection[T]
