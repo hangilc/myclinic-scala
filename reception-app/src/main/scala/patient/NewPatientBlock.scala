@@ -15,7 +15,7 @@ import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
 import dev.myclinic.scala.validator.{PatientValidator, SexValidator}
 import dev.myclinic.scala.model.{Sex, Patient}
 import dev.fujiwara.kanjidate.KanjiDate.Gengou
-import dev.fujiwara.dateinput.DateInput
+import dev.fujiwara.dateinput.{DateInput, DateOptionInput}
 
 class NewPatientBlock(onClose: (NewPatientBlock => Unit)):
   val eErrorBox = ErrorBox()
@@ -24,7 +24,7 @@ class NewPatientBlock(onClose: (NewPatientBlock => Unit)):
   val eLastNameYomiInput = Form.fixedSizeInput("10rem")
   val eFirstNameYomiInput = Form.fixedSizeInput("10rem")
   val eSexInput = form()
-  val eBirthdayInput = DateInput()
+  val eBirthdayInput = DateOptionInput()
   val eAddressInput = inputText()
   val ePhoneInput = inputText()
   val ele = Block(

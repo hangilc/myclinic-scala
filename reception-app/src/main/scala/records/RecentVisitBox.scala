@@ -12,6 +12,7 @@ import dev.myclinic.scala.model.{Patient, Visit}
 import dev.fujiwara.kanjidate.KanjiDate
 import scala.util.Success
 import scala.util.Failure
+import scala.language.implicitConversions
 
 class RecentVisitBox(cb: Patient => Unit):
   val selection = Selection(onSelect = cb)

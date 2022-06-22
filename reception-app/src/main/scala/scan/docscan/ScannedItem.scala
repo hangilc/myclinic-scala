@@ -139,12 +139,15 @@ class ScannedItem(
     ScanTask(() =>
       for data <- Api.getScannedFile(savedFile)
       yield
+        val propBag = new BlobPropertyBag{}
+        propBag.`type` = "image/jpeg"
         val oURL = URL.createObjectURL(
           new Blob(
             js.Array(data),
-            new BlobPropertyBag {
-              override val `type`: js.UndefOr[String] = "image/jpeg"
-            }
+            propBag
+            // new BlobPropertyBag {
+            //   override val `type`: js.UndefOr[String] = "image/jpeg"
+            // }
           )
         )
         val image = org.scalajs.dom.document

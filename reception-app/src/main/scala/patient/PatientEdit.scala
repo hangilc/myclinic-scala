@@ -2,7 +2,7 @@ package dev.myclinic.scala.web.reception.patient
 
 import dev.fujiwara.domq.all.{*, given}
 import dev.myclinic.scala.model.Patient
-import dev.fujiwara.dateinput.DateInput
+import dev.fujiwara.dateinput.{DateInput, DateOptionInput}
 import org.scalajs.dom.HTMLInputElement
 import org.scalajs.dom.HTMLElement
 import dev.myclinic.scala.validator.PatientValidator
@@ -58,7 +58,7 @@ object PatientEdit:
     ui.ele.qSelector(s"input[type=radio][name=sex][value=${patient.sex.code}]").foreach(
       e => e.asInstanceOf[HTMLInputElement].checked = true
     )
-    ui.birthdayInput.set(Some(patient.birthday))
+    ui.birthdayInput.init(Some(patient.birthday))
     ui.addressInput.value = patient.address
     ui.phoneInput.value = patient.phone
 
@@ -73,7 +73,7 @@ object PatientEdit:
       patientForm.qSelector("input[name=sex]:checked").map(e => {
         e.asInstanceOf[HTMLInputElement].value
       })
-    val birthdayInput = new DateInput()
+    val birthdayInput = DateOptionInput()
     val addressInput = inputText
     val phoneInput = inputText
     val ele = patientForm(
@@ -104,7 +104,7 @@ object PatientFormValidator:
     def lastNameYomiInput: HTMLInputElement
     def firstNameYomiInput: HTMLInputElement
     def sexValue: Option[String]
-    def birthdayInput: DateInput
+    def birthdayInput: DateOptionInput
     def addressInput: HTMLInputElement
     def phoneInput: HTMLInputElement
   

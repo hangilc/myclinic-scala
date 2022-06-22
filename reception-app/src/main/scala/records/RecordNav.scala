@@ -11,7 +11,7 @@ import java.time.{LocalDate, LocalDateTime}
 import org.scalajs.dom.{HTMLElement}
 import dev.myclinic.scala.apputil.HokenUtil
 import dev.myclinic.scala.apputil.DrugUtil
-import dev.fujiwara.dateinput.ZenkakuUtil
+import dev.myclinic.scala.util.ZenkakuUtil
 import dev.myclinic.scala.{util => ju}
 import dev.myclinic.scala.util.NumberUtil
 

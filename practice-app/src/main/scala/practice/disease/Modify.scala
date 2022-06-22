@@ -4,7 +4,7 @@ import dev.myclinic.scala.model.*
 import dev.fujiwara.domq.all.{*, given}
 import dev.fujiwara.domq.SelectProxy
 import dev.fujiwara.dateinput.EditableDate
-import dev.fujiwara.dateinput.EditableOptionalDate
+import dev.fujiwara.dateinput.EditableDateOption
 import dev.myclinic.scala.myclinicutil.DiseaseUtil
 import dev.myclinic.scala.webclient.{Api, global}
 import scala.language.implicitConversions
@@ -18,16 +18,16 @@ case class Modify(
 ):
   val nameSpan = span
   val startDateEdit = EditableDate(disease.startDate, title = "開始日")
-  val endDateEdit = EditableOptionalDate(
+  val endDateEdit = EditableDateOption(
     disease.endDate.value,
     title = "終了日",
-    nullFormatter = () => "未終了"
+    formatNone = () => "未終了"
   )
   val endReasonSelect = SelectProxy[DiseaseEndReason](
     DiseaseEndReason.values.toList,
     (opt, reason) => opt(reason.label)
   )
-  val search = Search(() => startDateEdit.date, examples)
+  val search = Search(() => startDateEdit.value, examples)
   search.onByoumeiSelected(doByoumeiSelected _)
   search.onShuushokugoSelected(doShuushokugoSelected _)
 

@@ -11,7 +11,7 @@ import dev.myclinic.scala.model.*
 import dev.myclinic.scala.web.appbase.validator.ShahokokuhoValidator
 import dev.myclinic.scala.web.appbase.validator.ShahokokuhoValidator.*
 import java.time.LocalDate
-import dev.fujiwara.dateinput.DateInput
+import dev.fujiwara.dateinput.{DateInput, DateOptionInput}
 import dev.fujiwara.kanjidate.KanjiDate
 
 class ShahokokuhoForm:
@@ -20,8 +20,8 @@ class ShahokokuhoForm:
   val eHihokenshaBangou = inputText()
   val eHonninForm = form()
   val eKoureiForm = form()
-  val eValidFrom = DateInput()
-  val eValidUpto = DateInput()
+  val eValidFrom = DateOptionInput()
+  val eValidUpto = DateOptionInput()
   val eEdaban = inputText()
   val ele = Form.rows(
     span("保険者番号") -> eHokenshaBangou(
@@ -53,8 +53,8 @@ class ShahokokuhoForm:
     eEdaban.value = data.edaban
     eHonninForm.setRadioGroupValue("honnin", data.honninStore.toString)
     eKoureiForm.setRadioGroupValue("kourei", data.koureiStore.toString)
-    eValidFrom.set(Some(data.validFrom))
-    eValidUpto.set(data.validUpto.value)
+    eValidFrom.init(Some(data.validFrom))
+    eValidUpto.init(data.validUpto.value)
 
   def validateForEnter(patientId: Int): ShahokokuhoValidator.Result[Shahokokuho] =
     ShahokokuhoValidator.validateShahokokuhoForEnter(

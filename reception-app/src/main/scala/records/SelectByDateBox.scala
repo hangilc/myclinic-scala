@@ -2,7 +2,7 @@ package dev.myclinic.scala.web.reception.records
 
 import dev.myclinic.scala.web.appbase.SideMenuService
 import dev.fujiwara.domq.all.{*, given}
-import dev.fujiwara.dateinput.DateInput
+import dev.fujiwara.dateinput.{DateInput, DateOptionInput}
 import org.scalajs.dom.{HTMLElement, HTMLInputElement}
 import scala.concurrent.Future
 import org.scalajs.dom.MouseEvent
@@ -20,7 +20,7 @@ import scala.language.implicitConversions
 
 class SelectByDateBox(cb: Patient => Unit):
   val selection = Selection[Patient](onSelect = cb)
-  val dateInput = DateInput()
+  val dateInput = DateOptionInput()
   dateInput.onChange(listDate _)
   val ele = div(cls := "records-select-by-date-box")(
     div("日付別", cls := "title"),
@@ -35,26 +35,25 @@ class SelectByDateBox(cb: Patient => Unit):
 
   def init(): Future[Unit] =
     val today = LocalDate.now()
-    dateInput.set(Some(today))
-    listDate(today)
+    dateInput.init(Some(today))
+    listDate(Some(today))
 
   def advance(f: LocalDate => LocalDate): Unit =
-    dateInput.changeDate(f)
-    dateInput.validate() match {
-      case Valid(d) => 
-        val dd = f(d)
-        dateInput.setDate(dd)
-        listDate(dd)
-      case Invalid(_) => ()
-    }
+    dateInput.simulateChange(_.map(f))
 
-  def listDate(at: LocalDate): Future[Unit] =
-    for
-      visits <- Api.listVisitByDate(at)
-      patientMap <- Api.batchGetPatient(visits.map(_.patientId))
-    yield {
-      val items = visits.map(visit => (visit, patientMap(visit.patientId)))
-      setItems(items)
+  def listDate(atOption: Option[LocalDate]): Future[Unit] =
+    atOption match {
+      case None => 
+        setItems(List.empty)
+        Future.successful(())
+      case Some(at) =>
+        for
+          visits <- Api.listVisitByDate(at)
+          patientMap <- Api.batchGetPatient(visits.map(_.patientId))
+        yield {
+          val items = visits.map(visit => (visit, patientMap(visit.patientId)))
+          setItems(items)
+        }
     }
 
   def setItems(items: List[(Visit, Patient)]): Unit =

@@ -9,8 +9,8 @@ import dev.myclinic.scala.webclient.{Api, global}
 import org.scalajs.dom.HTMLElement
 import scala.concurrent.Future
 import cats.syntax.all.*
-import dev.fujiwara.dateinput.ManualInput
 import scala.language.implicitConversions
+import dev.fujiwara.dateinput.DateInputDialog
 
 case class Add(
     patientId: Int,
@@ -126,7 +126,8 @@ case class Add(
     }
 
   def doManualStartDate(): Unit =
-    ManualInput.getDateByDialog(onDateSelect _, init = Some(startDate), title = "開始日入力")
+    val dlog = DateInputDialog(startDate, title = "開始日入力")
+    dlog.onEnter(onDateSelect _)
 
   def doStartDateClick(): Unit =
     val select = dateSelect

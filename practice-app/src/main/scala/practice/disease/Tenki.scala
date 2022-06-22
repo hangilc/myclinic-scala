@@ -23,7 +23,7 @@ case class Tenki(
   val currents: CompAppendList[Item] =
     CompAppendList[Item](curWrapper, list.map(Item.apply.tupled(_)))
   val endDateEle = EditableDate(LocalDate.now(), title = "終了日")
-  def endDate: LocalDate = endDateEle.date
+  def endDate: LocalDate = endDateEle.value
   val endReasonGroup = RadioGroup[DiseaseEndReason](
     List(
       "治癒" -> DiseaseEndReason.Cured,
@@ -54,24 +54,24 @@ case class Tenki(
           }
         ))
         .getOrElse(LocalDate.now())
-      endDateEle.set(endDate)
+      endDateEle.init(endDate)
     )
   )
 
   def doWeek(event: MouseEvent): Unit =
     if event.shiftKey then
-      endDateEle.incDays(-7)
+      endDateEle.init(endDate.plusDays(-7))
     else
-      endDateEle.incDays(7)
+      endDateEle.init(endDate.plusDays(7))
 
   def doToday(): Unit =
-    endDateEle.set(LocalDate.now())
+    endDateEle.init(LocalDate.now())
 
   def doEndOfMonth(): Unit =
-    endDateEle.set(endDate.withDayOfMonth(1).plusMonths(1).plusDays(-1))
+    endDateEle.init(endDate.withDayOfMonth(1).plusMonths(1).plusDays(-1))
 
   def doEndOfLastMonth(): Unit =
-    endDateEle.set(LocalDate.now().withDayOfMonth(1).plusDays(-1))
+    endDateEle.init(LocalDate.now().withDayOfMonth(1).plusDays(-1))
 
   def endReason: DiseaseEndReason =
     endReasonGroup.selected

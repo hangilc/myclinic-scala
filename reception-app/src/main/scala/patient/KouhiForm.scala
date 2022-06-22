@@ -6,7 +6,7 @@ import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.{Icons, Form, ErrorBox, Modifier}
 import scala.language.implicitConversions
 import dev.fujiwara.kanjidate.KanjiDate
-import dev.fujiwara.dateinput.DateInput
+import dev.fujiwara.dateinput.{DateInput, DateOptionInput}
 import org.scalajs.dom.{HTMLElement, HTMLInputElement}
 import dev.myclinic.scala.util.DateUtil
 import dev.myclinic.scala.model.*
@@ -17,8 +17,8 @@ import java.time.LocalDate
 class KouhiForm:
   val eFutanshaBangou = inputText()
   val eJukyuushaBangou = inputText()
-  val eValidFrom = DateInput()
-  val eValidUpto = DateInput()
+  val eValidFrom = DateOptionInput()
+  val eValidUpto = DateOptionInput()
   val ele = Form.rows(
     span("負担者番号") -> eFutanshaBangou(
       cls := "futansha-bangou-input"
@@ -32,8 +32,8 @@ class KouhiForm:
   def setData(data: Kouhi): Unit =
     eFutanshaBangou.value = data.futansha.toString
     eJukyuushaBangou.value = data.jukyuusha.toString
-    eValidFrom.set(data.validFrom)
-    eValidUpto.set(data.validUpto.value)
+    eValidFrom.init(Some(data.validFrom))
+    eValidUpto.init(data.validUpto.value)
 
   def validateForEnter(
       patientId: Int
