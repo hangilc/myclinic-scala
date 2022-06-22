@@ -72,10 +72,11 @@ object Main extends IOApp:
     FileService.Config(System.getenv("MYCLINIC_PORTAL_TMP_DIR"), "/")
   )
   val staticService = fileService[IO](FileService.Config("./web", "/"))
-  val deployTestService: HttpRoutes[IO] =
-    if Files.exists(java.nio.file.Path.of("./deploy")) then
-      fileService[IO](FileService.Config("./deploy", "/"))
-    else HttpRoutes[IO](_ => OptionT.some(Response.notFound[IO]))
+
+  // val deployTestService: HttpRoutes[IO] =
+  //   if Files.exists(java.nio.file.Path.of("./deploy")) then
+  //     fileService[IO](FileService.Config("./deploy", "/"))
+  //   else HttpRoutes[IO](_ => OptionT.some(Response.notFound[IO]))
 
   def buildServer(
       topic: Topic[IO, WebSocketFrame],
@@ -91,18 +92,18 @@ object Main extends IOApp:
     builder
       .withHttpWebSocketApp(websocketBuilder =>
         Router(
-          // "/appoint" -> HttpRoutes.of[IO] { case GET -> Root =>
-          //   PermanentRedirect(Location(uri"/appoint/"))
-          // },
-          // "/reception" -> HttpRoutes.of[IO] { case GET -> Root =>
-          //   PermanentRedirect(Location(uri"/reception/"))
-          // },
-          // "/practice" -> HttpRoutes.of[IO] { case GET -> Root =>
-          //   PermanentRedirect(Location(uri"/practice/"))
-          // },
+          "/appoint" -> HttpRoutes.of[IO] { case GET -> Root =>
+            TemporaryRedirect(Location(uri"/appoint/index.html"))
+          },
+          "/reception" -> HttpRoutes.of[IO] { case GET -> Root =>
+            TemporaryRedirect(Location(uri"/reception/index.html"))
+          },
+          "/practice" -> HttpRoutes.of[IO] { case GET -> Root =>
+            TemporaryRedirect(Location(uri"/practice/index.html"))
+          },
           "/api" -> RestService.routes,
           "/ws" -> ws(topic, websocketBuilder),
-          "/deploy" -> deployTestService,
+          // "/deploy" -> deployTestService,
           "/portal-tmp" -> portalTmpStaticService,
           "/" -> staticService
         ).orNotFound
