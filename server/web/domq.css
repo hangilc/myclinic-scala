@@ -6,6 +6,10 @@
   user-select: none;
 }
 
+.domq-cursor-pointer {
+  cursor: pointer;
+}
+
 /* Form ****************************************************************/
 
 .domq-form-value .input-group {

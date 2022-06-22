@@ -8,9 +8,10 @@ import scala.language.implicitConversions
 case class DataInputDialog[T](
     title: String,
     initText: String,
-    fromText: String => Either[String, T],
-    onEnter: T => Unit
+    fromText: String => Either[String, T]
 ):
+  val onEnterPublisher = new LocalEventPublisher[T]
+  val onCancelPublisher = new LocalEventPublisher[Unit]
   val input = Html.input
   val errBox = ErrorBox()
   val dlog = ModalDialog3()
@@ -24,12 +25,22 @@ case class DataInputDialog[T](
     button("キャンセル", onclick := (() => dlog.close()))
   )
 
+  def onEnter(handler: T => Unit): Unit =
+    onEnterPublisher.subscribe(handler)
+
+  def onCancel(handler: () => Unit): Unit =
+    onCancelPublisher.subscribe(_ => handler())
+
   def open(): Unit = dlog.open()
 
   private def doEnter(): Unit =
     fromText(input.value) match {
       case Left(msg) => errBox.show(msg)
-      case Right(t) =>
+      case Right(t) => 
         dlog.close()
-        onEnter(t)
+        onEnterPublisher.publish(t)
     }
+
+  private def doCancel(): Unit =
+    dlog.close()
+    onCancelPublisher.publish(())

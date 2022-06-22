@@ -7,15 +7,14 @@ import scala.language.implicitConversions
 import dev.fujiwara.kanjidate.KanjiDate
 import org.scalajs.dom.HTMLElement
 
-case class DateInput(
+case class DateOptionInput(
     private var init: Option[LocalDate] = None,
-    formatter: LocalDate => String = DateInput.defaultFormatter,
-    nullFormatter: () => String = () => "",
+    format: LocalDate => String = d => KanjiDate.dateToKanji(d),
+    formatNone: () => String = () => "",
     title: String = "日付の入力"
 ):
-  private val onChangePublisher = new LocalEventPublisher[LocalDate]
   val dateEdit =
-    EditableOptionalDate(init, formatter = formatter, title = title)
+    EditableDateOption(init, format, formatNone, title)
   val icon = Icons.calendar
   val ele = div(
     cls := "domq-date-input",
@@ -23,30 +22,58 @@ case class DateInput(
     icon(cls := "domq-calendar-icon", onclick := (doCalendar _))
   )
 
-  def value: Option[LocalDate] = dateEdit.dateOption
-  def set(value: Option[LocalDate]): Unit = dateEdit.set(value)
-  def set(value: LocalDate): Unit = set(Some(value))
-  def unset(): Unit = set(None)
+  def value: Option[LocalDate] = dateEdit.value
+  def simulateChange(f: Option[LocalDate] => Option[LocalDate]): Unit =
+    dateEdit.simulateChange(f)
 
-  def onChange(handler: LocalDate => Unit): Unit =
-    onChangePublisher.subscribe(handler)
-
-  def changeDate(f: LocalDate => LocalDate): Unit =
-    dateEdit.changeDate(f)
+  def onChange(handler: Option[LocalDate] => Unit): Unit =
+    dateEdit.onChange(handler)
 
   private def doCalendar(): Unit =
-    val picker = DatePicker(dateEdit.dateOption)
-    picker.onDateSelected(d => 
-      dateEdit.set(Some(d))
-      onChangePublisher.publish(d)
+    DateInputCommon.openCalendar(
+      dateEdit.value,
+      icon,
+      d => simulateChange(_ => Some(d))
     )
+
+case class DateInput(
+    private var init: LocalDate,
+    format: LocalDate => String = d => KanjiDate.dateToKanji(d),
+    title: String = "日付の入力"
+):
+  val dateEdit = EditableDate(init, format, title)
+  val icon = Icons.calendar
+  val ele = div(
+    cls := "domq-date-input",
+    dateEdit.ele,
+    icon(cls := "domq-calendar-icon", onclick := (doCalendar _))
+  )
+
+  def value: LocalDate = dateEdit.value
+  def simulateChange(f: LocalDate => LocalDate): Unit =
+    dateEdit.simulateChange(f)
+
+  def onChange(handler: LocalDate => Unit): Unit =
+    dateEdit.onChange(handler)
+
+  private def doCalendar(): Unit =
+    DateInputCommon.openCalendar(
+      Some(dateEdit.value),
+      icon,
+      d => simulateChange(_ => d)
+    )
+
+object DateInputCommon:
+  def openCalendar(
+      init: Option[LocalDate],
+      icon: HTMLElement,
+      onEnter: LocalDate => Unit
+  ): Unit =
+    val picker = DatePicker(init)
+    picker.onDateSelected(onEnter)
     // Absolute.enableDrag(picker.ele, picker.ele)
     def locate(e: HTMLElement): Unit =
       Absolute.setLeftOf(e, Absolute.rightOf(icon) + 4)
       Absolute.setBottomOf(e, Absolute.topOf(icon) - 4)
       Absolute.ensureInViewOffsetting(e, 10)
     picker.open(locate)
-
-object DateInput:
-  val defaultFormatter: LocalDate => String =
-    d => KanjiDate.dateToKanji(d)

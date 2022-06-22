@@ -5,126 +5,58 @@ import dev.fujiwara.kanjidate.KanjiDate
 
 import dev.fujiwara.domq.all.{*, given}
 
-class EditableDateBase(
-  private var dateOption: Option[LocalDate],
-  formatter: Option[LocalDate] => String,
-  title: String
+class EditableDate(
+    init: LocalDate,
+    format: LocalDate => String = d => KanjiDate.dateToKanji(d),
+    title: String = "日付の入力"
 ):
-  private val onChangePublisher = new LocalEventPublisher[Option[LocalDate]]
-
-  val ele = span(cls := "domq-editable-date", onclick := (doEdit _))
+  private val onChangePublisher = new LocalEventPublisher[LocalDate]
+  private var date: LocalDate = init
+  val ele = span(cls := "domq-editable-date domq-cursor-pointer", onclick := (doClick _))
   updateUI()
 
-  def optionValue: Option[LocalDate] = dateOption
+  def value: LocalDate = date
 
-  def set(newValue: Option[LocalDate]): Unit =
-    dateOption = newValue
+  def onChange(handler: LocalDate => Unit): Unit =
+    onChangePublisher.subscribe(handler)
+
+  def simulateChange(f: LocalDate => LocalDate): Unit =
+    date = f(date)
+    updateUI()
+    onChangePublisher.publish(date)
+
+  private def updateUI(): Unit =
+    ele(innerText := format(date))
+
+  private def doClick(): Unit =
+    val dlog = DateInputDialog(date)
+    dlog.onEnter(d => simulateChange(_ => d))
+
+class EditableDateOption(
+    var init: Option[LocalDate],
+    format: LocalDate => String = d => KanjiDate.dateToKanji(d),
+    formatNone: () => String = () => "",
+    title: String = "日付の入力"
+):
+  private val onChangePublisher = new LocalEventPublisher[Option[LocalDate]]
+  private var dateOption: Option[LocalDate] = init
+  val ele = span(cls := "domq-editable-date domq-cursor-pointer", onclick := (doClick _))
+  updateUI()
+
+  def value: Option[LocalDate] = dateOption
+
+  def onChange(handler: Option[LocalDate] => Unit): Unit =
+    onChangePublisher.subscribe(handler)
+
+  def simulateChange(f: Option[LocalDate] => Option[LocalDate]): Unit =
+    dateOption = f(dateOption)
     updateUI()
     onChangePublisher.publish(dateOption)
 
-  def onChange(handler: Option[LocalDate] => Unit): Unit =
-    onChangePublisher.subscribe(handler)
-
   private def updateUI(): Unit =
-    ele(innerText := formatter(dateOption))
+    ele(innerText := dateOption.fold(formatNone())(format))
 
-  private def doEdit(): Unit =
-    ManualInput.getDateOptionByDialog(set _, dateOption, title)
+  private def doClick(): Unit =
+    val dlog = DateOptionInputDialog(dateOption)
+    dlog.onEnter(d => simulateChange(_ => d))
 
-class EditableDate(init: LocalDate, formatter: LocalDate => String, title: String)
-  extends EditableDateBase(Some(init), dateOption => {
-    dateOption match {
-      case None => ""
-      case Some(d) => formatter(d)
-    }
-  }, title):
-  def onChange(handler: LocalDate => Unit): Unit =
-    super.onChange(dateOption => dateOption match {
-      case Some(d) => handler(d)
-      case None => ()
-    })
-
-  def set(value: LocalDate): Unit =
-    super.set(Some(value))
-
-case class EditableDate(
-    var date: LocalDate,
-    formatter: LocalDate => String = EditableDate.defaultFormatter,
-    title: String = "日付の入力"
-):
-  val ele = span(cls := "cursor-pointer", onclick := (doEdit _))
-  updateUI()
-
-  def set(newValue: LocalDate): Unit =
-    date = newValue
-    updateUI()
-
-  def incDays(days: Int): Unit =
-    date = date.plusDays(days)
-    updateUI()
-
-  def incMonths(months: Int): Unit =
-    date = date.plusMonths(months)
-    updateUI()
-
-  def incYears(years: Int): Unit =
-    date = date.plusYears(years)
-    updateUI()
-
-  def updateUI(): Unit =
-    ele(innerText := formatter(date))
-
-  def doEdit(): Unit =
-    ManualInput.getDateByDialog(set _, init = Some(date), title = title)
-
-object EditableDate:
-  val defaultFormatter: LocalDate => String =
-    d => KanjiDate.dateToKanji(d)
-
-case class EditableOptionalDate(
-    var dateOption: Option[LocalDate],
-    formatter: LocalDate => String = EditableDate.defaultFormatter,
-    nullFormatter: () => String = () => "",
-    title: String = "日付の入力"
-):
-  private val onChangePublisher = new LocalEventPublisher[Option[LocalDate]]
-  val ele = span(cls := "cursor-pointer", onclick := (doEdit _))
-  updateUI()
-
-  def set(newValue: Option[LocalDate]): Unit =
-    dateOption = newValue
-    updateUI()
-
-  def onChange(handler: Option[LocalDate] => Unit): Unit =
-    onChangePublisher.subscribe(handler)
-
-  def changeDate(f: LocalDate => LocalDate): Unit =
-    dateOption.foreach(date =>
-      dateOption = Some(f(date))
-      updateUI()
-      onChangePublisher.publish(Some(date))  
-    )
-
-  def incDays(days: Int): Unit =
-    changeDate(_.plusDays(days))
-
-  def incMonths(months: Int): Unit =
-    changeDate(_.plusMonths(months))
-
-  def incYears(years: Int): Unit =
-    changeDate(_.plusYears(years))
-
-  private def format(opt: Option[LocalDate]): String =
-    opt match {
-      case None => nullFormatter()
-      case Some(d) => formatter(d)
-    }
-
-  def updateUI(): Unit =
-    ele(innerText := format(dateOption))
-
-  def doEdit(): Unit =
-    ManualInput.getDateOptionByDialog(dateOption => {
-      set(dateOption)
-      onChangePublisher.publish(dateOption)
-    }, dateOption, title)

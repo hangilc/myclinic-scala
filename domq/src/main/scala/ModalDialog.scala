@@ -6,7 +6,7 @@ import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
 import scala.language.implicitConversions
 
-class ModalDialog(onClose: ModalDialog => Unit):
+class ModalDialog:
   private val zIndexScreen = ZIndexManager.alloc()
   private val zIndexContent = ZIndexManager.alloc()
   private val screen: HTMLElement = div(cls := "domq-modal-dialog-screen", zIndex := zIndexScreen)
@@ -17,13 +17,12 @@ class ModalDialog(onClose: ModalDialog => Unit):
     document.body(screen, content)
 
   def close(): Unit =
-    onClose(this)
     content.remove()
     screen.remove()
     ZIndexManager.release(zIndexContent)
     ZIndexManager.release(zIndexScreen)
 
-class ModalDialog3(onClose: ModalDialog => Unit = _ => ()) extends ModalDialog(onClose):
+class ModalDialog3 extends ModalDialog:
   val title: HTMLElement = div(cls := "domq-modal-dialog3-title")
   val body: HTMLElement = div(cls := "domq-modal-dialog3-body")
   val commands: HTMLElement = div(cls := "domq-modal-dialog3-commands")
