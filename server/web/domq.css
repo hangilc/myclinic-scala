@@ -40,6 +40,15 @@
   white-space: nowrap;
 }
 
+.domq-date-picker .year-nen .domq-icon-hand {
+  width: 1rem;
+  height: 1rem;
+  position: relative;
+  top: -2px;
+  cursor: pointer;
+  stroke: orange;
+}
+
 .domq-date-picker-dates-tab {
   display: grid;
   grid-template-columns: 1.5rem 1.5rem 1.5rem 1.5rem 1.5rem 1.5rem 1.5rem;

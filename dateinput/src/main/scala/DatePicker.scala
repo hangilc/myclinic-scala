@@ -21,10 +21,11 @@ case class DatePicker(init: Option[LocalDate]):
   private val initDay: Option[Int] = init.map(_.getDayOfMonth)
   val yearDisp = YearDisp(initGengou, initNen)
   val monthDisp = MonthDisp(initMonth)
+  val hand = Icons.hand
   val datesTab = div
   val ele = div(cls := "domq-date-picker domq-user-select-none",
     div(cls := "year-nen",
-      yearDisp.ele, monthDisp.ele, Icons.cog(cls := "domq-icon-cog")
+      yearDisp.ele, monthDisp.ele, hand //,Icons.cog(cls := "domq-icon-cog")
     ),
     datesTab(cls := "domq-date-picker-dates-tab"),
     css(_.position = "absolute")
