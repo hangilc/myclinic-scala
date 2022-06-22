@@ -7,100 +7,73 @@ import cats.data.Validated.*
 import cats.implicits.*
 import dev.myclinic.scala.model.{Shahokokuho, ValidUpto}
 import java.time.LocalDate
-import cats.data.Validated.Valid
-import cats.data.Validated.Invalid
+import cats.data.Validated
+import cats.data.Validated.*
 import scala.util.{Try, Success, Failure}
+import dev.myclinic.scala.validator.ValidatorUtil.*
 
 object ShahokokuhoValidator:
-  sealed trait ShahokokuhoError:
-    def message: String
-  object NonPositiveShahokokuhoId extends ShahokokuhoError:
-    def message: String = "Zero shahokokuho-id"
-  object NonPositivePatientId extends ShahokokuhoError:
-    def message: String = "Zero patient-id"
-  object NonIntegerHokenshaBangou extends ShahokokuhoError:
-    def message: String = "保険者番号が整数でありません。"
-  object NonPositiveHokenshaBangou extends ShahokokuhoError:
-    def message: String = "保険者番号が正の整数でありません。"
-  object InvalidHonnin extends ShahokokuhoError:
-    def message: String = "Invalid honnin value (should be 0 or 1)"
-  case class InvalidValidFrom[E](err: NonEmptyChain[E], messageOf: E => String)
-      extends ShahokokuhoError:
-    def message: String = err.toList.map("（期限開始）" + messageOf(_)).mkString("\n")
-  case class InvalidValidUpto[E](err: NonEmptyChain[E], messageOf: E => String)
-      extends ShahokokuhoError:
-    def message: String = err.toList.map("（期限終了）" + messageOf(_)).mkString("\n")
-  object InvalidKourei extends ShahokokuhoError:
-    def message: String = "Invalid kourei value (should be 0, 2, or 3"
-  object HihokenshaKigouBangouError extends ShahokokuhoError:
-    def message: String = "被保険者記号と番号がどちらも空白です。"
 
-  type Result[T] = ValidatedNec[ShahokokuhoError, T]
+  sealed class ShahokokuhoError(val group: ErrorGroup, msg: String)
+      extends ValidationError:
+    def message: String = msg
 
-  extension [T](r: Result[T])
-    def asEither: Either[String, T] =
-      r match {
-        case Valid(t) => Right(t)
-        case Invalid(err) =>
-          Left(err.toList.map(_.message).mkString("\n"))
-      }
+  enum ErrorGroup(name: String):
+    import dev.myclinic.scala.validator.ValidatorUtil.ErrorMessages.*
+    def apply(msg: String): ShahokokuhoError =
+      new ShahokokuhoError(this, msg)
+    def empty: ShahokokuhoError = apply(isEmptyErrorMessage(name))
+    def notInteger: ShahokokuhoError = apply(notIntegerErrorMessage(name))
+    def notPositive: ShahokokuhoError = apply(notPositiveErrorMessage(name))
+    def invalid: ShahokokuhoError = apply(invalidValueErrorMessage(name))
+
+    case ShahokokuhoIdError extends ErrorGroup("shahokokuhoId")
+    case PatientIdError extends ErrorGroup("patientId")
+    case HokenshaBangouError extends ErrorGroup("保険者番号")
+    case HonninError extends ErrorGroup("本人")
+    case ValidFromError extends ErrorGroup("期限開始日")
+    case ValidUptoError extends ErrorGroup("期限終了日")
+    case KoureiError extends ErrorGroup("高齢")
+    case InconsistentHihokenshaError extends ErrorGroup("被保険者記号・番号")
+
+  type Result[T] = Validated[List[ShahokokuhoError], T]
+  import ErrorGroup.*
 
   def validateShahokokuhoIdForUpdate(value: Int): Result[Int] =
-    condNec(value > 0, value, NonPositiveShahokokuhoId)
+    condValid(value > 0, value, ShahokokuhoIdError.notPositive)
+  
   def validatePatientId(patientId: Int): Result[Int] =
-    condNec(patientId > 0, patientId, NonPositivePatientId)
+    condValid(patientId > 0, patientId, PatientIdError.notPositive)
+
   def validateHokenshaBangou(value: Int): Result[Int] =
-    condNec(value > 0, value, NonPositiveHokenshaBangou)
+    condValid(value > 0, value, HokenshaBangouError.notPositive)
+  
   def validateHokenshaBangouInput(src: String): Result[Int] =
-    Try(src.toInt) match {
-      case Success(i) => validateHokenshaBangou(i)
-      case Failure(_) => invalidNec(NonIntegerHokenshaBangou)
-    }
-  def validateHihokenshaKigou(src: String): Result[String] =
-    validNec(if src == null then "" else src)
-  def validateHihokenshaBangou(src: String): Result[String] =
-    validNec(if src == null then "" else src)
+    isNotEmpty(src, HokenshaBangouError.empty)
+      .andThen(toInt(_, HokenshaBangouError.notInteger))
+      .andThen(validateHokenshaBangou(_))
+
+  def validateHihokenshaKigou(src: String): Result[String] = nonNullString(src)
+
+  def validateHihokenshaBangou(src: String): Result[String] = nonNullString(src)
+  
   def validateHonnin(srcOpt: Option[String]): Result[Int] =
-    val src = srcOpt.getOrElse("")
-    condNec(!(src == null || src.isEmpty), src, InvalidHonnin)
-      .andThen(str => {
-        Try(str.toInt) match {
-          case Success(i) => validNec(i)
-          case Failure(_) => invalidNec(InvalidHonnin)
-        }
-      })
-      .andThen {
-        case i @ (0 | 1) => validNec(i)
-        case _           => invalidNec(InvalidHonnin)
-      }
-  def validateValidFrom[E](
-      result: ValidatedNec[E, LocalDate],
-      messageOf: E => String
-  ): Result[LocalDate] =
-    result.fold(
-      err => invalidNec(InvalidValidFrom(err, messageOf)),
-      validNec(_)
-    )
-  def validateValidUpto[E](result: ValidatedNec[E, ValidUpto], messageOf: E => String): Result[ValidUpto] =
-    result.fold(
-      err => invalidNec(InvalidValidUpto(err, messageOf)),
-      validNec(_)
-    )
+    isSome(srcOpt, HonninError.empty)
+      .andThen(toInt(_, HonninError.notInteger))
+      .andThen(isOneOf(_, List(0, 1), HonninError.invalid))
+
+  def validateValidFrom(dateOption: Option[LocalDate]): Result[LocalDate] =
+    isSome(dateOption, ValidFromError.empty)
+
+  def validateValidUpto(dateOption: Option[LocalDate]): Result[ValidUpto] = 
+    Valid(ValidUpto(dateOption))
+
   def validateKourei(srcOpt: Option[String]): Result[Int] =
-    val src = srcOpt.getOrElse("")
-    condNec(!(src == null || src.isEmpty), src, InvalidKourei)
-      .andThen(str => {
-        Try(str.toInt) match {
-          case Success(i) => validNec(i)
-          case Failure(_) => invalidNec(InvalidKourei)
-        }
-      })
-      .andThen {
-        case i @ (0 | 2 | 3) => validNec(i)
-        case _               => invalidNec(InvalidKourei)
-      }
-  def validateEdaban(src: String): Result[String] =
-    validNec(if src == null then "" else src)
+    isSome(srcOpt, KoureiError.empty)
+      .andThen(toInt(_, KoureiError.notInteger))
+      .andThen(isOneOf(_, List(0, 2, 3), KoureiError.invalid))
+
+  def validateEdaban(src: String): Result[String] = nonNullString(src)
 
   def validateShahokokuho(
       shahokokuhoIdResult: Result[Int],
@@ -128,8 +101,8 @@ object ShahokokuhoValidator:
     ).mapN(Shahokokuho.apply)
       .andThen(shaho =>
         if shaho.hihokenshaKigou.isEmpty && shaho.hihokenshaBangou.isEmpty then
-          invalidNec(HihokenshaKigouBangouError)
-        else validNec(shaho)
+          Invalid(List(InconsistentHihokenshaError("被保険者記号・番号が両方空白です。")))
+        else Valid(shaho)
       )
 
   def validateShahokokuhoForEnter(
@@ -144,7 +117,7 @@ object ShahokokuhoValidator:
       edabanResult: Result[String]
   ): Result[Shahokokuho] =
     validateShahokokuho(
-      validNec(0),
+      Valid(0),
       patientIdResult,
       hokenshaBangouResult,
       hihokenshaKigouResult,
@@ -156,27 +129,27 @@ object ShahokokuhoValidator:
       edabanResult
     )
 
-  def validateShahokokuhoForUpdate(
-      shahokokuhoId: Int,
-      patientIdResult: Result[Int],
-      hokenshaBangouResult: Result[Int],
-      hihokenshaKigouResult: Result[String],
-      hihokenshaBangouResult: Result[String],
-      honninResult: Result[Int],
-      validFromResult: Result[LocalDate],
-      validUptoResult: Result[ValidUpto],
-      koureiResult: Result[Int],
-      edabanResult: Result[String]
-  ): Result[Shahokokuho] =
-    validateShahokokuho(
-      validateShahokokuhoIdForUpdate(shahokokuhoId),
-      patientIdResult,
-      hokenshaBangouResult,
-      hihokenshaKigouResult,
-      hihokenshaBangouResult,
-      honninResult,
-      validFromResult,
-      validUptoResult,
-      koureiResult,
-      edabanResult
-    )
+  // def validateShahokokuhoForUpdate(
+  //     shahokokuhoId: Int,
+  //     patientIdResult: Result[Int],
+  //     hokenshaBangouResult: Result[Int],
+  //     hihokenshaKigouResult: Result[String],
+  //     hihokenshaBangouResult: Result[String],
+  //     honninResult: Result[Int],
+  //     validFromResult: Result[LocalDate],
+  //     validUptoResult: Result[ValidUpto],
+  //     koureiResult: Result[Int],
+  //     edabanResult: Result[String]
+  // ): Result[Shahokokuho] =
+  //   validateShahokokuho(
+  //     validateShahokokuhoIdForUpdate(shahokokuhoId),
+  //     patientIdResult,
+  //     hokenshaBangouResult,
+  //     hihokenshaKigouResult,
+  //     hihokenshaBangouResult,
+  //     honninResult,
+  //     validFromResult,
+  //     validUptoResult,
+  //     koureiResult,
+  //     edabanResult
+  //   )

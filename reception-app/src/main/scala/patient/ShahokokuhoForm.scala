@@ -53,8 +53,8 @@ class ShahokokuhoForm:
     eEdaban.value = data.edaban
     eHonninForm.setRadioGroupValue("honnin", data.honninStore.toString)
     eKoureiForm.setRadioGroupValue("kourei", data.koureiStore.toString)
-    eValidFrom.eInput.value = KanjiDate.dateToKanji(data.validFrom)
-    eValidUpto.eInput.value = data.validUpto.value.fold("")(KanjiDate.dateToKanji(_))
+    eValidFrom.set(Some(data.validFrom))
+    eValidUpto.set(data.validUpto.value)
 
   def validateForEnter(patientId: Int): ShahokokuhoValidator.Result[Shahokokuho] =
     ShahokokuhoValidator.validateShahokokuhoForEnter(
@@ -63,22 +63,22 @@ class ShahokokuhoForm:
       validateHihokenshaKigou(eHihokenshaKigou.value),
       validateHihokenshaBangou(eHihokenshaBangou.value),
       validateHonnin(eHonninForm.getCheckedRadioValue("honnin")),
-      validateValidFrom(eValidFrom.validate(), _.message),
-      validateValidUpto(eValidUpto.validateOption().map(ValidUpto(_)), _.message),
+      validateValidFrom(eValidFrom.value),
+      validateValidUpto(eValidUpto.value),
       validateKourei(eKoureiForm.getCheckedRadioValue("kourei")),
       validateEdaban(eEdaban.value)
     )
 
   def validateForUpdate(shahokokuhoId: Int, patientId: Int): ShahokokuhoValidator.Result[Shahokokuho] =
-    ShahokokuhoValidator.validateShahokokuhoForUpdate(
-      shahokokuhoId,
+    ShahokokuhoValidator.validateShahokokuho(
+      validateShahokokuhoIdForUpdate(shahokokuhoId),
       validatePatientId(patientId),
       validateHokenshaBangouInput(eHokenshaBangou.value),
       validateHihokenshaKigou(eHihokenshaKigou.value),
       validateHihokenshaBangou(eHihokenshaBangou.value),
       validateHonnin(eHonninForm.getCheckedRadioValue("honnin")),
-      validateValidFrom(eValidFrom.validate(), _.message),
-      validateValidUpto(eValidUpto.validateOption().map(ValidUpto(_)), _.message),
+      validateValidFrom(eValidFrom.value),
+      validateValidUpto(eValidUpto.value),
       validateKourei(eKoureiForm.getCheckedRadioValue("kourei")),
       validateEdaban(eEdaban.value)
     )
