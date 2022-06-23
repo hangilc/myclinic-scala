@@ -13,7 +13,7 @@ import cats.syntax.all.*
 
 class DateInputForm(
     var value: Option[LocalDate] = None,
-    gengouList: List[Era] = Gengou.values.toList.reverse
+    gengouList: List[Era] = DateInputForm.defaultGengouList
 ):
   val gengouSelect = SelectProxy(gengouList, (opt, e) => opt(eraName(e)))
   val nenInput = input
@@ -53,6 +53,10 @@ class DateInputForm(
         monthInput.value = di.month.toString
         dayInput.value = di.day.toString
     }
+
+object DateInputForm:
+  val defaultGengouList: List[Era] = 
+    Gengou.values.toList.reverse
 
 object DateInputFormValidator:
   import cats.data.Validated
