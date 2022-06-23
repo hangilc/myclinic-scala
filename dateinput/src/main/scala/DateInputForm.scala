@@ -42,6 +42,28 @@ class DateInputForm(
         dayInput.value = di.day.toString
     }
 
-object DateInputFormValidator
+object DateInputFormValidator:
+  import cats.data.Validated
+  import dev.fujiwara.validator.ValidatorUtil.*
+
+  type GroupedError[G] = (G, ValidationError)
+
+  class SectionValidator[G](name: String):
+    type Result[T] = Validated[List[E], T]
+    def error(g: G, msg: String): GroupedError[G] =
+      (g, )
+      new GroupedError(g, msg)
+
+    def validateIsSome[T](src: Option[T]): Result[T] =
+      isSome
+    def validateNotEmpty[T](src: String): Result[T] =
+      ???
+
+  enum ErrorGroup(name: String) extends SectionValidator[ErrorGroup, GroupedError[ErrorGroup]](name):
+    case GengouError extends ErrorGroup("元号")
+    case NenError extends ErrorGroup("年")
+    case MonthError extends ErrorGroup("月")
+    case DayError extends ErrorGroup("日")
+    case InvalidValueError extends ErrorGroup("指定されて日付が無効な日付です。")
 
 
