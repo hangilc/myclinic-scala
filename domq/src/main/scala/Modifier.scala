@@ -171,7 +171,13 @@ object Modifiers:
   val floatRight = cssFloat := "right"
   val textAlign = AssignCss((s, v) => s.textAlign = v)
   val stroke = AssignCss((s, v) => s.stroke = v)
-  val zIndex = Assign[HTMLElement, Int]((e, v) => e.style.zIndex = v.toString)
+  val zIndex = Assign[HTMLElement, Int | Option[Int]]((e, v) => {
+    v match {
+      case i: Int => e.style.zIndex = i.toString
+      case Some(i) => e.style.zIndex = i.toString
+      case None => e.style.zIndex = ""
+    }
+  })
   val showHide = Assign[HTMLElement, Boolean]((e, b) =>
     if b then e(displayDefault) else e(displayNone)
   )

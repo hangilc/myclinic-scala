@@ -6,13 +6,10 @@ object ZIndexManager:
   def alloc(): Int =
     val z = stack.head + 1
     stack = z :: stack
-    println(("alloc", z))
     z
   
   def release(z: Int): Unit =
-    println(("releasing", z, stack))
     stack = remove(stack, z)
-    println(("released", stack))
 
   private def remove(list: List[Int], n: Int): List[Int] =
     val head = list.head
