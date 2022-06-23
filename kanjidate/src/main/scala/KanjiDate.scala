@@ -95,6 +95,12 @@ object KanjiDate:
       case s: Seireki => s.name
     }
 
+  def eraToYear(era: Era, nen: Int): Int =
+    era match {
+      case g: Gengou => Gengou.gengouToYear(g, nen)
+      case _: Seireki => nen
+    }
+
   case class Wareki(gengou: Gengou, nen: Int)
 
   object Wareki:

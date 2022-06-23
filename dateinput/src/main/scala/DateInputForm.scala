@@ -6,6 +6,10 @@ import dev.fujiwara.kanjidate.KanjiDate.{Gengou, Seireki, Era, eraName}
 import java.time.LocalDate
 import dev.fujiwara.kanjidate.KanjiDate
 import dev.fujiwara.validator.ValidatorUtil.*
+import scala.util.Try
+import scala.util.Success
+import scala.util.Failure
+import cats.syntax.all.*
 
 class DateInputForm(
     var value: Option[LocalDate] = None,
@@ -34,8 +38,7 @@ class DateInputForm(
         dayInput.value = ""
       case Some(d) =>
         val di = KanjiDate.DateInfo(d)
-        if !gengouSelect.contains(di.era) then
-          gengouSelect.prepend(di.era)
+        if !gengouSelect.contains(di.era) then gengouSelect.prepend(di.era)
         gengouSelect.simulateSelect(di.era)
         nenInput.value = di.nen.toString
         monthInput.value = di.month.toString
@@ -44,26 +47,110 @@ class DateInputForm(
 
 object DateInputFormValidator:
   import cats.data.Validated
+  import cats.data.Validated.{Valid, Invalid}
   import dev.fujiwara.validator.ValidatorUtil.*
 
-  type GroupedError[G] = (G, ValidationError)
+  abstract class SectionValidator[S](name: String):
+    type Result[T] = Validated[List[(S, String)], T]
 
-  class SectionValidator[G](name: String):
-    type Result[T] = Validated[List[E], T]
-    def error(g: G, msg: String): GroupedError[G] =
-      (g, )
-      new GroupedError(g, msg)
+    def section: S
 
-    def validateIsSome[T](src: Option[T]): Result[T] =
-      isSome
-    def validateNotEmpty[T](src: String): Result[T] =
-      ???
+    def getName: String = name
 
-  enum ErrorGroup(name: String) extends SectionValidator[ErrorGroup, GroupedError[ErrorGroup]](name):
-    case GengouError extends ErrorGroup("元号")
-    case NenError extends ErrorGroup("年")
-    case MonthError extends ErrorGroup("月")
-    case DayError extends ErrorGroup("日")
-    case InvalidValueError extends ErrorGroup("指定されて日付が無効な日付です。")
+    def error[T](msg: String): Result[T] = Invalid(List((section, msg)))
 
+    def cond[T](
+        test: Boolean,
+        validValue: T,
+        errMsg: => String
+    ): Result[T] =
+      if test then Valid(validValue) else error(errMsg)
 
+    def isSome[T](src: Option[T]): Result[T] =
+      src match {
+        case Some(t) => Valid(t)
+        case None    => error(s"${name}の値が設定されていません（None）。")
+      }
+
+    def isNotEmpty(src: String): Result[String] =
+      cond(!(src == null || src.isEmpty), src, s"${name}の値が入力されていません。")
+
+    def toInt(src: String): Result[Int] =
+      src.toIntOption match {
+        case Some(i) => Valid(i)
+        case None    => error(s"${name}の入力が整数でありません。")
+      }
+
+    def isPositive(i: Int): Result[Int] =
+      cond(i > 0, i, s"${name}の値が正の整数でありません。")
+
+    def isInRange(i: Int, minVal: Int, maxVal: Int): Result[Int] =
+      cond(
+        i >= minVal && i <= maxVal,
+        i,
+        s"${name}の値（${i}）が、${minVal} と ${maxVal} の範囲内でありません。"
+      )
+
+    def validateAsPositiveInt(i: Int): Result[Int] =
+      isPositive(i)
+
+    def validateAsPositiveInt(src: String): Result[Int] =
+      isNotEmpty(src)
+        .andThen(toInt(_))
+        .andThen(isPositive(_))
+
+    def validateAsInRange(src: String, minVal: Int, maxVal: Int): Result[Int] =
+      isNotEmpty(src)
+        .andThen(toInt(_))
+        .andThen(isInRange(_, minVal, maxVal))
+
+  enum SectionGroup(name: String)
+      extends SectionValidator[SectionGroup](name):
+    def section: SectionGroup = this
+    case GengouSection extends SectionGroup("元号")
+    case NenSection extends SectionGroup("年")
+    case MonthSection extends SectionGroup("月")
+    case DaySection extends SectionGroup("日")
+    case InvalidValueSection extends SectionGroup("指定されて日付が無効な日付です。")
+
+  type Result[T] = SectionGroup#Result[T]
+  import SectionGroup.*
+
+  def validateGengou(gOpt: Option[Era]): Result[Era] =
+    GengouSection.isSome(gOpt)
+
+  def validateNen(src: String): Result[Int] =
+    NenSection.validateAsPositiveInt(src)
+
+  def validateMonth(src: String): Result[Int] =
+    MonthSection.validateAsInRange(src, 1, 12)
+
+  def validateDay(src: String): Result[Int] =
+    DaySection.validateAsInRange(src, 1, 31)
+
+  def validateValue(e: Era, nen: Int, month: Int, day: Int): Result[LocalDate] =
+    val year = KanjiDate.eraToYear(e, nen)
+    Try(LocalDate.of(year, month, day)) match {
+      case Success(d) => Valid(d)
+      case Failure(_) => InvalidValueSection.error(InvalidValueSection.getName)
+    }
+
+  def validateDateInputForm(
+      era: Option[Era],
+      nen: String,
+      month: String,
+      day: String
+  ): Result[Option[LocalDate]] =
+    if nen.isEmpty && month.isEmpty && day.isEmpty then Valid(None)
+    else
+      (
+        validateGengou(era),
+        validateNen(nen),
+        validateMonth(month),
+        validateDay(day)
+      )
+        .tupled
+        .andThen {
+          case (g, n, m, d) => validateValue(g, n, m, d)
+        }
+        .map(Some(_))
