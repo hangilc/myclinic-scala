@@ -30,6 +30,15 @@ class DateInputForm(
   )
   updateUI()
 
+  def validated: Either[String, Option[LocalDate]] =
+    import DateInputFormValidator.*
+    validateDateInputForm(
+      Some(gengouSelect.selected),
+      nenInput.value,
+      monthInput.value,
+      dayInput.value
+    ).asEither
+
   private def updateUI(): Unit =
     value match {
       case None =>
@@ -103,6 +112,10 @@ object DateInputFormValidator:
       isNotEmpty(src)
         .andThen(toInt(_))
         .andThen(isInRange(_, minVal, maxVal))
+
+  extension [S, T] (v: Validated[List[(S, String)], T])
+    def asEither: Either[String, T] =
+      v.toEither.left.map(errs => errs.map(_._2).mkString("\n"))
 
   enum SectionGroup(name: String)
       extends SectionValidator[SectionGroup](name):

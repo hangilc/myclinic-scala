@@ -11,6 +11,11 @@ object StartUpPractice:
     import dev.fujiwara.domq.{Absolute}
     import org.scalajs.dom.document
     val dateForm = dev.fujiwara.dateinput.DateInputForm(Some(LocalDate.now()))
-    service.right.ui.ele(dateForm.ele)
+    service.right.ui.ele(dateForm.ele,
+      div(button("入力", onclick := (() => {
+        println(dateForm.validated)
+      })))
+    )
+
     Future.successful(())
 
