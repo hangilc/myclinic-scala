@@ -8,7 +8,7 @@ case class YearDisp(var g: Gengou, var nen: Int):
   private val changeYearPublisher = new LocalEventPublisher[Int]
 
   val yearSpan = span
-  val ele = div(cls := "domq-display-inline-block domq-date-picker-year-disp",
+  val ele = div(cls := "domq-display-inline-block domq-date-picker-year-disp domq-user-select-none",
     Icons.chevronLeft(cls := "domq-icon-chevron-left", onclick := (() => doChangeYear(-1))),
     yearSpan,
     Icons.chevronRight(cls := "domq-icon-chevron-right", onclick := (() => doChangeYear(1)))
