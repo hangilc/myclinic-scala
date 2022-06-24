@@ -1,0 +1,16 @@
+.domq-display-inline-block {
+  display: inline-block;
+}
+
+.domq-user-select-none {
+  user-select: none;
+}
+
+.domq-cursor-pointer {
+  cursor: pointer;
+}
+
+.domq-background-white {
+  background: white;
+}
+

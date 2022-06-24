@@ -49,9 +49,9 @@ case class DateInput(
   val dateEdit = EditableDate(initialValue, format, title)
   val icon = Icons.calendar
   val ele = div(
-    cls := "domq-date-input",
+    cls := "domq-date-input date-required",
     dateEdit.ele,
-    icon(cls := "domq-calendar-icon", onclick := (doCalendar _))
+    icon(onclick := (doCalendar _))
   )
 
   def value: LocalDate = dateEdit.value
