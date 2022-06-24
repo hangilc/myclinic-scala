@@ -9,7 +9,7 @@ import java.time.LocalDate
 case class MonthList():
   val selection = Selection[Int](
     (1 to 12).toList,
-    m => div(f"${m}02d月")
+    m => div(f"${m}%02d月")
   )
   val ele = selection.ele
 
