@@ -4,7 +4,7 @@ import dev.fujiwara.domq.ElementQ.*
 import dev.fujiwara.domq.Html.*
 import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.myclinic.scala.model._
-import dev.myclinic.scala.util.DateUtil
+import dev.fujiwara.kanjidate.DateUtil
 import org.scalajs.dom
 import org.scalajs.dom.document
 import java.time.LocalDate

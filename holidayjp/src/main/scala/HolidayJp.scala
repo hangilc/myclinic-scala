@@ -1,6 +1,6 @@
 package dev.fujiwara.holidayjp
 
-import dev.myclinic.scala.util.DateUtil
+import dev.fujiwara.kanjidate.DateUtil
 import java.time.DayOfWeek.*
 import java.time.*
 import java.time.temporal.ChronoUnit.*

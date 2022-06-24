@@ -6,7 +6,7 @@ import dev.fujiwara.kanjidate.KanjiDate
 import dev.myclinic.scala.model.Patient
 import dev.myclinic.scala.model.Visit
 import dev.myclinic.scala.model.WaitState
-import dev.myclinic.scala.util.DateUtil
+import dev.fujiwara.kanjidate.DateUtil
 import dev.myclinic.scala.web.appbase.SideMenuService
 import dev.myclinic.scala.webclient.Api
 import dev.myclinic.scala.webclient.global

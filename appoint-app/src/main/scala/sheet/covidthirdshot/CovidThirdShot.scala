@@ -6,7 +6,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import dev.myclinic.scala.model.Patient
 import java.time.LocalDate
 import dev.fujiwara.kanjidate.KanjiDate
-import dev.myclinic.scala.util.DateUtil
+import dev.fujiwara.kanjidate.DateUtil
 import scala.util.{Try, Success, Failure}
 import scala.language.implicitConversions
 

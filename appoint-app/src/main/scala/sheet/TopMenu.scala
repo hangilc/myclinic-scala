@@ -7,7 +7,7 @@ import dev.myclinic.scala.webclient.{Api, global}
 import dev.myclinic.scala.web.appoint.AppointHistoryWindow
 import scala.util.{Success, Failure}
 import org.scalajs.dom.MouseEvent
-import dev.myclinic.scala.util.DateUtil
+import dev.fujiwara.kanjidate.DateUtil
 import dev.myclinic.scala.web.appoint.sheet.searchappointdialog.SearchAppointDialog
 import scala.language.implicitConversions
 

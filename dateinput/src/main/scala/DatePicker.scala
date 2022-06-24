@@ -9,6 +9,9 @@ import scala.collection.mutable.ListBuffer
 import dev.fujiwara.dateinput.datepicker.*
 import dev.fujiwara.kanjidate.KanjiDate.Gengou
 import dev.fujiwara.kanjidate.KanjiDate
+import java.time.DayOfWeek
+import dev.fujiwara.kanjidate.DateUtil
+import dev.fujiwara.kanjidate.DateUtil.given
 
 case class DatePicker(init: Option[LocalDate]):
   private val dateSelectedPublisher = new LocalEventPublisher[LocalDate]
@@ -22,10 +25,11 @@ case class DatePicker(init: Option[LocalDate]):
   val yearDisp = YearDisp(initGengou, initNen)
   val monthDisp = MonthDisp(initMonth)
   val hand = Icons.hand
+  val cog = Icons.cog
   val datesTab = div
   val ele = div(cls := "domq-date-picker domq-user-select-none",
     div(cls := "year-nen",
-      yearDisp.ele, monthDisp.ele, hand //,Icons.cog(cls := "domq-icon-cog")
+      yearDisp.ele, monthDisp.ele, hand, cog(displayNone)
     ),
     datesTab(cls := "domq-date-picker-dates-tab"),
     css(_.position = "absolute")
@@ -62,22 +66,20 @@ case class DatePicker(init: Option[LocalDate]):
     stuffDates(yearDisp.year, monthDisp.month)
 
   private def stuffDates(year: Int, month: Int): Unit =
-    datesTab(clear)
-    val d1 = LocalDate.of(year, month, 1)
-    val pad = d1.getDayOfWeek.getValue % 7
-    for _ <- 0 until pad do datesTab(div())
-    datesTab(children := makeDates(year, month))
+    datesTab(clear, children := makeDates(year, month))
 
   private def makeDates(year: Int, month: Int): List[HTMLElement] =
-    val start = LocalDate.of(year, month, 1)
-    val end = start.plusMonths(1)
-    var d = start
-    val buf = ListBuffer[LocalDate]()
+    val start: LocalDate = LocalDate.of(year, month, 1)
+    val end: LocalDate = start.plusMonths(1).minusDays(1)
+    val preMonthStart: LocalDate = 
+      if start.getDayOfWeek == DayOfWeek.SUNDAY then start.minusDays(7)
+      else DateUtil.startDayOfWeek(start)
+    val postMonthEnd: LocalDate = 
+      if end.getDayOfWeek == DayOfWeek.SATURDAY then end.plusDays(7)
+      else end.plusDays(6 - (end.getDayOfWeek.getValue % 7))
+    val dates: List[LocalDate] = DateUtil.enumDates(preMonthStart, postMonthEnd)
     val tmpDay = initDay.map(_.min(KanjiDate.lastDayOfMonth(year, month).getDayOfMonth))
-    while d.isBefore(end) do
-      buf.addOne(d)
-      d = d.plusDays(1)
-    buf.toList.map(d => {
+    dates.map(d => {
       val e = div(d.getDayOfMonth.toString)(
         cls := "domq-date-picker-date-box",
         onclick := (() => onDayClick(d)),
@@ -85,6 +87,12 @@ case class DatePicker(init: Option[LocalDate]):
       )
       if Some(d) == init then e(cls := "init-date")
       else if Some(d.getDayOfMonth) == tmpDay then e(cls := "init-date-equiv")
+      d.getDayOfWeek match 
+        case DayOfWeek.SUNDAY => e(cls := "sunday")
+        case DayOfWeek.SATURDAY => e(cls := "saturday")
+        case _ => ()
+      if d < start then e(cls := "pre-month")
+      else if d > end then e(cls := "post-month") 
       e
     })
 

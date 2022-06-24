@@ -2,7 +2,7 @@ package dev.myclinic.scala.server
 
 import org.http4s.QueryParamDecoder
 import java.time.{LocalDate, LocalTime, LocalDateTime}
-import dev.myclinic.scala.util.DateUtil
+import dev.fujiwara.kanjidate.DateUtil
 
 trait DateTimeQueryParam:
   given QueryParamDecoder[LocalDate] =

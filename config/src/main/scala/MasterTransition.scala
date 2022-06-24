@@ -1,7 +1,7 @@
 package dev.myclinic.scala.config
 
 import java.time.LocalDate
-import dev.myclinic.scala.util.DateUtil.given
+import dev.fujiwara.kanjidate.DateUtil.given
 import scala.language.implicitConversions
 
 case class MasterTransition(

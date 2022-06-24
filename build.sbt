@@ -363,7 +363,7 @@ val validatorJS = validator.js
 lazy val holidayjp = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Pure)
   .in(file("holidayjp"))
-  .dependsOn(util)
+  .dependsOn(util, kanjidate)
   .jsSettings(
     scalaJSUseMainModuleInitializer := false,
     libraryDependencies ++= Seq(

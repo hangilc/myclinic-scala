@@ -2,7 +2,7 @@ package dev.myclinic.scala.clinicop
 
 import java.time.LocalDate
 import java.time.DayOfWeek.*
-import dev.myclinic.scala.util.DateUtil
+import dev.fujiwara.kanjidate.DateUtil
 import dev.fujiwara.holidayjp.NationalHolidays
 
 sealed trait ClinicOperation:

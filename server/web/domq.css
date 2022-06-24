@@ -109,6 +109,19 @@
   background-color: #dcdcdc;
 }
 
+.domq-date-picker-date-box.sunday {
+  color: #ff0000;
+}
+
+.domq-date-picker-date-box.saturday {
+  color: #009900;
+}
+
+.domq-date-picker-date-box.pre-month,
+.domq-date-picker-date-box.post-month {
+  opacity: 0.4;
+}
+
 .domq-date-input-form-gengou {
   margin-right: 1px;
 }

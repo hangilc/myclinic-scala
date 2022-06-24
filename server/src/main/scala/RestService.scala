@@ -13,7 +13,7 @@ import io.circe.syntax._
 import dev.myclinic.scala.db.Db
 import java.time.LocalDate
 import java.time.LocalTime
-import dev.myclinic.scala.util.DateUtil
+import dev.fujiwara.kanjidate.DateUtil
 import fs2.concurrent.Topic
 import org.http4s.websocket.WebSocketFrame
 import dev.myclinic.scala.model.*

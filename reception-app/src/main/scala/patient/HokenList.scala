@@ -3,8 +3,9 @@ package dev.myclinic.scala.web.reception.patient
 import dev.fujiwara.domq.all.{*, given}
 import org.scalajs.dom.{HTMLElement, HTMLInputElement}
 import scala.scalajs.js
-import dev.myclinic.scala.util.{DateUtil, HokenRep}
+import dev.myclinic.scala.util.HokenRep
 import dev.fujiwara.kanjidate.KanjiDate
+import dev.fujiwara.kanjidate.DateUtil
 import dev.myclinic.scala.model.{*, given}
 import java.time.LocalDate
 import dev.myclinic.scala.webclient.Api

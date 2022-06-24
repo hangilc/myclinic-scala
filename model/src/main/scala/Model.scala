@@ -10,7 +10,7 @@ import io.circe.syntax.*
 import io.circe.parser.decode
 import io.circe.generic.semiauto._
 import scala.concurrent.duration.FiniteDuration
-import dev.myclinic.scala.util.DateUtil
+import dev.fujiwara.kanjidate.DateUtil
 import dev.myclinic.scala.util.HokenRep
 
 case class ValidUpto(value: Option[LocalDate])

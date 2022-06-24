@@ -1,4 +1,4 @@
-package dev.myclinic.scala.util
+package dev.fujiwara.kanjidate
 
 import java.time.{LocalDate, LocalTime, LocalDateTime, DayOfWeek}
 import java.time.format.DateTimeFormatter

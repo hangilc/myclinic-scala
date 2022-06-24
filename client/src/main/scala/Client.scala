@@ -17,7 +17,7 @@ import org.http4s.circe.CirceEntityEncoder._
 import org.http4s.circe.CirceEntityDecoder._
 import java.time.{LocalDate, LocalTime}
 import org.http4s.{EntityDecoder, EntityEncoder}
-import dev.myclinic.scala.util.DateUtil
+import dev.fujiwara.kanjidate.DateUtil
 
 object Client:
   val client: Client[IO] =

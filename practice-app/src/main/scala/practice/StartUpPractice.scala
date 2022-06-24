@@ -10,10 +10,12 @@ object StartUpPractice:
   def run(service: PracticeService): Future[Unit] =
     import dev.fujiwara.domq.{Absolute}
     import org.scalajs.dom.document
-    // val dateForm = dev.fujiwara.dateinput.DateInputFormDialog()
-    // dateForm.onEnter(d => println(d))
-    // service.right.ui.ele(
-    //   button("click", onclick := (() => dateForm.open()))
-    // )
+    import dev.fujiwara.dateinput.*
+    service.right.ui.ele(
+      button("click", onclick := (() =>
+        val dlog = new DatePicker(None)
+        dlog.open(_ => ())  
+      ))
+    )
     Future.successful(())
 

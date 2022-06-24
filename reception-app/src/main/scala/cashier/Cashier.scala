@@ -9,7 +9,7 @@ import dev.myclinic.scala.web.appbase.{SideMenu, EventPublishers, PrintDialog}
 import dev.myclinic.scala.web.appbase.ElementEvent.*
 import dev.myclinic.scala.model.*
 import dev.fujiwara.kanjidate.KanjiDate
-import dev.myclinic.scala.util.DateUtil
+import dev.fujiwara.kanjidate.DateUtil
 import dev.myclinic.scala.webclient.Api
 import org.scalajs.dom.{HTMLElement, MouseEvent}
 import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._

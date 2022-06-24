@@ -6,7 +6,7 @@ import dev.fujiwara.domq.all.{*, given}
 import dev.fujiwara.domq.DataSource
 import org.scalajs.dom.HTMLElement
 import dev.fujiwara.kanjidate.KanjiDate
-import dev.myclinic.scala.util.DateUtil
+import dev.fujiwara.kanjidate.DateUtil
 import java.time.LocalDate
 
 class WqueueRow(ds: DataSource[(Wqueue, Visit, Patient)])(

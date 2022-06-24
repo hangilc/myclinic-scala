@@ -4,7 +4,7 @@ import dev.fujiwara.domq.all.{*, given}
 import dev.myclinic.scala.model.AppointTime
 import java.time.LocalTime
 import scala.util.{Try, Success, Failure}
-import dev.myclinic.scala.util.DateUtil
+import dev.fujiwara.kanjidate.DateUtil
 import dev.myclinic.scala.web.appbase.AppointTimeValidator
 import dev.myclinic.scala.web.appbase.AppointTimeValidator.{*, given}
 import dev.myclinic.scala.webclient.Api

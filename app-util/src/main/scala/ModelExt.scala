@@ -2,7 +2,7 @@ package dev.myclinic.scala.apputil
 
 import dev.myclinic.scala.model.*
 import dev.fujiwara.kanjidate.KanjiDate
-import dev.myclinic.scala.util.DateUtil
+import dev.fujiwara.kanjidate.DateUtil
 import java.time.LocalDate
 
 object ModelExt:

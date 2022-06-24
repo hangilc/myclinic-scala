@@ -3,7 +3,7 @@ package dev.myclinic.scala.web.appoint.sheet
 import dev.fujiwara.domq.all.{given, *}
 import dev.myclinic.scala.model.*
 import dev.myclinic.scala.clinicop.*
-import dev.myclinic.scala.util.DateUtil
+import dev.fujiwara.kanjidate.DateUtil
 import math.Ordered.orderingToOrdered
 import org.scalajs.dom.HTMLElement
 import java.time.LocalDate

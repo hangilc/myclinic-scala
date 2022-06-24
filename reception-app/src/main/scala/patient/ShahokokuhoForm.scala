@@ -6,7 +6,7 @@ import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.{Icons, Form, ErrorBox, Modifier}
 import scala.language.implicitConversions
 import org.scalajs.dom.{HTMLElement, HTMLInputElement}
-import dev.myclinic.scala.util.DateUtil
+import dev.fujiwara.kanjidate.DateUtil
 import dev.myclinic.scala.model.*
 import dev.myclinic.scala.web.appbase.validator.ShahokokuhoValidator
 import dev.myclinic.scala.web.appbase.validator.ShahokokuhoValidator.*
@@ -21,7 +21,7 @@ class ShahokokuhoForm:
   val eHonninForm = form()
   val eKoureiForm = form()
   val eValidFrom = DateOptionInput()
-  val eValidUpto = DateOptionInput()
+  val eValidUpto = DateOptionInput(formatNone = () => "（期限なし）")
   val eEdaban = inputText()
   val ele = Form.rows(
     span("保険者番号") -> eHokenshaBangou(

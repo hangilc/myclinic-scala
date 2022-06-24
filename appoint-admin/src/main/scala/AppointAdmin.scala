@@ -3,7 +3,7 @@ package dev.myclinic.scala.appoint.admin
 import cats.*
 import cats.syntax.all.*
 import cats.effect.IO
-import dev.myclinic.scala.util.DateUtil
+import dev.fujiwara.kanjidate.DateUtil
 import dev.myclinic.scala.db.Db
 import dev.myclinic.scala.model.*
 import dev.myclinic.scala.clinicop.*

@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.LocalTime
 import scala.collection.mutable.ListBuffer
-import dev.myclinic.scala.util.DateUtil
+import dev.fujiwara.kanjidate.DateUtil
 import java.time.LocalDateTime
 import scala.scalajs.js.URIUtils
 
