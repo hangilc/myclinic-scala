@@ -12,14 +12,15 @@ case class DateOptionInput(
     format: LocalDate => String = d => KanjiDate.dateToKanji(d),
     formatNone: () => String = () => "（未入力）",
     title: String = "日付の入力"
-):
+)(using InitNoneConverter):
   val dateEdit =
     EditableDateOption(initialValue, format, formatNone, title)
   val icon = Icons.calendar
   val ele = div(
-    cls := "domq-date-input",
+    cls := "domq-date-input date-option",
     dateEdit.ele,
-    icon(cls := "domq-calendar-icon", onclick := (doCalendar _))
+    Icons.xCircle,
+    icon(onclick := (doCalendar _))
   )
 
   def value: Option[LocalDate] = dateEdit.value
@@ -44,7 +45,7 @@ case class DateInput(
     private var initialValue: LocalDate,
     format: LocalDate => String = d => KanjiDate.dateToKanji(d),
     title: String = "日付の入力"
-):
+)(using InitNoneConverter):
   val dateEdit = EditableDate(initialValue, format, title)
   val icon = Icons.calendar
   val ele = div(
@@ -73,7 +74,7 @@ object DateInputCommon:
       init: Option[LocalDate],
       icon: HTMLElement,
       onEnter: LocalDate => Unit
-  ): Unit =
+  )(using InitNoneConverter): Unit =
     val picker = DatePicker(init)
     picker.onDateSelected(onEnter)
     def locate(e: HTMLElement): Unit =
@@ -81,3 +82,4 @@ object DateInputCommon:
       Absolute.setBottomOf(e, Absolute.topOf(icon) - 4)
       Absolute.ensureInViewOffsetting(e, 10)
     picker.open(locate)
+

@@ -9,7 +9,7 @@ class EditableDate(
     initialValue: LocalDate,
     format: LocalDate => String = d => KanjiDate.dateToKanji(d),
     title: String = "日付の入力"
-):
+)(using InitNoneConverter):
   private val onChangePublisher = new LocalEventPublisher[LocalDate]
   private var date: LocalDate = initialValue
   val ele = span(cls := "domq-editable-date domq-cursor-pointer", onclick := (doClick _))
@@ -45,7 +45,7 @@ class EditableDateOption(
     format: LocalDate => String = d => KanjiDate.dateToKanji(d),
     formatNone: () => String = () => "（未入力）",
     title: String = "日付の入力"
-):
+)(using InitNoneConverter):
   private val onChangePublisher = new LocalEventPublisher[Option[LocalDate]]
   private var dateOption: Option[LocalDate] = initialValue
   val ele = span(cls := "domq-editable-date domq-cursor-pointer", onclick := (doClick _))
@@ -75,7 +75,4 @@ class EditableDateOption(
     val dlog = DateInputFormDialog(dateOption)
     dlog.onEnter(dOpt => simulateChange(dOpt))
     dlog.open()
-    // val dlog = DateOptionInputDialog(dateOption)
-    // dlog.onEnter(d => simulateChange(_ => d))
-    // dlog.open()
 

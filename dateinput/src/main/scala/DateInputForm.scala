@@ -15,7 +15,8 @@ import org.scalajs.dom.MouseEvent
 class DateInputForm(
     var value: Option[LocalDate] = None,
     gengouList: List[Era] = DateInputForm.defaultGengouList
-):
+)(using initNoneConverter: InitNoneConverter):
+  value = value.orElse(initNoneConverter.convert)
   val gengouSelect = SelectProxy(gengouList, (opt, e) => opt(eraName(e)))
   val nenInput = input
   val monthInput = input

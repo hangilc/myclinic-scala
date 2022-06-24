@@ -13,6 +13,7 @@ import dev.myclinic.scala.web.appbase.validator.ShahokokuhoValidator.*
 import java.time.LocalDate
 import dev.fujiwara.dateinput.{DateInput, DateOptionInput}
 import dev.fujiwara.kanjidate.KanjiDate
+import dev.fujiwara.dateinput.InitNoneConverter
 
 class ShahokokuhoForm:
   val eHokenshaBangou = inputText()
@@ -21,7 +22,10 @@ class ShahokokuhoForm:
   val eHonninForm = form()
   val eKoureiForm = form()
   val eValidFrom = DateOptionInput()
-  val eValidUpto = DateOptionInput(formatNone = () => "（期限なし）")
+  val eValidUpto = DateOptionInput(formatNone = () => "（期限なし）")(
+    using new InitNoneConverter:
+      def convert: Option[LocalDate] = eValidFrom.value
+  )
   val eEdaban = inputText()
   val ele = Form.rows(
     span("保険者番号") -> eHokenshaBangou(

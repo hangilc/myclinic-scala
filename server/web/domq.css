@@ -26,11 +26,27 @@
 
 /* Date Input ***********************************************************/
 
-.domq-date-input .domq-calendar-icon {
+.domq-date-input .domq-icon {
   position: relative;
   top: -0.15rem;
-  margin-left: 6px;
+  /* margin-left: 6px; */
   cursor: pointer;
+}
+
+.domq-date-input.date-option .domq-x-circle-icon {
+  margin-left: 6px;
+}
+
+.domq-date-input.date-option .domq-calendar-icon {
+  margin-left: 2px;
+}
+
+.domq-date-input .domq-calendar-icon {
+  margin-left: 6px;
+}
+
+.domq-date-input.date-option .domq-x-circle-icon {
+  margin-left: 6px;
 }
 
 .domq-date-picker {

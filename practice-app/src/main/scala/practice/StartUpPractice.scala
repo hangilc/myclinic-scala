@@ -11,6 +11,8 @@ object StartUpPractice:
     import dev.fujiwara.domq.{Absolute}
     import org.scalajs.dom.document
     import dev.fujiwara.dateinput.*
+    given InitNoneConverter with
+      def convert: Option[LocalDate] = Some(LocalDate.of(1957, 6, 2))
     service.right.ui.ele(
       button("click", onclick := (() =>
         val dlog = new DatePicker(None)

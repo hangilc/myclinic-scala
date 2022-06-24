@@ -10,7 +10,7 @@ class DateInputFormDialog(
     title: String = "日付の入力",
     gengouList: List[Era] = DateInputForm.defaultGengouList,
     allowNone: Boolean = true
-):
+)(using InitNoneConverter):
   private val onEnterPublisher = new LocalEventPublisher[Option[LocalDate]]
   val form = new DateInputForm(init)
   val errBox = ErrorBox()

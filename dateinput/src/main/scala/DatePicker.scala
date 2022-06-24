@@ -14,15 +14,18 @@ import java.time.DayOfWeek
 import dev.fujiwara.kanjidate.DateUtil
 import dev.fujiwara.kanjidate.DateUtil.given
 
-case class DatePicker(init: Option[LocalDate]):
+case class DatePicker(init: Option[LocalDate])(
+  using initNoneConverter: InitNoneConverter
+):
   private val dateSelectedPublisher = new LocalEventPublisher[LocalDate]
+  private val convertedInit: Option[LocalDate] = init.orElse(initNoneConverter.convert)
   private val (initYear, initGengou: Era, initNen: Int, initMonth: Int) =
-    init.orElse(Some(LocalDate.now()))
+    convertedInit.orElse(Some(LocalDate.now()))
     .map(d => 
       val (e, n) = Gengou.dateToEra(d)
       (d.getYear, e, n, d.getMonthValue)
     ).get
-  private val initDay: Option[Int] = init.map(_.getDayOfMonth)
+  private val initDay: Option[Int] = convertedInit.map(_.getDayOfMonth)
   val yearDisp = YearDisp(initYear)
   val monthDisp = MonthDisp(initMonth)
   val hand = Icons.hand
@@ -49,9 +52,6 @@ case class DatePicker(init: Option[LocalDate]):
     close = Absolute.openWithScreen(ele, locator)
 
   private def doChangeYear(newYear: Int): Unit =
-    // val tmpDay = initDay.getOrElse(1)
-    // val d = tmpDay.min(KanjiDate.lastDayOfMonth(newYear, monthDisp.month).getDayOfMonth)
-    // val (g, n) = Gengou.dateToGengou(LocalDate.of(newYear, monthDisp.month, d)).get
     yearDisp.set(newYear)
     stuffDates(yearDisp.year, monthDisp.month)
 
@@ -62,7 +62,6 @@ case class DatePicker(init: Option[LocalDate]):
       (t.getYear, t.getMonthValue)
     val tmpDay = initDay.getOrElse(1)
     val d = tmpDay.min(KanjiDate.lastDayOfMonth(targetYear, targetMonth).getDayOfMonth)
-    // val (g, n) = Gengou.dateToGengou(LocalDate.of(targetYear, targetMonth, d)).get
     yearDisp.set(targetYear)
     monthDisp.set(targetMonth)
     stuffDates(yearDisp.year, monthDisp.month)

@@ -40,7 +40,7 @@ object Icons:
       List(
         "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
       )
-    )
+    )(cls := "domq-calendar-icon")
 
   // Based from Heroicons
   // src: https://github.com/tailwindlabs/heroicons
@@ -332,7 +332,7 @@ object Icons:
       List(
         "M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
       )
-    )
+    )(cls := "domq-x-circle-icon")
 
   // Based from Heroicons
   // src: https://github.com/tailwindlabs/heroicons
