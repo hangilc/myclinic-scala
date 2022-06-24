@@ -36,6 +36,7 @@ case class DatePicker(init: Option[LocalDate]):
   )
   yearDisp.onChangeYear(doChangeYear _)
   monthDisp.onChangeMonth(doChangeMonth _)
+  Absolute.enableDrag(ele, hand)
   var close: () => Unit = () => ()
 
   def onDateSelected(handler: LocalDate => Unit): Unit =

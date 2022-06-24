@@ -76,7 +76,6 @@ object DateInputCommon:
   ): Unit =
     val picker = DatePicker(init)
     picker.onDateSelected(onEnter)
-    Absolute.enableDrag(picker.ele, picker.hand)
     def locate(e: HTMLElement): Unit =
       Absolute.setLeftOf(e, Absolute.rightOf(icon) + 4)
       Absolute.setBottomOf(e, Absolute.topOf(icon) - 4)
