@@ -3,32 +3,54 @@ package dev.fujiwara.dateinput.datepicker
 import dev.fujiwara.domq.all.{*, given}
 import scala.language.implicitConversions
 import dev.fujiwara.kanjidate.KanjiDate.{Gengou}
+import org.scalajs.dom.MouseEvent
+import dev.fujiwara.kanjidate.KanjiDate
+import dev.fujiwara.kanjidate.KanjiDate.{Era, Gengou, Seireki}
+import java.time.LocalDate
 
-case class YearDisp(var g: Gengou, var nen: Int):
+case class YearDisp(var year: Int):
   private val changeYearPublisher = new LocalEventPublisher[Int]
 
   val yearSpan = span
   val ele = div(cls := "domq-display-inline-block domq-date-picker-year-disp domq-user-select-none",
-    Icons.chevronLeft(cls := "domq-icon-chevron-left", onclick := (() => doChangeYear(-1))),
-    yearSpan,
-    Icons.chevronRight(cls := "domq-icon-chevron-right", onclick := (() => doChangeYear(1)))
+    Icons.chevronLeft(cls := "domq-icon-chevron-left", onclick := (() => simulateChange(_ - 1))),
+    yearSpan(cls := "domq-cursor-pointer", onclick := (doYearClick _)),
+    Icons.chevronRight(cls := "domq-icon-chevron-right", onclick := (() => simulateChange(_ + 1)))
   )
   updateUI()
 
-  def year: Int = Gengou.gengouToYear(g, nen)
-
-  def set(newGengou: Gengou, newNen: Int): Unit =
-    g = newGengou
-    nen = newNen
+  def set(newYear: Int): Unit =
+    year = newYear
     updateUI()
+
+  def simulateChange(f: Int => Int): Unit =
+    set(f(year))
+    changeYearPublisher.publish(year)
 
   def onChangeYear(handler: Int => Unit): Unit = changeYearPublisher.subscribe(handler)
 
-  private def doChangeYear(n: Int): Unit =
-    changeYearPublisher.publish(year + n)
+  private def doYearClick(event: MouseEvent): Unit =
+    val yearList = YearList(2010, 2022)
+    yearList.selection.addSelectEventHandler(year => {
+      simulateChange(_ => year)
+    })
+    yearList.ele(cls := "domq-background-white")
+    Absolute.position(yearList.ele)
+    Absolute.openWithScreen(yearList.ele, e => {
+      val (x, y) = Absolute.clickPos(event)
+      Absolute.setLeftOf(e, x + 8)
+      Absolute.setBottomOf(e, y + 20)
+      Absolute.ensureInViewOffsetting(e, 10)
+    })
 
   private def updateUI(): Unit =
-    yearSpan(innerText := f"${g.name}${nen}%02d年")
+    val (era, nen) = Gengou.dateToEra(LocalDate.of(year, 12, 31))
+    val eraName = 
+      era match {
+        case g: Gengou => g.name
+        case s: Seireki => ""
+      }
+    yearSpan(innerText := f"${eraName}${nen}%02d年")
 
 
 

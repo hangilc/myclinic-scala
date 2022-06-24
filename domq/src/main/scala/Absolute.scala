@@ -71,6 +71,9 @@ object Absolute:
 
   def viewportOffsetTop: Double = window.scrollY
 
+  def clickPos(event: MouseEvent): (Double, Double) =
+    (event.clientX + viewportOffsetLeft, event.clientY + viewportOffsetTop)
+
   def ensureHorizInViewOffsetting(e: HTMLElement, extra: Double): Unit =
     val r = e.getBoundingClientRect()
     if r.right > (viewportWidth - extra) then
@@ -114,8 +117,9 @@ object Absolute:
 
   private val dragEventHandler: scala.scalajs.js.Function1[MouseEvent, Unit] = e =>
     if dragTarget != null then
-      dragTarget.style.left = s"${e.clientX + dragTargetOffsetX}px"
-      dragTarget.style.top = s"${e.clientY + dragTargetOffsetY}px"
+      val (x, y) = clickPos(e)
+      dragTarget.style.left = s"${x + dragTargetOffsetX}px"
+      dragTarget.style.top = s"${y + dragTargetOffsetY}px"
 
   private val undragEventHandler: scala.scalajs.js.Function1[MouseEvent, Unit] = e =>
     if dragTarget != null then
@@ -126,10 +130,11 @@ object Absolute:
 
   def enableDrag(e: HTMLElement, dragArea: HTMLElement): Unit =
     dragArea.addEventListener("mousedown", (event: MouseEvent) => {
+      val (x, y) = clickPos(event)
       val style = window.getComputedStyle(e)
       dragTarget = e
-      dragTargetOffsetX = parseDouble(style.left) - event.clientX
-      dragTargetOffsetY = parseDouble(style.top) - event.clientY 
+      dragTargetOffsetX = parseDouble(style.left) - x
+      dragTargetOffsetY = parseDouble(style.top) - y
       document.body.addEventListener("mousemove", dragEventHandler)
       document.body.addEventListener("mouseup", undragEventHandler)
     })

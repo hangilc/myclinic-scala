@@ -84,8 +84,13 @@ object KanjiDate:
       val w = Wareki.fromDate(d)
       w.map(w => (w.gengou, w.nen))
 
+    def dateToEra(d: LocalDate): (Era, Int) =
+      dateToGengou(d).getOrElse((Seireki, d.getYear))
+
   case class Seireki():
     def name = "西暦"
+
+  object Seireki extends Seireki
 
   type Era = Gengou | Seireki
 

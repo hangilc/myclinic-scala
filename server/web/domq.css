@@ -10,6 +10,10 @@
   cursor: pointer;
 }
 
+.domq-background-white {
+  background: white;
+}
+
 /* Form ****************************************************************/
 
 .domq-form-value .input-group {
