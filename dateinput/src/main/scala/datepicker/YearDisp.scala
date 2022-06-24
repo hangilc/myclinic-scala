@@ -31,16 +31,17 @@ case class YearDisp(var year: Int):
 
   private def doYearClick(event: MouseEvent): Unit =
     val yearList = YearList(2010, 2022)
-    yearList.selection.addSelectEventHandler(year => {
-      simulateChange(_ => year)
-    })
     yearList.ele(cls := "domq-background-white")
     Absolute.position(yearList.ele)
-    Absolute.openWithScreen(yearList.ele, e => {
+    val close = Absolute.openWithScreen(yearList.ele, e => {
       val (x, y) = Absolute.clickPos(event)
       Absolute.setLeftOf(e, x + 8)
       Absolute.setBottomOf(e, y + 20)
       Absolute.ensureInViewOffsetting(e, 10)
+    })
+    yearList.selection.addSelectEventHandler(year => {
+      close()
+      simulateChange(_ => year)
     })
 
   private def updateUI(): Unit =

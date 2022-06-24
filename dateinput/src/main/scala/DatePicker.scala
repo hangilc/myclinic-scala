@@ -62,8 +62,8 @@ case class DatePicker(init: Option[LocalDate]):
       (t.getYear, t.getMonthValue)
     val tmpDay = initDay.getOrElse(1)
     val d = tmpDay.min(KanjiDate.lastDayOfMonth(targetYear, targetMonth).getDayOfMonth)
-    val (g, n) = Gengou.dateToGengou(LocalDate.of(targetYear, targetMonth, d)).get
-    yearDisp.set(g, n)
+    // val (g, n) = Gengou.dateToGengou(LocalDate.of(targetYear, targetMonth, d)).get
+    yearDisp.set(targetYear)
     monthDisp.set(targetMonth)
     stuffDates(yearDisp.year, monthDisp.month)
 
