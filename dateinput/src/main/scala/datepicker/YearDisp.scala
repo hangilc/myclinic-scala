@@ -30,7 +30,7 @@ case class YearDisp(var year: Int):
   def onChangeYear(handler: Int => Unit): Unit = changeYearPublisher.subscribe(handler)
 
   private def doYearClick(event: MouseEvent): Unit =
-    val yearList = YearList(2010, 2022)
+    val yearList = YearList(1926, LocalDate.now().getYear + 6)
     yearList.ele(cls := "domq-background-white")
     Absolute.position(yearList.ele)
     val close = Absolute.openWithScreen(yearList.ele, e => {
