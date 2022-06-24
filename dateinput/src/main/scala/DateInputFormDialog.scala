@@ -8,7 +8,8 @@ import dev.fujiwara.kanjidate.KanjiDate.Era
 class DateInputFormDialog(
     init: Option[LocalDate] = None,
     title: String = "日付の入力",
-    gengouList: List[Era] = DateInputForm.defaultGengouList
+    gengouList: List[Era] = DateInputForm.defaultGengouList,
+    allowNone: Boolean = true
 ):
   private val onEnterPublisher = new LocalEventPublisher[Option[LocalDate]]
   val form = new DateInputForm(init)
@@ -30,8 +31,11 @@ class DateInputFormDialog(
   private def doEnter(): Unit =
     form.validated match {
       case Right(dOpt) => 
-        dlog.close()
-        onEnterPublisher.publish(dOpt)
+        if dOpt.isEmpty && !allowNone then
+          errBox.show("日付が入力されていません。")
+        else
+          dlog.close()
+          onEnterPublisher.publish(dOpt)
       case Left(msg) => 
         errBox.show(msg)
     }

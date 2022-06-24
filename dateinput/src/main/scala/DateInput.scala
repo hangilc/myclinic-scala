@@ -10,7 +10,7 @@ import org.scalajs.dom.HTMLElement
 case class DateOptionInput(
     private var initialValue: Option[LocalDate] = None,
     format: LocalDate => String = d => KanjiDate.dateToKanji(d),
-    formatNone: () => String = () => "",
+    formatNone: () => String = () => "（未入力）",
     title: String = "日付の入力"
 ):
   val dateEdit =

@@ -29,18 +29,21 @@ class EditableDate(
     updateUI()
     onChangePublisher.publish(date)
 
+  def simulateChange(d: LocalDate): Unit =
+    simulateChange(_ => d)
+
   private def updateUI(): Unit =
     ele(innerText := format(date))
 
   private def doClick(): Unit =
-    val dlog = DateInputDialog(date)
-    dlog.onEnter(d => simulateChange(_ => d))
+    val dlog = DateInputFormDialog(Some(date), allowNone = false)
+    dlog.onEnter(_.foreach(simulateChange(_)))
     dlog.open()
 
 class EditableDateOption(
     var initialValue: Option[LocalDate],
     format: LocalDate => String = d => KanjiDate.dateToKanji(d),
-    formatNone: () => String = () => "",
+    formatNone: () => String = () => "（未入力）",
     title: String = "日付の入力"
 ):
   private val onChangePublisher = new LocalEventPublisher[Option[LocalDate]]
@@ -62,11 +65,17 @@ class EditableDateOption(
     updateUI()
     onChangePublisher.publish(dateOption)
 
+  def simulateChange(dOption: Option[LocalDate]): Unit =
+    simulateChange(_ => dOption)
+
   private def updateUI(): Unit =
     ele(innerText := dateOption.fold(formatNone())(format))
 
   private def doClick(): Unit =
-    val dlog = DateOptionInputDialog(dateOption)
-    dlog.onEnter(d => simulateChange(_ => d))
+    val dlog = DateInputFormDialog(dateOption)
+    dlog.onEnter(dOpt => simulateChange(dOpt))
     dlog.open()
+    // val dlog = DateOptionInputDialog(dateOption)
+    // dlog.onEnter(d => simulateChange(_ => d))
+    // dlog.open()
 

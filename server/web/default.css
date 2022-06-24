@@ -59,10 +59,11 @@ textarea:focus {
   border: 2px solid var(--primary-color);
 }
 
-select {
-  font-size: 1rem;
-  padding: 3px;
-}
+/* select {
+  font-size: 0.8rem;
+  margin-left: 3px;
+  padding: 2px;
+} */
 
 select + select {
   margin-left: 6px;

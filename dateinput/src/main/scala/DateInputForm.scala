@@ -10,6 +10,7 @@ import scala.util.Try
 import scala.util.Success
 import scala.util.Failure
 import cats.syntax.all.*
+import org.scalajs.dom.MouseEvent
 
 class DateInputForm(
     var value: Option[LocalDate] = None,
@@ -19,14 +20,14 @@ class DateInputForm(
   val nenInput = input
   val monthInput = input
   val dayInput = input
-  val ele = div(
+  val ele = div(cls := "domq-date-input-form domq-user-select-none",
     gengouSelect.ele(cls := "domq-date-input-form-gengou"),
     nenInput(cls := "domq-date-input-form-nen"),
-    "年",
+    span("年", onclick := (doNenClick _), cls := "domq-cursor-pointer"),
     monthInput(cls := "domq-date-input-form-month"),
-    "月",
+    span("月", onclick := (doMonthClick _), cls := "domq-cursor-pointer"),
     dayInput(cls := "domq-date-input-form-day"),
-    "日"
+    span("日", onclick := (doDayClick _), cls := "domq-cursor-pointer")
   )
   updateUI()
 
@@ -38,6 +39,26 @@ class DateInputForm(
       monthInput.value,
       dayInput.value
     ).asEither
+
+  def simulateChange(f: Option[LocalDate] => Option[LocalDate]): Unit =
+     validated match {
+      case Right(dOpt) =>
+        value = f(dOpt)
+        updateUI()
+      case _ => ()
+    }
+
+  private def doNenClick(event: MouseEvent): Unit =
+    val n: Int = if event.shiftKey then -1 else 1
+    simulateChange(_.map(_.plusYears(n)))
+
+  private def doMonthClick(event: MouseEvent): Unit =
+    val n: Int = if event.shiftKey then -1 else 1
+    simulateChange(_.map(_.plusMonths(n)))
+
+  private def doDayClick(event: MouseEvent): Unit =
+    val n: Int = if event.shiftKey then -1 else 1
+    simulateChange(_.map(_.plusDays(n)))
 
   private def updateUI(): Unit =
     value match {
