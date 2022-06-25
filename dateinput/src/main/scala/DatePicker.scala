@@ -18,16 +18,16 @@ case class DatePicker(init: Option[LocalDate])(
   using initNoneConverter: InitNoneConverter
 ):
   private val dateSelectedPublisher = new LocalEventPublisher[LocalDate]
-  private val convertedInit: Option[LocalDate] = init.orElse(initNoneConverter.convert)
-  private val (initYear, initGengou: Era, initNen: Int, initMonth: Int) =
-    convertedInit.orElse(Some(LocalDate.now()))
-    .map(d => 
-      val (e, n) = Gengou.dateToEra(d)
-      (d.getYear, e, n, d.getMonthValue)
-    ).get
-  private val initDay: Option[Int] = convertedInit.map(_.getDayOfMonth)
-  val yearDisp = YearDisp(initYear)
-  val monthDisp = MonthDisp(initMonth)
+  private val initSuggest: Option[LocalDate] =
+    init match {
+      case None => initNoneConverter.convert
+      case Some(_) => None
+    }
+  private val setupDate: LocalDate = init.orElse(initSuggest).getOrElse(LocalDate.now())
+  private val initDay: Option[Int] = init.map(_.getDayOfMonth)
+  private val suggestDay: Option[Int] = initSuggest.map(_.getDayOfMonth)
+  val yearDisp = YearDisp(setupDate.getYear)
+  val monthDisp = MonthDisp(setupDate.getMonthValue)
   val hand = Icons.hand
   val cog = Icons.cog
   val datesTab = div
@@ -66,10 +66,17 @@ case class DatePicker(init: Option[LocalDate])(
     monthDisp.set(targetMonth)
     stuffDates(yearDisp.year, monthDisp.month)
 
-  private enum CalDate(val date: LocalDate):
-    case PreDate(date) extends CalDate(date)
-    case MonthDate(date) extends CalDate(date)
-    case PostDate(date) extends CalDate(date)
+  private def adjustedDay(year: Int, month: Int, day: Int): Int =
+    if day <= 28 then day
+    else
+      val lastDay = DateUtil.lastDayOfMonth(year, month).getDayOfMonth
+      day.min(lastDay)
+
+  private enum CalDate(date: LocalDate):
+    def value: LocalDate = date
+    case PreDate(date: LocalDate) extends CalDate(date)
+    case MonthDate(date: LocalDate) extends CalDate(date)
+    case PostDate(date: LocalDate) extends CalDate(date)
 
   private def listCalendarDates(year: Int, month: Int): List[CalDate] =
     import CalDate.*
@@ -86,24 +93,38 @@ case class DatePicker(init: Option[LocalDate])(
       ++ DateUtil.enumDates(end.plusDays(1), postMonthEnd).map(PostDate(_))
 
   private def stuffDates(year: Int, month: Int): Unit =
-    datesTab(clear, children := makeDates(listCalendarDates(year, month)))
+    datesTab(clear, children := makeDates(year, month))
 
-  private def makeDates(calDates: List[CalDate]): List[HTMLElement] =
-    val tmpDay = initDay.map(_.min(KanjiDate.lastDayOfMonth(year, month).getDayOfMonth))
-    dates.map(d => {
+  private def makeDates(year: Int, month: Int): List[HTMLElement] =
+    import CalDate.*
+    val calDates: List[CalDate] = listCalendarDates(year, month)
+    val initDayEquiv: Option[Int] = initDay.map(adjustedDay(year, month, _))
+    val suggestDayEquiv: Option[Int] = suggestDay.map(adjustedDay(year, month, _))
+    calDates.map(c => {
+      val d = c.value
       val e = div(d.getDayOfMonth.toString)(
         cls := "domq-date-picker-date-box",
         onclick := (() => onDayClick(d)),
         attr("data-date") := d.getDayOfMonth.toString
       )
-      if Some(d) == init then e(cls := "init-date")
-      else if Some(d.getDayOfMonth) == tmpDay then e(cls := "init-date-equiv")
       d.getDayOfWeek match 
         case DayOfWeek.SUNDAY => e(cls := "sunday")
         case DayOfWeek.SATURDAY => e(cls := "saturday")
         case _ => ()
-      if d < start then e(cls := "pre-month")
-      else if d > end then e(cls := "post-month") 
+      c match {
+        case _: PreDate =>
+          e(cls := "pre-month")
+        case _: MonthDate => 
+          if Some(d) == init then e(cls := "init-date")
+          else if Some(d) == suggestDay then e(cls := "suggest-date")
+          else 
+            if Some(d.getDayOfMonth) == initDayEquiv then
+              e(cls := "init-date-equiv")
+            else if Some(d.getDayOfMonth) == suggestDayEquiv then
+              e(cls := "suggest-date-equiv")
+        case _: PostDate =>
+          e(cls := "post-month")
+      }
       e
     })
 

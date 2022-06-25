@@ -45,6 +45,14 @@
   background-color: #dcdcdc;
 }
 
+.domq-date-picker-date-box.suggest-date {
+  background-color: #89cff0;
+}
+
+.domq-date-picker-date-box.suggest-date-equiv {
+  background-color: red;
+}
+
 .domq-date-picker-date-box.sunday {
   color: #ff0000;
 }
