@@ -47,7 +47,7 @@ case class DatePicker(init: Option[LocalDate])(
     dateSelectedPublisher.subscribe(handler)
 
   def open(locator: HTMLElement => Unit): Unit =
-    var cur: LocalDate = init.getOrElse(LocalDate.now()) 
+    var cur: LocalDate = setupDate
     stuffDates(cur.getYear, cur.getMonthValue)
     close = Absolute.openWithScreen(ele, locator)
 
@@ -116,7 +116,7 @@ case class DatePicker(init: Option[LocalDate])(
           e(cls := "pre-month")
         case _: MonthDate => 
           if Some(d) == init then e(cls := "init-date")
-          else if Some(d) == suggestDay then e(cls := "suggest-date")
+          else if Some(d) == initSuggest then e(cls := "suggest-date")
           else 
             if Some(d.getDayOfMonth) == initDayEquiv then
               e(cls := "init-date-equiv")
