@@ -15,13 +15,17 @@ case class DateOptionInput(
 )(using InitNoneConverter):
   val dateEdit =
     EditableDateOption(initialValue, format, formatNone, title)
+  val xCircleIcon = Icons.xCircle
   val icon = Icons.calendar
   val ele = div(
     cls := "domq-date-input date-option",
     dateEdit.ele,
-    Icons.xCircle,
+    xCircleIcon(onclick := (doClear _)),
     icon(onclick := (doCalendar _))
   )
+  updateUI(dateEdit.value)
+  dateEdit.onChange(updateUI _)
+
 
   def value: Option[LocalDate] = dateEdit.value
 
@@ -33,6 +37,15 @@ case class DateOptionInput(
 
   def onChange(handler: Option[LocalDate] => Unit): Unit =
     dateEdit.onChange(handler)
+
+  private def updateUI(currentValue: Option[LocalDate]): Unit =
+    currentValue match {
+      case None => xCircleIcon(displayNone)
+      case Some(_) => xCircleIcon(displayDefault)
+    }
+
+  private def doClear(): Unit =
+    simulateChange(_ => None)
 
   private def doCalendar(): Unit =
     DateInputCommon.openCalendar(
