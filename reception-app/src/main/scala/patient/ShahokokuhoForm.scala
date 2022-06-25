@@ -24,7 +24,7 @@ class ShahokokuhoForm:
   val eValidFrom = DateOptionInput()
   val eValidUpto = DateOptionInput(formatNone = () => "（期限なし）")(
     using new InitNoneConverter:
-      def convert: Option[LocalDate] = eValidFrom.value
+      def convert: Option[LocalDate] = eValidFrom.value.map(_.plusYears(1).minusDays(1))
   )
   val eEdaban = inputText()
   val ele = Form.rows(

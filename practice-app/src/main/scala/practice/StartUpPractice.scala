@@ -11,11 +11,11 @@ object StartUpPractice:
     import dev.fujiwara.domq.{Absolute}
     import org.scalajs.dom.document
     import dev.fujiwara.dateinput.*
-    given InitNoneConverter with
-      def convert: Option[LocalDate] = Some(LocalDate.of(1957, 6, 2))
-    service.right.ui.ele(
-      div(DateOptionInput().ele),
-      div(DateInput(LocalDate.now()).ele)
-    )
+    // given InitNoneConverter with
+    //   def convert: Option[LocalDate] = Some(LocalDate.of(1957, 6, 2))
+    // service.right.ui.ele(
+    //   div(DateOptionInput().ele),
+    //   div(DateInput(LocalDate.now()).ele)
+    // )
     Future.successful(())
 
