@@ -66,10 +66,13 @@ case class DatePicker(init: Option[LocalDate])(
     monthDisp.set(targetMonth)
     stuffDates(yearDisp.year, monthDisp.month)
 
-  private def stuffDates(year: Int, month: Int): Unit =
-    datesTab(clear, children := makeDates(year, month))
+  private enum CalDate(val date: LocalDate):
+    case PreDate(date) extends CalDate(date)
+    case MonthDate(date) extends CalDate(date)
+    case PostDate(date) extends CalDate(date)
 
-  private def makeDates(year: Int, month: Int): List[HTMLElement] =
+  private def listCalendarDates(year: Int, month: Int): List[CalDate] =
+    import CalDate.*
     val start: LocalDate = LocalDate.of(year, month, 1)
     val end: LocalDate = start.plusMonths(1).minusDays(1)
     val preMonthStart: LocalDate = 
@@ -78,7 +81,14 @@ case class DatePicker(init: Option[LocalDate])(
     val postMonthEnd: LocalDate = 
       if end.getDayOfWeek == DayOfWeek.SATURDAY then end.plusDays(7)
       else end.plusDays(6 - (end.getDayOfWeek.getValue % 7))
-    val dates: List[LocalDate] = DateUtil.enumDates(preMonthStart, postMonthEnd)
+    DateUtil.enumDates(preMonthStart, start.minusDays(1)).map(PreDate(_))
+      ++ DateUtil.enumDates(start, end).map(MonthDate(_))
+      ++ DateUtil.enumDates(end.plusDays(1), postMonthEnd).map(PostDate(_))
+
+  private def stuffDates(year: Int, month: Int): Unit =
+    datesTab(clear, children := makeDates(listCalendarDates(year, month)))
+
+  private def makeDates(calDates: List[CalDate]): List[HTMLElement] =
     val tmpDay = initDay.map(_.min(KanjiDate.lastDayOfMonth(year, month).getDayOfMonth))
     dates.map(d => {
       val e = div(d.getDayOfMonth.toString)(
