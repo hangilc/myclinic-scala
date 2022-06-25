@@ -9,7 +9,7 @@ import java.time.LocalDate
 case class YearList(from: Int, upto: Int):
   val selection = Selection[Int](
     (from to upto).toList,
-    year => div(format(year))
+    year => div(format(year), cls := "domq-word-break-keep-all")
   )
   val ele = selection.ele
 

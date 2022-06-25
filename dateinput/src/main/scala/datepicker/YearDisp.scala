@@ -27,6 +27,9 @@ case class YearDisp(var year: Int):
     set(f(year))
     changeYearPublisher.publish(year)
 
+  def simulateChange(newYear: Int): Unit =
+    simulateChange(_ => newYear)
+
   def onChangeYear(handler: Int => Unit): Unit = changeYearPublisher.subscribe(handler)
 
   private def doYearClick(event: MouseEvent): Unit =
@@ -41,7 +44,7 @@ case class YearDisp(var year: Int):
     })
     yearList.selection.addSelectEventHandler(year => {
       close()
-      simulateChange(_ => year)
+      changeYearPublisher.publish(year)
     })
 
   private def updateUI(): Unit =

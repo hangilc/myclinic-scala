@@ -40,6 +40,7 @@ case class DatePicker(init: Option[LocalDate])(
   )
   yearDisp.onChangeYear(doChangeYear _)
   monthDisp.onChangeMonth(doChangeMonth _)
+  monthDisp.onIncMonth(doIncMonth _)
   Absolute.enableDrag(ele, hand)
   var close: () => Unit = () => ()
 
@@ -51,20 +52,20 @@ case class DatePicker(init: Option[LocalDate])(
     stuffDates(cur.getYear, cur.getMonthValue)
     close = Absolute.openWithScreen(ele, locator)
 
+  private def doChange(newYear: Int, newMonth: Int): Unit =
+    if yearDisp.year != newYear then yearDisp.simulateChange(newYear)
+    if monthDisp.month != newMonth then monthDisp.simulateChange(newMonth)
+    stuffDates(newYear, newMonth)
+
   private def doChangeYear(newYear: Int): Unit =
-    yearDisp.set(newYear)
-    stuffDates(yearDisp.year, monthDisp.month)
+    doChange(newYear, monthDisp.month)
+
+  private def doIncMonth(n: Int): Unit =
+    val newM: LocalDate = LocalDate.of(yearDisp.year, monthDisp.month, 1).plusMonths(n)
+    doChange(newM.getYear, newM.getMonthValue)
 
   private def doChangeMonth(newMonth: Int): Unit =
-    val diff = newMonth - monthDisp.month
-    val (targetYear, targetMonth) = 
-      val t = LocalDate.of(yearDisp.year, monthDisp.month, 1).plusMonths(diff)
-      (t.getYear, t.getMonthValue)
-    val tmpDay = initDay.getOrElse(1)
-    val d = tmpDay.min(KanjiDate.lastDayOfMonth(targetYear, targetMonth).getDayOfMonth)
-    yearDisp.set(targetYear)
-    monthDisp.set(targetMonth)
-    stuffDates(yearDisp.year, monthDisp.month)
+    doChange(yearDisp.year, newMonth)
 
   private def adjustedDay(year: Int, month: Int, day: Int): Int =
     if day <= 28 then day

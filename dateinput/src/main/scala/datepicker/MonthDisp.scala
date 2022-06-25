@@ -7,18 +7,22 @@ import java.time.LocalDate
 import org.scalajs.dom.MouseEvent
 
 case class MonthDisp(var month: Int):
-  private val monhtChangePublisher = new LocalEventPublisher[Int]
+  private val incMonthPublisher = new LocalEventPublisher[Int]
+  private val changeMonthPublisher = new LocalEventPublisher[Int]
   val monthSpan = span
   val ele = div(cls := "domq-user-select-none",
     cls := "domq-display-inline-block domq-date-picker-month-disp",
-    Icons.chevronLeft(cls := "domq-icon-chevron-left", onclick := (() => simulateChange(_ - 1))),
+    Icons.chevronLeft(cls := "domq-icon-chevron-left", onclick := (() => doIncMonth(-1))),
     monthSpan(onclick := (doMonthClick _)),
-    Icons.chevronRight(cls := "domq-icon-chevron-right", onclick := (() => simulateChange(_ + 1)))
+    Icons.chevronRight(cls := "domq-icon-chevron-right", onclick := (() => doIncMonth(1)))
   )
   updateUI()
 
+  def onIncMonth(handler: Int => Unit): Unit =
+    incMonthPublisher.subscribe(handler)
+
   def onChangeMonth(handler: Int => Unit): Unit =
-    monhtChangePublisher.subscribe(handler)
+    changeMonthPublisher.subscribe(handler)
 
   def set(newMonth: Int): Unit =
     month = newMonth
@@ -26,10 +30,16 @@ case class MonthDisp(var month: Int):
 
   def simulateChange(f: Int => Int): Unit =
     set(f(month))
-    monhtChangePublisher.publish(month)
+    changeMonthPublisher.publish(month)
+
+  def simulateChange(newMonth: Int): Unit =
+    simulateChange(_ => newMonth)
 
   def updateUI(): Unit =
     monthSpan(innerText := f"${month}%02d月")
+
+  private def doIncMonth(n: Int): Unit =
+    incMonthPublisher.publish(n)
 
   def doMonthClick(event: MouseEvent): Unit =
     val (x, y) = Absolute.clickPos(event)
@@ -43,6 +53,6 @@ case class MonthDisp(var month: Int):
     })
     monthList.selection.addSelectEventHandler(m => {
       close()
-      simulateChange(_ => m)
+      changeMonthPublisher.publish(m)
     })
 

@@ -14,3 +14,7 @@
   background: white;
 }
 
+.domq-word-break-keep-all {
+  word-break: keep-all;
+}
+
