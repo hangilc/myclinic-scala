@@ -27,9 +27,17 @@ case class PatientSearchResultDialog(patients: List[Patient]):
     val disp = PatientDisp(patient)
     dlog.body(clear, disp.ele)
     dlog.commands(clear,
+      div(
       button("診察受付", onclick := (() => doRegister(patient.patientId))),
       button("閉じる", onclick := (() => dlog.close()))
+      ),
+      div(cls := "domq-mt-4",
+        a("編集", onclick := (edit _))
+      )
     )
+
+  private def edit(): Unit =
+    ???
 
   private def doRegister(patientId: Int): Unit =
     for
