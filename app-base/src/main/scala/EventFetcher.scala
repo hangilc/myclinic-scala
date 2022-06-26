@@ -59,6 +59,7 @@ class EventFetcher:
       ws.onmessage = { (e: dom.MessageEvent) =>
         {
           val msg = e.data.asInstanceOf[String]
+          println(("ws-message", msg))
           handleMessage(msg)
         }
       }

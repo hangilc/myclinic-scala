@@ -151,7 +151,8 @@ object MiscService extends DateTimeQueryParam with Publisher:
           result <- Db.startVisit(patientId, at)
           (visit, events) = result
           _ <- publishAll(events)
-        yield visit
+        yield 
+          visit
       Ok(op)
 
     case GET -> Root / "find-available-shahokokuho" :? intPatientId(

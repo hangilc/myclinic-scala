@@ -29,8 +29,12 @@ class Selection[T](using config: SelectionConfig):
   private var items: List[SelectionItem[T]] = List.empty
   private var markedValue: Option[T] = None
 
-  def addSelectEventHandler(handler: T => Unit): Unit = 
+  def onSelect(handler: T => Unit): Unit =
     selectEventPublisher.subscribe(handler)
+
+  def addSelectEventHandler(handler: T => Unit): Unit = 
+    onSelect(handler)
+    
   private def publishSelect(t: T): Unit = selectEventPublisher.publish(t)
 
   def addUnselectEventHandler(handler: () => Unit): Unit =

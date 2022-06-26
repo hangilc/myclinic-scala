@@ -22,7 +22,7 @@ class PatientManagement(using EventFetcher) extends SideMenuService:
   val eWorkarea: HTMLElement = div()
   val ele: HTMLElement = div(cls := "patient-management")(
     div(
-      h1("受付管理", display := "inline-block"),
+      h1("患者管理", display := "inline-block"),
       Icons.menu(
         cssFloat := "right",
         onclick := (onMenu _),

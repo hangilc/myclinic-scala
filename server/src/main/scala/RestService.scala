@@ -229,6 +229,9 @@ object RestService extends DateTimeQueryParam with Publisher:
     case GET -> Root / "find-wqueue" :? intVisitId(visitId) =>
       Ok(Db.findWqueue(visitId))
 
+    case GET -> Root / "get-wqueue" :? intVisitId(visitId) =>
+      Ok(Db.getWqueue(visitId))
+
     case req @ POST -> Root / "update-wqueue" =>
       val op =
         for

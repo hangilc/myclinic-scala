@@ -1,0 +1,98 @@
+.reception-cashier-head-box {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.reception-service-title {
+    position: relative;
+    top: 2px;
+    margin-right: 40px;
+}
+
+.reception-cashier-search-text-input {
+    width: 6rem;
+    padding: 3px;
+}
+
+.reception-cashier-menu-icon {
+    margin-left: 10px;
+}
+
+.reception-cashier-wqueue-table {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    border: 1px solid gray;
+    padding: 10px;
+    border-radius: 6px;
+}
+
+.reception-cashier-wqueue-table .header {
+    font-size: 0.8rem;
+}
+
+.reception-cashier-wqueue-table .col-state {
+    width: 3rem;
+}
+
+.reception-cashier-wqueue-table .col-patient-id {
+    width: 5rem;
+}
+
+.reception-cashier-wqueue-table .col-name {
+    width: 6rem;
+}
+
+.reception-cashier-wqueue-table .col-yomi {
+    width: 10rem;
+}
+
+.reception-cashier-wqueue-table .col-sex {
+    width: 2rem;
+}
+
+.reception-cashier-wqueue-table .col-birthday {
+    width: 7.5rem;
+}
+
+.reception-cashier-wqueue-table .cell-birthday {
+    font-size: 0.8rem;
+    vertical-align: middle;
+}
+
+.reception-cashier-wqueue-table .col-age {
+    width: 3rem;
+}
+
+.reception-cashier-wqueue-table .col-manip {
+    width: 3rem;
+}
+
+.reception-cashier-search-patient-result-dialog .selection {
+    max-width: 240px;
+}
+
+.cashier-dialog {
+    width: 360px;
+}
+
+.cashier-dialog .detail-table {
+    width: 100%;
+    border-top: 1px solid gray;
+    border-bottom: 1px solid gray;
+    margin: 10px 0;
+    padding: 6px 0;
+}
+
+.cashier-dialog .detail-table .right-columng {
+    width: 6rem;
+}
+
+.cashier-dialog .detail-table .section-title {
+    font-weight: bold;
+}
+
+.cashier-dialog .charge-line {
+    font-weight: bold;
+    color: var(--primary-color);
+}

@@ -12,7 +12,13 @@
 }
 
 .grid-disp *:nth-child(odd) {
-    text-align: right;
+    justify-content: right;
+    margin-right: 6px;
+}
+
+.grid-disp > * {
+    display: flex;
+    align-items: center;
 }
 
 .width-8rem {

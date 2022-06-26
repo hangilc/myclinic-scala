@@ -49,3 +49,6 @@ case class ResourceCleanups(e: HTMLElement):
   def add(handler: () => Unit): Unit =
     cleanups = handler :: cleanups
 
+  def add(handler: LocalEventUnsubscriber): Unit =
+    add(handler.unsubscribe _)
+

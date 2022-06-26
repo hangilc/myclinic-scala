@@ -32,7 +32,7 @@ object JsMain:
       mock: Boolean
   ): List[(String, SideMenuProcs => SideMenuService)] =
     List(
-      "メイン" -> (_ => Cashier()),
+      "メイン" -> (_ => new Cashier()),
       "患者管理" -> (_ => new PatientManagement()),
       "診療記録" -> (_ => Records()),
       "スキャン" -> (_ => Scan(mock))

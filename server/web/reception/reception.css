@@ -1,50 +1,8 @@
-a {
-  color: #007bff;
-  word-break: keep-all;
-}
+@import url("./reception-css/reception-general.css");
+@import url("./reception-css/cashier.css");
 
-button {
-  min-height: 1.68rem;
-}
-
-#page-layout1-banner {
-  background-color: #17a2b8;
-  color: white;
-}
-
-.content h1 {
-  font-weight: normal;
-  margin: 0 0 10px 0;
+.reception-service-title {
   font-size: 1.5rem;
-}
-
-.table .header {
-  font-weight: bold;
-}
-
-.cashier-dialog {
-  width: 360px;
-}
-
-.cashier-dialog .detail-table {
-  width: 100%;
-  border-top: 1px solid gray;
-  border-bottom: 1px solid gray;
-  margin: 10px 0;
-  padding: 6px 0;
-}
-
-.cashier-dialog .detail-table .right-columng {
-  width: 6rem;
-}
-
-.cashier-dialog .detail-table .section-title {
-  font-weight: bold;
-}
-
-.cashier-dialog .charge-line {
-  font-weight: bold;
-  color: var(--primary-color);
 }
 
 /* Patient Management ***************************************************************/

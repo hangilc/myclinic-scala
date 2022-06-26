@@ -23,6 +23,15 @@ object PatientApi extends ApiBase:
     def searchPatient(text: String): Future[(Int, List[Patient])] = 
       get("search-patient", Params("text" -> text))
 
+    def searchPatientSmart(text: String): Future[List[Patient]] =
+      val emptyPattern = raw"\s*".r
+      val digitsPattern = raw"\d+".r
+      text match {
+        case null | emptyPattern() => Future.successful(List.empty)
+        case digitsPattern(digits) => findPatient(digits.toInt).map(_.toList)
+        case t => searchPatient(t).map(_._2)
+      }
+
     def batchGetPatient(patientIds: List[Int]): Future[Map[Int, Patient]] =
       post("batch-get-patient", Params(), patientIds)
 

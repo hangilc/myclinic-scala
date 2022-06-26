@@ -9,64 +9,49 @@ import dev.fujiwara.kanjidate.KanjiDate
 import dev.fujiwara.kanjidate.DateUtil
 import java.time.LocalDate
 
-class WqueueRow(ds: DataSource[(Wqueue, Visit, Patient)])(
-  using DataId[Wqueue], ModelSymbol[Wqueue], EventFetcher
+case class WqueueRow(wqueue: Wqueue, visit: Visit, patient: Patient)(using
+    DataId[Wqueue],
+    ModelSymbol[Wqueue]
 ):
   val stateLabelCell: HTMLElement = Table.cell
-  val patientIdCell: HTMLElement = Table.cell //Table.cell(patient.patientId.toString)
-  val nameCell: HTMLElement = Table.cell //Table.cell(patient.fullName())
-  val yomiCell: HTMLElement = Table.cell //Table.cell(patient.fullNameYomi())
-  val sexCell: HTMLElement = Table.cell //Table.cell(patient.sex.rep)
-  val birthdayCell: HTMLElement = Table.cell //Table.cell(birthday)
-  val ageCell: HTMLElement = Table.cell //Table.cell(age.toString)
-  val manageCell: HTMLElement = Table.cell //Table.cell
-  val ele = Table.createRow(List(
-    stateLabelCell,
-    patientIdCell,
-    nameCell,
-    yomiCell,
-    sexCell,
-    birthdayCell,
-    ageCell,
-    manageCell
-  ))
-  ele(cls := s"wqueue-row-${wqData.visitId}")
-
-  def wqData: Wqueue = ds.data._1
-  def visitData: Visit = ds.data._2
-  def patientData: Patient = ds.data._3
+  val patientIdCell: HTMLElement = Table.cell
+  val nameCell: HTMLElement = Table.cell
+  val yomiCell: HTMLElement = Table.cell
+  val sexCell: HTMLElement = Table.cell
+  val birthdayCell: HTMLElement = Table.cell
+  val ageCell: HTMLElement = Table.cell
+  val manageCell: HTMLElement = Table.cell
+  val ele = Table.createRow(
+    List(
+      stateLabelCell(cls := "cell-state"),
+      patientIdCell(cls := "cell-patient-id"),
+      nameCell(cls := "cell-name"),
+      yomiCell(cls := "cell-yomi"),
+      sexCell(cls := "cell-sex"),
+      ageCell(cls := "cell-age"),
+      birthdayCell(cls := "cell-birthday"),
+      manageCell(cls := "cell-manip")
+    )
+  )
+  ele(cls := "reception-cashier-wqueue-table-row")
+  updateUI()
 
   def updateUI(): Unit =
-    stateLabelCell(innerText := wqData.waitState.label)
-    manageCell(children := List.empty)
-    patientIdCell(innerText := patientData.patientId.toString)
-    nameCell(innerText := patientData.fullName())
-    yomiCell(innerText := patientData.fullNameYomi())
-    sexCell(innerText := patientData.sex.rep)
-    birthdayCell(innerText := birthday(patientData.birthday))
-    ageCell(innerText := age(patientData.birthday).toString)
-    manageCell()
-  
-  def birthday(d: LocalDate): String = KanjiDate.dateToKanji(
-    d,
-    formatYear = i => s"${i.gengouAlphaChar}${i.nen}",
-    formatMonth = i => s".${i.month}",
-    formatDay = i => s".${i.day}",
-    formatYoubi = _ => ""
-  )
+    stateLabelCell(innerText := wqueue.waitState.label)
+    patientIdCell(innerText := patient.patientId.toString)
+    nameCell(innerText := patient.fullName())
+    yomiCell(innerText := patient.fullNameYomi())
+    sexCell(innerText := patient.sex.rep)
+    ageCell(innerText := age(patient.birthday).toString + "才")
+    birthdayCell(innerText := birthday(patient.birthday))
+    manageCell(clear)
 
-  def age(birthday: LocalDate):Int = DateUtil.calcAge(birthday, LocalDate.now())
+  def birthday(d: LocalDate): String = KanjiDate.dateToKanji(d)
 
+  def age(birthday: LocalDate): Int =
+    DateUtil.calcAge(birthday, LocalDate.now())
 
-        // e => {
-        //   if wq.waitState == WaitState.WaitCashier then
-        //     e(
-        //       button("会計")(
-        //         onclick := (() =>
-        //           doCashier(wq.visitId, patient, visit.visitedAt.toLocalDate)
-        //         )
-        //       )
-        //     )
-        //   if wq.waitState == WaitState.WaitExam then
-        //     e(a("削除", onclick := (() => doDelete(visit, patient))))
-        // }
+object WqueueRow:
+  given Ordering[WqueueRow] = Ordering.by(_.wqueue.visitId)
+  given Comp[WqueueRow] = _.ele
+  given Dispose[WqueueRow] = _ => ()

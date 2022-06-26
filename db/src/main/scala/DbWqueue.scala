@@ -16,6 +16,9 @@ trait DbWqueue extends Mysql:
   def listWqueue(): IO[List[Wqueue]] =
     mysql(DbWqueuePrim.listWqueue().to[List])
 
+  def getWqueue(visitId: Int): IO[Wqueue] =
+    mysql(DbWqueuePrim.getWqueue(visitId).unique)
+
   def findWqueue(visitId: Int): IO[Option[Wqueue]] =
     mysql(DbWqueuePrim.getWqueue(visitId).option)
 

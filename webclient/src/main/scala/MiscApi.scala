@@ -50,6 +50,9 @@ object MiscApi extends ApiBase:
     def findWqueue(visitId: Int): Future[Option[Wqueue]] =
       get("find-wqueue", Params("visit-id" -> visitId))
 
+    def getWqueue(visitId: Int): Future[Wqueue] =
+      get("get-wqueue", Params("visit-id" -> visitId))
+
     def updateWqueue(wq: Wqueue): Future[Boolean] =
       post("update-wqueue", Params(), wq)
 
