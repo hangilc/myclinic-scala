@@ -19,6 +19,9 @@ import dev.myclinic.scala.util.{HokenRep, RcptUtil}
 import dev.myclinic.scala.apputil.FutanWari
 import dev.myclinic.scala.web.appbase.{EventFetcher}
 import dev.myclinic.scala.web.appbase.SyncedDataSource
+import dev.fujiwara.domq.Resource
+import scala.collection.mutable.ListBuffer
+import dev.fujiwara.domq.ResourceCleanups
 
 class ManagePatientBlock(ds: => SyncedDataSource[Patient])(using EventFetcher):
   import ManagePatientBlock.*

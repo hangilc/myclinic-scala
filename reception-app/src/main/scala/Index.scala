@@ -44,6 +44,8 @@ object JsMain:
     ui.banner("受付")
     ui.sideMenu.addItems(sideMenuItems(isAdmin, isMock))
     document.body(ui.ele)
+    val rsc = new dev.fujiwara.domq.Resource()
+    rsc.startObserve(ui.ele)
     (for
       _ <- ui.hotline.init()
       _ <- fetcher.start()
