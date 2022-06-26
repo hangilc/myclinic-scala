@@ -5,6 +5,7 @@ import dev.myclinic.scala.web.practiceapp.practice.disease.Frame
 import dev.fujiwara.domq.all.{*, given}
 import scala.language.implicitConversions
 import java.time.LocalDate
+import org.scalajs.dom.MutationObserver
 
 object StartUpPractice:
   def run(service: PracticeService): Future[Unit] =
@@ -17,5 +18,6 @@ object StartUpPractice:
     //   div(DateOptionInput().ele),
     //   div(DateInput(LocalDate.now()).ele)
     // )
+    val ob = new MutationObserver((_, _) => ())
     Future.successful(())
 
