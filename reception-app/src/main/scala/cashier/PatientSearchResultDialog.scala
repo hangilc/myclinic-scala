@@ -32,12 +32,14 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       button("閉じる", onclick := (() => dlog.close()))
       ),
       div(cls := "domq-mt-4",
-        a("編集", onclick := (edit _))
+        a("編集", onclick := (() => edit(patient)))
       )
     )
 
-  private def edit(): Unit =
-    ???
+  private def edit(patient: Patient): Unit =
+    val panel = PatientForm(Some(patient))
+    dlog.body(clear, panel.ele)
+    dlog.commands(clear)
 
   private def doRegister(patientId: Int): Unit =
     for

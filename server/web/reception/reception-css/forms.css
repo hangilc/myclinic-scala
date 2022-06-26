@@ -1,0 +1,17 @@
+
+/* Patient form ****************************************************************************/
+
+.reception-patient-form .last-name-input,
+.reception-patient-form .first-name-input,
+.reception-patient-form .last-name-yomi-input,
+.reception-patient-form .first-name-yomi-input {
+  width: 5rem;
+}
+
+.reception-patient-form .address-input {
+  width: 15rem;
+}
+
+.reception-patient-form .phone-input {
+  width: 8rem;
+}

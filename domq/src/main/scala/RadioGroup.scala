@@ -9,13 +9,17 @@ import scala.language.implicitConversions
 case class RadioGroup[T](
     items: List[(String, T)],
     name: String = RadioGroup.createName,
-    itemWrapper: () => HTMLElement = () => span
+    itemWrapper: () => HTMLElement = () => span,
+    initValue: Option[T] = None
 ):
   val radioLabels: List[RadioLabel[T]] = items.map { case (label, value) =>
     RadioLabel(name, value, label)
   }
   val ele = div(radioLabels.map(_.ele))
-  radioLabels.headOption.foreach(_.check())
+  initValue match {
+    case Some(v) => check(v)
+    case None => radioLabels.headOption.foreach(_.check())
+  }
 
   def selected: T = 
     radioLabels.find(_.checked).get.value

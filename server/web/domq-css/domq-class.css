@@ -22,3 +22,23 @@
   margin-top: 4px;
 }
 
+.domq-disp-panel {
+  display: grid;
+  grid-template-columns: auto 1fr;
+}
+
+.domq-disp-panel *:nth-child(odd) {
+  justify-content: right;
+  margin-right: 6px;
+}
+
+.domq-disp-panel > * {
+  display: flex;
+  align-items: center;
+}
+
+.domq-disp-panel.form .domq-disp-panel-value {
+  margin: 2px 0;
+}
+
+
