@@ -84,9 +84,12 @@ class Cashier extends SideMenuService:
     val text = searchTextInput.value
     for patients <- Api.searchPatientSmart(text)
     yield 
-      val dlog = PatientSearchResultDialog(patients)
-      dlog.open()
-      searchTextInput.value = ""
+      if patients.size == 0 then
+        ShowMessage.showMessage("該当する患者がありませんでした。")
+      else
+        val dlog = PatientSearchResultDialog(patients)
+        dlog.open()
+        searchTextInput.value = ""
 
   private def doPrintBlankReceipt(): Unit =
     val f =

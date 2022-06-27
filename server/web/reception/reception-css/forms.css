@@ -15,3 +15,17 @@
 .reception-patient-form .phone-input {
   width: 8rem;
 }
+
+/* Shahokokuho form ************************************************************************/
+
+.reception-shahokokuho-form .hokenshabangou-input {
+  width: 5rem;
+}
+
+.reception-shahokokuho-form .hihokensha-kigou-input,
+.reception-shahokokuho-form .hihokensha-bangou-input {
+  width: 5rem;
+}
+
+
+

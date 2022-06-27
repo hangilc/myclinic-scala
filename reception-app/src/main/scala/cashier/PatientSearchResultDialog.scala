@@ -16,6 +16,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
   dlog.commands(
     button("閉じる", onclick := (() => dlog.close()))
   )
+  if patients.size == 1 then disp(patients.head)
 
   def open(): Unit =
     dlog.open()
@@ -32,13 +33,17 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       button("閉じる", onclick := (() => dlog.close()))
       ),
       div(cls := "domq-mt-4",
-        a("編集", onclick := (() => edit(patient))),
+        a("編集", onclick := (() => edit(patient))), "|", 
         a("新規社保国保", onclick := (() => newShahokokuho(patient)))
       )
     )
 
   private def newShahokokuho(patient: Patient): Unit =
-    ???
+    val form = ShahokokuhoForm(None)
+    dlog.body(clear, form.ele)
+    dlog.commands(clear,
+      button("キャンセル", onclick := (() => disp(patient)))
+    )
 
   private def edit(patient: Patient): Unit =
     val panel = PatientForm(Some(patient))

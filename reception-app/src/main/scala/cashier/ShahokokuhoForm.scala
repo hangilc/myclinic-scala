@@ -26,9 +26,15 @@ case class ShahokokuhoForm(init: Option[Shahokokuho]):
   )
   val eEdaban = inputText()
   val dp = DispPanel(form = true)
-  dp.add("保険者番号", hokenshaBangouInput)
+  dp.ele(cls := "reception-shahokokuho-form")
+  dp.add("保険者番号", hokenshaBangouInput(cls := "hokenshabangou-input"))
   dp.add("記号・番号", div(
-    hihokenshKigouInput(placeholder := "記号")、
-    hihokenshaBangouInput(placeholder := "番号")
+    hihokenshaKigouInput(placeholder := "記号", cls := "hihokensha-kigou-input"), "・",
+    hihokenshaBangouInput(placeholder := "番号", cls := "hihokensha-bangou-input")
   ))
-  
+  dp.add("高齢", koureiInput.ele(cls := "kourei-input"))
+  dp.add("期限開始", validFromInput.ele(cls := "valid-from-input"))
+  dp.add("期限終了", validUptoInput.ele(cls := "valid-upto-input"))
+
+  def ele = dp.ele
+
