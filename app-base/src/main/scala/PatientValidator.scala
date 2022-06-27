@@ -16,6 +16,9 @@ import dev.fujiwara.validator.ValidatorUtil.*
 object PatientValidator:
   sealed trait PatientError extends ValidationError
 
+  object EmptyPatientIdError extends PatientError:
+    def message: String = "patient-id is not available"
+
   object NonZeroPatientIdError extends PatientError:
     def message: String = "Non-zero patient-id"
   object ZeroPatientIdError extends PatientError:
@@ -37,6 +40,9 @@ object PatientValidator:
 
   def validatePatientIdForUpdate(patientId: Int): Result[Int] =
     condValid(patientId != 0, patientId, ZeroPatientIdError)
+  def validatePatientIdOptionForUpdate(patientIdOption: Option[Int]): Result[Int] =
+    isSome(patientIdOption, EmptyPatientIdError)
+      .andThen(validatePatientIdForUpdate(_))
   def validateLastName(input: String): Result[String] =
     isNotEmpty(input, EmptyLastNameError)
   def validateFirstName(input: String): Result[String] =

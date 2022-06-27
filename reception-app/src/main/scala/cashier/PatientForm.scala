@@ -5,6 +5,7 @@ import scala.language.implicitConversions
 import dev.myclinic.scala.model.*
 import dev.fujiwara.dateinput.DateOptionInput
 import dev.fujiwara.domq.DispPanel
+import dev.myclinic.scala.web.appbase.PatientValidator
 
 case class PatientForm(init: Option[Patient]):
   val lastNameInput = inputText
@@ -30,10 +31,39 @@ case class PatientForm(init: Option[Patient]):
     ))
   dispPanel.add("性別", sexInput.ele(cls := "sex-input"))
   dispPanel.add("生年月日", birthdayInput.ele(cls := "birthday-input"))
-  dispPanel.add("住所", addressInput(cls := "address-input"))
-  dispPanel.add("電話", phoneInput(cls := "phone-input"))
+  dispPanel.add("住所", addressInput(cls := "address-input", value := initValue(_.address)))
+  dispPanel.add("電話", phoneInput(cls := "phone-input", value := initValue(_.phone)))
 
   val ele = dispPanel.ele(cls := "reception-patient-form")
 
   def initValue(f: Patient => String): String =
     init.map(f).getOrElse("")
+
+  def validateForEnter: Either[String, Patient] =
+    import PatientValidator.*
+    validatePatientForEnter(
+      validateLastName(lastNameInput.value),
+      validateFirstName(firstNameInput.value),
+      validateLastNameYomi(lastNameYomiInput.value),
+      validateFirstNameYomi(firstNameYomiInput.value),
+      validateSex(sexInput.value),
+      validateBirthday(birthdayInput.value),
+      validateAddress(addressInput.value),
+      validatePhone(phoneInput.value)
+    ).asEither
+
+  def validateForUpdate: Either[String, Patient] =
+    import PatientValidator.*
+    validatePatientForUpdate(
+      validatePatientIdOptionForUpdate(init.map(_.patientId)),
+      validateLastName(lastNameInput.value),
+      validateFirstName(firstNameInput.value),
+      validateLastNameYomi(lastNameYomiInput.value),
+      validateFirstNameYomi(firstNameYomiInput.value),
+      validateSex(sexInput.value),
+      validateBirthday(birthdayInput.value),
+      validateAddress(addressInput.value),
+      validatePhone(phoneInput.value)
+    ).asEither
+
+

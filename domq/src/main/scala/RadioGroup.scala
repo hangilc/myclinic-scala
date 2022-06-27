@@ -24,6 +24,8 @@ case class RadioGroup[T](
   def selected: T = 
     radioLabels.find(_.checked).get.value
 
+  def value: T = selected
+
   def check(value: T): Unit =
     radioLabels.find(_.value == value).foreach(_.check())
 

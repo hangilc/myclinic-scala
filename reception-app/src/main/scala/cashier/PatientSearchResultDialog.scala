@@ -38,8 +38,23 @@ case class PatientSearchResultDialog(patients: List[Patient]):
 
   private def edit(patient: Patient): Unit =
     val panel = PatientForm(Some(patient))
-    dlog.body(clear, panel.ele)
-    dlog.commands(clear)
+    val errBox = ErrorBox()
+    dlog.body(clear, panel.ele, errBox.ele)
+    dlog.commands(clear,
+      button("入力", onclick := (() => {
+        panel.validateForUpdate match {
+          case Left(msg) => errBox.show(msg)
+          case Right(newPatient) => 
+            for
+              _ <- Api.updatePatient(newPatient)
+              updated <- Api.getPatient(patient.patientId)
+            yield 
+              disp(updated)
+        }
+        ()
+      })),
+      button("キャンセル", onclick := (() => disp(patient)))
+    )
 
   private def doRegister(patientId: Int): Unit =
     for
