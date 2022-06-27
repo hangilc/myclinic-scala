@@ -18,6 +18,15 @@ object HokenUtil:
       hoken.kouhiList.lift(2).map(_.futansha)
     )
 
+  def hokenRep(hoken: Hoken): String =
+    val info = hoken match {
+      case h: Shahokokuho => HokenInfo(shahokokuho = Some(h))
+      case h: Roujin => HokenInfo(roujin = Some(h))
+      case h: Koukikourei => HokenInfo(koukikourei = Some(h))
+      case h: Kouhi => HokenInfo(kouhiList = List(h))
+    }
+    hokenRep(info)
+
   object Ext:
     extension (s: Shahokokuho)
       def rep: String = HokenRep.shahokokuhoRep(

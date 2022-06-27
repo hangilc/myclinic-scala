@@ -193,7 +193,7 @@ object MiscApi extends ApiBase:
     def listKouhi(patientId: Int): Future[List[Kouhi]] =
       get("list-kouhi", Params("patient-id" -> patientId))
 
-    def enterShahokokuho(shahokokuho: Shahokokuho): Future[Boolean] =
+    def enterShahokokuho(shahokokuho: Shahokokuho): Future[Shahokokuho] =
       post("enter-shahokokuho", Params(), shahokokuho)
 
     def enterRoujin(roujin: Roujin): Future[Boolean] =

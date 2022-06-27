@@ -32,7 +32,7 @@ trait DbShahokokuho extends Mysql:
   def listShahokokuho(patientId: Int): IO[List[Shahokokuho]] =
     mysql(DbShahokokuhoPrim.listShahokokuho(patientId))
 
-  def enterShahokokuho(shahokokuho: Shahokokuho): IO[AppEvent] =
+  def enterShahokokuho(shahokokuho: Shahokokuho): IO[(Shahokokuho, AppEvent)] =
     mysql(DbShahokokuhoPrim.enterShahokokuho(shahokokuho))
 
   def updateShahokokuho(shahokokuho: Shahokokuho): IO[AppEvent] =
