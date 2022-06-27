@@ -5,6 +5,7 @@ import scala.language.implicitConversions
 import dev.myclinic.scala.model.*
 import dev.myclinic.scala.webclient.{Api, global}
 import java.time.LocalDateTime
+import java.time.LocalDate
 
 case class PatientSearchResultDialog(patients: List[Patient]):
   val selection = Selection[Patient](patients, p => div(format(p)))
@@ -16,7 +17,11 @@ case class PatientSearchResultDialog(patients: List[Patient]):
   dlog.commands(
     button("閉じる", onclick := (() => dlog.close()))
   )
-  if patients.size == 1 then disp(patients.head)
+  if patients.size == 1 then
+    val patient = patients.head
+    for
+      hoken <- Api.getPatientHoken(patient.patientId, LocalDate.now())
+    disp(patient)
 
   def open(): Unit =
     dlog.open()
@@ -24,7 +29,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
   def format(patient: Patient): String =
     String.format("(%04d) %s %s", patient.patientId, patient.lastName, patient.firstName)
 
-  private def disp(patient: Patient): Unit =
+  private def disp(patient: Patient, hokenList: List[Hoken]): Unit =
     val disp = PatientDisp(patient)
     dlog.body(clear, disp.ele)
     dlog.commands(clear,

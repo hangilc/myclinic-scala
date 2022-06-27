@@ -377,6 +377,8 @@ case class ShuushokugoMaster(
 trait PatientIdProvider[T]:
   def getPatientId(t: T): Int
 
+type Hoken = Shahokokuho | Roujin | Koukikourei | Kouhi
+
 case class Shahokokuho(
     shahokokuhoId: Int,
     patientId: Int,
