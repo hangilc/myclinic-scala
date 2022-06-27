@@ -8,6 +8,7 @@ import dev.fujiwara.domq.DispPanel
 import dev.myclinic.scala.web.appbase.PatientValidator
 import dev.fujiwara.dateinput.InitNoneConverter
 import java.time.LocalDate
+import dev.myclinic.scala.web.appbase.validator.ShahokokuhoValidator
 
 case class ShahokokuhoForm(init: Option[Shahokokuho]):
   val hokenshaBangouInput = inputText()
@@ -43,5 +44,34 @@ case class ShahokokuhoForm(init: Option[Shahokokuho]):
 
   def initValue(f: Shahokokuho => String): String =
     init.map(f).getOrElse("")
+
+  def validateForEnter(patientId: Int): Either[String, Shahokokuho] =
+    import ShahokokuhoValidator.*
+    ShahokokuhoValidator.validateShahokokuhoForEnter(
+      validatePatientId(patientId),
+      validateHokenshaBangouInput(hokenshaBangouInput.value),
+      validateHihokenshaKigou(hihokenshaKigouInput.value),
+      validateHihokenshaBangou(hihokenshaBangouInput.value),
+      validateHonnin(honninInput.value),
+      validateValidFrom(validFromInput.value),
+      validateValidUpto(validUptoInput.value),
+      validateKourei(koureiInput.value),
+      validateEdaban(edabanInput.value)
+    ).asEither
+
+  def validateForUpdate(shahokokuhoId: Int, patientId: Int): Either[String, Shahokokuho] =
+    import ShahokokuhoValidator.*
+    ShahokokuhoValidator.validateShahokokuho(
+      validateShahokokuhoIdOptionForUpdate(init.map(_.shahokokuhoId)),
+      validatePatientId(patientId),
+      validateHokenshaBangouInput(hokenshaBangouInput.value),
+      validateHihokenshaKigou(hihokenshaKigouInput.value),
+      validateHihokenshaBangou(hihokenshaBangouInput.value),
+      validateHonnin(honninInput.value),
+      validateValidFrom(validFromInput.value),
+      validateValidUpto(validUptoInput.value),
+      validateKourei(koureiInput.value),
+      validateEdaban(edabanInput.value)
+    ).asEither
 
 

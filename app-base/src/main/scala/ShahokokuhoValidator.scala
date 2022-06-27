@@ -37,13 +37,26 @@ object ShahokokuhoValidator:
     case InconsistentHihokenshaError extends ErrorGroup("被保険者記号・番号")
 
   type Result[T] = Validated[List[ShahokokuhoError], T]
+
+  extension [T] (r: Result[T])
+    def asEither: Either[String, T] =
+      r.toEither.left.map(_.map(_.message).mkString("\n"))
+
   import ErrorGroup.*
 
   def validateShahokokuhoIdForUpdate(value: Int): Result[Int] =
     condValid(value > 0, value, ShahokokuhoIdError.notPositive)
   
+  def validateShahokokuhoIdOptionForUpdate(value: Option[Int]): Result[Int] =
+    isSome(value, ShahokokuhoIdError.empty)
+      .andThen(validateShahokokuhoIdForUpdate(_))
+  
   def validatePatientId(patientId: Int): Result[Int] =
     condValid(patientId > 0, patientId, PatientIdError.notPositive)
+
+  def validatePatientIdOption(patientIdOption: Option[Int]): Result[Int] =
+    isSome(patientIdOption, PatientIdError.empty)
+      .andThen(validatePatientId(_))
 
   def validateHokenshaBangou(value: Int): Result[Int] =
     condValid(value > 0, value, HokenshaBangouError.notPositive)
@@ -57,10 +70,13 @@ object ShahokokuhoValidator:
 
   def validateHihokenshaBangou(src: String): Result[String] = nonNullString(src)
   
-  def validateHonnin(srcOpt: Option[String]): Result[Int] =
+  def validateHonnin(value: Int): Result[Int] =
+    isOneOf(value, List(0, 1), HonninError.invalid)
+
+  def validateHonninInput(srcOpt: Option[String]): Result[Int] =
     isSome(srcOpt, HonninError.empty)
       .andThen(toInt(_, HonninError.notInteger))
-      .andThen(isOneOf(_, List(0, 1), HonninError.invalid))
+      .andThen(validateHonnin(_))
 
   def validateValidFrom(dateOption: Option[LocalDate]): Result[LocalDate] =
     isSome(dateOption, ValidFromError.empty)
@@ -68,10 +84,13 @@ object ShahokokuhoValidator:
   def validateValidUpto(dateOption: Option[LocalDate]): Result[ValidUpto] = 
     Valid(ValidUpto(dateOption))
 
-  def validateKourei(srcOpt: Option[String]): Result[Int] =
+  def validateKourei(value: Int): Result[Int] =
+    isOneOf(value, List(0, 2, 3), KoureiError.invalid)
+
+  def validateKoureiInput(srcOpt: Option[String]): Result[Int] =
     isSome(srcOpt, KoureiError.empty)
       .andThen(toInt(_, KoureiError.notInteger))
-      .andThen(isOneOf(_, List(0, 2, 3), KoureiError.invalid))
+      .andThen(validateKourei(_))
 
   def validateEdaban(src: String): Result[String] = nonNullString(src)
 

@@ -66,10 +66,10 @@ class ShahokokuhoForm:
       validateHokenshaBangouInput(eHokenshaBangou.value),
       validateHihokenshaKigou(eHihokenshaKigou.value),
       validateHihokenshaBangou(eHihokenshaBangou.value),
-      validateHonnin(eHonninForm.getCheckedRadioValue("honnin")),
+      validateHonninInput(eHonninForm.getCheckedRadioValue("honnin")),
       validateValidFrom(eValidFrom.value),
       validateValidUpto(eValidUpto.value),
-      validateKourei(eKoureiForm.getCheckedRadioValue("kourei")),
+      validateKoureiInput(eKoureiForm.getCheckedRadioValue("kourei")),
       validateEdaban(eEdaban.value)
     )
 
@@ -80,10 +80,10 @@ class ShahokokuhoForm:
       validateHokenshaBangouInput(eHokenshaBangou.value),
       validateHihokenshaKigou(eHihokenshaKigou.value),
       validateHihokenshaBangou(eHihokenshaBangou.value),
-      validateHonnin(eHonninForm.getCheckedRadioValue("honnin")),
+      validateHonninInput(eHonninForm.getCheckedRadioValue("honnin")),
       validateValidFrom(eValidFrom.value),
       validateValidUpto(eValidUpto.value),
-      validateKourei(eKoureiForm.getCheckedRadioValue("kourei")),
+      validateKoureiInput(eKoureiForm.getCheckedRadioValue("kourei")),
       validateEdaban(eEdaban.value)
     )
 
