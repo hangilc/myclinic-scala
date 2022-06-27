@@ -6,7 +6,7 @@ import Modifiers.{*, given}
 import scala.language.implicitConversions
 import org.scalajs.dom.HTMLElement
 
-case class DispPanel(form: Boolean):
+case class DispPanel(form: Boolean = false):
   val ele = div(
     cls := "domq-disp-panel"
   )
