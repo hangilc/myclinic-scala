@@ -10,65 +10,56 @@ import java.time.LocalDate
 import cats.data.Validated
 import cats.data.Validated.*
 import scala.util.{Try, Success, Failure}
-import dev.fujiwara.validator.ValidatorUtil.*
+import dev.fujiwara.validator.section.*
 
 object ShahokokuhoValidator:
 
-  sealed class ShahokokuhoError(val group: ErrorGroup, msg: String)
-      extends ValidationError:
-    def message: String = msg
+  sealed trait ShahokokuhoError
+  object ShahokokuhoIdError extends ShahokokuhoError
+  object PatientIdError extends ShahokokuhoError
+  object HokenshaBangouError extends ShahokokuhoError
+  object HihokenshaKigouError extends ShahokokuhoError
+  object HihokenshaBangouError extends ShahokokuhoError
+  object HonninError extends ShahokokuhoError
+  object ValidFromError extends ShahokokuhoError
+  object ValidUptoError extends ShahokokuhoError
+  object KoureiError extends ShahokokuhoError
+  object InconsistentHihokenshaError extends ShahokokuhoError
 
-  enum ErrorGroup(name: String):
-    import dev.fujiwara.validator.ValidatorUtil.ErrorMessages.*
-    def apply(msg: String): ShahokokuhoError =
-      new ShahokokuhoError(this, msg)
-    def empty: ShahokokuhoError = apply(isEmptyErrorMessage(name))
-    def notInteger: ShahokokuhoError = apply(notIntegerErrorMessage(name))
-    def notPositive: ShahokokuhoError = apply(notPositiveErrorMessage(name))
-    def invalid: ShahokokuhoError = apply(invalidValueErrorMessage(name))
+  object ShahokokuhoIdValidator extends SectionValidator(ShahokokuhoIdError, "shahokokuho-id"):
+    def validateForEnter: Result[Int] = valid(0)
 
-    case ShahokokuhoIdError extends ErrorGroup("shahokokuhoId")
-    case PatientIdError extends ErrorGroup("patientId")
-    case HokenshaBangouError extends ErrorGroup("保険者番号")
-    case HonninError extends ErrorGroup("本人")
-    case ValidFromError extends ErrorGroup("期限開始日")
-    case ValidUptoError extends ErrorGroup("期限終了日")
-    case KoureiError extends ErrorGroup("高齢")
-    case InconsistentHihokenshaError extends ErrorGroup("被保険者記号・番号")
+    def validateForUpdate(value: Int): Result[Int] =
+      positive(value)
 
-  type Result[T] = Validated[List[ShahokokuhoError], T]
-
-  extension [T] (r: Result[T])
-    def asEither: Either[String, T] =
-      r.toEither.left.map(_.map(_.message).mkString("\n"))
-
-  import ErrorGroup.*
-
-  def validateShahokokuhoIdForUpdate(value: Int): Result[Int] =
-    condValid(value > 0, value, ShahokokuhoIdError.notPositive)
+    def validateOptionForUpdate(value: Option[Int]): Result[Int] =
+      some(value) 
+        |> validateForUpdate
   
-  def validateShahokokuhoIdOptionForUpdate(value: Option[Int]): Result[Int] =
-    isSome(value, ShahokokuhoIdError.empty)
-      .andThen(validateShahokokuhoIdForUpdate(_))
-  
-  def validatePatientId(patientId: Int): Result[Int] =
-    condValid(patientId > 0, patientId, PatientIdError.notPositive)
+  object PatientIdValidator extends SectionValidator(PatientIdError, "patient-id"):
+    def validate(patientId: Int): Result[Int] =
+      positive(patientId)
 
-  def validatePatientIdOption(patientIdOption: Option[Int]): Result[Int] =
-    isSome(patientIdOption, PatientIdError.empty)
-      .andThen(validatePatientId(_))
+    def validateOption(patientIdOption: Option[Int]) = 
+      some(patientIdOption)
+        |> validate
 
-  def validateHokenshaBangou(value: Int): Result[Int] =
-    condValid(value > 0, value, HokenshaBangouError.notPositive)
-  
-  def validateHokenshaBangouInput(src: String): Result[Int] =
-    isNotEmpty(src, HokenshaBangouError.empty)
-      .andThen(toInt(_, HokenshaBangouError.notInteger))
-      .andThen(validateHokenshaBangou(_))
+  object HokenshaBangouValidator extends SectionValidator(HokenshaBangouError, "保険者番号"):
+    def validate(value: Int): Result[Int] =
+      positive(value)
 
-  def validateHihokenshaKigou(src: String): Result[String] = nonNullString(src)
+    def validateInput(input: String): Result[Int] =
+      inputToInt(input)
+        |> validate
 
-  def validateHihokenshaBangou(src: String): Result[String] = nonNullString(src)
+  object HihokenshaKigouValidator extends SectionValidator(HihokenshaKigouError, "被保険者記号"):
+    def validate(input: String): Result[String] =
+      notNull(input)
+
+  object HihokenshaBangouValidator extends SectionValidator(HihokenshaBangouError, "被保険者記号"):
+    def validate(input: String): Result[String] =
+      notNull(input)
+
   
   def validateHonnin(value: Int): Result[Int] =
     isOneOf(value, List(0, 1), HonninError.invalid)
