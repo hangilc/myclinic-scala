@@ -147,28 +147,3 @@ object ShahokokuhoValidator:
       koureiResult,
       edabanResult
     )
-
-  // def validateShahokokuhoForUpdate(
-  //     shahokokuhoId: Int,
-  //     patientIdResult: Result[Int],
-  //     hokenshaBangouResult: Result[Int],
-  //     hihokenshaKigouResult: Result[String],
-  //     hihokenshaBangouResult: Result[String],
-  //     honninResult: Result[Int],
-  //     validFromResult: Result[LocalDate],
-  //     validUptoResult: Result[ValidUpto],
-  //     koureiResult: Result[Int],
-  //     edabanResult: Result[String]
-  // ): Result[Shahokokuho] =
-  //   validateShahokokuho(
-  //     validateShahokokuhoIdForUpdate(shahokokuhoId),
-  //     patientIdResult,
-  //     hokenshaBangouResult,
-  //     hihokenshaKigouResult,
-  //     hihokenshaBangouResult,
-  //     honninResult,
-  //     validFromResult,
-  //     validUptoResult,
-  //     koureiResult,
-  //     edabanResult
-  //   )
