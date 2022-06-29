@@ -23,6 +23,12 @@ object KouhiValidator:
   object PatientIdError extends KouhiError
   object InconsistentValidRangeError extends KouhiError
 
+  def asKouhiError[E, T](r: ValidatedResult[E, T]): ValidatedResult[KouhiError, T] =
+    r match {
+      case Valid(t) => Valid(t)
+      case Invalid(e) => Invalid(e.map(es => (KouhiError, es._2)))
+    }
+
   object KouhiIdValidator extends DatabaseIdValidator(KouhiIdError, "kouhi-id")
 
   object FutanshaValidator extends SectionValidator(FutanshaError, "負担者番号"):
@@ -59,13 +65,20 @@ object KouhiValidator:
       patientIdResult: ValidatedResult[PatientIdError.type, Int]
   )
 
+  type CastToKouhiResult[A] = A match {
+    case ValidatedResult[_, t] => ValidatedResult[KouhiError, t]
+  }
+
+  def castToKouhiResult[A](a: A): CastToKouhiResult[A] = a match {
+    case r: ValidatedResult[e, t] => asKouhiError(r)
+  }
   
   def validateForEnter(
       results: ValidationResults
   ): ValidatedResult[KouhiError, Kouhi] =
     import cats.Invariant.catsApplicativeForArrow
-    val rs = Tuple
+    Tuple
       .fromProductTyped(results)
+      .map([A] => (a: A) => castToKouhiResult(a))
       .mapN(Kouhi.apply _)
-
-// |> ConsistentValidRangeValidator.validate
+      |> ConsistentValidRangeValidator.validate
