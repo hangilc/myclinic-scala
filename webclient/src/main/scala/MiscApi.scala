@@ -199,7 +199,7 @@ object MiscApi extends ApiBase:
     def enterRoujin(roujin: Roujin): Future[Boolean] =
       post("enter-roujin", Params(), roujin)
 
-    def enterKoukikourei(koukikourei: Koukikourei): Future[Boolean] =
+    def enterKoukikourei(koukikourei: Koukikourei): Future[Koukikourei] =
       post("enter-koukikourei", Params(), koukikourei)
 
     def enterKouhi(kouhi: Kouhi): Future[Boolean] =
