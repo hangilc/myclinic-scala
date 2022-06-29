@@ -250,7 +250,8 @@ lazy val appbase = project
     validatorJS,
     drawerJS,
     kanjidateJS,
-    validatorJS
+    validatorJS,
+    dateinput
   )
   .settings(
     name := "myclinic-appbase",
