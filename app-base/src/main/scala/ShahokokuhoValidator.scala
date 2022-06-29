@@ -25,26 +25,30 @@ object ShahokokuhoValidator:
   object ValidUptoError extends ShahokokuhoError
   object KoureiError extends ShahokokuhoError
   object InconsistentHihokenshaError extends ShahokokuhoError
+  object InconsistentValidRangeError extends ShahokokuhoError
 
-  object ShahokokuhoIdValidator extends SectionValidator(ShahokokuhoIdError, "shahokokuho-id"):
+  object ShahokokuhoIdValidator
+      extends SectionValidator(ShahokokuhoIdError, "shahokokuho-id"):
     def validateForEnter: Result[Int] = valid(0)
 
     def validateForUpdate(value: Int): Result[Int] =
       positive(value)
 
     def validateOptionForUpdate(value: Option[Int]): Result[Int] =
-      some(value) 
+      some(value)
         |> validateForUpdate
-  
-  object PatientIdValidator extends SectionValidator(PatientIdError, "patient-id"):
+
+  object PatientIdValidator
+      extends SectionValidator(PatientIdError, "patient-id"):
     def validate(patientId: Int): Result[Int] =
       positive(patientId)
 
-    def validateOption(patientIdOption: Option[Int]) = 
+    def validateOption(patientIdOption: Option[Int]) =
       some(patientIdOption)
         |> validate
 
-  object HokenshaBangouValidator extends SectionValidator(HokenshaBangouError, "保険者番号"):
+  object HokenshaBangouValidator
+      extends SectionValidator(HokenshaBangouError, "保険者番号"):
     def validate(value: Int): Result[Int] =
       positive(value)
 
@@ -52,89 +56,102 @@ object ShahokokuhoValidator:
       inputToInt(input)
         |> validate
 
-  object HihokenshaKigouValidator extends SectionValidator(HihokenshaKigouError, "被保険者記号"):
+  object HihokenshaKigouValidator
+      extends SectionValidator(HihokenshaKigouError, "被保険者記号"):
     def validate(input: String): Result[String] =
       notNull(input)
 
-  object HihokenshaBangouValidator extends SectionValidator(HihokenshaBangouError, "被保険者記号"):
+  object HihokenshaBangouValidator
+      extends SectionValidator(HihokenshaBangouError, "被保険者番号"):
     def validate(input: String): Result[String] =
       notNull(input)
 
-  
-  def validateHonnin(value: Int): Result[Int] =
-    isOneOf(value, List(0, 1), HonninError.invalid)
+  object HonninValidator extends SectionValidator(HonninError, "本人・家族"):
+    def validate(value: Int): Result[Int] =
+      oneOf(value, List(0, 1))
 
-  def validateHonninInput(srcOpt: Option[String]): Result[Int] =
-    isSome(srcOpt, HonninError.empty)
-      .andThen(toInt(_, HonninError.notInteger))
-      .andThen(validateHonnin(_))
+    def validateInput(input: String): Result[Int] =
+      inputToInt(input) |> validate
 
-  def validateValidFrom(dateOption: Option[LocalDate]): Result[LocalDate] =
-    isSome(dateOption, ValidFromError.empty)
+    def validateInputOption(inputOption: Option[String]): Result[Int] =
+      some(inputOption) |> validateInput
 
-  def validateValidUpto(dateOption: Option[LocalDate]): Result[ValidUpto] = 
-    Valid(ValidUpto(dateOption))
+  object ValidFromValidator extends SectionValidator(ValidFromError, "期限開始"):
+    def validate(date: LocalDate): Result[LocalDate] =
+      valid(date)
 
-  def validateKourei(value: Int): Result[Int] =
-    isOneOf(value, List(0, 2, 3), KoureiError.invalid)
+    def validateOption(dateOption: Option[LocalDate]): Result[LocalDate] =
+      some(dateOption) |> validate
 
-  def validateKoureiInput(srcOpt: Option[String]): Result[Int] =
-    isSome(srcOpt, KoureiError.empty)
-      .andThen(toInt(_, KoureiError.notInteger))
-      .andThen(validateKourei(_))
+  object ValidUptoValidator extends SectionValidator(ValidUptoError, "期限終了"):
+    def validate(dateOption: Option[LocalDate]): Result[ValidUpto] =
+      valid(ValidUpto(dateOption))
 
-  def validateEdaban(src: String): Result[String] = nonNullString(src)
+  object KoureiValidator extends SectionValidator(KoureiError, "高齢"):
+    def validate(value: Int): Result[Int] =
+      oneOf(value, List(0, 2, 3))
 
-  def validateShahokokuho(
-      shahokokuhoIdResult: Result[Int],
-      patientIdResult: Result[Int],
-      hokenshaBangouResult: Result[Int],
-      hihokenshaKigouResult: Result[String],
-      hihokenshaBangouResult: Result[String],
-      honninResult: Result[Int],
-      validFromResult: Result[LocalDate],
-      validUptoResult: Result[ValidUpto],
-      koureiResult: Result[Int],
-      edabanResult: Result[String]
-  ): Result[Shahokokuho] =
-    (
-      shahokokuhoIdResult,
-      patientIdResult,
-      hokenshaBangouResult,
-      hihokenshaKigouResult,
-      hihokenshaBangouResult,
-      honninResult,
-      validFromResult,
-      validUptoResult,
-      koureiResult,
-      edabanResult
-    ).mapN(Shahokokuho.apply)
-      .andThen(shaho =>
-        if shaho.hihokenshaKigou.isEmpty && shaho.hihokenshaBangou.isEmpty then
-          Invalid(List(InconsistentHihokenshaError("被保険者記号・番号が両方空白です。")))
-        else Valid(shaho)
+    def validateInput(input: String): Result[Int] =
+      inputToInt(input) |> validate
+
+  object EdabanValidator extends SectionValidator(KoureiError, "枝番"):
+    def validate(src: String): Result[String] =
+      notNull(src)
+
+  object ConsistentHihokenshaValidator
+      extends SectionValidator(InconsistentHihokenshaError, ""):
+    def validate(h: Shahokokuho): Result[Shahokokuho] =
+      condNot(
+        h.hihokenshaKigou.isEmpty && h.hihokenshaBangou.isEmpty,
+        h,
+        "被保険者の記号と番号が両方空白です。"
       )
 
-  def validateShahokokuhoForEnter(
-      patientIdResult: Result[Int],
-      hokenshaBangouResult: Result[Int],
-      hihokenshaKigouResult: Result[String],
-      hihokenshaBangouResult: Result[String],
-      honninResult: Result[Int],
-      validFromResult: Result[LocalDate],
-      validUptoResult: Result[ValidUpto],
-      koureiResult: Result[Int],
-      edabanResult: Result[String]
-  ): Result[Shahokokuho] =
-    validateShahokokuho(
-      Valid(0),
-      patientIdResult,
-      hokenshaBangouResult,
-      hihokenshaKigouResult,
-      hihokenshaBangouResult,
-      honninResult,
-      validFromResult,
-      validUptoResult,
-      koureiResult,
-      edabanResult
-    )
+  object ConsistentValidRangeValidator extends SectionValidator(InconsistentValidRangeError, ""):
+    def validate(h: Shahokokuho): Result[Shahokokuho] =
+      consistentValidRange(h.validFrom, h.validUpto.value, h)
+
+  def validate(
+      shahokokuhoIdResult: ShahokokuhoIdValidator.type#Result[Int],
+      patientIdResult: PatientIdValidator.type#Result[Int],
+      hokenshaBangouResult: HokenshaBangouValidator.type#Result[Int],
+      hihokenshaKigouResult: HihokenshaKigouValidator.type#Result[String],
+      hihokenshaBangouResult: HihokenshaBangouValidator.type#Result[String],
+      honninResult: HonninValidator.type#Result[Int],
+      validFromResult: ValidFromValidator.type#Result[LocalDate],
+      validUptoResult: ValidUptoValidator.type#Result[ValidUpto],
+      koureiResult: KoureiValidator.type#Result[Int],
+      edabanResult: EdabanValidator.type#Result[String]
+  ): ValidatedSection[ShahokokuhoError, Shahokokuho] =
+    val gShahokokuhoIdResult: ValidatedSection[ShahokokuhoError, Int] =
+      shahokokuhoIdResult
+    val gPatientIdResult: ValidatedSection[ShahokokuhoError, Int] =
+      patientIdResult
+    val gHokenshaBangouResult: ValidatedSection[ShahokokuhoError, Int] =
+      hokenshaBangouResult
+    val gHihokenshaKigouResult: ValidatedSection[ShahokokuhoError, String] =
+      hihokenshaKigouResult
+    val gHihokenshaBangouResult: ValidatedSection[ShahokokuhoError, String] =
+      hihokenshaBangouResult
+    val gHonninResult: ValidatedSection[ShahokokuhoError, Int] = honninResult
+    val gValidFromResult: ValidatedSection[ShahokokuhoError, LocalDate] =
+      validFromResult
+    val gValidUptoResult: ValidatedSection[ShahokokuhoError, ValidUpto] =
+      validUptoResult
+    val gKoureiResult: ValidatedSection[ShahokokuhoError, Int] = koureiResult
+    val gEdabanResult: ValidatedSection[ShahokokuhoError, String] = edabanResult
+    (
+      gShahokokuhoIdResult,
+      gPatientIdResult,
+      gHokenshaBangouResult,
+      gHihokenshaKigouResult,
+      gHihokenshaBangouResult,
+      gHonninResult,
+      gValidFromResult,
+      gValidUptoResult,
+      gKoureiResult,
+      gEdabanResult
+    ).mapN(Shahokokuho.apply _) 
+      |> ConsistentHihokenshaValidator.validate
+      |> ConsistentValidRangeValidator.validate
+
