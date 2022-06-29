@@ -10,7 +10,8 @@ import scala.util.Failure
 import java.time.LocalDate
 import math.Ordering.Implicits.infixOrderingOps
 
-type ValidatedSection[E, T] = Validated[List[(E, String)], T]
+type ValidatedResult[E, T] = Validated[List[(E, String)], T]
+type ValidatedSection[E, T] = ValidatedResult[E, T]
 
 object Implicits:
   extension [E, T](v: ValidatedSection[E, T])
@@ -120,18 +121,21 @@ class ValidUptoValidator[E, T](
     valid(f(dateOption))
 
 class GlobalValidator[E, T](
-    err: () => E,
-    f: T => Boolean
+    err: E,
+    f: T => Boolean,
+    errMessage: () => String
 ):
-  def validate(t: T): Validated[List[E], T] =
+  def validate(t: T): ValidatedResult[E, T] =
     if f(t) then Valid(t)
-    else Invalid(List(err()))
+    else Invalid(List((err, errMessage())))
 
 class ConsistentValidRangeValidator[E, T](
-    err: () => E,
+    err: E,
     validFrom: T => LocalDate,
-    validUpto: T => Option[LocalDate]
+    validUpto: T => Option[LocalDate],
+    errMessage: () => String = () => "有効期限開始が有効期限終了の後です。"
 ) extends GlobalValidator[E, T](
       err,
-      t => validUpto(t) == None || validFrom(t) <= validUpto(t).get
+      t => validUpto(t) == None || validFrom(t) <= validUpto(t).get,
+      errMessage
     )

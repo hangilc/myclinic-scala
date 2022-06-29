@@ -13,6 +13,7 @@ import dev.myclinic.scala.model.*
 import java.time.LocalDate
 import dev.myclinic.scala.web.appbase.validator.KoukikoureiValidator
 import dev.myclinic.scala.web.appbase.validator.KoukikoureiValidator.*
+import dev.fujiwara.validator.section.*
 
 class KoukikoureiForm:
   val eHokenshaBangou = inputText()
@@ -47,26 +48,28 @@ class KoukikoureiForm:
 
   def validateForEnter(
       patientId: Int
-  ): Result[Koukikourei] =
-    validateKoukikoureiForEnter(
-      validatePatientId(patientId),
-      validateHokenshaBangou(eHokenshaBangou.value),
-      validateHihokenshaBangou(eHihokenshaBangou.value),
-      validateFutanWari(eFutanWariForm.getCheckedRadioValue("futanwari")),
-      validateValidFrom(eValidFrom.value),
-      validateValidUpto(eValidUpto.value)
-    )
+  ): ValidatedResult[KoukikoureiError, Koukikourei] =
+    ???
+    // validateKoukikoureiForEnter(
+    //   validatePatientId(patientId),
+    //   validateHokenshaBangou(eHokenshaBangou.value),
+    //   validateHihokenshaBangou(eHihokenshaBangou.value),
+    //   validateFutanWari(eFutanWariForm.getCheckedRadioValue("futanwari")),
+    //   validateValidFrom(eValidFrom.value),
+    //   validateValidUpto(eValidUpto.value)
+    // )
 
   def validateForUpdate(
       koukikoureiId: Int,
       patientId: Int
-  ): Result[Koukikourei] =
-    validateKoukikourei(
-      validateKoukikoureiIdForUpdate(koukikoureiId),
-      validatePatientId(patientId),
-      validateHokenshaBangou(eHokenshaBangou.value),
-      validateHihokenshaBangou(eHihokenshaBangou.value),
-      validateFutanWari(eFutanWariForm.getCheckedRadioValue("futanwari")),
-      validateValidFrom(eValidFrom.value),
-      validateValidUpto(eValidUpto.value)
-    )
+  ): ValidatedResult[KoukikoureiError, Koukikourei] =
+    ???
+    // validateKoukikourei(
+    //   validateKoukikoureiIdForUpdate(koukikoureiId),
+    //   validatePatientId(patientId),
+    //   validateHokenshaBangou(eHokenshaBangou.value),
+    //   validateHihokenshaBangou(eHihokenshaBangou.value),
+    //   validateFutanWari(eFutanWariForm.getCheckedRadioValue("futanwari")),
+    //   validateValidFrom(eValidFrom.value),
+    //   validateValidUpto(eValidUpto.value)
+    // )

@@ -15,7 +15,7 @@ import org.scalajs.dom.HTMLInputElement
 
 class KoukikoureiForm(init: Option[Koukikourei]):
 
-  case class Prop[T, E <: KoukikoureiError](
+  case class Prop[T, E](
       label: String,
       element: HTMLElement,
       validator: () => SectionResult[E, T]
@@ -23,12 +23,12 @@ class KoukikoureiForm(init: Option[Koukikourei]):
     def keyElement: (String, HTMLElement) = (label, element)
 
   object Prop:
-    def apply[E](
+    def apply[T, E](
         label: String,
         e: HTMLInputElement,
-        validator: String => SectionResult[E, String]
-    ): Prop[String, E] =
-      new Prop[String, E](label, e, () => validator(e.value))
+        validator: String => SectionResult[E, T]
+    ): Prop[T, E] =
+      new Prop[T, E](label, e, () => validator(e.value))
 
     def radio[T, E](
         label: String,
@@ -42,10 +42,26 @@ class KoukikoureiForm(init: Option[Koukikourei]):
     def date[E](
         label: String,
         init: Option[LocalDate],
-        validator: Option[LocalDate] => SectionResult[E, Option[LocalDate]]
-    ): Prop[Option[LocalDate], E] =
+        validator: Option[LocalDate] => SectionResult[E, LocalDate]
+    ): Prop[LocalDate, E] =
       val dateInput = DateOptionInput(init)
-      new Prop[Option[LocalDate], E](label, dateInput.ele, () => validator(dateInput.value))
+      new Prop[LocalDate, E](
+        label,
+        dateInput.ele,
+        () => validator(dateInput.value)
+      )
+
+    def validUpto[E](
+        label: String,
+        init: Option[LocalDate],
+        validator: Option[LocalDate] => SectionResult[E, ValidUpto]
+    ): Prop[ValidUpto, E] =
+      val dateInput = DateOptionInput(init)
+      new Prop[ValidUpto, E](
+        label,
+        dateInput.ele,
+        () => validator(dateInput.value)
+      )
 
   val futanWariData = List(
     "１割" -> 1,
@@ -53,16 +69,19 @@ class KoukikoureiForm(init: Option[Koukikourei]):
     "３割" -> 3
   )
 
-  val hokenshaBangouProp = Prop[HokenshaBangouError]("保険者番号", input)
-  val hihokenshaBangouProp = Prop("被保険者番号", input)
-  val futanshaWariProp = Prop.radio("負担割", futanWariData, 1)
-  val validFromProp = Prop.date("期限開始", None)
-  val validUptoProp = Prop.date("期限終了", None)
+  val hokenshaBangouProp =
+    Prop("保険者番号", input, HokenshaBangouValidator.validate)
+  val hihokenshaBangouProp =
+    Prop("被保険者番号", input, HihokenshaBangouValidator.validate)
+  val futanWariProp =
+    Prop.radio("負担割", futanWariData, 1, FutanWariValidator.validate)
+  val validFromProp = Prop.date("期限開始", None, ValidFromValidator.validateOption)
+  val validUptoProp = Prop.validUpto("期限終了", None, ValidUptoValidator.validate)
 
   val props = List(
     hokenshaBangouProp.keyElement,
     hihokenshaBangouProp.keyElement,
-    futanshaWariProp.keyElement,
+    futanWariProp.keyElement,
     validFromProp.keyElement,
     validUptoProp.keyElement
   )
@@ -73,3 +92,16 @@ class KoukikoureiForm(init: Option[Koukikourei]):
   }
 
   val ele = panel.ele
+
+  def validateForEnter(patientId: Int): Either[String, Koukikourei] =
+    KoukikoureiValidator
+      .validate(
+        KoukikoureiIdValidator.validateForEnter,
+        PatientIdValidator.validate(patientId),
+        hokenshaBangouProp.validator(),
+        hihokenshaBangouProp.validator(),
+        futanWariProp.validator(),
+        validFromProp.validator(),
+        validUptoProp.validator()
+      )
+      .asEither

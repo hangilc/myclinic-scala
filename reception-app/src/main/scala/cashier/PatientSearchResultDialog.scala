@@ -88,8 +88,19 @@ case class PatientSearchResultDialog(patients: List[Patient]):
 
   private def newKoukikourei(patient: Patient, hokenList: List[Hoken]): Unit =
     val form = new KoukikoureiForm(None)
-    dlog.body(clear, form.ele)
+    val errBox = ErrorBox()
+    dlog.body(clear, form.ele, errBox.ele)
     dlog.commands(clear,
+      button("入力", onclick := (() => {
+        form.validateForEnter(patient.patientId) match {
+          case Left(msg) => errBox.show(msg)
+          case Right(newKoukikourei) =>
+            for
+              entered <- Api.enterKoukikourei(newKoukikourei)
+            yield invokeDisp(patient)
+        }
+        ()
+      })),
       button("キャンセル", onclick := (() => disp(patient, hokenList)))
     )
 
