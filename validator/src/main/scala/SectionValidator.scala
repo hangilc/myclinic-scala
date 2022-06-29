@@ -17,12 +17,13 @@ object Implicits:
     def asEither: Either[String, T] =
       v.toEither.left.map(_.map(_._2).mkString("\n"))
 
-  extension [E, T](v: ValidatedSection[E, T])
-    def |>[U](f: T => ValidatedSection[E, U]): ValidatedSection[E, U] =
+  extension [E, T](v: Validated[E, T])
+    def |>[U](f: T => Validated[E, U]): Validated[E, U] =
       v.andThen(f)
 
+import Implicits.|>
+
 class SectionValidator[E](err: E, name: String):
-  import Implicits.*
   type Result[T] = ValidatedSection[E, T]
   def invalid[T](msg: String): Result[T] = Invalid(List((err, msg)))
   def valid[T](t: T): Result[T] = Valid(t)
@@ -60,6 +61,13 @@ class SectionValidator[E](err: E, name: String):
   def oneOf[T](value: T, options: List[T]): Result[T] =
     cond(options.contains(value), value, s"${name}が適切な値（${options}）でありません。")
 
+  def inRange(value: Int, min: Int, max: Int): Result[Int] =
+    cond(
+      value >= min && value <= max,
+      value,
+      s"${name}が適切な範囲内（${min}以上${max}以下）でありません。"
+    )
+
   def consistentValidRange[T](
       validFrom: LocalDate,
       validUpto: Option[LocalDate],
@@ -83,4 +91,47 @@ class SectionValidator[E](err: E, name: String):
       "有効期限の開始日が終了日よりも後です。"
     )
 
+class DatabaseIdValidator[E](err: E, name: String)
+    extends SectionValidator(err, name):
+  def validateForEnter: Result[Int] = valid(0)
 
+  def validateForUpdate(value: Int): Result[Int] =
+    positive(value)
+
+  def validateOptionForUpdate(value: Option[Int]): Result[Int] =
+    some(value)
+      |> validateForUpdate
+
+class ValidFromValidator[E](err: E, name: String = "期限開始")
+    extends SectionValidator(err, name):
+  import Implicits.*
+  def validate(date: LocalDate): Result[LocalDate] =
+    valid(date)
+
+  def validateOption(dateOption: Option[LocalDate]): Result[LocalDate] =
+    some(dateOption) |> validate
+
+class ValidUptoValidator[E, T](
+    err: E,
+    f: Option[LocalDate] => T,
+    name: String = "期限終了"
+) extends SectionValidator(err, name):
+  def validate(dateOption: Option[LocalDate]): Result[T] =
+    valid(f(dateOption))
+
+class GlobalValidator[E, T](
+    err: () => E,
+    f: T => Boolean
+):
+  def validate(t: T): Validated[List[E], T] =
+    if f(t) then Valid(t)
+    else Invalid(List(err()))
+
+class ConsistentValidRangeValidator[E, T](
+    err: () => E,
+    validFrom: T => LocalDate,
+    validUpto: T => Option[LocalDate]
+) extends GlobalValidator[E, T](
+      err,
+      t => validUpto(t) == None || validFrom(t) <= validUpto(t).get
+    )
