@@ -62,7 +62,8 @@ case class PatientSearchResultDialog(patients: List[Patient]):
         cls := "domq-mt-4",
         a("編集", onclick := (() => edit(patient))),
         "|",
-        a("新規社保国保", onclick := (() => newShahokokuho(patient)))
+        a("新規社保国保", onclick := (() => newShahokokuho(patient))), "|",
+        a("新規後期高齢", onclick := (() => newKoukikourei(patient, hokenList)))
       )
     )
 
@@ -83,6 +84,13 @@ case class PatientSearchResultDialog(patients: List[Patient]):
         ()
       })),
       button("キャンセル", onclick := (() => { invokeDisp(patient); () }))
+    )
+
+  private def newKoukikourei(patient: Patient, hokenList: List[Hoken]): Unit =
+    val form = new KoukikoureiForm(None)
+    dlog.body(clear, form.ele)
+    dlog.commands(clear,
+      button("キャンセル", onclick := (() => disp(patient, hokenList)))
     )
 
   private def edit(patient: Patient): Unit =

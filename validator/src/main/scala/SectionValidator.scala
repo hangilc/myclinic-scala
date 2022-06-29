@@ -12,15 +12,17 @@ import math.Ordering.Implicits.infixOrderingOps
 
 type ValidatedSection[E, T] = Validated[List[(E, String)], T]
 
-extension [E, T](v: ValidatedSection[E, T])
-  def asEither: Either[String, T] =
-    v.toEither.left.map(_.map(_._2).mkString("\n"))
+object Implicits:
+  extension [E, T](v: ValidatedSection[E, T])
+    def asEither: Either[String, T] =
+      v.toEither.left.map(_.map(_._2).mkString("\n"))
 
-extension [E, T](v: ValidatedSection[E, T])
-  def |>[U](f: T => ValidatedSection[E, U]): ValidatedSection[E, U] =
-    v.andThen(f)
+  extension [E, T](v: ValidatedSection[E, T])
+    def |>[U](f: T => ValidatedSection[E, U]): ValidatedSection[E, U] =
+      v.andThen(f)
 
 class SectionValidator[E](err: E, name: String):
+  import Implicits.*
   type Result[T] = ValidatedSection[E, T]
   def invalid[T](msg: String): Result[T] = Invalid(List((err, msg)))
   def valid[T](t: T): Result[T] = Valid(t)

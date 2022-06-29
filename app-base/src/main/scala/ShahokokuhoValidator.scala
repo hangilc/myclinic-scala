@@ -11,6 +11,7 @@ import cats.data.Validated
 import cats.data.Validated.*
 import scala.util.{Try, Success, Failure}
 import dev.fujiwara.validator.section.*
+import dev.fujiwara.validator.section.Implicits.*
 
 object ShahokokuhoValidator:
 
@@ -107,9 +108,12 @@ object ShahokokuhoValidator:
         "被保険者の記号と番号が両方空白です。"
       )
 
-  object ConsistentValidRangeValidator extends SectionValidator(InconsistentValidRangeError, ""):
+  object ConsistentValidRangeValidator
+      extends SectionValidator(InconsistentValidRangeError, ""):
     def validate(h: Shahokokuho): Result[Shahokokuho] =
       consistentValidRange(h.validFrom, h.validUpto.value, h)
+
+  type ShahokokuhoResult[T] = ValidatedSection[ShahokokuhoError, T]
 
   def validate(
       shahokokuhoIdResult: ShahokokuhoIdValidator.type#Result[Int],
@@ -123,23 +127,23 @@ object ShahokokuhoValidator:
       koureiResult: KoureiValidator.type#Result[Int],
       edabanResult: EdabanValidator.type#Result[String]
   ): ValidatedSection[ShahokokuhoError, Shahokokuho] =
-    val gShahokokuhoIdResult: ValidatedSection[ShahokokuhoError, Int] =
+    val gShahokokuhoIdResult: ShahokokuhoResult[Int] =
       shahokokuhoIdResult
-    val gPatientIdResult: ValidatedSection[ShahokokuhoError, Int] =
+    val gPatientIdResult: ShahokokuhoResult[Int] =
       patientIdResult
-    val gHokenshaBangouResult: ValidatedSection[ShahokokuhoError, Int] =
+    val gHokenshaBangouResult: ShahokokuhoResult[Int] =
       hokenshaBangouResult
-    val gHihokenshaKigouResult: ValidatedSection[ShahokokuhoError, String] =
+    val gHihokenshaKigouResult: ShahokokuhoResult[String] =
       hihokenshaKigouResult
-    val gHihokenshaBangouResult: ValidatedSection[ShahokokuhoError, String] =
+    val gHihokenshaBangouResult: ShahokokuhoResult[String] =
       hihokenshaBangouResult
-    val gHonninResult: ValidatedSection[ShahokokuhoError, Int] = honninResult
-    val gValidFromResult: ValidatedSection[ShahokokuhoError, LocalDate] =
+    val gHonninResult: ShahokokuhoResult[Int] = honninResult
+    val gValidFromResult: ShahokokuhoResult[LocalDate] =
       validFromResult
-    val gValidUptoResult: ValidatedSection[ShahokokuhoError, ValidUpto] =
+    val gValidUptoResult: ShahokokuhoResult[ValidUpto] =
       validUptoResult
-    val gKoureiResult: ValidatedSection[ShahokokuhoError, Int] = koureiResult
-    val gEdabanResult: ValidatedSection[ShahokokuhoError, String] = edabanResult
+    val gKoureiResult: ShahokokuhoResult[Int] = koureiResult
+    val gEdabanResult: ShahokokuhoResult[String] = edabanResult
     (
       gShahokokuhoIdResult,
       gPatientIdResult,
@@ -151,7 +155,8 @@ object ShahokokuhoValidator:
       gValidUptoResult,
       gKoureiResult,
       gEdabanResult
-    ).mapN(Shahokokuho.apply _) 
+    ).mapN(Shahokokuho.apply _)
       |> ConsistentHihokenshaValidator.validate
       |> ConsistentValidRangeValidator.validate
 
+  export Implicits.asEither

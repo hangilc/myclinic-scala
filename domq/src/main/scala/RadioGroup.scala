@@ -13,7 +13,7 @@ case class RadioGroup[T](
     initValue: Option[T] = None
 ):
   val radioLabels: List[RadioLabel[T]] = items.map { case (label, value) =>
-    RadioLabel(name, value, label)
+    RadioLabel(name, value, label, wrapper = itemWrapper())
   }
   val ele = div(radioLabels.map(_.ele))
   initValue match {

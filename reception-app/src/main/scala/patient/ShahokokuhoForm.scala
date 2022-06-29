@@ -60,30 +60,32 @@ class ShahokokuhoForm:
     eValidFrom.init(Some(data.validFrom))
     eValidUpto.init(data.validUpto.value)
 
-  def validateForEnter(patientId: Int): ShahokokuhoValidator.Result[Shahokokuho] =
-    ShahokokuhoValidator.validateShahokokuhoForEnter(
-      validatePatientId(patientId),
-      validateHokenshaBangouInput(eHokenshaBangou.value),
-      validateHihokenshaKigou(eHihokenshaKigou.value),
-      validateHihokenshaBangou(eHihokenshaBangou.value),
-      validateHonninInput(eHonninForm.getCheckedRadioValue("honnin")),
-      validateValidFrom(eValidFrom.value),
-      validateValidUpto(eValidUpto.value),
-      validateKoureiInput(eKoureiForm.getCheckedRadioValue("kourei")),
-      validateEdaban(eEdaban.value)
-    )
+  def validateForEnter(patientId: Int): ShahokokuhoValidator.ShahokokuhoResult[Shahokokuho] =
+    ???
+    // ShahokokuhoValidator.validateShahokokuhoForEnter(
+    //   validatePatientId(patientId),
+    //   validateHokenshaBangouInput(eHokenshaBangou.value),
+    //   validateHihokenshaKigou(eHihokenshaKigou.value),
+    //   validateHihokenshaBangou(eHihokenshaBangou.value),
+    //   validateHonninInput(eHonninForm.getCheckedRadioValue("honnin")),
+    //   validateValidFrom(eValidFrom.value),
+    //   validateValidUpto(eValidUpto.value),
+    //   validateKoureiInput(eKoureiForm.getCheckedRadioValue("kourei")),
+    //   validateEdaban(eEdaban.value)
+    // )
 
-  def validateForUpdate(shahokokuhoId: Int, patientId: Int): ShahokokuhoValidator.Result[Shahokokuho] =
-    ShahokokuhoValidator.validateShahokokuho(
-      validateShahokokuhoIdForUpdate(shahokokuhoId),
-      validatePatientId(patientId),
-      validateHokenshaBangouInput(eHokenshaBangou.value),
-      validateHihokenshaKigou(eHihokenshaKigou.value),
-      validateHihokenshaBangou(eHihokenshaBangou.value),
-      validateHonninInput(eHonninForm.getCheckedRadioValue("honnin")),
-      validateValidFrom(eValidFrom.value),
-      validateValidUpto(eValidUpto.value),
-      validateKoureiInput(eKoureiForm.getCheckedRadioValue("kourei")),
-      validateEdaban(eEdaban.value)
-    )
+  def validateForUpdate(shahokokuhoId: Int, patientId: Int): ShahokokuhoValidator.ShahokokuhoResult[Shahokokuho] =
+    ???
+    // ShahokokuhoValidator.validateShahokokuho(
+    //   validateShahokokuhoIdForUpdate(shahokokuhoId),
+    //   validatePatientId(patientId),
+    //   validateHokenshaBangouInput(eHokenshaBangou.value),
+    //   validateHihokenshaKigou(eHihokenshaKigou.value),
+    //   validateHihokenshaBangou(eHihokenshaBangou.value),
+    //   validateHonninInput(eHonninForm.getCheckedRadioValue("honnin")),
+    //   validateValidFrom(eValidFrom.value),
+    //   validateValidUpto(eValidUpto.value),
+    //   validateKoureiInput(eKoureiForm.getCheckedRadioValue("kourei")),
+    //   validateEdaban(eEdaban.value)
+    // )
 
