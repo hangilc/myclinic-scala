@@ -1,88 +1,69 @@
 package dev.myclinic.scala.web.appbase.validator
 
-import cats.*
-import cats.syntax.*
-import cats.data.{ValidatedNec, NonEmptyChain}
-import cats.data.Validated.*
-import cats.implicits.*
-import dev.myclinic.scala.model.{Kouhi, ValidUpto}
-import java.time.LocalDate
-import cats.data.Validated.Valid
-import cats.data.Validated.Invalid
-import scala.util.{Try, Success, Failure}
+import cats.syntax.all.*
 import cats.data.Validated
-import dev.fujiwara.validator.ValidatorUtil.*
+import dev.fujiwara.validator.section.*
+import dev.fujiwara.validator.section.Implicits.*
+import dev.myclinic.scala.model.ValidUpto
+import java.time.LocalDate
+import dev.myclinic.scala.model.Kouhi
 
 object KouhiValidator:
-  sealed trait KouhiError extends ValidationError
 
-  object NonPositiveKouhiId extends KouhiError:
-    def message: String = "Zero kouhi-id"
-  object NonPositivePatientId extends KouhiError:
-    def message: String = "Zero patient-id"
-  object NonIntegerFutanshaBangou extends KouhiError:
-    def message: String = "負担者番号が整数でありません。"
-  object EmptyFutanshaBangou extends KouhiError:
-    def message: String = "負担者番号が入力されていません。"
-  object NonPositiveFutanshaBangou extends KouhiError:
-    def message: String = "負担者番号が正の整数でありません。"
-  object EmptyJukyuushaBangou extends KouhiError:
-    def message: String = "受給者番号が入力されていません。"
-  object NonIntegerJukyuushaBangou extends KouhiError:
-    def message: String = "受給者番号が整数でありません。"
-  object NonPositiveJukyuushaBangou extends KouhiError:
-    def message: String = "受給者番号が正の整数でありません。"
-  object EmptyValidFrom extends KouhiError:
-    def message: String = "期限開始日が入力されていません。"
+  sealed trait KouhiError
 
-  type Result[T] = Validated[List[KouhiError], T]
+  object KouhiIdError extends KouhiError
+  object FutanshaError extends KouhiError
+  object JukyuushaError extends KouhiError
+  object ValidFromError extends KouhiError
+  object ValidUptoError extends KouhiError
+  object PatientIdError extends KouhiError
+  object InconsistentValidRangeError extends KouhiError
 
-  def validateKouhiIdForUpdate(kouhiId: Int): Result[Int] =
-    isPositive(kouhiId, NonPositiveKouhiId)
+  extension [E <: KouhiError, T](r: ValidatedResult[E, T])
+    def asKouhiError: ValidatedResult[KouhiError, T] = r
 
-  def validatePatientId(patientId: Int): Result[Int] =
-    isPositive(patientId, NonPositivePatientId)
+  object KouhiIdValidator extends DatabaseIdValidator(KouhiIdError, "kouhi-id")
 
-  def validateFutanshaBangou(src: String): Result[Int] =
-    toInt(src, EmptyFutanshaBangou)
-      .andThen(isPositive(_, NonIntegerFutanshaBangou))
+  object FutanshaValidator extends SectionValidator(FutanshaError, "負担者番号"):
+    def validate(input: String): Result[Int] =
+      inputToInt(input) |> positive
 
-  def validateJukyuushaBangou(src: String): Result[Int] =
-    toInt(src, EmptyJukyuushaBangou)
-      .andThen(isPositive(_, NonPositiveJukyuushaBangou))
+  object JukyuushaValidator extends SectionValidator(JukyuushaError, "受給者番号"):
+    def validate(input: String): Result[Int] =
+      inputToInt(input) |> positive
 
-  def validateValidFrom(dateOption: Option[LocalDate]): Result[LocalDate] =
-    isSome(dateOption, EmptyValidFrom)
+  object ValidFromValidator extends ValidFromValidator(ValidFromError)
 
-  def validateKouhiForEnter(
-      patientIdResult: Result[Int],
-      futanshaBangouResult: Result[Int],
-      jukyuushaBangouResult: Result[Int],
-      validFromResult: Result[LocalDate],
-      validUptoValue: Option[LocalDate]
-  ): Result[Kouhi] =
+  object ValidUptoValidator
+      extends ValidUptoValidator(ValidUptoError, ValidUpto.apply _)
+
+  object PatientIdValidator
+      extends SectionValidator(PatientIdError, "patient-id"):
+    def validate(value: Int): Result[Int] =
+      positive(value)
+
+  object ConsistentValidRangeValidator
+      extends ConsistentValidRangeValidator[KouhiError, Kouhi](
+        InconsistentValidRangeError,
+        _.validFrom,
+        _.validUpto.value
+      )
+
+  def validateForEnter(
+      kouhidIdResult: ValidatedResult[KouhiIdError.type, Int],
+      futanshaResult: ValidatedResult[FutanshaError.type, Int],
+      jukyuushaResult: ValidatedResult[JukyuushaError.type, Int],
+      validFromResult: ValidatedResult[ValidFromError.type, LocalDate],
+      validUptoResult: ValidatedResult[ValidUptoError.type, ValidUpto],
+      patientIdResult: ValidatedResult[PatientIdError.type, Int]
+  ): ValidatedResult[KouhiError, Kouhi] =
     (
-      Valid(0),
-      futanshaBangouResult,
-      jukyuushaBangouResult,
-      validFromResult,
-      Valid(ValidUpto(validUptoValue)),
-      patientIdResult
-    ).mapN(Kouhi.apply _)
-
-  def validateKouhiForUpdate(
-      kouhiIdResult: Result[Int],
-      patientIdResult: Result[Int],
-      futanshaBangouResult: Result[Int],
-      jukyuushaBangouResult: Result[Int],
-      validFromResult: Result[LocalDate],
-      validUptoValue: Option[LocalDate]
-  ): Result[Kouhi] =
-    (
-      kouhiIdResult,
-      futanshaBangouResult,
-      jukyuushaBangouResult,
-      validFromResult,
-      Valid(ValidUpto(validUptoValue)),
-      patientIdResult
-    ).mapN(Kouhi.apply _)
+      kouhidIdResult.asKouhiError,
+      futanshaResult.asKouhiError,
+      jukyuushaResult.asKouhiError,
+      validFromResult.asKouhiError,
+      validUptoResult.asKouhiError,
+      patientIdResult.asKouhiError,
+    ).mapN(Kouhi.apply _) |> ConsistentValidRangeValidator.validate
+    
