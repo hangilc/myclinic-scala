@@ -20,7 +20,7 @@ trait LabelElementExtractor[T]:
 trait LabelElementListExtractor[T]:
   def extract(t: T): List[(String, HTMLElement)]
 
-type ResultOf[T] = T match {
+type ResultOf[H] = H match {
   case Prop[t, e] => ValidatedResult[e, t]
 }
 
@@ -45,10 +45,13 @@ object Prop:
   ](tuple: H *: T): List[(String, HTMLElement)] =
     summon[LabelElementListExtractor[H *: T]].extract(tuple)
 
-  def resultsOf[Tup <: Tuple](props: Tup): Tuple.Map[Tup, ResultOf] =
-    props.map[ResultOf]([tt] => (t: tt) => t match {
+  def resultOf[T](t: T): ResultOf[T] =
+    t match {
       case p: Prop[t, e] => p.validator()
-    })
+    }
+
+  def resultsOf(props: Tuple) =
+    props.map[ResultOf]([T] => (t: T) => resultOf(t))
  
   def apply[T, E](
       label: String,

@@ -22,21 +22,12 @@ class KoukikoureiForm(init: Option[Koukikourei]):
     "３割" -> 3
   )
 
-  val hokenshaBangouProp =
-    Prop("保険者番号", input, HokenshaBangouValidator.validate)
-  val hihokenshaBangouProp =
-    Prop("被保険者番号", input, HihokenshaBangouValidator.validate)
-  val futanWariProp =
-    Prop.radio("負担割", futanWariData, 1, FutanWariValidator.validate)
-  val validFromProp = Prop.date("期限開始", None, ValidFromValidator.validateOption)
-  val validUptoProp = Prop.validUpto("期限終了", None, ValidUptoValidator.validate)
-
   val props = (
-    hokenshaBangouProp,
-    hihokenshaBangouProp,
-    futanWariProp,
-    validFromProp,
-    validUptoProp
+    Prop("保険者番号", input, HokenshaBangouValidator.validate),
+    Prop("被保険者番号", input, HihokenshaBangouValidator.validate),
+    Prop.radio("負担割", futanWariData, 1, FutanWariValidator.validate),
+    Prop.date("期限開始", None, ValidFromValidator.validateOption),
+    Prop.validUpto("期限終了", None, ValidUptoValidator.validate)
   )
 
   val panel = DispPanel(form = true)
@@ -47,14 +38,9 @@ class KoukikoureiForm(init: Option[Koukikourei]):
   val ele = panel.ele
 
   def validateForEnter(patientId: Int): Either[String, Koukikourei] =
-    KoukikoureiValidator
-      .validate(
-        KoukikoureiIdValidator.validateForEnter,
-        PatientIdValidator.validate(patientId),
-        hokenshaBangouProp.validator(),
-        hihokenshaBangouProp.validator(),
-        futanWariProp.validator(),
-        validFromProp.validator(),
-        validUptoProp.validator()
+    KoukikoureiValidator.validate
+      .tupled(
+        KoukikoureiIdValidator.validateForEnter *:
+          PatientIdValidator.validate(patientId) *: Prop.resultsOf(props)
       )
       .asEither
