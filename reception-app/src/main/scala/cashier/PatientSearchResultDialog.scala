@@ -48,9 +48,12 @@ case class PatientSearchResultDialog(patients: List[Patient]):
     dlog.body(
       clear,
       disp.ele,
-      hokenArea(cls := "hoken-area", hokenList.map(h => {
-        a(HokenUtil.hokenRep(h))
-      }))
+      hokenArea(
+        cls := "hoken-area",
+        hokenList.map(h => {
+          a(HokenUtil.hokenRep(h))
+        })
+      )
     )
     dlog.commands(
       clear,
@@ -62,8 +65,11 @@ case class PatientSearchResultDialog(patients: List[Patient]):
         cls := "domq-mt-4",
         a("編集", onclick := (() => edit(patient))),
         "|",
-        a("新規社保国保", onclick := (() => newShahokokuho(patient))), "|",
-        a("新規後期高齢", onclick := (() => newKoukikourei(patient, hokenList)))
+        a("新規社保国保", onclick := (() => newShahokokuho(patient))),
+        "|",
+        a("新規後期高齢", onclick := (() => newKoukikourei(patient, hokenList))),
+        "|",
+        a("新規公費", onclick := (() => newKouhi(patient, hokenList)))
       )
     )
 
@@ -73,16 +79,18 @@ case class PatientSearchResultDialog(patients: List[Patient]):
     dlog.body(clear, form.ele, errBox.ele)
     dlog.commands(
       clear,
-      button("入力", onclick := (() => {
-        form.validateForEnter(patient.patientId) match {
-          case Left(msg) => errBox.show(msg)
-          case Right(newShahokokuho) => 
-            for
-              entered <- Api.enterShahokokuho(newShahokokuho)
-            yield invokeDisp(patient)
-        }
-        ()
-      })),
+      button(
+        "入力",
+        onclick := (() => {
+          form.validateForEnter(patient.patientId) match {
+            case Left(msg) => errBox.show(msg)
+            case Right(newShahokokuho) =>
+              for entered <- Api.enterShahokokuho(newShahokokuho)
+              yield invokeDisp(patient)
+          }
+          ()
+        })
+      ),
       button("キャンセル", onclick := (() => { invokeDisp(patient); () }))
     )
 
@@ -90,14 +98,34 @@ case class PatientSearchResultDialog(patients: List[Patient]):
     val form = new KoukikoureiForm(None)
     val errBox = ErrorBox()
     dlog.body(clear, form.ele, errBox.ele)
-    dlog.commands(clear,
+    dlog.commands(
+      clear,
+      button(
+        "入力",
+        onclick := (() => {
+          form.validateForEnter(patient.patientId) match {
+            case Left(msg) => errBox.show(msg)
+            case Right(newKoukikourei) =>
+              for entered <- Api.enterKoukikourei(newKoukikourei)
+              yield invokeDisp(patient)
+          }
+          ()
+        })
+      ),
+      button("キャンセル", onclick := (() => disp(patient, hokenList)))
+    )
+
+  private def newKouhi(patient: Patient, hokenList: List[Hoken]): Unit =
+    val form = new KouhiForm(None)
+    val errBox = ErrorBox()
+    dlog.body(clear, form.ele, errBox.ele)
+    dlog.commands(
+      clear,
       button("入力", onclick := (() => {
-        form.validateForEnter(patient.patientId) match {
+        form.validaForEnter(patient.patientId) match {
           case Left(msg) => errBox.show(msg)
-          case Right(newKoukikourei) =>
-            for
-              entered <- Api.enterKoukikourei(newKoukikourei)
-            yield invokeDisp(patient)
+          case Right(newKouhi) => 
+            println(newKouhi)
         }
         ()
       })),

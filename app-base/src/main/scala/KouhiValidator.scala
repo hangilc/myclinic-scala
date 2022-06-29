@@ -13,7 +13,6 @@ import cats.kernel.Semigroup
 object KouhiValidator:
 
   sealed trait KouhiError
-  object KouhiError extends KouhiError
 
   object KouhiIdError extends KouhiError
   object FutanshaError extends KouhiError
@@ -22,12 +21,6 @@ object KouhiValidator:
   object ValidUptoError extends KouhiError
   object PatientIdError extends KouhiError
   object InconsistentValidRangeError extends KouhiError
-
-  def asKouhiError[E, T](r: ValidatedResult[E, T]): ValidatedResult[KouhiError, T] =
-    r match {
-      case Valid(t) => Valid(t)
-      case Invalid(e) => Invalid(e.map(es => (KouhiError, es._2)))
-    }
 
   object KouhiIdValidator extends DatabaseIdValidator(KouhiIdError, "kouhi-id")
 
@@ -56,29 +49,18 @@ object KouhiValidator:
         _.validUpto.value
       )
 
-  case class ValidationResults(
-      kouhidIdResult: ValidatedResult[KouhiIdError.type, Int],
-      futanshaResult: ValidatedResult[FutanshaError.type, Int],
-      jukyuushaResult: ValidatedResult[JukyuushaError.type, Int],
-      validFromResult: ValidatedResult[ValidFromError.type, LocalDate],
-      validUptoResult: ValidatedResult[ValidUptoError.type, ValidUpto],
-      patientIdResult: ValidatedResult[PatientIdError.type, Int]
-  )
-
-  type CastToKouhiResult[A] = A match {
-    case ValidatedResult[_, t] => ValidatedResult[KouhiError, t]
-  }
-
-  def castToKouhiResult[A](a: A): CastToKouhiResult[A] = a match {
-    case r: ValidatedResult[e, t] => asKouhiError(r)
-  }
-  
-  def validateForEnter(
-      results: ValidationResults
+  def validate(
+      rs: (
+          ValidatedResult[KouhiIdError.type, Int],
+          ValidatedResult[FutanshaError.type, Int],
+          ValidatedResult[JukyuushaError.type, Int],
+          ValidatedResult[ValidFromError.type, LocalDate],
+          ValidatedResult[ValidUptoError.type, ValidUpto],
+          ValidatedResult[PatientIdError.type, Int]
+      )
   ): ValidatedResult[KouhiError, Kouhi] =
-    import cats.Invariant.catsApplicativeForArrow
-    Tuple
-      .fromProductTyped(results)
-      .map([A] => (a: A) => castToKouhiResult(a))
-      .mapN(Kouhi.apply _)
+    val dm: ValidatedResult[KouhiError, Int] = Valid(0)
+    (dm *: rs).tupled
+      .map(_.tail)
+      .map(Kouhi.apply.tupled)
       |> ConsistentValidRangeValidator.validate

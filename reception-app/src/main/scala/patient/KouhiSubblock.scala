@@ -19,6 +19,7 @@ import dev.myclinic.scala.util.{HokenRep, RcptUtil}
 import dev.myclinic.scala.apputil.FutanWari
 import dev.myclinic.scala.web.appbase.SyncedDataSource
 import dev.myclinic.scala.web.appbase.EventFetcher
+import dev.fujiwara.validator.section.Implicits.*
 
 class KouhiSubblock(oriGen: Int, oriKouhi: Kouhi)(using EventFetcher):
   val ds = SyncedDataSource(oriGen, oriKouhi)

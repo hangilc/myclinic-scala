@@ -12,6 +12,7 @@ import dev.fujiwara.kanjidate.DateUtil
 import dev.myclinic.scala.model.*
 import dev.myclinic.scala.web.appbase.validator.KouhiValidator
 import dev.myclinic.scala.web.appbase.validator.KouhiValidator.*
+import dev.fujiwara.validator.section.*
 import java.time.LocalDate
 
 class KouhiForm:
@@ -37,28 +38,30 @@ class KouhiForm:
 
   def validateForEnter(
       patientId: Int
-  ): KouhiValidator.Result[Kouhi] =
-    import cats.data.Validated.*
-    import KouhiValidator.*
-    KouhiValidator.validateKouhiForEnter(
-      validatePatientId(patientId),
-      validateFutanshaBangou(eFutanshaBangou.value),
-      validateJukyuushaBangou(eJukyuushaBangou.value),
-      validateValidFrom(eValidFrom.value),
-      eValidUpto.value
-    )
+  ): ValidatedResult[KouhiError, Kouhi] =
+    ???
+    // import cats.data.Validated.*
+    // import KouhiValidator.*
+    // KouhiValidator.validateKouhiForEnter(
+    //   validatePatientId(patientId),
+    //   validateFutanshaBangou(eFutanshaBangou.value),
+    //   validateJukyuushaBangou(eJukyuushaBangou.value),
+    //   validateValidFrom(eValidFrom.value),
+    //   eValidUpto.value
+    // )
 
   def validateForUpdate(
       kouhiId: Int,
       patientId: Int
-  ): KouhiValidator.Result[Kouhi] =
-    import cats.data.Validated.*
-    import KouhiValidator.*
-    KouhiValidator.validateKouhiForUpdate(
-      validateKouhiIdForUpdate(kouhiId),
-      validatePatientId(patientId),
-      validateFutanshaBangou(eFutanshaBangou.value),
-      validateJukyuushaBangou(eJukyuushaBangou.value),
-      validateValidFrom(eValidFrom.value),
-      eValidUpto.value
-    )
+  ): ValidatedResult[KouhiError, Kouhi] =
+    ???
+    // import cats.data.Validated.*
+    // import KouhiValidator.*
+    // KouhiValidator.validateKouhiForUpdate(
+    //   validateKouhiIdForUpdate(kouhiId),
+    //   validatePatientId(patientId),
+    //   validateFutanshaBangou(eFutanshaBangou.value),
+    //   validateJukyuushaBangou(eJukyuushaBangou.value),
+    //   validateValidFrom(eValidFrom.value),
+    //   eValidUpto.value
+    // )

@@ -17,6 +17,7 @@ import java.time.LocalDateTime
 import java.time.LocalDate
 import dev.myclinic.scala.util.{HokenRep, RcptUtil}
 import dev.myclinic.scala.apputil.FutanWari
+import dev.fujiwara.validator.section.Implicits.*
 
 class NewKouhiSubblock(patientId: Int):
   val form = KouhiForm()

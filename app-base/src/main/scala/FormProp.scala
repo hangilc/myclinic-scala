@@ -7,6 +7,7 @@ import dev.fujiwara.domq.all.{*, given}
 import java.time.LocalDate
 import dev.fujiwara.dateinput.DateOptionInput
 import dev.myclinic.scala.model.ValidUpto
+import dev.fujiwara.domq.DispPanel
 
 case class Prop[T, E](
     label: String,
@@ -44,6 +45,14 @@ object Prop:
       T <: Tuple: LabelElementListExtractor
   ](tuple: H *: T): List[(String, HTMLElement)] =
     summon[LabelElementListExtractor[H *: T]].extract(tuple)
+
+  def panel[
+      H: LabelElementExtractor,
+      T <: Tuple: LabelElementListExtractor
+  ](props: H *: T): HTMLElement =
+    val dp = DispPanel(form = true)
+    labelElements(props).foreach(dp.add.tupled)
+    dp.ele
 
   def resultOf[T](t: T): ResultOf[T] =
     t match {
