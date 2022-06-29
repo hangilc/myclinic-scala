@@ -8,11 +8,11 @@ import dev.fujiwara.validator.section.Implicits.*
 import dev.myclinic.scala.model.ValidUpto
 import java.time.LocalDate
 import dev.myclinic.scala.model.Kouhi
+import cats.kernel.Semigroup
 
 object KouhiValidator:
 
-  sealed trait KouhiError:
-    def asKouhiError: KouhiError = KouhiError
+  sealed trait KouhiError
   object KouhiError extends KouhiError
 
   object KouhiIdError extends KouhiError
@@ -23,16 +23,7 @@ object KouhiValidator:
   object PatientIdError extends KouhiError
   object InconsistentValidRangeError extends KouhiError
 
-  // extension [E <: KouhiError, T](r: ValidatedResult[E, T])
-  //   def asKouhiError: ValidatedResult[KouhiError, T] = r
-
-  def asKouhiError[E, T](
-      r: ValidatedResult[E, T]
-  ): ValidatedResult[KouhiError, T] =
-    r match {
-      case Invalid(e) => Invalid(e.map { (e, s) => (KouhiError, s)})
-      case Valid(t)   => Valid(t)
-    }
+  given [E1 <: KouhiError, E2 <: KouhiError]: Semigroup[E1]
 
   object KouhiIdValidator extends DatabaseIdValidator(KouhiIdError, "kouhi-id")
 
@@ -70,23 +61,11 @@ object KouhiValidator:
       patientIdResult: ValidatedResult[PatientIdError.type, Int]
   )
 
-  type CastToResult[A] = A match {
-    case ValidatedResult[e, t] => ValidatedResult[KouhiError, t]
-  }
-
-  def castToResult[A, E <: KouhiError](a: A): CastToResult[A] = a match {
-    case r: ValidatedResult[E, t] => asKouhiError(r)
-  }
-
   def validateForEnter(
       results: ValidationResults
   ): ValidatedResult[KouhiError, Kouhi] =
     val rs = Tuple
       .fromProductTyped(results)
-      .map[[A] =>> ValidatedResult[KouhiError, A]](
-        [T] => (t: T) => castToResult(t)
-      )
-    ???
-// .mapN(Kouhi.apply _)
+      .mapN(Kouhi.apply _)
 
 // |> ConsistentValidRangeValidator.validate
