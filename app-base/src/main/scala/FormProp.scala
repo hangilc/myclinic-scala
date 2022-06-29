@@ -50,7 +50,7 @@ object Prop:
       case p: Prop[t, e] => p.validator()
     }
 
-  def resultsOf(props: Tuple) =
+  def resultsOf(props: Tuple): Tuple.Map[props.type, ResultOf] =
     props.map[ResultOf]([T] => (t: T) => resultOf(t))
  
   def apply[T, E](
