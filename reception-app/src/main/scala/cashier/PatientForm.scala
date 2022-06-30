@@ -13,7 +13,7 @@ case class PatientForm(init: Option[Patient]):
   val lastNameYomiInput = inputText
   val firstNameYomiInput = inputText
   val birthdayInput = DateOptionInput(init.map(_.birthday))
-  val sexInput = RadioGroup(List(
+  val sexInput: RadioGroup[Sex] = RadioGroup[Sex](List(
     "男" -> Sex.Male,
     "女" -> Sex.Female
   ), "sex", initValue = init.map(_.sex).orElse(Some(Sex.Female)))

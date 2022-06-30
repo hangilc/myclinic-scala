@@ -10,18 +10,24 @@ case class RadioGroup[T](
     items: List[(String, T)],
     name: String = RadioGroup.createName,
     itemWrapper: () => HTMLElement = () => span,
-    initValue: Option[T] = None
+    initValue: Option[T] = None,
+    layout: RadioGroup[T] => HTMLElement = RadioGroup.defaultLayout[T] _
 ):
   val radioLabels: List[RadioLabel[T]] = items.map { case (label, value) =>
     RadioLabel(name, value, label, wrapper = itemWrapper())
   }
-  val ele = div(radioLabels.map(_.ele))
+
+  def getRadioLabel(value: T): RadioLabel[T] =
+    radioLabels.find(_.value == value).get
+
+  val ele: HTMLElement = layout(this)
+  
   initValue match {
     case Some(v) => check(v)
-    case None => radioLabels.headOption.foreach(_.check())
+    case None    => radioLabels.headOption.foreach(_.check())
   }
 
-  def selected: T = 
+  def selected: T =
     radioLabels.find(_.checked).get.value
 
   def value: T = selected
@@ -34,3 +40,6 @@ case class RadioGroup[T](
 
 object RadioGroup:
   def createName: String = GenSym.genSym
+
+  def defaultLayout[T](g: RadioGroup[T]): HTMLElement =
+    div(g.radioLabels.map(_.ele))

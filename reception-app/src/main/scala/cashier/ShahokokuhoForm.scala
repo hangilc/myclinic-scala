@@ -12,6 +12,7 @@ import dev.myclinic.scala.web.appbase.validator.ShahokokuhoValidator.*
 import dev.myclinic.scala.web.appbase.formprop.Prop
 import dev.myclinic.scala.web.appbase.formprop.Prop.{*, given}
 import dev.fujiwara.validator.section.Implicits.*
+import org.scalajs.dom.HTMLElement
 
 case class ShahokokuhoForm(init: Option[Shahokokuho]):
   val props = (
@@ -23,7 +24,7 @@ case class ShahokokuhoForm(init: Option[Shahokokuho]):
     ),
     Prop(
       "被保険者記号",
-      () => input(cls := "ihokensha-kigou-input"),
+      () => input(cls := "hihokensha-kigou-input"),
       HihokenshaKigouValidator.validate,
       mRep[Shahokokuho, String](_.hihokenshaKigou)
     ),
@@ -57,7 +58,11 @@ case class ShahokokuhoForm(init: Option[Shahokokuho]):
       List("高齢でない" -> 0, "１割" -> 1, "２割" -> 2, "３割" -> 3),
       0,
       KoureiValidator.validate,
-      mRep[Shahokokuho, Int](_.koureiStore, formatKourei _)
+      mRep[Shahokokuho, Int](_.koureiStore, formatKourei _),
+      layout = (g: RadioGroup[Int]) => div(display := "block",
+        div(g.getRadioLabel(0).ele),
+        div(List(1, 2, 3).map(i => g.getRadioLabel(i).ele))
+      )
     ),
     Prop(
       "枝番",
@@ -78,7 +83,7 @@ case class ShahokokuhoForm(init: Option[Shahokokuho]):
     edabanProp
   ) = props
 
-  def ele = Prop.panel(
+  val formProps = (
     (
       hokenshaBangouProp,
       (
@@ -87,8 +92,7 @@ case class ShahokokuhoForm(init: Option[Shahokokuho]):
           hihokenshaKigouProp.elementCreator(),
           "・",
           hihokenshaBangouProp.elementCreator()
-        ),
-        ()
+        )
       ),
       edabanProp,
       honninProp,
@@ -97,6 +101,9 @@ case class ShahokokuhoForm(init: Option[Shahokokuho]):
       koureiProp
     )
   )
+
+  val ele: HTMLElement = Prop.panel(formProps)
+  ele(cls := "reception-shahokokuho-form")
 
   val dispProps = (
     hokenshaBangouProp,

@@ -28,8 +28,8 @@ object Prop:
     def extract(p: Prop[T, E, M]): (String, HTMLElement) =
       (p.label, p.elementCreator())
 
-  given LabelElementExtractor[(String, HTMLElement, Unit)] with
-    def extract(le: (String, HTMLElement, Unit)): (String, HTMLElement) =
+  given LabelElementExtractor[(String, HTMLElement)] with
+    def extract(le: (String, HTMLElement)): (String, HTMLElement) =
       (le._1, le._2)
 
   given LabelElementListExtractor[EmptyTuple] with
@@ -82,9 +82,10 @@ object Prop:
       data: List[(String, T)],
       init: T,
       validator: T => ValidatedResult[E, T],
-      dispRep: Option[M] => String
+      dispRep: Option[M] => String,
+      layout: RadioGroup[T] => HTMLElement = RadioGroup.defaultLayout[T] _
   ): Prop[T, E, M] =
-    lazy val radioGroup = RadioGroup(data, initValue = Some(init))
+    lazy val radioGroup = RadioGroup(data, initValue = Some(init), layout = layout)
     new Prop[T, E, M](label, () => radioGroup.ele, () => validator(radioGroup.value), dispRep)
 
   def date[E, M](
