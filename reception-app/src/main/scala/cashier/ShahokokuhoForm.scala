@@ -8,10 +8,72 @@ import dev.fujiwara.domq.DispPanel
 import dev.fujiwara.dateinput.InitNoneConverter
 import java.time.LocalDate
 import dev.myclinic.scala.web.appbase.validator.ShahokokuhoValidator
+import dev.myclinic.scala.web.appbase.validator.ShahokokuhoValidator.*
 import dev.myclinic.scala.web.appbase.formprop.Prop
 import dev.myclinic.scala.web.appbase.formprop.Prop.{*, given}
 
 case class ShahokokuhoForm(init: Option[Shahokokuho]):
+  val props = (
+    Prop(
+      "保険者番号",
+      () => input(cls := "hokensha-bangou-input"),
+      HokenshaBangouValidator.validateInput,
+      mRep[Shahokokuho, Int](_.hokenshaBangou)
+    ),
+    Prop(
+      "被保険者記号",
+      () => input(cls := "ihokensha-kigou-input"),
+      HihokenshaKigouValidator.validate,
+      mRep[Shahokokuho, String](_.hihokenshaKigou)
+    ),
+    Prop(
+      "被保険者番号",
+      () => input(cls := "hihokensha-bangou-input"),
+      HihokenshaBangouValidator.validate,
+      mRep[Shahokokuho, String](_.hihokenshaBangou)
+    ),
+    Prop(
+      "枝番",
+      () => input(cls := "edaban"),
+      EdabanValidator.validate,
+      mRep[Shahokokuho, String](_.edaban)
+    ),
+    Prop.radio(
+      "本人・家族",
+      List("本人" -> 1, "家族" -> 0),
+      0,
+      HonninValidator.validate,
+      mRep[Shahokokuho, Int](_.honninStore)
+    ),
+    Prop.radio(
+      "高齢",
+      List("高齢でない" -> 0, "１割" -> 1, "２割" -> 2, "３割" -> 3),
+      0,
+      KoureiValidator.validate,
+      mRep[Shahokokuho, Int](_.koureiStore, formatKourei _)
+    ),
+    Prop.date(
+      "期限開始",
+      None,
+      ValidFromValidator.validateOption,
+      mRepDate[Shahokokuho](_.validFrom)
+    ),
+    Prop.validUpto(
+      "期限終了",
+      None,
+      ValidUptoValidator.validate,
+      mRepValidUpto[Shahokokuho](_.validUpto)
+    )
+  )
+
+  def formatKourei(kourei: Int): String = kourei match {
+    case 0 => "高齢でない"
+    case 1 => "１割"
+    case 2 => "２割"
+    case 3 => "３割"
+    case _ => "不明"
+  }
+
   val hokenshaBangouInput = inputText()
   val hihokenshaKigouInput = inputText()
   val hihokenshaBangouInput = inputText()
@@ -21,7 +83,7 @@ case class ShahokokuhoForm(init: Option[Shahokokuho]):
     initValue = init.map(_.honninStore)
   )
   val koureiInput = RadioGroup[Int](
-    List("高齢でない" -> 0, "２割" -> 2, "３割" -> 3),
+    List("高齢でない" -> 0, "１割" -> 1, "２割" -> 2, "３割" -> 3),
     initValue = init.map(_.koureiStore)
   )
   val validFromInput = DateOptionInput(init.map(_.validFrom))
