@@ -8,7 +8,6 @@ import dev.fujiwara.validator.section.Implicits.*
 import dev.myclinic.scala.model.ValidUpto
 import java.time.LocalDate
 import dev.myclinic.scala.model.Kouhi
-import cats.kernel.Semigroup
 
 object KouhiValidator:
 

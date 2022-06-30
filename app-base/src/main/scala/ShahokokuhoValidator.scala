@@ -25,19 +25,12 @@ object ShahokokuhoValidator:
   object ValidFromError extends ShahokokuhoError
   object ValidUptoError extends ShahokokuhoError
   object KoureiError extends ShahokokuhoError
+  object EdabanError extends ShahokokuhoError
   object InconsistentHihokenshaError extends ShahokokuhoError
   object InconsistentValidRangeError extends ShahokokuhoError
 
   object ShahokokuhoIdValidator
-      extends SectionValidator(ShahokokuhoIdError, "shahokokuho-id"):
-    def validateForEnter: Result[Int] = valid(0)
-
-    def validateForUpdate(value: Int): Result[Int] =
-      positive(value)
-
-    def validateOptionForUpdate(value: Option[Int]): Result[Int] =
-      some(value)
-        |> validateForUpdate
+      extends DatabaseIdValidator(ShahokokuhoIdError, "shahokokuho-id")
 
   object PatientIdValidator
       extends SectionValidator(PatientIdError, "patient-id"):
@@ -95,7 +88,7 @@ object ShahokokuhoValidator:
     def validateInput(input: String): Result[Int] =
       inputToInt(input) |> validate
 
-  object EdabanValidator extends SectionValidator(KoureiError, "枝番"):
+  object EdabanValidator extends SectionValidator(EdabanError, "枝番"):
     def validate(src: String): Result[String] =
       notNull(src)
 
@@ -113,50 +106,22 @@ object ShahokokuhoValidator:
     def validate(h: Shahokokuho): Result[Shahokokuho] =
       consistentValidRange(h.validFrom, h.validUpto.value, h)
 
-  type ShahokokuhoResult[T] = ValidatedSection[ShahokokuhoError, T]
-
   def validate(
-      shahokokuhoIdResult: ShahokokuhoIdValidator.type#Result[Int],
-      patientIdResult: PatientIdValidator.type#Result[Int],
-      hokenshaBangouResult: HokenshaBangouValidator.type#Result[Int],
-      hihokenshaKigouResult: HihokenshaKigouValidator.type#Result[String],
-      hihokenshaBangouResult: HihokenshaBangouValidator.type#Result[String],
-      honninResult: HonninValidator.type#Result[Int],
-      validFromResult: ValidFromValidator.type#Result[LocalDate],
-      validUptoResult: ValidUptoValidator.type#Result[ValidUpto],
-      koureiResult: KoureiValidator.type#Result[Int],
-      edabanResult: EdabanValidator.type#Result[String]
+      rs: (
+          ValidatedSection[ShahokokuhoIdError.type, Int],
+          ValidatedSection[PatientIdError.type, Int],
+          ValidatedSection[HokenshaBangouError.type, Int],
+          ValidatedSection[HihokenshaKigouError.type, String],
+          ValidatedSection[HihokenshaBangouError.type, String],
+          ValidatedSection[HonninError.type, Int],
+          ValidatedSection[ValidFromError.type, LocalDate],
+          ValidatedSection[ValidUptoError.type, ValidUpto],
+          ValidatedSection[KoureiError.type, Int],
+          ValidatedSection[EdabanError.type, String]
+      )
   ): ValidatedSection[ShahokokuhoError, Shahokokuho] =
-    val gShahokokuhoIdResult: ShahokokuhoResult[Int] =
-      shahokokuhoIdResult
-    val gPatientIdResult: ShahokokuhoResult[Int] =
-      patientIdResult
-    val gHokenshaBangouResult: ShahokokuhoResult[Int] =
-      hokenshaBangouResult
-    val gHihokenshaKigouResult: ShahokokuhoResult[String] =
-      hihokenshaKigouResult
-    val gHihokenshaBangouResult: ShahokokuhoResult[String] =
-      hihokenshaBangouResult
-    val gHonninResult: ShahokokuhoResult[Int] = honninResult
-    val gValidFromResult: ShahokokuhoResult[LocalDate] =
-      validFromResult
-    val gValidUptoResult: ShahokokuhoResult[ValidUpto] =
-      validUptoResult
-    val gKoureiResult: ShahokokuhoResult[Int] = koureiResult
-    val gEdabanResult: ShahokokuhoResult[String] = edabanResult
-    (
-      gShahokokuhoIdResult,
-      gPatientIdResult,
-      gHokenshaBangouResult,
-      gHihokenshaKigouResult,
-      gHihokenshaBangouResult,
-      gHonninResult,
-      gValidFromResult,
-      gValidUptoResult,
-      gKoureiResult,
-      gEdabanResult
-    ).mapN(Shahokokuho.apply _)
+    val dummy: ValidatedSection[ShahokokuhoError, Int] = Valid(1)
+    (dummy *: rs).tupled.map(args => Shahokokuho.apply.tupled(args.tail))
       |> ConsistentHihokenshaValidator.validate
       |> ConsistentValidRangeValidator.validate
 
-  export Implicits.asEither

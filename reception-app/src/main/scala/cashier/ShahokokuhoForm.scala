@@ -5,10 +5,11 @@ import scala.language.implicitConversions
 import dev.myclinic.scala.model.*
 import dev.fujiwara.dateinput.DateOptionInput
 import dev.fujiwara.domq.DispPanel
-import dev.myclinic.scala.web.appbase.PatientValidator
 import dev.fujiwara.dateinput.InitNoneConverter
 import java.time.LocalDate
 import dev.myclinic.scala.web.appbase.validator.ShahokokuhoValidator
+import dev.myclinic.scala.web.appbase.formprop.Prop
+import dev.myclinic.scala.web.appbase.formprop.Prop.{*, given}
 
 case class ShahokokuhoForm(init: Option[Shahokokuho]):
   val hokenshaBangouInput = inputText()

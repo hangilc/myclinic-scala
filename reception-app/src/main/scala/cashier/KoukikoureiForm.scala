@@ -11,8 +11,8 @@ import dev.myclinic.scala.web.appbase.validator.KoukikoureiValidator
 import dev.myclinic.scala.web.appbase.validator.KoukikoureiValidator.*
 import org.scalajs.dom.HTMLElement
 import org.scalajs.dom.HTMLInputElement
-import dev.myclinic.scala.web.appbase.formprop.*
-import dev.myclinic.scala.web.appbase.formprop.Prop.given
+import dev.myclinic.scala.web.appbase.formprop.Prop
+import dev.myclinic.scala.web.appbase.formprop.Prop.{*, given}
 
 class KoukikoureiForm(init: Option[Koukikourei]):
 
@@ -23,19 +23,40 @@ class KoukikoureiForm(init: Option[Koukikourei]):
   )
 
   val props = (
-    Prop("保険者番号", input, HokenshaBangouValidator.validate),
-    Prop("被保険者番号", input, HihokenshaBangouValidator.validate),
-    Prop.radio("負担割", futanWariData, 1, FutanWariValidator.validate),
-    Prop.date("期限開始", None, ValidFromValidator.validateOption),
-    Prop.validUpto("期限終了", None, ValidUptoValidator.validate)
+    Prop(
+      "保険者番号",
+      () => input,
+      HokenshaBangouValidator.validate,
+      mRep[Koukikourei, String](_.hokenshaBangou)
+    ),
+    Prop(
+      "被保険者番号",
+      () => input,
+      HihokenshaBangouValidator.validate,
+      mRep[Koukikourei, String](_.hihokenshaBangou)
+    ),
+    Prop.radio(
+      "負担割",
+      futanWariData,
+      1,
+      FutanWariValidator.validate,
+      mRep[Koukikourei, Int](_.futanWari, i => s"${i}割")
+    ),
+    Prop.date(
+      "期限開始",
+      None,
+      ValidFromValidator.validateOption,
+      mRepDate[Koukikourei](_.validFrom)
+    ),
+    Prop.validUpto(
+      "期限終了",
+      None,
+      ValidUptoValidator.validate,
+      mRepValidUpto[Koukikourei](_.validUpto)
+    )
   )
 
-  val panel = DispPanel(form = true)
-  Prop.labelElements(props).foreach { (key, ele) =>
-    panel.add(key, ele)
-  }
-
-  val ele = panel.ele
+  val ele = Prop.panel(props)
 
   def validateForEnter(patientId: Int): Either[String, Koukikourei] =
     KoukikoureiValidator.validate
