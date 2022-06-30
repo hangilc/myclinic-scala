@@ -14,6 +14,7 @@ import java.time.LocalDate
 import dev.fujiwara.dateinput.{DateInput, DateOptionInput}
 import dev.fujiwara.kanjidate.KanjiDate
 import dev.fujiwara.dateinput.InitNoneConverter
+import dev.fujiwara.validator.section.*
 
 class ShahokokuhoForm:
   val eHokenshaBangou = inputText()
@@ -60,7 +61,7 @@ class ShahokokuhoForm:
     eValidFrom.init(Some(data.validFrom))
     eValidUpto.init(data.validUpto.value)
 
-  def validateForEnter(patientId: Int): ShahokokuhoValidator.ShahokokuhoResult[Shahokokuho] =
+  def validateForEnter(patientId: Int): ValidatedResult[ShahokokuhoError, Shahokokuho] =
     ???
     // ShahokokuhoValidator.validateShahokokuhoForEnter(
     //   validatePatientId(patientId),
@@ -74,7 +75,7 @@ class ShahokokuhoForm:
     //   validateEdaban(eEdaban.value)
     // )
 
-  def validateForUpdate(shahokokuhoId: Int, patientId: Int): ShahokokuhoValidator.ShahokokuhoResult[Shahokokuho] =
+  def validateForUpdate(shahokokuhoId: Int, patientId: Int): ValidatedResult[ShahokokuhoError, Shahokokuho] =
     ???
     // ShahokokuhoValidator.validateShahokokuho(
     //   validateShahokokuhoIdForUpdate(shahokokuhoId),

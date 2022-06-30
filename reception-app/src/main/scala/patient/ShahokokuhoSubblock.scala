@@ -68,17 +68,18 @@ class ShahokokuhoSubblock(dsCtor: () => SyncedDataSource[Shahokokuho]):
     edit()
 
   private def onEnter(form: ShahokokuhoForm, errBox: ErrorBox): Unit =
-    form
-      .validateForUpdate(shahokokuho.shahokokuhoId, shahokokuho.patientId)
-      .asEither match {
-      case Right(h) => {
-        Api.updateShahokokuho(h).onComplete {
-          case Success(_gen)  => disp()
-          case Failure(ex) => errBox.show(ex.getMessage)
-        }
-      }
-      case Left(msg) => errBox.show(msg)
-    }
+    ???
+    // form
+    //   .validateForUpdate(shahokokuho.shahokokuhoId, shahokokuho.patientId)
+    //   .asEither match {
+    //   case Right(h) => {
+    //     Api.updateShahokokuho(h).onComplete {
+    //       case Success(_gen)  => disp()
+    //       case Failure(ex) => errBox.show(ex.getMessage)
+    //     }
+    //   }
+    //   case Left(msg) => errBox.show(msg)
+    // }
 
   private def onDelete(): Unit =
     ShowMessage.confirm("この保険を削除していいですか？")(() => doDelete(shahokokuho.shahokokuhoId))

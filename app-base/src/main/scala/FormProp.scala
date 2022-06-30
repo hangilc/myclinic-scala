@@ -28,6 +28,10 @@ object Prop:
     def extract(p: Prop[T, E, M]): (String, HTMLElement) =
       (p.label, p.elementCreator())
 
+  given LabelElementExtractor[(String, HTMLElement, Unit)] with
+    def extract(le: (String, HTMLElement, Unit)): (String, HTMLElement) =
+      (le._1, le._2)
+
   given LabelElementListExtractor[EmptyTuple] with
     def extract(t: EmptyTuple): List[(String, HTMLElement)] =
       List.empty

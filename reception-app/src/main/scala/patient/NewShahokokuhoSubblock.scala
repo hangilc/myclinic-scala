@@ -36,12 +36,13 @@ class NewShahokokuhoSubblock(patientId: Int):
   def close(): Unit = block.ele.remove()
 
   private def onEnter(): Unit =
-      form.validateForEnter(patientId).asEither match {
-          case Right(h) => {
-              Api.enterShahokokuho(h).onComplete {
-                  case Success(_) => close()
-                  case Failure(ex) => errBox.show(ex.getMessage)
-              }
-          }
-          case Left(msg) => errBox.show(msg)
-      }
+    ???
+    //   form.validateForEnter(patientId).asEither match {
+    //       case Right(h) => {
+    //           Api.enterShahokokuho(h).onComplete {
+    //               case Success(_) => close()
+    //               case Failure(ex) => errBox.show(ex.getMessage)
+    //           }
+    //       }
+    //       case Left(msg) => errBox.show(msg)
+    //   }
