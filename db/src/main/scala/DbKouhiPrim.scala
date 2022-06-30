@@ -36,7 +36,7 @@ object DbKouhiPrim:
       order by kouhi_id desc
     """.query[Kouhi].to[List]
 
-  def enterKouhi(d: Kouhi): ConnectionIO[AppEvent] =
+  def enterKouhi(d: Kouhi): ConnectionIO[(Kouhi, AppEvent)] =
     val op = sql"""
       insert into kouhi 
         (patient_id, futansha, jukyuusha, 
@@ -48,7 +48,7 @@ object DbKouhiPrim:
       id <- op.update.withUniqueGeneratedKeys[Int]("kouhi_id")
       entered <- getKouhi(id).unique
       event <- DbEventPrim.logKouhiCreated(entered)
-    yield event
+    yield (entered, event)
 
   def updateKouhi(d: Kouhi): ConnectionIO[AppEvent] =
     val op = sql"""

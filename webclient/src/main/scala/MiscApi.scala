@@ -202,7 +202,7 @@ object MiscApi extends ApiBase:
     def enterKoukikourei(koukikourei: Koukikourei): Future[Koukikourei] =
       post("enter-koukikourei", Params(), koukikourei)
 
-    def enterKouhi(kouhi: Kouhi): Future[Boolean] =
+    def enterKouhi(kouhi: Kouhi): Future[Kouhi] =
       post("enter-kouhi", Params(), kouhi)
 
     def updateShahokokuho(shahokokuho: Shahokokuho): Future[Int] =

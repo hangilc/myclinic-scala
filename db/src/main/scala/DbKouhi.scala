@@ -19,7 +19,7 @@ trait DbKouhi extends Mysql:
   def listKouhi(patientId: Int): IO[List[Kouhi]] =
     mysql(DbKouhiPrim.listKouhi(patientId))
 
-  def enterKouhi(kouhi: Kouhi): IO[AppEvent] =
+  def enterKouhi(kouhi: Kouhi): IO[(Kouhi, AppEvent)] =
     mysql(DbKouhiPrim.enterKouhi(kouhi))
 
   def updateKouhi(kouhi: Kouhi): IO[AppEvent] =

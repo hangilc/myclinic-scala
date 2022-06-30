@@ -125,7 +125,9 @@ case class PatientSearchResultDialog(patients: List[Patient]):
         form.validaForEnter(patient.patientId) match {
           case Left(msg) => errBox.show(msg)
           case Right(newKouhi) => 
-            println(newKouhi)
+            for
+              _ <- Api.enterKouhi(newKouhi)
+            yield invokeDisp(patient)
         }
         ()
       })),
