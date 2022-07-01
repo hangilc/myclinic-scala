@@ -21,13 +21,13 @@ object Prop:
   trait ToListConstraint[T, E]:
     def convert(t: T): List[E]
 
-  type ToListConstraintGen = [E] =>> [T] =>> ToListConstraint[T, E]
-
-  given [E]: ToListConstraintGen[E][EmptyTuple] with
+  given [E]: ToListConstraint[EmptyTuple, E] with
     def convert(t: EmptyTuple): List[E] = List.empty
 
+  type ToListConstraintGen = [E] =>> [T] =>> ToListConstraint[T, E]
+
   given [E, H: ToListElementConstraintGen[E], T <: Tuple: ToListConstraintGen[E]]
-      : ToListConstraintGen[E][H *: T] with
+      : ToListConstraint[H *: T, E] with
     def convert(t: H *: T): List[E] =
       summon[ToListElementConstraint[H, E]].convert(t.head) ::
         summon[ToListConstraint[T, E]].convert(t.tail)
@@ -91,6 +91,7 @@ object Prop:
   )
   val ele = formPanel(patientProps)
   val patient = Patient("A", "B")
-  val inputUpdater = new InputUpdater(Some(patient))
+  val inputUpdater = new InputUpdater[Patient](Some(patient))
+  import inputUpdater.given
   inputUpdater.updateInput(patientProps)
 

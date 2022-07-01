@@ -22,7 +22,7 @@ val fs2Version = "3.2.8"
 val scalaLoggingVersion = "3.9.4"
 val scalaTestVersion = "3.2.10"
 
-ThisBuild / scalacOptions ++= Seq("-deprecation", "-encoding", "UTF-8", "-feature")
+ThisBuild / scalacOptions ++= Seq("-deprecation", "-encoding", "UTF-8", "-feature", "-explain")
 ThisBuild / javacOptions ++= Seq("-encoding", "UTF-8")
 
 val rootDir = ThisBuild / baseDirectory
