@@ -45,6 +45,20 @@ object Prop:
     les.foreach { (s, e) => panel.add(s, e) }
     panel.ele
 
+  object UpdateInputByResult
+
+  class InputUpdater[M](model: Option[M]):
+    given [E, T]: ToListElementConstraint[Prop[M, E, T], UpdateInputByResult.type] with
+      def convert(p: Prop[M, E, T]): UpdateInputByResult.type =
+        p.updateInputBy(model)
+        UpdateInputByResult
+
+    def updateInput[Head, Tail <: Tuple](props: Head *: Tail)(
+      using ToListElementConstraint[Head, UpdateInputByResult.type],
+        ToListConstraint[Tail, UpdateInputByResult.type]
+    ): Unit =
+      summon[ToListConstraint[Head *: Tail, UpdateInputByResult.type]].convert(props)
+
   def apply[M, E, T](
       label: String,
       inputCreator: () => HTMLInputElement,
@@ -59,19 +73,24 @@ object Prop:
       () => validator(inputElement.value)
     )
 
-  import dev.myclinic.scala.model.Patient
+  case class Patient(lastName: String, firstName: String)
+
   val patientProps = (
     Prop[Patient, Nothing, String](
       "姓",
-      () => Html.div,
-      mOpt => (),
+      () => Html.input,
+      _.fold("")(_.lastName),
       () => ???
     ),
     Prop[Patient, Nothing, String](
       "名",
-      () => Html.div,
-      mOpt => (),
+      () => Html.input,
+      _.fold("")(_.firstName),
       () => ???
     ),
   )
   val ele = formPanel(patientProps)
+  val patient = Patient("A", "B")
+  val inputUpdater = new InputUpdater(Some(patient))
+  inputUpdater.updateInput(patientProps)
+
