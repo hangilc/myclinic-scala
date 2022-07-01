@@ -7,56 +7,42 @@ import dev.fujiwara.validator.section.ValidatedResult
 case class Prop[M, E, T](
     label: String,
     inputCreator: () => HTMLElement,
-    updateInputFrom: Option[M] => Unit,
+    updateInputBy: Option[M] => Unit,
     validator: () => ValidatedResult[E, T]
 )
 
 object Prop:
-  class TupleToListConverter[E]:
 
-    trait Extractor[T]:
-      def extract(t: T): E
+  trait ToListElementConstraint[T, E]:
+    def convert(t: T): E
 
-    trait ListExtractor[T]:
-      def extract(t: T): List[E]
+  type ToListElementConstraintGen = [E] =>> [T] =>> ToListElementConstraint[T, E]
 
-    given ListExtractor[EmptyTuple] with
-      def extract(t: EmptyTuple): List[E] = List.empty
+  trait ToListConstraint[T, E]:
+    def convert(t: T): List[E]
 
-    given [Head: Extractor, Tail <: Tuple: ListExtractor]
-        : ListExtractor[Head *: Tail] with
-      def extract(tuple: Head *: Tail): List[E] =
-        summon[Extractor[Head]].extract(tuple.head) ::
-          summon[ListExtractor[Tail]].extract(tuple.tail)
+  type ToListConstraintGen = [E] =>> [T] =>> ToListConstraint[T, E]
 
-    def convert[Head, Tail <: Tuple](tuple: Head *: Tail)(using
-        extractor: Extractor[Head],
-        listExtractor: ListExtractor[Tail]
-    ): List[E] =
-      summon[ListExtractor[Head *: Tail]].extract(tuple)
+  given [E]: ToListConstraintGen[E][EmptyTuple] with
+    def convert(t: EmptyTuple): List[E] = List.empty
 
-  object LabelElementExtractor
-      extends TupleToListConverter[(String, HTMLElement)]:
-    given [M, T, E]: Extractor[Prop[M, T, E]] with
-      def extract(prop: Prop[M, T, E]): (String, HTMLElement) =
-        (prop.label, prop.inputCreator())
+  given [E, H: ToListElementConstraintGen[E], T <: Tuple: ToListConstraintGen[E]]
+      : ToListConstraintGen[E][H *: T] with
+    def convert(t: H *: T): List[E] =
+      summon[ToListElementConstraint[H, E]].convert(t.head) ::
+        summon[ToListConstraint[T, E]].convert(t.tail)
 
-    given Extractor[(String, HTMLElement)] with
-      def extract(a: (String, HTMLElement)): (String, HTMLElement) = a
+  given [M, E, T]: ToListElementConstraint[Prop[M, E, T], (String, HTMLElement)] with
+    def convert(t: Prop[M, E, T]): (String, HTMLElement) =
+      (t.label, t.inputCreator())
 
-  def inputPanel[
-      H,
-      T <: Tuple
-  ](
-      props: H *: T
-  )(using
-      LabelElementExtractor.Extractor[H],
-      LabelElementExtractor.ListExtractor[T]
+  def formPanel[Head, Tail <: Tuple](props: Head *: Tail)(
+    using ToListElementConstraint[Head, (String, HTMLElement)],
+      ToListConstraint[Tail, (String, HTMLElement)]
   ): HTMLElement =
-    val panel = DispPanel(form = true)
-    LabelElementExtractor.convert(props).foreach { (s, e) =>
-      panel.add(s, e)
-    }
+    val les = summon[ToListConstraint[Head *: Tail, (String, HTMLElement)]].convert(props)
+    val panel = DispPanel()
+    les.foreach { (s, e) => panel.add(s, e) }
     panel.ele
 
   def apply[M, E, T](
@@ -72,3 +58,20 @@ object Prop:
       mOpt => inputElement.value = modelValue(mOpt),
       () => validator(inputElement.value)
     )
+
+  import dev.myclinic.scala.model.Patient
+  val patientProps = (
+    Prop[Patient, Nothing, String](
+      "姓",
+      () => Html.div,
+      mOpt => (),
+      () => ???
+    ),
+    Prop[Patient, Nothing, String](
+      "名",
+      () => Html.div,
+      mOpt => (),
+      () => ???
+    ),
+  )
+  val ele = formPanel(patientProps)
