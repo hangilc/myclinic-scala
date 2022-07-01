@@ -230,6 +230,7 @@ lazy val webclient = project
 lazy val domq = project
   .in(file("domq"))
   .enablePlugins(ScalaJSPlugin)
+  .dependsOn(validatorJS)
   .settings(
     name := "domq",
     libraryDependencies ++= Seq(

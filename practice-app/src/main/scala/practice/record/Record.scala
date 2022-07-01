@@ -6,6 +6,7 @@ import dev.myclinic.scala.model.{
   Drug as ModelDrug_,
   Conduct as ModelConduct,
   Payment as ModelPayment,
+  Hoken as ModelHoken,
   *
 }
 import dev.fujiwara.domq.all.{*, given}
