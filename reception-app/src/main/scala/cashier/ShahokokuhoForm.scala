@@ -102,8 +102,7 @@ case class ShahokokuhoForm(init: Option[Shahokokuho]):
     )
   )
 
-  val ele: HTMLElement = Prop.panel(formProps)
-  ele(cls := "reception-shahokokuho-form")
+  val ele: HTMLElement = Prop.panel(formProps)(cls := "reception-shahokokuho-form")
 
   val dispProps = (
     hokenshaBangouProp,
