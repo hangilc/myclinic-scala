@@ -3,29 +3,37 @@ package dev.fujiwara.domq.prop
 import org.scalajs.dom.HTMLElement
 import org.scalajs.dom.HTMLInputElement
 import dev.fujiwara.domq.DispPanel
+import dev.fujiwara.domq.ElementQ.{*, given}
+import dev.fujiwara.domq.Html.{*, given}
+import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.validator.section.ValidatedResult
 
-trait InputSpec[M, E, T]:
-  def createElement: HTMLElement
+abstract class InputSpec[M, E, T]:
+  def createElement(): HTMLElement
   def updateBy(model: Option[M]): Unit
-  def validate: ValidatedResult[E, T]
+  def validate(): ValidatedResult[E, T]
+
+  lazy val element: HTMLElement = createElement()
+  def addClass(className: String): InputSpec[M, E, T] =
+    element(cls := className)
+    this
 
 trait DispSpec[M]:
   def createElement: HTMLElement
   def updateBy(model: Option[M]): Unit
 
 case class Prop[M, E, T](
-    label: String,
-    inputSpec: InputSpec[M, E, T],
-    dispSpec: DispSpec[M]
+  label: String,
+  inputSpec: InputSpec[M, E, T],
+  dispSpec: DispSpec[M]
 )
-
 
 class PropsModel[M](model: Option[M]):
   trait ToListElementConstraint[T, E]:
     def convert(t: T): E
 
-  type ToListElementConstraintGen = [E] =>> [T] =>> ToListElementConstraint[T, E]
+  type ToListElementConstraintGen =
+    [E] =>> [T] =>> ToListElementConstraint[T, E]
 
   trait ToListConstraint[T, E]:
     def convert(t: T): List[E]
@@ -35,8 +43,9 @@ class PropsModel[M](model: Option[M]):
 
   type ToListConstraintGen = [E] =>> [T] =>> ToListConstraint[T, E]
 
-  given [E, H: ToListElementConstraintGen[E], T <: Tuple: ToListConstraintGen[E]]
-      : ToListConstraint[H *: T, E] with
+  given [E, H: ToListElementConstraintGen[E], T <: Tuple: ToListConstraintGen[
+    E
+  ]]: ToListConstraint[H *: T, E] with
     def convert(t: H *: T): List[E] =
       summon[ToListElementConstraint[H, E]].convert(t.head) ::
         summon[ToListConstraint[T, E]].convert(t.tail)
@@ -45,14 +54,15 @@ class PropsModel[M](model: Option[M]):
 
   given [E, T]: ToListElementConstraint[Prop[M, E, T], LabelInput] with
     def convert(t: Prop[M, E, T]): LabelInput =
-      LabelInput(t.label, t.inputSpec.createElement)
+      LabelInput(t.label, t.inputSpec.element)
 
-  given [T <: HTMLElement]: ToListElementConstraint[(String, T), LabelInput] with
+  given [T <: HTMLElement]: ToListElementConstraint[(String, T), LabelInput]
+    with
     def convert(t: (String, T)): LabelInput =
       LabelInput.apply.tupled(t)
 
-  def formPanel[Head, Tail <: Tuple](props: Head *: Tail)(
-    using ToListElementConstraint[Head, LabelInput],
+  def formPanel[Head, Tail <: Tuple](props: Head *: Tail)(using
+      ToListElementConstraint[Head, LabelInput],
       ToListConstraint[Tail, LabelInput]
   ): HTMLElement =
     val les = summon[ToListConstraint[Head *: Tail, LabelInput]].convert(props)
@@ -61,49 +71,55 @@ class PropsModel[M](model: Option[M]):
     panel.ele
 
   case class LabelElement(label: String, element: HTMLElement)
-  
+
   given [E, T]: ToListElementConstraint[Prop[M, E, T], LabelElement] with
     def convert(t: Prop[M, E, T]): LabelElement =
       LabelElement(t.label, t.dispSpec.createElement)
 
-  given [T <: HTMLElement]: ToListElementConstraint[(String, T), LabelElement] with
-    def convert(t: (String, T)): LabelElement = 
+  given [T <: HTMLElement]: ToListElementConstraint[(String, T), LabelElement]
+    with
+    def convert(t: (String, T)): LabelElement =
       LabelElement.apply.tupled(t)
 
-  def dispPanel[Head, Tail <: Tuple](props: Head *: Tail)(
-    using ToListElementConstraint[Head, LabelElement],
+  def dispPanel[Head, Tail <: Tuple](props: Head *: Tail)(using
+      ToListElementConstraint[Head, LabelElement],
       ToListConstraint[Tail, LabelElement]
   ): HTMLElement =
-    val les = summon[ToListConstraint[Head *: Tail, LabelElement]].convert(props)
+    val les =
+      summon[ToListConstraint[Head *: Tail, LabelElement]].convert(props)
     val panel = DispPanel()
     les.foreach(le => panel.add(le.label, le.element))
     panel.ele
 
   object UpdateInputByResult
 
-  given [E, T]: ToListElementConstraint[Prop[M, E, T], UpdateInputByResult.type] with
+  given [E, T]: ToListElementConstraint[Prop[M, E, T], UpdateInputByResult.type]
+    with
     def convert(p: Prop[M, E, T]): UpdateInputByResult.type =
       p.inputSpec.updateBy(model)
       UpdateInputByResult
 
-  def updateInput[Head, Tail <: Tuple, M](props: Head *: Tail)(
-    using ToListElementConstraint[Head, UpdateInputByResult.type],
+  def updateInput[Head, Tail <: Tuple, M](props: Head *: Tail)(using
+      ToListElementConstraint[Head, UpdateInputByResult.type],
       ToListConstraint[Tail, UpdateInputByResult.type]
   ): Unit =
-    summon[ToListConstraint[Head *: Tail, UpdateInputByResult.type]].convert(props)
+    summon[ToListConstraint[Head *: Tail, UpdateInputByResult.type]]
+      .convert(props)
 
   object UpdateDispByResult
 
-  given [E, T]: ToListElementConstraint[Prop[M, E, T], UpdateDispByResult.type] with
+  given [E, T]: ToListElementConstraint[Prop[M, E, T], UpdateDispByResult.type]
+    with
     def convert(p: Prop[M, E, T]): UpdateDispByResult.type =
       p.dispSpec.updateBy(model)
       UpdateDispByResult
 
-  def updateDisp[Head, Tail <: Tuple, M](props: Head *: Tail)(
-    using ToListElementConstraint[Head, UpdateDispByResult.type],
+  def updateDisp[Head, Tail <: Tuple, M](props: Head *: Tail)(using
+      ToListElementConstraint[Head, UpdateDispByResult.type],
       ToListConstraint[Tail, UpdateDispByResult.type]
   ): Unit =
-    summon[ToListConstraint[Head *: Tail, UpdateDispByResult.type]].convert(props)
+    summon[ToListConstraint[Head *: Tail, UpdateDispByResult.type]]
+      .convert(props)
 
   type ResultOf[H] = H match {
     case Prop[m, e, t] => ValidatedResult[e, t]
@@ -111,11 +127,8 @@ class PropsModel[M](model: Option[M]):
 
   def resultOf[T](t: T): ResultOf[T] =
     t match {
-      case p: Prop[m, e, t] => p.inputSpec.validate
+      case p: Prop[m, e, t] => p.inputSpec.validate()
     }
 
   def resultsOf(props: Tuple): Tuple.Map[props.type, ResultOf] =
     props.map[ResultOf]([T] => (t: T) => resultOf(t))
-
-
-

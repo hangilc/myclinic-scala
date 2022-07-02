@@ -8,8 +8,8 @@ import scala.language.implicitConversions
 import org.scalajs.dom.{HTMLElement, HTMLInputElement}
 import dev.fujiwara.kanjidate.DateUtil
 import dev.myclinic.scala.model.*
-import dev.myclinic.scala.web.appbase.validator.ShahokokuhoValidator
-import dev.myclinic.scala.web.appbase.validator.ShahokokuhoValidator.*
+import dev.myclinic.scala.web.appbase.ShahokokuhoValidator
+import dev.myclinic.scala.web.appbase.ShahokokuhoValidator.*
 import java.time.LocalDate
 import dev.fujiwara.dateinput.{DateInput, DateOptionInput}
 import dev.fujiwara.kanjidate.KanjiDate

@@ -7,8 +7,8 @@ import dev.fujiwara.dateinput.DateOptionInput
 import dev.fujiwara.domq.DispPanel
 import dev.fujiwara.dateinput.InitNoneConverter
 import java.time.LocalDate
-import dev.myclinic.scala.web.appbase.validator.ShahokokuhoValidator
-import dev.myclinic.scala.web.appbase.validator.ShahokokuhoValidator.*
+import dev.myclinic.scala.web.appbase.ShahokokuhoValidator
+import dev.myclinic.scala.web.appbase.ShahokokuhoValidator.*
 import dev.myclinic.scala.web.appbase.formprop.Prop
 import dev.myclinic.scala.web.appbase.formprop.Prop.{*, given}
 import dev.fujiwara.validator.section.Implicits.*

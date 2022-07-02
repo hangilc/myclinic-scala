@@ -1,4 +1,4 @@
-package dev.myclinic.scala.web.appbase.validator
+package dev.myclinic.scala.web.appbase
 
 import cats.*
 import cats.syntax.*
