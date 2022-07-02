@@ -8,7 +8,7 @@ import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.validator.section.ValidatedResult
 
-trait InputSpec[M, E, T]:
+trait InputSpec[M, +E, T]:
   val ele: HTMLElement
   def updateBy(model: Option[M]): Unit
   def validate(): ValidatedResult[E, T]
@@ -21,39 +21,42 @@ trait DispSpec[M]:
   val ele: HTMLElement
   def updateBy(model: Option[M]): Unit
 
-trait Prop[M, E, T]:
+trait Prop[M, +E, T]:
   def label: String
   lazy val inputSpec: InputSpec[M, E, T]
   lazy val dispSpec: DispSpec[M]
 
+trait ToListElementConstraint[T, E]:
+  def convert(t: T): E
+
+type ToListElementConstraintGen =
+  [E] =>> [T] =>> ToListElementConstraint[T, E]
+
+trait ToListConstraint[T, E]:
+  def convert(t: T): List[E]
+
+given [E]: ToListConstraint[EmptyTuple, E] with
+  def convert(t: EmptyTuple): List[E] = List.empty
+
+type ToListConstraintGen = [E] =>> [T] =>> ToListConstraint[T, E]
+
+given [E, E1 <: E, H: ToListElementConstraintGen[
+  E1
+], E2 <: E, T <: Tuple: ToListConstraintGen[
+  E2
+]]: ToListConstraint[H *: T, E] with
+  def convert(t: H *: T): List[E] =
+    summon[ToListElementConstraint[H, E1]].convert(t.head) ::
+      summon[ToListConstraint[T, E2]].convert(t.tail)
+
+case class LabelInput(label: String, input: HTMLElement)
+
+given [E, T, P[M, E, T] <: Prop[M, E, T]]
+    : ToListElementConstraint[P[M, E, T], LabelInput] with
+  def convert(t: P[M, E, T]): LabelInput =
+    LabelInput(t.label, t.inputSpec.ele)
+
 class PropsModel[M](model: Option[M]):
-  trait ToListElementConstraint[T, E]:
-    def convert(t: T): E
-
-  type ToListElementConstraintGen =
-    [E] =>> [T] =>> ToListElementConstraint[T, E]
-
-  trait ToListConstraint[T, E]:
-    def convert(t: T): List[E]
-
-  given [E]: ToListConstraint[EmptyTuple, E] with
-    def convert(t: EmptyTuple): List[E] = List.empty
-
-  type ToListConstraintGen = [E] =>> [T] =>> ToListConstraint[T, E]
-
-  given [E, H: ToListElementConstraintGen[E], T <: Tuple: ToListConstraintGen[
-    E
-  ]]: ToListConstraint[H *: T, E] with
-    def convert(t: H *: T): List[E] =
-      summon[ToListElementConstraint[H, E]].convert(t.head) ::
-        summon[ToListConstraint[T, E]].convert(t.tail)
-
-  case class LabelInput(label: String, input: HTMLElement)
-
-  given [E, T]: ToListElementConstraint[Prop[M, E, T], LabelInput] with
-    def convert(t: Prop[M, E, T]): LabelInput =
-      LabelInput(t.label, t.inputSpec.ele)
-
   given [T <: HTMLElement]: ToListElementConstraint[(String, T), LabelInput]
     with
     def convert(t: (String, T)): LabelInput =
@@ -70,8 +73,9 @@ class PropsModel[M](model: Option[M]):
 
   case class LabelElement(label: String, element: HTMLElement)
 
-  given [E, T]: ToListElementConstraint[Prop[M, E, T], LabelElement] with
-    def convert(t: Prop[M, E, T]): LabelElement =
+  given [E, T, P[M, E, T] <: Prop[M, E, T]]
+      : ToListElementConstraint[P[M, E, T], LabelElement] with
+    def convert(t: P[M, E, T]): LabelElement =
       LabelElement(t.label, t.dispSpec.ele)
 
   given [T <: HTMLElement]: ToListElementConstraint[(String, T), LabelElement]
@@ -91,9 +95,9 @@ class PropsModel[M](model: Option[M]):
 
   object UpdateInputByResult
 
-  given [E, T]: ToListElementConstraint[Prop[M, E, T], UpdateInputByResult.type]
-    with
-    def convert(p: Prop[M, E, T]): UpdateInputByResult.type =
+  given [E, T, P[M, E, T] <: Prop[M, E, T]]
+      : ToListElementConstraint[P[M, E, T], UpdateInputByResult.type] with
+    def convert(p: P[M, E, T]): UpdateInputByResult.type =
       p.inputSpec.updateBy(model)
       UpdateInputByResult
 
@@ -106,9 +110,9 @@ class PropsModel[M](model: Option[M]):
 
   object UpdateDispByResult
 
-  given [E, T]: ToListElementConstraint[Prop[M, E, T], UpdateDispByResult.type]
-    with
-    def convert(p: Prop[M, E, T]): UpdateDispByResult.type =
+  given [E, T, P[M, E, T] <: Prop[M, E, T]]
+      : ToListElementConstraint[P[M, E, T], UpdateDispByResult.type] with
+    def convert(p: P[M, E, T]): UpdateDispByResult.type =
       p.dispSpec.updateBy(model)
       UpdateDispByResult
 

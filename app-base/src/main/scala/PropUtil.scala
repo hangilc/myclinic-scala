@@ -37,15 +37,15 @@ object PropUtil:
     def validate: ValidatedResult[E, T] =
       validator(radioGroup.selected)
 
-  class DateInput[M, E, T](
+  class DateInput[M, E](
       modelValue: M => LocalDate,
-      validator: Option[LocalDate] => ValidatedResult[E, T]
-  ) extends InputSpec[M, E, T]:
+      validator: Option[LocalDate] => ValidatedResult[E, LocalDate]
+  ) extends InputSpec[M, E, LocalDate]:
     val dateInput = DateOptionInput()
     val ele: HTMLElement = dateInput.ele
     def updateBy(model: Option[M]): Unit =
       dateInput.init(model.map(modelValue(_)))
-    def validate: ValidatedResult[E, T] =
+    def validate: ValidatedResult[E, LocalDate] =
       validator(dateInput.value)
 
   class ValidUptoInput[M, E](
@@ -69,7 +69,7 @@ object PropUtil:
 
   class ValidUptoDisp[M](
       modelValue: M => ValidUpto,
-      defaultValue: String = "（期限なし）"
+      defaultValue: String
   ) extends DispSpec[M]:
     val ele: HTMLElement = span
     def updateBy(model: Option[M]): Unit =
@@ -113,7 +113,41 @@ object PropUtil:
       validator,
       defaultValue
     )
-    lazy val dispSpec = new SpanDisp(
+    lazy val dispSpec = new SpanDisp[M](
       m => radioGroup.findLabel(modelValue(m)).getOrElse(""),
       dispDefaultValue
     )
+
+  case class DateProp[M, E](
+    val label: String,
+    modelValue: M => LocalDate,
+    validator: Option[LocalDate] => ValidatedResult[E, LocalDate],
+    dateFormatter: LocalDate => String = d => KanjiDate.dateToKanji(d),
+    dispDefaultValue: String = ""
+  ) extends Prop[M, E, LocalDate]:
+    lazy val inputSpec = new DateInput[M, E](
+      modelValue,
+      validator
+    )
+    lazy val dispSpec = new SpanDisp[M](
+      m => dateFormatter(modelValue(m)),
+      dispDefaultValue
+    )
+
+  case class ValidUptoProp[M, E](
+    val label: String,
+    modelValue: M => ValidUpto,
+    validator: Option[LocalDate] => ValidatedResult[E, ValidUpto],
+    dateFormatter: LocalDate => String = d => KanjiDate.dateToKanji(d),
+    dispDefaultValue: String = "（期限なし）"
+  ) extends Prop[M, E, ValidUpto]:
+    lazy val inputSpec = new ValidUptoInput[M, E](
+      modelValue,
+      validator
+    )
+    lazy val dispSpec = new SpanDisp[M](
+      m => dateFormatter(modelValue(m)),
+      dispDefaultValue
+    )
+
+
