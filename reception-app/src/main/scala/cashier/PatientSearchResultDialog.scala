@@ -8,6 +8,7 @@ import java.time.LocalDateTime
 import java.time.LocalDate
 import scala.concurrent.Future
 import dev.myclinic.scala.apputil.HokenUtil
+import dev.myclinic.scala.web.appbase.PatientProps
 
 case class PatientSearchResultDialog(patients: List[Patient]):
   val selection = Selection[Patient](patients, p => div(format(p)))
@@ -44,10 +45,10 @@ case class PatientSearchResultDialog(patients: List[Patient]):
 
   private def disp(patient: Patient, hokenList: List[Hoken]): Unit =
     val hokenArea = div
-    val disp = PatientDisp(patient)
+    val disp = PatientProps.disp(patient)
     dlog.body(
       clear,
-      disp.ele,
+      disp,
       hokenArea(
         cls := "hoken-area",
         hokenList.map(h => {
@@ -135,15 +136,15 @@ case class PatientSearchResultDialog(patients: List[Patient]):
     )
 
   private def edit(patient: Patient): Unit =
-    val panel = PatientForm(Some(patient))
+    val form = PatientProps.form(Some(patient))
     val errBox = ErrorBox()
-    dlog.body(clear, panel.ele, errBox.ele)
+    dlog.body(clear, form.ele, errBox.ele)
     dlog.commands(
       clear,
       button(
         "入力",
         onclick := (() => {
-          panel.validateForUpdate match {
+          form.validateForUpdate match {
             case Left(msg) => errBox.show(msg)
             case Right(newPatient) =>
               for

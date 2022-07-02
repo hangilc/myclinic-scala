@@ -47,6 +47,10 @@ class PropsModel[M](model: Option[M]):
     def convert(t: Prop[M, E, T]): LabelInput =
       LabelInput(t.label, t.inputSpec.createElement)
 
+  given [T <: HTMLElement]: ToListElementConstraint[(String, T), LabelInput] with
+    def convert(t: (String, T)): LabelInput =
+      LabelInput.apply.tupled(t)
+
   def formPanel[Head, Tail <: Tuple](props: Head *: Tail)(
     using ToListElementConstraint[Head, LabelInput],
       ToListConstraint[Tail, LabelInput]
@@ -61,6 +65,10 @@ class PropsModel[M](model: Option[M]):
   given [E, T]: ToListElementConstraint[Prop[M, E, T], LabelElement] with
     def convert(t: Prop[M, E, T]): LabelElement =
       LabelElement(t.label, t.dispSpec.createElement)
+
+  given [T <: HTMLElement]: ToListElementConstraint[(String, T), LabelElement] with
+    def convert(t: (String, T)): LabelElement = 
+      LabelElement.apply.tupled(t)
 
   def dispPanel[Head, Tail <: Tuple](props: Head *: Tail)(
     using ToListElementConstraint[Head, LabelElement],

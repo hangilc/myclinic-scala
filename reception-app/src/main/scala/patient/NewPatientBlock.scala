@@ -63,24 +63,25 @@ class NewPatientBlock(onClose: (NewPatientBlock => Unit)):
   ).ele
 
   private def onEnter(): Unit =
-    validate().asEither match {
-      case Right(patient) => {
-        Api.enterPatient(patient).onComplete {
-          case Success(_)  => onClose(this)
-          case Failure(ex) => eErrorBox.show(ex.getMessage)
-        }
-      }
-      case Left(msg) => eErrorBox.show(msg)
-    }
+    ???
+    // validate().asEither match {
+    //   case Right(patient) => {
+    //     Api.enterPatient(patient).onComplete {
+    //       case Success(_)  => onClose(this)
+    //       case Failure(ex) => eErrorBox.show(ex.getMessage)
+    //     }
+    //   }
+    //   case Left(msg) => eErrorBox.show(msg)
+    // }
 
-  private def validate(): PatientValidator.Result[Patient] =
-    PatientValidator.validatePatientForEnter(
-      PatientValidator.validateLastName(eLastNameInput.value),
-      PatientValidator.validateFirstName(eFirstNameInput.value),
-      PatientValidator.validateLastNameYomi(eLastNameYomiInput.value),
-      PatientValidator.validateFirstNameYomi(eFirstNameYomiInput.value),
-      PatientValidator.validateSexInput(eSexInput.getCheckedRadioValue("sex")),
-      PatientValidator.validateBirthday(eBirthdayInput.value),
-      PatientValidator.validateAddress(eAddressInput.value),
-      PatientValidator.validatePhone(ePhoneInput.value)
-    )
+  // private def validate(): PatientValidator.Result[Patient] =
+    // PatientValidator.validatePatientForEnter(
+    //   PatientValidator.validateLastName(eLastNameInput.value),
+    //   PatientValidator.validateFirstName(eFirstNameInput.value),
+    //   PatientValidator.validateLastNameYomi(eLastNameYomiInput.value),
+    //   PatientValidator.validateFirstNameYomi(eFirstNameYomiInput.value),
+    //   PatientValidator.validateSexInput(eSexInput.getCheckedRadioValue("sex")),
+    //   PatientValidator.validateBirthday(eBirthdayInput.value),
+    //   PatientValidator.validateAddress(eAddressInput.value),
+    //   PatientValidator.validatePhone(ePhoneInput.value)
+    // )

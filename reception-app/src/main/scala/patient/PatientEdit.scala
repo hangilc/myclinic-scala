@@ -110,30 +110,32 @@ object PatientFormValidator:
     def phoneInput: HTMLInputElement
   
   def validateForEnter(ui: PatientFormUI): Either[String, Patient] =
-    import PatientValidator.*
-    validatePatientForEnter(
-      validateLastName(ui.lastNameInput.value),
-      validateFirstName(ui.firstNameInput.value),
-      validateLastNameYomi(ui.lastNameYomiInput.value),
-      validateFirstNameYomi(ui.firstNameYomiInput.value),
-      validateSexInput(ui.sexValue),
-      validateBirthday(ui.birthdayInput.value),
-      validateAddress(ui.addressInput.value),
-      validatePhone(ui.phoneInput.value)
-    ).asEither
+    ???
+    // import PatientValidator.*
+    // validatePatientForEnter(
+    //   validateLastName(ui.lastNameInput.value),
+    //   validateFirstName(ui.firstNameInput.value),
+    //   validateLastNameYomi(ui.lastNameYomiInput.value),
+    //   validateFirstNameYomi(ui.firstNameYomiInput.value),
+    //   validateSexInput(ui.sexValue),
+    //   validateBirthday(ui.birthdayInput.value),
+    //   validateAddress(ui.addressInput.value),
+    //   validatePhone(ui.phoneInput.value)
+    // ).asEither
 
   def validateForUpdate(patientId: Int, ui: PatientFormUI): Either[String, Patient] =
-    import PatientValidator.*
-    validatePatientForUpdate(
-      validatePatientIdForUpdate(patientId),
-      validateLastName(ui.lastNameInput.value),
-      validateFirstName(ui.firstNameInput.value),
-      validateLastNameYomi(ui.lastNameYomiInput.value),
-      validateFirstNameYomi(ui.firstNameYomiInput.value),
-      validateSexInput(ui.sexValue),
-      validateBirthday(ui.birthdayInput.value),
-      validateAddress(ui.addressInput.value),
-      validatePhone(ui.phoneInput.value)
-    ).asEither
+    ???
+    // import PatientValidator.*
+    // validatePatientForUpdate(
+    //   validatePatientIdForUpdate(patientId),
+    //   validateLastName(ui.lastNameInput.value),
+    //   validateFirstName(ui.firstNameInput.value),
+    //   validateLastNameYomi(ui.lastNameYomiInput.value),
+    //   validateFirstNameYomi(ui.firstNameYomiInput.value),
+    //   validateSexInput(ui.sexValue),
+    //   validateBirthday(ui.birthdayInput.value),
+    //   validateAddress(ui.addressInput.value),
+    //   validatePhone(ui.phoneInput.value)
+    // ).asEither
 
 
