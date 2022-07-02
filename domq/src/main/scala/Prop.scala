@@ -8,25 +8,23 @@ import dev.fujiwara.domq.Html.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.validator.section.ValidatedResult
 
-abstract class InputSpec[M, E, T]:
-  def createElement(): HTMLElement
+trait InputSpec[M, E, T]:
+  val ele: HTMLElement
   def updateBy(model: Option[M]): Unit
   def validate(): ValidatedResult[E, T]
 
-  lazy val element: HTMLElement = createElement()
   def addClass(className: String): InputSpec[M, E, T] =
-    element(cls := className)
+    ele(cls := className)
     this
 
 trait DispSpec[M]:
-  def createElement: HTMLElement
+  val ele: HTMLElement
   def updateBy(model: Option[M]): Unit
 
-case class Prop[M, E, T](
-  label: String,
-  inputSpec: InputSpec[M, E, T],
-  dispSpec: DispSpec[M]
-)
+trait Prop[M, E, T]:
+  def label: String
+  lazy val inputSpec: InputSpec[M, E, T]
+  lazy val dispSpec: DispSpec[M]
 
 class PropsModel[M](model: Option[M]):
   trait ToListElementConstraint[T, E]:
@@ -54,7 +52,7 @@ class PropsModel[M](model: Option[M]):
 
   given [E, T]: ToListElementConstraint[Prop[M, E, T], LabelInput] with
     def convert(t: Prop[M, E, T]): LabelInput =
-      LabelInput(t.label, t.inputSpec.element)
+      LabelInput(t.label, t.inputSpec.ele)
 
   given [T <: HTMLElement]: ToListElementConstraint[(String, T), LabelInput]
     with
@@ -74,7 +72,7 @@ class PropsModel[M](model: Option[M]):
 
   given [E, T]: ToListElementConstraint[Prop[M, E, T], LabelElement] with
     def convert(t: Prop[M, E, T]): LabelElement =
-      LabelElement(t.label, t.dispSpec.createElement)
+      LabelElement(t.label, t.dispSpec.ele)
 
   given [T <: HTMLElement]: ToListElementConstraint[(String, T), LabelElement]
     with

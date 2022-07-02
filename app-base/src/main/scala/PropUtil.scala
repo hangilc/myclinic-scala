@@ -12,95 +12,108 @@ import dev.myclinic.scala.model.ValidUpto
 import dev.fujiwara.kanjidate.KanjiDate
 
 object PropUtil:
-  case class TextInput[M, E, T](
-      modelValue: M => String,
+  class TextInput[M, E, T](
+      modelValue: M => T,
       validator: String => ValidatedResult[E, T],
-      noneValue: String = ""
+      toInputValue: T => String,
+      defaultValue: String
   ) extends InputSpec[M, E, T]:
-    def createElement(): HTMLElement = element
+    val input: HTMLInputElement = inputText
+    val ele: HTMLElement = input
     def updateBy(model: Option[M]): Unit =
-      element.value = model.fold(noneValue)(modelValue(_))
+      input.value = model.fold(defaultValue)(m => toInputValue(modelValue(m)))
     def validate: ValidatedResult[E, T] =
-      validator(element.value)
+      validator(input.value)
 
-  case class RadioInput[M, E, T](
-      data: List[(String, T)],
-      init: T,
+  class RadioInput[M, E, T](
+      radioGroup: RadioGroup[T],
       modelValue: M => T,
       validator: T => ValidatedResult[E, T],
-      postCreate: HTMLElement => Unit = _ => ()
+      defaultValue: T
   ) extends InputSpec[M, E, T]:
-    lazy val radioGroup =
-      val r = RadioGroup[T](data, initValue = Some(init))
-      postCreate(r.ele)
-      r
-
-    def createElement: HTMLElement = radioGroup.ele
+    val ele: HTMLElement = radioGroup.ele
     def updateBy(model: Option[M]): Unit =
-      model.fold(init)(modelValue(_))
+      model.fold(defaultValue)(modelValue(_))
     def validate: ValidatedResult[E, T] =
       validator(radioGroup.selected)
 
-  case class DateInput[M, E, T](
+  class DateInput[M, E, T](
       modelValue: M => LocalDate,
-      validator: Option[LocalDate] => ValidatedResult[E, T],
-      postCreate: HTMLElement => Unit = _ => ()
+      validator: Option[LocalDate] => ValidatedResult[E, T]
   ) extends InputSpec[M, E, T]:
-    lazy val dateInput =
-      val di = DateOptionInput()
-      postCreate(di.ele)
-      di
-    def createElement: HTMLElement = dateInput.ele
+    val dateInput = DateOptionInput()
+    val ele: HTMLElement = dateInput.ele
     def updateBy(model: Option[M]): Unit =
       dateInput.init(model.map(modelValue(_)))
     def validate: ValidatedResult[E, T] =
       validator(dateInput.value)
 
-  case class ValidUptoInput[M, E](
+  class ValidUptoInput[M, E](
       modelValue: M => ValidUpto,
-      validator: Option[LocalDate] => ValidatedResult[E, ValidUpto],
-      postCreate: HTMLElement => Unit = _ => ()
+      validator: Option[LocalDate] => ValidatedResult[E, ValidUpto]
   ) extends InputSpec[M, E, ValidUpto]:
-    lazy val dateInput =
-      val di = DateOptionInput()
-      postCreate(di.ele)
-      di
-
-    def createElement: HTMLElement = dateInput.ele
+    val dateInput = DateOptionInput()
+    val ele: HTMLElement = dateInput.ele
     def updateBy(model: Option[M]): Unit =
       dateInput.init(model.flatMap(modelValue(_).value))
     def validate: ValidatedResult[E, ValidUpto] =
       validator(dateInput.value)
 
-  case class SpanDisp[M](
+  class SpanDisp[M](
       modelValue: M => String,
-      postCreate: HTMLElement => Unit = _ => (),
-      noneValue: String = ""
+      defaultValue: String
   ) extends DispSpec[M]:
-    lazy val element: HTMLElement =
-      val e = span
-      postCreate(e)
-      e
-
-    def createElement: HTMLElement = element
+    val ele: HTMLElement = span
     def updateBy(model: Option[M]): Unit =
-      element(innerText := model.fold(noneValue)(modelValue(_)))
+      ele(innerText := model.fold(defaultValue)(modelValue(_)))
 
-  case class ValidUptoDisp[M](
+  class ValidUptoDisp[M](
       modelValue: M => ValidUpto,
-      postCreate: HTMLElement => Unit = _ => (),
-      noneValue: String = "（期限なし）"
+      defaultValue: String = "（期限なし）"
   ) extends DispSpec[M]:
-    lazy val element: HTMLElement =
-      val e = span
-      postCreate(e)
-      e
-    def createElement: HTMLElement = element
+    val ele: HTMLElement = span
     def updateBy(model: Option[M]): Unit =
       val t: String = model
         .flatMap(modelValue(_).value.map(d => KanjiDate.dateToKanji(d)))
-        .getOrElse(noneValue)
-      element(innerText := t)
+        .getOrElse(defaultValue)
+      ele(innerText := t)
 
+  case class TextProp[M, E, T](
+      val label: String,
+      modelValue: M => T,
+      validator: String => ValidatedResult[E, T],
+      toInputValue: T => String = (t :T) => t.toString,
+      toDispValue: T => String = (t :T) => t.toString,
+      inputDefaultValue: String = "",
+      dispDefaultValue: String = ""
+  ) extends Prop[M, E, T]:
+    lazy val inputSpec = new TextInput[M, E, T](
+      modelValue,
+      validator,
+      toInputValue,
+      inputDefaultValue
+    )
+    lazy val dispSpec: DispSpec[M] = new SpanDisp[M](
+      m => toDispValue(modelValue(m)),
+      dispDefaultValue
+    )
 
-
+  case class RadioProp[M, E, T](
+    val label: String,
+    data: List[(String, T)],
+    defaultValue: T,
+    modelValue: M => T,
+    validator: T => ValidatedResult[E, T],
+    dispDefaultValue: String = ""
+  ) extends Prop[M, E, T]:
+    val radioGroup = RadioGroup[T](data, initValue = Some(defaultValue))
+    lazy val inputSpec = new RadioInput[M, E, T](
+      radioGroup,
+      modelValue,
+      validator,
+      defaultValue
+    )
+    lazy val dispSpec = new SpanDisp(
+      m => radioGroup.findLabel(modelValue(m)).getOrElse(""),
+      dispDefaultValue
+    )

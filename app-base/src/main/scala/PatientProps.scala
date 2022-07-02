@@ -16,57 +16,32 @@ import scala.language.implicitConversions
 case class PatientProps(model: Option[Patient]):
 
   val props = (
-    Prop[Patient, LastNameError.type, String](
+    TextProp[Patient, LastNameError.type, String](
       "姓",
-      TextInput(
-        _.lastName,
-        LastNameValidator.validate
-      ),
-      SpanDisp(
-        _.lastName
-      )
+      _.lastName,
+      LastNameValidator.validate _
     ),
-    Prop[Patient, FirstNameError.type, String](
+    TextProp[Patient, FirstNameError.type, String](
       "名",
-      TextInput(
-        _.firstName,
-        FirstNameValidator.validate
-      ),
-      SpanDisp(
-        _.firstName
-      )
+      _.firstName,
+      FirstNameValidator.validate _
     ),
-    Prop[Patient, LastNameYomiError.type, String](
+    TextProp[Patient, LastNameYomiError.type, String](
       "姓（よみ）",
-      TextInput(
-        _.lastNameYomi,
-        LastNameYomiValidator.validate
-      ),
-      SpanDisp(
-        _.lastNameYomi
-      )
+      _.lastNameYomi,
+      LastNameYomiValidator.validate _
     ),
-    Prop[Patient, FirstNameYomiError.type, String](
+    TextProp[Patient, FirstNameYomiError.type, String](
       "名（よみ）",
-      TextInput(
-        _.firstNameYomi,
-        FirstNameYomiValidator.validate
-      ),
-      SpanDisp(
-        _.firstNameYomi
-      )
+      _.firstNameYomi,
+      FirstNameYomiValidator.validate
     ),
-    Prop[Patient, SexError.type, Sex](
+    RadioProp[Patient, SexError.type, Sex](
       "性別",
-      RadioInput(
-        List("男" -> Sex.Male, "女" -> Sex.Female),
-        Sex.Female,
-        _.sex,
-        SexValidator.validate
-      ),
-      SpanDisp(
-        _.sex.rep + "性"
-      )
+      List("男" -> Sex.Male, "女" -> Sex.Female),
+      Sex.Female,
+      _.sex,
+      SexValidator.validate
     ),
     Prop[Patient, BirthdayError.type, LocalDate](
       "生年月日",
