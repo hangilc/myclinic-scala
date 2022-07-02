@@ -41,30 +41,101 @@ object Prop:
       summon[ToListElementConstraint[H, E]].convert(t.head) ::
         summon[ToListConstraint[T, E]].convert(t.tail)
 
-  given [M, E, T]: ToListElementConstraint[Prop[M, E, T], (String, HTMLElement)] with
-    def convert(t: Prop[M, E, T]): (String, HTMLElement) =
-      (t.label, t.inputSpec.createElement)
+  case class LabelInput(label: String, input: HTMLElement)
+
+  given [E, T]: ToListElementConstraint[Prop[M, E, T], LabelInput] with
+    def convert(t: Prop[M, E, T]): LabelInput =
+      LabelInput(t.label, t.inputCreator())
 
   def formPanel[Head, Tail <: Tuple](props: Head *: Tail)(
-    using ToListElementConstraint[Head, (String, HTMLElement)],
-      ToListConstraint[Tail, (String, HTMLElement)]
+    using ToListElementConstraint[Head, LabelInput],
+      ToListConstraint[Tail, LabelInput]
   ): HTMLElement =
-    val les = summon[ToListConstraint[Head *: Tail, (String, HTMLElement)]].convert(props)
+    val les = summon[ToListConstraint[Head *: Tail, LabelInput]].convert(props)
+    val panel = DispPanel(form = true)
+    les.foreach(li => panel.add(li.label, li.input))
+    panel.ele
+
+  case class LabelElement(label: String, element: HTMLElement)
+  
+  given [E, T]: ToListElementConstraint[Prop[M, E, T], LabelElement] with
+    def convert(t: Prop[M, E, T]): LabelElement =
+      LabelElement(t.label, t.dispCreator())
+
+  def dispPanel[Head, Tail <: Tuple](props: Head *: Tail)(
+    using ToListElementConstraint[Head, LabelElement],
+      ToListConstraint[Tail, LabelElement]
+  ): HTMLElement =
+    val les = summon[ToListConstraint[Head *: Tail, LabelElement]].convert(props)
     val panel = DispPanel()
-    les.foreach { (s, e) => panel.add(s, e) }
+    les.foreach(le => panel.add(le.label, le.element))
     panel.ele
 
   object UpdateInputByResult
 
-  class InputUpdater[M](model: Option[M]):
-    given [E, T]: ToListElementConstraint[Prop[M, E, T], UpdateInputByResult.type] with
-      def convert(p: Prop[M, E, T]): UpdateInputByResult.type =
-        p.inputSpec.updateBy(model)
-        UpdateInputByResult
+  given [E, T]: ToListElementConstraint[Prop[M, E, T], UpdateInputByResult.type] with
+    def convert(p: Prop[M, E, T]): UpdateInputByResult.type =
+      p.updateInputBy(model)
+      UpdateInputByResult
 
-    def updateInput[Head, Tail <: Tuple](props: Head *: Tail)(
-      using ToListElementConstraint[Head, UpdateInputByResult.type],
-        ToListConstraint[Tail, UpdateInputByResult.type]
-    ): Unit =
-      summon[ToListConstraint[Head *: Tail, UpdateInputByResult.type]].convert(props)
+  def updateInput[Head, Tail <: Tuple, M](props: Head *: Tail, model: Option[M])(
+    using ToListElementConstraint[Head, UpdateInputByResult.type],
+      ToListConstraint[Tail, UpdateInputByResult.type]
+  ): Unit =
+    summon[ToListConstraint[Head *: Tail, UpdateInputByResult.type]].convert(props)
+
+  object UpdateDispByResult
+
+  given [E, T]: ToListElementConstraint[Prop[M, E, T], UpdateDispByResult.type] with
+    def convert(p: Prop[M, E, T]): UpdateDispByResult.type =
+      p.updateDispBy(model)
+      UpdateDispByResult
+
+  def updateDisp[Head, Tail <: Tuple, M](props: Head *: Tail, model: Option[M])(
+    using ToListElementConstraint[Head, UpdateDispByResult.type],
+      ToListConstraint[Tail, UpdateDispByResult.type]
+  ): Unit =
+    summon[ToListConstraint[Head *: Tail, UpdateDispByResult.type]].convert(props)
+
+  type ResultOf[H] = H match {
+    case Prop[m, e, t] => ValidatedResult[e, t]
+  }
+
+  def resultOf[T](t: T): ResultOf[T] =
+    t match {
+      case p: Prop[m, e, t] => p.validator()
+    }
+
+  def resultsOf(props: Tuple): Tuple.Map[props.type, ResultOf] =
+    props.map[ResultOf]([T] => (t: T) => resultOf(t))
+
+object Props:
+  case class Patient(lastName: String, firstName: String)
+
+  val patientProps = (
+    Prop[Patient, Nothing, String](
+      "姓",
+      () => Html.input,
+      _.fold("")(_.lastName),
+      () => ???,
+      () => Html.span,
+      _ => ()
+    ),
+    Prop[Patient, Nothing, String](
+      "名",
+      () => Html.input,
+      _.fold("")(_.firstName),
+      () => ???,
+      () => Html.span,
+      _ => ()
+    ),
+  )
+  val pModel = new PropsModel(Some(patient))
+  val ele = pModel.formPanel(patientProps)
+  val patient = Patient("A", "B")
+  pModel.updateInput(patientProps, Some(patient))
+  val disp = pModel.dispPanel(patientProps)
+  pModel.updateDisp(patientProps, Some(patient))
+  val results = pModel.resultsOf(patientProps)
+
 
