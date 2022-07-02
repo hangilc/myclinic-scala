@@ -32,7 +32,7 @@ object PropUtil:
     init: T,
     modelValue: M => T,
     validator: T => ValidatedResult[E, T],
-    postCreate: HTMLElement => Unit
+    postCreate: HTMLElement => Unit = _ => ()
   ) extends InputSpec[M, E, T]:
     lazy val radioGroup = 
       val r = RadioGroup[T](data, initValue = Some(init))
@@ -48,7 +48,7 @@ object PropUtil:
   case class DateInput[M, E, T](
     modelValue: M => LocalDate,
     validator: Option[LocalDate] => ValidatedResult[E, T],
-    postCreate: HTMLElement => Unit
+    postCreate: HTMLElement => Unit = _ => ()
   ) extends InputSpec[M, E, T]:
     lazy val dateInput = 
       val di = DateOptionInput()
@@ -63,7 +63,7 @@ object PropUtil:
   case class ValidUptoInput[M, E](
     modelValue: M => ValidUpto,
     validator: Option[LocalDate] => ValidatedResult[E, ValidUpto],
-    postCreate: HTMLElement => Unit
+    postCreate: HTMLElement => Unit = _ => ()
   ) extends InputSpec[M, E, ValidUpto]:
     lazy val dateInput = 
       val di = DateOptionInput()
@@ -95,8 +95,10 @@ object PropUtil:
 
 
   import dev.myclinic.scala.model.Patient
+  import dev.myclinic.scala.model.Sex
   import dev.myclinic.scala.web.appbase.PatientValidator.{*, given}
   import dev.myclinic.scala.web.appbase.PatientValidator
+  import dev.fujiwara.kanjidate.KanjiDate
 
   val patientProps = (
     Prop[Patient, LastNameError.type, String](
@@ -119,9 +121,71 @@ object PropUtil:
         _.firstName
       )
     ),
+    Prop[Patient, LastNameYomiError.type, String](
+      "姓（よみ）",
+      TextInput(
+        _.lastNameYomi,
+        LastNameYomiValidator.validate
+      ),
+      SpanDisp(
+        _.lastNameYomi
+      )
+    ),
+    Prop[Patient, FirstNameYomiError.type, String](
+      "名（よみ）",
+      TextInput(
+        _.firstNameYomi,
+        FirstNameYomiValidator.validate
+      ),
+      SpanDisp(
+        _.firstNameYomi
+      )
+    ),
+    Prop[Patient, SexError.type, Sex](
+      "性別",
+      RadioInput(
+        List("男" -> Sex.Male, "女" -> Sex.Female),
+        Sex.Female,
+        _.sex,
+        SexValidator.validate
+      ),
+      SpanDisp(
+        _.sex.rep + "性"
+      )
+    ),
+    Prop[Patient, BirthdayError.type, LocalDate](
+      "生年月日",
+      DateInput(
+        _.birthday,
+        BirthdayValidator.validate,
+      ),
+      SpanDisp(
+        p => KanjiDate.dateToKanji(p.birthday)
+      )
+    ),
+    Prop[Patient, AddressError.type, String](
+      "住所",
+      TextInput(
+        _.address,
+        AddressValidator.validate
+      ),
+      SpanDisp(_.address)
+    ),
+    Prop[Patient, PhoneError.type, String](
+      "電話",
+      TextInput(
+        _.phone,
+        PhoneValidator.validate
+      ),
+      SpanDisp(_.phone)
+    )
   )
-  val ele = Prop.formPanel(patientProps)
-  val inputUpdater = new InputUpdater[Patient](Some(patient))
-  import inputUpdater.given
-  inputUpdater.updateInput(patientProps)
+  val patient = Patient(123, "田中", "孝", "たなか", "たかし", Sex.Male, LocalDate.of(1970, 2, 3), "", "")
+  val pModel = PropsModel(Some(patient))
+  pModel.updateInput(patientProps)
+  val formPanel = pModel.formPanel(patientProps)
+  val results = pModel.resultsOf(patientProps)
+  pModel.updateDisp(patientProps)
+  val dispPanel = pModel.dispPanel(patientProps)
+  
 

@@ -21,7 +21,7 @@ case class Prop[M, E, T](
 )
 
 
-object Prop:
+class PropsModel[M](model: Option[M]):
   trait ToListElementConstraint[T, E]:
     def convert(t: T): E
 
@@ -45,7 +45,7 @@ object Prop:
 
   given [E, T]: ToListElementConstraint[Prop[M, E, T], LabelInput] with
     def convert(t: Prop[M, E, T]): LabelInput =
-      LabelInput(t.label, t.inputCreator())
+      LabelInput(t.label, t.inputSpec.createElement)
 
   def formPanel[Head, Tail <: Tuple](props: Head *: Tail)(
     using ToListElementConstraint[Head, LabelInput],
@@ -60,7 +60,7 @@ object Prop:
   
   given [E, T]: ToListElementConstraint[Prop[M, E, T], LabelElement] with
     def convert(t: Prop[M, E, T]): LabelElement =
-      LabelElement(t.label, t.dispCreator())
+      LabelElement(t.label, t.dispSpec.createElement)
 
   def dispPanel[Head, Tail <: Tuple](props: Head *: Tail)(
     using ToListElementConstraint[Head, LabelElement],
@@ -75,10 +75,10 @@ object Prop:
 
   given [E, T]: ToListElementConstraint[Prop[M, E, T], UpdateInputByResult.type] with
     def convert(p: Prop[M, E, T]): UpdateInputByResult.type =
-      p.updateInputBy(model)
+      p.inputSpec.updateBy(model)
       UpdateInputByResult
 
-  def updateInput[Head, Tail <: Tuple, M](props: Head *: Tail, model: Option[M])(
+  def updateInput[Head, Tail <: Tuple, M](props: Head *: Tail)(
     using ToListElementConstraint[Head, UpdateInputByResult.type],
       ToListConstraint[Tail, UpdateInputByResult.type]
   ): Unit =
@@ -88,10 +88,10 @@ object Prop:
 
   given [E, T]: ToListElementConstraint[Prop[M, E, T], UpdateDispByResult.type] with
     def convert(p: Prop[M, E, T]): UpdateDispByResult.type =
-      p.updateDispBy(model)
+      p.dispSpec.updateBy(model)
       UpdateDispByResult
 
-  def updateDisp[Head, Tail <: Tuple, M](props: Head *: Tail, model: Option[M])(
+  def updateDisp[Head, Tail <: Tuple, M](props: Head *: Tail)(
     using ToListElementConstraint[Head, UpdateDispByResult.type],
       ToListConstraint[Tail, UpdateDispByResult.type]
   ): Unit =
@@ -103,39 +103,11 @@ object Prop:
 
   def resultOf[T](t: T): ResultOf[T] =
     t match {
-      case p: Prop[m, e, t] => p.validator()
+      case p: Prop[m, e, t] => p.inputSpec.validate
     }
 
   def resultsOf(props: Tuple): Tuple.Map[props.type, ResultOf] =
     props.map[ResultOf]([T] => (t: T) => resultOf(t))
 
-object Props:
-  case class Patient(lastName: String, firstName: String)
-
-  val patientProps = (
-    Prop[Patient, Nothing, String](
-      "姓",
-      () => Html.input,
-      _.fold("")(_.lastName),
-      () => ???,
-      () => Html.span,
-      _ => ()
-    ),
-    Prop[Patient, Nothing, String](
-      "名",
-      () => Html.input,
-      _.fold("")(_.firstName),
-      () => ???,
-      () => Html.span,
-      _ => ()
-    ),
-  )
-  val pModel = new PropsModel(Some(patient))
-  val ele = pModel.formPanel(patientProps)
-  val patient = Patient("A", "B")
-  pModel.updateInput(patientProps, Some(patient))
-  val disp = pModel.dispPanel(patientProps)
-  pModel.updateDisp(patientProps, Some(patient))
-  val results = pModel.resultsOf(patientProps)
 
 
