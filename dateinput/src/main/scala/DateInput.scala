@@ -26,7 +26,6 @@ case class DateOptionInput(
   updateUI(dateEdit.value)
   dateEdit.onChange(updateUI _)
 
-
   def value: Option[LocalDate] = dateEdit.value
 
   def init(newValue: Option[LocalDate]): Unit =

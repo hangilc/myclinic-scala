@@ -1,18 +1,27 @@
-package dev.fujiwara.domq
+package dev.fujiwara.domq.prop
 
 import org.scalajs.dom.HTMLElement
 import org.scalajs.dom.HTMLInputElement
+import dev.fujiwara.domq.DispPanel
 import dev.fujiwara.validator.section.ValidatedResult
+
+trait InputSpec[M, E, T]:
+  def createElement: HTMLElement
+  def updateBy(model: Option[M]): Unit
+  def validate: ValidatedResult[E, T]
+
+trait DispSpec[M]:
+  def createElement: HTMLElement
+  def updateBy(model: Option[M]): Unit
 
 case class Prop[M, E, T](
     label: String,
-    inputCreator: () => HTMLElement,
-    updateInputBy: Option[M] => Unit,
-    validator: () => ValidatedResult[E, T]
+    inputSpec: InputSpec[M, E, T],
+    dispSpec: DispSpec[M]
 )
 
-object Prop:
 
+object Prop:
   trait ToListElementConstraint[T, E]:
     def convert(t: T): E
 
@@ -34,7 +43,7 @@ object Prop:
 
   given [M, E, T]: ToListElementConstraint[Prop[M, E, T], (String, HTMLElement)] with
     def convert(t: Prop[M, E, T]): (String, HTMLElement) =
-      (t.label, t.inputCreator())
+      (t.label, t.inputSpec.createElement)
 
   def formPanel[Head, Tail <: Tuple](props: Head *: Tail)(
     using ToListElementConstraint[Head, (String, HTMLElement)],
@@ -50,7 +59,7 @@ object Prop:
   class InputUpdater[M](model: Option[M]):
     given [E, T]: ToListElementConstraint[Prop[M, E, T], UpdateInputByResult.type] with
       def convert(p: Prop[M, E, T]): UpdateInputByResult.type =
-        p.updateInputBy(model)
+        p.inputSpec.updateBy(model)
         UpdateInputByResult
 
     def updateInput[Head, Tail <: Tuple](props: Head *: Tail)(
@@ -58,40 +67,4 @@ object Prop:
         ToListConstraint[Tail, UpdateInputByResult.type]
     ): Unit =
       summon[ToListConstraint[Head *: Tail, UpdateInputByResult.type]].convert(props)
-
-  def apply[M, E, T](
-      label: String,
-      inputCreator: () => HTMLInputElement,
-      modelValue: Option[M] => String,
-      validator: String => ValidatedResult[E, T]
-  ): Prop[M, E, T] =
-    lazy val inputElement: HTMLInputElement = inputCreator()
-    new Prop(
-      label,
-      () => inputElement,
-      mOpt => inputElement.value = modelValue(mOpt),
-      () => validator(inputElement.value)
-    )
-
-  case class Patient(lastName: String, firstName: String)
-
-  val patientProps = (
-    Prop[Patient, Nothing, String](
-      "姓",
-      () => Html.input,
-      _.fold("")(_.lastName),
-      () => ???
-    ),
-    Prop[Patient, Nothing, String](
-      "名",
-      () => Html.input,
-      _.fold("")(_.firstName),
-      () => ???
-    ),
-  )
-  val ele = formPanel(patientProps)
-  val patient = Patient("A", "B")
-  val inputUpdater = new InputUpdater[Patient](Some(patient))
-  import inputUpdater.given
-  inputUpdater.updateInput(patientProps)
 
