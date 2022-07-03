@@ -16,11 +16,11 @@ import scala.language.implicitConversions
 case class PatientProps(modelOpt: Option[Patient]):
 
   val props = (
-    PatientProp(TextProp[Patient, LastNameError.type, String](
+    TextProp[Patient, LastNameError.type, String](
       "姓",
       _.lastName,
       LastNameValidator.validate _
-    )),
+    ),
     TextProp[Patient, FirstNameError.type, String](
       "名",
       _.firstName,
@@ -100,17 +100,14 @@ case class PatientProps(modelOpt: Option[Patient]):
   def formPanel: HTMLElement = Prop.formPanel(formProps)
   def dispPanel: HTMLElement = Prop.dispPanel(dispProps)
 
-  case class PatientProp[E, T](value: Prop[Patient, E, T])
-
   type UpdateInputResult[T] = T match {
-    case PatientProp[e, t] => Unit
+    case Prop[Patient, e, t] => Unit
   }
 
   def updateInput[T](t: T): UpdateInputResult[T] =
     t match {
-      case p: PatientProp[e, t] => 
-        p.value.inputSpec.updateBy(modelOpt)
-        ()
+      case p: Prop[Patient, e, t] => 
+        p.inputSpec.updateBy(modelOpt)
     }
 
   def updateInput(props: Tuple): Tuple.Map[props.type, UpdateInputResult] =
