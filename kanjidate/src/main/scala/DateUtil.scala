@@ -6,6 +6,10 @@ import java.time.temporal.ChronoUnit
 import java.time.temporal.ChronoUnit.DAYS
 import java.time.DayOfWeek.*
 import math.Ordered.orderingToOrdered
+import scala.util.Try
+import scala.util.Success
+import scala.util.Failure
+import scala.language.implicitConversions
 
 object DateUtil:
 
@@ -87,8 +91,25 @@ object DateUtil:
       case Some(upto) => !d.isAfter(upto)
     }
 
+  def safeDayOf(year: Int, monthArg: Int, dayArg: Int): LocalDate =
+    val month: Int = monthArg.max(1).min(12)
+    val day: Int = dayArg.max(1).min(31)
+    Try(LocalDate.of(year, month, day)) match {
+      case Success(d) => d
+      case Failure(_) => 
+        val lastDay: Int = lastDayOfMonth(year, month).getDayOfMonth
+        if day > lastDay then LocalDate.of(year, month, lastDay)
+        else throw new RuntimeException(s"Invalid day: ${year}-${monthArg}-${dayArg}")
+    }
+
+  def nextDateOf(month: Int, day: Int, anchor: LocalDate): LocalDate =
+    val candidate: LocalDate = safeDayOf(anchor.getYear, month, day)
+    if candidate >= anchor then candidate
+    else candidate.plusYears(1)
+    
   given Ordering[LocalDate] = _ compareTo _
   given Conversion[LocalDate, Ordered[LocalDate]] = orderingToOrdered(_)
+
 
   
 

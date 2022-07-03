@@ -12,6 +12,7 @@ import org.scalajs.dom.HTMLElement
 import dev.fujiwara.validator.section.Implicits.*
 import dev.fujiwara.domq.all.{*, given}
 import scala.language.implicitConversions
+import dev.fujiwara.kanjidate.DateUtil
 
 case class KoukikoureiProps(var modelOpt: Option[Koukikourei]):
   type K = Koukikourei
@@ -42,7 +43,8 @@ case class KoukikoureiProps(var modelOpt: Option[Koukikourei]):
     ValidUptoProp[K, ValidUptoError.type](
       "期限終了",
       _.validUpto,
-      ValidUptoValidator.validate
+      ValidUptoValidator.validate,
+      suggest = () => Some(suggestValidUpto())
     )
   )
 
@@ -53,6 +55,10 @@ case class KoukikoureiProps(var modelOpt: Option[Koukikourei]):
     validFromProp,
     validUptoProp
   ) = props
+
+  private def suggestValidUpto(): LocalDate =
+    val anchor: LocalDate = validFromProp.currentInputValue.getOrElse(LocalDate.now())
+    DateUtil.nextDateOf(7, 31, anchor)
 
   def updateInput(): this.type =
     val updater = new InputUpdater(modelOpt)
