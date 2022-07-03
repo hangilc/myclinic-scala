@@ -10,6 +10,8 @@ import scala.concurrent.Future
 import dev.myclinic.scala.apputil.HokenUtil
 import dev.myclinic.scala.web.appbase.PatientProps
 import dev.myclinic.scala.web.appbase.ShahokokuhoProps
+import dev.myclinic.scala.web.appbase.KoukikoureiProps
+import dev.myclinic.scala.web.appbase.KouhiProps
 
 case class PatientSearchResultDialog(patients: List[Patient]):
   val selection = Selection[Patient](patients, p => div(format(p)))
@@ -97,15 +99,15 @@ case class PatientSearchResultDialog(patients: List[Patient]):
     )
 
   private def newKoukikourei(patient: Patient, hokenList: List[Hoken]): Unit =
-    val form = new KoukikoureiForm(None)
+    val props = KoukikoureiProps(None)
     val errBox = ErrorBox()
-    dlog.body(clear, form.ele, errBox.ele)
+    dlog.body(clear, props.formPanel, errBox.ele)
     dlog.commands(
       clear,
       button(
         "入力",
         onclick := (() => {
-          form.validateForEnter(patient.patientId) match {
+          props.validatedForEnter(patient.patientId) match {
             case Left(msg) => errBox.show(msg)
             case Right(newKoukikourei) =>
               for entered <- Api.enterKoukikourei(newKoukikourei)
@@ -118,13 +120,13 @@ case class PatientSearchResultDialog(patients: List[Patient]):
     )
 
   private def newKouhi(patient: Patient, hokenList: List[Hoken]): Unit =
-    val form = new KouhiForm(None)
+    val props = KouhiProps(None)
     val errBox = ErrorBox()
-    dlog.body(clear, form.ele, errBox.ele)
+    dlog.body(clear, props.formPanel, errBox.ele)
     dlog.commands(
       clear,
       button("入力", onclick := (() => {
-        form.validaForEnter(patient.patientId) match {
+        props.validatedForEnter(patient.patientId) match {
           case Left(msg) => errBox.show(msg)
           case Right(newKouhi) => 
             for

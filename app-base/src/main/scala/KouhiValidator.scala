@@ -1,4 +1,4 @@
-package dev.myclinic.scala.web.appbase.validator
+package dev.myclinic.scala.web.appbase
 
 import cats.syntax.all.*
 import cats.data.Validated
@@ -40,6 +40,9 @@ object KouhiValidator:
       extends SectionValidator(PatientIdError, "patient-id"):
     def validate(value: Int): Result[Int] =
       positive(value)
+
+    def validateOption(value: Option[Int]): Result[Int] =
+      some(value) |> validate
 
   object ConsistentValidRangeValidator
       extends ConsistentValidRangeValidator[KouhiError, Kouhi](

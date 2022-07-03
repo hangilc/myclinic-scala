@@ -11,8 +11,8 @@ import org.scalajs.dom.{HTMLElement, HTMLInputElement}
 import dev.fujiwara.kanjidate.DateUtil
 import dev.myclinic.scala.model.*
 import java.time.LocalDate
-import dev.myclinic.scala.web.appbase.validator.KoukikoureiValidator
-import dev.myclinic.scala.web.appbase.validator.KoukikoureiValidator.*
+import dev.myclinic.scala.web.appbase.KoukikoureiValidator
+import dev.myclinic.scala.web.appbase.KoukikoureiValidator.*
 import dev.fujiwara.validator.section.*
 
 class KoukikoureiForm:
