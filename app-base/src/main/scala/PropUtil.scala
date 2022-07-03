@@ -10,6 +10,7 @@ import org.scalajs.dom.HTMLElement
 import java.time.LocalDate
 import dev.myclinic.scala.model.ValidUpto
 import dev.fujiwara.kanjidate.KanjiDate
+import dev.fujiwara.dateinput.InitNoneConverter
 
 object PropUtil:
   class TextInput[M, E, T](
@@ -40,7 +41,7 @@ object PropUtil:
   class DateInput[M, E](
       modelValue: M => LocalDate,
       validator: Option[LocalDate] => ValidatedResult[E, LocalDate]
-  ) extends InputSpec[M, E, LocalDate]:
+  )(using InitNoneConverter) extends InputSpec[M, E, LocalDate]:
     val dateInput = DateOptionInput()
     val ele: HTMLElement = dateInput.ele
     def updateBy(model: Option[M]): Unit =
@@ -51,7 +52,7 @@ object PropUtil:
   class ValidUptoInput[M, E](
       modelValue: M => ValidUpto,
       validator: Option[LocalDate] => ValidatedResult[E, ValidUpto]
-  ) extends InputSpec[M, E, ValidUpto]:
+  )(using InitNoneConverter) extends InputSpec[M, E, ValidUpto]:
     val dateInput = DateOptionInput()
     val ele: HTMLElement = dateInput.ele
     def updateBy(model: Option[M]): Unit =
@@ -129,7 +130,7 @@ object PropUtil:
       dateFormatter: LocalDate => String = d => KanjiDate.dateToKanji(d),
       dispDefaultValue: String = ""
   ) extends Prop[M, E, LocalDate]:
-    lazy val inputSpec = new DateInput[M, E](
+    lazy val inputSpec: DateInput[M, E] = new DateInput[M, E](
       modelValue,
       validator
     )
@@ -138,13 +139,18 @@ object PropUtil:
       dispDefaultValue
     )
 
+    def currentInputValue: Option[LocalDate] = inputSpec.dateInput.value
+
   case class ValidUptoProp[M, E](
       val label: String,
       modelValue: M => ValidUpto,
       validator: Option[LocalDate] => ValidatedResult[E, ValidUpto],
       dateFormatter: LocalDate => String = d => KanjiDate.dateToKanji(d),
-      dispDefaultValue: String = "（期限なし）"
+      dispDefaultValue: String = "（期限なし）",
+      suggest: () => Option[LocalDate] = () => None
   ) extends Prop[M, E, ValidUpto]:
+    given InitNoneConverter with
+      def convert: Option[LocalDate] = suggest()
     lazy val inputSpec = new ValidUptoInput[M, E](
       modelValue,
       validator

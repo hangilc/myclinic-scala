@@ -45,7 +45,8 @@ case class ShahokokuhoProps(var modelOpt: Option[Shahokokuho]):
     ValidUptoProp[Shahokokuho, ValidUptoError.type](
       "期限終了",
       _.validUpto,
-      ValidUptoValidator.validate
+      ValidUptoValidator.validate,
+      suggest = suggestValidUpto
     ),
     RadioProp[Shahokokuho, KoureiError.type, Int](
       "高齢",
@@ -115,6 +116,9 @@ case class ShahokokuhoProps(var modelOpt: Option[Shahokokuho]):
     validFromProp,
     validUptoProp
   )
+
+  private def suggestValidUpto(): Option[LocalDate] = 
+    validFromProp.currentInputValue.map(_.plusYears(1).minusDays(1))
 
   def updateInput(): this.type = 
     val updater = new InputUpdater(modelOpt)
