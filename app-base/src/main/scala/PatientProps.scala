@@ -91,11 +91,7 @@ case class PatientProps(model: Option[Patient]):
     )
   )
 
-  //def dispPanel: HTMLElement = pModel.dispPanel(p)
-
-  import dev.fujiwara.domq.prop.*
-  val s = summon[ToListElementConstraint[BirthdayError.type, LocalDate]]
-
+  def dispPanel: HTMLElement = pModel.dispPanel(p)
 
   // def updateDisp(): Unit = pModel.updateDisp(props)
   // def dispPanel: HTMLElement = pModel.dispPanel(props)

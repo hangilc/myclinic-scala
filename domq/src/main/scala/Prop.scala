@@ -40,21 +40,24 @@ given [E]: ToListConstraint[EmptyTuple, E] with
 
 type ToListConstraintGen = [E] =>> [T] =>> ToListConstraint[T, E]
 
-given [E, E1 <: E, H: ToListElementConstraintGen[
-  E1
-], E2 <: E, T <: Tuple: ToListConstraintGen[
-  E2
+given [E, H: ToListElementConstraintGen[E], T <: Tuple: ToListConstraintGen[
+  E
 ]]: ToListConstraint[H *: T, E] with
   def convert(t: H *: T): List[E] =
-    summon[ToListElementConstraint[H, E1]].convert(t.head) ::
-      summon[ToListConstraint[T, E2]].convert(t.tail)
+    summon[ToListElementConstraint[H, E]].convert(t.head) ::
+      summon[ToListConstraint[T, E]].convert(t.tail)
 
 case class LabelInput(label: String, input: HTMLElement)
 
-given [E, T, P[M, E, T] <: Prop[M, E, T]]
-    : ToListElementConstraint[P[M, E, T], LabelInput] with
-  def convert(t: P[M, E, T]): LabelInput =
+given [M, E, T, P <: Prop[M, E, T]]
+    : ToListElementConstraint[P, LabelInput] with
+  def convert(t: P): LabelInput =
     LabelInput(t.label, t.inputSpec.ele)
+
+// given [M, E, T, P[M, E, T] <: Prop[M, E, T]]
+//     : ToListElementConstraint[P[M, E, T], LabelInput] with
+//   def convert(t: P[M, E, T]): LabelInput =
+//     LabelInput(t.label, t.inputSpec.ele)
 
 class PropsModel[M](model: Option[M]):
   given [T <: HTMLElement]: ToListElementConstraint[(String, T), LabelInput]
