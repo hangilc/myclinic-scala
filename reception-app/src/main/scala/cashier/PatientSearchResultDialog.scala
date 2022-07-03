@@ -12,6 +12,7 @@ import dev.myclinic.scala.web.appbase.PatientProps
 import dev.myclinic.scala.web.appbase.ShahokokuhoProps
 import dev.myclinic.scala.web.appbase.KoukikoureiProps
 import dev.myclinic.scala.web.appbase.KouhiProps
+import org.scalajs.dom.HTMLElement
 
 case class PatientSearchResultDialog(patients: List[Patient]):
   val selection = Selection[Patient](patients, p => div(format(p)))
@@ -46,17 +47,34 @@ case class PatientSearchResultDialog(patients: List[Patient]):
     for hoken <- listHoken(patient.patientId)
     yield disp(patient, hoken)
 
+  type Modified = Boolean
+
   private def disp(patient: Patient, hokenList: List[Hoken]): Unit =
     val hokenArea = div
-    val disp = PatientProps(Some(patient)).updateDisp().dispPanel
+    val dispElement = PatientProps(Some(patient)).updateDisp().dispPanel
+    def onHokenDispDone(modified: Boolean): Unit =
+      if modified then invokeDisp(patient)
+      else disp(patient, hokenList)
     dlog.body(
       clear,
-      div(cls := "reception-cashier-patient-search-result-dialog-disp-body",
-        disp,
+      div(
+        cls := "reception-cashier-patient-search-result-dialog-disp-body",
+        dispElement,
         hokenArea(
           cls := "hoken-area",
           hokenList.map(h => {
-            a(HokenUtil.hokenRep(h))
+            a(
+              HokenUtil.hokenRep(h),
+              onclick := (() => {
+                h match {
+                  case s: Shahokokuho => dispShahokokuho(s, patient, onHokenDispDone _)
+                  case k: Koukikourei => dispKoukikourei(k, patient, onHokenDispDone _)
+                  case k: Kouhi       => dispKouhi(k, patient, onHokenDispDone _)
+                  case r: Roujin      => dispRoujin(r, patient, onHokenDispDone _)
+                }
+                ()
+              })
+            )
           })
         )
       )
@@ -79,10 +97,60 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       )
     )
 
+  private def dispShahokokuho(
+      shahokokuho: Shahokokuho,
+      patient: Patient,
+      onDone: Modified => Unit
+  ) =
+    val props = ShahokokuhoProps(Some(shahokokuho)).updateDisp()
+    dlog.body(clear, patientBlock(patient), props.dispPanel)
+    dlog.commands(clear, 
+          button("戻る", onclick := (() => onDone(false)))
+    )
+
+  private def dispKoukikourei(
+      koukikourei: Koukikourei,
+      patient: Patient,
+      onDone: Modified => Unit
+  ) =
+    val props = KoukikoureiProps(Some(koukikourei)).updateDisp()
+    dlog.body(clear, patientBlock(patient), props.dispPanel)
+    dlog.commands(clear, 
+          button("戻る", onclick := (() => onDone(false)))
+    )
+
+  private def dispKouhi(
+      kouhi: Kouhi,
+      patient: Patient,
+      onDone: Modified => Unit
+  ) =
+    val props = KouhiProps(Some(kouhi)).updateDisp()
+    dlog.body(clear, patientBlock(patient), props.dispPanel)
+    dlog.commands(clear, 
+          button("戻る", onclick := (() => onDone(false)))
+    )
+
+  private def dispRoujin(
+      roujin: Roujin,
+      patient: Patient,
+      onDone: Modified => Unit
+  ) =
+    val props = RoujinProps(Some(roujin)).updateDisp()
+    dlog.body(clear, patientBlock(patient), props.dispPanel)
+    dlog.commands(clear, 
+          button("戻る", onclick := (() => onDone(false)))
+    )
+
+  private def patientBlock(patient: Patient): HTMLElement =
+    div(
+      innerText := s"(${patient.patientId} ${patient.lastName} ${patient.firstName}",
+      cls := "patient-block"
+    )
+
   private def newShahokokuho(patient: Patient): Unit =
     val props = ShahokokuhoProps(None).updateInput()
     val errBox = ErrorBox()
-    dlog.body(clear, props.formPanel, errBox.ele)
+    dlog.body(clear, patientBlock(patient), props.formPanel, errBox.ele)
     dlog.commands(
       clear,
       button(
