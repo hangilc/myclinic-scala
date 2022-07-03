@@ -56,12 +56,12 @@ case class ShahokokuhoProps(var modelOpt: Option[Shahokokuho]):
       inputLayout = rg => 
         val rest: List[Int] = rg.values.filter(_ != 0)
         div(displayBlock,
-          div(rg.getRadioLabel(0).ele),
-          div(
+          div(cls := "upper-row", rg.getRadioLabel(0).ele),
+          div(cls := "lower-row",
             rest.map(rg.getRadioLabel(_).ele)
           )
         )
-    ),
+    ).inputElementClass("kourei-input"),
     TextProp[Shahokokuho, EdabanError.type, String](
       "枝番",
       _.edaban,

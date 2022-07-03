@@ -39,13 +39,32 @@
 
 /* shahokokuho form **********************************/
 
-.shahokokuho-form .hokensha-bangou-input,
+.shahokokuho-form .hokensha-bangou-input {
+  width: 6rem;
+}
+
 .shahokokuho-form .hihokensha-kigou-input,
 .shahokokuho-form .hihokensha-bangou-input
 {
-  width: 5rem;
+  width: 6rem;
+  width: 6rem;
 }
 
 .shahokokuho-form .edaban-input {
   width: 3rem;
+}
+
+.shahokokuho-form .kourei-input {
+  margin: 4px 0;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+}
+
+.shahokokuho-form .kourei-input .lower-row{
+  margin-top: -4px;
+}
+
+.shahokokuho-form .kourei-input input {
+  margin-top: 0;
+  margin-bottom: 0;
 }
