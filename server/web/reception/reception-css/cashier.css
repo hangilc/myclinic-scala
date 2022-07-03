@@ -36,7 +36,7 @@
 }
 
 .reception-cashier-wqueue-table .col-patient-id {
-    width: 5rem;
+    width: 4rem;
 }
 
 .reception-cashier-wqueue-table .col-name {
@@ -53,6 +53,11 @@
 
 .reception-cashier-wqueue-table .col-birthday {
     width: 7.5rem;
+}
+
+.reception-cashier-wqueue-table .cell-patient-id {
+    text-align: center;
+    padding-right: 0.7rem;
 }
 
 .reception-cashier-wqueue-table .cell-birthday {

@@ -41,12 +41,12 @@ object KoukikoureiValidator:
   object HokenshaBangouValidator
       extends SectionValidator(HokenshaBangouError, "保険者番号"):
     def validate(input: String): Result[String] =
-      notEmpty(input)
+      (inputToInt(input) |> positive).map(_ => input)
 
   object HihokenshaBangouValidator
       extends SectionValidator(HihokenshaBangouError, "被保険者番号"):
     def validate(input: String): Result[String] =
-      notEmpty(input)
+      (inputToInt(input) |> positive).map(_ => input)
 
   object FutanWariValidator extends SectionValidator(FutanWariError, "負担割"):
     def validate(value: Int): Result[Int] =

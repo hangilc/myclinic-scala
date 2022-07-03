@@ -14,6 +14,8 @@ import dev.fujiwara.domq.all.{*, given}
 import scala.language.implicitConversions
 
 case class ShahokokuhoProps(var modelOpt: Option[Shahokokuho]):
+  private val validUptoChangedPublisher = new LocalEventPublisher[Option[LocalDate]]
+
   val props = (
     TextProp[Shahokokuho, HokenshaBangouError.type, Int](
       "保険者番号",
@@ -46,7 +48,8 @@ case class ShahokokuhoProps(var modelOpt: Option[Shahokokuho]):
       "期限終了",
       _.validUpto,
       ValidUptoValidator.validate,
-      suggest = suggestValidUpto
+      suggest = suggestValidUpto,
+      onInputChange = onValidUptoChange _
     ),
     RadioProp[Shahokokuho, KoureiError.type, Int](
       "高齢",
@@ -117,8 +120,14 @@ case class ShahokokuhoProps(var modelOpt: Option[Shahokokuho]):
     validUptoProp
   )
 
+  def onValidUptoChange(handler: Option[LocalDate] => Unit): Unit =
+    validUptoChangedPublisher.subscribe(handler)
+
   private def suggestValidUpto(): Option[LocalDate] = 
     validFromProp.currentInputValue.map(_.plusYears(1).minusDays(1))
+
+  private def onValidUptoChange(dateOpt: Option[LocalDate]): Unit =
+    validUptoChangedPublisher.publish(dateOpt)
 
   def updateInput(): this.type = 
     val updater = new InputUpdater(modelOpt)

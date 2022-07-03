@@ -12,6 +12,7 @@ import dev.myclinic.scala.web.appbase.PatientProps
 import dev.myclinic.scala.web.appbase.ShahokokuhoProps
 import dev.myclinic.scala.web.appbase.KoukikoureiProps
 import dev.myclinic.scala.web.appbase.KouhiProps
+import dev.myclinic.scala.web.appbase.RoujinProps
 import org.scalajs.dom.HTMLElement
 
 case class PatientSearchResultDialog(patients: List[Patient]):
@@ -101,18 +102,30 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       shahokokuho: Shahokokuho,
       patient: Patient,
       onDone: Modified => Unit
-  ) =
+  ): Unit =
     val props = ShahokokuhoProps(Some(shahokokuho)).updateDisp()
     dlog.body(clear, patientBlock(patient), props.dispPanel)
     dlog.commands(clear, 
+          button("編集", onclick := (() => editShahokokuho(shahokokuho, patient, onDone))),
           button("戻る", onclick := (() => onDone(false)))
+    )
+
+  private def editShahokokuho(
+      shahokokuho: Shahokokuho,
+      patient: Patient,
+      onDone: Modified => Unit
+  ): Unit =
+    val props = ShahokokuhoProps(Some(shahokokuho)).updateInput()
+    dlog.body(clear, patientBlock(patient), props.formPanel)
+    dlog.commands(clear, 
+          button("キャンセル", onclick := (() => onDone(false)))
     )
 
   private def dispKoukikourei(
       koukikourei: Koukikourei,
       patient: Patient,
       onDone: Modified => Unit
-  ) =
+  ): Unit =
     val props = KoukikoureiProps(Some(koukikourei)).updateDisp()
     dlog.body(clear, patientBlock(patient), props.dispPanel)
     dlog.commands(clear, 
@@ -123,7 +136,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       kouhi: Kouhi,
       patient: Patient,
       onDone: Modified => Unit
-  ) =
+  ): Unit =
     val props = KouhiProps(Some(kouhi)).updateDisp()
     dlog.body(clear, patientBlock(patient), props.dispPanel)
     dlog.commands(clear, 
@@ -134,7 +147,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       roujin: Roujin,
       patient: Patient,
       onDone: Modified => Unit
-  ) =
+  ): Unit =
     val props = RoujinProps(Some(roujin)).updateDisp()
     dlog.body(clear, patientBlock(patient), props.dispPanel)
     dlog.commands(clear, 
@@ -143,7 +156,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
 
   private def patientBlock(patient: Patient): HTMLElement =
     div(
-      innerText := s"(${patient.patientId} ${patient.lastName} ${patient.firstName}",
+      innerText := s"(${patient.patientId}) ${patient.lastName} ${patient.firstName}",
       cls := "patient-block"
     )
 

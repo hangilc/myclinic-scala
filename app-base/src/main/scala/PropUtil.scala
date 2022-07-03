@@ -51,9 +51,11 @@ object PropUtil:
 
   class ValidUptoInput[M, E](
       modelValue: M => ValidUpto,
-      validator: Option[LocalDate] => ValidatedResult[E, ValidUpto]
+      validator: Option[LocalDate] => ValidatedResult[E, ValidUpto],
+      onChange: Option[LocalDate] => Unit
   )(using InitNoneConverter) extends InputSpec[M, E, ValidUpto]:
     val dateInput = DateOptionInput()
+    dateInput.onChange(onChange)
     val ele: HTMLElement = dateInput.ele
     def updateBy(model: Option[M]): Unit =
       dateInput.init(model.flatMap(modelValue(_).value))
@@ -147,13 +149,15 @@ object PropUtil:
       validator: Option[LocalDate] => ValidatedResult[E, ValidUpto],
       dateFormatter: LocalDate => String = d => KanjiDate.dateToKanji(d),
       dispDefaultValue: String = "（期限なし）",
-      suggest: () => Option[LocalDate] = () => None
+      suggest: () => Option[LocalDate] = () => None,
+      onInputChange: Option[LocalDate] => Unit = _ => ()
   ) extends Prop[M, E, ValidUpto]:
     given InitNoneConverter with
       def convert: Option[LocalDate] = suggest()
     lazy val inputSpec = new ValidUptoInput[M, E](
       modelValue,
-      validator
+      validator,
+      onChange = onInputChange
     )
     lazy val dispSpec = new SpanDisp[M](
       m => dateFormatter(modelValue(m)),

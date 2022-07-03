@@ -38,7 +38,7 @@ case class WqueueRow(wqueue: Wqueue, visit: Visit, patient: Patient)(using
 
   def updateUI(): Unit =
     stateLabelCell(innerText := wqueue.waitState.label)
-    patientIdCell(innerText := patient.patientId.toString)
+    patientIdCell(innerText := String.format("%04d", patient.patientId))
     nameCell(innerText := patient.fullName())
     yomiCell(innerText := patient.fullNameYomi())
     sexCell(innerText := patient.sex.rep)
