@@ -149,4 +149,3 @@ object Prop:
 
   def resultsOf(props: Tuple): Tuple.Map[props.type, ResultOf] =
     props.map[ResultOf]([T] => (t: T) => resultOf(t))
-

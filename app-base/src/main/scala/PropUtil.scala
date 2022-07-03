@@ -104,7 +104,9 @@ object PropUtil:
     defaultValue: T,
     modelValue: M => T,
     validator: T => ValidatedResult[E, T],
-    dispDefaultValue: String = ""
+    dispDefaultValue: String = "",
+    toDispValue: (T, RadioGroup[T]) => String = 
+      (t: T, g: RadioGroup[T]) => g.findLabel(t)
   ) extends Prop[M, E, T]:
     val radioGroup = RadioGroup[T](data, initValue = Some(defaultValue))
     lazy val inputSpec = new RadioInput[M, E, T](
@@ -114,7 +116,7 @@ object PropUtil:
       defaultValue
     )
     lazy val dispSpec = new SpanDisp[M](
-      m => radioGroup.findLabel(modelValue(m)).getOrElse(""),
+      m => toDispValue(modelValue(m), radioGroup),
       dispDefaultValue
     )
 

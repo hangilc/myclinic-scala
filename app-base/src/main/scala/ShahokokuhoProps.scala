@@ -138,7 +138,7 @@ case class ShahokokuhoProps(var modelOpt: Option[Shahokokuho]):
     val rs = Prop.resultsOf(props)
     ShahokokuhoValidator
       .validate(
-        ShahokokuhoIdValidator.validateForEnter *:
+        ShahokokuhoIdValidator.validateOptionForUpdate(modelOpt.map(_.shahokokuhoId)) *:
           PatientIdValidator.validateOption(modelOpt.map(_.patientId)) *: rs
       )
       .asEither

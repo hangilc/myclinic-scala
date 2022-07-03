@@ -41,7 +41,8 @@ case class PatientProps(modelOpt: Option[Patient]):
       List("男" -> Sex.Male, "女" -> Sex.Female),
       Sex.Female,
       _.sex,
-      SexValidator.validate
+      SexValidator.validate,
+      toDispValue = (t: Sex, g: RadioGroup[Sex]) => g.findLabel(t) + "性"
     ),
     DateProp[Patient, BirthdayError.type](
       "生年月日",

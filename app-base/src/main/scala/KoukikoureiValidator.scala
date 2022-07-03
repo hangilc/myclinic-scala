@@ -1,7 +1,8 @@
-package dev.myclinic.scala.web.appbase.validator
+package dev.myclinic.scala.web.appbase
 
 import cats.syntax.all.*
 import cats.data.Validated
+import cats.data.Validated.Valid
 import dev.fujiwara.validator.section.*
 import dev.fujiwara.validator.section.Implicits.*
 import dev.myclinic.scala.model.ValidUpto
@@ -23,7 +24,7 @@ object KoukikoureiValidator:
 
   type SectionResult[E, T] = ValidatedSection[E, T]
 
-  extension [E <: KoukikoureiError, T] (r: SectionResult[E, T])
+  extension [E <: KoukikoureiError, T](r: SectionResult[E, T])
     def asKoukikoureiError: SectionResult[KoukikoureiError, T] = r
 
   object KoukikoureiIdValidator
@@ -33,6 +34,9 @@ object KoukikoureiValidator:
       extends SectionValidator(PatientIdError, "patient-id"):
     def validate(value: Int): Result[Int] =
       positive(value)
+
+    def validateOption(value: Option[Int]): Result[Int] =
+      some(value) |> validate
 
   object HokenshaBangouValidator
       extends SectionValidator(HokenshaBangouError, "保険者番号"):
@@ -56,27 +60,23 @@ object KoukikoureiValidator:
   object ConsistentValidRangeValidator
       extends ConsistentValidRangeValidator[KoukikoureiError, Koukikourei](
         InconsistentValidRangeError,
-        _.validFrom, _.validUpto.value
+        _.validFrom,
+        _.validUpto.value
       )
 
   def validate(
-      koukikoureiIdResult: SectionResult[KoukikoureiIdError.type, Int],
-      patientIdResult: SectionResult[PatientIdError.type, Int],
-      hokenshaBangouResult: SectionResult[HokenshaBangouError.type, String],
-      hihokenshaBangouResult: SectionResult[HihokenshaBangouError.type, String],
-      futanWariResult: SectionResult[FutanWariError.type, Int],
-      validFromResult: SectionResult[ValidFromError.type, LocalDate],
-      validUptoResult: SectionResult[ValidUptoError.type, ValidUpto]
+      rs: (
+          SectionResult[KoukikoureiIdError.type, Int],
+          SectionResult[PatientIdError.type, Int],
+          SectionResult[HokenshaBangouError.type, String],
+          SectionResult[HihokenshaBangouError.type, String],
+          SectionResult[FutanWariError.type, Int],
+          SectionResult[ValidFromError.type, LocalDate],
+          SectionResult[ValidUptoError.type, ValidUpto]
+      )
   ): ValidatedResult[KoukikoureiError, Koukikourei] =
-    (
-      koukikoureiIdResult.asKoukikoureiError,
-      patientIdResult.asKoukikoureiError,
-      hokenshaBangouResult.asKoukikoureiError,
-      hihokenshaBangouResult.asKoukikoureiError,
-      futanWariResult.asKoukikoureiError,
-      validFromResult.asKoukikoureiError,
-      validUptoResult.asKoukikoureiError,
-    ).mapN(Koukikourei.apply _) |> ConsistentValidRangeValidator.validate
+    val dummy: ValidatedResult[KoukikoureiError, Int] = Valid(0)
+    (dummy *: rs).tupled.map(_.tail).map(Koukikourei.apply.tupled)
+      |> ConsistentValidRangeValidator.validate
 
   export Implicits.asEither
-
