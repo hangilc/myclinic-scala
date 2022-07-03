@@ -100,30 +100,17 @@ case class PatientProps(modelOpt: Option[Patient]):
   def formPanel: HTMLElement = Prop.formPanel(formProps)
   def dispPanel: HTMLElement = Prop.dispPanel(dispProps)
 
-  type UpdateInputResult[T] = T match {
-    case Prop[Patient, e, t] => Unit
-  }
+  def updateInput(): this.type =
+    val updater = new InputUpdater[Patient](modelOpt)
+    import updater.given
+    updater.update(props)
+    this
 
-  def updateInput[T](t: T): UpdateInputResult[T] =
-    t match {
-      case p: Prop[Patient, e, t] => 
-        p.inputSpec.updateBy(modelOpt)
-    }
-
-  def updateInput(props: Tuple): Tuple.Map[props.type, UpdateInputResult] =
-    props.map[UpdateInputResult]([T] => (t: T) => updateInput(t))
-
-
-  // def updateInput(): this.type = 
-  //   val updater = Prop.InputUpdater(modelOpt)
-  //   import updater.given
-  //   updater.update(props)
-  //   this
-  // def updateDisp(): this.type = 
-  //   val updater = Prop.DispUpdater(modelOpt)
-  //   import updater.given
-  //   updater.update(props)
-  //   this
+  def updateDisp(): this.type =
+    val updater = new DispUpdater[Patient](modelOpt)
+    import updater.given
+    updater.update(props)
+    this
 
   def validatedForEnter: Either[String, Patient] =
     PatientValidator.validate(

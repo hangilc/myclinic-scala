@@ -9,6 +9,7 @@ import java.time.LocalDate
 import scala.concurrent.Future
 import dev.myclinic.scala.apputil.HokenUtil
 import dev.myclinic.scala.web.appbase.PatientProps
+import dev.myclinic.scala.web.appbase.ShahokokuhoProps
 
 case class PatientSearchResultDialog(patients: List[Patient]):
   val selection = Selection[Patient](patients, p => div(format(p)))
@@ -75,15 +76,15 @@ case class PatientSearchResultDialog(patients: List[Patient]):
     )
 
   private def newShahokokuho(patient: Patient): Unit =
-    val form = ShahokokuhoForm(None)
+    val props = ShahokokuhoProps(None).updateInput()
     val errBox = ErrorBox()
-    dlog.body(clear, form.ele, errBox.ele)
+    dlog.body(clear, props.formPanel, errBox.ele)
     dlog.commands(
       clear,
       button(
         "入力",
         onclick := (() => {
-          form.validateForEnter(patient.patientId) match {
+          props.validatedForEnter(patient.patientId) match {
             case Left(msg) => errBox.show(msg)
             case Right(newShahokokuho) =>
               for entered <- Api.enterShahokokuho(newShahokokuho)
@@ -136,15 +137,15 @@ case class PatientSearchResultDialog(patients: List[Patient]):
     )
 
   private def edit(patient: Patient): Unit =
-    val form = PatientProps.form(Some(patient))
+    val props = PatientProps(Some(patient)).updateInput()
     val errBox = ErrorBox()
-    dlog.body(clear, form.ele, errBox.ele)
+    dlog.body(clear, props.formPanel, errBox.ele)
     dlog.commands(
       clear,
       button(
         "入力",
         onclick := (() => {
-          form.validateForUpdate match {
+          props.validatedForUpdate match {
             case Left(msg) => errBox.show(msg)
             case Right(newPatient) =>
               for

@@ -108,16 +108,16 @@ case class ShahokokuhoProps(var modelOpt: Option[Shahokokuho]):
     validUptoProp
   )
 
-  // def updateInput(): this.type = 
-  //   val updater = Prop.InputUpdater(modelOpt)
-  //   import updater.given
-  //   updater.update(props)
-  //   this
-  // def updateDisp(): this.type = 
-  //   val updater = Prop.DispUpdater(modelOpt)
-  //   import updater.given
-  //   updater.update(props)
-  //   this
+  def updateInput(): this.type = 
+    val updater = new InputUpdater(modelOpt)
+    import updater.given
+    updater.update(props)
+    this
+  def updateDisp(): this.type = 
+    val updater = new DispUpdater(modelOpt)
+    import updater.given
+    updater.update(props)
+    this
 
   def formPanel: HTMLElement =
     Prop.formPanel(formProps)
