@@ -52,13 +52,21 @@ case class ShahokokuhoProps(var modelOpt: Option[Shahokokuho]):
       List("高齢でない" -> 0, "１割" -> 1, "２割" -> 2, "３割" -> 3),
       0,
       _.koureiStore,
-      KoureiValidator.validate
+      KoureiValidator.validate,
+      inputLayout = rg => 
+        val rest: List[Int] = rg.values.filter(_ != 0)
+        div(displayBlock,
+          div(rg.getRadioLabel(0).ele),
+          div(
+            rest.map(rg.getRadioLabel(_).ele)
+          )
+        )
     ),
     TextProp[Shahokokuho, EdabanError.type, String](
       "枝番",
       _.edaban,
       EdabanValidator.validate
-    )
+    ).inputElementClass("edaban-input")
   )
 
   val (
@@ -120,7 +128,7 @@ case class ShahokokuhoProps(var modelOpt: Option[Shahokokuho]):
     this
 
   def formPanel: HTMLElement =
-    Prop.formPanel(formProps)
+    Prop.formPanel(formProps)(cls := "shahokokuho-form")
 
   def dispPanel: HTMLElement =
     Prop.dispPanel(dispProps)

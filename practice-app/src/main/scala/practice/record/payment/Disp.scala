@@ -16,7 +16,7 @@ case class Disp(chargeOption: Option[Charge], paymentOption: Option[Payment], vi
   chargeSpan(innerText := PaymentHelper.chargeRep(chargeOption))
   setPaymentStatus(status)
   if status != PaymentStatus.NotYet then
-    ele(onclick := (doEdit _), cls := "can-edit")
+    ele(onclick := (doEdit _), cls := "domq-cursor-pointer")
 
   def setPaymentStatus(status: PaymentStatus): Unit =
     statusSpan(innerText := status.rep)

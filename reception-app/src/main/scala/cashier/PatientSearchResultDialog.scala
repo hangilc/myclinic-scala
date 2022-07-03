@@ -51,12 +51,14 @@ case class PatientSearchResultDialog(patients: List[Patient]):
     val disp = PatientProps(Some(patient)).updateDisp().dispPanel
     dlog.body(
       clear,
-      disp,
-      hokenArea(
-        cls := "hoken-area",
-        hokenList.map(h => {
-          a(HokenUtil.hokenRep(h))
-        })
+      div(cls := "reception-cashier-patient-search-result-dialog-disp-body",
+        disp,
+        hokenArea(
+          cls := "hoken-area",
+          hokenList.map(h => {
+            a(HokenUtil.hokenRep(h))
+          })
+        )
       )
     )
     dlog.commands(
@@ -66,7 +68,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
         button("閉じる", onclick := (() => dlog.close()))
       ),
       div(
-        cls := "domq-mt-4",
+        cls := "domq-mt-4 reception-cashier-patient-search-result-dialog-disp-link-commands",
         a("編集", onclick := (() => edit(patient))),
         "|",
         a("新規社保国保", onclick := (() => newShahokokuho(patient))),
@@ -125,16 +127,18 @@ case class PatientSearchResultDialog(patients: List[Patient]):
     dlog.body(clear, props.formPanel, errBox.ele)
     dlog.commands(
       clear,
-      button("入力", onclick := (() => {
-        props.validatedForEnter(patient.patientId) match {
-          case Left(msg) => errBox.show(msg)
-          case Right(newKouhi) => 
-            for
-              _ <- Api.enterKouhi(newKouhi)
-            yield invokeDisp(patient)
-        }
-        ()
-      })),
+      button(
+        "入力",
+        onclick := (() => {
+          props.validatedForEnter(patient.patientId) match {
+            case Left(msg) => errBox.show(msg)
+            case Right(newKouhi) =>
+              for _ <- Api.enterKouhi(newKouhi)
+              yield invokeDisp(patient)
+          }
+          ()
+        })
+      ),
       button("キャンセル", onclick := (() => disp(patient, hokenList)))
     )
 

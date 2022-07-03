@@ -32,6 +32,8 @@ case class RadioGroup[T](
 
   def value: T = selected
 
+  def values: List[T] = items.map(_._2)
+
   def check(value: T): Unit =
     radioLabels.find(_.value == value).foreach(_.check())
 

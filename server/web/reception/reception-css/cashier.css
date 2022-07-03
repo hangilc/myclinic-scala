@@ -96,3 +96,12 @@
     font-weight: bold;
     color: var(--primary-color);
 }
+
+.reception-cashier-patient-search-result-dialog-disp-body {
+    max-width: 16rem;
+}
+
+.reception-cashier-patient-search-result-dialog-disp-link-commands {
+    text-align: left;
+    max-width: 16rem;
+}

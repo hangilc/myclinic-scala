@@ -20,22 +20,22 @@ case class PatientProps(modelOpt: Option[Patient]):
       "姓",
       _.lastName,
       LastNameValidator.validate _
-    ),
+    ).inputElementClass("last-name-input"),
     TextProp[Patient, FirstNameError.type, String](
       "名",
       _.firstName,
       FirstNameValidator.validate _
-    ),
+    ).inputElementClass("first-name-input"),
     TextProp[Patient, LastNameYomiError.type, String](
       "姓（よみ）",
       _.lastNameYomi,
       LastNameYomiValidator.validate _
-    ),
+    ).inputElementClass("last-name-yomi-input"),
     TextProp[Patient, FirstNameYomiError.type, String](
       "名（よみ）",
       _.firstNameYomi,
       FirstNameYomiValidator.validate
-    ),
+    ).inputElementClass("first-name-yomi-input"),
     RadioProp[Patient, SexError.type, Sex](
       "性別",
       List("男" -> Sex.Male, "女" -> Sex.Female),
@@ -53,12 +53,12 @@ case class PatientProps(modelOpt: Option[Patient]):
       "住所",
       _.address,
       AddressValidator.validate
-    ),
+    ).inputElementClass("address-input"),
     TextProp[Patient, PhoneError.type, String](
       "電話",
       _.phone,
       PhoneValidator.validate
-    )
+    ).inputElementClass("phone-input")
   )
 
   val (
@@ -98,7 +98,7 @@ case class PatientProps(modelOpt: Option[Patient]):
     phoneProp
   )
 
-  def formPanel: HTMLElement = Prop.formPanel(formProps)
+  def formPanel: HTMLElement = Prop.formPanel(formProps)(cls := "patient-form")
   def dispPanel: HTMLElement = Prop.dispPanel(dispProps)
 
   def updateInput(): this.type =

@@ -1,4 +1,4 @@
-/* DateInput ************************************************************/
+/* date input *************************************/
 
 .appbase-date-input {
   display: flex;
@@ -21,9 +21,31 @@
   margin-left: 0.1rem;
 }
 
-/* can edit ***************************************************************/
+/* patient form *************************************/
 
-.can-edit {
-  cursor: pointer;
+.patient-form .last-name-input,
+.patient-form .first-name-input,
+.patient-form .last-name-yomi-input,
+.patient-form .first-name-yomi-input
+{
+  width: 5rem;
 }
 
+.patient-form .address-input,
+.patient-form .phone-input
+{
+  width: 12rem;
+}
+
+/* shahokokuho form **********************************/
+
+.shahokokuho-form .hokensha-bangou-input,
+.shahokokuho-form .hihokensha-kigou-input,
+.shahokokuho-form .hihokensha-bangou-input
+{
+  width: 5rem;
+}
+
+.shahokokuho-form .edaban-input {
+  width: 3rem;
+}

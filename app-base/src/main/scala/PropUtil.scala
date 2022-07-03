@@ -82,8 +82,8 @@ object PropUtil:
       val label: String,
       modelValue: M => T,
       validator: String => ValidatedResult[E, T],
-      toInputValue: T => String = (t :T) => t.toString,
-      toDispValue: T => String = (t :T) => t.toString,
+      toInputValue: T => String = (t: T) => t.toString,
+      toDispValue: T => String = (t: T) => t.toString,
       inputDefaultValue: String = "",
       dispDefaultValue: String = ""
   ) extends Prop[M, E, T]:
@@ -99,16 +99,18 @@ object PropUtil:
     )
 
   case class RadioProp[M, E, T](
-    val label: String,
-    data: List[(String, T)],
-    defaultValue: T,
-    modelValue: M => T,
-    validator: T => ValidatedResult[E, T],
-    dispDefaultValue: String = "",
-    toDispValue: (T, RadioGroup[T]) => String = 
-      (t: T, g: RadioGroup[T]) => g.findLabel(t)
+      val label: String,
+      data: List[(String, T)],
+      defaultValue: T,
+      modelValue: M => T,
+      validator: T => ValidatedResult[E, T],
+      dispDefaultValue: String = "",
+      toDispValue: (T, RadioGroup[T]) => String = (t: T, g: RadioGroup[T]) =>
+        g.findLabel(t),
+      inputLayout: RadioGroup[T] => HTMLElement = RadioGroup.defaultLayout[T]
   ) extends Prop[M, E, T]:
-    val radioGroup = RadioGroup[T](data, initValue = Some(defaultValue))
+    val radioGroup =
+      RadioGroup[T](data, initValue = Some(defaultValue), layout = inputLayout)
     lazy val inputSpec = new RadioInput[M, E, T](
       radioGroup,
       modelValue,
@@ -121,11 +123,11 @@ object PropUtil:
     )
 
   case class DateProp[M, E](
-    val label: String,
-    modelValue: M => LocalDate,
-    validator: Option[LocalDate] => ValidatedResult[E, LocalDate],
-    dateFormatter: LocalDate => String = d => KanjiDate.dateToKanji(d),
-    dispDefaultValue: String = ""
+      val label: String,
+      modelValue: M => LocalDate,
+      validator: Option[LocalDate] => ValidatedResult[E, LocalDate],
+      dateFormatter: LocalDate => String = d => KanjiDate.dateToKanji(d),
+      dispDefaultValue: String = ""
   ) extends Prop[M, E, LocalDate]:
     lazy val inputSpec = new DateInput[M, E](
       modelValue,
@@ -137,11 +139,11 @@ object PropUtil:
     )
 
   case class ValidUptoProp[M, E](
-    val label: String,
-    modelValue: M => ValidUpto,
-    validator: Option[LocalDate] => ValidatedResult[E, ValidUpto],
-    dateFormatter: LocalDate => String = d => KanjiDate.dateToKanji(d),
-    dispDefaultValue: String = "（期限なし）"
+      val label: String,
+      modelValue: M => ValidUpto,
+      validator: Option[LocalDate] => ValidatedResult[E, ValidUpto],
+      dateFormatter: LocalDate => String = d => KanjiDate.dateToKanji(d),
+      dispDefaultValue: String = "（期限なし）"
   ) extends Prop[M, E, ValidUpto]:
     lazy val inputSpec = new ValidUptoInput[M, E](
       modelValue,
@@ -151,5 +153,3 @@ object PropUtil:
       m => dateFormatter(modelValue(m)),
       dispDefaultValue
     )
-
-
