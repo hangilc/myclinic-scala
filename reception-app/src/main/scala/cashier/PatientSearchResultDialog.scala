@@ -45,7 +45,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
 
   private def disp(patient: Patient, hokenList: List[Hoken]): Unit =
     val hokenArea = div
-    val disp = PatientProps.disp(patient)
+    val disp = PatientProps(Some(patient)).updateDisp().dispPanel
     dlog.body(
       clear,
       disp,

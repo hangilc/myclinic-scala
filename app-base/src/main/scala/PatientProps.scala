@@ -1,6 +1,6 @@
 package dev.myclinic.scala.web.appbase
 
-import dev.fujiwara.domq.prop.*
+import dev.fujiwara.domq.prop.{*, given}
 import dev.myclinic.scala.model.Patient
 import dev.myclinic.scala.model.Sex
 import dev.myclinic.scala.web.appbase.PatientValidator.{*, given}
@@ -13,14 +13,14 @@ import dev.fujiwara.validator.section.Implicits.*
 import dev.fujiwara.domq.all.{*, given}
 import scala.language.implicitConversions
 
-case class PatientProps(model: Option[Patient]):
+case class PatientProps(modelOpt: Option[Patient]):
 
   val props = (
-    TextProp[Patient, LastNameError.type, String](
+    PatientProp(TextProp[Patient, LastNameError.type, String](
       "姓",
       _.lastName,
       LastNameValidator.validate _
-    ),
+    )),
     TextProp[Patient, FirstNameError.type, String](
       "名",
       _.firstName,
@@ -71,105 +71,74 @@ case class PatientProps(model: Option[Patient]):
     phoneProp
   ) = props
 
-  val pModel = PropsModel(model)
-
-  val p = (
-    DateProp[Patient, BirthdayError.type](
-      "生年月日",
-      _.birthday,
-      BirthdayValidator.validate
-    ),
-    // TextProp[Patient, AddressError.type, String](
-    //   "住所",
-    //   _.address,
-    //   AddressValidator.validate
-    // ),
-    TextProp[Patient, PhoneError.type, String](
-      "電話",
-      _.phone,
-      PhoneValidator.validate
-    )
+  val formProps = (
+    ("名前", div(displayBlock,
+      lastNameProp.inputElement, " ", firstNameProp.inputElement
+    )),
+    ("よみ", div(displayBlock,
+      lastNameYomiProp.inputElement, " ", firstNameYomiProp.inputElement
+    )),
+    sexProp,
+    birthdayProp,
+    addressProp,
+    phoneProp
   )
 
-  def dispPanel: HTMLElement = pModel.dispPanel(p)
+  val dispProps = (
+    ("名前", div(displayBlock,
+      lastNameProp.dispElement, " ", firstNameProp.dispElement
+    )),
+    ("よみ", div(displayBlock,
+      lastNameYomiProp.dispElement, " ", firstNameYomiProp.dispElement
+    )),
+    sexProp,
+    birthdayProp,
+    addressProp,
+    phoneProp
+  )
 
-  // def updateDisp(): Unit = pModel.updateDisp(props)
-  // def dispPanel: HTMLElement = pModel.dispPanel(props)
-  // def updateInput(): Unit = pModel.updateInput(props)
-  // def formPanel: HTMLElement = pModel.formPanel(props)
+  def formPanel: HTMLElement = Prop.formPanel(formProps)
+  def dispPanel: HTMLElement = Prop.dispPanel(dispProps)
 
-// object PatientProps:
-//   def disp(patient: Patient): HTMLElement =
-//     val props = PatientProps(Some(patient))
-//     props.updateDisp()
-//     val dispProps = (
-//       ("患者番号", span(patient.patientId.toString)),
-//       (
-//         "姓名",
-//         div(
-//           props.lastNameProp.dispSpec.ele,
-//           " ",
-//           props.firstNameProp.dispSpec.ele
-//         )
-//       ),
-//       (
-//         "よみ",
-//         div(
-//           props.lastNameYomiProp.dispSpec.ele,
-//           " ",
-//           props.firstNameYomiProp.dispSpec.ele
-//         )
-//       ),
-//       // props.birthdayProp,
-//       props.sexProp,
-//       props.addressProp,
-//       props.phoneProp
-//     )
-//     props.pModel.dispPanel(dispProps)
+  case class PatientProp[E, T](value: Prop[Patient, E, T])
 
-//   case class Form(model: Option[Patient]):
-//     val props = PatientProps(model)
-//     props.updateInput()
-//     val ele: HTMLElement =
-//       val formProps = (
-//         (
-//           "姓名",
-//           div(
-//             props.lastNameProp.inputSpec.ele,
-//             " ",
-//             props.firstNameProp.inputSpec.ele
-//           )
-//         ),
-//         (
-//           "よみ",
-//           div(
-//             props.lastNameYomiProp.inputSpec.ele,
-//             " ",
-//             props.firstNameYomiProp.inputSpec.ele
-//           )
-//         ),
-//         // props.birthdayProp,
-//         props.sexProp,
-//         props.addressProp,
-//         props.phoneProp
-//       )
-//       props.pModel.formPanel(formProps)
-//     def validateForEnter: Either[String, Patient] =
-//       ???
-//       // val rs = props.pModel.resultsOf(props.props)
-//       // PatientValidator
-//       //   .validate(PatientIdValidator.validateForEnter *: rs)
-//       //   .asEither
-//     def validateForUpdate: Either[String, Patient] =
-//       ???
-//       // val rs = props.pModel.resultsOf(props.props)
-//       // PatientValidator
-//       //   .validate(
-//       //     PatientIdValidator.validateOptionForUpdate(
-//       //       model.map(_.patientId)
-//       //     ) *: rs
-//       //   )
-//       //   .asEither
+  type UpdateInputResult[T] = T match {
+    case PatientProp[e, t] => Unit
+  }
 
-//   def form(patientOption: Option[Patient]): Form =
-//     Form(patientOption)
+  def updateInput[T](t: T): UpdateInputResult[T] =
+    t match {
+      case p: PatientProp[e, t] => 
+        p.value.inputSpec.updateBy(modelOpt)
+        ()
+    }
+
+  def updateInput(props: Tuple): Tuple.Map[props.type, UpdateInputResult] =
+    props.map[UpdateInputResult]([T] => (t: T) => updateInput(t))
+
+
+  // def updateInput(): this.type = 
+  //   val updater = Prop.InputUpdater(modelOpt)
+  //   import updater.given
+  //   updater.update(props)
+  //   this
+  // def updateDisp(): this.type = 
+  //   val updater = Prop.DispUpdater(modelOpt)
+  //   import updater.given
+  //   updater.update(props)
+  //   this
+
+  def validatedForEnter: Either[String, Patient] =
+    PatientValidator.validate(
+      PatientIdValidator.validateForEnter *:
+        Prop.resultsOf(props)
+    ).asEither
+
+  def validatedForUpdate: Either[String, Patient] =
+    PatientValidator.validate(
+      PatientIdValidator.validateOptionForUpdate(modelOpt.map(_.patientId)) *:
+        Prop.resultsOf(props)
+    ).asEither
+
+
+

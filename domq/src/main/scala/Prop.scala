@@ -26,6 +26,25 @@ trait Prop[M, +E, T]:
   lazy val inputSpec: InputSpec[M, E, T]
   lazy val dispSpec: DispSpec[M]
 
+  def withInputElement(handler: HTMLElement => Unit): Prop[M, E, T] =
+    handler(inputSpec.ele)
+    this
+
+  def withDispElement(handler: HTMLElement => Unit): Prop[M, E, T] =
+    handler(dispSpec.ele)
+    this
+
+  def inputElementClass(className: String): Prop[M, E, T] =
+    withInputElement(_(cls := className))
+
+  def dispElementClass(className: String): Prop[M, E, T] =
+    withDispElement(_(cls := className))
+
+  def inputElement: HTMLElement = inputSpec.ele
+
+  def dispElement: HTMLElement = dispSpec.ele
+
+
 trait ToListElementConstraint[T, E]:
   def convert(t: T): E
 
@@ -49,22 +68,29 @@ given [E, H: ToListElementConstraintGen[E], T <: Tuple: ToListConstraintGen[
 
 case class LabelInput(label: String, input: HTMLElement)
 
-given [M, E, T, P <: Prop[M, E, T]]
-    : ToListElementConstraint[P, LabelInput] with
+given [M, E, T, P <: Prop[M, E, T]]: ToListElementConstraint[P, LabelInput] with
   def convert(t: P): LabelInput =
     LabelInput(t.label, t.inputSpec.ele)
 
-// given [M, E, T, P[M, E, T] <: Prop[M, E, T]]
-//     : ToListElementConstraint[P[M, E, T], LabelInput] with
-//   def convert(t: P[M, E, T]): LabelInput =
-//     LabelInput(t.label, t.inputSpec.ele)
+given [T <: HTMLElement]: ToListElementConstraint[(String, T), LabelInput] with
+  def convert(t: (String, T)): LabelInput =
+    LabelInput.apply.tupled(t)
 
-class PropsModel[M](model: Option[M]):
-  given [T <: HTMLElement]: ToListElementConstraint[(String, T), LabelInput]
-    with
-    def convert(t: (String, T)): LabelInput =
-      LabelInput.apply.tupled(t)
+case class LabelElement(label: String, element: HTMLElement)
 
+given [M, E, T, P <: Prop[M, E, T]]: ToListElementConstraint[P, LabelElement]
+  with
+  def convert(t: P): LabelElement =
+    LabelElement(t.label, t.dispSpec.ele)
+
+given [T <: HTMLElement]: ToListElementConstraint[(String, T), LabelElement]
+  with
+  def convert(t: (String, T)): LabelElement =
+    LabelElement.apply.tupled(t)
+
+object UpdateInputByResult
+
+object Prop:
   def formPanel[Head, Tail <: Tuple](props: Head *: Tail)(using
       ToListElementConstraint[Head, LabelInput],
       ToListConstraint[Tail, LabelInput]
@@ -73,18 +99,6 @@ class PropsModel[M](model: Option[M]):
     val panel = DispPanel(form = true)
     les.foreach(li => panel.add(li.label, li.input))
     panel.ele
-
-  case class LabelElement(label: String, element: HTMLElement)
-
-  given [E, T, P[M, E, T] <: Prop[M, E, T]]
-      : ToListElementConstraint[P[M, E, T], LabelElement] with
-    def convert(t: P[M, E, T]): LabelElement =
-      LabelElement(t.label, t.dispSpec.ele)
-
-  given [T <: HTMLElement]: ToListElementConstraint[(String, T), LabelElement]
-    with
-    def convert(t: (String, T)): LabelElement =
-      LabelElement.apply.tupled(t)
 
   def dispPanel[Head, Tail <: Tuple](props: Head *: Tail)(using
       ToListElementConstraint[Head, LabelElement],
@@ -96,35 +110,63 @@ class PropsModel[M](model: Option[M]):
     les.foreach(le => panel.add(le.label, le.element))
     panel.ele
 
-  object UpdateInputByResult
+  // class InputUpdater[M](modelOpt: Option[M]):
+  //   type UpdateResult[T] = T match {
+  //     case Prop[M, e, t] => Unit
+  //   }
 
-  given [E, T, P[M, E, T] <: Prop[M, E, T]]
-      : ToListElementConstraint[P[M, E, T], UpdateInputByResult.type] with
-    def convert(p: P[M, E, T]): UpdateInputByResult.type =
-      p.inputSpec.updateBy(model)
-      UpdateInputByResult
+  //   def update[T](t: T): UpdateResult[T] =
+  //     t match {
+  //       case p: Prop[M, e, t] => p.inputSpec.updateBy(modelOpt)
+  //     }
 
-  def updateInput[Head, Tail <: Tuple, M](props: Head *: Tail)(using
-      ToListElementConstraint[Head, UpdateInputByResult.type],
-      ToListConstraint[Tail, UpdateInputByResult.type]
-  ): Unit =
-    summon[ToListConstraint[Head *: Tail, UpdateInputByResult.type]]
-      .convert(props)
+  //   def update(props: Tuple): Tuple.Map[props.type, UpdateResult] =
+  //     props.map[UpdateResult]([T] => (t: T) => update(t))
 
-  object UpdateDispByResult
+  // class DispUpdater[M](modelOpt: Option[M]):
+  //   type UpdateResult[T] = T match {
+  //     case Prop[M, e, t] => Unit
+  //   }
 
-  given [E, T, P[M, E, T] <: Prop[M, E, T]]
-      : ToListElementConstraint[P[M, E, T], UpdateDispByResult.type] with
-    def convert(p: P[M, E, T]): UpdateDispByResult.type =
-      p.dispSpec.updateBy(model)
-      UpdateDispByResult
+  //   def update[T](t: T): UpdateResult[T] =
+  //     t match {
+  //       case p: Prop[M, e, t] => p.dispSpec.updateBy(modelOpt)
+  //     }
 
-  def updateDisp[Head, Tail <: Tuple, M](props: Head *: Tail)(using
-      ToListElementConstraint[Head, UpdateDispByResult.type],
-      ToListConstraint[Tail, UpdateDispByResult.type]
-  ): Unit =
-    summon[ToListConstraint[Head *: Tail, UpdateDispByResult.type]]
-      .convert(props)
+  //   def update(props: Tuple): Tuple.Map[props.type, UpdateResult] =
+  //     props.map[UpdateResult]([T] => (t: T) => update(t))
+
+  // type ForEachType[T, M] = T match {
+  //   case Prop[M, e, t] => Unit
+  // }
+
+  // type ForEachTypeWith = [M] =>> [T] =>> ForEachType[T, M]
+
+  // def updateInputBy[M, T](t: T, modelOpt: Option[M]): ForEachType[T, M] =
+  //   t match {
+  //     case p: Prop[M, e, t] =>
+  //       p.inputSpec.updateBy(modelOpt)
+  //       ()
+  //   }
+
+  // def updateInput[M](
+  //     props: Tuple,
+  //     modelOpt: Option[M]
+  // ): Tuple.Map[props.type, ForEachTypeWith[M]] =
+  //   props.map[ForEachTypeWith[M]]([T] => (t: T) => updateInputBy(t, modelOpt))
+
+  // def updateDispBy[M, T](t: T, modelOpt: Option[M]): ForEachType[T, M] =
+  //   t match {
+  //     case p: Prop[M, e, t] =>
+  //       p.dispSpec.updateBy(modelOpt)
+  //       ()
+  //   }
+
+  // def updateDisp[M](
+  //     props: Tuple,
+  //     modelOpt: Option[M]
+  // ): Tuple.Map[props.type, ForEachTypeWith[M]] =
+  //   props.map[ForEachTypeWith[M]]([T] => (t: T) => updateDispBy(t, modelOpt))
 
   type ResultOf[H] = H match {
     case Prop[m, e, t] => ValidatedResult[e, t]
@@ -137,3 +179,36 @@ class PropsModel[M](model: Option[M]):
 
   def resultsOf(props: Tuple): Tuple.Map[props.type, ResultOf] =
     props.map[ResultOf]([T] => (t: T) => resultOf(t))
+
+// class PropsModel[M](model: Option[M]):
+
+//   object UpdateInputByResult
+
+//   given [E, T, P[M, E, T] <: Prop[M, E, T]]
+//       : ToListElementConstraint[P[M, E, T], UpdateInputByResult.type] with
+//     def convert(p: P[M, E, T]): UpdateInputByResult.type =
+//       p.inputSpec.updateBy(model)
+//       UpdateInputByResult
+
+//   def updateInput[Head, Tail <: Tuple, M](props: Head *: Tail)(using
+//       ToListElementConstraint[Head, UpdateInputByResult.type],
+//       ToListConstraint[Tail, UpdateInputByResult.type]
+//   ): Unit =
+//     summon[ToListConstraint[Head *: Tail, UpdateInputByResult.type]]
+//       .convert(props)
+
+//   object UpdateDispByResult
+
+//   given [E, T, P[M, E, T] <: Prop[M, E, T]]
+//       : ToListElementConstraint[P[M, E, T], UpdateDispByResult.type] with
+//     def convert(p: P[M, E, T]): UpdateDispByResult.type =
+//       p.dispSpec.updateBy(model)
+//       UpdateDispByResult
+
+//   def updateDisp[Head, Tail <: Tuple, M](props: Head *: Tail)(using
+//       ToListElementConstraint[Head, UpdateDispByResult.type],
+//       ToListConstraint[Tail, UpdateDispByResult.type]
+//   ): Unit =
+//     summon[ToListConstraint[Head *: Tail, UpdateDispByResult.type]]
+//       .convert(props)
+

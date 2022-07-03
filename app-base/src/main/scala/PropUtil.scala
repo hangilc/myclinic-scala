@@ -22,7 +22,7 @@ object PropUtil:
     val ele: HTMLElement = input
     def updateBy(model: Option[M]): Unit =
       input.value = model.fold(defaultValue)(m => toInputValue(modelValue(m)))
-    def validate: ValidatedResult[E, T] =
+    def validate(): ValidatedResult[E, T] =
       validator(input.value)
 
   class RadioInput[M, E, T](
@@ -34,7 +34,7 @@ object PropUtil:
     val ele: HTMLElement = radioGroup.ele
     def updateBy(model: Option[M]): Unit =
       model.fold(defaultValue)(modelValue(_))
-    def validate: ValidatedResult[E, T] =
+    def validate(): ValidatedResult[E, T] =
       validator(radioGroup.selected)
 
   class DateInput[M, E](
@@ -45,7 +45,7 @@ object PropUtil:
     val ele: HTMLElement = dateInput.ele
     def updateBy(model: Option[M]): Unit =
       dateInput.init(model.map(modelValue(_)))
-    def validate: ValidatedResult[E, LocalDate] =
+    def validate(): ValidatedResult[E, LocalDate] =
       validator(dateInput.value)
 
   class ValidUptoInput[M, E](
@@ -56,7 +56,7 @@ object PropUtil:
     val ele: HTMLElement = dateInput.ele
     def updateBy(model: Option[M]): Unit =
       dateInput.init(model.flatMap(modelValue(_).value))
-    def validate: ValidatedResult[E, ValidUpto] =
+    def validate(): ValidatedResult[E, ValidUpto] =
       validator(dateInput.value)
 
   class SpanDisp[M](
