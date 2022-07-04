@@ -123,8 +123,29 @@ case class PatientSearchResultDialog(patients: List[Patient]):
   ): Unit =
     val props = ShahokokuhoProps(Some(shahokokuho)).updateInput()
     val errBox = ErrorBox()
+    val renewButton = button
     dlog.body(clear, patientBlock(patient), props.formPanel, errBox.ele)
     dlog.commands(clear, 
+      renewButton("更新", displayNone, onclick := (() => {
+        props.validatedForUpdate match {
+          case Left(msg) => errBox.show(msg)
+          case Right(newShahokokuho) =>
+            newShahokokuho.validUpto.value match {
+              case None => errBox.show("期限終了がせていされていません。")
+              case Some(validUptoValue) =>
+                for
+                  updated <- updateIfModified(newShahokokuho, shahokokuho)
+                yield
+                  val renewShahokokuho = newShahokokuho.copy(
+                    validFrom = validUptoValue.plusDays(1),
+                    validUpto = ValidUpto(None)
+                  )
+                  newShahokokuho
+
+            }
+        }
+        ()
+      })),
       button("入力", onclick := (() => {
         props.validatedForUpdate match {
           case Left(msg) => errBox.show(msg)
@@ -137,6 +158,20 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       })),
       button("キャンセル", onclick := (() => onDone(false)))
     )
+    if props.validUptoProp.currentInputValue.isDefined then
+      renewButton(displayDefault)
+    props.validUptoProp.onInputChange(dateOpt => 
+      dateOpt match {
+        case Some(_) => renewButton(displayDefault)
+        case None => renewButton(displayNone)
+      }
+    )
+
+  private def updateIfModified(newShahokokuho: Shahokokuho, oldShahokokuho: Shahokokuho): Future[Boolean] =
+    if newShahokokuho == oldShahokokuho then
+      Future.successful(false)
+    else
+      Api.updateShahokokuho(newShahokokuho).map(_ => true)
 
   private def dispKoukikourei(
       koukikourei: Koukikourei,
@@ -171,8 +206,8 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       cls := "patient-block"
     )
 
-  private def newShahokokuho(patient: Patient): Unit =
-    val props = ShahokokuhoProps(None).updateInput()
+  private def newShahokokuho(patient: Patient, template: Option[Shahokokuho] = None): Unit =
+    val props = ShahokokuhoProps(template).updateInput()
     val errBox = ErrorBox()
     dlog.body(clear, patientBlock(patient), props.formPanel, errBox.ele)
     dlog.commands(

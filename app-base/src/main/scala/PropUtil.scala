@@ -34,7 +34,7 @@ object PropUtil:
   ) extends InputSpec[M, E, T]:
     val ele: HTMLElement = radioGroup.ele
     def updateBy(model: Option[M]): Unit =
-      model.fold(defaultValue)(modelValue(_))
+      radioGroup.check(model.fold(defaultValue)(modelValue(_)))
     def validate(): ValidatedResult[E, T] =
       validator(radioGroup.selected)
 
@@ -51,11 +51,9 @@ object PropUtil:
 
   class ValidUptoInput[M, E](
       modelValue: M => ValidUpto,
-      validator: Option[LocalDate] => ValidatedResult[E, ValidUpto],
-      onChange: Option[LocalDate] => Unit
+      validator: Option[LocalDate] => ValidatedResult[E, ValidUpto]
   )(using InitNoneConverter) extends InputSpec[M, E, ValidUpto]:
     val dateInput = DateOptionInput()
-    dateInput.onChange(onChange)
     val ele: HTMLElement = dateInput.ele
     def updateBy(model: Option[M]): Unit =
       dateInput.init(model.flatMap(modelValue(_).value))
@@ -149,17 +147,23 @@ object PropUtil:
       validator: Option[LocalDate] => ValidatedResult[E, ValidUpto],
       dateFormatter: LocalDate => String = d => KanjiDate.dateToKanji(d),
       dispDefaultValue: String = "（期限なし）",
-      suggest: () => Option[LocalDate] = () => None,
-      onInputChange: Option[LocalDate] => Unit = _ => ()
+      suggest: () => Option[LocalDate] = () => None
   ) extends Prop[M, E, ValidUpto]:
     given InitNoneConverter with
       def convert: Option[LocalDate] = suggest()
-    lazy val inputSpec = new ValidUptoInput[M, E](
+    lazy val inputSpec: ValidUptoInput[M, E] = new ValidUptoInput[M, E](
       modelValue,
-      validator,
-      onChange = onInputChange
+      validator
     )
     lazy val dispSpec = new SpanDisp[M](
-      m => dateFormatter(modelValue(m)),
+      m => modelValue(m).value.map(dateFormatter).getOrElse(dispDefaultValue),
       dispDefaultValue
     )
+
+    def onInputChange(handler: Option[LocalDate] => Unit): this.type = 
+      inputSpec.dateInput.onChange(handler)
+      this
+
+    def currentInputValue: Option[LocalDate] =
+      inputSpec.dateInput.value
+

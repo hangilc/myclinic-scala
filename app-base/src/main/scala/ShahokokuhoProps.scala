@@ -49,12 +49,11 @@ case class ShahokokuhoProps(var modelOpt: Option[Shahokokuho]):
       "期限終了",
       _.validUpto,
       ValidUptoValidator.validate,
-      suggest = suggestValidUpto,
-      onInputChange = onValidUptoChange _
+      suggest = suggestValidUpto
     ),
     RadioProp[Shahokokuho, KoureiError.type, Int](
       "高齢",
-      RadioGroup.createItemsFromValues(ShahokokuhoValidator.validKoureiValues, formatKourei _),
+      RadioGroup.createItemsFromValues(ShahokokuhoValidator.validKoureiValues, formatKourei),
       0,
       _.koureiStore,
       KoureiValidator.validate,
@@ -120,9 +119,6 @@ case class ShahokokuhoProps(var modelOpt: Option[Shahokokuho]):
     validFromProp,
     validUptoProp
   )
-
-  def onValidUptoChange(handler: Option[LocalDate] => Unit): Unit =
-    validUptoChangedPublisher.subscribe(handler)
 
   private def suggestValidUpto(): Option[LocalDate] = 
     validFromProp.currentInputValue.map(_.plusYears(1).minusDays(1))
