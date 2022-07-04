@@ -125,59 +125,69 @@ case class PatientSearchResultDialog(patients: List[Patient]):
     val errBox = ErrorBox()
     val renewButton = button
     dlog.body(clear, patientBlock(patient), props.formPanel, errBox.ele)
-    dlog.commands(clear, 
-      renewButton("更新", displayNone, onclick := (() => {
-        props.validatedForUpdate match {
-          case Left(msg) => errBox.show(msg)
-          case Right(newShahokokuho) =>
-            newShahokokuho.validUpto.value match {
-              case None => errBox.show("期限終了がせていされていません。")
-              case Some(validUptoValue) =>
-                for
-                  updated <- updateIfModified(newShahokokuho, shahokokuho)
-                yield
-                  val renewShahokokuho = newShahokokuho.copy(
-                    validFrom = validUptoValue.plusDays(1),
-                    validUpto = ValidUpto(None)
-                  )
-                  newShahokokuho
+    dlog.commands(
+      clear,
+      renewButton(
+        "更新",
+        displayNone,
+        onclick := (() => {
+          props.validatedForUpdate.flatMap(createRenewalShahokokuho _) match {
+            case Left(msg) => errBox.show(msg)
+            case Right((newShahokokuho, inputShahokokuho)) => {
+              for updated <- updateIfModified(newShahokokuho, inputShahokokuho)
+              yield
+                newShahokokuho(patient, newShahokokuho)
 
             }
-        }
-        ()
-      })),
-      button("入力", onclick := (() => {
-        props.validatedForUpdate match {
-          case Left(msg) => errBox.show(msg)
-          case Right(newShahokokuho) =>
-            for 
-              _ <- Api.updateShahokokuho(newShahokokuho)
-            yield onDone(true)
-        }
-        ()
-      })),
+          }
+          ()
+        })
+      ),
+      button(
+        "入力",
+        onclick := (() => {
+          props.validatedForUpdate match {
+            case Left(msg) => errBox.show(msg)
+            case Right(newShahokokuho) =>
+              for _ <- Api.updateShahokokuho(newShahokokuho)
+              yield onDone(true)
+          }
+          ()
+        })
+      ),
       button("キャンセル", onclick := (() => onDone(false)))
     )
     if props.validUptoProp.currentInputValue.isDefined then
       renewButton(displayDefault)
-    props.validUptoProp.onInputChange(dateOpt => 
+    props.validUptoProp.onInputChange(dateOpt =>
       dateOpt match {
         case Some(_) => renewButton(displayDefault)
-        case None => renewButton(displayNone)
+        case None    => renewButton(displayNone)
       }
     )
 
-  private def updateIfModified(newShahokokuho: Shahokokuho, oldShahokokuho: Shahokokuho): Future[Boolean] =
-    if newShahokokuho == oldShahokokuho then
-      Future.successful(false)
-    else
-      Api.updateShahokokuho(newShahokokuho).map(_ => true)
+  private def updateIfModified(
+      newShahokokuho: Shahokokuho,
+      oldShahokokuho: Shahokokuho
+  ): Future[Boolean] =
+    if newShahokokuho == oldShahokokuho then Future.successful(false)
+    else Api.updateShahokokuho(newShahokokuho).map(_ => true)
 
-  private def createRenewalShahokokuho(oldShahokokuho: Shahokokuho): Shahokokuho =
-    Shahokokuho(
-      shahokokuhoId = 0,
-      validFrom = 
-    )
+  type RenewalShahokokuho = Shahokokuho
+
+  private def createRenewalShahokokuho(
+      oldShahokokuho: Shahokokuho
+  ): Either[String, (RenewalShahokokuho, Shahokokuho)] =
+    oldShahokokuho.validUpto.value match {
+      case None => Left("期限終了日が設定されていません。")
+      case Some(validUptoValue) =>
+        val renew: RenewalShahokokuho = oldShahokokuho.copy(
+          shahokokuhoId = 0,
+          validFrom = validUptoValue.plusDays(1),
+          validUpto = ValidUpto(None)
+        )
+        Right(renew, oldShahokokuho)
+    }
 
   private def dispKoukikourei(
       koukikourei: Koukikourei,
@@ -212,7 +222,10 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       cls := "patient-block"
     )
 
-  private def newShahokokuho(patient: Patient, template: Option[Shahokokuho] = None): Unit =
+  private def newShahokokuho(
+      patient: Patient,
+      template: Option[Shahokokuho] = None
+  ): Unit =
     val props = ShahokokuhoProps(template).updateInput()
     val errBox = ErrorBox()
     dlog.body(clear, patientBlock(patient), props.formPanel, errBox.ele)
