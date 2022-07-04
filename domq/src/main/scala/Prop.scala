@@ -23,6 +23,7 @@ trait DispSpec[M]:
 
 trait Prop[M, +E, T]:
   def label: String
+  def modelValue: M => T
   lazy val inputSpec: InputSpec[M, E, T]
   lazy val dispSpec: DispSpec[M]
 
@@ -117,6 +118,21 @@ class DispUpdater[M](modelOpt: Option[M]):
   ): this.type =
     c.convert(props)
     this
+
+class ValueEvaluator[M](model: M):
+  type ModelProp[E, T] = Prop[M, E, T]
+
+  type PropValue[P] = P match {
+    case ModelProp[e, t] => t
+  }
+
+  def propValue[P](p: P): PropValue[P] =
+    p match {
+      case pp: ModelProp[e, t] => pp.modelValue(model)
+    }
+
+  def eval[E, T, Head <: Prop[M, E, T], Tail <: Tuple](props: Head *: Tail): Tuple.Map[props.type, PropValue] =
+    props.map[PropValue]([T] => (t: T) => propValue(t))
 
 object Prop:
   def formPanel[Head, Tail <: Tuple](props: Head *: Tail)(using

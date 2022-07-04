@@ -13,7 +13,7 @@ object PatientSearch:
     val eSearchForm = form
     val eSearchButton = button
     val searchResult = Selection[Patient]()
-    searchResult.ele.hide
+    searchResult.ele.hide()
     val ele = div(
       div(cls := "search-area")(
         h2("患者選択"),
@@ -34,11 +34,11 @@ class PatientSearch(ui: PatientSearch.UI):
 
   private def onSelect(patient: Patient): Unit =
     ui.searchResult.clear()
-    ui.searchResult.ele.hide
+    ui.searchResult.ele.hide()
     onSelectCallback(patient)
 
   def hideResult: Unit =
-    ui.searchResult.ele.hide
+    ui.searchResult.ele.hide()
 
   private def onSearch(): Unit =
     val txt = ui.eSearchInput.value.trim
@@ -53,7 +53,7 @@ class PatientSearch(ui: PatientSearch.UI):
         else
           searchResult.clear()
           searchResult.addAll(patients, formatter)
-          searchResult.ele.show
+          searchResult.ele.show()
           searchResult.ele.scrollToTop()
 
   private def formatPatient(patient: Patient): String =
