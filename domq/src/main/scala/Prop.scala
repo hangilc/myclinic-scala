@@ -128,7 +128,7 @@ class ValueEvaluator[M](model: M):
 
   def propValue[P](p: P): PropValue[P] =
     p match {
-      case pp: ModelProp[e, t] => pp.modelValue(model)
+      case pp: ModelProp[e, t] @unchecked => pp.modelValue(model)
     }
 
   def eval[E, T, Head <: Prop[M, E, T], Tail <: Tuple](props: Head *: Tail): Tuple.Map[props.type, PropValue] =
@@ -165,3 +165,43 @@ object Prop:
 
   def resultsOf(props: Tuple): Tuple.Map[props.type, ResultOf] =
     props.map[ResultOf]([T] => (t: T) => resultOf(t))
+
+
+trait ModelProps:
+  type M
+
+  trait Prop[E, T]:
+    def label: String
+    def modelValue(m: M): T 
+
+  type Value[P] = P match {
+    case Prop[e, t] => t
+  }
+
+  def value[P](p: P, m: M): Value[P] = p match {
+    case pp: Prop[e, t] => pp.modelValue(m)
+  }
+
+  def values(props: Tuple, model: M): Tuple.Map[props.type, Value] =
+    props.map[Value]([T] => (t: T) => value(t, model))
+
+object ModelProps:
+  case class C(a: Int, b: String)
+
+  class CModelProps extends ModelProps:
+    type M = C
+
+    val props = (
+      new Prop[String, Int]:
+        def label: String = "a"
+        def modelValue(c: C): Int = c.a,
+      new Prop[String, String]:
+        def label: String = "b"
+        def modelValue(c: C): String = c.b
+    )
+
+  val mProps = new CModelProps()
+
+  println(mProps.values(mProps.props, C(1, "p")))
+
+  

@@ -6,14 +6,24 @@ import dev.myclinic.scala.model.Sex
 import dev.myclinic.scala.web.appbase.PatientValidator.{*, given}
 import dev.myclinic.scala.web.appbase.PatientValidator
 import dev.fujiwara.kanjidate.KanjiDate
-import PropUtil.*
 import java.time.LocalDate
 import org.scalajs.dom.HTMLElement
 import dev.fujiwara.validator.section.Implicits.*
 import dev.fujiwara.domq.all.{*, given}
 import scala.language.implicitConversions
 
-case class PatientProps(modelOpt: Option[Patient]):
+case class PatientProps() extends dev.fujiwara.domq.ModelProps[Patient] with PropUtil[Patient]:
+
+  val props = (
+    TextProp[LastNameError.type, String](
+      "姓",
+      _.lastName,
+      LastNameValidator.validate _
+    ).inputElementClass("last-name-input")      
+  )
+
+
+case class PatientPropsOrig(modelOpt: Option[Patient]):
 
   val props = (
     TextProp[Patient, LastNameError.type, String](

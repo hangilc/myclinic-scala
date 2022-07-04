@@ -2,6 +2,7 @@ package dev.myclinic.scala.web.appbase
 
 import dev.fujiwara.domq.prop.*
 import dev.fujiwara.domq.all.{*, given}
+import dev.fujiwara.domq.ModelProps
 import scala.language.implicitConversions
 import dev.fujiwara.validator.section.*
 import dev.fujiwara.dateinput.DateOptionInput
@@ -12,7 +13,53 @@ import dev.myclinic.scala.model.ValidUpto
 import dev.fujiwara.kanjidate.KanjiDate
 import dev.fujiwara.dateinput.InitNoneConverter
 
-object PropUtil:
+trait PropUtil[M]:
+  this: ModelProps[M] =>
+
+  class TextInput[E, T](
+      modelValue: M => T,
+      validator: String => ValidatedResult[E, T],
+      toInputValue: T => String,
+      defaultValue: String
+  ) extends InputSpec[E, T]:
+    val input: HTMLInputElement = inputText
+    val ele: HTMLElement = input
+    def updateBy(model: Option[M]): Unit =
+      input.value = model.fold(defaultValue)(m => toInputValue(modelValue(m)))
+    def validate(): ValidatedResult[E, T] =
+      validator(input.value)
+
+  class SpanDisp(
+      modelValue: M => String,
+      defaultValue: String
+  ) extends DispSpec:
+    val ele: HTMLElement = span
+    def updateBy(model: Option[M]): Unit =
+      ele(innerText := model.fold(defaultValue)(modelValue(_)))
+
+  case class TextProp[E, T](
+      val label: String,
+      acc: M => T,
+      validator: String => ValidatedResult[E, T],
+      toInputValue: T => String = (t: T) => t.toString,
+      toDispValue: T => String = (t: T) => t.toString,
+      inputDefaultValue: String = "",
+      dispDefaultValue: String = ""
+  ) extends Prop[E, T]:
+    def modelValue(m: M): T = acc(m)
+    
+    lazy val inputSpec = new TextInput[E, T](
+      modelValue,
+      validator,
+      toInputValue,
+      inputDefaultValue
+    )
+    lazy val dispSpec: DispSpec = new SpanDisp(
+      m => toDispValue(modelValue(m)),
+      dispDefaultValue
+    )
+
+object PropUtilOrig:
   class TextInput[M, E, T](
       modelValue: M => T,
       validator: String => ValidatedResult[E, T],
