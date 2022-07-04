@@ -81,9 +81,11 @@ object ShahokokuhoValidator:
     def validate(dateOption: Option[LocalDate]): Result[ValidUpto] =
       valid(ValidUpto(dateOption))
 
+  val validKoureiValues: List[Int] = List(0, 1, 2, 3)
+  
   object KoureiValidator extends SectionValidator(KoureiError, "高齢"):
     def validate(value: Int): Result[Int] =
-      oneOf(value, List(0, 2, 3))
+      oneOf(value, validKoureiValues)
 
     def validateInput(input: String): Result[Int] =
       inputToInt(input) |> validate

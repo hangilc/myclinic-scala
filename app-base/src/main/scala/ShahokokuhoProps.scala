@@ -12,6 +12,7 @@ import org.scalajs.dom.HTMLElement
 import dev.fujiwara.validator.section.Implicits.*
 import dev.fujiwara.domq.all.{*, given}
 import scala.language.implicitConversions
+import dev.myclinic.scala.util.ZenkakuUtil
 
 case class ShahokokuhoProps(var modelOpt: Option[Shahokokuho]):
   private val validUptoChangedPublisher = new LocalEventPublisher[Option[LocalDate]]
@@ -53,7 +54,7 @@ case class ShahokokuhoProps(var modelOpt: Option[Shahokokuho]):
     ),
     RadioProp[Shahokokuho, KoureiError.type, Int](
       "高齢",
-      List("高齢でない" -> 0, "１割" -> 1, "２割" -> 2, "３割" -> 3),
+      RadioGroup.createItemsFromValues(ShahokokuhoValidator.validKoureiValues, formatKourei _),
       0,
       _.koureiStore,
       KoureiValidator.validate,
@@ -128,6 +129,12 @@ case class ShahokokuhoProps(var modelOpt: Option[Shahokokuho]):
 
   private def onValidUptoChange(dateOpt: Option[LocalDate]): Unit =
     validUptoChangedPublisher.publish(dateOpt)
+
+  private def formatKourei(kourei: Int): String =
+    kourei match {
+      case 0 => "高齢でない"
+      case i => ZenkakuUtil.toZenkaku(s"${i}割")
+    }
 
   def updateInput(): this.type = 
     val updater = new InputUpdater(modelOpt)

@@ -68,10 +68,12 @@ case class PatientSearchResultDialog(patients: List[Patient]):
               HokenUtil.hokenRep(h),
               onclick := (() => {
                 h match {
-                  case s: Shahokokuho => dispShahokokuho(s, patient, onHokenDispDone _)
-                  case k: Koukikourei => dispKoukikourei(k, patient, onHokenDispDone _)
-                  case k: Kouhi       => dispKouhi(k, patient, onHokenDispDone _)
-                  case r: Roujin      => dispRoujin(r, patient, onHokenDispDone _)
+                  case s: Shahokokuho =>
+                    dispShahokokuho(s, patient, onHokenDispDone _)
+                  case k: Koukikourei =>
+                    dispKoukikourei(k, patient, onHokenDispDone _)
+                  case k: Kouhi  => dispKouhi(k, patient, onHokenDispDone _)
+                  case r: Roujin => dispRoujin(r, patient, onHokenDispDone _)
                 }
                 ()
               })
@@ -105,9 +107,13 @@ case class PatientSearchResultDialog(patients: List[Patient]):
   ): Unit =
     val props = ShahokokuhoProps(Some(shahokokuho)).updateDisp()
     dlog.body(clear, patientBlock(patient), props.dispPanel)
-    dlog.commands(clear, 
-          button("編集", onclick := (() => editShahokokuho(shahokokuho, patient, onDone))),
-          button("戻る", onclick := (() => onDone(false)))
+    dlog.commands(
+      clear,
+      button(
+        "編集",
+        onclick := (() => editShahokokuho(shahokokuho, patient, onDone))
+      ),
+      button("戻る", onclick := (() => onDone(false)))
     )
 
   private def editShahokokuho(
@@ -116,9 +122,20 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       onDone: Modified => Unit
   ): Unit =
     val props = ShahokokuhoProps(Some(shahokokuho)).updateInput()
-    dlog.body(clear, patientBlock(patient), props.formPanel)
+    val errBox = ErrorBox()
+    dlog.body(clear, patientBlock(patient), props.formPanel, errBox.ele)
     dlog.commands(clear, 
-          button("キャンセル", onclick := (() => onDone(false)))
+      button("入力", onclick := (() => {
+        props.validatedForUpdate match {
+          case Left(msg) => errBox.show(msg)
+          case Right(newShahokokuho) =>
+            for 
+              _ <- Api.updateShahokokuho(newShahokokuho)
+            yield onDone(true)
+        }
+        ()
+      })),
+      button("キャンセル", onclick := (() => onDone(false)))
     )
 
   private def dispKoukikourei(
@@ -128,9 +145,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
   ): Unit =
     val props = KoukikoureiProps(Some(koukikourei)).updateDisp()
     dlog.body(clear, patientBlock(patient), props.dispPanel)
-    dlog.commands(clear, 
-          button("戻る", onclick := (() => onDone(false)))
-    )
+    dlog.commands(clear, button("戻る", onclick := (() => onDone(false))))
 
   private def dispKouhi(
       kouhi: Kouhi,
@@ -139,9 +154,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
   ): Unit =
     val props = KouhiProps(Some(kouhi)).updateDisp()
     dlog.body(clear, patientBlock(patient), props.dispPanel)
-    dlog.commands(clear, 
-          button("戻る", onclick := (() => onDone(false)))
-    )
+    dlog.commands(clear, button("戻る", onclick := (() => onDone(false))))
 
   private def dispRoujin(
       roujin: Roujin,
@@ -150,9 +163,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
   ): Unit =
     val props = RoujinProps(Some(roujin)).updateDisp()
     dlog.body(clear, patientBlock(patient), props.dispPanel)
-    dlog.commands(clear, 
-          button("戻る", onclick := (() => onDone(false)))
-    )
+    dlog.commands(clear, button("戻る", onclick := (() => onDone(false))))
 
   private def patientBlock(patient: Patient): HTMLElement =
     div(

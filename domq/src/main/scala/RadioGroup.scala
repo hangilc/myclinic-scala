@@ -21,7 +21,7 @@ case class RadioGroup[T](
     radioLabels.find(_.value == value).get
 
   val ele: HTMLElement = layout(this)
-  
+
   initValue match {
     case Some(v) => check(v)
     case None    => radioLabels.headOption.foreach(_.check())
@@ -48,3 +48,9 @@ object RadioGroup:
 
   def defaultLayout[T](g: RadioGroup[T]): HTMLElement =
     div(g.radioLabels.map(_.ele))
+
+  def createItemsFromValues[T](
+      values: List[T],
+      format: T => String = (t: T) => t.toString
+  ): List[(String, T)] =
+    values.map(t => (format(t), t))
