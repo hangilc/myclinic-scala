@@ -173,6 +173,12 @@ case class PatientSearchResultDialog(patients: List[Patient]):
     else
       Api.updateShahokokuho(newShahokokuho).map(_ => true)
 
+  private def createRenewalShahokokuho(oldShahokokuho: Shahokokuho): Shahokokuho =
+    Shahokokuho(
+      shahokokuhoId = 0,
+      validFrom = 
+    )
+
   private def dispKoukikourei(
       koukikourei: Koukikourei,
       patient: Patient,
