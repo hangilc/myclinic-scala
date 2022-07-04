@@ -232,6 +232,23 @@ object Db
       yield (gen, patient, shahokokuho, koukikourei, roujin, kouhi)
     mysql(op)
 
+  def listAllHoken(patientId: Int): IO[
+    (
+        List[Shahokokuho],
+        List[Koukikourei],
+        List[Roujin],
+        List[Kouhi]
+    )
+  ] =
+    val op =
+      for
+        shahokokuho <- DbShahokokuhoPrim.listShahokokuho(patientId)
+        koukikourei <- DbKoukikoureiPrim.listKoukikourei(patientId)
+        roujin <- DbRoujinPrim.listRoujin(patientId)
+        kouhi <- DbKouhiPrim.listKouhi(patientId)
+      yield (shahokokuho, koukikourei, roujin, kouhi)
+    mysql(op)
+
   def getPatientAllHoken(patientId: Int): IO[
     (
         Int,
@@ -340,8 +357,13 @@ object Db
   def deleteDiseaseEx(diseaseId: Int): IO[List[AppEvent]] =
     val op =
       for
-        adjIds <- DbDiseaseAdjPrim.listDiseaseAdj(diseaseId).map(_.diseaseAdjId).to[List]
+        adjIds <- DbDiseaseAdjPrim
+          .listDiseaseAdj(diseaseId)
+          .map(_.diseaseAdjId)
+          .to[List]
         diseaseEvent <- DbDiseasePrim.deleteDisease(diseaseId)
-        adjEvents <- adjIds.map(adjId => DbDiseaseAdjPrim.deleteDiseaseAdj(adjId)).sequence
+        adjEvents <- adjIds
+          .map(adjId => DbDiseaseAdjPrim.deleteDiseaseAdj(adjId))
+          .sequence
       yield List(diseaseEvent) ++ adjEvents
     mysql(op)

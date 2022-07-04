@@ -108,18 +108,21 @@ object ElementQ:
         case None    => ele.appendChild(e)
       }
 
-    def show: Unit =
+    def show(): Unit =
       ele.style.display = ""
     
-    def hide: Unit =
+    def hide(): Unit =
       ele.style.display = "none"
 
     def show(flag: Boolean): Unit =
-      if flag then show else hide
+      if flag then show() else hide()
 
     def toggle(): Unit =
       if ele.style.display == "none" then ele.style.display = ""
       else ele.style.display = "none"
+
+    def isDisplayed: Boolean = 
+      ele.style.display != "none"
 
     def listenToCustomEvent[T](typeArg: String, handler: T => Unit): Unit =
       ele.addEventListener(typeArg, (e: CustomEvent[T]) => handler(e.detail))

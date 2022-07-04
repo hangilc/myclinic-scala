@@ -44,7 +44,7 @@ class ScanProgress(ui: ScanProgress.UI, deviceRef: () => Option[String])(using
   private def scan(deviceId: String): ScanTask =
     ScanTask(
       () => {
-        ui.eScanProgress(clear).show
+        ui.eScanProgress(clear).show()
         for
           file <- Api.scan(
             deviceId,

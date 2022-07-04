@@ -96,9 +96,30 @@ case class PatientSearchResultDialog(patients: List[Patient]):
         "|",
         a("新規後期高齢", onclick := (() => newKoukikourei(patient, hokenList))),
         "|",
-        a("新規公費", onclick := (() => newKouhi(patient, hokenList)))
+        a("新規公費", onclick := (() => newKouhi(patient, hokenList))),
+        "|",
+        a("保険履歴", onclick := (() => hokenHistory(patient, onHokenDispDone _)))
       )
     )
+
+  private def hokenHistory(patient: Patient, onDone: Modified => Unit): Unit =
+    val hokenWrapper = div
+    val boxes: CompSortList[HokenBox] = CompSortList[HokenBox](hokenWrapper)
+    dlog.body(
+      clear,
+      patientBlock(patient),
+      div("保険履歴", cls := "patient-search-result-dialog-subtitle"),
+      hokenWrapper
+    )
+    dlog.commands(
+      clear,
+      button("戻る", onclick := (() => onDone(false)))
+    )
+    for
+      result <- Api.listAllHoken(patient.patientId)
+    yield
+      val hokenList = HokenUtil.toHokenList.tupled(result)
+      boxes.set(hokenList.map(HokenBox.apply _))
 
   private def dispShahokokuho(
       shahokokuho: Shahokokuho,
@@ -133,11 +154,9 @@ case class PatientSearchResultDialog(patients: List[Patient]):
         onclick := (() => {
           props.validatedForUpdate.flatMap(createRenewalShahokokuho _) match {
             case Left(msg) => errBox.show(msg)
-            case Right((newShahokokuho, inputShahokokuho)) => {
-              for updated <- updateIfModified(newShahokokuho, inputShahokokuho)
-              yield
-                newShahokokuho(patient, newShahokokuho)
-
+            case Right((renewalShahokokuho, inputShahokokuho)) => {
+              for updated <- updateIfModified(inputShahokokuho, shahokokuho)
+              yield newShahokokuho(patient, Some(renewalShahokokuho))
             }
           }
           ()

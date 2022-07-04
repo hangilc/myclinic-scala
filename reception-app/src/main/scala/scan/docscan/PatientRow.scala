@@ -66,13 +66,13 @@ object PatientRow:
     def formatPatient(patient: Patient): String =
       String.format("(%04d) %s", patient.patientId, patient.fullName())
     search.ui.form(a("[キャンセル]", onclick := (() => onCancel())))
-    search.ui.selection.ele.hide
-    search.engine.onSearchDone = () => search.ui.selection.ele.show
+    search.ui.selection.ele.hide()
+    search.engine.onSearchDone = () => search.ui.selection.ele.show()
     search.onSelect(patient => {
       val hurdles =
         ds.scannedDocs.data.filter(_.getState != ScannedDoc.State.Scanned).size
       if hurdles == 0 then
-        search.ui.selection.ele.hide
+        search.ui.selection.ele.hide()
         onSelect(patient)
       else ShowMessage.showError("文書がすでにアップロードされているか、または操作中であるため、患者の変更ができません。")
     })

@@ -184,8 +184,8 @@ class ScannedItem(
   def rescanTask(deviceId: String): ScanTask =
     ScanTask(
       () =>
-        ui.eRescanLink.hide
-        ui.eScanProgress(clear).show
+        ui.eRescanLink.hide()
+        ui.eScanProgress(clear).show()
         for
           saved <- Api.scan(
             deviceId,
@@ -197,7 +197,7 @@ class ScannedItem(
           _ <-
             if isUploaded then cancelUpload
             else Future.successful(())
-        yield ui.eScanProgress(clear).hide
+        yield ui.eScanProgress(clear).hide()
       ,
       isScanning = Some(deviceId)
     )

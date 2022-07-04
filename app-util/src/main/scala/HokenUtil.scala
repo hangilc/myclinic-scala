@@ -2,6 +2,7 @@ package dev.myclinic.scala.apputil
 
 import dev.myclinic.scala.model.*
 import dev.myclinic.scala.util.HokenRep
+import java.time.LocalDate
 
 object HokenUtil:
   def hokenRep(visit: VisitEx): String =
@@ -21,16 +22,35 @@ object HokenUtil:
   def hokenRep(hoken: Hoken): String =
     val info = hoken match {
       case h: Shahokokuho => HokenInfo(shahokokuho = Some(h))
-      case h: Roujin => HokenInfo(roujin = Some(h))
+      case h: Roujin      => HokenInfo(roujin = Some(h))
       case h: Koukikourei => HokenInfo(koukikourei = Some(h))
-      case h: Kouhi => HokenInfo(kouhiList = List(h))
+      case h: Kouhi       => HokenInfo(kouhiList = List(h))
     }
     hokenRep(info)
+
+  def validFromOf(hoken: Hoken): LocalDate =
+    hoken match {
+      case h: Shahokokuho => h.validFrom
+      case h: Koukikourei => h.validFrom
+      case h: Kouhi       => h.validFrom
+      case h: Roujin      => h.validFrom
+    }
+
+  def toHokenList(
+      shahokokuhoList: List[Shahokokuho],
+      koukikoureiList: List[Koukikourei],
+      roujinList: List[Roujin],
+      kouhiList: List[Kouhi]
+  ): List[Hoken] =
+    List.empty[
+      Hoken
+    ] ++ shahokokuhoList ++ koukikoureiList ++ roujinList ++ kouhiList
 
   object Ext:
     extension (s: Shahokokuho)
       def rep: String = HokenRep.shahokokuhoRep(
-        s.hokenshaBangou, s.koureiFutanWari
+        s.hokenshaBangou,
+        s.koureiFutanWari
       )
 
     extension (k: Koukikourei)
@@ -38,9 +58,6 @@ object HokenUtil:
         k.futanWari
       )
 
-    extension (r: Roujin)
-      def rep: String = HokenRep.roujinRep(r.futanWari)
+    extension (r: Roujin) def rep: String = HokenRep.roujinRep(r.futanWari)
 
-    extension (k: Kouhi)
-      def rep: String = HokenRep.kouhiRep(k.futansha)
-      
+    extension (k: Kouhi) def rep: String = HokenRep.kouhiRep(k.futansha)

@@ -107,6 +107,11 @@
 }
 
 .reception-cashier-patient-search-result-dialog-disp-link-commands {
-    text-align: left;
     max-width: 16rem;
+    text-align: left;
+    word-break: break-all;
+}
+
+.reception-cashier-patient-search-result-dialog-disp-link-commands a {
+    word-break: break-all;
 }

@@ -77,6 +77,16 @@ object MiscApi extends ApiBase:
     ] =
       get("get-patient-hoken", Params("patient-id" -> patientId, "at" -> at))
 
+    def listAllHoken(patientId: Int): Future[
+      (
+          List[Shahokokuho],
+          List[Koukikourei],
+          List[Roujin],
+          List[Kouhi]
+      )
+    ] =
+      get("list-all-hoken", Params("patient-id" -> patientId))
+
     def getPatientAllHoken(patientId: Int): Future[
       (
           Int,

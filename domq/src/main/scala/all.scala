@@ -28,7 +28,8 @@ object all:
   type LocalEventPublisher[T] = dev.fujiwara.domq.LocalEventPublisher[T]
   type LocalEventUnsubscriber = dev.fujiwara.domq.LocalEventUnsubscriber
   type CompAppendList[C] = dev.fujiwara.domq.CompAppendList[C]
-  type CompSortList[C] = dev.fujiwara.domq.CompSortList[C]
+  export dev.fujiwara.domq.CompSortList
+  // type CompSortList[C] = dev.fujiwara.domq.CompSortList[C]
   type CheckLabel[T] = dev.fujiwara.domq.CheckLabel[T]
   val CheckLabel = dev.fujiwara.domq.CheckLabel
   type SearchForm[D] = dev.fujiwara.domq.searchform.SearchForm[D]

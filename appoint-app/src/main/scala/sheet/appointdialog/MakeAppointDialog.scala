@@ -166,7 +166,7 @@ object MakeAppointDialog:
       val searchIcon = Icons.search
       val searchResult = Selection[Patient]()
       private val searchResultWrapper = div(displayNone)
-      searchResult.ele.hide
+      searchResult.ele.hide()
       val ele = div(
         inputArea(Form.inputGroup)(
           searchForm(input, flex := "1 1 auto"),
@@ -175,8 +175,8 @@ object MakeAppointDialog:
         searchResultWrapper(searchResult.ele(mt := "6px"))
       )
       def showSearchResult(): Unit =
-        searchResult.ele.show
+        searchResult.ele.show()
         searchResultWrapper(displayDefault)
       def hideSearchResult(): Unit =
-        searchResult.ele.hide
+        searchResult.ele.hide()
         searchResultWrapper(displayNone)

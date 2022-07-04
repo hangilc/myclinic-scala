@@ -279,6 +279,9 @@ object RestService extends DateTimeQueryParam with Publisher:
         ) =>
       Ok(Db.getPatientHoken(patientId, at))
 
+    case GET -> Root / "list-all-hoken" :? intPatientId(patientId) =>
+      Ok(Db.listAllHoken(patientId))
+
     case GET -> Root / "get-patient-all-hoken" :? intPatientId(patientId) =>
       Ok(Db.getPatientAllHoken(patientId))
 
