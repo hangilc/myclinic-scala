@@ -7,12 +7,14 @@ import scala.language.implicitConversions
 import dev.fujiwara.kanjidate.KanjiDate
 import org.scalajs.dom.HTMLElement
 
+import Implicits.{*, given}
+
 case class DateOptionInput(
     private var initialValue: Option[LocalDate] = None,
     format: LocalDate => String = d => KanjiDate.dateToKanji(d),
     formatNone: () => String = () => "（未入力）",
     title: String = "日付の入力"
-)(using InitNoneConverter):
+)(using Suggest):
   val dateEdit =
     EditableDateOption(initialValue, format, formatNone, title)
   val xCircleIcon = Icons.xCircle
@@ -57,7 +59,7 @@ case class DateInput(
     private var initialValue: LocalDate,
     format: LocalDate => String = d => KanjiDate.dateToKanji(d),
     title: String = "日付の入力"
-)(using InitNoneConverter):
+)(using Suggest):
   val dateEdit = EditableDate(initialValue, format, title)
   val icon = Icons.calendar
   val ele = div(
@@ -86,7 +88,7 @@ object DateInputCommon:
       init: Option[LocalDate],
       icon: HTMLElement,
       onEnter: LocalDate => Unit
-  )(using InitNoneConverter): Unit =
+  )(using Suggest): Unit =
     val picker = DatePicker(init)
     picker.onDateSelected(onEnter)
     def locate(e: HTMLElement): Unit =

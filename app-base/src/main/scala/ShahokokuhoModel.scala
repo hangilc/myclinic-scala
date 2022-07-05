@@ -8,6 +8,7 @@ import dev.myclinic.scala.model.*
 import PatientValidator.*
 import org.scalajs.dom.HTMLElement
 import dev.fujiwara.domq.DispPanel
+import dev.fujiwara.domq.dateinput.Implicits as DateInputImplicits
 
 object ShahokokuhoProps:
   class HokenshaBangouProp extends ModelProp("保険者番号")
@@ -130,6 +131,14 @@ case class ShahokokuhoInputs(modelOpt: Option[Shahokokuho])
 
   val inputs = create(ShahokokuhoProps.props)
 
+  private val validUptoSuggest: DateInputImplicits.Suggest =
+    Suggest(() => 
+      validFromInput.validate() match {
+        case Right(d) => d.plusYears(1).minusDays(1)
+        case Left(_) => DateInputImplicits.defaultSuggest.value
+      }
+    )
+
   def update(): Unit =
     update(inputs, modelOpt)
 
@@ -154,6 +163,7 @@ case class ShahokokuhoInputs(modelOpt: Option[Shahokokuho])
       )
       .asEither
 
+  
 
 
 

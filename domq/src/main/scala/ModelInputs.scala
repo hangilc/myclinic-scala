@@ -7,7 +7,6 @@ import dev.fujiwara.validator.section.ValidatedResult
 import org.scalajs.dom.HTMLElement
 import java.time.LocalDate
 import dev.fujiwara.domq.dateinput.DateOptionInput
-import dev.fujiwara.domq.dateinput.InitNoneConverter
 import dev.myclinic.scala.model.ValidUpto
 
 trait ModelInput[M]:
@@ -96,25 +95,28 @@ trait ModelInputs[M]:
     modelValue: M => LocalDate,
     validator: Option[LocalDate] => ValidatedResult[E, LocalDate],
     initValue: Option[LocalDate],
-    suggest: () => Option[LocalDate] = InitNoneConverter.defaultInitNoneFun
   ) extends Input[E, LocalDate]:
-    given InitNoneConverter with 
-      def convert: Option[LocalDate] = suggest()
-    val dateInput = DateOptionInput(initValue)
+    import dev.fujiwara.domq.dateinput.Implicits.{Suggest, defaultSuggest}
+
+    val dateInput = DateOptionInput(initValue)(using suggest)
     val ele: HTMLElement = dateInput.ele
     def updateBy(modelOpt: Option[M]): Unit =
       dateInput.init(modelOpt.map(modelValue(_)))
     def validate(): ValidatedResult[E, LocalDate] =
       validator(dateInput.value)
+    def suggest: Suggest = defaultSuggest
 
   class ValidUptoInput[E](
     modelValue: M => ValidUpto,
     validator: Option[LocalDate] => ValidatedResult[E, ValidUpto],
     initValue: Option[LocalDate]
   ) extends Input[E, ValidUpto]:
-    val dateInput = DateOptionInput(initValue)
+    import dev.fujiwara.domq.dateinput.Implicits.{Suggest, defaultSuggest}
+
+    val dateInput = DateOptionInput(initValue)(using suggest)
     val ele: HTMLElement = dateInput.ele
     def updateBy(modelOpt: Option[M]): Unit =
       dateInput.init(modelOpt.flatMap(m => modelValue(m).value))
     def validate(): ValidatedResult[E, ValidUpto] =
       validator(dateInput.value)
+    def suggest: Suggest = defaultSuggest

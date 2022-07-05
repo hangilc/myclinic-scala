@@ -14,13 +14,15 @@ import java.time.DayOfWeek
 import dev.fujiwara.kanjidate.DateUtil
 import dev.fujiwara.kanjidate.DateUtil.given
 
+import Implicits.{*, given}
+
 case class DatePicker(init: Option[LocalDate])(
-  using initNoneConverter: InitNoneConverter
+  using suggest: Suggest
 ):
   private val dateSelectedPublisher = new LocalEventPublisher[LocalDate]
   private val initSuggest: Option[LocalDate] =
     init match {
-      case None => initNoneConverter.convert
+      case None => suggest.value
       case Some(_) => None
     }
   private val setupDate: LocalDate = init.orElse(initSuggest).getOrElse(LocalDate.now())

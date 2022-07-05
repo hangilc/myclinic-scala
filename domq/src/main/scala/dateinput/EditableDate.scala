@@ -5,11 +5,13 @@ import dev.fujiwara.kanjidate.KanjiDate
 
 import dev.fujiwara.domq.all.{*, given}
 
+import Implicits.{*, given}
+
 class EditableDate(
     initialValue: LocalDate,
     format: LocalDate => String = d => KanjiDate.dateToKanji(d),
     title: String = "日付の入力"
-)(using InitNoneConverter):
+)(using Suggest):
   private val onChangePublisher = new LocalEventPublisher[LocalDate]
   private var date: LocalDate = initialValue
   val ele = span(cls := "domq-editable-date domq-cursor-pointer", onclick := (doClick _))
@@ -45,7 +47,7 @@ class EditableDateOption(
     format: LocalDate => String = d => KanjiDate.dateToKanji(d),
     formatNone: () => String = () => "（未入力）",
     title: String = "日付の入力"
-)(using InitNoneConverter):
+)(using Suggest):
   private val onChangePublisher = new LocalEventPublisher[Option[LocalDate]]
   private var dateOption: Option[LocalDate] = initialValue
   val ele = span(cls := "domq-editable-date domq-cursor-pointer", onclick := (doClick _))
