@@ -251,8 +251,7 @@ lazy val appbase = project
     validatorJS,
     drawerJS,
     kanjidateJS,
-    validatorJS,
-    dateinput
+    validatorJS
   )
   .settings(
     name := "myclinic-appbase",
@@ -305,8 +304,7 @@ lazy val receptionApp = project
     appUtilJS,
     drawerJS,
     drawerformJS,
-    kanjidateJS,
-    dateinput
+    kanjidateJS
   )
   .settings(
     name := "myclinic-reception",
@@ -333,7 +331,6 @@ lazy val practiceApp = project
     appUtilJS,
     drawerJS,
     kanjidateJS,
-    dateinput,
     formatshohousenJS,
     myclinicutilJS
   )
@@ -486,19 +483,6 @@ lazy val drawerform = crossProject(JVMPlatform, JSPlatform)
 
 val drawerformJVM = drawerform.jvm
 val drawerformJS = drawerform.js
-
-lazy val dateinput = project
-  .in(file("dateinput"))
-  .enablePlugins(ScalaJSPlugin)
-  .dependsOn(domq, kanjidateJS, validatorJS)
-  .settings(
-    name := "dateinput",
-    scalaJSUseMainModuleInitializer := false,
-    libraryDependencies ++= Seq(
-      "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion,
-      "org.typelevel" %%% "cats-core" % catsVersion
-    )
-  )
 
 lazy val kanjidate = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Pure)
