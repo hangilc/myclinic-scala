@@ -7,6 +7,7 @@ import dev.fujiwara.validator.section.ValidatedResult
 import org.scalajs.dom.HTMLElement
 import java.time.LocalDate
 import dev.fujiwara.domq.dateinput.DateOptionInput
+import dev.fujiwara.domq.dateinput.InitNoneConverter
 import dev.myclinic.scala.model.ValidUpto
 
 trait ModelInput[M]:
@@ -14,6 +15,10 @@ trait ModelInput[M]:
     val ele: HTMLElement
     def updateBy(m: Option[M]): Unit
     def validate(): ValidatedResult[E, T]
+
+    def cssClass(className: String): this.type =
+      ele(cls := className)
+      this
 
 trait ModelInputProcs[M]:
   this: ModelInput[M] =>
@@ -60,8 +65,6 @@ trait ModelInputProcs[M]:
     }
     panel.ele
 
-
-
 trait ModelInputs[M]:
   this: ModelInput[M] =>
   
@@ -92,8 +95,11 @@ trait ModelInputs[M]:
   class DateInput[E](
     modelValue: M => LocalDate,
     validator: Option[LocalDate] => ValidatedResult[E, LocalDate],
-    initValue: Option[LocalDate]
+    initValue: Option[LocalDate],
+    suggest: () => Option[LocalDate] = InitNoneConverter.defaultInitNoneFun
   ) extends Input[E, LocalDate]:
+    given InitNoneConverter with 
+      def convert: Option[LocalDate] = suggest()
     val dateInput = DateOptionInput(initValue)
     val ele: HTMLElement = dateInput.ele
     def updateBy(modelOpt: Option[M]): Unit =
