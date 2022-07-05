@@ -1,38 +1,36 @@
 package dev.myclinic.scala.web.appbase
 
-import dev.fujiwara.domq.prop.{*, given}
 import dev.myclinic.scala.model.Kouhi
 import dev.myclinic.scala.model.ValidUpto
 import dev.myclinic.scala.web.appbase.KouhiValidator.{*, given}
 import dev.myclinic.scala.web.appbase.KouhiValidator
 import dev.fujiwara.kanjidate.KanjiDate
-import PropUtil.*
 import java.time.LocalDate
 import org.scalajs.dom.HTMLElement
 import dev.fujiwara.validator.section.Implicits.*
 import dev.fujiwara.domq.all.{*, given}
 import scala.language.implicitConversions
+import dev.fujiwara.domq.ModelProps
 
-case class KouhiProps(var modelOpt: Option[Kouhi]):
-  type K = Kouhi
+case class KouhiProps(var modelOpt: Option[Kouhi]) extends ModelProps[Kouhi] with PropUtil[Kouhi]:
 
   val props = (
-    TextProp[K, FutanshaError.type, Int](
+    TextProp[FutanshaError.type, Int](
       "負担者番号",
       _.futansha,
       FutanshaValidator.validate
     ),
-    TextProp[K, JukyuushaError.type, Int](
+    TextProp[JukyuushaError.type, Int](
       "受給者番号",
       _.jukyuusha,
       JukyuushaValidator.validate
     ),
-    DateProp[K, ValidFromError.type](
+    DateProp[ValidFromError.type](
       "期限開始",
       _.validFrom,
       ValidFromValidator.validateOption
     ),
-    ValidUptoProp[K, ValidUptoError.type](
+    ValidUptoProp[ValidUptoError.type](
       "期限終了",
       _.validUpto,
       ValidUptoValidator.validate
@@ -42,27 +40,23 @@ case class KouhiProps(var modelOpt: Option[Kouhi]):
   val (futanshaProp, jukyuushaProp, validFromProp, validUptoProp) = props
 
     def updateInput(): this.type =
-    val updater = new InputUpdater(modelOpt)
-    import updater.given
-    updater.update(props)
+    super.updateInput(props, modelOpt)
     this
   def updateDisp(): this.type =
-    val updater = new DispUpdater(modelOpt)
-    import updater.given
-    updater.update(props)
+    super.updateDisp(props, modelOpt)
     this
 
   val formProps = props
   val dispProps = props
 
   def formPanel: HTMLElement =
-    Prop.formPanel(formProps)
+    formPanel(formProps)(cls := "kouhi-form")
 
   def dispPanel: HTMLElement =
-    Prop.dispPanel(dispProps)
+    dispPanel(dispProps)(cls := "kouhi-disp")
 
   def validatedForEnter(patientId: Int): Either[String, Kouhi] =
-    val rs = Prop.resultsOf(props)
+    val rs = resultsOf(props)
     KouhiValidator
       .validate(
         KouhiIdValidator.validateForEnter *:
@@ -72,7 +66,7 @@ case class KouhiProps(var modelOpt: Option[Kouhi]):
       .asEither
 
   def validatedForUpdate: Either[String, Kouhi] =
-    val rs = Prop.resultsOf(props)
+    val rs = resultsOf(props)
     KouhiValidator
       .validate(
         KouhiIdValidator.validateOptionForUpdate(modelOpt.map(_.kouhiId)) *:

@@ -8,7 +8,7 @@ import Modifiers.{*, given}
 import scala.language.implicitConversions
 
 class ModelProps[M]:
-  trait InputSpec[+E, +T]:
+  trait InputSpec[+E, T]:
     val ele: HTMLElement
     def updateBy(model: Option[M]): Unit
     def validate(): ValidatedResult[E, T]
@@ -21,11 +21,25 @@ class ModelProps[M]:
     val ele: HTMLElement
     def updateBy(model: Option[M]): Unit
 
-  trait Prop[+E, +T]:
+  trait Prop[+E, T]:
     def label: String
     def modelValue(m: M): T 
     lazy val inputSpec: InputSpec[E, T]
     lazy val dispSpec: DispSpec
+
+    def inputElement: HTMLElement =
+      inputSpec.ele
+
+    def dispElement: HTMLElement =
+      dispSpec.ele
+
+    def inputElementClass(className: String): this.type =
+      inputElement(cls := className)
+      this
+
+    def dispElementClass(className: String): this.type =
+      dispElement(cls := className)
+      this
 
   type Label[P] = P match {
     case Prop[e, t] => String
@@ -120,4 +134,5 @@ class ModelProps[M]:
 
   def resultsOf(props: Tuple): Tuple.Map[props.type, ResultOf] =
     props.map[ResultOf]([T] => (t: T) => resultOf(t))
+
 

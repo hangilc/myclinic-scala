@@ -1,46 +1,44 @@
 package dev.myclinic.scala.web.appbase
 
-import dev.fujiwara.domq.prop.{*, given}
 import dev.myclinic.scala.model.Koukikourei
 import dev.myclinic.scala.model.ValidUpto
 import dev.myclinic.scala.web.appbase.KoukikoureiValidator.{*, given}
 import dev.myclinic.scala.web.appbase.KoukikoureiValidator
 import dev.fujiwara.kanjidate.KanjiDate
-import PropUtil.*
 import java.time.LocalDate
 import org.scalajs.dom.HTMLElement
 import dev.fujiwara.validator.section.Implicits.*
 import dev.fujiwara.domq.all.{*, given}
 import scala.language.implicitConversions
 import dev.fujiwara.kanjidate.DateUtil
+import dev.fujiwara.domq.ModelProps
 
-case class KoukikoureiProps(var modelOpt: Option[Koukikourei]):
-  type K = Koukikourei
+case class KoukikoureiProps(var modelOpt: Option[Koukikourei]) extends ModelProps[Koukikourei] with PropUtil[Koukikourei]:
 
   val props = (
-    TextProp[K, HokenshaBangouError.type, String](
+    TextProp[HokenshaBangouError.type, String](
       "保険者番号",
       _.hokenshaBangou,
       HokenshaBangouValidator.validate
     ),
-    TextProp[K, HihokenshaBangouError.type, String](
+    TextProp[HihokenshaBangouError.type, String](
       "被保険者番号",
       _.hihokenshaBangou,
       HihokenshaBangouValidator.validate
     ),
-    RadioProp[K, FutanWariError.type, Int](
+    RadioProp[FutanWariError.type, Int](
       "負担割",
       List("１割" -> 1, "２割" -> 2, "３割" -> 3),
       1,
       _.futanWari,
       FutanWariValidator.validate
     ),
-    DateProp[K, ValidFromError.type](
+    DateProp[ValidFromError.type](
       "期限開始",
       _.validFrom,
       ValidFromValidator.validateOption
     ),
-    ValidUptoProp[K, ValidUptoError.type](
+    ValidUptoProp[ValidUptoError.type](
       "期限終了",
       _.validUpto,
       ValidUptoValidator.validate,
@@ -61,27 +59,23 @@ case class KoukikoureiProps(var modelOpt: Option[Koukikourei]):
     DateUtil.nextDateOf(7, 31, anchor)
 
   def updateInput(): this.type =
-    val updater = new InputUpdater(modelOpt)
-    import updater.given
-    updater.update(props)
+    super.updateInput(props, modelOpt)
     this
   def updateDisp(): this.type =
-    val updater = new DispUpdater(modelOpt)
-    import updater.given
-    updater.update(props)
+    super.updateDisp(props, modelOpt)
     this
 
   val formProps = props
   val dispProps = props
 
   def formPanel: HTMLElement =
-    Prop.formPanel(formProps)
+    super.formPanel(formProps)(cls := "koukikourei-form")
 
   def dispPanel: HTMLElement =
-    Prop.dispPanel(dispProps)
+    super.dispPanel(dispProps)(cls := "koukikourei-disp")
 
   def validatedForEnter(patientId: Int): Either[String, Koukikourei] =
-    val rs = Prop.resultsOf(props)
+    val rs = resultsOf(props)
     KoukikoureiValidator
       .validate(
         KoukikoureiIdValidator.validateForEnter *:
@@ -91,7 +85,7 @@ case class KoukikoureiProps(var modelOpt: Option[Koukikourei]):
       .asEither
 
   def validatedForUpdate: Either[String, Koukikourei] =
-    val rs = Prop.resultsOf(props)
+    val rs = resultsOf(props)
     KoukikoureiValidator
       .validate(
         KoukikoureiIdValidator.validateOptionForUpdate(modelOpt.map(_.koukikoureiId)) *:

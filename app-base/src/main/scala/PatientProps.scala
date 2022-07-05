@@ -1,6 +1,5 @@
 package dev.myclinic.scala.web.appbase
 
-import dev.fujiwara.domq.prop.{*, given}
 import dev.myclinic.scala.model.Patient
 import dev.myclinic.scala.model.Sex
 import dev.myclinic.scala.web.appbase.PatientValidator.{*, given}
@@ -11,42 +10,33 @@ import org.scalajs.dom.HTMLElement
 import dev.fujiwara.validator.section.Implicits.*
 import dev.fujiwara.domq.all.{*, given}
 import scala.language.implicitConversions
+import dev.fujiwara.domq.ModelProps
+import dev.myclinic.scala.web.appbase.PropUtil
 
-case class PatientProps() extends dev.fujiwara.domq.ModelProps[Patient] with PropUtil[Patient]:
+case class PatientProps(modelOpt: Option[Patient]) extends ModelProps[Patient] with PropUtil[Patient]:
 
   val props = (
     TextProp[LastNameError.type, String](
       "姓",
       _.lastName,
       LastNameValidator.validate _
-    ).inputElementClass("last-name-input")      
-  )
-
-
-case class PatientPropsOrig(modelOpt: Option[Patient]):
-
-  val props = (
-    TextProp[Patient, LastNameError.type, String](
-      "姓",
-      _.lastName,
-      LastNameValidator.validate _
     ).inputElementClass("last-name-input"),
-    TextProp[Patient, FirstNameError.type, String](
+    TextProp[FirstNameError.type, String](
       "名",
       _.firstName,
       FirstNameValidator.validate _
     ).inputElementClass("first-name-input"),
-    TextProp[Patient, LastNameYomiError.type, String](
+    TextProp[LastNameYomiError.type, String](
       "姓（よみ）",
       _.lastNameYomi,
       LastNameYomiValidator.validate _
     ).inputElementClass("last-name-yomi-input"),
-    TextProp[Patient, FirstNameYomiError.type, String](
+    TextProp[FirstNameYomiError.type, String](
       "名（よみ）",
       _.firstNameYomi,
       FirstNameYomiValidator.validate
     ).inputElementClass("first-name-yomi-input"),
-    RadioProp[Patient, SexError.type, Sex](
+    RadioProp[SexError.type, Sex](
       "性別",
       List("男" -> Sex.Male, "女" -> Sex.Female),
       Sex.Female,
@@ -54,17 +44,17 @@ case class PatientPropsOrig(modelOpt: Option[Patient]):
       SexValidator.validate,
       toDispValue = (t: Sex, g: RadioGroup[Sex]) => g.findLabel(t) + "性"
     ),
-    DateProp[Patient, BirthdayError.type](
+    DateProp[BirthdayError.type](
       "生年月日",
       _.birthday,
       BirthdayValidator.validate
     ),
-    TextProp[Patient, AddressError.type, String](
+    TextProp[AddressError.type, String](
       "住所",
       _.address,
       AddressValidator.validate
     ).inputElementClass("address-input"),
-    TextProp[Patient, PhoneError.type, String](
+    TextProp[PhoneError.type, String](
       "電話",
       _.phone,
       PhoneValidator.validate
@@ -108,32 +98,26 @@ case class PatientPropsOrig(modelOpt: Option[Patient]):
     phoneProp
   )
 
-  def formPanel: HTMLElement = Prop.formPanel(formProps)(cls := "patient-form")
-  def dispPanel: HTMLElement = Prop.dispPanel(dispProps)
+  def formPanel: HTMLElement = super.formPanel(formProps)(cls := "patient-form")
+  def dispPanel: HTMLElement = super.dispPanel(dispProps)(cls := "patient-disp")
 
   def updateInput(): this.type =
-    val updater = new InputUpdater[Patient](modelOpt)
-    import updater.given
-    updater.update(props)
+    super.updateInput(props, modelOpt)
     this
 
   def updateDisp(): this.type =
-    val updater = new DispUpdater[Patient](modelOpt)
-    import updater.given
-    updater.update(props)
+    super.updateInput(props, modelOpt)
     this
 
   def validatedForEnter: Either[String, Patient] =
     PatientValidator.validate(
       PatientIdValidator.validateForEnter *:
-        Prop.resultsOf(props)
+        resultsOf(props)
     ).asEither
 
   def validatedForUpdate: Either[String, Patient] =
     PatientValidator.validate(
       PatientIdValidator.validateOptionForUpdate(modelOpt.map(_.patientId)) *:
-        Prop.resultsOf(props)
+        resultsOf(props)
     ).asEither
-
-
 

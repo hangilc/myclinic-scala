@@ -1,57 +1,56 @@
 package dev.myclinic.scala.web.appbase
 
-import dev.fujiwara.domq.prop.{*, given}
 import dev.myclinic.scala.model.Shahokokuho
 import dev.myclinic.scala.model.ValidUpto
 import dev.myclinic.scala.web.appbase.ShahokokuhoValidator.{*, given}
 import dev.myclinic.scala.web.appbase.ShahokokuhoValidator
 import dev.fujiwara.kanjidate.KanjiDate
-import PropUtil.*
 import java.time.LocalDate
 import org.scalajs.dom.HTMLElement
 import dev.fujiwara.validator.section.Implicits.*
 import dev.fujiwara.domq.all.{*, given}
 import scala.language.implicitConversions
+import dev.fujiwara.domq.ModelProps
 import dev.myclinic.scala.util.ZenkakuUtil
 
-case class ShahokokuhoProps(var modelOpt: Option[Shahokokuho]):
+case class ShahokokuhoProps(var modelOpt: Option[Shahokokuho]) extends ModelProps[Shahokokuho] with PropUtil[Shahokokuho]:
   private val validUptoChangedPublisher = new LocalEventPublisher[Option[LocalDate]]
 
   val props = (
-    TextProp[Shahokokuho, HokenshaBangouError.type, Int](
+    TextProp[HokenshaBangouError.type, Int](
       "保険者番号",
       _.hokenshaBangou,
       HokenshaBangouValidator.validateInput
     ).inputElementClass("hokensha-bangou-input"),
-    TextProp[Shahokokuho, HihokenshaKigouError.type, String](
+    TextProp[HihokenshaKigouError.type, String](
       "被保険者記号",
       _.hihokenshaKigou,
       HihokenshaKigouValidator.validate
     ).inputElementClass("hihokensha-kigou-input"),
-    TextProp[Shahokokuho, HihokenshaBangouError.type, String](
+    TextProp[HihokenshaBangouError.type, String](
       "被保険者番号",
       _.hihokenshaBangou,
       HihokenshaBangouValidator.validate
     ).inputElementClass("hihokensha-bangou-input"),
-    RadioProp[Shahokokuho, HonninError.type, Int](
+    RadioProp[HonninError.type, Int](
       "本人・家族",
       List("本人" -> 1, "家族" -> 0),
       0,
       _.honninStore,
       HonninValidator.validate
     ),
-    DateProp[Shahokokuho, ValidFromError.type](
+    DateProp[ValidFromError.type](
       "期限開始",
       _.validFrom,
       ValidFromValidator.validateOption
     ),
-    ValidUptoProp[Shahokokuho, ValidUptoError.type](
+    ValidUptoProp[ValidUptoError.type](
       "期限終了",
       _.validUpto,
       ValidUptoValidator.validate,
       suggest = suggestValidUpto
     ),
-    RadioProp[Shahokokuho, KoureiError.type, Int](
+    RadioProp[KoureiError.type, Int](
       "高齢",
       RadioGroup.createItemsFromValues(ShahokokuhoValidator.validKoureiValues, formatKourei),
       0,
@@ -66,7 +65,7 @@ case class ShahokokuhoProps(var modelOpt: Option[Shahokokuho]):
           )
         )
     ).inputElementClass("kourei-input"),
-    TextProp[Shahokokuho, EdabanError.type, String](
+    TextProp[EdabanError.type, String](
       "枝番",
       _.edaban,
       EdabanValidator.validate
@@ -133,24 +132,21 @@ case class ShahokokuhoProps(var modelOpt: Option[Shahokokuho]):
     }
 
   def updateInput(): this.type = 
-    val updater = new InputUpdater(modelOpt)
-    import updater.given
-    updater.update(props)
+    super.updateInput(props, modelOpt)
     this
+
   def updateDisp(): this.type = 
-    val updater = new DispUpdater(modelOpt)
-    import updater.given
-    updater.update(props)
+    super.updateDisp(props, modelOpt)
     this
 
   def formPanel: HTMLElement =
-    Prop.formPanel(formProps)(cls := "shahokokuho-form")
+    super.formPanel(formProps)(cls := "shahokokuho-form")
 
   def dispPanel: HTMLElement =
-    Prop.dispPanel(dispProps)
+    super.dispPanel(dispProps)(cls := "shahokokuho-disp")
 
   def validatedForEnter(patientId: Int): Either[String, Shahokokuho] =
-    val rs = Prop.resultsOf(props)
+    val rs = resultsOf(props)
     ShahokokuhoValidator
       .validate(
         ShahokokuhoIdValidator.validateForEnter *:
@@ -158,8 +154,8 @@ case class ShahokokuhoProps(var modelOpt: Option[Shahokokuho]):
       )
       .asEither
 
-  def validatedForUpdate: Either[String, Shahokokuho] =
-    val rs = Prop.resultsOf(props)
+  def validatedForUpdate(): Either[String, Shahokokuho] =
+    val rs = resultsOf(props)
     ShahokokuhoValidator
       .validate(
         ShahokokuhoIdValidator.validateOptionForUpdate(modelOpt.map(_.shahokokuhoId)) *:

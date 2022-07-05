@@ -1,45 +1,43 @@
 package dev.myclinic.scala.web.appbase
 
-import dev.fujiwara.domq.prop.{*, given}
 import dev.myclinic.scala.model.Roujin
 import dev.myclinic.scala.model.ValidUpto
 import dev.myclinic.scala.web.appbase.RoujinValidator.{*, given}
 import dev.myclinic.scala.web.appbase.RoujinValidator
 import dev.fujiwara.kanjidate.KanjiDate
-import PropUtil.*
 import java.time.LocalDate
 import org.scalajs.dom.HTMLElement
 import dev.fujiwara.validator.section.Implicits.*
 import dev.fujiwara.domq.all.{*, given}
 import scala.language.implicitConversions
+import dev.fujiwara.domq.ModelProps
 
-case class RoujinProps(var modelOpt: Option[Roujin]):
-  type K = Roujin
+case class RoujinProps(var modelOpt: Option[Roujin]) extends ModelProps[Roujin] with PropUtil[Roujin]:
 
   val props = (
-    TextProp[K, ShichousonError.type, Int](
+    TextProp[ShichousonError.type, Int](
       "市町村番号",
       _.shichouson,
       ShichousonValidator.validateInput
     ),
-    TextProp[K, JukyuushaError.type, Int](
+    TextProp[JukyuushaError.type, Int](
       "受給者番号",
       _.jukyuusha,
       JukyuushaValidator.validateInput
     ),
-    RadioProp[K, FutanWariError.type, Int](
+    RadioProp[FutanWariError.type, Int](
       "負担割",
       List("１割" -> 1, "２割" -> 2, "３割" -> 3),
       1,
       _.futanWari,
       FutanWariValidator.validate
     ),
-    DateProp[K, ValidFromError.type](
+    DateProp[ValidFromError.type](
       "期限開始",
       _.validFrom,
       ValidFromValidator.validateOption
     ),
-    ValidUptoProp[K, ValidUptoError.type](
+    ValidUptoProp[ValidUptoError.type](
       "期限終了",
       _.validUpto,
       ValidUptoValidator.validate
@@ -55,27 +53,23 @@ case class RoujinProps(var modelOpt: Option[Roujin]):
   ) = props
 
   def updateInput(): this.type =
-    val updater = new InputUpdater(modelOpt)
-    import updater.given
-    updater.update(props)
+    super.updateInput(props, modelOpt)
     this
   def updateDisp(): this.type =
-    val updater = new DispUpdater(modelOpt)
-    import updater.given
-    updater.update(props)
+    super.updateDisp(props, modelOpt)
     this
 
   val formProps = props
   val dispProps = props
 
   def formPanel: HTMLElement =
-    Prop.formPanel(formProps)
+    formPanel(formProps)(cls := "roujin-form")
 
   def dispPanel: HTMLElement =
-    Prop.dispPanel(dispProps)
+    dispPanel(dispProps)(cls := "roujin-disp")
 
   def validatedForEnter(patientId: Int): Either[String, Roujin] =
-    val rs = Prop.resultsOf(props)
+    val rs = resultsOf(props)
     RoujinValidator
       .validate(
         RoujinIdValidator.validateForEnter *:
@@ -85,7 +79,7 @@ case class RoujinProps(var modelOpt: Option[Roujin]):
       .asEither
 
   def validatedForUpdate: Either[String, Roujin] =
-    val rs = Prop.resultsOf(props)
+    val rs = resultsOf(props)
     RoujinValidator
       .validate(
         RoujinIdValidator.validateOptionForUpdate(modelOpt.map(_.roujinId)) *:
@@ -93,3 +87,5 @@ case class RoujinProps(var modelOpt: Option[Roujin]):
           rs
       )
       .asEither
+
+      
