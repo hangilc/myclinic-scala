@@ -1,8 +1,10 @@
-package dev.fujiwara.domq
+package dev.fujiwara.domq.prop
 
 import org.scalajs.dom.HTMLElement
 import dev.fujiwara.validator.section.ValidatedResult
 import org.scalajs.dom.HTMLInputElement
+import dev.fujiwara.domq.DispPanel
+import dev.fujiwara.domq.Html
 
 class ModelProp(val label: String)
 
@@ -28,15 +30,36 @@ abstract class BoundModelInput[M, E, I, T](
   def validate(): ValidatedResult[E, T] =
     validator(currentInputValue())
 
-trait BoundModelInputProcs extends ModelPropUtil:
+trait ModelDisp:
+  val prop: ModelProp
+  def rep: String
+  def ele: HTMLElement
+  def update(): Unit
+
+class BoundModelDisp[M, T](
+  val prop: ModelProp,
+  mOpt: Option[M],
+  modelValue: M => T,
+  toRep: T => String = (i: T) => i.toString,
+  defaultRep: () => String = () => "",
+  val ele: HTMLElement = Html.span
+) extends ModelDisp:
+  update()
+  def rep: String = 
+    mOpt.fold(defaultRep())(m => toRep(modelValue(m)))
+  def update(): Unit = ele.innerText = rep
+
+case class LabelElement(label: String, element: HTMLElement)
+
+trait BoundModelInputProcs extends ModelUtil:
   type FormPanel[T] = T match {
     case ModelInput[e, t]      => (String, HTMLElement)
-    case (String, HTMLElement) => (String, HTMLElement)
+    case LabelElement => (String, HTMLElement)
   }
 
   def fFormPanel[T](t: T): FormPanel[T] = t match {
     case tt: ModelInput[e, t]      => (tt.prop.label, tt.ele)
-    case tt: (String, HTMLElement) => tt
+    case tt: LabelElement => (tt.label, tt.element)
   }
 
   def formPanel(inputs: Tuple): HTMLElement =
@@ -81,7 +104,7 @@ object ModelInputs:
     def currentInputValue(): String =
       ele.value
 
-class PatientInputs(modelOpt: Option[Patient]) extends BoundModelInputProcs with ModelPropUtil:
+class PatientInputs(modelOpt: Option[Patient]) extends BoundModelInputProcs with ModelUtil:
   import ModelInputs.*
   import PatientProp.*
 
