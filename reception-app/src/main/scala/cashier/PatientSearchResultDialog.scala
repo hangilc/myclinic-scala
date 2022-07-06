@@ -8,11 +8,11 @@ import java.time.LocalDateTime
 import java.time.LocalDate
 import scala.concurrent.Future
 import dev.myclinic.scala.apputil.HokenUtil
-import dev.myclinic.scala.web.appbase.PatientProps
-import dev.myclinic.scala.web.appbase.ShahokokuhoProps
-import dev.myclinic.scala.web.appbase.KoukikoureiProps
-import dev.myclinic.scala.web.appbase.KouhiProps
-import dev.myclinic.scala.web.appbase.RoujinProps
+import dev.myclinic.scala.web.appbase.PatientModel
+import dev.myclinic.scala.web.appbase.ShahokokuhoModel
+import dev.myclinic.scala.web.appbase.KoukikoureiModel
+import dev.myclinic.scala.web.appbase.KouhiModel
+import dev.myclinic.scala.web.appbase.RoujinModel
 import org.scalajs.dom.HTMLElement
 
 case class PatientSearchResultDialog(patients: List[Patient]):
@@ -52,7 +52,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
 
   private def disp(patient: Patient, hokenList: List[Hoken]): Unit =
     val hokenArea = div
-    val dispElement = PatientProps(Some(patient)).updateDisp().dispPanel
+    val dispElement = new PatientModel(Some(patient)).updateDisp().dispPanel
     def onHokenDispDone(modified: Boolean): Unit =
       if modified then invokeDisp(patient)
       else disp(patient, hokenList)

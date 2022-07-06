@@ -13,9 +13,7 @@ object HokenHelper:
     }
 
   def shahokokuhoDetail(h: Shahokokuho): String =
-    val props = ShahokokuhoProps(Some(h)).props
-    props.map([T] => (t: T) => t.modelValue(h).toString)
-
+    ???
 
   def koukikoureiDetail(h: Koukikourei): String =
     ???

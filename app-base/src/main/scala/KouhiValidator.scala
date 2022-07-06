@@ -24,11 +24,11 @@ object KouhiValidator:
   object KouhiIdValidator extends DatabaseIdValidator(KouhiIdError, "kouhi-id")
 
   object FutanshaValidator extends SectionValidator(FutanshaError, "負担者番号"):
-    def validate(input: String): Result[Int] =
+    def validateInput(input: String): Result[Int] =
       inputToInt(input) |> positive
 
   object JukyuushaValidator extends SectionValidator(JukyuushaError, "受給者番号"):
-    def validate(input: String): Result[Int] =
+    def validateInput(input: String): Result[Int] =
       inputToInt(input) |> positive
 
   object ValidFromValidator extends ValidFromValidator(ValidFromError)

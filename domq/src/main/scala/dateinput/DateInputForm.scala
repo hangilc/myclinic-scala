@@ -12,12 +12,10 @@ import scala.util.Failure
 import cats.syntax.all.*
 import org.scalajs.dom.MouseEvent
 
-import Implicits.{*, given}
-
 class DateInputForm(
     var value: Option[LocalDate] = None,
     gengouList: List[Era] = DateInputForm.defaultGengouList
-)(using suggest: Suggest):
+)(using suggest: DateInput.Suggest):
   value = value.orElse(suggest.value)
   val gengouSelect = SelectProxy(gengouList, (opt, e) => opt(eraName(e)))
   val nenInput = input

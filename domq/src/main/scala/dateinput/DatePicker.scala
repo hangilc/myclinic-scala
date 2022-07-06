@@ -14,10 +14,8 @@ import java.time.DayOfWeek
 import dev.fujiwara.kanjidate.DateUtil
 import dev.fujiwara.kanjidate.DateUtil.given
 
-import Implicits.{*, given}
-
 case class DatePicker(init: Option[LocalDate])(
-  using suggest: Suggest
+  using suggest: DateInput.Suggest
 ):
   private val dateSelectedPublisher = new LocalEventPublisher[LocalDate]
   private val initSuggest: Option[LocalDate] =

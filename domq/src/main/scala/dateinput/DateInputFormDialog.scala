@@ -5,14 +5,12 @@ import dev.fujiwara.domq.all.{*, given}
 import scala.language.implicitConversions
 import dev.fujiwara.kanjidate.KanjiDate.Era
 
-import Implicits.{*, given}
-
 class DateInputFormDialog(
     init: Option[LocalDate] = None,
     title: String = "日付の入力",
     gengouList: List[Era] = DateInputForm.defaultGengouList,
     allowNone: Boolean = true
-)(using Suggest):
+)(using DateInput.Suggest):
   private val onEnterPublisher = new LocalEventPublisher[Option[LocalDate]]
   val form = new DateInputForm(init)
   val errBox = ErrorBox()

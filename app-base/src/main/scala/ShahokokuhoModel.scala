@@ -5,10 +5,16 @@ import dev.fujiwara.domq.ModelInput
 import dev.fujiwara.domq.ModelInputs
 import dev.fujiwara.domq.ModelInputProcs
 import dev.myclinic.scala.model.*
-import PatientValidator.*
+import ShahokokuhoValidator.*
 import org.scalajs.dom.HTMLElement
 import dev.fujiwara.domq.DispPanel
-import dev.fujiwara.domq.dateinput.Implicits as DateInputImplicits
+import dev.myclinic.scala.util.ZenkakuUtil
+import dev.fujiwara.domq.dateinput.DateInput
+import cats.data.Validated.Valid
+import cats.data.Validated.Invalid.apply
+import cats.data.Validated.Invalid
+import dev.fujiwara.domq.dateinput.DateOptionInput
+import dev.fujiwara.validator.section.Implicits.*
 
 object ShahokokuhoProps:
   class HokenshaBangouProp extends ModelProp("保険者番号")
@@ -20,14 +26,14 @@ object ShahokokuhoProps:
   class KoureiProp extends ModelProp("高齢")
   class EdabanProp extends ModelProp("枝番")
 
-  object hokenshaBangouProp extends HokenshaBangouProp
-  object hihokenshaKigouProp extends HihokenshaKigouProp
-  object hihokenshaBangouProp extends HihokenshaBangouProp
-  object honninProp extends HonninProp
-  object validFromProp extends ValidFromProp
-  object validUptoProp extends ValidUptoProp
-  object koureiProp extends KoureiProp
-  object edabanProp extends EdabanProp
+  val hokenshaBangouProp: HokenshaBangouProp = new HokenshaBangouProp
+  val hihokenshaKigouProp: HihokenshaKigouProp = new HihokenshaKigouProp
+  val hihokenshaBangouProp: HihokenshaBangouProp = new HihokenshaBangouProp
+  val honninProp: HonninProp = new HonninProp
+  val validFromProp: ValidFromProp = new ValidFromProp
+  val validUptoProp: ValidUptoProp = new ValidUptoProp
+  val koureiProp: KoureiProp = new KoureiProp
+  val edabanProp: EdabanProp = new EdabanProp
 
   val props = (
     hokenshaBangouProp,
@@ -45,64 +51,72 @@ case class ShahokokuhoInputs(modelOpt: Option[Shahokokuho])
     with ModelInputs[Shahokokuho]
     with ModelInputProcs[Shahokokuho]:
   class HokenshaBangouInput
-      extends TextInput[HokenshaBangouError.type, Int](
-        "保険者番号",
-        _.hokenshaBangou,
+      extends ModelTextInput[HokenshaBangouError.type, Int](
+        _.hokenshaBangou.toString,
         HokenshaBangouValidator.validateInput
       )
+  val hokenshaBangouInput:HokenshaBangouInput = new HokenshaBangouInput
 
   class HihokenshaKigouInput
-      extends TextInput[HokenshaBangouError.type, Int](
-        "被保険者記号",
+      extends ModelTextInput[HihokenshaKigouError.type, String](
         _.hihokenshaKigou,
         HihokenshaKigouValidator.validate
       )
+  val hihokenshaKigouInput: HihokenshaKigouInput = new HihokenshaKigouInput
 
   class HihokenshaBangouInput
-      extends TextInput[HokenshaBangouError.type, Int](
-        "被保険者番号",
+      extends ModelTextInput[HihokenshaBangouError.type, String](
         _.hihokenshaBangou,
         HihokenshaBangouValidator.validate
       )
+  val hihokenshaBangouInput: HihokenshaBangouInput = new HihokenshaBangouInput
 
   class HonninInput
-      extends RadioInput[HonninError.type, Int](
-        "本人・家族",
+      extends ModelRadioInput[HonninError.type, Int](
         _.honninStore,
         HonninValidator.validate,
         List("本人" -> 1, "家族" -> 0),
         0
       )
+  val honninInput: HonninInput = new HonninInput
 
   class ValidFromInput
-      extends DateInput[ValidFromError.type, LocalDate](
-        "期限終了",
+      extends ModelDateInput[ValidFromError.type](
         _.validFrom,
-        ValidFromValidator.validate
+        ValidFromValidator.validateOption,
+        None
       )
+  val validFromInput: ValidFromInput = new ValidFromInput
 
   class ValidUptoInput
-      extends ValidUptoInput[ValidUptoError.type, ValidUpto](
-        "期限終了",
+      extends ModelValidUptoInput[ValidUptoError.type](
         _.validUpto,
-        ValidUptoValidator.validate
-      )
+        ValidUptoValidator.validate,
+        None
+      )(using validUptoSuggest)
+  val validUptoInput: ValidUptoInput = new ValidUptoInput
 
   class KoureiInput
-      extends RadioInput[KoureiError.type, Int](
-        "高齢",
+      extends ModelRadioInput[KoureiError.type, Int](
         _.koureiStore,
         KoureiValidator.validate,
-        ShahokokuhoValidator.validKoureiValues,
+        ShahokokuhoValidator.validKoureiValues.map(k => 
+          val label = k match {
+            case 0 => "高齢でない"
+            case i => ZenkakuUtil.toZenkaku(s"${i}割") 
+          }
+          (label, k)
+        ),
         0
       )
+  val koureiInput: KoureiInput = new KoureiInput
 
   class EdabanInput
-      extends TextInput[HokenshaBangouError.type, Int](
-        "枝番",
+      extends ModelTextInput[EdabanError.type, String](
         _.edaban,
         EdabanValidator.validate
       )
+  val edabanInput: EdabanInput = new EdabanInput
 
   type Create[P] = P match {
     case ShahokokuhoProps.HokenshaBangouProp => HokenshaBangouInput
@@ -115,27 +129,27 @@ case class ShahokokuhoInputs(modelOpt: Option[Shahokokuho])
     case ShahokokuhoProps.EdabanProp => EdabanInput  
   }
 
-  def fCreate[P](p: P) = p match {
-    case _: ShahokokuhoProps.HokenshaBangouProp => new HokenshaBangouInput()
-    case _: ShahokokuhoProps.HihokenshaKigouProp => new HihokenshaKigouInput()
-    case _: ShahokokuhoProps.HihokenshaBangouProp => new HihokenshaBangouInput()
-    case _: ShahokokuhoProps.HonninProp => new HonninInput()
-    case _: ShahokokuhoProps.ValidFromProp => new ValidFromInput()
-    case _: ShahokokuhoProps.ValidUptoProp => new ValidUptoInput()
-    case _: ShahokokuhoProps.KoureiProp => new KoureiInput()
-    case _: ShahokokuhoProps.EdabanProp => new EdabanInput  ()
+  def fCreate[P](p: P): Create[P] = p match {
+    case _: ShahokokuhoProps.HokenshaBangouProp => hokenshaBangouInput
+    case _: ShahokokuhoProps.HihokenshaKigouProp => hihokenshaKigouInput
+    case _: ShahokokuhoProps.HihokenshaBangouProp => hihokenshaBangouInput
+    case _: ShahokokuhoProps.HonninProp => honninInput
+    case _: ShahokokuhoProps.ValidFromProp => validFromInput
+    case _: ShahokokuhoProps.ValidUptoProp => validUptoInput
+    case _: ShahokokuhoProps.KoureiProp => koureiInput
+    case _: ShahokokuhoProps.EdabanProp => edabanInput
   }
 
   def create(props: Tuple): Tuple.Map[props.type, Create] =
-    props.map([T] => (t: T) => fCreate(t))
+    props.map[Create]([T] => (t: T) => fCreate(t))
 
   val inputs = create(ShahokokuhoProps.props)
 
-  private val validUptoSuggest: DateInputImplicits.Suggest =
-    Suggest(() => 
+  private val validUptoSuggest: DateInput.Suggest =
+    DateInput.Suggest(() => 
       validFromInput.validate() match {
-        case Right(d) => d.plusYears(1).minusDays(1)
-        case Left(_) => DateInputImplicits.defaultSuggest.value
+        case Valid(d) => Some(d.plusYears(1).minusDays(1))
+        case Invalid(_) => None
       }
     )
 
@@ -146,7 +160,7 @@ case class ShahokokuhoInputs(modelOpt: Option[Shahokokuho])
     createForm(ShahokokuhoProps.props, inputs)
 
   def validatedForEnter(patientId: Int): Either[String, Shahokokuho] =
-    val rs = resultsOf(props)
+    val rs = resultsOf(inputs)
     ShahokokuhoValidator
       .validate(
         ShahokokuhoIdValidator.validateForEnter *:
@@ -155,7 +169,7 @@ case class ShahokokuhoInputs(modelOpt: Option[Shahokokuho])
       .asEither
 
   def validatedForUpdate(): Either[String, Shahokokuho] =
-    val rs = resultsOf(props)
+    val rs = resultsOf(inputs)
     ShahokokuhoValidator
       .validate(
         ShahokokuhoIdValidator.validateOptionForUpdate(modelOpt.map(_.shahokokuhoId)) *:
