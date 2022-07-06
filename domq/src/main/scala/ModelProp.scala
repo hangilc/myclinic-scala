@@ -7,11 +7,13 @@ import org.scalajs.dom.HTMLInputElement
 class ModelProp(val label: String)
 
 trait ModelInput[E, T]:
+  val prop: ModelProp
   val ele: HTMLElement
   def update(): Unit
   def validate(): ValidatedResult[E, T]
 
 abstract class BoundModelInput[M, E, I, T](
+    val prop: ModelProp,
     mOpt: Option[M],
     val ele: HTMLElement,
     modelValue: M => T,
@@ -22,9 +24,28 @@ abstract class BoundModelInput[M, E, I, T](
   def updateBy(i: I): Unit
   def currentInputValue(): I
   def update(): Unit =
-    updateBy(mOpt.fold(defaultInputValue())(m => toInputValue(m)))
+    updateBy(mOpt.fold(defaultInputValue())(m => toInputValue(modelValue(m))))
   def validate(): ValidatedResult[E, T] =
     validator(currentInputValue())
+
+trait BoundModelInputProcs extends ModelPropUtil:
+  type FormPanel[T] = T match {
+    case ModelInput[e, t]      => (String, HTMLElement)
+    case (String, HTMLElement) => (String, HTMLElement)
+  }
+
+  def fFormPanel[T](t: T): FormPanel[T] = t match {
+    case tt: ModelInput[e, t]      => (tt.prop.label, tt.ele)
+    case tt: (String, HTMLElement) => tt
+  }
+
+  def formPanel(inputs: Tuple): HTMLElement =
+    val pairs = tupleToList[(String, HTMLElement)](
+      inputs.map([T] => (t: T) => fFormPanel(t))
+    )
+    val panel = DispPanel(form = true)
+    pairs.foreach(panel.add.tupled(_))
+    panel.ele
 
 case class Patient(patientId: Int, name: String, yomi: String)
 
@@ -38,50 +59,51 @@ object PatientProp:
 
 object ModelInputs:
   class TextModelInput[M, E, T](
-    modelValue: M => T,
-    validator: String => ValidatedResult[E, T],
-    var mOpt: Option[M] = None,
-    toInputValue: T => String = (t: T) => t.toString,
-    defaultInputValue: () => String = () => "",
-    ele: HTMLInputElement = dev.fujiwara.domq.Html.input,
+      prop: ModelProp,
+      mOpt: Option[M],
+      modelValue: M => T,
+      validator: String => ValidatedResult[E, T],
+      toInputValue: T => String = (t: T) => t.toString,
+      defaultInputValue: () => String = () => "",
+      ele: HTMLInputElement = dev.fujiwara.domq.Html.input
   ) extends BoundModelInput[M, E, String, T](
-    mOpt,
-    ele,
-    modelValue,
-    toInputValue,
-    defaultInputValue,
-    validator
-  ):
-    def updateBy(t: String): Unit = 
+        prop,
+        mOpt,
+        ele,
+        modelValue,
+        toInputValue,
+        defaultInputValue,
+        validator
+      ):
+    update()
+    def updateBy(t: String): Unit =
       ele.value = t
     def currentInputValue(): String =
       ele.value
-    def bind(newModel: Option[M]): this.type =
-      mOpt = newModel
-      update()
-      this
 
-object PatientInputs extends ModelPropUtil:
+class PatientInputs(modelOpt: Option[Patient]) extends BoundModelInputProcs with ModelPropUtil:
   import ModelInputs.*
   import PatientProp.*
 
-  trait PatientInput
+  object NameInput
+      extends TextModelInput[Patient, ValidatedResult[String, String], String](
+        NameProp,
+        modelOpt,
+        _.name,
+        s => cats.data.Validated.Valid(s)
+      )
 
-  object NameInput extends TextModelInput[Patient, ValidatedResult[String, String], String](
-    _.name,
-    s => cats.data.Validated.Valid(s)
-  ) with PatientInput
+  extension (p: NameProp.type) def input: NameInput.type = NameInput
 
-  extension (p: NameProp.type)
-    def input: NameInput.type = NameInput
+  object YomiInput
+      extends TextModelInput[Patient, ValidatedResult[String, String], String](
+        YomiProp,
+        modelOpt,
+        _.yomi,
+        s => cats.data.Validated.Valid(s)
+      )
 
-  object YomiInput extends TextModelInput[Patient, ValidatedResult[String, String], String](
-    _.yomi,
-    s => cats.data.Validated.Valid(s)
-  ) with PatientInput
-
-  extension (p: YomiProp.type)
-    def input: YomiInput.type = YomiInput
+  extension (p: YomiProp.type) def input: YomiInput.type = YomiInput
 
   type CreateInput[P] = P match {
     case NameProp.type => NameInput.type
@@ -101,4 +123,4 @@ object PatientInputs extends ModelPropUtil:
     YomiProp
   )
 
-
+  def formPanel: HTMLElement = formPanel(formProps)
