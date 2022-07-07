@@ -1,6 +1,6 @@
 package dev.fujiwara.domq.prop
 
-trait ModelUtil:
+object ModelUtil:
   def tupleToList[T](tuple: Tuple): List[T] =
     tuple match {
       case EmptyTuple => List.empty
