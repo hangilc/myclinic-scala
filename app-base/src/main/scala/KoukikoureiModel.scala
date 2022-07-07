@@ -1,9 +1,7 @@
 package dev.myclinic.scala.web.appbase
 
-import dev.fujiwara.domq.ModelProp
-import dev.fujiwara.domq.ModelInput
-import dev.fujiwara.domq.ModelInputs
-import dev.fujiwara.domq.ModelInputProcs
+import dev.fujiwara.domq.prop.*
+import dev.fujiwara.domq.all.{*, given}
 import dev.myclinic.scala.model.*
 import KoukikoureiValidator.*
 import org.scalajs.dom.HTMLElement
@@ -19,17 +17,11 @@ import dev.fujiwara.kanjidate.DateUtil
 import java.time.LocalDate
 
 object KoukikoureiProps:
-  class HokenshaBangouProp extends ModelProp("保険者番号")
-  class HihokenshaBangouProp extends ModelProp("被保険者番号")
-  class FutanWariProp extends ModelProp("負担割")
-  class ValidFromProp extends ModelProp("期限開始")
-  class ValidUptoProp extends ModelProp("期限終了")
-
-  val hokenshaBangouProp: HokenshaBangouProp = new HokenshaBangouProp
-  val hihokenshaBangouProp: HihokenshaBangouProp = new HihokenshaBangouProp
-  val futanWariProp: FutanWariProp = new FutanWariProp
-  val validFromProp: ValidFromProp = new ValidFromProp
-  val validUptoProp: ValidUptoProp = new ValidUptoProp
+  object hokenshaBangouProp extends ModelProp("保険者番号")
+  object hihokenshaBangouProp extends ModelProp("被保険者番号")
+  object futanWariProp extends ModelProp("負担割")
+  object validFromProp extends ModelProp("期限開始")
+  object validUptoProp extends ModelProp("期限終了")
 
   val props = (
     hokenshaBangouProp,
@@ -39,63 +31,90 @@ object KoukikoureiProps:
     validUptoProp
   )
 
-case class KoukikoureiInputs(modelOpt: Option[Koukikourei])
-    extends ModelInput[Koukikourei]
-    with ModelInputs[Koukikourei]
-    with ModelInputProcs[Koukikourei]:
-  class HokenshaBangouInput
-      extends ModelTextInput[HokenshaBangouError.type, String](
-        _.hokenshaBangou.toString,
+class KoukikoureiInputs(modelOpt: Option[Koukikourei])
+    extends BoundInputProcs
+    with ModelUtil:
+  import KoukikoureiProps.*
+
+  object hokenshaBangouInput
+      extends BoundInput[Koukikourei, String, HokenshaBangouError.type, String](
+        hokenshaBangouProp,
+        modelOpt,
+        _.hokenshaBangou,
+        () => "",
         HokenshaBangouValidator.validate
-      )
-  val hokenshaBangouInput:HokenshaBangouInput = new HokenshaBangouInput
+      ):
+    val inputUI = new TextInputUI(resolveInitValue())
 
-  class HihokenshaBangouInput
-      extends ModelTextInput[HihokenshaBangouError.type, String](
+  object hihokenshaBangouInput
+      extends BoundInput[
+        Koukikourei,
+        String,
+        HihokenshaBangouError.type,
+        String
+      ](
+        hihokenshaBangouProp,
+        modelOpt,
         _.hihokenshaBangou,
+        () => "",
         HihokenshaBangouValidator.validate
-      )
-  val hihokenshaBangouInput: HihokenshaBangouInput = new HihokenshaBangouInput
+      ):
+    val inputUI = new TextInputUI(resolveInitValue())
 
-  class FutanWariInput
-      extends ModelRadioInput[FutanWariError.type, Int](
+  object futanWariInput
+      extends BoundInput[Koukikourei, Int, FutanWariError.type, Int](
+        futanWariProp,
+        modelOpt,
         _.futanWari,
-        FutanWariValidator.validate,
-        List("本人" -> 1, "家族" -> 0),
-        0
-      )
-  val futanWariInput: FutanWariInput = new FutanWariInput
+        () => 1,
+        FutanWariValidator.validate
+      ):
+    val inputUI = new RadioInputUI(
+      List("１割" -> 1, "２割" -> 2, "３割" -> 3),
+      resolveInitValue()
+    )
 
-  class ValidFromInput
-      extends ModelDateInput[ValidFromError.type](
-        _.validFrom,
-        ValidFromValidator.validateOption,
-        None
-      )
-  val validFromInput: ValidFromInput = new ValidFromInput
+  object validFromInput
+      extends BoundInput[Koukikourei, Option[
+        LocalDate
+      ], ValidFromError.type, LocalDate](
+        validFromProp,
+        modelOpt,
+        m => Some(m.validFrom),
+        () => None,
+        ValidFromValidator.validateOption
+      ):
+    val inputUI = new DateOptionInputUI(resolveInitValue())
 
-  class ValidUptoInput
-      extends ModelValidUptoInput[ValidUptoError.type](
+  object validUptoInput
+      extends BoundInput[
+        Koukikourei,
+        ValidUpto,
+        ValidUptoError.type,
+        ValidUpto
+      ](
+        validUptoProp,
+        modelOpt,
         _.validUpto,
-        ValidUptoValidator.validate,
-        None
-      )(using validUptoSuggest)
-  val validUptoInput: ValidUptoInput = new ValidUptoInput
+        () => validUptoSuggest,
+        ValidUptoValidator.validate
+      ):
+    val inputUI = new ValidUptoInputUI(resolveInitValue())
 
   type Create[P] = P match {
-    case KoukikoureiProps.HokenshaBangouProp => HokenshaBangouInput
+    case KoukikoureiProps.HokenshaBangouProp   => HokenshaBangouInput
     case KoukikoureiProps.HihokenshaBangouProp => HihokenshaBangouInput
-    case KoukikoureiProps.FutanWariProp => FutanWariInput
-    case KoukikoureiProps.ValidFromProp => ValidFromInput
-    case KoukikoureiProps.ValidUptoProp => ValidUptoInput
+    case KoukikoureiProps.FutanWariProp        => FutanWariInput
+    case KoukikoureiProps.ValidFromProp        => ValidFromInput
+    case KoukikoureiProps.ValidUptoProp        => ValidUptoInput
   }
 
   def fCreate[P](p: P): Create[P] = p match {
-    case _: KoukikoureiProps.HokenshaBangouProp => hokenshaBangouInput
+    case _: KoukikoureiProps.HokenshaBangouProp   => hokenshaBangouInput
     case _: KoukikoureiProps.HihokenshaBangouProp => hihokenshaBangouInput
-    case _: KoukikoureiProps.FutanWariProp => futanWariInput
-    case _: KoukikoureiProps.ValidFromProp => validFromInput
-    case _: KoukikoureiProps.ValidUptoProp => validUptoInput
+    case _: KoukikoureiProps.FutanWariProp        => futanWariInput
+    case _: KoukikoureiProps.ValidFromProp        => validFromInput
+    case _: KoukikoureiProps.ValidUptoProp        => validUptoInput
   }
 
   def create(props: Tuple): Tuple.Map[props.type, Create] =
@@ -103,14 +122,12 @@ case class KoukikoureiInputs(modelOpt: Option[Koukikourei])
 
   val inputs = create(KoukikoureiProps.props)
 
-  private val validUptoSuggest: DateInput.Suggest =
-    DateInput.Suggest(() => 
+  private val validUptoSuggest: ValidUpto =
       val anchor = validFromInput.validate() match {
-        case Valid(d) => d
+        case Valid(d)   => d
         case Invalid(_) => LocalDate.now()
       }
-      Some(DateUtil.nextDateOf(7, 31, anchor))
-    )
+      ValidUpto(Some(DateUtil.nextDateOf(7, 31, anchor)))
 
   def update(): Unit =
     update(inputs, modelOpt)
@@ -131,20 +148,9 @@ case class KoukikoureiInputs(modelOpt: Option[Koukikourei])
     val rs = resultsOf(inputs)
     KoukikoureiValidator
       .validate(
-        KoukikoureiIdValidator.validateOptionForUpdate(modelOpt.map(_.koukikoureiId)) *:
+        KoukikoureiIdValidator.validateOptionForUpdate(
+          modelOpt.map(_.koukikoureiId)
+        ) *:
           PatientIdValidator.validateOption(modelOpt.map(_.patientId)) *: rs
       )
       .asEither
-
-  
-
-
-
-
-
-
-
-
-
-
-
