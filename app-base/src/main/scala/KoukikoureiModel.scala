@@ -123,11 +123,11 @@ class KoukikoureiInputs(modelOpt: Option[Koukikourei])
   val inputs = create(KoukikoureiProps.props)
 
   private val validUptoSuggest: ValidUpto =
-      val anchor = validFromInput.validate() match {
-        case Valid(d)   => d
-        case Invalid(_) => LocalDate.now()
-      }
-      ValidUpto(Some(DateUtil.nextDateOf(7, 31, anchor)))
+    val anchor = validFromInput.validate() match {
+      case Valid(d)   => d
+      case Invalid(_) => LocalDate.now()
+    }
+    ValidUpto(Some(DateUtil.nextDateOf(7, 31, anchor)))
 
   def update(): Unit =
     update(inputs, modelOpt)
