@@ -1,76 +1,115 @@
 package dev.myclinic.scala.web.appbase
 
 import dev.fujiwara.domq.*
+import dev.fujiwara.domq.prop.*
 import dev.myclinic.scala.model.*
 import PatientValidator.*
 import org.scalajs.dom.HTMLElement
 import dev.fujiwara.validator.section.Implicits.*
+import java.time.LocalDate
 
-enum PatientProp(val label: String) extends ModelProp(label):
-  case PatientIdProp extends PatientProp("患者番号")
-  case LastNameProp extends PatientProp("姓")
-  case FirstNameProp extends PatientProp("名")
-  case LastNameYomiProp extends PatientProp("姓（よみ）")
-  case FirstNameYomiProp extends PatientProp("名（よみ）")
-  case SexProp extends PatientProp("性別")
-  case BirthdayProp extends PatientProp("生年月日")
-  case AddressProp extends PatientProp("住所")
-  case PhoneProp extends PatientProp("電話")
+object PatientProps:
+  object patientIdProp extends ModelProp("患者番号")
+  object lastNameProp extends ModelProp("姓")
+  object firstNameProp extends ModelProp("名")
+  object lastNameYomiProp extends ModelProp("姓（よみ）")
+  object firstNameYomiProp extends ModelProp("名（よみ）")
+  object sexProp extends ModelProp("性別")
+  object birthdayProp extends ModelProp("生年月日")
+  object addressProp extends ModelProp("住所")
+  object phoneProp extends ModelProp("電話")
 
-class PatientInputs(modelOpt: Option[Patient])
-    extends ModelInput[Patient]
-    with ModelInputs[Patient]
-    with ModelInputProcs[Patient]:
+class PatientInputs(modelOpt: Option[Patient]):
+  import PatientProps.*
 
   object lastNameInput
-      extends ModelTextInput[LastNameError.type, String](
+      extends BoundInput[Patient, String, LastNameError.type, String](
+        lastNameProp,
+        modelOpt,
         _.lastName,
-        LastNameValidator.validate _
+        () => "",
+        identity,
+        LastNameValidator.validate,
+        new TextInputUI
       )
 
   object firstNameInput
-      extends ModelTextInput[FirstNameError.type, String](
+      extends BoundInput[Patient, String, FirstNameError.type, String](
+        firstNameProp,
+        modelOpt,
         _.firstName,
-        FirstNameValidator.validate _
+        () => "",
+        identity,
+        FirstNameValidator.validate,
+        new TextInputUI
       )
 
   object lastNameYomiInput
-      extends ModelTextInput[LastNameYomiError.type, String](
+      extends BoundInput[Patient, String, LastNameYomiError.type, String](
+        lastNameYomiProp,
+        modelOpt,
         _.lastNameYomi,
-        LastNameYomiValidator.validate _
+        () => "",
+        identity,
+        LastNameYomiValidator.validate,
+        new TextInputUI
       )
 
   object firstNameYomiInput
-      extends ModelTextInput[FirstNameYomiError.type, String](
+      extends BoundInput[Patient, String, FirstNameYomiError.type, String](
+        firstNameYomiProp,
+        modelOpt,
         _.firstNameYomi,
-        FirstNameYomiValidator.validate _
+        () => "",
+        identity,
+        FirstNameYomiValidator.validate,
+        new TextInputUI
       )
 
   object sexInput
-      extends ModelRadioInput[SexError.type, Sex](
+      extends BoundInput[Patient, Sex, SexError.type, Sex](
+        sexProp,
+        modelOpt,
         _.sex,
+        () => Sex.Female,
+        identity,
         SexValidator.validate,
-        List("男" -> Sex.Male, "女" -> Sex.Female),
-        Sex.Female
+        new RadioInputUI(
+          List("男" -> Sex.Male, "女" -> Sex.Female)
+        )
       )
 
   object birthdayInput
-      extends ModelDateInput[BirthdayError.type](
+      extends BoundInput[Patient, LocalDate, BirthdayError.type, LocalDate](
+        birthdayProp,
+        modelOpt,
         _.birthday,
+        () => LocalDate.now(),
+        identity,
         BirthdayValidator.validate,
-        None
+        new DateInputUI
       )
 
   object addressInput
-      extends ModelTextInput[AddressError.type, String](
+      extends BoundInput[Patient, String, AddressError.type, String](
+        addressProp,
+        modelOpt,
         _.address,
-        AddressValidator.validate
+        () => "",
+        identity,
+        AddressValidator.validate,
+        new TextInputUI
       )
 
   object phoneInput
-      extends ModelTextInput[PhoneError.type, String](
+      extends BoundInput[Patient, String, PhoneError.type, String](
+        phoneProp,
+        modelOpt,
         _.phone,
-        PhoneValidator.validate
+        () => "",
+        identity,
+        PhoneValidator.validate,
+        new TextInputUI
       )
 
   type Create[P] = P match {
@@ -94,8 +133,6 @@ class PatientInputs(modelOpt: Option[Patient])
     case _: PatientProps.addressProp.type       => addressInput
     case _: PatientProps.phoneProp.type         => phoneInput
   }
-
-  def f[E, T](prop: ModelProp): Input[E, T] = fCreate(prop)
 
   def create(props: Tuple): Tuple.Map[props.type, Create] =
     props.map[Create]([T] => (t: T) => fCreate(t))

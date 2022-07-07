@@ -46,7 +46,10 @@ object PatientValidator:
       valid(sex)
 
   object BirthdayValidator extends SectionValidator(BirthdayError, "生年月日"):
-    def validate(dateOpt: Option[LocalDate]): Result[LocalDate] =
+    def validate(date: LocalDate): Result[LocalDate] =
+      valid(date)
+
+    def validateOption(dateOpt: Option[LocalDate]): Result[LocalDate] =
       some(dateOpt)
 
   object AddressValidator extends SectionValidator(AddressError, "住所"):

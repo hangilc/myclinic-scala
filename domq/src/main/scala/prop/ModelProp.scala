@@ -37,18 +37,15 @@ class TextInputUI extends InputUI[String]:
   def getValue(): String = ele.value
 
 class RadioInputUI[T](
-  data: List[(String, T)],
-  initValue: T
+  data: List[(String, T)]
 ) extends InputUI[T]:
-  val radioGroup = RadioGroup[T](data, initValue = Some(initValue))
+  val radioGroup = RadioGroup[T](data)
   lazy val ele: HTMLElement = radioGroup.ele
   def setValue(value: T): Unit = radioGroup.check(value)
   def getValue(): T = radioGroup.selected
 
-class DateInputUI(
-  initValue: () => LocalDate = () => LocalDate.now()
-) extends InputUI[LocalDate]:
-  val dateInput = DateInput(initValue())
+class DateInputUI extends InputUI[LocalDate]:
+  val dateInput = DateInput(LocalDate.now())
   lazy val ele: HTMLElement = dateInput.ele
   def setValue(value: LocalDate): Unit = dateInput.init(value)
   def getValue(): LocalDate = dateInput.value
@@ -61,7 +58,7 @@ class ValidUptoInputUI(
   def setValue(value: ValidUpto): Unit = dateInput.init(value.value)
   def getValue(): ValidUpto = ValidUpto(dateInput.value)
 
-case class BoundInput[M, E, I, T](
+case class BoundInput[M, I, E, T](
     prop: ModelProp, 
     modelOption: Option[M],
     modelValue: M => T,
