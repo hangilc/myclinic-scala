@@ -89,13 +89,21 @@ trait BoundInputProcs extends ModelUtil:
   def propElements(inputs: Tuple): Tuple.Map[inputs.type, PropElement] =
     inputs.map([T] => (t: T) => fPropElement(t))
 
-  type Validate[I] = I match {
+  def propElementsAsList(inputs: Tuple): List[(String, HTMLElement)] =
+    tupleToList[(String, HTMLElement)](propElements(inputs))
+
+  def formPanel(inputs: Tuple): HTMLElement = 
+    val panel = DispPanel(form = true)
+    propElementsAsList(inputs).foreach(panel.add.tupled(_))
+    panel.ele
+
+  type ResultsOf[I] = I match {
     case DataValidator[e, t] => ValidatedResult[e, t]
   }
 
-  def fValidate[I](i: I): Validate[I] = i match {
+  def fResultsOf[I](i: I): ResultsOf[I] = i match {
     case ii: DataValidator[e, t] => ii.validate()
   }
 
-  def validate(inputs: Tuple): Tuple.Map[inputs.type, Validate] =
-    inputs.map([T] => (t: T) => fValidate(t))
+  def resultsOf(inputs: Tuple): Tuple.Map[inputs.type, ResultsOf] =
+    inputs.map([T] => (t: T) => fResultsOf(t))
