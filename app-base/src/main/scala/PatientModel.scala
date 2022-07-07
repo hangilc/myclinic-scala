@@ -22,17 +22,6 @@ object PatientProps:
 class PatientInputs(modelOpt: Option[Patient]):
   import PatientProps.*
 
-  object patientIdInput
-      extends BoundInput[Patient, Int, PatientIdError.type, Int](
-        patientIdProp,
-        modelOpt,
-        _.patientId,
-        () => 0,
-        identity,
-        PatientIdValidator.validate,
-        new CachedInputUI
-      )
-
   object lastNameInput
       extends BoundInput[Patient, String, LastNameError.type, String](
         lastNameProp,
@@ -40,9 +29,9 @@ class PatientInputs(modelOpt: Option[Patient]):
         _.lastName,
         () => "",
         identity,
-        LastNameValidator.validate,
-        new TextInputUI
-      )
+        LastNameValidator.validate
+      ):
+        val inputUI = new TextInputUI(resolveInitValue())
 
   object firstNameInput
       extends BoundInput[Patient, String, FirstNameError.type, String](
@@ -51,9 +40,9 @@ class PatientInputs(modelOpt: Option[Patient]):
         _.firstName,
         () => "",
         identity,
-        FirstNameValidator.validate,
-        new TextInputUI
-      )
+        FirstNameValidator.validate
+      ):
+        val inputUI = new TextInputUI(resolveInitValue())
 
   object lastNameYomiInput
       extends BoundInput[Patient, String, LastNameYomiError.type, String](
@@ -62,9 +51,9 @@ class PatientInputs(modelOpt: Option[Patient]):
         _.lastNameYomi,
         () => "",
         identity,
-        LastNameYomiValidator.validate,
-        new TextInputUI
-      )
+        LastNameYomiValidator.validate
+      ):
+        val inputUI = new TextInputUI(resolveInitValue())
 
   object firstNameYomiInput
       extends BoundInput[Patient, String, FirstNameYomiError.type, String](
@@ -73,9 +62,9 @@ class PatientInputs(modelOpt: Option[Patient]):
         _.firstNameYomi,
         () => "",
         identity,
-        FirstNameYomiValidator.validate,
-        new TextInputUI
-      )
+        FirstNameYomiValidator.validate
+      ):
+        val inputUI = new TextInputUI(resolveInitValue())
 
   object sexInput
       extends BoundInput[Patient, Sex, SexError.type, Sex](
@@ -84,11 +73,12 @@ class PatientInputs(modelOpt: Option[Patient]):
         _.sex,
         () => Sex.Female,
         identity,
-        SexValidator.validate,
-        new RadioInputUI(
-          List("男" -> Sex.Male, "女" -> Sex.Female)
+        SexValidator.validate
+      ):
+        val inputUI = new RadioInputUI(
+          List("男" -> Sex.Male, "女" -> Sex.Female),
+          resolveInitValue()
         )
-      )
 
   object birthdayInput
       extends BoundInput[Patient, LocalDate, BirthdayError.type, LocalDate](
@@ -97,9 +87,9 @@ class PatientInputs(modelOpt: Option[Patient]):
         _.birthday,
         () => LocalDate.now(),
         identity,
-        BirthdayValidator.validate,
-        new DateInputUI
-      )
+        BirthdayValidator.validate
+      ):
+        val inputUI = new DateInputUI(resolveInitValue())
 
   object addressInput
       extends BoundInput[Patient, String, AddressError.type, String](
@@ -108,9 +98,9 @@ class PatientInputs(modelOpt: Option[Patient]):
         _.address,
         () => "",
         identity,
-        AddressValidator.validate,
-        new TextInputUI
-      )
+        AddressValidator.validate
+      ):
+        val inputUI = new TextInputUI(resolveInitValue())
 
   object phoneInput
       extends BoundInput[Patient, String, PhoneError.type, String](
@@ -119,9 +109,9 @@ class PatientInputs(modelOpt: Option[Patient]):
         _.phone,
         () => "",
         identity,
-        PhoneValidator.validate,
-        new TextInputUI
-      )
+        PhoneValidator.validate
+      ):
+        val inputUI = new TextInputUI(resolveInitValue())
 
   type Create[P] = P match {
     case PatientProps.lastNameProp.type      => lastNameInput.type
