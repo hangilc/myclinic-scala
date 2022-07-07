@@ -25,7 +25,7 @@ trait DataGetter[M, T]:
 trait ElementProvider:
   def getElement: HTMLElement
 
-trait ValidationProvider[E, T]:
+trait DataValidator[E, T]:
   def validate(): ValidatedResult[E, T]
 
 trait DispProvider:
@@ -35,12 +35,17 @@ trait LabelElementProvider extends LabelProvider with ElementProvider
 
 trait LabelDispProvider extends LabelProvider with DispProvider
 
+trait InitValue[M, I]:
+  def getInitValue(modelOpt: Option[M]): I
+
 class ModelProp(label: String) extends LabelProvider:
   def getLabel: String = label
 
-class InitValue[M, T](getter: DataGetter[M, T], defaultValue: T):
-  def getInitValue(modelOpt: Option[M]): T =
-    modelOpt.fold(defaultValue)(m => getter.getFrom(m))
+object InitValue:
+  def apply[M, I, T](getter: DataGetter[M, T], conv: T => I, defaultValue: I): InitValue[M, I] =
+    new InitValue[M, I]:
+      def getInitValue(modelOpt: Option[M]): I =
+        modelOpt.fold(defaultValue)(m => conv(getter.getFrom(m)))
 
 class TextInput[T](initValue: T, toInputValue: T => String)
     extends ElementProvider
@@ -84,7 +89,11 @@ class ModelPropDisp[M, T](
 ) extends DispProvider:
   def disp: String = stringify(init.getInitValue(modelOpt))
 
-object ModelProp:
+case class LabelElement(label: String, element: HTMLElement) extends LabelElementProvider:
+  def getLabel: String = label
+  def getElement: HTMLElement = element
+
+object ModelInputUtil:
   import ModelUtil.*
 
   type ElementPanel[T] = T match {
@@ -105,6 +114,17 @@ object ModelProp:
     val panel = DispPanel()
     elementPanelList(tuple).foreach(panel.add.tupled(_))
     panel.ele
+
+  type ResultsOf[I] = I match {
+    case DataValidator[e, t] => ValidatedResult[e, t]
+  }
+
+  def fResultsOf[I](i: I): ResultsOf[I] = i match {
+    case ii: DataValidator[e, t] => ii.validate()
+  }
+
+  def resultsOf(inputs: Tuple): Tuple.Map[inputs.type, ResultsOf] =
+    inputs.map([T] => (t: T) => fResultsOf(t))
 
 // trait PropElementProvider:
 //   def getProp: ModelProp
