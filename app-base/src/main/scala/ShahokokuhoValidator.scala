@@ -78,8 +78,11 @@ object ShahokokuhoValidator:
       some(dateOption) |> validate
 
   object ValidUptoValidator extends SectionValidator(ValidUptoError, "期限終了"):
-    def validate(dateOption: Option[LocalDate]): Result[ValidUpto] =
-      valid(ValidUpto(dateOption))
+    def validate(value: ValidUpto): Result[ValidUpto] =
+      valid(value)
+
+    def validateDateOption(dateOption: Option[LocalDate]): Result[ValidUpto] =
+      validate(ValidUpto(dateOption))
 
   val validKoureiValues: List[Int] = List(0, 1, 2, 3)
   

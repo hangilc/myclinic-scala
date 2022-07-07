@@ -29,7 +29,6 @@ class PatientInputs(modelOpt: Option[Patient]) extends BoundInputProcs:
         modelOpt,
         _.lastName,
         () => "",
-        identity,
         LastNameValidator.validate
       ):
     val inputUI = new TextInputUI(resolveInitValue())
@@ -40,7 +39,6 @@ class PatientInputs(modelOpt: Option[Patient]) extends BoundInputProcs:
         modelOpt,
         _.firstName,
         () => "",
-        identity,
         FirstNameValidator.validate
       ):
     val inputUI = new TextInputUI(resolveInitValue())
@@ -51,7 +49,6 @@ class PatientInputs(modelOpt: Option[Patient]) extends BoundInputProcs:
         modelOpt,
         _.lastNameYomi,
         () => "",
-        identity,
         LastNameYomiValidator.validate
       ):
     val inputUI = new TextInputUI(resolveInitValue())
@@ -62,7 +59,6 @@ class PatientInputs(modelOpt: Option[Patient]) extends BoundInputProcs:
         modelOpt,
         _.firstNameYomi,
         () => "",
-        identity,
         FirstNameYomiValidator.validate
       ):
     val inputUI = new TextInputUI(resolveInitValue())
@@ -73,7 +69,6 @@ class PatientInputs(modelOpt: Option[Patient]) extends BoundInputProcs:
         modelOpt,
         _.sex,
         () => Sex.Female,
-        identity,
         SexValidator.validate
       ):
     val inputUI = new RadioInputUI(
@@ -82,15 +77,14 @@ class PatientInputs(modelOpt: Option[Patient]) extends BoundInputProcs:
     )
 
   object birthdayInput
-      extends BoundInput[Patient, LocalDate, BirthdayError.type, LocalDate](
+      extends BoundInput[Patient, Option[LocalDate], BirthdayError.type, LocalDate](
         birthdayProp,
         modelOpt,
-        _.birthday,
-        () => LocalDate.now(),
-        identity,
-        BirthdayValidator.validate
+        patient => Some(patient.birthday),
+        () => None,
+        BirthdayValidator.validateOption
       ):
-    val inputUI = new DateInputUI(resolveInitValue())
+    val inputUI = new DateOptionInputUI(resolveInitValue())
 
   object addressInput
       extends BoundInput[Patient, String, AddressError.type, String](
@@ -98,7 +92,6 @@ class PatientInputs(modelOpt: Option[Patient]) extends BoundInputProcs:
         modelOpt,
         _.address,
         () => "",
-        identity,
         AddressValidator.validate
       ):
     val inputUI = new TextInputUI(resolveInitValue())
@@ -109,7 +102,6 @@ class PatientInputs(modelOpt: Option[Patient]) extends BoundInputProcs:
         modelOpt,
         _.phone,
         () => "",
-        identity,
         PhoneValidator.validate
       ):
     val inputUI = new TextInputUI(resolveInitValue())
@@ -127,10 +119,10 @@ class PatientInputs(modelOpt: Option[Patient]) extends BoundInputProcs:
 
   val formInputs = (
     LabelElement("氏名", div(
-      lastNameInput.getElement, "・", firstNameInput.getElement
+      lastNameInput.getElement, " ", firstNameInput.getElement
     )),
     LabelElement("よみ", div(
-      lastNameYomiInput.getElement, "・", firstNameYomiInput.getElement
+      lastNameYomiInput.getElement, " ", firstNameYomiInput.getElement
     )),
     sexInput,
     birthdayInput,

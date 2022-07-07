@@ -45,10 +45,10 @@ class RadioInputUI[T](
   def getElement: HTMLElement = radioGroup.ele
   def getValue: T = radioGroup.selected
 
-class DateInputUI(initValue: LocalDate) extends InputUI[LocalDate]:
-  val dateInput = DateInput(initValue)
+class DateOptionInputUI(initValue: Option[LocalDate]) extends InputUI[Option[LocalDate]]:
+  val dateInput = DateOptionInput(initValue)
   def getElement: HTMLElement = dateInput.ele
-  def getValue: LocalDate = dateInput.value
+  def getValue: Option[LocalDate] = dateInput.value
 
 class ValidUptoInputUI(
     initValue: ValidUpto
@@ -60,14 +60,13 @@ class ValidUptoInputUI(
 abstract case class BoundInput[M, I, E, T](
     prop: ModelProp,
     modelOption: Option[M],
-    modelValue: M => T,
-    defaultModelValue: () => T,
-    toInputValue: T => I,
+    modelInputValue: M => I,
+    defaultInputValue: () => I,
     validator: I => ValidatedResult[E, T]
 ) extends PropElementProvider with DataValidator[E, T]:
   val inputUI: InputUI[I]
   def resolveInitValue(): I =
-    toInputValue(modelOption.fold(defaultModelValue())(modelValue(_)))
+    modelOption.fold(defaultInputValue())(modelInputValue(_))
   def getElement: HTMLElement = inputUI.getElement
   def validate(): ValidatedResult[E, T] =
     val ival = inputUI.getValue
