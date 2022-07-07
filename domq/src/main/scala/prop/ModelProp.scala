@@ -15,99 +15,96 @@ import dev.myclinic.scala.model.ValidUpto
 
 class ModelProp(val label: String)
 
-abstract class InputUI[T]:
-  lazy val ele: HTMLElement
-  def setValue(value: T): Unit
-  def getValue(): T
-
-trait ModelInput[E, T]:
-  val prop: ModelProp
+trait PropElementProvider:
+  def getProp: ModelProp
   def getElement: HTMLElement
-  def update(): Unit
+
+trait DataValidator[E, T]:
   def validate(): ValidatedResult[E, T]
 
-class CachedInputUI[T](var cache: T) extends InputUI[T]:
-  lazy val ele: HTMLElement = span // dummy
-  def setValue(value: T): Unit = cache = value
-  def getValue(): T = cache
+class ReadOnlyInput[E, T](cache: T, var validator: T => ValidatedResult[E, T])
+    extends DataValidator[E, T]:
+  def validate(): ValidatedResult[E, T] =
+    validator(cache)
 
-class TextInputUI extends InputUI[String]:
-  lazy val ele: HTMLInputElement = input
-  def setValue(value: String): Unit = ele.value = value
+abstract class InputUI[T]:
+  def getValue: T
+
+class TextInputUI(initValue: String) extends InputUI[String]:
+  val ele: HTMLInputElement = input
+  ele.value = initValue
   def getValue(): String = ele.value
 
 class RadioInputUI[T](
-  data: List[(String, T)]
+    data: List[(String, T)],
+    initValue: T
 ) extends InputUI[T]:
-  val radioGroup = RadioGroup[T](data)
+  val radioGroup = RadioGroup[T](data, initValue = Some(initValue))
   lazy val ele: HTMLElement = radioGroup.ele
-  def setValue(value: T): Unit = radioGroup.check(value)
   def getValue(): T = radioGroup.selected
 
-class DateInputUI extends InputUI[LocalDate]:
-  val dateInput = DateInput(LocalDate.now())
+class DateInputUI(initValue: Option[LocalDate]) extends InputUI[Option[LocalDate]]:
+  val dateInput = DateOptionInput(initValue)
   lazy val ele: HTMLElement = dateInput.ele
-  def setValue(value: LocalDate): Unit = dateInput.init(value)
-  def getValue(): LocalDate = dateInput.value
+  def getValue(): Option[LocalDate] = dateInput.value
 
 class ValidUptoInputUI(
-  initValue: () => Option[LocalDate] = () => None
+    initValue: () => ValidUpto = () => ValidUpto(None)
 ) extends InputUI[ValidUpto]:
-  val dateInput = DateOptionInput(initValue())
+  val dateInput = DateOptionInput(initValue().value)
   lazy val ele: HTMLElement = dateInput.ele
-  def setValue(value: ValidUpto): Unit = dateInput.init(value.value)
   def getValue(): ValidUpto = ValidUpto(dateInput.value)
 
-case class BoundInput[M, I, E, T](
-    prop: ModelProp, 
+abstract case class BoundInput[M, I, E, T](
+    prop: ModelProp,
     modelOption: Option[M],
     modelValue: M => T,
     defaultModelValue: () => T,
     toInputValue: T => I,
-    validator: I => ValidatedResult[E, T],
-    inputUI: InputUI[I]
-) extends ModelInput[E, T]:
-    def getElement: HTMLElement = inputUI.ele
-    def update(): Unit =
-      val mval = modelOption.fold(defaultModelValue())(modelValue(_))
-      inputUI.setValue(toInputValue(mval))
-    def validate(): ValidatedResult[E, T] =
-      val ival = inputUI.getValue()
-      validator(ival)
+    validator: I => ValidatedResult[E, T]
+) extends PropElementProvider with DataValidator[E, T]:
+  val inputUI: InputUI[I]
+  def getElement: HTMLElement = inputUI.ele
+  def update(): Unit =
+    val mval = modelOption.fold(defaultModelValue())(modelValue(_))
+    inputUI.setValue(toInputValue(mval))
+  def validate(): ValidatedResult[E, T] =
+    val ival = inputUI.getValue()
+    validator(ival)
 
 case class LabelElement(label: String, element: HTMLElement)
 
 trait BoundInputProcs extends ModelUtil:
   type PropElement[T] = T match {
-    case ModelInput[e, t] => (String, HTMLElement)
-    case LabelElement => (String, HTMLElement)
+    case PropElementProvider => (String, HTMLElement)
+    case LabelElement        => (String, HTMLElement)
   }
 
   def fPropElement[T](t: T): PropElement[T] = t match {
-    case tt: ModelInput[e, t] => (tt.prop.label, tt.getElement)
-    case tt: LabelElement => (tt.label, tt.element)
+    case tt: PropElementProvider => (tt.getProp.label, tt.getElement)
+    case tt: LabelElement        => (tt.label, tt.element)
   }
 
   def propElements(inputs: Tuple): Tuple.Map[inputs.type, PropElement] =
     inputs.map([T] => (t: T) => fPropElement(t))
 
   type Update[I] = I match {
-    case ModelInput[e, t] => Unit
+    case DataUpdator => Unit
   }
 
   def fUpdate[I](i: I): Update[I] = i match {
-    case ii: ModelInput[e, t] => ii.update()
+    case ii: DataUpdator => ii.update()
   }
 
   def update(inputs: Tuple): Unit =
     inputs.map([T] => (t: T) => fUpdate(t))
 
   type Validate[I] = I match {
-    case ModelInput[e, t] => ValidatedResult[e, t]
+    case DataValidator[e, t] => ValidatedResult[e, t]
   }
 
   def fValidate[I](i: I): Validate[I] = i match {
-    case ii: ModelInput[e, t] => ii.validate()
+    case ii: DataValidator[e, t] => ii.validate()
   }
 
   def validate(inputs: Tuple): Tuple.Map[inputs.type, Validate] =
@@ -144,10 +141,9 @@ trait BoundInputProcs extends ModelUtil:
 //   val ele: HTMLElement = Html.span
 // ) extends ModelDisp:
 //   update()
-//   def rep: String = 
+//   def rep: String =
 //     mOpt.fold(defaultRep())(m => toRep(modelValue(m)))
 //   def update(): Unit = ele.innerText = rep
-
 
 // trait BoundModelInputProcs extends ModelUtil:
 //   type FormPanel[T] = T match {

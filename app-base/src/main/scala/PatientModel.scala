@@ -22,6 +22,17 @@ object PatientProps:
 class PatientInputs(modelOpt: Option[Patient]):
   import PatientProps.*
 
+  object patientIdInput
+      extends BoundInput[Patient, Int, PatientIdError.type, Int](
+        patientIdProp,
+        modelOpt,
+        _.patientId,
+        () => 0,
+        identity,
+        PatientIdValidator.validate,
+        new CachedInputUI
+      )
+
   object lastNameInput
       extends BoundInput[Patient, String, LastNameError.type, String](
         lastNameProp,
@@ -137,7 +148,7 @@ class PatientInputs(modelOpt: Option[Patient]):
   def create(props: Tuple): Tuple.Map[props.type, Create] =
     props.map[Create]([T] => (t: T) => fCreate(t))
 
-  val inputs = create(PatientProps.props)
+  val inputs =
 
   def update(): Unit =
     update(inputs, modelOpt)
