@@ -163,3 +163,64 @@ class PatientInputs(modelOpt: Option[Patient]):
           ModelInputUtil.resultsOf(inputs)
       )
       .asEither
+
+class PatientReps(modelOpt: Option[Patient]):
+  import PatientProps.*
+
+  object patientIdRep extends LabelRepProvider with RepToSpan:
+    val prop = patientIdProp
+    val rep = ModelPropRep(modelOpt, patientIdProp)
+    def getLabel = prop.getLabel
+    def getRep = rep.getRep
+
+  object lastNameRep extends LabelRepProvider with RepToSpan:
+    val prop = lastNameProp
+    val rep = ModelPropRep(modelOpt, lastNameProp)
+    def getLabel = prop.getLabel
+    def getRep = rep.getRep
+
+  object firstNameRep extends LabelRepProvider with RepToSpan:
+    val prop = firstNameProp
+    val rep = ModelPropRep(modelOpt, firstNameProp)
+    def getLabel = prop.getLabel
+    def getRep = rep.getRep
+
+  object lastNameYomiRep extends LabelRepProvider with RepToSpan:
+    val prop = lastNameYomiProp
+    val rep = ModelPropRep(modelOpt, lastNameYomiProp)
+    def getLabel = prop.getLabel
+    def getRep = rep.getRep
+
+  object firstNameYomiRep extends LabelRepProvider with RepToSpan:
+    val prop = firstNameYomiProp
+    val rep = ModelPropRep(modelOpt, firstNameYomiProp)
+    def getLabel = prop.getLabel
+    def getRep = rep.getRep
+
+  object sexRep extends LabelRepProvider with RepToSpan:
+    val prop = sexProp
+    val rep = ModelPropRep(modelOpt, sexProp, _.rep + "性")
+    def getLabel = prop.getLabel
+    def getRep = rep.getRep
+
+  object birthdayRep extends LabelRepProvider with RepToSpan:
+    val prop = birthdayProp
+    val rep = ModelDatePropRep(modelOpt, birthdayProp)
+    def getLabel = prop.getLabel
+    def getRep = rep.getRep
+
+  object addressRep extends LabelRepProvider with RepToSpan:
+    val prop = addressProp
+    val rep = ModelPropRep(modelOpt, addressProp)
+    def getLabel = prop.getLabel
+    def getRep = rep.getRep
+
+  object phoneRep extends LabelRepProvider with RepToSpan:
+    val prop = phoneProp
+    val rep = ModelPropRep(modelOpt, phoneProp)
+    def getLabel = prop.getLabel
+    def getRep = rep.getRep
+
+
+
+

@@ -12,6 +12,7 @@ import java.time.LocalDate
 import dev.fujiwara.domq.dateinput.DateOptionInput
 import dev.fujiwara.domq.dateinput.DateInput
 import dev.myclinic.scala.model.ValidUpto
+import dev.fujiwara.kanjidate.KanjiDate
 
 trait LabelProvider:
   def getLabel: String
@@ -28,12 +29,12 @@ trait ElementProvider:
 trait DataValidator[E, T]:
   def validate(): ValidatedResult[E, T]
 
-trait DispProvider:
-  def disp: String
+trait RepProvider:
+  def getRep: String
 
 trait LabelElementProvider extends LabelProvider with ElementProvider
 
-trait LabelDispProvider extends LabelProvider with DispProvider
+trait LabelRepProvider extends LabelProvider with RepProvider
 
 trait InitValue[M, I]:
   def getInitValue(modelOpt: Option[M]): I
@@ -82,12 +83,27 @@ class StringInput(initValue: String)
 class IntInput(initValue: Int)
     extends TextInput[Int](initValue, (i: Int) => i.toString)
 
-class ModelPropDisp[M, T](
+class ModelPropRep[M, T](
     modelOpt: Option[M],
-    init: InitValue[M, T],
-    stringify: T => String = (t: T) => t.toString
-) extends DispProvider:
-  def disp: String = stringify(init.getInitValue(modelOpt))
+    getter: DataGetter[M, T],
+    stringify: T => String = (t: T) => t.toString,
+    defaultValue: String = ""
+) extends RepProvider:
+  def getRep: String = modelOpt.fold(defaultValue)(m => stringify(getter.getFrom(m)))
+
+class ModelDatePropRep[M](
+  modelOpt: Option[M],
+  getter: DataGetter[M, LocalDate],
+  stringify: LocalDate => String = (t: LocalDate) => KanjiDate.dateToKanji(t),
+  defaultValue: String = ""
+) extends ModelPropRep[M, LocalDate](
+  modelOpt, getter, stringify, defaultValue
+)
+
+trait RepToSpan extends ElementProvider:
+  this: RepProvider =>
+  
+  def getElement: HTMLElement = span(innerText := getRep)
 
 case class LabelElement(label: String, element: HTMLElement) extends LabelElementProvider:
   def getLabel: String = label
@@ -97,11 +113,13 @@ object ModelInputUtil:
   import ModelUtil.*
 
   type ElementPanel[T] = T match {
-    case LabelElementProvider => (String, HTMLElement)
+    // case LabelElementProvider => (String, HTMLElement)
+    case LabelProvider & ElementProvider => (String, HTMLElement)
   }
 
   def fElementPanel[T](t: T): ElementPanel[T] = t match {
-    case tt: LabelElementProvider => (tt.getLabel, tt.getElement)
+    // case tt: LabelElementProvider => (tt.getLabel, tt.getElement)
+    case tt: (LabelProvider & ElementProvider) => (tt.getLabel, tt.getElement)
   }
 
   def elementPanelTuple(tuple: Tuple): Tuple.Map[tuple.type, ElementPanel] =
@@ -126,94 +144,16 @@ object ModelInputUtil:
   def resultsOf(inputs: Tuple): Tuple.Map[inputs.type, ResultsOf] =
     inputs.map([T] => (t: T) => fResultsOf(t))
 
-// trait PropElementProvider:
-//   def getProp: ModelProp
-//   def getElement: HTMLElement
+  type LabelRep[T] = T match {
+    case LabelRepProvider => (String, String)
+  }
 
-// trait DataValidator[E, T]:
-//   def validate(): ValidatedResult[E, T]
+  def fLabelRep[T](t: T): LabelRep[T] = t match {
+    case tt: LabelRepProvider => (tt.getLabel, tt.getRep)
+  }
 
-// class ReadOnlyInput[E, T](cache: T, validator: T => ValidatedResult[E, T])
-//     extends DataValidator[E, T]:
-//   def validate(): ValidatedResult[E, T] =
-//     validator(cache)
+  def labelRepTuple(tuple: Tuple): Tuple.Map[tuple.type, LabelRep] =
+    tuple.map([T] => (t: T) => fLabelRep(t))
 
-// abstract class InputUI[T]:
-//   def getElement: HTMLElement
-//   def getValue: T
-
-// class TextInputUI(initValue: String) extends InputUI[String]:
-//   val ele: HTMLInputElement = input
-//   ele.value = initValue
-//   def getElement: HTMLElement = ele
-//   def getValue: String = ele.value
-
-// class RadioInputUI[T](
-//     data: List[(String, T)],
-//     initValue: T
-// ) extends InputUI[T]:
-//   val radioGroup = RadioGroup[T](data, initValue = Some(initValue))
-//   def getElement: HTMLElement = radioGroup.ele
-//   def getValue: T = radioGroup.selected
-
-// class DateOptionInputUI(initValue: Option[LocalDate]) extends InputUI[Option[LocalDate]]:
-//   val dateInput = DateOptionInput(initValue)
-//   def getElement: HTMLElement = dateInput.ele
-//   def getValue: Option[LocalDate] = dateInput.value
-
-// class ValidUptoInputUI(
-//     initValue: ValidUpto
-// ) extends InputUI[ValidUpto]:
-//   val dateInput = DateOptionInput(initValue.value)
-//   def getElement: HTMLElement = dateInput.ele
-//   def getValue: ValidUpto = ValidUpto(dateInput.value)
-
-// abstract case class BoundInput[M, I, E, T](
-//     prop: ModelProp,
-//     modelOption: Option[M],
-//     modelInputValue: M => I,
-//     defaultInputValue: () => I,
-//     validator: I => ValidatedResult[E, T]
-// ) extends PropElementProvider with DataValidator[E, T]:
-//   val inputUI: InputUI[I]
-//   def resolveInitValue(): I =
-//     modelOption.fold(defaultInputValue())(modelInputValue(_))
-//   def getElement: HTMLElement = inputUI.getElement
-//   def validate(): ValidatedResult[E, T] =
-//     val ival = inputUI.getValue
-//     validator(ival)
-
-// case class LabelElement(label: String, element: HTMLElement)
-
-// trait BoundInputProcs extends ModelUtil:
-//   type PropElement[T] = T match {
-//     case PropElementProvider => (String, HTMLElement)
-//     case LabelElement        => (String, HTMLElement)
-//   }
-
-//   def fPropElement[T](t: T): PropElement[T] = t match {
-//     case tt: PropElementProvider => (tt.getProp.label, tt.getElement)
-//     case tt: LabelElement        => (tt.label, tt.element)
-//   }
-
-//   def propElements(inputs: Tuple): Tuple.Map[inputs.type, PropElement] =
-//     inputs.map([T] => (t: T) => fPropElement(t))
-
-//   def propElementsAsList(inputs: Tuple): List[(String, HTMLElement)] =
-//     tupleToList[(String, HTMLElement)](propElements(inputs))
-
-//   def formPanel(inputs: Tuple): HTMLElement =
-//     val panel = DispPanel(form = true)
-//     propElementsAsList(inputs).foreach(panel.add.tupled(_))
-//     panel.ele
-
-//   type ResultsOf[I] = I match {
-//     case DataValidator[e, t] => ValidatedResult[e, t]
-//   }
-
-//   def fResultsOf[I](i: I): ResultsOf[I] = i match {
-//     case ii: DataValidator[e, t] => ii.validate()
-//   }
-
-//   def resultsOf(inputs: Tuple): Tuple.Map[inputs.type, ResultsOf] =
-//     inputs.map([T] => (t: T) => fResultsOf(t))
+  def labelRep(tuple: Tuple): List[(String, String)] =
+    tupleToList[(String, String)](labelRepTuple(tuple))
