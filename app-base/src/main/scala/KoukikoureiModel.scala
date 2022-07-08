@@ -84,7 +84,7 @@ class KoukikoureiInputs(modelOpt: Option[Koukikourei]):
   def formPanel: HTMLElement =
     ModelInputUtil.elementPanel(inputs)
 
-  def validatedForEnter(patientId: Int): Either[String, Koukikourei] =
+  def validateForEnter(patientId: Int): Either[String, Koukikourei] =
     val rs = ModelInputUtil.resultsOf(inputs)
     KoukikoureiValidator
       .validate(
@@ -93,7 +93,7 @@ class KoukikoureiInputs(modelOpt: Option[Koukikourei]):
       )
       .asEither
 
-  def validatedForUpdate(): Either[String, Koukikourei] =
+  def validateForUpdate(): Either[String, Koukikourei] =
     val rs = ModelInputUtil.resultsOf(inputs)
     KoukikoureiValidator
       .validate(

@@ -27,7 +27,7 @@ object CompList:
         comp.ele(post.head).remove()
       pre ++ post.tail
 
-def clear[C](list: List[C], removeElements: Boolean = false)(using comp: Comp[C]): List[C] =
-  if removeElements then
-    list.foreach(c => comp.ele(c).remove())
-  List.empty
+  def clear[C](list: List[C], removeElements: Boolean = false)(using comp: Comp[C]): List[C] =
+    if removeElements then
+      list.foreach(c => comp.ele(c).remove())
+    List.empty

@@ -8,14 +8,8 @@ import java.time.LocalDateTime
 import java.time.LocalDate
 import scala.concurrent.Future
 import dev.myclinic.scala.apputil.HokenUtil
-import dev.myclinic.scala.web.appbase.PatientModel
-import dev.myclinic.scala.web.appbase.ShahokokuhoModel
-import dev.myclinic.scala.web.appbase.KoukikoureiModel
-import dev.myclinic.scala.web.appbase.KouhiModel
-import dev.myclinic.scala.web.appbase.RoujinModel
+import dev.myclinic.scala.web.appbase.*
 import org.scalajs.dom.HTMLElement
-import dev.myclinic.scala.web.appbase.ShahokokuhoReps
-import dev.myclinic.scala.web.appbase.ShahokokuhoInputs
 
 case class PatientSearchResultDialog(patients: List[Patient]):
   val selection = Selection[Patient](patients, p => div(format(p)))
@@ -54,7 +48,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
 
   private def disp(patient: Patient, hokenList: List[Hoken]): Unit =
     val hokenArea = div
-    val dispElement = new PatientModelReps(Some(patient)).dispPanel
+    val dispElement = new PatientReps(Some(patient)).dispPanel
     def onHokenDispDone(modified: Boolean): Unit =
       if modified then invokeDisp(patient)
       else disp(patient, hokenList)
@@ -180,8 +174,8 @@ case class PatientSearchResultDialog(patients: List[Patient]):
     )
     if props.validUptoInput.getValue.value.isDefined then
       renewButton(displayDefault)
-    props.validUptoProp.onInputChange(dateOpt =>
-      dateOpt match {
+    props.validUptoInput.onChange(validUpto =>
+      validUpto.value match {
         case Some(_) => renewButton(displayDefault)
         case None    => renewButton(displayNone)
       }
@@ -215,7 +209,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       patient: Patient,
       onDone: Modified => Unit
   ): Unit =
-    val props = KoukikoureiProps(Some(koukikourei)).updateDisp()
+    val props = new KoukikoureiReps(Some(koukikourei))
     dlog.body(clear, patientBlock(patient), props.dispPanel)
     dlog.commands(clear, button("戻る", onclick := (() => onDone(false))))
 
@@ -224,7 +218,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       patient: Patient,
       onDone: Modified => Unit
   ): Unit =
-    val props = KouhiProps(Some(kouhi)).updateDisp()
+    val props = new KouhiReps(Some(kouhi))
     dlog.body(clear, patientBlock(patient), props.dispPanel)
     dlog.commands(clear, button("戻る", onclick := (() => onDone(false))))
 
@@ -233,7 +227,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       patient: Patient,
       onDone: Modified => Unit
   ): Unit =
-    val props = RoujinProps(Some(roujin)).updateDisp()
+    val props = new RoujinReps(Some(roujin))
     dlog.body(clear, patientBlock(patient), props.dispPanel)
     dlog.commands(clear, button("戻る", onclick := (() => onDone(false))))
 
@@ -247,7 +241,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       patient: Patient,
       template: Option[Shahokokuho] = None
   ): Unit =
-    val props = ShahokokuhoProps(template).updateInput()
+    val props = new ShahokokuhoInputs(template)
     val errBox = ErrorBox()
     dlog.body(clear, patientBlock(patient), props.formPanel, errBox.ele)
     dlog.commands(
@@ -255,7 +249,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       button(
         "入力",
         onclick := (() => {
-          props.validatedForEnter(patient.patientId) match {
+          props.validateForEnter(patient.patientId) match {
             case Left(msg) => errBox.show(msg)
             case Right(newShahokokuho) =>
               for entered <- Api.enterShahokokuho(newShahokokuho)
@@ -268,7 +262,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
     )
 
   private def newKoukikourei(patient: Patient, hokenList: List[Hoken]): Unit =
-    val props = KoukikoureiProps(None)
+    val props = KoukikoureiInputs(None)
     val errBox = ErrorBox()
     dlog.body(clear, props.formPanel, errBox.ele)
     dlog.commands(
@@ -276,7 +270,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       button(
         "入力",
         onclick := (() => {
-          props.validatedForEnter(patient.patientId) match {
+          props.validateForEnter(patient.patientId) match {
             case Left(msg) => errBox.show(msg)
             case Right(newKoukikourei) =>
               for entered <- Api.enterKoukikourei(newKoukikourei)
@@ -289,7 +283,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
     )
 
   private def newKouhi(patient: Patient, hokenList: List[Hoken]): Unit =
-    val props = KouhiProps(None)
+    val props = new KouhiInputs(None)
     val errBox = ErrorBox()
     dlog.body(clear, props.formPanel, errBox.ele)
     dlog.commands(
@@ -297,7 +291,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       button(
         "入力",
         onclick := (() => {
-          props.validatedForEnter(patient.patientId) match {
+          props.validateForEnter(patient.patientId) match {
             case Left(msg) => errBox.show(msg)
             case Right(newKouhi) =>
               for _ <- Api.enterKouhi(newKouhi)
@@ -310,7 +304,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
     )
 
   private def edit(patient: Patient): Unit =
-    val props = PatientProps(Some(patient)).updateInput()
+    val props = new PatientInputs(Some(patient))
     val errBox = ErrorBox()
     dlog.body(clear, props.formPanel, errBox.ele)
     dlog.commands(
@@ -318,7 +312,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       button(
         "入力",
         onclick := (() => {
-          props.validatedForUpdate match {
+          props.validateForUpdate match {
             case Left(msg) => errBox.show(msg)
             case Right(newPatient) =>
               for

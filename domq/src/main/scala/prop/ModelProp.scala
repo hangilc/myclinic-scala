@@ -17,7 +17,7 @@ import dev.fujiwara.kanjidate.KanjiDate
 trait LabelProvider:
   def getLabel: String
 
-trait DataProvider[T]:
+trait ValueProvider[T]:
   def getValue: T
 
 trait DataGetter[M, T]:
@@ -35,6 +35,9 @@ trait RepProvider:
 trait InitValue[M, I]:
   def getInitValue(modelOpt: Option[M]): I
 
+trait OnChangePublisher[T]:
+  def onChange(handler: T => Unit): Unit
+
 class ModelProp[M, T](label: String, getter: M => T) extends LabelProvider with DataGetter[M, T]:
   def getLabel: String = label
   def getFrom(m: M): T = getter(m)
@@ -47,7 +50,7 @@ object InitValue:
 
 class TextInput[T](initValue: T, toInputValue: T => String)
     extends ElementProvider
-    with DataProvider[String]:
+    with ValueProvider[String]:
   val ele: HTMLInputElement = input
   ele.value = toInputValue(initValue)
   def getElement: HTMLElement = ele
@@ -58,24 +61,27 @@ class StringInput(initValue: String)
 
 class RadioInput[T](initValue: T, data: List[(String, T)])
     extends ElementProvider
-    with DataProvider[T]:
+    with ValueProvider[T]:
   val radioGroup = RadioGroup[T](data, initValue = Some(initValue))
   def getElement: HTMLElement = radioGroup.ele
   def getValue: T = radioGroup.selected
 
 class DateInput(initValue: Option[LocalDate])
     extends ElementProvider
-    with DataProvider[Option[LocalDate]]:
+    with ValueProvider[Option[LocalDate]]:
   val dateInput = DateOptionInput(initValue)
   def getElement: HTMLElement = dateInput.ele
   def getValue: Option[LocalDate] = dateInput.value
 
 class ValidUptoInput(initValue: ValidUpto)
     extends ElementProvider
-    with DataProvider[ValidUpto]:
+    with ValueProvider[ValidUpto]
+    with OnChangePublisher[ValidUpto]:
   val dateInput = DateOptionInput(initValue.value)
   def getElement: HTMLElement = dateInput.ele
   def getValue: ValidUpto = ValidUpto(dateInput.value)
+  def onChange(handler: ValidUpto => Unit): Unit =
+    dateInput.onChange(dateOpt => handler(ValidUpto(dateOpt)))
 
 class IntInput(initValue: Int)
     extends TextInput[Int](initValue, (i: Int) => i.toString)

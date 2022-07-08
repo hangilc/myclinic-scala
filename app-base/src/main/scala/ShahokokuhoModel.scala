@@ -13,85 +13,125 @@ import cats.data.Validated.Valid
 import cats.data.Validated.Invalid
 
 object ShahokokuhoProps:
-  object shahokokuhoIdProp extends ModelProp[Shahokokuho, Int]("shahokokuho-id", _.shahokokuhoId)
-  object hokenshaBangouProp extends ModelProp[Shahokokuho, Int]("保険者番号", _.hokenshaBangou)
-  object hihokenshaKigouProp extends ModelProp[Shahokokuho, String]("被保険者記号", _.hihokenshaKigou)
-  object hihokenshaBangouProp extends ModelProp[Shahokokuho, String]("被保険者番号", _.hihokenshaBangou)
+  object shahokokuhoIdProp
+      extends ModelProp[Shahokokuho, Int]("shahokokuho-id", _.shahokokuhoId)
+  object hokenshaBangouProp
+      extends ModelProp[Shahokokuho, Int]("保険者番号", _.hokenshaBangou)
+  object hihokenshaKigouProp
+      extends ModelProp[Shahokokuho, String]("被保険者記号", _.hihokenshaKigou)
+  object hihokenshaBangouProp
+      extends ModelProp[Shahokokuho, String]("被保険者番号", _.hihokenshaBangou)
   object honninProp extends ModelProp[Shahokokuho, Int]("本人・家族", _.honninStore)
-  object validFromProp extends ModelProp[Shahokokuho, LocalDate]("期限開始", _.validUpto)
-  object validUptoProp extends ModelProp[Shahokokuho, ValidUpto]("期限終了",_.validUpto)
+  object validFromProp
+      extends ModelProp[Shahokokuho, LocalDate]("期限開始", _.validUpto)
+  object validUptoProp
+      extends ModelProp[Shahokokuho, ValidUpto]("期限終了", _.validUpto)
   object koureiProp extends ModelProp[Shahokokuho, Int]("高齢", _.koureiStore)
   object edabanProp extends ModelProp[Shahokokuho, String]("枝番", _.edaban)
 
 class ShahokokuhoInputs(modelOpt: Option[Shahokokuho]):
   import ShahokokuhoProps.*
 
-  object hokenshaBangouInput extends LabelProvider with ElementProvider with DataValidator[HokenshaBangouError.type, Int]:
+  object hokenshaBangouInput
+      extends LabelProvider
+      with ElementProvider
+      with DataValidator[HokenshaBangouError.type, Int]:
     val init = InitValue(hokenshaBangouProp, _.toString, "")
     val input = new StringInput(init.getInitValue(modelOpt))
     def getLabel: String = hokenshaBangouProp.getLabel
     def getElement: HTMLElement = input.getElement
     def validate() = HokenshaBangouValidator.validateInput(input.getValue)
 
-  object hihokenshaKigouInput extends LabelProvider with ElementProvider with DataValidator[HihokenshaKigouError.type, String]:
+  object hihokenshaKigouInput
+      extends LabelProvider
+      with ElementProvider
+      with DataValidator[HihokenshaKigouError.type, String]:
     val init = InitValue(hihokenshaKigouProp, identity, "")
     val input = new StringInput(init.getInitValue(modelOpt))
     def getLabel: String = hihokenshaKigouProp.getLabel
     def getElement: HTMLElement = input.getElement
     def validate() = HihokenshaKigouValidator.validate(input.getValue)
 
-
-  object hihokenshaBangouInput extends LabelProvider with ElementProvider with DataValidator[HihokenshaBangouError.type, String]:
+  object hihokenshaBangouInput
+      extends LabelProvider
+      with ElementProvider
+      with DataValidator[HihokenshaBangouError.type, String]:
     val init = InitValue(hihokenshaBangouProp, identity, "")
     val input = new StringInput(init.getInitValue(modelOpt))
     def getLabel: String = hihokenshaBangouProp.getLabel
     def getElement: HTMLElement = input.getElement
     def validate() = HihokenshaBangouValidator.validate(input.getValue)
 
-  object honninInput extends LabelProvider with ElementProvider with DataValidator[HonninError.type, Int]:
+  object honninInput
+      extends LabelProvider
+      with ElementProvider
+      with DataValidator[HonninError.type, Int]:
     val init = InitValue(honninProp, identity, 0)
-    val input = new RadioInput[Int](init.getInitValue(modelOpt), List("本人" -> 1, "家族" -> 0))
+    val input = new RadioInput[Int](
+      init.getInitValue(modelOpt),
+      List("本人" -> 1, "家族" -> 0)
+    )
     def getLabel: String = honninProp.getLabel
     def getElement: HTMLElement = input.getElement
     def validate() = HonninValidator.validate(input.getValue)
 
-  object validFromInput extends LabelProvider with ElementProvider with DataValidator[ValidFromError.type, LocalDate]:
-    val init = InitValue[Shahokokuho, Option[LocalDate], LocalDate](validFromProp, Some(_), None)
+  object validFromInput
+      extends LabelProvider
+      with ElementProvider
+      with DataValidator[ValidFromError.type, LocalDate]:
+    val init = InitValue[Shahokokuho, Option[LocalDate], LocalDate](
+      validFromProp,
+      Some(_),
+      None
+    )
     val input = new DateInput(init.getInitValue(modelOpt))
     def getLabel: String = validFromProp.getLabel
     def getElement: HTMLElement = input.getElement
     def validate() = ValidFromValidator.validateOption(input.getValue)
 
-  object validUptoInput extends LabelProvider with ElementProvider with DataValidator[ValidUptoError.type, ValidUpto]:
+  object validUptoInput
+      extends LabelProvider
+      with ElementProvider
+      with DataValidator[ValidUptoError.type, ValidUpto]
+      with ValueProvider[ValidUpto]
+      with OnChangePublisher[ValidUpto]:
     val init = InitValue(validUptoProp, identity, validUptoSuggest)
     val input = new ValidUptoInput(init.getInitValue(modelOpt))
     def getLabel: String = validUptoProp.getLabel
     def getElement: HTMLElement = input.getElement
     def validate() = ValidUptoValidator.validate(input.getValue)
+    def getValue: ValidUpto = input.getValue
+    def onChange(handler: ValidUpto => Unit): Unit =
+      input.onChange(handler)
 
-  object koureiInput extends LabelProvider with ElementProvider with DataValidator[KoureiError.type, Int]:
+  object koureiInput
+      extends LabelProvider
+      with ElementProvider
+      with DataValidator[KoureiError.type, Int]:
     val init = InitValue(koureiProp, identity, 1)
     val input = new RadioInput(init.getInitValue(modelOpt), koureiData)
     def getLabel: String = koureiProp.getLabel
     def getElement: HTMLElement = input.getElement
     def validate() = KoureiValidator.validate(input.getValue)
 
-  object edabanInput extends LabelProvider with ElementProvider with DataValidator[EdabanError.type, String]:
+  object edabanInput
+      extends LabelProvider
+      with ElementProvider
+      with DataValidator[EdabanError.type, String]:
     val init = InitValue(edabanProp, identity, "")
     val input = new StringInput(init.getInitValue(modelOpt))
     def getLabel: String = edabanProp.getLabel
     def getElement: HTMLElement = input.getElement
     def validate() = EdabanValidator.validate(input.getValue)
 
-  def koureiData: List[(String, Int)] = 
-      ShahokokuhoValidator.validKoureiValues.map(k =>
-        val label = k match {
-          case 0 => "高齢でない"
-          case i => ZenkakuUtil.toZenkaku(s"${i}割")
-        }
-        (label, k)
-      )
-
+  def koureiData: List[(String, Int)] =
+    ShahokokuhoValidator.validKoureiValues.map(k =>
+      val label = k match {
+        case 0 => "高齢でない"
+        case i => ZenkakuUtil.toZenkaku(s"${i}割")
+      }
+      (label, k)
+    )
 
   val inputs = (
     hokenshaBangouInput,
@@ -153,19 +193,28 @@ class ShahokokuhoInputs(modelOpt: Option[Shahokokuho]):
 class ShahokokuhoReps(modelOpt: Option[Shahokokuho]):
   import ShahokokuhoProps.*
 
-  object hokenshaBangouRep extends LabelProvider with RepProvider with RepToSpan:
+  object hokenshaBangouRep
+      extends LabelProvider
+      with RepProvider
+      with RepToSpan:
     val prop = hokenshaBangouProp
     val rep = ModelPropRep(modelOpt, hokenshaBangouProp)
     def getLabel = prop.getLabel
     def getRep = rep.getRep
 
-  object hihokenshaKigouRep extends LabelProvider with RepProvider with RepToSpan:
+  object hihokenshaKigouRep
+      extends LabelProvider
+      with RepProvider
+      with RepToSpan:
     val prop = hihokenshaKigouProp
     val rep = ModelPropRep(modelOpt, hihokenshaKigouProp)
     def getLabel = prop.getLabel
     def getRep = rep.getRep
 
-  object hihokenshaBangouRep extends LabelProvider with RepProvider with RepToSpan:
+  object hihokenshaBangouRep
+      extends LabelProvider
+      with RepProvider
+      with RepToSpan:
     val prop = hihokenshaBangouProp
     val rep = ModelPropRep(modelOpt, hihokenshaBangouProp)
     def getLabel = prop.getLabel
@@ -220,7 +269,3 @@ class ShahokokuhoReps(modelOpt: Option[Shahokokuho]):
 
   val dispPanel: HTMLElement =
     ModelInputUtil.elementPanel(dispReps)
-
-
-
-

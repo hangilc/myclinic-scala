@@ -164,7 +164,7 @@ class PatientInputs(modelOpt: Option[Patient]):
       )
       .asEither
 
-class PatientModelReps(modelOpt: Option[Patient]):
+class PatientReps(modelOpt: Option[Patient]):
   import PatientProps.*
 
   object patientIdRep extends LabelProvider with RepProvider with RepToSpan:

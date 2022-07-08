@@ -90,7 +90,7 @@ class KouhiInputs(modelOpt: Option[Kouhi]):
   def formPanel: HTMLElement =
     ModelInputUtil.elementPanel(inputs)
 
-  def validatedForEnter(patientId: Int): Either[String, Kouhi] =
+  def validateForEnter(patientId: Int): Either[String, Kouhi] =
     val rs = ModelInputUtil.resultsOf(inputs)
     KouhiValidator
       .validate(
@@ -99,7 +99,7 @@ class KouhiInputs(modelOpt: Option[Kouhi]):
       )
       .asEither
 
-  def validatedForUpdate(): Either[String, Kouhi] =
+  def validateForUpdate(): Either[String, Kouhi] =
     val rs = ModelInputUtil.resultsOf(inputs)
     KouhiValidator
       .validate(
