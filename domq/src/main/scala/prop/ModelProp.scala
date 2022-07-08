@@ -32,10 +32,6 @@ trait DataValidator[E, T]:
 trait RepProvider:
   def getRep: String
 
-trait LabelElementProvider extends LabelProvider with ElementProvider
-
-trait LabelRepProvider extends LabelProvider with RepProvider
-
 trait InitValue[M, I]:
   def getInitValue(modelOpt: Option[M]): I
 
@@ -105,7 +101,7 @@ trait RepToSpan extends ElementProvider:
   
   def getElement: HTMLElement = span(innerText := getRep)
 
-case class LabelElement(label: String, element: HTMLElement) extends LabelElementProvider:
+case class LabelElement(label: String, element: HTMLElement) extends LabelProvider with ElementProvider:
   def getLabel: String = label
   def getElement: HTMLElement = element
 
@@ -113,12 +109,10 @@ object ModelInputUtil:
   import ModelUtil.*
 
   type ElementPanel[T] = T match {
-    // case LabelElementProvider => (String, HTMLElement)
     case LabelProvider & ElementProvider => (String, HTMLElement)
   }
 
   def fElementPanel[T](t: T): ElementPanel[T] = t match {
-    // case tt: LabelElementProvider => (tt.getLabel, tt.getElement)
     case tt: (LabelProvider & ElementProvider) => (tt.getLabel, tt.getElement)
   }
 
@@ -145,11 +139,11 @@ object ModelInputUtil:
     inputs.map([T] => (t: T) => fResultsOf(t))
 
   type LabelRep[T] = T match {
-    case LabelRepProvider => (String, String)
+    case LabelProvider & RepProvider => (String, String)
   }
 
   def fLabelRep[T](t: T): LabelRep[T] = t match {
-    case tt: LabelRepProvider => (tt.getLabel, tt.getRep)
+    case tt: (LabelProvider & RepProvider) => (tt.getLabel, tt.getRep)
   }
 
   def labelRepTuple(tuple: Tuple): Tuple.Map[tuple.type, LabelRep] =
