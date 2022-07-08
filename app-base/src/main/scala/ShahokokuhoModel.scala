@@ -8,6 +8,9 @@ import ShahokokuhoValidator.*
 import org.scalajs.dom.HTMLElement
 import dev.fujiwara.validator.section.Implicits.*
 import java.time.LocalDate
+import dev.myclinic.scala.util.ZenkakuUtil
+import cats.data.Validated.Valid
+import cats.data.Validated.Invalid
 
 object ShahokokuhoProps:
   object shahokokuhoIdProp extends ModelProp[Shahokokuho, Int]("shahokokuho-id", _.shahokokuhoId)
@@ -52,127 +55,97 @@ class ShahokokuhoInputs(modelOpt: Option[Shahokokuho]):
     def getElement: HTMLElement = input.getElement
     def validate() = HonninValidator.validate(input.getValue)
 
+  object validFromInput extends LabelProvider with ElementProvider with DataValidator[ValidFromError.type, LocalDate]:
+    val init = InitValue[Shahokokuho, Option[LocalDate], LocalDate](validFromProp, Some(_), None)
+    val input = new DateInput(init.getInitValue(modelOpt))
+    def getLabel: String = validFromProp.getLabel
+    def getElement: HTMLElement = input.getElement
+    def validate() = ValidFromValidator.validateOption(input.getValue)
+
+  object validUptoInput extends LabelProvider with ElementProvider with DataValidator[ValidUptoError.type, ValidUpto]:
+    val init = InitValue(validUptoProp, identity, validUptoSuggest)
+    val input = new ValidUptoInput(init.getInitValue(modelOpt))
+    def getLabel: String = validUptoProp.getLabel
+    def getElement: HTMLElement = input.getElement
+    def validate() = ValidUptoValidator.validate(input.getValue)
+
+  object koureiInput extends LabelProvider with ElementProvider with DataValidator[KoureiError.type, Int]:
+    val init = InitValue(koureiProp, identity, 1)
+    val input = new RadioInput(init.getInitValue(modelOpt), koureiData)
+    def getLabel: String = koureiProp.getLabel
+    def getElement: HTMLElement = input.getElement
+    def validate() = KoureiValidator.validate(input.getValue)
+
+  object edabanInput extends LabelProvider with ElementProvider with DataValidator[EdabanError.type, String]:
+    val init = InitValue(edabanProp, identity, "")
+    val input = new StringInput(init.getInitValue(modelOpt))
+    def getLabel: String = edabanProp.getLabel
+    def getElement: HTMLElement = input.getElement
+    def validate() = EdabanValidator.validate(input.getValue)
+
+  def koureiData: List[(String, Int)] = 
+      ShahokokuhoValidator.validKoureiValues.map(k =>
+        val label = k match {
+          case 0 => "高齢でない"
+          case i => ZenkakuUtil.toZenkaku(s"${i}割")
+        }
+        (label, k)
+      )
 
 
-//   object honninInput
-//       extends BoundInput[Shahokokuho, Int, HonninError.type, Int](
-//         honninProp,
-//         modelOpt,
-//         _.honninStore,
-//         () => 0,
-//         HonninValidator.validate
-//       ):
-//     val inputUI = new RadioInputUI(
-//       List("本人" -> 1, "家族" -> 0),
-//       resolveInitValue()
-//     )
+  val inputs = (
+    hokenshaBangouInput,
+    hihokenshaKigouInput,
+    hihokenshaBangouInput,
+    honninInput,
+    validFromInput,
+    validUptoInput,
+    koureiInput,
+    edabanInput
+  )
 
-//   object validFromInput
-//       extends BoundInput[Shahokokuho, Option[
-//         LocalDate
-//       ], ValidFromError.type, LocalDate](
-//         validFromProp,
-//         modelOpt,
-//         m => Some(m.validFrom),
-//         () => None,
-//         ValidFromValidator.validateOption
-//       ):
-//     val inputUI = new DateOptionInputUI(resolveInitValue())
+  private val validUptoSuggest: ValidUpto =
+    validFromInput.validate() match {
+      case Valid(d)   => ValidUpto(Some(d.plusYears(1).minusDays(1)))
+      case Invalid(_) => ValidUpto(None)
+    }
 
-//   object validUptoInput
-//       extends BoundInput[
-//         Shahokokuho,
-//         ValidUpto,
-//         ValidUptoError.type,
-//         ValidUpto
-//       ](
-//         validUptoProp,
-//         modelOpt,
-//         _.validUpto,
-//         () => validUptoSuggest,
-//         ValidUptoValidator.validate
-//       ):
-//     val inputUI = new ValidUptoInputUI(resolveInitValue())
+  val formInputs = (
+    hokenshaBangouInput,
+    LabelElement(
+      "記号・番号",
+      div(
+        hihokenshaKigouInput.getElement,
+        "・",
+        hihokenshaBangouInput.getElement
+      )
+    ),
+    edabanInput,
+    honninInput,
+    validFromInput,
+    validUptoInput,
+    koureiInput
+  )
 
-//   object koureiInput
-//       extends BoundInput[Shahokokuho, Int, KoureiError.type, Int](
-//         koureiProp,
-//         modelOpt,
-//         _.koureiStore,
-//         () => 0,
-//         KoureiValidator.validate
-//       ):
-//     val inputUI = new RadioInputUI(
-//       ShahokokuhoValidator.validKoureiValues.map(k =>
-//         val label = k match {
-//           case 0 => "高齢でない"
-//           case i => ZenkakuUtil.toZenkaku(s"${i}割")
-//         }
-//         (label, k)
-//       ),
-//       resolveInitValue()
-//     )
+  def formPanel: HTMLElement =
+    ModelInputUtil.elementPanel(formInputs)
 
-//   object edabanInput
-//       extends BoundInput[Shahokokuho, String, EdabanError.type, String](
-//         edabanProp,
-//         modelOpt,
-//         _.edaban,
-//         () => "",
-//         EdabanValidator.validate
-//       ):
-//     val inputUI = new TextInputUI(resolveInitValue())
+  def validatedForEnter(patientId: Int): Either[String, Shahokokuho] =
+    val rs = ModelInputUtil.resultsOf(inputs)
+    ShahokokuhoValidator
+      .validate(
+        ShahokokuhoIdValidator.validateForEnter *:
+          PatientIdValidator.validate(patientId) *: rs
+      )
+      .asEither
 
-//   val inputs = (
-//     hokenshaBangouInput,
-//     hihokenshaKigouInput,
-//     hihokenshaBangouInput,
-//     honninInput,
-//     validFromInput,
-//     validUptoInput,
-//     koureiInput,
-//     edabanInput
-//   )
-
-//   private val validUptoSuggest: ValidUpto =
-//     validFromInput.validate() match {
-//       case Valid(d)   => ValidUpto(Some(d.plusYears(1).minusDays(1)))
-//       case Invalid(_) => ValidUpto(None)
-//     }
-
-//   val formInputs = (
-//     hokenshaBangouInput,
-//     LabelElement(
-//       "記号・番号",
-//       div(
-//         hihokenshaKigouInput.getElement,
-//         "・",
-//         hihokenshaBangouInput.getElement
-//       )
-//     ),
-//     edabanInput,
-//     honninInput,
-//     validFromInput,
-//     validUptoInput,
-//     koureiInput
-//   )
-
-//   def validatedForEnter(patientId: Int): Either[String, Shahokokuho] =
-//     val rs = resultsOf(inputs)
-//     ShahokokuhoValidator
-//       .validate(
-//         ShahokokuhoIdValidator.validateForEnter *:
-//           PatientIdValidator.validate(patientId) *: rs
-//       )
-//       .asEither
-
-//   def validatedForUpdate(): Either[String, Shahokokuho] =
-//     val rs = resultsOf(inputs)
-//     ShahokokuhoValidator
-//       .validate(
-//         ShahokokuhoIdValidator.validateOptionForUpdate(
-//           modelOpt.map(_.shahokokuhoId)
-//         ) *:
-//           PatientIdValidator.validateOption(modelOpt.map(_.patientId)) *: rs
-//       )
-//       .asEither
+  def validatedForUpdate(): Either[String, Shahokokuho] =
+    val rs = ModelInputUtil.resultsOf(inputs)
+    ShahokokuhoValidator
+      .validate(
+        ShahokokuhoIdValidator.validateOptionForUpdate(
+          modelOpt.map(_.shahokokuhoId)
+        ) *:
+          PatientIdValidator.validateOption(modelOpt.map(_.patientId)) *: rs
+      )
+      .asEither
