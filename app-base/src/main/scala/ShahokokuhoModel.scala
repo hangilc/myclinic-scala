@@ -1,41 +1,35 @@
-// package dev.myclinic.scala.web.appbase
+package dev.myclinic.scala.web.appbase
 
-// import dev.fujiwara.domq.prop.*
-// import dev.fujiwara.domq.all.{*, given}
-// import scala.language.implicitConversions
-// import dev.myclinic.scala.model.*
-// import ShahokokuhoValidator.*
-// import org.scalajs.dom.HTMLElement
-// import dev.fujiwara.domq.DispPanel
-// import dev.myclinic.scala.util.ZenkakuUtil
-// import dev.fujiwara.domq.dateinput.DateInput
-// import cats.data.Validated.Valid
-// import cats.data.Validated.Invalid.apply
-// import cats.data.Validated.Invalid
-// import dev.fujiwara.domq.dateinput.DateOptionInput
-// import dev.fujiwara.validator.section.Implicits.*
-// import java.time.LocalDate
+import dev.fujiwara.domq.all.{ElementProvider => _, *, given}
+import scala.language.implicitConversions
+import dev.fujiwara.domq.prop.*
+import dev.myclinic.scala.model.{RepProvider => _, *}
+import ShahokokuhoValidator.*
+import org.scalajs.dom.HTMLElement
+import dev.fujiwara.validator.section.Implicits.*
+import java.time.LocalDate
 
-// object ShahokokuhoProps:
-//   object hokenshaBangouProp extends ModelProp("保険者番号")
-//   object hihokenshaKigouProp extends ModelProp("被保険者記号")
-//   object hihokenshaBangouProp extends ModelProp("被保険者番号")
-//   object honninProp extends ModelProp("本人・家族")
-//   object validFromProp extends ModelProp("期限開始")
-//   object validUptoProp extends ModelProp("期限終了")
-//   object koureiProp extends ModelProp("高齢")
-//   object edabanProp extends ModelProp("枝番")
+object ShahokokuhoProps:
+  object shahokokuhoIdProp extends ModelProp[Shahokokuho, Int]("shahokokuho-id", _.shahokokuhoId)
+  object hokenshaBangouProp extends ModelProp[Shahokokuho, Int]("保険者番号", _.hokenshaBangou)
+  object hihokenshaKigouProp extends ModelProp[Shahokokuho, String]("被保険者記号", _.hihokenshaKigou)
+  object hihokenshaBangouProp extends ModelProp[Shahokokuho, String]("被保険者番号", _.hihokenshaBangou)
+  object honninProp extends ModelProp[Shahokokuho, Int]("本人・家族", _.honninStore)
+  object validFromProp extends ModelProp[Shahokokuho, LocalDate]("期限開始", _.validUpto)
+  object validUptoProp extends ModelProp[Shahokokuho, ValidUpto]("期限終了",_.validUpto)
+  object koureiProp extends ModelProp[Shahokokuho, Int]("高齢", _.koureiStore)
+  object edabanProp extends ModelProp[Shahokokuho, String]("枝番", _.edaban)
 
-//   val props = (
-//     hokenshaBangouProp,
-//     hihokenshaKigouProp,
-//     hihokenshaBangouProp,
-//     honninProp,
-//     validFromProp,
-//     validUptoProp,
-//     koureiProp,
-//     edabanProp
-//   )
+class ShahokokuhoInputs(modelOpt: Option[Shahokokuho]):
+  import ShahokokuhoProps.*
+
+  object hokenshaBangouInput extends LabelProvider with ElementProvider with DataValidator[HokenshaBangouError.type, Int]:
+    val init = InitValue(hokenshaBangouProp, _.toString, "")
+    val input = new StringInput(init.getInitValue(modelOpt))
+    def getLabel: String = hokenshaBangouProp.getLabel
+    def getElement: HTMLElement = input.getElement
+    def validate() = HokenshaBangouValidator.validateInput(input.getValue)
+
 
 // class ShahokokuhoInputs(modelOpt: Option[Shahokokuho]) extends BoundInputProcs:
 //   import ShahokokuhoProps.*

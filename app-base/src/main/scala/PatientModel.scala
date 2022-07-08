@@ -10,44 +10,24 @@ import dev.fujiwara.validator.section.Implicits.*
 import java.time.LocalDate
 
 object PatientProps:
-  object patientIdProp extends ModelProp("患者番号") with DataGetter[Patient, Int]:
-    def getFrom(m: Patient): Int = m.patientId
-
-  object lastNameProp extends ModelProp("姓") with DataGetter[Patient, String]:
-    def getFrom(m: Patient): String = m.lastName
-
-  object firstNameProp extends ModelProp("名") with DataGetter[Patient, String]:
-    def getFrom(m: Patient): String = m.firstName
-
+  object patientIdProp extends ModelProp[Patient, Int]("患者番号", _.patientId)
+  object lastNameProp extends ModelProp[Patient, String]("姓", _.lastName)
+  object firstNameProp extends ModelProp[Patient, String]("名", _.firstName)
   object lastNameYomiProp
-      extends ModelProp("姓（よみ）")
-      with DataGetter[Patient, String]:
-    def getFrom(m: Patient): String = m.lastNameYomi
-
+      extends ModelProp[Patient, String]("姓（よみ）", _.lastNameYomi)
   object firstNameYomiProp
-      extends ModelProp("名（よみ）")
-      with DataGetter[Patient, String]:
-    def getFrom(m: Patient): String = m.firstNameYomi
-
-  object sexProp extends ModelProp("性別") with DataGetter[Patient, Sex]:
-    def getFrom(m: Patient): Sex = m.sex
-
-  object birthdayProp
-      extends ModelProp("生年月日")
-      with DataGetter[Patient, LocalDate]:
-    def getFrom(m: Patient): LocalDate = m.birthday
-
-  object addressProp extends ModelProp("住所") with DataGetter[Patient, String]:
-    def getFrom(m: Patient): String = m.address
-
-  object phoneProp extends ModelProp("電話") with DataGetter[Patient, String]:
-    def getFrom(m: Patient): String = m.phone
+      extends ModelProp[Patient, String]("名（よみ）", _.firstNameYomi)
+  object sexProp extends ModelProp[Patient, Sex]("性別", _.sex)
+  object birthdayProp extends ModelProp[Patient, LocalDate]("生年月日", _.birthday)
+  object addressProp extends ModelProp[Patient, String]("住所", _.address)
+  object phoneProp extends ModelProp[Patient, String]("電話", _.phone)
 
 class PatientInputs(modelOpt: Option[Patient]):
   import PatientProps.*
 
   object lastNameInput
-      extends LabelProvider with ElementProvider
+      extends LabelProvider
+      with ElementProvider
       with DataValidator[LastNameError.type, String]:
     val init = InitValue(lastNameProp, identity, "")
     val input = new StringInput(init.getInitValue(modelOpt))
@@ -56,7 +36,8 @@ class PatientInputs(modelOpt: Option[Patient]):
     def validate() = LastNameValidator.validate(input.getValue)
 
   object firstNameInput
-      extends LabelProvider with ElementProvider
+      extends LabelProvider
+      with ElementProvider
       with DataValidator[FirstNameError.type, String]:
     val init = InitValue(firstNameProp, identity, "")
     val input = new StringInput(init.getInitValue(modelOpt))
@@ -65,7 +46,8 @@ class PatientInputs(modelOpt: Option[Patient]):
     def validate() = FirstNameValidator.validate(input.getValue)
 
   object lastNameYomiInput
-      extends LabelProvider with ElementProvider
+      extends LabelProvider
+      with ElementProvider
       with DataValidator[LastNameYomiError.type, String]:
     val init = InitValue(lastNameYomiProp, identity, "")
     val input = new StringInput(init.getInitValue(modelOpt))
@@ -74,7 +56,8 @@ class PatientInputs(modelOpt: Option[Patient]):
     def validate() = LastNameYomiValidator.validate(input.getValue)
 
   object firstNameYomiInput
-      extends LabelProvider with ElementProvider
+      extends LabelProvider
+      with ElementProvider
       with DataValidator[FirstNameYomiError.type, String]:
     val init = InitValue(firstNameYomiProp, identity, "")
     val input = new StringInput(init.getInitValue(modelOpt))
@@ -83,17 +66,22 @@ class PatientInputs(modelOpt: Option[Patient]):
     def validate() = FirstNameYomiValidator.validate(input.getValue)
 
   object sexInput
-    extends LabelProvider with ElementProvider
-    with DataValidator[SexError.type, Sex]:
+      extends LabelProvider
+      with ElementProvider
+      with DataValidator[SexError.type, Sex]:
     val init = InitValue(sexProp, identity, Sex.Female)
-    val input = new RadioInput(init.getInitValue(modelOpt), List("男" -> Sex.Male, "女" -> Sex.Female))
+    val input = new RadioInput(
+      init.getInitValue(modelOpt),
+      List("男" -> Sex.Male, "女" -> Sex.Female)
+    )
     def getLabel = sexProp.getLabel
     def getElement = input.getElement
     def validate() = SexValidator.validate(input.getValue)
 
   object birthdayInput
-    extends LabelProvider with ElementProvider
-    with DataValidator[BirthdayError.type, LocalDate]:
+      extends LabelProvider
+      with ElementProvider
+      with DataValidator[BirthdayError.type, LocalDate]:
     val init = InitValue(birthdayProp, Some(_), None)
     val input = new DateInput(init.getInitValue(modelOpt))
     def getLabel = birthdayProp.getLabel
@@ -101,7 +89,8 @@ class PatientInputs(modelOpt: Option[Patient]):
     def validate() = BirthdayValidator.validateOption(input.getValue)
 
   object addressInput
-      extends LabelProvider with ElementProvider
+      extends LabelProvider
+      with ElementProvider
       with DataValidator[AddressError.type, String]:
     val init = InitValue(addressProp, identity, "")
     val input = new StringInput(init.getInitValue(modelOpt))
@@ -110,7 +99,8 @@ class PatientInputs(modelOpt: Option[Patient]):
     def validate() = AddressValidator.validate(input.getValue)
 
   object phoneInput
-      extends LabelProvider with ElementProvider
+      extends LabelProvider
+      with ElementProvider
       with DataValidator[PhoneError.type, String]:
     val init = InitValue(phoneProp, identity, "")
     val input = new StringInput(init.getInitValue(modelOpt))
@@ -119,12 +109,22 @@ class PatientInputs(modelOpt: Option[Patient]):
     def validate() = PhoneValidator.validate(input.getValue)
 
   val formInputs = (
-    LabelElement("氏名", div(
-      lastNameInput.getElement, " ", firstNameInput.getElement
-    )),
-    LabelElement("よみ", div(
-      lastNameYomiInput.getElement, " ", firstNameYomiInput.getElement
-    )),
+    LabelElement(
+      "氏名",
+      div(
+        lastNameInput.getElement,
+        " ",
+        firstNameInput.getElement
+      )
+    ),
+    LabelElement(
+      "よみ",
+      div(
+        lastNameYomiInput.getElement,
+        " ",
+        firstNameYomiInput.getElement
+      )
+    ),
     birthdayInput,
     sexInput,
     addressInput,
@@ -220,7 +220,3 @@ class PatientReps(modelOpt: Option[Patient]):
     val rep = ModelPropRep(modelOpt, phoneProp)
     def getLabel = prop.getLabel
     def getRep = rep.getRep
-
-
-
-

@@ -35,8 +35,9 @@ trait RepProvider:
 trait InitValue[M, I]:
   def getInitValue(modelOpt: Option[M]): I
 
-class ModelProp(label: String) extends LabelProvider:
+class ModelProp[M, T](label: String, getter: M => T) extends LabelProvider with DataGetter[M, T]:
   def getLabel: String = label
+  def getFrom(m: M): T = getter(m)
 
 object InitValue:
   def apply[M, I, T](getter: DataGetter[M, T], conv: T => I, defaultValue: I): InitValue[M, I] =
