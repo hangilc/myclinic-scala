@@ -53,6 +53,9 @@ class TextInput[T](initValue: T, toInputValue: T => String)
   def getElement: HTMLElement = ele
   def getValue: String = ele.value
 
+class StringInput(initValue: String)
+    extends TextInput[String](initValue, identity)
+
 class RadioInput[T](initValue: T, data: List[(String, T)])
     extends ElementProvider
     with DataProvider[T]:
@@ -73,9 +76,6 @@ class ValidUptoInput(initValue: ValidUpto)
   val dateInput = DateOptionInput(initValue.value)
   def getElement: HTMLElement = dateInput.ele
   def getValue: ValidUpto = ValidUpto(dateInput.value)
-
-class StringInput(initValue: String)
-    extends TextInput[String](initValue, identity)
 
 class IntInput(initValue: Int)
     extends TextInput[Int](initValue, (i: Int) => i.toString)

@@ -30,49 +30,29 @@ class ShahokokuhoInputs(modelOpt: Option[Shahokokuho]):
     def getElement: HTMLElement = input.getElement
     def validate() = HokenshaBangouValidator.validateInput(input.getValue)
 
+  object hihokenshaKigouInput extends LabelProvider with ElementProvider with DataValidator[HihokenshaKigouError.type, String]:
+    val init = InitValue(hihokenshaKigouProp, identity, "")
+    val input = new StringInput(init.getInitValue(modelOpt))
+    def getLabel: String = hihokenshaKigouProp.getLabel
+    def getElement: HTMLElement = input.getElement
+    def validate() = HihokenshaKigouValidator.validate(input.getValue)
 
-// class ShahokokuhoInputs(modelOpt: Option[Shahokokuho]) extends BoundInputProcs:
-//   import ShahokokuhoProps.*
 
-//   object hokenshaBangouInput
-//       extends BoundInput[Shahokokuho, String, HokenshaBangouError.type, Int](
-//         hokenshaBangouProp,
-//         modelOpt,
-//         _.hokenshaBangou.toString,
-//         () => "",
-//         HokenshaBangouValidator.validateInput
-//       ):
-//     val inputUI = new TextInputUI(resolveInitValue())
+  object hihokenshaBangouInput extends LabelProvider with ElementProvider with DataValidator[HihokenshaBangouError.type, String]:
+    val init = InitValue(hihokenshaBangouProp, identity, "")
+    val input = new StringInput(init.getInitValue(modelOpt))
+    def getLabel: String = hihokenshaBangouProp.getLabel
+    def getElement: HTMLElement = input.getElement
+    def validate() = HihokenshaBangouValidator.validate(input.getValue)
 
-//   object hihokenshaKigouInput
-//       extends BoundInput[
-//         Shahokokuho,
-//         String,
-//         HihokenshaKigouError.type,
-//         String
-//       ](
-//         hihokenshaKigouProp,
-//         modelOpt,
-//         _.hihokenshaKigou,
-//         () => "",
-//         HihokenshaKigouValidator.validate
-//       ):
-//     val inputUI = new TextInputUI(resolveInitValue())
+  object honninInput extends LabelProvider with ElementProvider with DataValidator[HonninError.type, Int]:
+    val init = InitValue(honninProp, identity, 0)
+    val input = new RadioInput[Int](init.getInitValue(modelOpt), List("本人" -> 1, "家族" -> 0))
+    def getLabel: String = honninProp.getLabel
+    def getElement: HTMLElement = input.getElement
+    def validate() = HonninValidator.validate(input.getValue)
 
-//   object hihokenshaBangouInput
-//       extends BoundInput[
-//         Shahokokuho,
-//         String,
-//         HihokenshaBangouError.type,
-//         String
-//       ](
-//         hihokenshaBangouProp,
-//         modelOpt,
-//         _.hihokenshaBangou,
-//         () => "",
-//         HihokenshaBangouValidator.validate
-//       ):
-//     val inputUI = new TextInputUI(resolveInitValue())
+
 
 //   object honninInput
 //       extends BoundInput[Shahokokuho, Int, HonninError.type, Int](
