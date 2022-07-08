@@ -9,6 +9,7 @@ import scala.util.Success
 import scala.util.Failure
 import java.time.LocalDate
 import math.Ordering.Implicits.infixOrderingOps
+import dev.myclinic.scala.model.ValidUpto
 
 type ValidatedResult[E, T] = Validated[List[(E, String)], T]
 type ValidatedSection[E, T] = ValidatedResult[E, T]
@@ -112,12 +113,15 @@ class ValidFromValidator[E](err: E, name: String = "期限開始")
   def validateOption(dateOption: Option[LocalDate]): Result[LocalDate] =
     some(dateOption) |> validate
 
-class ValidUptoValidator[E, T](
+class ValidUptoValidator[E, ValidUpto](
     err: E,
-    f: Option[LocalDate] => T,
+    f: Option[LocalDate] => ValidUpto,
     name: String = "期限終了"
 ) extends SectionValidator(err, name):
-  def validate(dateOption: Option[LocalDate]): Result[T] =
+  def validate(value: ValidUpto): Result[ValidUpto] =
+    valid(value)
+
+  def validateDateOption(dateOption: Option[LocalDate]): Result[ValidUpto] =
     valid(f(dateOption))
 
 class GlobalValidator[E, T](
