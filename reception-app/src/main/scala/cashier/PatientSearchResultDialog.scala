@@ -14,6 +14,8 @@ import dev.myclinic.scala.web.appbase.KoukikoureiModel
 import dev.myclinic.scala.web.appbase.KouhiModel
 import dev.myclinic.scala.web.appbase.RoujinModel
 import org.scalajs.dom.HTMLElement
+import dev.myclinic.scala.web.appbase.ShahokokuhoReps
+import dev.myclinic.scala.web.appbase.ShahokokuhoInputs
 
 case class PatientSearchResultDialog(patients: List[Patient]):
   val selection = Selection[Patient](patients, p => div(format(p)))
@@ -52,7 +54,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
 
   private def disp(patient: Patient, hokenList: List[Hoken]): Unit =
     val hokenArea = div
-    val dispElement = new PatientModel(Some(patient)).updateDisp().dispPanel
+    val dispElement = new PatientModelReps(Some(patient)).dispPanel
     def onHokenDispDone(modified: Boolean): Unit =
       if modified then invokeDisp(patient)
       else disp(patient, hokenList)
@@ -126,7 +128,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       patient: Patient,
       onDone: Modified => Unit
   ): Unit =
-    val props = ShahokokuhoProps(Some(shahokokuho)).updateDisp()
+    val props = new ShahokokuhoReps(Some(shahokokuho))
     dlog.body(clear, patientBlock(patient), props.dispPanel)
     dlog.commands(
       clear,
@@ -142,7 +144,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       patient: Patient,
       onDone: Modified => Unit
   ): Unit =
-    val props = ShahokokuhoProps(Some(shahokokuho)).updateInput()
+    val props = new ShahokokuhoInputs(Some(shahokokuho))
     val errBox = ErrorBox()
     val renewButton = button
     dlog.body(clear, patientBlock(patient), props.formPanel, errBox.ele)
@@ -152,7 +154,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
         "更新",
         displayNone,
         onclick := (() => {
-          props.validatedForUpdate.flatMap(createRenewalShahokokuho _) match {
+          props.validateForUpdate().flatMap(createRenewalShahokokuho _) match {
             case Left(msg) => errBox.show(msg)
             case Right((renewalShahokokuho, inputShahokokuho)) => {
               for updated <- updateIfModified(inputShahokokuho, shahokokuho)
@@ -165,7 +167,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       button(
         "入力",
         onclick := (() => {
-          props.validatedForUpdate match {
+          props.validateForUpdate() match {
             case Left(msg) => errBox.show(msg)
             case Right(newShahokokuho) =>
               for _ <- Api.updateShahokokuho(newShahokokuho)
@@ -176,7 +178,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       ),
       button("キャンセル", onclick := (() => onDone(false)))
     )
-    if props.validUptoProp.currentInputValue.isDefined then
+    if props.validUptoInput.getValue.value.isDefined then
       renewButton(displayDefault)
     props.validUptoProp.onInputChange(dateOpt =>
       dateOpt match {

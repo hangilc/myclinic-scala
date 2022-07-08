@@ -164,7 +164,7 @@ class PatientInputs(modelOpt: Option[Patient]):
       )
       .asEither
 
-class PatientReps(modelOpt: Option[Patient]):
+class PatientModelReps(modelOpt: Option[Patient]):
   import PatientProps.*
 
   object patientIdRep extends LabelProvider with RepProvider with RepToSpan:
@@ -220,3 +220,30 @@ class PatientReps(modelOpt: Option[Patient]):
     val rep = ModelPropRep(modelOpt, phoneProp)
     def getLabel = prop.getLabel
     def getRep = rep.getRep
+
+  val disps = (
+    patientIdRep,
+    LabelElement(
+      "氏名",
+      div(
+        lastNameRep.getElement,
+        " ",
+        firstNameRep.getElement
+      )
+    ),
+    LabelElement(
+      "よみ",
+      div(
+        lastNameYomiRep.getElement,
+        " ",
+        firstNameYomiRep.getElement
+      )
+    ),
+    birthdayRep,
+    sexRep,
+    addressRep,
+    phoneRep
+  )
+
+  def dispPanel: HTMLElement =
+    ModelInputUtil.elementPanel(disps)

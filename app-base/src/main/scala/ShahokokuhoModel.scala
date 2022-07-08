@@ -130,7 +130,7 @@ class ShahokokuhoInputs(modelOpt: Option[Shahokokuho]):
   def formPanel: HTMLElement =
     ModelInputUtil.elementPanel(formInputs)
 
-  def validatedForEnter(patientId: Int): Either[String, Shahokokuho] =
+  def validateForEnter(patientId: Int): Either[String, Shahokokuho] =
     val rs = ModelInputUtil.resultsOf(inputs)
     ShahokokuhoValidator
       .validate(
@@ -139,7 +139,7 @@ class ShahokokuhoInputs(modelOpt: Option[Shahokokuho]):
       )
       .asEither
 
-  def validatedForUpdate(): Either[String, Shahokokuho] =
+  def validateForUpdate(): Either[String, Shahokokuho] =
     val rs = ModelInputUtil.resultsOf(inputs)
     ShahokokuhoValidator
       .validate(
@@ -149,3 +149,78 @@ class ShahokokuhoInputs(modelOpt: Option[Shahokokuho]):
           PatientIdValidator.validateOption(modelOpt.map(_.patientId)) *: rs
       )
       .asEither
+
+class ShahokokuhoReps(modelOpt: Option[Shahokokuho]):
+  import ShahokokuhoProps.*
+
+  object hokenshaBangouRep extends LabelProvider with RepProvider with RepToSpan:
+    val prop = hokenshaBangouProp
+    val rep = ModelPropRep(modelOpt, hokenshaBangouProp)
+    def getLabel = prop.getLabel
+    def getRep = rep.getRep
+
+  object hihokenshaKigouRep extends LabelProvider with RepProvider with RepToSpan:
+    val prop = hihokenshaKigouProp
+    val rep = ModelPropRep(modelOpt, hihokenshaKigouProp)
+    def getLabel = prop.getLabel
+    def getRep = rep.getRep
+
+  object hihokenshaBangouRep extends LabelProvider with RepProvider with RepToSpan:
+    val prop = hihokenshaBangouProp
+    val rep = ModelPropRep(modelOpt, hihokenshaBangouProp)
+    def getLabel = prop.getLabel
+    def getRep = rep.getRep
+
+  object edabanRep extends LabelProvider with RepProvider with RepToSpan:
+    val prop = edabanProp
+    val rep = ModelPropRep(modelOpt, edabanProp)
+    def getLabel = prop.getLabel
+    def getRep = rep.getRep
+
+  object honninRep extends LabelProvider with RepProvider with RepToSpan:
+    val prop = honninProp
+    val rep = ModelPropRep(modelOpt, honninProp)
+    def getLabel = prop.getLabel
+    def getRep = rep.getRep
+
+  object validFromRep extends LabelProvider with RepProvider with RepToSpan:
+    val prop = validFromProp
+    val rep = ModelPropRep(modelOpt, validFromProp)
+    def getLabel = prop.getLabel
+    def getRep = rep.getRep
+
+  object validUptoRep extends LabelProvider with RepProvider with RepToSpan:
+    val prop = validUptoProp
+    val rep = ModelPropRep(modelOpt, validUptoProp)
+    def getLabel = prop.getLabel
+    def getRep = rep.getRep
+
+  object koureiRep extends LabelProvider with RepProvider with RepToSpan:
+    val prop = koureiProp
+    val rep = ModelPropRep(modelOpt, koureiProp)
+    def getLabel = prop.getLabel
+    def getRep = rep.getRep
+
+  val dispReps = (
+    hokenshaBangouRep,
+    LabelElement(
+      "記号・番号",
+      div(
+        hihokenshaKigouRep.getElement,
+        "・",
+        hihokenshaBangouRep.getElement
+      )
+    ),
+    edabanRep,
+    honninRep,
+    validFromRep,
+    validUptoRep,
+    koureiRep
+  )
+
+  val dispPanel: HTMLElement =
+    ModelInputUtil.elementPanel(dispReps)
+
+
+
+

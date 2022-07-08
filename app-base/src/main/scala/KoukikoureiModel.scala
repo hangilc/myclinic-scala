@@ -66,28 +66,6 @@ class KoukikoureiInputs(modelOpt: Option[Koukikourei]):
     def getElement: HTMLElement = input.getElement
     def validate() = ValidUptoValidator.validate(input.getValue)
 
-
-//   type Create[P] = P match {
-//     case KoukikoureiProps.HokenshaBangouProp   => HokenshaBangouInput
-//     case KoukikoureiProps.HihokenshaBangouProp => HihokenshaBangouInput
-//     case KoukikoureiProps.FutanWariProp        => FutanWariInput
-//     case KoukikoureiProps.ValidFromProp        => ValidFromInput
-//     case KoukikoureiProps.ValidUptoProp        => ValidUptoInput
-//   }
-
-//   def fCreate[P](p: P): Create[P] = p match {
-//     case _: KoukikoureiProps.HokenshaBangouProp   => hokenshaBangouInput
-//     case _: KoukikoureiProps.HihokenshaBangouProp => hihokenshaBangouInput
-//     case _: KoukikoureiProps.FutanWariProp        => futanWariInput
-//     case _: KoukikoureiProps.ValidFromProp        => validFromInput
-//     case _: KoukikoureiProps.ValidUptoProp        => validUptoInput
-//   }
-
-//   def create(props: Tuple): Tuple.Map[props.type, Create] =
-//     props.map[Create]([T] => (t: T) => fCreate(t))
-
-//   val inputs = create(KoukikoureiProps.props)
-
   private val validUptoSuggest: ValidUpto =
     val anchor = validFromInput.validate() match {
       case Valid(d)   => d
@@ -95,28 +73,81 @@ class KoukikoureiInputs(modelOpt: Option[Koukikourei]):
     }
     ValidUpto(Some(DateUtil.nextDateOf(7, 31, anchor)))
 
-//   def update(): Unit =
-//     update(inputs, modelOpt)
+  val inputs = (
+    hokenshaBangouInput,
+    hihokenshaBangouInput,
+    futanWariInput,
+    validFromInput,
+    validUptoInput
+  )
 
-//   def inputForm: HTMLElement =
-//     createForm(KoukikoureiProps.props, inputs)
+  def formPanel: HTMLElement =
+    ModelInputUtil.elementPanel(inputs)
 
-//   def validatedForEnter(patientId: Int): Either[String, Koukikourei] =
-//     val rs = resultsOf(inputs)
-//     KoukikoureiValidator
-//       .validate(
-//         KoukikoureiIdValidator.validateForEnter *:
-//           PatientIdValidator.validate(patientId) *: rs
-//       )
-//       .asEither
+  def validatedForEnter(patientId: Int): Either[String, Koukikourei] =
+    val rs = ModelInputUtil.resultsOf(inputs)
+    KoukikoureiValidator
+      .validate(
+        KoukikoureiIdValidator.validateForEnter *:
+          PatientIdValidator.validate(patientId) *: rs
+      )
+      .asEither
 
-//   def validatedForUpdate(): Either[String, Koukikourei] =
-//     val rs = resultsOf(inputs)
-//     KoukikoureiValidator
-//       .validate(
-//         KoukikoureiIdValidator.validateOptionForUpdate(
-//           modelOpt.map(_.koukikoureiId)
-//         ) *:
-//           PatientIdValidator.validateOption(modelOpt.map(_.patientId)) *: rs
-//       )
-//       .asEither
+  def validatedForUpdate(): Either[String, Koukikourei] =
+    val rs = ModelInputUtil.resultsOf(inputs)
+    KoukikoureiValidator
+      .validate(
+        KoukikoureiIdValidator.validateOptionForUpdate(
+          modelOpt.map(_.koukikoureiId)
+        ) *:
+          PatientIdValidator.validateOption(modelOpt.map(_.patientId)) *: rs
+      )
+      .asEither
+
+class KoukikoureiReps(modelOpt: Option[Koukikourei]):
+  import KoukikoureiProps.*
+
+  object hokenshaBangouRep extends LabelProvider with RepProvider with RepToSpan:
+    val prop = hokenshaBangouProp
+    val rep = ModelPropRep(modelOpt, hokenshaBangouProp)
+    def getLabel = prop.getLabel
+    def getRep = rep.getRep
+
+  object hihokenshaBangouRep extends LabelProvider with RepProvider with RepToSpan:
+    val prop = hihokenshaBangouProp
+    val rep = ModelPropRep(modelOpt, hihokenshaBangouProp)
+    def getLabel = prop.getLabel
+    def getRep = rep.getRep
+
+  object futanWariRep extends LabelProvider with RepProvider with RepToSpan:
+    val prop = futanWariProp
+    val rep = ModelPropRep(modelOpt, futanWariProp)
+    def getLabel = prop.getLabel
+    def getRep = rep.getRep
+
+  object validFromRep extends LabelProvider with RepProvider with RepToSpan:
+    val prop = validFromProp
+    val rep = ModelPropRep(modelOpt, validFromProp)
+    def getLabel = prop.getLabel
+    def getRep = rep.getRep
+
+  object validUptoRep extends LabelProvider with RepProvider with RepToSpan:
+    val prop = validUptoProp
+    val rep = ModelPropRep(modelOpt, validUptoProp)
+    def getLabel = prop.getLabel
+    def getRep = rep.getRep
+
+  val dispReps = (
+    hokenshaBangouRep,
+    hihokenshaBangouRep,
+    futanWariRep,
+    validFromRep,
+    validUptoRep
+  )
+
+  def dispPanel: HTMLElement =
+    ModelInputUtil.elementPanel(dispReps)
+
+
+
+
