@@ -32,7 +32,7 @@ class PatientInputs(modelOpt: Option[Patient]):
     val init = InitValue(lastNameProp, identity, "")
     val input = new StringInput(init.getInitValue(modelOpt))
     def getLabel: String = lastNameProp.getLabel
-    def getElement: HTMLElement = input.getElement
+    def getElement: HTMLElement = input.getElement(cls := "last-name-input")
     def validate() = LastNameValidator.validate(input.getValue)
 
   object firstNameInput
@@ -42,7 +42,7 @@ class PatientInputs(modelOpt: Option[Patient]):
     val init = InitValue(firstNameProp, identity, "")
     val input = new StringInput(init.getInitValue(modelOpt))
     def getLabel: String = firstNameProp.getLabel
-    def getElement: HTMLElement = input.getElement
+    def getElement: HTMLElement = input.getElement(cls := "first-name-input")
     def validate() = FirstNameValidator.validate(input.getValue)
 
   object lastNameYomiInput
@@ -52,7 +52,7 @@ class PatientInputs(modelOpt: Option[Patient]):
     val init = InitValue(lastNameYomiProp, identity, "")
     val input = new StringInput(init.getInitValue(modelOpt))
     def getLabel: String = lastNameYomiProp.getLabel
-    def getElement: HTMLElement = input.getElement
+    def getElement: HTMLElement = input.getElement(cls := "last-name-yomi-input")
     def validate() = LastNameYomiValidator.validate(input.getValue)
 
   object firstNameYomiInput
@@ -62,7 +62,7 @@ class PatientInputs(modelOpt: Option[Patient]):
     val init = InitValue(firstNameYomiProp, identity, "")
     val input = new StringInput(init.getInitValue(modelOpt))
     def getLabel: String = firstNameYomiProp.getLabel
-    def getElement: HTMLElement = input.getElement
+    def getElement: HTMLElement = input.getElement(cls := "first-name-yomi-input")
     def validate() = FirstNameYomiValidator.validate(input.getValue)
 
   object sexInput
@@ -75,7 +75,7 @@ class PatientInputs(modelOpt: Option[Patient]):
       List("男" -> Sex.Male, "女" -> Sex.Female)
     )
     def getLabel = sexProp.getLabel
-    def getElement = input.getElement
+    def getElement = input.getElement(cls := "sex-input")
     def validate() = SexValidator.validate(input.getValue)
 
   object birthdayInput
@@ -85,7 +85,7 @@ class PatientInputs(modelOpt: Option[Patient]):
     val init = InitValue(birthdayProp, Some(_), None)
     val input = new DateInput(init.getInitValue(modelOpt))
     def getLabel = birthdayProp.getLabel
-    def getElement = input.getElement
+    def getElement = input.getElement(cls := "birthday-input")
     def validate() = BirthdayValidator.validateOption(input.getValue)
 
   object addressInput
@@ -95,7 +95,7 @@ class PatientInputs(modelOpt: Option[Patient]):
     val init = InitValue(addressProp, identity, "")
     val input = new StringInput(init.getInitValue(modelOpt))
     def getLabel: String = addressProp.getLabel
-    def getElement: HTMLElement = input.getElement
+    def getElement: HTMLElement = input.getElement(cls := "address-input")
     def validate() = AddressValidator.validate(input.getValue)
 
   object phoneInput
@@ -105,10 +105,10 @@ class PatientInputs(modelOpt: Option[Patient]):
     val init = InitValue(phoneProp, identity, "")
     val input = new StringInput(init.getInitValue(modelOpt))
     def getLabel: String = phoneProp.getLabel
-    def getElement: HTMLElement = input.getElement
+    def getElement: HTMLElement = input.getElement(cls := "phone-input")
     def validate() = PhoneValidator.validate(input.getValue)
 
-  val formInputs = (
+  val formInputsEnter = (
     LabelElement(
       "氏名",
       div(
@@ -131,8 +131,16 @@ class PatientInputs(modelOpt: Option[Patient]):
     phoneInput
   )
 
+  val formInputs = 
+    modelOpt.fold(formInputsEnter)(m =>
+      LabelElement(
+        patientIdProp.getLabel,
+        span(PatientRepFactory.PatientIdRep(Some(m)).getRep)
+      ) *: formInputsEnter
+    )
+
   def formPanel(tuple: Tuple): HTMLElement =
-    ModelInputUtil.elementPanel(tuple)
+    ModelInputUtil.elementPanel(tuple)(cls := "patient-form")
 
   def formPanel: HTMLElement =
     formPanel(formInputs)
@@ -164,62 +172,77 @@ class PatientInputs(modelOpt: Option[Patient]):
       )
       .asEither
 
-class PatientReps(modelOpt: Option[Patient]):
+object PatientRepFactory:
   import PatientProps.*
 
-  object patientIdRep extends LabelProvider with RepProvider with RepToSpan:
+  class PatientIdRep(modelOpt: Option[Patient]) extends LabelProvider with RepProvider with RepToSpan:
     val prop = patientIdProp
     val rep = ModelPropRep(modelOpt, patientIdProp)
     def getLabel = prop.getLabel
     def getRep = rep.getRep
 
-  object lastNameRep extends LabelProvider with RepProvider with RepToSpan:
+  class LastNameRep(modelOpt: Option[Patient]) extends LabelProvider with RepProvider with RepToSpan:
     val prop = lastNameProp
     val rep = ModelPropRep(modelOpt, lastNameProp)
     def getLabel = prop.getLabel
     def getRep = rep.getRep
 
-  object firstNameRep extends LabelProvider with RepProvider with RepToSpan:
+  class FirstNameRep(modelOpt: Option[Patient]) extends LabelProvider with RepProvider with RepToSpan:
     val prop = firstNameProp
     val rep = ModelPropRep(modelOpt, firstNameProp)
     def getLabel = prop.getLabel
     def getRep = rep.getRep
 
-  object lastNameYomiRep extends LabelProvider with RepProvider with RepToSpan:
+  class LastNameYomiRep(modelOpt: Option[Patient]) extends LabelProvider with RepProvider with RepToSpan:
     val prop = lastNameYomiProp
     val rep = ModelPropRep(modelOpt, lastNameYomiProp)
     def getLabel = prop.getLabel
     def getRep = rep.getRep
 
-  object firstNameYomiRep extends LabelProvider with RepProvider with RepToSpan:
+  class FirstNameYomiRep(modelOpt: Option[Patient]) extends LabelProvider with RepProvider with RepToSpan:
     val prop = firstNameYomiProp
     val rep = ModelPropRep(modelOpt, firstNameYomiProp)
     def getLabel = prop.getLabel
     def getRep = rep.getRep
 
-  object sexRep extends LabelProvider with RepProvider with RepToSpan:
+  class SexRep(modelOpt: Option[Patient]) extends LabelProvider with RepProvider with RepToSpan:
     val prop = sexProp
     val rep = ModelPropRep(modelOpt, sexProp, _.rep + "性")
     def getLabel = prop.getLabel
     def getRep = rep.getRep
 
-  object birthdayRep extends LabelProvider with RepProvider with RepToSpan:
+  class BirthdayRep(modelOpt: Option[Patient]) extends LabelProvider with RepProvider with RepToSpan:
     val prop = birthdayProp
     val rep = ModelDatePropRep(modelOpt, birthdayProp)
     def getLabel = prop.getLabel
     def getRep = rep.getRep
 
-  object addressRep extends LabelProvider with RepProvider with RepToSpan:
+  class AddressRep(modelOpt: Option[Patient]) extends LabelProvider with RepProvider with RepToSpan:
     val prop = addressProp
     val rep = ModelPropRep(modelOpt, addressProp)
     def getLabel = prop.getLabel
     def getRep = rep.getRep
 
-  object phoneRep extends LabelProvider with RepProvider with RepToSpan:
+  class PhoneRep(modelOpt: Option[Patient]) extends LabelProvider with RepProvider with RepToSpan:
     val prop = phoneProp
     val rep = ModelPropRep(modelOpt, phoneProp)
     def getLabel = prop.getLabel
     def getRep = rep.getRep
+
+
+class PatientReps(modelOpt: Option[Patient]):
+  import PatientProps.*
+  import PatientRepFactory.*
+
+  val patientIdRep = new PatientIdRep(modelOpt)
+  val lastNameRep = new LastNameRep(modelOpt)
+  val firstNameRep = new FirstNameRep(modelOpt)
+  val lastNameYomiRep = new LastNameYomiRep(modelOpt)
+  val firstNameYomiRep = new FirstNameYomiRep(modelOpt)
+  val sexRep = new SexRep(modelOpt)
+  val birthdayRep = new BirthdayRep(modelOpt)
+  val addressRep = new AddressRep(modelOpt)
+  val phoneRep = new PhoneRep(modelOpt)
 
   val disps = (
     patientIdRep,

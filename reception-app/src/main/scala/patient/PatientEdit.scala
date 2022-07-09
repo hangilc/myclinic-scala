@@ -2,7 +2,7 @@ package dev.myclinic.scala.web.reception.patient
 
 import dev.fujiwara.domq.all.{*, given}
 import dev.myclinic.scala.model.Patient
-import dev.fujiwara.dateinput.{DateInput, DateOptionInput}
+import dev.fujiwara.domq.dateinput.{DateInput, DateOptionInput}
 import org.scalajs.dom.HTMLInputElement
 import org.scalajs.dom.HTMLElement
 import dev.myclinic.scala.web.appbase.PatientValidator

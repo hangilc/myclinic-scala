@@ -15,7 +15,7 @@ import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
 import dev.myclinic.scala.web.appbase.{PatientValidator, SexValidator}
 import dev.myclinic.scala.model.{Sex, Patient}
 import dev.fujiwara.kanjidate.KanjiDate.Gengou
-import dev.fujiwara.dateinput.{DateInput, DateOptionInput}
+import dev.fujiwara.domq.dateinput.{DateInput, DateOptionInput}
 
 class NewPatientBlock(onClose: (NewPatientBlock => Unit)):
   val eErrorBox = ErrorBox()

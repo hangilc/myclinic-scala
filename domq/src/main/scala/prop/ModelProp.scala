@@ -51,7 +51,7 @@ object InitValue:
 class TextInput[T](initValue: T, toInputValue: T => String)
     extends ElementProvider
     with ValueProvider[String]:
-  val ele: HTMLInputElement = input
+  val ele: HTMLInputElement = inputText
   ele.value = toInputValue(initValue)
   def getElement: HTMLElement = ele
   def getValue: String = ele.value
@@ -62,7 +62,10 @@ class StringInput(initValue: String)
 class RadioInput[T](initValue: T, data: List[(String, T)])
     extends ElementProvider
     with ValueProvider[T]:
+  given RadioGroup.Layout[T] = layout
   val radioGroup = RadioGroup[T](data, initValue = Some(initValue))
+
+  def layout: RadioGroup.Layout[T] = RadioGroup.defaultLayout[T]
   def getElement: HTMLElement = radioGroup.ele
   def getValue: T = radioGroup.selected
 

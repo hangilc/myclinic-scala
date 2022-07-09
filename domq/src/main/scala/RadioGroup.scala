@@ -39,7 +39,7 @@ case class RadioGroup[T](
   def addOnInputListener(listener: RadioLabel[T] => Unit): Unit =
     radioLabels.foreach(_.addOnInputListener(listener))
 
-  def findLabel(value: T): String =
+  def getLabel(value: T): String =
     items.find(_._2 == value).map(_._1).getOrElse("")
 
 object RadioGroup:

@@ -6,7 +6,7 @@ import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.{Icons, Form, ErrorBox, Modifier}
 import scala.language.implicitConversions
 import dev.fujiwara.kanjidate.KanjiDate
-import dev.fujiwara.dateinput.{DateInput, DateOptionInput}
+import dev.fujiwara.domq.dateinput.{DateInput, DateOptionInput}
 import org.scalajs.dom.{HTMLElement, HTMLInputElement}
 import dev.fujiwara.kanjidate.DateUtil
 import dev.myclinic.scala.model.*

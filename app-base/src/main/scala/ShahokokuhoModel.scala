@@ -39,7 +39,7 @@ class ShahokokuhoInputs(modelOpt: Option[Shahokokuho]):
     val init = InitValue(hokenshaBangouProp, _.toString, "")
     val input = new StringInput(init.getInitValue(modelOpt))
     def getLabel: String = hokenshaBangouProp.getLabel
-    def getElement: HTMLElement = input.getElement
+    def getElement: HTMLElement = input.getElement(cls := "hokensha-bangou-input")
     def validate() = HokenshaBangouValidator.validateInput(input.getValue)
 
   object hihokenshaKigouInput
@@ -49,7 +49,7 @@ class ShahokokuhoInputs(modelOpt: Option[Shahokokuho]):
     val init = InitValue(hihokenshaKigouProp, identity, "")
     val input = new StringInput(init.getInitValue(modelOpt))
     def getLabel: String = hihokenshaKigouProp.getLabel
-    def getElement: HTMLElement = input.getElement
+    def getElement: HTMLElement = input.getElement(cls := "hihokensha-kigou-input")
     def validate() = HihokenshaKigouValidator.validate(input.getValue)
 
   object hihokenshaBangouInput
@@ -59,7 +59,7 @@ class ShahokokuhoInputs(modelOpt: Option[Shahokokuho]):
     val init = InitValue(hihokenshaBangouProp, identity, "")
     val input = new StringInput(init.getInitValue(modelOpt))
     def getLabel: String = hihokenshaBangouProp.getLabel
-    def getElement: HTMLElement = input.getElement
+    def getElement: HTMLElement = input.getElement(cls := "hihokensha-bangou-input")
     def validate() = HihokenshaBangouValidator.validate(input.getValue)
 
   object honninInput
@@ -72,7 +72,7 @@ class ShahokokuhoInputs(modelOpt: Option[Shahokokuho]):
       List("本人" -> 1, "家族" -> 0)
     )
     def getLabel: String = honninProp.getLabel
-    def getElement: HTMLElement = input.getElement
+    def getElement: HTMLElement = input.getElement(cls := "honnin-input")
     def validate() = HonninValidator.validate(input.getValue)
 
   object validFromInput
@@ -86,7 +86,7 @@ class ShahokokuhoInputs(modelOpt: Option[Shahokokuho]):
     )
     val input = new DateInput(init.getInitValue(modelOpt))
     def getLabel: String = validFromProp.getLabel
-    def getElement: HTMLElement = input.getElement
+    def getElement: HTMLElement = input.getElement(cls := "valid-from-input")
     def validate() = ValidFromValidator.validateOption(input.getValue)
 
   object validUptoInput
@@ -98,7 +98,7 @@ class ShahokokuhoInputs(modelOpt: Option[Shahokokuho]):
     val init = InitValue(validUptoProp, identity, validUptoSuggest)
     val input = new ValidUptoInput(init.getInitValue(modelOpt))
     def getLabel: String = validUptoProp.getLabel
-    def getElement: HTMLElement = input.getElement
+    def getElement: HTMLElement = input.getElement(cls := "valid-upto-input")
     def validate() = ValidUptoValidator.validate(input.getValue)
     def getValue: ValidUpto = input.getValue
     def onChange(handler: ValidUpto => Unit): Unit =
@@ -108,10 +108,20 @@ class ShahokokuhoInputs(modelOpt: Option[Shahokokuho]):
       extends LabelProvider
       with ElementProvider
       with DataValidator[KoureiError.type, Int]:
-    val init = InitValue(koureiProp, identity, 1)
-    val input = new RadioInput(init.getInitValue(modelOpt), koureiData)
+    val init = InitValue(koureiProp, identity, 0)
+    val input = new RadioInput(init.getInitValue(modelOpt), koureiData):
+      override def layout: RadioGroup.Layout[Int] =
+        println("enter-layout")
+        RadioGroup.Layout[Int](g => 
+          div(displayBlock,
+            div(g.getRadioLabel(0).ele),
+            div(
+              g.radioLabels.filter(l => l.value != 0).map(_.ele)
+            )
+          )
+        )
     def getLabel: String = koureiProp.getLabel
-    def getElement: HTMLElement = input.getElement
+    def getElement: HTMLElement = input.getElement(cls := "kourei-input")
     def validate() = KoureiValidator.validate(input.getValue)
 
   object edabanInput
@@ -121,7 +131,7 @@ class ShahokokuhoInputs(modelOpt: Option[Shahokokuho]):
     val init = InitValue(edabanProp, identity, "")
     val input = new StringInput(init.getInitValue(modelOpt))
     def getLabel: String = edabanProp.getLabel
-    def getElement: HTMLElement = input.getElement
+    def getElement: HTMLElement = input.getElement(cls := "edaban-input")
     def validate() = EdabanValidator.validate(input.getValue)
 
   def koureiData: List[(String, Int)] =
@@ -144,7 +154,7 @@ class ShahokokuhoInputs(modelOpt: Option[Shahokokuho]):
     edabanInput
   )
 
-  private val validUptoSuggest: ValidUpto =
+  private def validUptoSuggest: ValidUpto =
     validFromInput.validate() match {
       case Valid(d)   => ValidUpto(Some(d.plusYears(1).minusDays(1)))
       case Invalid(_) => ValidUpto(None)
@@ -168,7 +178,7 @@ class ShahokokuhoInputs(modelOpt: Option[Shahokokuho]):
   )
 
   def formPanel: HTMLElement =
-    ModelInputUtil.elementPanel(formInputs)
+    ModelInputUtil.elementPanel(formInputs)(cls := "shahokokuho-form")
 
   def validateForEnter(patientId: Int): Either[String, Shahokokuho] =
     val rs = ModelInputUtil.resultsOf(inputs)

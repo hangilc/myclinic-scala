@@ -2,7 +2,7 @@ package dev.myclinic.scala.web.reception.records
 
 import dev.myclinic.scala.web.appbase.SideMenuService
 import dev.fujiwara.domq.all.{*, given}
-import dev.fujiwara.dateinput.{DateInput, DateOptionInput}
+import dev.fujiwara.domq.dateinput.{DateInput, DateOptionInput}
 import org.scalajs.dom.{HTMLElement, HTMLInputElement}
 import scala.concurrent.Future
 import org.scalajs.dom.MouseEvent
