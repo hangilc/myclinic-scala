@@ -7,13 +7,14 @@ import dev.myclinic.scala.webclient.{Api, global}
 import java.time.LocalDateTime
 import java.time.LocalDate
 import scala.concurrent.Future
+import scala.collection.mutable
 import dev.myclinic.scala.apputil.HokenUtil
 import dev.myclinic.scala.web.appbase.*
 import org.scalajs.dom.HTMLElement
 
 case class PatientSearchResultDialog(patients: List[Patient]):
   val selection = Selection[Patient](patients, p => div(format(p)))
-  selection.onSelect(patient => { invokeDisp(patient); () })
+  selection.onSelect(patient => start(patient))
   val dlog = new ModalDialog3()
   dlog.content(cls := "reception-cashier-search-patient-result-dialog")
   dlog.title("患者検索結果")
@@ -21,7 +22,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
   dlog.commands(
     button("閉じる", onclick := (() => dlog.close()))
   )
-  if patients.size == 1 then invokeDisp(patients.head)
+  if patients.size == 1 then start(patients.head)
 
   def open(): Unit =
     dlog.open()
@@ -40,13 +41,44 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       (_, _, shahokokuho, koukikourei, roujin, kouhi) = result
     yield List.empty[Hoken] ++ shahokokuho ++ koukikourei ++ roujin ++ kouhi
 
-  private def invokeDisp(patient: Patient): Future[Unit] =
+  private def start(patient: Patient): Unit =
     for hoken <- listHoken(patient.patientId)
-    yield disp(patient, hoken)
+    yield run(Transition.Start(disp, patient hoken))
 
-  type Modified = Boolean
+  type DlogFun = (Patient, List[Hoken]) => Transition
 
-  private def disp(patient: Patient, hokenList: List[Hoken]): Unit =
+  enum Transition:
+    case Start(f: DlogFun, patient: Patient, hoken: List[Hoken])
+    case GoForward(next: DlogFun, patient: Patient, hoken: List[Hoken], prev: DlogFun)
+    case GoBack(patient: Patient, hoken: List[Hoken])
+    case Exit
+
+  val callStack = mutable.Stack[DlogFun]()
+
+  @annotation.tailrec
+  def run(trans: Transition): Unit =
+    import Transition.*
+    trans match {
+      case Start(f, patient, hoken) =>
+        run(f(patient, hoken))
+      case GoForward(next, patient, hoken, prev) =>
+        callStack.push(prev)
+        run(next(patient, hoken))
+      case GoBack(patient, hoken) =>
+        val f = callStack.pop()
+        run(f(patient, hoken))
+      case Exit =>
+        dlog.close()
+    }
+
+  def remember(f: (Patient, List[Hoken]) => Unit): Unit =
+    callStack.push(f)
+
+  def goback(patient: Patient, hoken: List[Hoken]): Unit =
+    val f = callStack.pop()
+    f(patient, hoken)
+
+  private def disp(patient: Patient, hokenList: List[Hoken]): Transition =
     val hokenArea = div
     val dispElement = new PatientReps(Some(patient)).dispPanel
     def onHokenDispDone(modified: Boolean): Unit =
@@ -122,6 +154,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       patient: Patient,
       onDone: Modified => Unit
   ): Unit =
+    println(("valid-from", shahokokuho.validFrom))
     val props = new ShahokokuhoReps(Some(shahokokuho))
     dlog.body(clear, patientBlock(patient), props.dispPanel)
     dlog.commands(
@@ -132,6 +165,8 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       ),
       button("戻る", onclick := (() => onDone(false)))
     )
+
+  private def dispShahokokuhoCont
 
   private def editShahokokuho(
       shahokokuho: Shahokokuho,

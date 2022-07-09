@@ -180,8 +180,8 @@ object PatientRepFactory:
   class FirstNameRep(modelOpt: Option[Patient]) extends ModelPropRep(modelOpt, firstNameProp)
   class LastNameYomiRep(modelOpt: Option[Patient]) extends ModelPropRep(modelOpt, lastNameYomiProp)
   class FirstNameYomiRep(modelOpt: Option[Patient]) extends ModelPropRep(modelOpt, firstNameYomiProp)
-  class SexRep(modelOpt: Option[Patient]) extends ModelPropRep(modelOpt, sexProp)
-  class BirthdayRep(modelOpt: Option[Patient]) extends ModelPropRep(modelOpt, birthdayProp)
+  class SexRep(modelOpt: Option[Patient]) extends ModelPropRep(modelOpt, sexProp, stringify = _.rep + "性")
+  class BirthdayRep(modelOpt: Option[Patient]) extends ModelDatePropRep(modelOpt, birthdayProp)
   class AddressRep(modelOpt: Option[Patient]) extends ModelPropRep(modelOpt, addressProp)
   class PhoneRep(modelOpt: Option[Patient]) extends ModelPropRep(modelOpt, phoneProp)
 

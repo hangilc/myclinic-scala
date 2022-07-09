@@ -23,7 +23,7 @@ object ShahokokuhoProps:
       extends ModelProp[Shahokokuho, String]("被保険者番号", _.hihokenshaBangou)
   object honninProp extends ModelProp[Shahokokuho, Int]("本人・家族", _.honninStore)
   object validFromProp
-      extends ModelProp[Shahokokuho, LocalDate]("期限開始", _.validUpto)
+      extends ModelProp[Shahokokuho, LocalDate]("期限開始", _.validFrom)
   object validUptoProp
       extends ModelProp[Shahokokuho, ValidUpto]("期限終了", _.validUpto)
   object koureiProp extends ModelProp[Shahokokuho, Int]("高齢", _.koureiStore)
@@ -207,10 +207,23 @@ object ShahokokuhoRepFactory:
   class HihokenshaKigouRep(modelOpt: Option[Shahokokuho]) extends ModelPropRep(modelOpt, hihokenshaKigouProp)
   class HihokenshaBangouRep(modelOpt: Option[Shahokokuho]) extends ModelPropRep(modelOpt, hihokenshaBangouProp)
   class EdabanRep(modelOpt: Option[Shahokokuho]) extends ModelPropRep(modelOpt, edabanProp)
-  class HonninRep(modelOpt: Option[Shahokokuho]) extends ModelPropRep(modelOpt, honninProp)
-  class KoureiRep(modelOpt: Option[Shahokokuho]) extends ModelPropRep(modelOpt, koureiProp)
-  class ValidFromRep(modelOpt: Option[Shahokokuho]) extends ModelPropRep(modelOpt, validFromProp)
-  class ValidUptoRep(modelOpt: Option[Shahokokuho]) extends ModelPropRep(modelOpt, validUptoProp)
+  class HonninRep(modelOpt: Option[Shahokokuho]) extends ModelPropRep(modelOpt, honninProp, stringify = honninRep)
+  class KoureiRep(modelOpt: Option[Shahokokuho]) extends ModelPropRep(modelOpt, koureiProp, stringify = koureiRep)
+  class ValidFromRep(modelOpt: Option[Shahokokuho]) extends ModelDatePropRep(modelOpt, validFromProp)
+  class ValidUptoRep(modelOpt: Option[Shahokokuho]) extends ModelValidUptoPropRep(modelOpt, validUptoProp)
+
+  def koureiRep(i: Int): String =
+    i match {
+      case 0 => "高齢でない"
+      case i => ZenkakuUtil.toZenkaku(s"${i}割")
+    }
+    
+
+  def honninRep(honnin: Int): String =
+    honnin match {
+      case 0 => "家族"
+      case _ => "本人"
+    }
 
 class ShahokokuhoReps(modelOpt: Option[Shahokokuho]):
   import ShahokokuhoRepFactory.*

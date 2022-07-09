@@ -38,12 +38,18 @@ trait InitValue[M, I]:
 trait OnChangePublisher[T]:
   def onChange(handler: T => Unit): Unit
 
-class ModelProp[M, T](label: String, getter: M => T) extends LabelProvider with DataGetter[M, T]:
+class ModelProp[M, T](label: String, getter: M => T)
+    extends LabelProvider
+    with DataGetter[M, T]:
   def getLabel: String = label
   def getFrom(m: M): T = getter(m)
 
 object InitValue:
-  def apply[M, I, T](getter: DataGetter[M, T], conv: T => I, defaultValue: I): InitValue[M, I] =
+  def apply[M, I, T](
+      getter: DataGetter[M, T],
+      conv: T => I,
+      defaultValue: I
+  ): InitValue[M, I] =
     new InitValue[M, I]:
       def getInitValue(modelOpt: Option[M]): I =
         modelOpt.fold(defaultValue)(m => conv(getter.getFrom(m)))
@@ -94,25 +100,46 @@ class ModelPropRep[M, T](
     prop: ModelProp[M, T],
     stringify: T => String = (t: T) => t.toString,
     defaultValue: String = ""
-) extends RepProvider with LabelProvider with RepToSpan:
-  def getRep: String = modelOpt.fold(defaultValue)(m => stringify(prop.getFrom(m)))
+) extends RepProvider
+    with LabelProvider
+    with RepToSpan:
+  def getRep: String =
+    modelOpt.fold(defaultValue)(m => stringify(prop.getFrom(m)))
   def getLabel: String = prop.getLabel
 
 class ModelDatePropRep[M](
-  modelOpt: Option[M],
-  prop: ModelProp[M, LocalDate],
-  stringify: LocalDate => String = (t: LocalDate) => KanjiDate.dateToKanji(t),
-  defaultValue: String = ""
+    modelOpt: Option[M],
+    prop: ModelProp[M, LocalDate],
+    stringify: LocalDate => String = (t: LocalDate) => KanjiDate.dateToKanji(t),
+    defaultValue: String = ""
 ) extends ModelPropRep[M, LocalDate](
-  modelOpt, prop, stringify, defaultValue
-)
+      modelOpt,
+      prop,
+      stringify,
+      defaultValue
+    )
+
+class ModelValidUptoPropRep[M](
+    modelOpt: Option[M],
+    prop: ModelProp[M, ValidUpto],
+    stringify: ValidUpto => String = (t: ValidUpto) =>
+      t.value.fold("（期限なし）")(d => KanjiDate.dateToKanji(d)),
+    defaultValue: String = ""
+) extends ModelPropRep[M, ValidUpto](
+      modelOpt,
+      prop,
+      stringify,
+      defaultValue
+    )
 
 trait RepToSpan extends ElementProvider:
   this: RepProvider =>
-  
+
   def getElement: HTMLElement = span(innerText := getRep)
 
-case class LabelElement(label: String, element: HTMLElement) extends LabelProvider with ElementProvider:
+case class LabelElement(label: String, element: HTMLElement)
+    extends LabelProvider
+    with ElementProvider:
   def getLabel: String = label
   def getElement: HTMLElement = element
 
