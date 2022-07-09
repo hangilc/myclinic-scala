@@ -14,6 +14,7 @@ import cats.data.Validated.Invalid
 import dev.fujiwara.kanjidate.DateUtil
 
 object KoukikoureiProps:
+  object koukikoureiIdProp extends ModelProp[Koukikourei, Int]("koukikourei-id", _.koukikoureiId)
   object hokenshaBangouProp extends ModelProp[Koukikourei, String]("保険者番号", _.hokenshaBangou)
   object hihokenshaBangouProp extends ModelProp[Koukikourei, String]("被保険者番号", _.hihokenshaBangou)
   object futanWariProp extends ModelProp[Koukikourei, Int]("負担割", _.futanWari)
@@ -104,38 +105,25 @@ class KoukikoureiInputs(modelOpt: Option[Koukikourei]):
       )
       .asEither
 
-class KoukikoureiReps(modelOpt: Option[Koukikourei]):
+object KoukikoureiRepFactory:
   import KoukikoureiProps.*
 
-  object hokenshaBangouRep extends LabelProvider with RepProvider with RepToSpan:
-    val prop = hokenshaBangouProp
-    val rep = ModelPropRep(modelOpt, hokenshaBangouProp)
-    def getLabel = prop.getLabel
-    def getRep = rep.getRep
+  class KoukikoureiIdRep(modelOpt: Option[Koukikourei]) extends ModelPropRep(modelOpt, koukikoureiIdProp)
+  class HokenshaBangouRep(modelOpt: Option[Koukikourei]) extends ModelPropRep(modelOpt, hokenshaBangouProp)
+  class HihokenshaBangouRep(modelOpt: Option[Koukikourei]) extends ModelPropRep(modelOpt, hihokenshaBangouProp)
+  class FutanWariRep(modelOpt: Option[Koukikourei]) extends ModelPropRep(modelOpt, futanWariProp)
+  class ValidFromRep(modelOpt: Option[Koukikourei]) extends ModelPropRep(modelOpt, validFromProp)
+  class ValidUptoRep(modelOpt: Option[Koukikourei]) extends ModelPropRep(modelOpt, validUptoProp)
 
-  object hihokenshaBangouRep extends LabelProvider with RepProvider with RepToSpan:
-    val prop = hihokenshaBangouProp
-    val rep = ModelPropRep(modelOpt, hihokenshaBangouProp)
-    def getLabel = prop.getLabel
-    def getRep = rep.getRep
+class KoukikoureiReps(modelOpt: Option[Koukikourei]):
+  import KoukikoureiRepFactory.*
 
-  object futanWariRep extends LabelProvider with RepProvider with RepToSpan:
-    val prop = futanWariProp
-    val rep = ModelPropRep(modelOpt, futanWariProp)
-    def getLabel = prop.getLabel
-    def getRep = rep.getRep
-
-  object validFromRep extends LabelProvider with RepProvider with RepToSpan:
-    val prop = validFromProp
-    val rep = ModelPropRep(modelOpt, validFromProp)
-    def getLabel = prop.getLabel
-    def getRep = rep.getRep
-
-  object validUptoRep extends LabelProvider with RepProvider with RepToSpan:
-    val prop = validUptoProp
-    val rep = ModelPropRep(modelOpt, validUptoProp)
-    def getLabel = prop.getLabel
-    def getRep = rep.getRep
+  val koukikoureiIdRep = new KoukikoureiIdRep(modelOpt)
+  val hokenshaBangouRep = new HokenshaBangouRep(modelOpt)
+  val hihokenshaBangouRep = new HihokenshaBangouRep(modelOpt)
+  val futanWariRep = new FutanWariRep(modelOpt)
+  val validFromRep = new ValidFromRep(modelOpt)
+  val validUptoRep = new ValidUptoRep(modelOpt)
 
   val dispReps = (
     hokenshaBangouRep,

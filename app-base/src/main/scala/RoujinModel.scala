@@ -126,38 +126,24 @@ class RoujinInputs(modelOpt: Option[Roujin]):
       )
       .asEither
 
-class RoujinReps(modelOpt: Option[Roujin]):
+object RoujinRepFactory:
   import RoujinProps.*
 
-  object shichousonRep extends LabelProvider with RepProvider with RepToSpan:
-    val prop = shichousonProp
-    val rep = ModelPropRep(modelOpt, shichousonProp)
-    def getLabel = prop.getLabel
-    def getRep = rep.getRep
+  class ShichousonRep(modelOpt: Option[Roujin]) extends ModelPropRep(modelOpt, shichousonProp)
+  class JukyuushaRep(modelOpt: Option[Roujin]) extends ModelPropRep(modelOpt, jukyuushaProp)
+  class FutanWariRep(modelOpt: Option[Roujin]) extends ModelPropRep(modelOpt, futanWariProp)
+  class ValidFromRep(modelOpt: Option[Roujin]) extends ModelPropRep(modelOpt, validFromProp)
+  class ValidUptoRep(modelOpt: Option[Roujin]) extends ModelPropRep(modelOpt, validUptoProp)
 
-  object jukyuushaRep extends LabelProvider with RepProvider with RepToSpan:
-    val prop = jukyuushaProp
-    val rep = ModelPropRep(modelOpt, jukyuushaProp)
-    def getLabel = prop.getLabel
-    def getRep = rep.getRep
 
-  object futanWariRep extends LabelProvider with RepProvider with RepToSpan:
-    val prop = futanWariProp
-    val rep = ModelPropRep(modelOpt, futanWariProp)
-    def getLabel = prop.getLabel
-    def getRep = rep.getRep
+class RoujinReps(modelOpt: Option[Roujin]):
+  import RoujinRepFactory.*
 
-  object validFromRep extends LabelProvider with RepProvider with RepToSpan:
-    val prop = validFromProp
-    val rep = ModelPropRep(modelOpt, validFromProp)
-    def getLabel = prop.getLabel
-    def getRep = rep.getRep
-
-  object validUptoRep extends LabelProvider with RepProvider with RepToSpan:
-    val prop = validUptoProp
-    val rep = ModelPropRep(modelOpt, validUptoProp)
-    def getLabel = prop.getLabel
-    def getRep = rep.getRep
+  val shichousonRep = new  ShichousonRep(modelOpt)
+  val jukyuushaRep = new  JukyuushaRep(modelOpt)
+  val futanWariRep = new  FutanWariRep(modelOpt)
+  val validFromRep = new  ValidFromRep(modelOpt)
+  val validUptoRep = new  ValidUptoRep(modelOpt)
 
   val dispReps = (
     shichousonRep,

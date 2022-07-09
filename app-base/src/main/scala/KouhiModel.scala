@@ -103,32 +103,22 @@ class KouhiInputs(modelOpt: Option[Kouhi]):
       )
       .asEither
 
-class KouhiReps(modelOpt: Option[Kouhi]):
+object KouhiRepFactory:
   import KouhiProps.*
 
-  object futanshaRep extends LabelProvider with RepProvider with RepToSpan:
-    val prop = futanshaProp
-    val rep = ModelPropRep(modelOpt, futanshaProp)
-    def getLabel = prop.getLabel
-    def getRep = rep.getRep
+  class FutanshaRep(modelOpt: Option[Kouhi]) extends ModelPropRep(modelOpt, futanshaProp)
+  class JukyuushaRep(modelOpt: Option[Kouhi]) extends ModelPropRep(modelOpt, jukyuushaProp)
+  class ValidFromRep(modelOpt: Option[Kouhi]) extends ModelPropRep(modelOpt, validFromProp)
+  class ValidUptoRep(modelOpt: Option[Kouhi]) extends ModelPropRep(modelOpt, validUptoProp)
 
-  object jukyuushaRep extends LabelProvider with RepProvider with RepToSpan:
-    val prop = jukyuushaProp
-    val rep = ModelPropRep(modelOpt, jukyuushaProp)
-    def getLabel = prop.getLabel
-    def getRep = rep.getRep
 
-  object validFromRep extends LabelProvider with RepProvider with RepToSpan:
-    val prop = validFromProp
-    val rep = ModelPropRep(modelOpt, validFromProp)
-    def getLabel = prop.getLabel
-    def getRep = rep.getRep
+class KouhiReps(modelOpt: Option[Kouhi]):
+  import KouhiRepFactory.*
 
-  object validUptoRep extends LabelProvider with RepProvider with RepToSpan:
-    val prop = validUptoProp
-    val rep = ModelPropRep(modelOpt, validUptoProp)
-    def getLabel = prop.getLabel
-    def getRep = rep.getRep
+  val futanshaRep = new FutanshaRep(modelOpt)
+  val jukyuushaRep = new JukyuushaRep(modelOpt)
+  val validFromRep = new ValidFromRep(modelOpt)
+  val validUptoRep = new ValidUptoRep(modelOpt)
 
   val dispReps = (
     futanshaRep,

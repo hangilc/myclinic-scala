@@ -91,19 +91,20 @@ class IntInput(initValue: Int)
 
 class ModelPropRep[M, T](
     modelOpt: Option[M],
-    getter: DataGetter[M, T],
+    prop: ModelProp[M, T],
     stringify: T => String = (t: T) => t.toString,
     defaultValue: String = ""
-) extends RepProvider:
-  def getRep: String = modelOpt.fold(defaultValue)(m => stringify(getter.getFrom(m)))
+) extends RepProvider with LabelProvider with RepToSpan:
+  def getRep: String = modelOpt.fold(defaultValue)(m => stringify(prop.getFrom(m)))
+  def getLabel: String = prop.getLabel
 
 class ModelDatePropRep[M](
   modelOpt: Option[M],
-  getter: DataGetter[M, LocalDate],
+  prop: ModelProp[M, LocalDate],
   stringify: LocalDate => String = (t: LocalDate) => KanjiDate.dateToKanji(t),
   defaultValue: String = ""
 ) extends ModelPropRep[M, LocalDate](
-  modelOpt, getter, stringify, defaultValue
+  modelOpt, prop, stringify, defaultValue
 )
 
 trait RepToSpan extends ElementProvider:

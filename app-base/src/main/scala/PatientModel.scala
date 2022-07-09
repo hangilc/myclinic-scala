@@ -175,60 +175,15 @@ class PatientInputs(modelOpt: Option[Patient]):
 object PatientRepFactory:
   import PatientProps.*
 
-  class PatientIdRep(modelOpt: Option[Patient]) extends LabelProvider with RepProvider with RepToSpan:
-    val prop = patientIdProp
-    val rep = ModelPropRep(modelOpt, patientIdProp)
-    def getLabel = prop.getLabel
-    def getRep = rep.getRep
-
-  class LastNameRep(modelOpt: Option[Patient]) extends LabelProvider with RepProvider with RepToSpan:
-    val prop = lastNameProp
-    val rep = ModelPropRep(modelOpt, lastNameProp)
-    def getLabel = prop.getLabel
-    def getRep = rep.getRep
-
-  class FirstNameRep(modelOpt: Option[Patient]) extends LabelProvider with RepProvider with RepToSpan:
-    val prop = firstNameProp
-    val rep = ModelPropRep(modelOpt, firstNameProp)
-    def getLabel = prop.getLabel
-    def getRep = rep.getRep
-
-  class LastNameYomiRep(modelOpt: Option[Patient]) extends LabelProvider with RepProvider with RepToSpan:
-    val prop = lastNameYomiProp
-    val rep = ModelPropRep(modelOpt, lastNameYomiProp)
-    def getLabel = prop.getLabel
-    def getRep = rep.getRep
-
-  class FirstNameYomiRep(modelOpt: Option[Patient]) extends LabelProvider with RepProvider with RepToSpan:
-    val prop = firstNameYomiProp
-    val rep = ModelPropRep(modelOpt, firstNameYomiProp)
-    def getLabel = prop.getLabel
-    def getRep = rep.getRep
-
-  class SexRep(modelOpt: Option[Patient]) extends LabelProvider with RepProvider with RepToSpan:
-    val prop = sexProp
-    val rep = ModelPropRep(modelOpt, sexProp, _.rep + "性")
-    def getLabel = prop.getLabel
-    def getRep = rep.getRep
-
-  class BirthdayRep(modelOpt: Option[Patient]) extends LabelProvider with RepProvider with RepToSpan:
-    val prop = birthdayProp
-    val rep = ModelDatePropRep(modelOpt, birthdayProp)
-    def getLabel = prop.getLabel
-    def getRep = rep.getRep
-
-  class AddressRep(modelOpt: Option[Patient]) extends LabelProvider with RepProvider with RepToSpan:
-    val prop = addressProp
-    val rep = ModelPropRep(modelOpt, addressProp)
-    def getLabel = prop.getLabel
-    def getRep = rep.getRep
-
-  class PhoneRep(modelOpt: Option[Patient]) extends LabelProvider with RepProvider with RepToSpan:
-    val prop = phoneProp
-    val rep = ModelPropRep(modelOpt, phoneProp)
-    def getLabel = prop.getLabel
-    def getRep = rep.getRep
-
+  class PatientIdRep(modelOpt: Option[Patient]) extends ModelPropRep(modelOpt, patientIdProp)
+  class LastNameRep(modelOpt: Option[Patient]) extends ModelPropRep(modelOpt, lastNameProp)
+  class FirstNameRep(modelOpt: Option[Patient]) extends ModelPropRep(modelOpt, firstNameProp)
+  class LastNameYomiRep(modelOpt: Option[Patient]) extends ModelPropRep(modelOpt, lastNameYomiProp)
+  class FirstNameYomiRep(modelOpt: Option[Patient]) extends ModelPropRep(modelOpt, firstNameYomiProp)
+  class SexRep(modelOpt: Option[Patient]) extends ModelPropRep(modelOpt, sexProp)
+  class BirthdayRep(modelOpt: Option[Patient]) extends ModelPropRep(modelOpt, birthdayProp)
+  class AddressRep(modelOpt: Option[Patient]) extends ModelPropRep(modelOpt, addressProp)
+  class PhoneRep(modelOpt: Option[Patient]) extends ModelPropRep(modelOpt, phoneProp)
 
 class PatientReps(modelOpt: Option[Patient]):
   import PatientProps.*

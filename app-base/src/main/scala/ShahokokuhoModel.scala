@@ -200,66 +200,30 @@ class ShahokokuhoInputs(modelOpt: Option[Shahokokuho]):
       )
       .asEither
 
-class ShahokokuhoReps(modelOpt: Option[Shahokokuho]):
+object ShahokokuhoRepFactory:
   import ShahokokuhoProps.*
 
-  object hokenshaBangouRep
-      extends LabelProvider
-      with RepProvider
-      with RepToSpan:
-    val prop = hokenshaBangouProp
-    val rep = ModelPropRep(modelOpt, hokenshaBangouProp)
-    def getLabel = prop.getLabel
-    def getRep = rep.getRep
+  class HokenshaBangouRep(modelOpt: Option[Shahokokuho]) extends ModelPropRep(modelOpt, hokenshaBangouProp)
+  class HihokenshaKigouRep(modelOpt: Option[Shahokokuho]) extends ModelPropRep(modelOpt, hihokenshaKigouProp)
+  class HihokenshaBangouRep(modelOpt: Option[Shahokokuho]) extends ModelPropRep(modelOpt, hihokenshaBangouProp)
+  class EdabanRep(modelOpt: Option[Shahokokuho]) extends ModelPropRep(modelOpt, edabanProp)
+  class HonninRep(modelOpt: Option[Shahokokuho]) extends ModelPropRep(modelOpt, honninProp)
+  class KoureiRep(modelOpt: Option[Shahokokuho]) extends ModelPropRep(modelOpt, koureiProp)
+  class ValidFromRep(modelOpt: Option[Shahokokuho]) extends ModelPropRep(modelOpt, validFromProp)
+  class ValidUptoRep(modelOpt: Option[Shahokokuho]) extends ModelPropRep(modelOpt, validUptoProp)
 
-  object hihokenshaKigouRep
-      extends LabelProvider
-      with RepProvider
-      with RepToSpan:
-    val prop = hihokenshaKigouProp
-    val rep = ModelPropRep(modelOpt, hihokenshaKigouProp)
-    def getLabel = prop.getLabel
-    def getRep = rep.getRep
+class ShahokokuhoReps(modelOpt: Option[Shahokokuho]):
+  import ShahokokuhoRepFactory.*
 
-  object hihokenshaBangouRep
-      extends LabelProvider
-      with RepProvider
-      with RepToSpan:
-    val prop = hihokenshaBangouProp
-    val rep = ModelPropRep(modelOpt, hihokenshaBangouProp)
-    def getLabel = prop.getLabel
-    def getRep = rep.getRep
-
-  object edabanRep extends LabelProvider with RepProvider with RepToSpan:
-    val prop = edabanProp
-    val rep = ModelPropRep(modelOpt, edabanProp)
-    def getLabel = prop.getLabel
-    def getRep = rep.getRep
-
-  object honninRep extends LabelProvider with RepProvider with RepToSpan:
-    val prop = honninProp
-    val rep = ModelPropRep(modelOpt, honninProp)
-    def getLabel = prop.getLabel
-    def getRep = rep.getRep
-
-  object validFromRep extends LabelProvider with RepProvider with RepToSpan:
-    val prop = validFromProp
-    val rep = ModelPropRep(modelOpt, validFromProp)
-    def getLabel = prop.getLabel
-    def getRep = rep.getRep
-
-  object validUptoRep extends LabelProvider with RepProvider with RepToSpan:
-    val prop = validUptoProp
-    val rep = ModelPropRep(modelOpt, validUptoProp)
-    def getLabel = prop.getLabel
-    def getRep = rep.getRep
-
-  object koureiRep extends LabelProvider with RepProvider with RepToSpan:
-    val prop = koureiProp
-    val rep = ModelPropRep(modelOpt, koureiProp)
-    def getLabel = prop.getLabel
-    def getRep = rep.getRep
-
+  val hokenshaBangouRep = new HokenshaBangouRep(modelOpt)
+  val hihokenshaKigouRep = new HihokenshaKigouRep(modelOpt)
+  val hihokenshaBangouRep = new HihokenshaBangouRep(modelOpt)
+  val edabanRep = new EdabanRep(modelOpt)
+  val honninRep = new HonninRep(modelOpt)
+  val validFromRep = new ValidFromRep(modelOpt)
+  val validUptoRep = new ValidUptoRep(modelOpt)
+  val koureiRep = new KoureiRep(modelOpt)
+  
   val dispReps = (
     hokenshaBangouRep,
     LabelElement(
