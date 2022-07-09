@@ -42,8 +42,21 @@ case class PatientSearchResultDialog(patients: List[Patient]):
     yield List.empty[Hoken] ++ shahokokuho ++ koukikourei ++ roujin ++ kouhi
 
   private def start(patient: Patient): Unit =
-    for hoken <- listHoken(patient.patientId)
-    yield run(Transition.Start(disp, patient hoken))
+    ???
+
+  class Cache(val patient: Patient):
+    private val shahokokuhoCache = mutable.Map[Int, Shahokokuho]()
+    private val koukikoureiCache = mutable.Map[Int, Koukikourei]()
+    private val roujinCache = mutable.Map[Int, Roujin]()
+    private val kouhiCache = mutable.Map[Int, Kouhi]()
+    def init(hokenList: List[Hoken]): Unit =
+      hokenList.foreach {
+        case s: Shahokokuho => shahokokuhoCache(s.patientId) = s
+        case s: Koukikourei => ???
+        case s: Roujin => ???
+        case s: Kouhi => ???
+      }
+
 
   type DlogFun = (Patient, List[Hoken]) => Transition
 
