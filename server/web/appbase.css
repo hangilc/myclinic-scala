@@ -68,3 +68,17 @@
   margin-top: 0;
   margin-bottom: 0;
 }
+
+/* koukikourei form *************************************/
+
+.koukikourei-form .hokensha-input,
+.koukikourei-form .hihokensha-input {
+  width: 6rem;
+}
+
+/* kouhi form *******************************************/
+
+.kouhi-form .futansha-input,
+.kouhi-form .jukyuusha-input {
+  width: 6rem;
+}

@@ -36,7 +36,7 @@ class KouhiInputs(modelOpt: Option[Kouhi]):
     val init = InitValue(futanshaProp, _.toString, "")
     val input = new StringInput(init.getInitValue(modelOpt))
     def getLabel: String = futanshaProp.getLabel
-    def getElement: HTMLElement = input.getElement
+    def getElement: HTMLElement = input.getElement(cls := "futansha-input")
     def validate() = FutanshaValidator.validateInput(input.getValue)
 
   object jukyuushaInput
@@ -46,7 +46,7 @@ class KouhiInputs(modelOpt: Option[Kouhi]):
     val init = InitValue(jukyuushaProp, _.toString, "")
     val input = new StringInput(init.getInitValue(modelOpt))
     def getLabel: String = jukyuushaProp.getLabel
-    def getElement: HTMLElement = input.getElement
+    def getElement: HTMLElement = input.getElement(cls := "jukyuusha-input")
     def validate() = JukyuushaValidator.validateInput(input.getValue)
 
   object validFromInput
@@ -60,25 +60,18 @@ class KouhiInputs(modelOpt: Option[Kouhi]):
     )
     val input = new DateInput(init.getInitValue(modelOpt))
     def getLabel: String = validFromProp.getLabel
-    def getElement: HTMLElement = input.getElement
+    def getElement: HTMLElement = input.getElement(cls := "valid-from-input")
     def validate() = ValidFromValidator.validateOption(input.getValue)
 
   object validUptoInput
       extends LabelProvider
       with ElementProvider
       with DataValidator[ValidUptoError.type, ValidUpto]:
-    val init = InitValue(validUptoProp, identity, validUptoSuggest)
+    val init = InitValue(validUptoProp, identity, ValidUpto(None))
     val input = new ValidUptoInput(init.getInitValue(modelOpt))
     def getLabel: String = validUptoProp.getLabel
-    def getElement: HTMLElement = input.getElement
+    def getElement: HTMLElement = input.getElement(cls := "valid-upto-input")
     def validate() = ValidUptoValidator.validate(input.getValue)
-
-  private val validUptoSuggest: ValidUpto =
-    val anchor = validFromInput.validate() match {
-      case Valid(d)   => d
-      case Invalid(_) => LocalDate.now()
-    }
-    ValidUpto(Some(DateUtil.nextDateOf(7, 31, anchor)))
 
   val inputs = (
     futanshaInput,
@@ -88,7 +81,7 @@ class KouhiInputs(modelOpt: Option[Kouhi]):
   )
 
   def formPanel: HTMLElement =
-    ModelInputUtil.elementPanel(inputs)
+    ModelInputUtil.elementPanel(inputs)(cls := "kouhi-form")
 
   def validateForEnter(patientId: Int): Either[String, Kouhi] =
     val rs = ModelInputUtil.resultsOf(inputs)
