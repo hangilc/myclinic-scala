@@ -78,7 +78,9 @@ class ShahokokuhoInputs(modelOpt: Option[Shahokokuho]):
   object validFromInput
       extends LabelProvider
       with ElementProvider
-      with DataValidator[ValidFromError.type, LocalDate]:
+      with DataValidator[ValidFromError.type, LocalDate]
+      with ValueProvider[Option[LocalDate]]
+      with OnChangePublisher[Option[LocalDate]]:
     val init = InitValue[Shahokokuho, Option[LocalDate], LocalDate](
       validFromProp,
       Some(_),
@@ -88,6 +90,9 @@ class ShahokokuhoInputs(modelOpt: Option[Shahokokuho]):
     def getLabel: String = validFromProp.getLabel
     def getElement: HTMLElement = input.getElement(cls := "valid-from-input")
     def validate() = ValidFromValidator.validateOption(input.getValue)
+    def getValue: Option[LocalDate] = input.getValue
+    def onChange(handler: Option[LocalDate] => Unit): Unit =
+      input.dateInput.onChange(handler)
 
   object validUptoInput
       extends LabelProvider
@@ -95,7 +100,9 @@ class ShahokokuhoInputs(modelOpt: Option[Shahokokuho]):
       with DataValidator[ValidUptoError.type, ValidUpto]
       with ValueProvider[ValidUpto]
       with OnChangePublisher[ValidUpto]:
-    val init = InitValue(validUptoProp, identity, validUptoSuggest)
+    val init = InitValue(validUptoProp, identity, ValidUpto(None))
+    import dev.fujiwara.domq.dateinput.DateInput.Suggest 
+    given Suggest = Suggest(validUptoSuggest)
     val input = new ValidUptoInput(init.getInitValue(modelOpt))
     def getLabel: String = validUptoProp.getLabel
     def getElement: HTMLElement = input.getElement(cls := "valid-upto-input")
@@ -111,7 +118,6 @@ class ShahokokuhoInputs(modelOpt: Option[Shahokokuho]):
     val init = InitValue(koureiProp, identity, 0)
     val input = new RadioInput(init.getInitValue(modelOpt), koureiData):
       override def layout: RadioGroup.Layout[Int] =
-        println("enter-layout")
         RadioGroup.Layout[Int](g => 
           div(displayBlock,
             div(g.getRadioLabel(0).ele),
@@ -154,10 +160,10 @@ class ShahokokuhoInputs(modelOpt: Option[Shahokokuho]):
     edabanInput
   )
 
-  private def validUptoSuggest: ValidUpto =
-    validFromInput.validate() match {
-      case Valid(d)   => ValidUpto(Some(d.plusYears(1).minusDays(1)))
-      case Invalid(_) => ValidUpto(None)
+  private def validUptoSuggest(): Option[LocalDate] =
+    validFromInput.getValue match {
+      case Some(d)   => Some(d.plusYears(1).minusDays(1))
+      case None => Some(LocalDate.now())
     }
 
   val formInputs = (

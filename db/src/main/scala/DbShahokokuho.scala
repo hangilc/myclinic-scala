@@ -23,6 +23,9 @@ trait DbShahokokuho extends Mysql:
         .map(_.headOption)
     )
 
+  def getShahokokuho(shahokokuhoId: Int): IO[Shahokokuho] =
+    mysql(DbShahokokuhoPrim.getShahokokuho(shahokokuhoId).unique)
+
   def listAvailableShahokokuho(
       patientId: Int,
       at: LocalDate

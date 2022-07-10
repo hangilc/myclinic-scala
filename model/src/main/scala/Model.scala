@@ -379,6 +379,49 @@ trait PatientIdProvider[T]:
 
 type Hoken = Shahokokuho | Koukikourei | Roujin | Kouhi
 
+object Hoken:
+  enum HokenKind:
+    case ShahokokuhoKind, KoukikoureiKind, RoujinKind, KouhiKind
+
+  extension (h: Hoken)
+    def isShahokokuho: Boolean = h.isInstanceOf[Shahokokuho]
+    def isKoukikourei: Boolean = h.isInstanceOf[Koukikourei]
+    def isRoujin: Boolean = h.isInstanceOf[Roujin]
+    def isKouhi: Boolean = h.isInstanceOf[Kouhi]
+
+    def asShahokokuho: Shahokokuho = h.asInstanceOf[Shahokokuho]
+    def asKoukikourei: Koukikourei = h.asInstanceOf[Koukikourei]
+    def asRoujin: Roujin = h.asInstanceOf[Roujin]
+    def asKouhi: Kouhi = h.asInstanceOf[Kouhi]
+
+    def tryCastAsShahokokuho: Option[Shahokokuho] = Option.when(h.isShahokokuho)(h.asShahokokuho)
+    def tryCastAsKoukikourei: Option[Koukikourei] = Option.when(h.isKoukikourei)(h.asKoukikourei)
+    def tryCastAsRoujin: Option[Roujin] = Option.when(h.isRoujin)(h.asRoujin)
+    def tryCastAsKouhi: Option[Kouhi] = Option.when(h.isKouhi)(h.asKouhi)
+
+  object HokenKind:
+    def apply(hoken: Hoken): HokenKind =
+      hoken match {
+        case _: Shahokokuho => ShahokokuhoKind
+        case _: Koukikourei => KoukikoureiKind
+        case _: Roujin => RoujinKind
+        case _: Kouhi => KouhiKind
+      }
+
+  def idOf(hoken: Hoken): Int =
+      hoken match {
+        case h: Shahokokuho => h.shahokokuhoId
+        case h: Koukikourei => h.koukikoureiId
+        case h: Roujin => h.roujinId
+        case h: Kouhi => h.kouhiId
+      }
+
+  case class HokenId(kind: HokenKind, id: Int)
+
+  object HokenId:
+    def apply(hoken: Hoken): HokenId =
+      HokenId(HokenKind(hoken), idOf(hoken))
+
 case class Shahokokuho(
     shahokokuhoId: Int,
     patientId: Int,

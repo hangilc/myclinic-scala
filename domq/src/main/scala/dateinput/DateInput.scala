@@ -97,7 +97,8 @@ object DateInputCommon:
   def openCalendar(
       init: Option[LocalDate],
       icon: HTMLElement,
-      onEnter: LocalDate => Unit
+      onEnter: LocalDate => Unit,
+      suggest: () => Option[LocalDate] = () => None
   )(using DateInput.Suggest): Unit =
     val picker = DatePicker(init)
     picker.onDateSelected(onEnter)

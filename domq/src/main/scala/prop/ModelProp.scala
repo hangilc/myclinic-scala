@@ -54,6 +54,16 @@ object InitValue:
       def getInitValue(modelOpt: Option[M]): I =
         modelOpt.fold(defaultValue)(m => conv(getter.getFrom(m)))
 
+object InitValueDynamic:
+  def apply[M, I, T](
+      getter: DataGetter[M, T],
+      conv: T => I,
+      defaultValue: () => I
+  ): InitValue[M, I] =
+    new InitValue[M, I]:
+      def getInitValue(modelOpt: Option[M]): I =
+        modelOpt.fold(defaultValue())(m => conv(getter.getFrom(m)))
+
 class TextInput[T](initValue: T, toInputValue: T => String)
     extends ElementProvider
     with ValueProvider[String]:
@@ -75,14 +85,18 @@ class RadioInput[T](initValue: T, data: List[(String, T)])
   def getElement: HTMLElement = radioGroup.ele
   def getValue: T = radioGroup.selected
 
-class DateInput(initValue: Option[LocalDate])
+class DateInput(initValue: Option[LocalDate])(
+  using dev.fujiwara.domq.dateinput.DateInput.Suggest
+)
     extends ElementProvider
     with ValueProvider[Option[LocalDate]]:
   val dateInput = DateOptionInput(initValue)
   def getElement: HTMLElement = dateInput.ele
   def getValue: Option[LocalDate] = dateInput.value
 
-class ValidUptoInput(initValue: ValidUpto)
+class ValidUptoInput(initValue: ValidUpto)(
+  using dev.fujiwara.domq.dateinput.DateInput.Suggest
+)
     extends ElementProvider
     with ValueProvider[ValidUpto]
     with OnChangePublisher[ValidUpto]:
