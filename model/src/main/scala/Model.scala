@@ -399,6 +399,14 @@ object Hoken:
     def tryCastAsRoujin: Option[Roujin] = Option.when(h.isRoujin)(h.asRoujin)
     def tryCastAsKouhi: Option[Kouhi] = Option.when(h.isKouhi)(h.asKouhi)
 
+    def isValidAt(d: LocalDate): Boolean =
+      h match {
+        case h: Shahokokuho => h.isValidAt(d)
+        case h: Koukikourei => h.isValidAt(d)
+        case h: Roujin => h.isValidAt(d)
+        case h: Kouhi => h.isValidAt(d)
+      }
+
   object HokenKind:
     def apply(hoken: Hoken): HokenKind =
       hoken match {
