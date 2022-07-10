@@ -28,3 +28,8 @@ trait DbRoujin extends Mysql:
   def updateRoujin(roujin: Roujin): IO[AppEvent] =
     mysql(DbRoujinPrim.updateRoujin(roujin))
 
+  def getRoujin(roujinId: Int): IO[Roujin] =
+    mysql(DbRoujinPrim.getRoujin(roujinId).unique)
+
+
+

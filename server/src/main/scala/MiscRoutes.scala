@@ -205,6 +205,15 @@ object MiscService extends DateTimeQueryParam with Publisher:
     case GET -> Root / "get-shahokokuho" :? intShahokokuhoId(shahokokuhoId) =>
       Ok(Db.getShahokokuho(shahokokuhoId))
 
+    case GET -> Root / "get-koukikourei" :? intKoukikoureiId(koukikoureiId) =>
+      Ok(Db.getKoukikourei(koukikoureiId))
+
+    case GET -> Root / "get-roujin" :? intRoujinId(roujinId) =>
+      Ok(Db.getRoujin(roujinId))
+
+    case GET -> Root / "get-kouhi" :? intKouhiId(kouhiId) =>
+      Ok(Db.getKouhi(kouhiId))
+
     case req @ POST -> Root / "enter-shahokokuho" =>
       Ok(
         for

@@ -86,7 +86,6 @@ case class PatientSearchResultDialog(patients: List[Patient]):
     f(
       state,
       trans =>
-        println(("trans", state, stack))
         trans match {
           case GoForward(next, state)  => run(next, state, f :: stack)
           case GoTo(next, state, sfun) => run(next, state, sfun(stack))
@@ -159,7 +158,12 @@ case class PatientSearchResultDialog(patients: List[Patient]):
           )
         ),
         "|",
-        a("新規後期高齢", onclick := (() => next(GoForward(newKoukikourei, state)))),
+        a(
+          "新規後期高齢",
+          onclick := (() =>
+            next(GoForward(newKoukikourei(new KoukikoureiInputs(None)), state))
+          )
+        ),
         "|",
         a("新規公費", onclick := (() => next(GoForward(newKouhi, state)))),
         "|",
@@ -314,23 +318,101 @@ case class PatientSearchResultDialog(patients: List[Patient]):
     )
 
   private def dispKoukikourei(
-    koukikoureiId: Int
+      koukikoureiId: Int
   )(state: State, next: Transition => Unit): Unit =
     state.getKoukikourei(koukikoureiId) match {
       case Some(k) => doDispKoukikourei(k, state, next)
-      case None => next(GoBack(state))
+      case None    => next(GoBack(state))
     }
 
   private def doDispKoukikourei(
-      koukikourei: Koukikourei, state: State, next: Transition => Unit): Unit =
-    val reps = new KoukikoureiReps(Some(koukikourei))
+      koukikourei: Koukikourei,
+      state: State,
+      next: Transition => Unit
+  ): Unit =
+    val panel: HTMLElement = new KoukikoureiReps(Some(koukikourei)).dispPanel
+    val renewButton = button
     dlog.body(
       clear,
       patientBlock(state.patient, "後期高齢"),
-      reps.dispPanel
+      panel
     )
     dlog.commands(
       clear,
+      renewButton(
+        "更新",
+        displayNone,
+        onclick := (() =>
+          koukikourei.validUpto.value.foreach(d => {
+            val inputs = new KoukikoureiInputs(
+              Some(
+                koukikourei.copy(
+                  koukikoureiId = 0,
+                  validFrom = d.plusDays(1),
+                  validUpto = ValidUpto(None)
+                )
+              )
+            )
+            next(
+              GoTo(
+                newKoukikourei(
+                  inputs,
+                  state =>
+                    GoTo(dispKoukikourei(koukikourei.koukikoureiId), state)
+                ),
+                state
+              )
+            )
+          })
+        )
+      ),
+      button(
+        "編集",
+        onclick := (() =>
+          next(GoForward(editKoukikourei(koukikourei.koukikoureiId), state))
+        )
+      ),
+      button("戻る", onclick := (() => next(GoBack(state))))
+    )
+    renewButton.show(koukikourei.validUpto.value.isDefined)
+
+  private def editKoukikourei(
+      koukikoureiId: Int
+  )(state: State, next: Transition => Unit): Unit =
+    state.getKoukikourei(koukikoureiId) match {
+      case Some(k) => doEditKoukikourei(k, state, next)
+      case None    => next(GoBack(state))
+    }
+
+  private def doEditKoukikourei(
+      koukikourei: Koukikourei,
+      state: State,
+      next: Transition => Unit
+  ): Unit =
+    val inputs = new KoukikoureiInputs(Some(koukikourei))
+    val errBox = ErrorBox()
+    dlog.body(
+      clear,
+      patientBlock(state.patient, "後期高齢編集"),
+      inputs.formPanel,
+      errBox.ele
+    )
+    dlog.commands(
+      clear,
+      button(
+        "入力",
+        onclick := (() =>
+          inputs.validateForUpdate() match {
+            case Right(formKoukikourei) =>
+              for
+                _ <- Api.updateKoukikourei(formKoukikourei)
+                updated <- Api.getKoukikourei(koukikourei.koukikoureiId)
+              yield next(GoBack(state.add(updated)))
+            case Left(msg) => errBox.show(msg)
+          }
+          ()
+        )
+      ),
       button("戻る", onclick := (() => next(GoBack(state))))
     )
 
@@ -408,8 +490,10 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       button("キャンセル", onclick := (() => next(cancel(state))))
     )
 
-  private def newKoukikourei(state: State, next: Transition => Unit): Unit =
-    val inputs = new KoukikoureiInputs(None)
+  private def newKoukikourei(
+      inputs: KoukikoureiInputs,
+      cancel: State => Transition = GoBack(_)
+  )(state: State, next: Transition => Unit): Unit =
     val errBox = ErrorBox()
     dlog.body(
       clear,
@@ -424,16 +508,14 @@ case class PatientSearchResultDialog(patients: List[Patient]):
         onclick := (() =>
           inputs.validateForEnter(state.patient.patientId) match {
             case Left(msg) => errBox.show(msg)
-            case Right(formKoukikourei) => 
-              for
-                entered <- Api.enterKoukikourei(formKoukikourei)
-              yield 
-                next(GoBack(state.add(entered)))
+            case Right(formKoukikourei) =>
+              for entered <- Api.enterKoukikourei(formKoukikourei)
+              yield next(GoBack(state.add(entered)))
           }
           ()
         )
       ),
-      button("キャンセル", onclick := (() => next(GoBack(state))))
+      button("キャンセル", onclick := (() => next(cancel(state))))
     )
   // val props = KoukikoureiInputs(None)
   // val errBox = ErrorBox()

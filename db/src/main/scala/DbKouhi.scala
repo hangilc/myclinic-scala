@@ -25,3 +25,6 @@ trait DbKouhi extends Mysql:
   def updateKouhi(kouhi: Kouhi): IO[AppEvent] =
     mysql(DbKouhiPrim.updateKouhi(kouhi))
 
+  def getKouhi(kouhiId: Int): IO[Kouhi] =
+    mysql(DbKouhiPrim.getKouhi(kouhiId).unique)
+

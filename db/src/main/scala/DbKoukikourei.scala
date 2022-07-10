@@ -28,3 +28,6 @@ trait DbKoukikourei extends Mysql:
   def updateKoukikourei(koukikourei: Koukikourei): IO[AppEvent] =
     mysql(DbKoukikoureiPrim.updateKoukikourei(koukikourei))
 
+  def getKoukikourei(koukikoureiId: Int): IO[Koukikourei] =
+    mysql(DbKoukikoureiPrim.getKoukikourei(koukikoureiId).unique)
+

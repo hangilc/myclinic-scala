@@ -206,6 +206,15 @@ object MiscApi extends ApiBase:
     def getShahokokuho(shahokokuhoId: Int): Future[Shahokokuho] =
       get("get-shahokokuho", Params("shahokokuho-id" -> shahokokuhoId))
 
+    def getKoukikourei(koukikoureiId: Int): Future[Koukikourei] =
+      get("get-koukikourei", Params("koukikourei-id" -> koukikoureiId))
+
+    def getRoujin(roujinId: Int): Future[Roujin] =
+      get("get-roujin", Params("roujin-id" -> roujinId))
+
+    def getKouhi(kouhiId: Int): Future[Kouhi] =
+      get("get-kouhi", Params("kouhi-id" -> kouhiId))
+
     def enterShahokokuho(shahokokuho: Shahokokuho): Future[Shahokokuho] =
       post("enter-shahokokuho", Params(), shahokokuho)
 
