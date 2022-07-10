@@ -11,6 +11,7 @@ import java.time.LocalDate
 import dev.myclinic.scala.util.ZenkakuUtil
 import cats.data.Validated.Valid
 import cats.data.Validated.Invalid
+import dev.fujiwara.domq.dateinput.DateOptionInput
 
 object ShahokokuhoProps:
   object shahokokuhoIdProp
@@ -39,7 +40,8 @@ class ShahokokuhoInputs(modelOpt: Option[Shahokokuho]):
     val init = InitValue(hokenshaBangouProp, _.toString, "")
     val input = new StringInput(init.getInitValue(modelOpt))
     def getLabel: String = hokenshaBangouProp.getLabel
-    def getElement: HTMLElement = input.getElement(cls := "hokensha-bangou-input")
+    def getElement: HTMLElement =
+      input.getElement(cls := "hokensha-bangou-input")
     def validate() = HokenshaBangouValidator.validateInput(input.getValue)
 
   object hihokenshaKigouInput
@@ -49,7 +51,8 @@ class ShahokokuhoInputs(modelOpt: Option[Shahokokuho]):
     val init = InitValue(hihokenshaKigouProp, identity, "")
     val input = new StringInput(init.getInitValue(modelOpt))
     def getLabel: String = hihokenshaKigouProp.getLabel
-    def getElement: HTMLElement = input.getElement(cls := "hihokensha-kigou-input")
+    def getElement: HTMLElement =
+      input.getElement(cls := "hihokensha-kigou-input")
     def validate() = HihokenshaKigouValidator.validate(input.getValue)
 
   object hihokenshaBangouInput
@@ -59,7 +62,8 @@ class ShahokokuhoInputs(modelOpt: Option[Shahokokuho]):
     val init = InitValue(hihokenshaBangouProp, identity, "")
     val input = new StringInput(init.getInitValue(modelOpt))
     def getLabel: String = hihokenshaBangouProp.getLabel
-    def getElement: HTMLElement = input.getElement(cls := "hihokensha-bangou-input")
+    def getElement: HTMLElement =
+      input.getElement(cls := "hihokensha-bangou-input")
     def validate() = HihokenshaBangouValidator.validate(input.getValue)
 
   object honninInput
@@ -101,7 +105,7 @@ class ShahokokuhoInputs(modelOpt: Option[Shahokokuho]):
       with ValueProvider[ValidUpto]
       with OnChangePublisher[ValidUpto]:
     val init = InitValue(validUptoProp, identity, ValidUpto(None))
-    import dev.fujiwara.domq.dateinput.DateInput.Suggest 
+    import dev.fujiwara.domq.dateinput.DateInput.Suggest
     given Suggest = Suggest(validUptoSuggest)
     val input = new ValidUptoInput(init.getInitValue(modelOpt))
     def getLabel: String = validUptoProp.getLabel
@@ -118,8 +122,9 @@ class ShahokokuhoInputs(modelOpt: Option[Shahokokuho]):
     val init = InitValue(koureiProp, identity, 0)
     val input = new RadioInput(init.getInitValue(modelOpt), koureiData):
       override def layout: RadioGroup.Layout[Int] =
-        RadioGroup.Layout[Int](g => 
-          div(displayBlock,
+        RadioGroup.Layout[Int](g =>
+          div(
+            displayBlock,
             div(g.getRadioLabel(0).ele),
             div(
               g.radioLabels.filter(l => l.value != 0).map(_.ele)
@@ -162,8 +167,8 @@ class ShahokokuhoInputs(modelOpt: Option[Shahokokuho]):
 
   private def validUptoSuggest(): Option[LocalDate] =
     validFromInput.getValue match {
-      case Some(d)   => Some(d.plusYears(1).minusDays(1))
-      case None => Some(LocalDate.now())
+      case Some(d) => Some(d.plusYears(1).minusDays(1))
+      case None    => Some(LocalDate.now())
     }
 
   val formInputs = (
@@ -209,21 +214,28 @@ class ShahokokuhoInputs(modelOpt: Option[Shahokokuho]):
 object ShahokokuhoRepFactory:
   import ShahokokuhoProps.*
 
-  class HokenshaBangouRep(modelOpt: Option[Shahokokuho]) extends ModelPropRep(modelOpt, hokenshaBangouProp)
-  class HihokenshaKigouRep(modelOpt: Option[Shahokokuho]) extends ModelPropRep(modelOpt, hihokenshaKigouProp)
-  class HihokenshaBangouRep(modelOpt: Option[Shahokokuho]) extends ModelPropRep(modelOpt, hihokenshaBangouProp)
-  class EdabanRep(modelOpt: Option[Shahokokuho]) extends ModelPropRep(modelOpt, edabanProp)
-  class HonninRep(modelOpt: Option[Shahokokuho]) extends ModelPropRep(modelOpt, honninProp, stringify = honninRep)
-  class KoureiRep(modelOpt: Option[Shahokokuho]) extends ModelPropRep(modelOpt, koureiProp, stringify = koureiRep)
-  class ValidFromRep(modelOpt: Option[Shahokokuho]) extends ModelDatePropRep(modelOpt, validFromProp)
-  class ValidUptoRep(modelOpt: Option[Shahokokuho]) extends ModelValidUptoPropRep(modelOpt, validUptoProp)
+  class HokenshaBangouRep(modelOpt: Option[Shahokokuho])
+      extends ModelPropRep(modelOpt, hokenshaBangouProp)
+  class HihokenshaKigouRep(modelOpt: Option[Shahokokuho])
+      extends ModelPropRep(modelOpt, hihokenshaKigouProp)
+  class HihokenshaBangouRep(modelOpt: Option[Shahokokuho])
+      extends ModelPropRep(modelOpt, hihokenshaBangouProp)
+  class EdabanRep(modelOpt: Option[Shahokokuho])
+      extends ModelPropRep(modelOpt, edabanProp)
+  class HonninRep(modelOpt: Option[Shahokokuho])
+      extends ModelPropRep(modelOpt, honninProp, stringify = honninRep)
+  class KoureiRep(modelOpt: Option[Shahokokuho])
+      extends ModelPropRep(modelOpt, koureiProp, stringify = koureiRep)
+  class ValidFromRep(modelOpt: Option[Shahokokuho])
+      extends ModelDatePropRep(modelOpt, validFromProp)
+  class ValidUptoRep(modelOpt: Option[Shahokokuho])
+      extends ModelValidUptoPropRep(modelOpt, validUptoProp)
 
   def koureiRep(i: Int): String =
     i match {
       case 0 => "高齢でない"
       case i => ZenkakuUtil.toZenkaku(s"${i}割")
     }
-    
 
   def honninRep(honnin: Int): String =
     honnin match {
@@ -242,7 +254,7 @@ class ShahokokuhoReps(modelOpt: Option[Shahokokuho]):
   val validFromRep = new ValidFromRep(modelOpt)
   val validUptoRep = new ValidUptoRep(modelOpt)
   val koureiRep = new KoureiRep(modelOpt)
-  
+
   val dispReps = (
     hokenshaBangouRep,
     LabelElement(

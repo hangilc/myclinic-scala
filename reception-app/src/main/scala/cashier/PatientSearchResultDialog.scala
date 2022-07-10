@@ -313,47 +313,26 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       button("キャンセル", onclick := (() => next(GoBack(state))))
     )
 
-  private def updateIfModified(
-      newShahokokuho: Shahokokuho,
-      oldShahokokuho: Shahokokuho
-  ): Future[Boolean] =
-    if newShahokokuho == oldShahokokuho then Future.successful(false)
-    else Api.updateShahokokuho(newShahokokuho).map(_ => true)
-
-  type RenewalShahokokuho = Shahokokuho
-
-  private def createRenewalShahokokuho(
-      oldShahokokuho: Shahokokuho
-  ): Either[String, (RenewalShahokokuho, Shahokokuho)] =
-    oldShahokokuho.validUpto.value match {
-      case None => Left("期限終了日が設定されていません。")
-      case Some(validUptoValue) =>
-        val renew: RenewalShahokokuho = oldShahokokuho.copy(
-          shahokokuhoId = 0,
-          validFrom = validUptoValue.plusDays(1),
-          validUpto = ValidUpto(None)
-        )
-        Right(renew, oldShahokokuho)
+  private def dispKoukikourei(
+    koukikoureiId: Int
+  )(state: State, next: Transition => Unit): Unit =
+    state.getKoukikourei(koukikoureiId) match {
+      case Some(k) => doDispKoukikourei(k, state, next)
+      case None => next(GoBack(state))
     }
 
-  private def dispKoukikourei(
-      koukikoureiId: Int
-  )(state: State, next: Transition => Unit): Unit =
+  private def doDispKoukikourei(
+      koukikourei: Koukikourei, state: State, next: Transition => Unit): Unit =
+    val reps = new KoukikoureiReps(Some(koukikourei))
     dlog.body(
       clear,
-      s"Disp Koukikourei ${koukikoureiId}"
+      patientBlock(state.patient, "後期高齢"),
+      reps.dispPanel
     )
     dlog.commands(
       clear,
       button("戻る", onclick := (() => next(GoBack(state))))
     )
-  //     koukikourei: Koukikourei,
-  //     patient: Patient,
-  //     onDone: Modified => Unit
-  // ): Unit =
-  //   val props = new KoukikoureiReps(Some(koukikourei))
-  //   dlog.body(clear, patientBlock(patient), props.dispPanel)
-  //   dlog.commands(clear, button("戻る", onclick := (() => onDone(false))))
 
   private def dispKouhi(
       kouhiId: Int
@@ -430,17 +409,28 @@ case class PatientSearchResultDialog(patients: List[Patient]):
     )
 
   private def newKoukikourei(state: State, next: Transition => Unit): Unit =
+    val inputs = new KoukikoureiInputs(None)
+    val errBox = ErrorBox()
     dlog.body(
       clear,
-      s"New Koukikourei"
+      patientBlock(state.patient, "後期高齢入力"),
+      inputs.formPanel,
+      errBox.ele
     )
     dlog.commands(
       clear,
       button(
         "入力",
         onclick := (() =>
-          val newState: State = state
-          next(GoBack(newState))
+          inputs.validateForEnter(state.patient.patientId) match {
+            case Left(msg) => errBox.show(msg)
+            case Right(formKoukikourei) => 
+              for
+                entered <- Api.enterKoukikourei(formKoukikourei)
+              yield 
+                next(GoBack(state.add(entered)))
+          }
+          ()
         )
       ),
       button("キャンセル", onclick := (() => next(GoBack(state))))
