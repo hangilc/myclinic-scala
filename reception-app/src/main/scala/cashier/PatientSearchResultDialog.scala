@@ -68,8 +68,8 @@ case class PatientSearchResultDialog(patients: List[Patient]):
 
   enum Transition:
     case GoForward(next: DlogFun, state: State)
-    case Replace(next: DlogFun, state: State)
     case GoBack(state: State)
+    case GoTo(next: DlogFun, state: State, stackFun: List[DlogFun] => List[DlogFun] = identity)
     case Exit
 
   import Transition.*
@@ -81,12 +81,11 @@ case class PatientSearchResultDialog(patients: List[Patient]):
         println(("trans", state, stack))
         trans match {
           case GoForward(next, state) => run(next, state, f :: stack)
-          case Replace(next, state)   => run(next, state, stack)
-          case GoBack(state) if stack.headOption.isDefined =>
-            println(("go-back", stack))
-            run(stack.head, state, stack.tail)
-          case _ =>
-            dlog.close()
+          case GoTo(next, state, sfun)   => run(next, state, sfun(stack))
+          case GoBack(state) =>
+            if stack.isEmpty then System.err.println("stack under flow")
+            else run(stack.head, state, stack.tail)
+          case Exit => dlog.close()
         }
     )
 
@@ -213,12 +212,23 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       next: Transition => Unit
   ): Unit =
     val panel = new ShahokokuhoReps(Some(shahokokuho)).dispPanel
+    val renewButton = button
     dlog.body(
       clear,
+      patientBlock(state.patient, "社保国保"),
       panel
     )
     dlog.commands(
       clear,
+      renewButton("更新", displayNone, onclick := (() =>
+        shahokokuho.validUpto.value.foreach(d => {
+          val inputs = new ShahokokuhoInputs(Some(shahokokuho.copy(
+            shahokokuhoId = 0,
+            validFrom = d.plusYears(1).plusDays(1),
+            validUpto = ValidUpto(None)
+          )))
+        })
+      )),
       button(
         "編集",
         onclick := (() =>
@@ -227,6 +237,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       ),
       button("戻る", onclick := (() => next(GoBack(state))))
     )
+    renewButton.show(shahokokuho.validUpto.value.isDefined)
 
   private def editShahokokuho(
       shahokokuhoId: Int
@@ -243,7 +254,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
   ): Unit =
     val inputs = new ShahokokuhoInputs(Some(shahokokuho))
     val errBox = ErrorBox()
-    val renewButton = button
+    // val renewButton = button
     dlog.body(
       clear,
       inputs.formPanel,
@@ -251,35 +262,35 @@ case class PatientSearchResultDialog(patients: List[Patient]):
     )
     dlog.commands(
       clear,
-      renewButton(
-        "入力して更新",
-        onclick := (() =>
-          inputs.validateForUpdate() match {
-            case Left(msg) => errBox.show(msg)
-            case Right(modifiedShahokokuho) =>
-              for
-                _ <- Api.updateShahokokuho(modifiedShahokokuho)
-                updated <- Api.getShahokokuho(shahokokuho.shahokokuhoId)
-              yield updated.validUpto.value match {
-                case Some(d) =>
-                  val tmplInputs = new ShahokokuhoInputs(
-                    Some(
-                      updated.copy(
-                        shahokokuhoId = 0,
-                        validFrom = d.plusYears(1).plusDays(1),
-                        validUpto = ValidUpto(None)
-                      )
-                    )
-                  )
-                  next(Replace(newShahokokuho(tmplInputs), state.add(updated)))
-                case None =>
-                  ShowMessage.showError("入力しましたが、有効期限が指定されていないので、更新は実行できません。")
-                  next(GoBack(state.add(updated)))
-              }
-              ()
-          }
-        )
-      ),
+    //   renewButton(
+    //     "入力して更新",
+    //     onclick := (() =>
+    //       inputs.validateForUpdate() match {
+    //         case Left(msg) => errBox.show(msg)
+    //         case Right(modifiedShahokokuho) =>
+    //           for
+    //             _ <- Api.updateShahokokuho(modifiedShahokokuho)
+    //             updated <- Api.getShahokokuho(shahokokuho.shahokokuhoId)
+    //           yield updated.validUpto.value match {
+    //             case Some(d) =>
+    //               val tmplInputs = new ShahokokuhoInputs(
+    //                 Some(
+    //                   updated.copy(
+    //                     shahokokuhoId = 0,
+    //                     validFrom = d.plusYears(1).plusDays(1),
+    //                     validUpto = ValidUpto(None)
+    //                   )
+    //                 )
+    //               )
+    //               next(GoTo(newShahokokuho(tmplInputs), state.add(updated)))
+    //             case None =>
+    //               ShowMessage.showError("入力しましたが、有効期限が指定されていないので、更新は実行できません。")
+    //               next(GoBack(state.add(updated)))
+    //           }
+    //           ()
+    //       }
+    //     )
+    //   ),
       button(
         "入力",
         onclick := (() =>
@@ -296,10 +307,13 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       ),
       button("キャンセル", onclick := (() => next(GoBack(state))))
     )
-    renewButton.show(inputs.validUptoInput.getValue.value.isDefined)
-    inputs.validUptoInput.onChange(validUpto =>
-      renewButton.show(validUpto.value.isDefined)
-    )
+    // renewButton.show(inputs.validUptoInput.getValue.value.isDefined)
+    // inputs.validUptoInput.onChange(validUpto =>
+    //   renewButton.show(validUpto.value.isDefined)
+    // )
+
+
+
   //     shahokokuho: Shahokokuho,
   //     patient: Patient,
   //     onDone: Modified => Unit
@@ -429,9 +443,9 @@ case class PatientSearchResultDialog(patients: List[Patient]):
   //   dlog.commands(clear, button("戻る", onclick := (() => onDone(false))))
 
   private def patientBlock(patient: Patient, msg: String = ""): HTMLElement =
-    val extra = if msg.isEmpty then "" else s"：${msg}"
+    val extra = if msg.isEmpty then "" else s"${msg}："
     div(
-      innerText := s"(${patient.patientId}) ${patient.lastName} ${patient.firstName}" + extra,
+      innerText := extra + s"(${patient.patientId}) ${patient.lastName} ${patient.firstName}",
       cls := "patient-block"
     )
 
@@ -463,28 +477,6 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       ),
       button("キャンセル", onclick := (() => next(GoBack(state))))
     )
-  //     patient: Patient,
-  //     template: Option[Shahokokuho] = None
-  // ): Unit =
-  //   val props = new ShahokokuhoInputs(template)
-  //   val errBox = ErrorBox()
-  //   dlog.body(clear, patientBlock(patient), props.formPanel, errBox.ele)
-  //   dlog.commands(
-  //     clear,
-  //     button(
-  //       "入力",
-  //       onclick := (() => {
-  //         props.validateForEnter(patient.patientId) match {
-  //           case Left(msg) => errBox.show(msg)
-  //           case Right(newShahokokuho) =>
-  //             for entered <- Api.enterShahokokuho(newShahokokuho)
-  //             yield invokeDisp(patient)
-  //         }
-  //         ()
-  //       })
-  //     ),
-  //     button("キャンセル", onclick := (() => { invokeDisp(patient); () }))
-  //   )
 
   private def newKoukikourei(state: State, next: Transition => Unit): Unit =
     dlog.body(

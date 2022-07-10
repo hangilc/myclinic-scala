@@ -100,7 +100,11 @@ class ValidUptoInput(initValue: ValidUpto)(
     extends ElementProvider
     with ValueProvider[ValidUpto]
     with OnChangePublisher[ValidUpto]:
-  val dateInput = DateOptionInput(initValue.value)
+  val dateInput = DateOptionInput(
+    initValue.value,
+    formatNone = () => "（期限なし）",
+    title = "有効期限の入力"
+  )
   def getElement: HTMLElement = dateInput.ele
   def getValue: ValidUpto = ValidUpto(dateInput.value)
   def onChange(handler: ValidUpto => Unit): Unit =
