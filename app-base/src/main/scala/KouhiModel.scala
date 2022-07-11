@@ -72,18 +72,19 @@ class KouhiInputs(modelOpt: Option[Kouhi]):
       extends LabelProvider
       with ElementProvider
       with DataValidator[ValidUptoError.type, ValidUpto]:
-    val init = InitValue(validUptoProp, identity, validUptoSuggest)
+    val init = InitValue(validUptoProp, identity, ValidUpto(None))
+    import dev.fujiwara.domq.dateinput.DateInput.Suggest
+    given Suggest = Suggest(() => validUptoSuggest)
     val input = new ValidUptoInput(init.getInitValue(modelOpt))
     def getLabel: String = validUptoProp.getLabel
     def getElement: HTMLElement = input.getElement(cls := "valid-upto-input")
     def validate() = ValidUptoValidator.validate(input.getValue)
 
-  private def validUptoSuggest: ValidUpto =
-    val anchor = validFromInput.validate() match {
-      case Valid(d)   => d
-      case Invalid(_) => LocalDate.now()
+  private def validUptoSuggest: Option[LocalDate] =
+    validFromInput.getValue match {
+      case Some(d) => Some(d.plusYears(1).minusDays(1))
+      case None    => None
     }
-    ValidUpto(Some(DateUtil.nextDateOf(7, 31, anchor)))
 
   val inputs = (
     futanshaInput,
@@ -120,8 +121,8 @@ object KouhiRepFactory:
 
   class FutanshaRep(modelOpt: Option[Kouhi]) extends ModelPropRep(modelOpt, futanshaProp)
   class JukyuushaRep(modelOpt: Option[Kouhi]) extends ModelPropRep(modelOpt, jukyuushaProp)
-  class ValidFromRep(modelOpt: Option[Kouhi]) extends ModelPropRep(modelOpt, validFromProp)
-  class ValidUptoRep(modelOpt: Option[Kouhi]) extends ModelPropRep(modelOpt, validUptoProp)
+  class ValidFromRep(modelOpt: Option[Kouhi]) extends ModelDatePropRep(modelOpt, validFromProp)
+  class ValidUptoRep(modelOpt: Option[Kouhi]) extends ModelValidUptoPropRep(modelOpt, validUptoProp)
 
 
 class KouhiReps(modelOpt: Option[Kouhi]):
