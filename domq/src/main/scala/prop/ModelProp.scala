@@ -161,7 +161,7 @@ case class LabelElement(label: String, element: HTMLElement)
   def getLabel: String = label
   def getElement: HTMLElement = element
 
-object ModelInputUtil:
+object ModelPropUtil:
   import ModelUtil.*
 
   type ElementPanel[T] = T match {

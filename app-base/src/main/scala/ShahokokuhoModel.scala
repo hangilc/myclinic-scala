@@ -189,10 +189,10 @@ class ShahokokuhoInputs(modelOpt: Option[Shahokokuho]):
   )
 
   def formPanel: HTMLElement =
-    ModelInputUtil.elementPanel(formInputs)(cls := "shahokokuho-form")
+    ModelPropUtil.elementPanel(formInputs)(cls := "shahokokuho-form")
 
   def validateForEnter(patientId: Int): Either[String, Shahokokuho] =
-    val rs = ModelInputUtil.resultsOf(inputs)
+    val rs = ModelPropUtil.resultsOf(inputs)
     ShahokokuhoValidator
       .validate(
         ShahokokuhoIdValidator.validateForEnter *:
@@ -201,7 +201,7 @@ class ShahokokuhoInputs(modelOpt: Option[Shahokokuho]):
       .asEither
 
   def validateForUpdate(): Either[String, Shahokokuho] =
-    val rs = ModelInputUtil.resultsOf(inputs)
+    val rs = ModelPropUtil.resultsOf(inputs)
     ShahokokuhoValidator
       .validate(
         ShahokokuhoIdValidator.validateOptionForUpdate(
@@ -272,5 +272,19 @@ class ShahokokuhoReps(modelOpt: Option[Shahokokuho]):
     koureiRep
   )
 
+  val detailReps = (
+    hokenshaBangouRep,
+    hihokenshaKigouRep,
+    hihokenshaBangouRep,
+    edabanRep,
+    honninRep,
+    validFromRep,
+    validUptoRep,
+    koureiRep
+  )
+
   val dispPanel: HTMLElement =
-    ModelInputUtil.elementPanel(dispReps)
+    ModelPropUtil.elementPanel(dispReps)
+
+  val detailPairs: List[(String, String)] =
+    ModelPropUtil.labelRep(detailReps)

@@ -117,10 +117,10 @@ class KoukikoureiInputs(modelOpt: Option[Koukikourei]):
   )
 
   def formPanel: HTMLElement =
-    ModelInputUtil.elementPanel(inputs)(cls := "koukikourei-form")
+    ModelPropUtil.elementPanel(inputs)(cls := "koukikourei-form")
 
   def validateForEnter(patientId: Int): Either[String, Koukikourei] =
-    val rs = ModelInputUtil.resultsOf(inputs)
+    val rs = ModelPropUtil.resultsOf(inputs)
     KoukikoureiValidator
       .validate(
         KoukikoureiIdValidator.validateForEnter *:
@@ -129,7 +129,7 @@ class KoukikoureiInputs(modelOpt: Option[Koukikourei]):
       .asEither
 
   def validateForUpdate(): Either[String, Koukikourei] =
-    val rs = ModelInputUtil.resultsOf(inputs)
+    val rs = ModelPropUtil.resultsOf(inputs)
     KoukikoureiValidator
       .validate(
         KoukikoureiIdValidator.validateOptionForUpdate(
@@ -177,5 +177,10 @@ class KoukikoureiReps(modelOpt: Option[Koukikourei]):
     validUptoRep
   )
 
+  val detailReps = dispReps
+
   def dispPanel: HTMLElement =
-    ModelInputUtil.elementPanel(dispReps)
+    ModelPropUtil.elementPanel(dispReps)
+
+  val detailPairs: List[(String, String)] =
+    ModelPropUtil.labelRep(detailReps)

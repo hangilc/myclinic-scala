@@ -104,10 +104,10 @@ class RoujinInputs(modelOpt: Option[Roujin]):
   )
 
   def formPanel: HTMLElement =
-    ModelInputUtil.elementPanel(inputs)
+    ModelPropUtil.elementPanel(inputs)
 
   def validatedForEnter(patientId: Int): Either[String, Roujin] =
-    val rs = ModelInputUtil.resultsOf(inputs)
+    val rs = ModelPropUtil.resultsOf(inputs)
     RoujinValidator
       .validate(
         RoujinIdValidator.validateForEnter *:
@@ -116,7 +116,7 @@ class RoujinInputs(modelOpt: Option[Roujin]):
       .asEither
 
   def validatedForUpdate(): Either[String, Roujin] =
-    val rs = ModelInputUtil.resultsOf(inputs)
+    val rs = ModelPropUtil.resultsOf(inputs)
     RoujinValidator
       .validate(
         RoujinIdValidator.validateOptionForUpdate(
@@ -153,9 +153,16 @@ class RoujinReps(modelOpt: Option[Roujin]):
     validUptoRep
   )
 
-  def dispPanel: HTMLElement =
-    ModelInputUtil.elementPanel(dispReps)
+  val detailReps = dispReps
 
+  def dispPanel: HTMLElement =
+    ModelPropUtil.elementPanel(dispReps)
+
+  val detailPairs: List[(String, String)] =
+    ModelPropUtil.labelRep(detailReps)
+
+
+    
 
 
 

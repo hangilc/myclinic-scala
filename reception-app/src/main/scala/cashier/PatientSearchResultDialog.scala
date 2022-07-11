@@ -217,10 +217,13 @@ case class PatientSearchResultDialog(patients: List[Patient]):
     }
 
   private def doHokenHistory(allHoken: List[Hoken], state: State, next: Transition => Unit): Unit =
+    val boxWrapper = div
+    val boxes = CompSortList[HokenBox](boxWrapper)
+    boxes.set(allHoken.map(HokenBox.apply))
     dlog.body(
       clear,
       patientBlock(state.patient, "保険披瀝"),
-      allHoken.toString
+      boxWrapper
     )
     dlog.commands(
       clear,

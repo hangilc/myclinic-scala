@@ -246,3 +246,12 @@
   margin: 10px 0 10px 10px;
 }
 
+/* hoken box ********************************************************************/
+
+.reception-hoken-box {
+  border: 1px solid gray;
+  border-radius: 4px;
+  margin-bottom: 4px;
+  padding: 4px;
+}
+

@@ -94,10 +94,10 @@ class KouhiInputs(modelOpt: Option[Kouhi]):
   )
 
   def formPanel: HTMLElement =
-    ModelInputUtil.elementPanel(inputs)(cls := "kouhi-form")
+    ModelPropUtil.elementPanel(inputs)(cls := "kouhi-form")
 
   def validateForEnter(patientId: Int): Either[String, Kouhi] =
-    val rs = ModelInputUtil.resultsOf(inputs)
+    val rs = ModelPropUtil.resultsOf(inputs)
     KouhiValidator
       .validate(
         KouhiIdValidator.validateForEnter *: rs
@@ -106,7 +106,7 @@ class KouhiInputs(modelOpt: Option[Kouhi]):
       .asEither
 
   def validateForUpdate(): Either[String, Kouhi] =
-    val rs = ModelInputUtil.resultsOf(inputs)
+    val rs = ModelPropUtil.resultsOf(inputs)
     KouhiValidator
       .validate(
         KouhiIdValidator.validateOptionForUpdate(
@@ -140,7 +140,12 @@ class KouhiReps(modelOpt: Option[Kouhi]):
     validUptoRep
   )
 
+  val detailReps = dispReps
+
   def dispPanel: HTMLElement =
-    ModelInputUtil.elementPanel(dispReps)
+    ModelPropUtil.elementPanel(dispReps)
+
+  val detailPairs: List[(String, String)] =
+    ModelPropUtil.labelRep(detailReps)
 
 

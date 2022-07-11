@@ -140,7 +140,7 @@ class PatientInputs(modelOpt: Option[Patient]):
     )
 
   def formPanel(tuple: Tuple): HTMLElement =
-    ModelInputUtil.elementPanel(tuple)(cls := "patient-form")
+    ModelPropUtil.elementPanel(tuple)(cls := "patient-form")
 
   def formPanel: HTMLElement =
     formPanel(formInputs)
@@ -160,7 +160,7 @@ class PatientInputs(modelOpt: Option[Patient]):
     PatientValidator
       .validate(
         PatientIdValidator.validateForEnter *:
-          ModelInputUtil.resultsOf(inputs)
+          ModelPropUtil.resultsOf(inputs)
       )
       .asEither
 
@@ -168,7 +168,7 @@ class PatientInputs(modelOpt: Option[Patient]):
     PatientValidator
       .validate(
         PatientIdValidator.validateOptionForUpdate(modelOpt.map(_.patientId)) *:
-          ModelInputUtil.resultsOf(inputs)
+          ModelPropUtil.resultsOf(inputs)
       )
       .asEither
 
@@ -224,4 +224,4 @@ class PatientReps(modelOpt: Option[Patient]):
   )
 
   def dispPanel: HTMLElement =
-    ModelInputUtil.elementPanel(disps)
+    ModelPropUtil.elementPanel(disps)
