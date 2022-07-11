@@ -589,25 +589,6 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       ),
       button("キャンセル", onclick := (() => next(cancel(state))))
     )
-  // val props = KoukikoureiInputs(None)
-  // val errBox = ErrorBox()
-  // dlog.body(clear, props.formPanel, errBox.ele)
-  // dlog.commands(
-  //   clear,
-  //   button(
-  //     "入力",
-  //     onclick := (() => {
-  //       props.validateForEnter(patient.patientId) match {
-  //         case Left(msg) => errBox.show(msg)
-  //         case Right(newKoukikourei) =>
-  //           for entered <- Api.enterKoukikourei(newKoukikourei)
-  //           yield invokeDisp(patient)
-  //       }
-  //       ()
-  //     })
-  //   ),
-  //   button("キャンセル", onclick := (() => disp(patient, hokenList)))
-  // )
 
   private def newKouhi(
       inputs: KouhiInputs,

@@ -52,7 +52,9 @@ class KouhiInputs(modelOpt: Option[Kouhi]):
   object validFromInput
       extends LabelProvider
       with ElementProvider
-      with DataValidator[ValidFromError.type, LocalDate]:
+      with DataValidator[ValidFromError.type, LocalDate]
+      with ValueProvider[Option[LocalDate]]
+      with OnChangePublisher[Option[LocalDate]]:
     val init = InitValue[Kouhi, Option[LocalDate], LocalDate](
       validFromProp,
       Some(_),
@@ -62,16 +64,26 @@ class KouhiInputs(modelOpt: Option[Kouhi]):
     def getLabel: String = validFromProp.getLabel
     def getElement: HTMLElement = input.getElement(cls := "valid-from-input")
     def validate() = ValidFromValidator.validateOption(input.getValue)
+    def getValue: Option[LocalDate] = input.getValue
+    def onChange(handler: Option[LocalDate] => Unit): Unit =
+      input.dateInput.onChange(handler)
 
   object validUptoInput
       extends LabelProvider
       with ElementProvider
       with DataValidator[ValidUptoError.type, ValidUpto]:
-    val init = InitValue(validUptoProp, identity, ValidUpto(None))
+    val init = InitValue(validUptoProp, identity, validUptoSuggest)
     val input = new ValidUptoInput(init.getInitValue(modelOpt))
     def getLabel: String = validUptoProp.getLabel
     def getElement: HTMLElement = input.getElement(cls := "valid-upto-input")
     def validate() = ValidUptoValidator.validate(input.getValue)
+
+  private def validUptoSuggest: ValidUpto =
+    val anchor = validFromInput.validate() match {
+      case Valid(d)   => d
+      case Invalid(_) => LocalDate.now()
+    }
+    ValidUpto(Some(DateUtil.nextDateOf(7, 31, anchor)))
 
   val inputs = (
     futanshaInput,
