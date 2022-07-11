@@ -165,7 +165,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
           )
         ),
         "|",
-        a("新規公費", onclick := (() => next(GoForward(newKouhi, state)))),
+        a("新規公費", onclick := (() => next(GoForward(newKouhi(new KouhiInputs(None)), state)))),
         "|",
         a("保険履歴", onclick := (() => next(GoForward(hokenHistory, state))))
       )
@@ -419,41 +419,113 @@ case class PatientSearchResultDialog(patients: List[Patient]):
   private def dispKouhi(
       kouhiId: Int
   )(state: State, next: Transition => Unit): Unit =
+    state.getKouhi(kouhiId) match {
+      case Some(k) => doDispKouhi(k, state, next)
+      case None    => next(GoBack(state))
+    }
+
+  private def doDispKouhi(
+      kouhi: Kouhi, state: State, next: Transition => Unit): Unit =
+    val panel: HTMLElement = new KouhiReps(Some(kouhi)).dispPanel
+    val renewButton = button
     dlog.body(
       clear,
-      s"Disp Kouhi ${kouhiId}"
+      patientBlock(state.patient, "公費"),
+      panel
     )
     dlog.commands(
       clear,
+      renewButton(
+        "更新",
+        displayNone,
+        onclick := (() =>
+          kouhi.validUpto.value.foreach(d => {
+            val inputs = new KouhiInputs(
+              Some(
+                kouhi.copy(
+                  kouhiId = 0,
+                  validFrom = d.plusDays(1),
+                  validUpto = ValidUpto(None)
+                )
+              )
+            )
+            next(
+              GoTo(
+                newKouhi(
+                  inputs,
+                  state =>
+                    GoTo(dispKouhi(kouhi.kouhiId), state)
+                ),
+                state
+              )
+            )
+          })
+        )
+      ),
+      button(
+        "編集",
+        onclick := (() =>
+          next(GoForward(editKouhi(kouhi.kouhiId), state))
+        )
+      ),
       button("戻る", onclick := (() => next(GoBack(state))))
     )
+    renewButton.show(kouhi.validUpto.value.isDefined)
 
-  //     kouhi: Kouhi,
-  //     patient: Patient,
-  //     onDone: Modified => Unit
-  // ): Unit =
-  //   val props = new KouhiReps(Some(kouhi))
-  //   dlog.body(clear, patientBlock(patient), props.dispPanel)
-  //   dlog.commands(clear, button("戻る", onclick := (() => onDone(false))))
+  private def editKouhi(
+      kouhiId: Int
+  )(state: State, next: Transition => Unit): Unit =
+    state.getKouhi(kouhiId) match {
+      case Some(k) => doEditKouhi(k, state, next)
+      case None    => next(GoBack(state))
+    }
+
+  private def doEditKouhi(
+      kouhi: Kouhi,
+      state: State,
+      next: Transition => Unit
+  ): Unit =
+    val inputs = new KouhiInputs(Some(kouhi))
+    val errBox = ErrorBox()
+    dlog.body(
+      clear,
+      patientBlock(state.patient, "公費"),
+      inputs.formPanel,
+      errBox.ele
+    )
+    dlog.commands(
+      clear,
+      button(
+        "入力",
+        onclick := (() =>
+          inputs.validateForUpdate() match {
+            case Right(formKouhi) =>
+              for
+                _ <- Api.updateKouhi(formKouhi)
+                updated <- Api.getKouhi(kouhi.kouhiId)
+              yield next(GoBack(state.add(updated)))
+            case Left(msg) => errBox.show(msg)
+          }
+          ()
+        )
+      ),
+      button("戻る", onclick := (() => next(GoBack(state))))
+    )
 
   private def dispRoujin(
       roujinId: Int
   )(state: State, next: Transition => Unit): Unit =
+    val roujin: Roujin = state.getRoujin(roujinId).get
+    val panel: HTMLElement = new RoujinReps(Some(roujin)).dispPanel
     dlog.body(
       clear,
-      s"Disp Roujin ${roujinId}"
+      patientBlock(state.patient, "老人保健"),
+      panel
     )
     dlog.commands(
       clear,
       button("戻る", onclick := (() => next(GoBack(state))))
     )
-  //     roujin: Roujin,
-  //     patient: Patient,
-  //     onDone: Modified => Unit
-  // ): Unit =
-  //   val props = new RoujinReps(Some(roujin))
-  //   dlog.body(clear, patientBlock(patient), props.dispPanel)
-  //   dlog.commands(clear, button("戻る", onclick := (() => onDone(false))))
 
   private def patientBlock(patient: Patient, msg: String = ""): HTMLElement =
     val extra = if msg.isEmpty then "" else s"${msg}："
@@ -537,41 +609,33 @@ case class PatientSearchResultDialog(patients: List[Patient]):
   //   button("キャンセル", onclick := (() => disp(patient, hokenList)))
   // )
 
-  private def newKouhi(state: State, next: Transition => Unit): Unit =
+  private def newKouhi(
+      inputs: KouhiInputs,
+      cancel: State => Transition = GoBack(_)
+  )(state: State, next: Transition => Unit): Unit =
+    val errBox = ErrorBox()
     dlog.body(
       clear,
-      s"New Kouhi"
+      patientBlock(state.patient, "公費入力"),
+      inputs.formPanel,
+      errBox.ele
     )
     dlog.commands(
       clear,
       button(
         "入力",
         onclick := (() =>
-          val newState: State = state
-          next(GoBack(newState))
+          inputs.validateForEnter(state.patient.patientId) match {
+            case Left(msg) => errBox.show(msg)
+            case Right(formKouhi) =>
+              for entered <- Api.enterKouhi(formKouhi)
+              yield next(GoBack(state.add(entered)))
+          }
+          ()
         )
       ),
-      button("キャンセル", onclick := (() => next(GoBack(state))))
+      button("キャンセル", onclick := (() => next(cancel(state))))
     )
-  // val props = new KouhiInputs(None)
-  // val errBox = ErrorBox()
-  // dlog.body(clear, props.formPanel, errBox.ele)
-  // dlog.commands(
-  //   clear,
-  //   button(
-  //     "入力",
-  //     onclick := (() => {
-  //       props.validateForEnter(patient.patientId) match {
-  //         case Left(msg) => errBox.show(msg)
-  //         case Right(newKouhi) =>
-  //           for _ <- Api.enterKouhi(newKouhi)
-  //           yield invokeDisp(patient)
-  //       }
-  //       ()
-  //     })
-  //   ),
-  //   button("キャンセル", onclick := (() => disp(patient, hokenList)))
-  // )
 
   private def edit(state: State, next: Transition => Unit): Unit =
     dlog.body(
