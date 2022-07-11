@@ -164,7 +164,7 @@ class PatientInputs(modelOpt: Option[Patient]):
       )
       .asEither
 
-  def validateForUpdate: Either[String, Patient] =
+  def validateForUpdate(): Either[String, Patient] =
     PatientValidator
       .validate(
         PatientIdValidator.validateOptionForUpdate(modelOpt.map(_.patientId)) *:
