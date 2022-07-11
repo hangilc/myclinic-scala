@@ -10,6 +10,8 @@ import scala.concurrent.Future
 import dev.myclinic.scala.apputil.HokenUtil
 import dev.myclinic.scala.web.appbase.*
 import org.scalajs.dom.HTMLElement
+import scala.util.Success
+import scala.util.Failure
 
 case class PatientSearchResultDialog(patients: List[Patient]):
   val selection = Selection[Patient](patients, p => div(format(p)))
@@ -142,7 +144,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
         button(
           "診察受付",
           onclick := (() =>
-            next(GoForward(doRegister(state.patient.patientId), state))
+            next(GoForward(doRegister, state))
           )
         ),
         button("閉じる", onclick := (() => next(Exit)))
@@ -658,24 +660,28 @@ case class PatientSearchResultDialog(patients: List[Patient]):
   //   button("キャンセル", onclick := (() => { invokeDisp(patient); () }))
   // )
 
-  private def doRegister(
-      patientId: Int
-  )(state: State, next: Transition => Unit): Unit =
+  private def doRegister(state: State, next: Transition => Unit): Unit =
+    val patient: Patient = state.patient
+    val panel = new PatientReps(Some(patient)).dispPanel
     dlog.body(
       clear,
-      s"Register Exam"
+      patientBlock(patient, "診察受付"),
+      panel,
+      div("この患者の診察を受け付けますか？")
     )
     dlog.commands(
       clear,
       button(
-        "入力",
+        "受付実行",
         onclick := (() =>
-          val newState: State = state
-          next(GoBack(newState))
+          Api.startVisit(patient.patientId, LocalDateTime.now()).onComplete {
+            case Success(_) => 
+              dlog.close()
+              next(GoBack(state))
+            case Failure(ex) => ShowMessage.showError(ex.toString)
+          }
         )
       ),
       button("キャンセル", onclick := (() => next(GoBack(state))))
     )
 
-// for _ <- Api.startVisit(patientId, LocalDateTime.now())
-// yield dlog.close()
