@@ -190,17 +190,30 @@ case class PatientSearchResultDialog(patients: List[Patient]):
         next(GoForward(dispRoujin(r.roujinId), state))
     }
 
+  private def dispatchEditHoken(
+    hoken: Hoken,
+    state: State,
+    next: Transition => Unit
+  ): Unit =
+    hoken match {
+      case s: Shahokokuho =>
+        next(
+          GoForward(editShahokokuho(s.shahokokuhoId), state)
+        )
+      case k: Koukikourei =>
+        next(
+          GoForward(editKoukikourei(k.koukikoureiId), state)
+        )
+      case k: Kouhi =>
+        next(GoForward(editKouhi(k.kouhiId), state))
+      case r: Roujin => ()
+    }
+
   private def listHoken(patientId: Int): Future[List[Hoken]] =
     for
       result <- Api.getPatientHoken(patientId, LocalDate.now())
       (_, _, shahokokuho, koukikourei, roujin, kouhi) = result
     yield List.empty[Hoken] ++ shahokokuho ++ koukikourei ++ roujin ++ kouhi
-
-  // private def listAllHoken(patientId: Int): Future[List[Hoken]] =
-  //   for
-  //     result <- Api.listAllHoken(patientId)
-  //     (shahokokuho, koukikourei, roujin, kouhi) = result
-  //   yield List.empty[Hoken] ++ shahokokuho ++ koukikourei ++ roujin ++ kouhi
 
   private def hokenHistory(state: State, next: Transition => Unit): Unit =
     dlog.body(
@@ -232,18 +245,20 @@ case class PatientSearchResultDialog(patients: List[Patient]):
         ShowMessage.showError(ex.toString)
         next(GoBack(state))
       case Success((allHoken, countMaps)) =>
-        doHokenHistory(allHoken, countMaps, state, next)
+        next(GoTo(doHokenHistory(allHoken, countMaps), state))
     }
 
   private def doHokenHistory(
       allHoken: List[Hoken],
-      countMaps: (Map[Int, Int], Map[Int, Int], Map[Int, Int], Map[Int, Int]),
+      countMaps: (Map[Int, Int], Map[Int, Int], Map[Int, Int], Map[Int, Int])
+  )(
       state: State,
       next: Transition => Unit
   ): Unit =
+    val onEdit: Hoken => Unit = hoken => dispatchEditHoken(hoken, state.add(hoken), next)
     val boxWrapper = div
     val boxes = CompSortList[HokenBox](boxWrapper)
-    boxes.set(allHoken.map(h => HokenBox(h, countMaps)))
+    boxes.set(allHoken.map(h => HokenBox(h, countMaps, onEdit)))
     dlog.body(
       clear,
       patientBlock(state.patient, "保険披瀝"),

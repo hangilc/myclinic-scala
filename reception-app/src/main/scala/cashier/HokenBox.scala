@@ -13,7 +13,8 @@ import java.time.LocalDate
 
 case class HokenBox(
     hoken: Hoken,
-    countMaps: (Map[Int, Int], Map[Int, Int], Map[Int, Int], Map[Int, Int])
+    countMaps: (Map[Int, Int], Map[Int, Int], Map[Int, Int], Map[Int, Int]),
+    onEdit: Hoken => Unit
 ):
   val (
     shahokokuhoCountMap,
@@ -23,18 +24,13 @@ case class HokenBox(
   ) = countMaps
   val repSpan = span
   val detailSpan = span
-  val workarea = div
   val ele = div(
     cls := "reception-hoken-box",
     cls := Hoken.codeOf(hoken),
-    repSpan(HokenUtil.hokenRep(hoken), onclick := (onRepClick _)),
+    repSpan(HokenUtil.hokenRep(hoken)),
     detailSpan(innerText := detail),
-    workarea
+    a("編集", onclick := (() => onEdit(hoken)))
   )
-
-  def onRepClick(): Unit =
-    if workarea.isDisplayed then ()
-    else workarea.hide()
 
   def detail: String =
     hoken match {
