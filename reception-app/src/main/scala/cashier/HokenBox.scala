@@ -26,7 +26,7 @@ case class HokenBox(
   val workarea = div
   val ele = div(
     cls := "reception-hoken-box",
-    cls := "reception-cashier-hoken-box",
+    cls := Hoken.codeOf(hoken),
     repSpan(HokenUtil.hokenRep(hoken), onclick := (onRepClick _)),
     detailSpan(innerText := detail),
     workarea

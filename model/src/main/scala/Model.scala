@@ -424,6 +424,14 @@ object Hoken:
         case h: Kouhi => h.kouhiId
       }
 
+  def codeOf(hoken: Hoken): String =
+      hoken match {
+        case _: Shahokokuho => "shahokokuho"
+        case _: Koukikourei => "koukikourei"
+        case _: Roujin => "roujin"
+        case _: Kouhi => "kouhi"
+      }
+
   case class HokenId(kind: HokenKind, id: Int)
 
   object HokenId:

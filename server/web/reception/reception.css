@@ -249,9 +249,19 @@
 /* hoken box ********************************************************************/
 
 .reception-hoken-box {
-  border: 1px solid gray;
-  border-radius: 4px;
+  border-style: solid;
+  border-width: 2px;
+  border-color: gray;
+  border-radius: 6px;
   margin-bottom: 4px;
   padding: 4px;
+}
+
+.reception-hoken-box.shahokokuho {
+  border-color: blue
+}
+
+.reception-hoken-box.koukikourei {
+  border-color: orange
 }
 
