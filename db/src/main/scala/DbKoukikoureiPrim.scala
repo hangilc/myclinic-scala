@@ -80,3 +80,8 @@ object DbKoukikoureiPrim:
         )
       event <- DbEventPrim.logKoukikoureiDeleted(target)
     yield event
+
+  def countKoukikoureiUsage(koukikoureiId: Int): ConnectionIO[Int] =
+    sql"""
+      select count(*) from visit where koukikourei_id = ${koukikoureiId}
+    """.query[Int].unique

@@ -201,7 +201,27 @@ object MiscService extends DateTimeQueryParam with Publisher:
 
     case GET -> Root / "list-kouhi" :? intPatientId(patientId) =>
       Ok(Db.listKouhi(patientId))
+
+    case GET -> Root / "count-shahokokuho-usage" :? intShahokokuhoId(shahokokuhoId) =>
+      Ok(Db.countShahokokuhoUsage(shahokokuhoId))
     
+    case GET -> Root / "count-koukikourei-usage" :? intKoukikoureiId(koukikoureiId) =>
+      Ok(Db.countKoukikoureiUsage(koukikoureiId))
+    
+    case GET -> Root / "count-roujin-usage" :? intRoujinId(roujinId) =>
+      Ok(Db.countRoujinUsage(roujinId))
+    
+    case GET -> Root / "count-kouhi-usage" :? intKouhiId(kouhiId) =>
+      Ok(Db.countKouhiUsage(kouhiId))
+    
+    case req @ POST -> Root / "batch-count-hoken-usage" =>
+      val op =
+        for
+          tuple <- req.as[(List[Int], List[Int], List[Int], List[Int])]
+          maps <- Db.batchCountHokenUsage.tupled(tuple)
+        yield maps
+      Ok(op)
+
     case GET -> Root / "get-shahokokuho" :? intShahokokuhoId(shahokokuhoId) =>
       Ok(Db.getShahokokuho(shahokokuhoId))
 

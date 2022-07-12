@@ -78,3 +78,8 @@ object DbShahokokuhoPrim:
       _ = if affected != 1 then throw new RuntimeException(s"Failed to delete shahokokuho: ${shahokokuhoId}")
       event <- DbEventPrim.logShahokokuhoDeleted(target)
     yield event
+
+  def countShahokokuhoUsage(shahokokuhoId: Int): ConnectionIO[Int] =
+    sql"""
+      select count(*) from visit where shahokokuho_id = ${shahokokuhoId}
+    """.query[Int].unique

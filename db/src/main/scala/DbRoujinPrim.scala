@@ -76,3 +76,9 @@ object DbRoujinPrim:
       _ = if affected != 1 then throw new RuntimeException(s"Failed to delete roujin: ${roujinId}")
       event <- DbEventPrim.logRoujinDeleted(target)
     yield event
+
+  def countRoujinUsage(roujinId: Int): ConnectionIO[Int] =
+    sql"""
+      select count(*) from visit where roujin_id = ${roujinId}
+    """.query[Int].unique
+

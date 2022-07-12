@@ -31,5 +31,8 @@ trait DbRoujin extends Mysql:
   def getRoujin(roujinId: Int): IO[Roujin] =
     mysql(DbRoujinPrim.getRoujin(roujinId).unique)
 
+  def countRoujinUsage(roujinId: Int): IO[Int] =
+    mysql(DbRoujinPrim.countRoujinUsage(roujinId))
+
 
 

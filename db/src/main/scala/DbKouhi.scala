@@ -28,3 +28,6 @@ trait DbKouhi extends Mysql:
   def getKouhi(kouhiId: Int): IO[Kouhi] =
     mysql(DbKouhiPrim.getKouhi(kouhiId).unique)
 
+  def countKouhiUsage(kouhiId: Int): IO[Int] =
+    mysql(DbKouhiPrim.countKouhiUsage(kouhiId))
+

@@ -203,6 +203,18 @@ object MiscApi extends ApiBase:
     def listKouhi(patientId: Int): Future[List[Kouhi]] =
       get("list-kouhi", Params("patient-id" -> patientId))
 
+    def countShahokokuhoUsage(shahokokuhoId: Int): Future[Int] =
+      get("count-shahokokuho-usage", Params("shahokokuho-id" -> shahokokuhoId))
+
+    def countKoukikoureiUsage(koukikoureiId: Int): Future[Int] =
+      get("count-koukikourei-usage", Params("koukikourei-id" -> koukikoureiId))
+
+    def countRoujinUsage(roujinId: Int): Future[Int] =
+      get("count-roujin-usage", Params("roujin-id" -> roujinId))
+
+    def countKouhiUsage(kouhiId: Int): Future[Int] =
+      get("count-kouhi-usage", Params("kouhi-id" -> kouhiId))
+
     def getShahokokuho(shahokokuhoId: Int): Future[Shahokokuho] =
       get("get-shahokokuho", Params("shahokokuho-id" -> shahokokuhoId))
 

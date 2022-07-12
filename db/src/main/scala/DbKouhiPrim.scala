@@ -78,3 +78,8 @@ object DbKouhiPrim:
         throw new RuntimeException(s"Failed to delete kouhi: ${kouhiId}")
       event <- DbEventPrim.logKouhiDeleted(target)
     yield event
+
+  def countKouhiUsage(kouhiId: Int): ConnectionIO[Int] =
+    sql"""
+      select count(*) from visit where kouhi_id = ${kouhiId}
+    """.query[Int].unique

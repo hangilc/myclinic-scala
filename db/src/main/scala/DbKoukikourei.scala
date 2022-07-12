@@ -31,3 +31,6 @@ trait DbKoukikourei extends Mysql:
   def getKoukikourei(koukikoureiId: Int): IO[Koukikourei] =
     mysql(DbKoukikoureiPrim.getKoukikourei(koukikoureiId).unique)
 
+  def countKoukikoureiUsage(koukikoureiId: Int): IO[Int] =
+    mysql(DbKoukikoureiPrim.countKoukikoureiUsage(koukikoureiId))
+

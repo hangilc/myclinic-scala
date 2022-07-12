@@ -367,3 +367,20 @@ object Db
           .sequence
       yield List(diseaseEvent) ++ adjEvents
     mysql(op)
+
+  def batchCountHokenUsage(shahokokuhoIds: List[Int], koukikoureiIds: List[Int], roujinIds: List[Int], kouhiIds: List[Int]):
+    IO[(Map[Int, Int], Map[Int, Int], Map[Int, Int], Map[Int, Int])] =
+    val op = 
+      for
+        shahokokuhoCounts <- shahokokuhoIds.map(id => DbShahokokuhoPrim.countShahokokuhoUsage(id)).sequence
+        koukikoureiCounts <- koukikoureiIds.map(id => DbKoukikoureiPrim.countKoukikoureiUsage(id)).sequence
+        roujinCounts <- roujinIds.map(id => DbRoujinPrim.countRoujinUsage(id)).sequence
+        kouhiCounts <- kouhiIds.map(id => DbKouhiPrim.countKouhiUsage(id)).sequence
+      yield
+        (
+          Map[Int, Int](shahokokuhoIds.zip(shahokokuhoCounts): _*),
+          Map[Int, Int](koukikoureiIds.zip(koukikoureiCounts): _*),
+          Map[Int, Int](roujinIds.zip(roujinCounts): _*),
+          Map[Int, Int](kouhiIds.zip(kouhiCounts): _*)
+        )
+    mysql(op)
