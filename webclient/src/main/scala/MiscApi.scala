@@ -215,6 +215,15 @@ object MiscApi extends ApiBase:
     def countKouhiUsage(kouhiId: Int): Future[Int] =
       get("count-kouhi-usage", Params("kouhi-id" -> kouhiId))
 
+    def batchCountHokenUsage(shahokokuhoIds: List[Int], koukikoureiIds: List[Int], roujinIds: List[Int], kouhiIds: List[Int]):
+      Future[(Map[Int, Int], Map[Int, Int], Map[Int, Int], Map[Int, Int])] =
+      post("batch-count-hoken-usage", Params(), (
+        shahokokuhoIds,
+        koukikoureiIds,
+        roujinIds,
+        kouhiIds
+      ))
+
     def getShahokokuho(shahokokuhoId: Int): Future[Shahokokuho] =
       get("get-shahokokuho", Params("shahokokuho-id" -> shahokokuhoId))
 

@@ -9,8 +9,18 @@ import dev.myclinic.scala.web.appbase.ShahokokuhoReps
 import dev.myclinic.scala.web.appbase.KoukikoureiReps
 import dev.myclinic.scala.web.appbase.RoujinReps
 import dev.myclinic.scala.web.appbase.KouhiReps
+import java.time.LocalDate
 
-case class HokenBox(hoken: Hoken):
+case class HokenBox(
+    hoken: Hoken,
+    countMaps: (Map[Int, Int], Map[Int, Int], Map[Int, Int], Map[Int, Int])
+):
+  val (
+    shahokokuhoCountMap,
+    koukikoureiCountMap,
+    roujinCountMap,
+    kouhiCountMap
+  ) = countMaps
   val repSpan = span
   val detailSpan = span
   val workarea = div
@@ -23,27 +33,46 @@ case class HokenBox(hoken: Hoken):
   )
 
   def onRepClick(): Unit =
-    if workarea.isDisplayed then
-      ()
+    if workarea.isDisplayed then ()
     else workarea.hide()
 
-  def detail: String = 
+  def detail: String =
     hoken match {
-      case h: Shahokokuho => pairsToDetail(new ShahokokuhoReps(Some(h)).detailPairs)
-      case h: Koukikourei => pairsToDetail(new KoukikoureiReps(Some(h)).detailPairs)
-      case h: Roujin => pairsToDetail(new RoujinReps(Some(h)).detailPairs)
-      case h: Kouhi => pairsToDetail(new KouhiReps(Some(h)).detailPairs)
+      case h: Shahokokuho =>
+        pairsToDetail(
+          new ShahokokuhoReps(Some(h)).detailPairs,
+          shahokokuhoCountMap(h.shahokokuhoId)
+        )
+      case h: Koukikourei =>
+        pairsToDetail(
+          new KoukikoureiReps(Some(h)).detailPairs,
+          koukikoureiCountMap(h.koukikoureiId)
+        )
+      case h: Roujin =>
+        pairsToDetail(
+          new RoujinReps(Some(h)).detailPairs,
+          roujinCountMap(h.roujinId)
+        )
+      case h: Kouhi =>
+        pairsToDetail(
+          new KouhiReps(Some(h)).detailPairs,
+          kouhiCountMap(h.kouhiId)
+        )
     }
-  
+
   def pairToDetailItem(pair: (String, String)): String =
     val (label, value) = pair
     s"【${label}】${value}"
 
-  def pairsToDetail(pairs: List[(String, String)]): String =
-    pairs.map(pairToDetailItem).mkString("、")
+  def pairsToDetail(
+      pairs: List[(String, String)],
+      count: Int
+  ): String =
+    (pairs :+ ("使用回数", count.toString)).map(pairToDetailItem).mkString("、")
 
 object HokenBox:
-  given Ordering[HokenBox] = Ordering.by(box => HokenUtil.validFromOf(box.hoken))
+  given Ordering[HokenBox] =
+    Ordering.by[HokenBox, LocalDate](box => HokenUtil.validFromOf(box.hoken)).reverse
 
   given Comp[HokenBox] = _.ele
 

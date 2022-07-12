@@ -137,9 +137,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       div(
         button(
           "診察受付",
-          onclick := (() =>
-            next(GoForward(doRegister, state))
-          )
+          onclick := (() => next(GoForward(doRegister, state)))
         ),
         button("閉じる", onclick := (() => next(Exit)))
       ),
@@ -161,7 +159,12 @@ case class PatientSearchResultDialog(patients: List[Patient]):
           )
         ),
         "|",
-        a("新規公費", onclick := (() => next(GoForward(newKouhi(new KouhiInputs(None)), state)))),
+        a(
+          "新規公費",
+          onclick := (() =>
+            next(GoForward(newKouhi(new KouhiInputs(None)), state))
+          )
+        ),
         "|",
         a("保険履歴", onclick := (() => next(GoForward(hokenHistory, state))))
       )
@@ -193,12 +196,11 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       (_, _, shahokokuho, koukikourei, roujin, kouhi) = result
     yield List.empty[Hoken] ++ shahokokuho ++ koukikourei ++ roujin ++ kouhi
 
-  private def listAllHoken(patientId: Int): Future[List[Hoken]] =
-    for
-      result <- Api.listAllHoken(patientId)
-      (shahokokuho, koukikourei, roujin, kouhi) = result
-    yield List.empty[Hoken] ++ shahokokuho ++ koukikourei ++ roujin ++ kouhi
-
+  // private def listAllHoken(patientId: Int): Future[List[Hoken]] =
+  //   for
+  //     result <- Api.listAllHoken(patientId)
+  //     (shahokokuho, koukikourei, roujin, kouhi) = result
+  //   yield List.empty[Hoken] ++ shahokokuho ++ koukikourei ++ roujin ++ kouhi
 
   private def hokenHistory(state: State, next: Transition => Unit): Unit =
     dlog.body(
@@ -209,17 +211,39 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       clear,
       button("戻る", onclick := (() => next(GoBack(state))))
     )
-    listAllHoken(state.patient.patientId).onComplete {
-      case Failure(ex) => 
+    val op =
+      for
+        allHoken <- Api.listAllHoken(state.patient.patientId)
+        (shahokokuhoList, koukikoureiList, roujinList, kouhiList) = allHoken
+        allHokenIds = (
+          shahokokuhoList.map(_.shahokokuhoId),
+          koukikoureiList.map(_.koukikoureiId),
+          roujinList.map(_.roujinId),
+          kouhiList.map(_.kouhiId)
+        )
+        allHokenList = List.empty[
+          Hoken
+        ] ++ shahokokuhoList ++ koukikoureiList ++ roujinList ++ kouhiList
+        countMaps <- Api.batchCountHokenUsage.tupled(allHokenIds)
+      yield (allHokenList, countMaps)
+
+    op.onComplete {
+      case Failure(ex) =>
         ShowMessage.showError(ex.toString)
         next(GoBack(state))
-      case Success(allHoken) => doHokenHistory(allHoken, state, next)
+      case Success((allHoken, countMaps)) =>
+        doHokenHistory(allHoken, countMaps, state, next)
     }
 
-  private def doHokenHistory(allHoken: List[Hoken], state: State, next: Transition => Unit): Unit =
+  private def doHokenHistory(
+      allHoken: List[Hoken],
+      countMaps: (Map[Int, Int], Map[Int, Int], Map[Int, Int], Map[Int, Int]),
+      state: State,
+      next: Transition => Unit
+  ): Unit =
     val boxWrapper = div
     val boxes = CompSortList[HokenBox](boxWrapper)
-    boxes.set(allHoken.map(HokenBox.apply))
+    boxes.set(allHoken.map(h => HokenBox(h, countMaps)))
     dlog.body(
       clear,
       patientBlock(state.patient, "保険披瀝"),
@@ -437,7 +461,10 @@ case class PatientSearchResultDialog(patients: List[Patient]):
     }
 
   private def doDispKouhi(
-      kouhi: Kouhi, state: State, next: Transition => Unit): Unit =
+      kouhi: Kouhi,
+      state: State,
+      next: Transition => Unit
+  ): Unit =
     val panel: HTMLElement = new KouhiReps(Some(kouhi)).dispPanel
     val renewButton = button
     dlog.body(
@@ -465,8 +492,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
               GoTo(
                 newKouhi(
                   inputs,
-                  state =>
-                    GoTo(dispKouhi(kouhi.kouhiId), state)
+                  state => GoTo(dispKouhi(kouhi.kouhiId), state)
                 ),
                 state
               )
@@ -476,9 +502,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       ),
       button(
         "編集",
-        onclick := (() =>
-          next(GoForward(editKouhi(kouhi.kouhiId), state))
-        )
+        onclick := (() => next(GoForward(editKouhi(kouhi.kouhiId), state)))
       ),
       button("戻る", onclick := (() => next(GoBack(state))))
     )
@@ -638,7 +662,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       patientBlock(state.patient, "患者情報編集"),
       inputs.formPanel,
       errBox.ele
-    )    
+    )
     dlog.commands(
       clear,
       button(
@@ -653,7 +677,8 @@ case class PatientSearchResultDialog(patients: List[Patient]):
                   updated <- Api.getPatient(state.patient.patientId)
                 yield updated
               ).onComplete {
-                case Success(updated) => next(GoBack(state.copy(patient = updated)))
+                case Success(updated) =>
+                  next(GoBack(state.copy(patient = updated)))
                 case Failure(ex) => errBox.show(ex.toString)
               }
           }
@@ -677,7 +702,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
         "受付実行",
         onclick := (() =>
           Api.startVisit(patient.patientId, LocalDateTime.now()).onComplete {
-            case Success(_) => 
+            case Success(_) =>
               dlog.close()
               next(GoBack(state))
             case Failure(ex) => ShowMessage.showError(ex.toString)
@@ -686,4 +711,3 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       ),
       button("キャンセル", onclick := (() => next(GoBack(state))))
     )
-
