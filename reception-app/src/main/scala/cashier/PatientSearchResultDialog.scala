@@ -255,9 +255,10 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       next: Transition => Unit
   ): Unit =
     val onEdit: Hoken => Unit = hoken => dispatchEditHoken(hoken, state.add(hoken), next)
+    val onDelete: Hoken => Unit = hoken => next(GoTo(doHokenHistory(countMaps), state.remove(hoken)))
     val boxWrapper = div
     val boxes = CompSortList[HokenBox](boxWrapper)
-    boxes.set(state.hokenList.map(h => HokenBox(h, countMaps, onEdit)))
+    boxes.set(state.hokenList.map(h => HokenBox(h, countMaps, onEdit, onDelete)))
     dlog.body(
       clear,
       patientBlock(state.patient, "保険披瀝"),
