@@ -245,11 +245,10 @@ case class PatientSearchResultDialog(patients: List[Patient]):
         ShowMessage.showError(ex.toString)
         next(GoBack(state))
       case Success((allHoken, countMaps)) =>
-        next(GoTo(doHokenHistory(allHoken, countMaps), state))
+        next(GoTo(doHokenHistory(countMaps), state.copy(hokenList = allHoken)))
     }
 
   private def doHokenHistory(
-      allHoken: List[Hoken],
       countMaps: (Map[Int, Int], Map[Int, Int], Map[Int, Int], Map[Int, Int])
   )(
       state: State,
@@ -258,7 +257,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
     val onEdit: Hoken => Unit = hoken => dispatchEditHoken(hoken, state.add(hoken), next)
     val boxWrapper = div
     val boxes = CompSortList[HokenBox](boxWrapper)
-    boxes.set(allHoken.map(h => HokenBox(h, countMaps, onEdit)))
+    boxes.set(state.hokenList.map(h => HokenBox(h, countMaps, onEdit)))
     dlog.body(
       clear,
       patientBlock(state.patient, "保険披瀝"),
