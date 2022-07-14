@@ -261,13 +261,26 @@ case class PatientSearchResultDialog(patients: List[Patient]):
     boxes.set(state.hokenList.map(h => HokenBox(h, countMaps, onEdit, onDelete)))
     dlog.body(
       clear,
-      patientBlock(state.patient, "保険披瀝"),
-      boxWrapper
+      patientBlock(state.patient, "保険履歴"),
+      menu,
+      boxWrapper,
+      menu
     )
     dlog.commands(
-      clear,
-      button("戻る", onclick := (() => next(GoBack(state))))
+      clear
     )
+
+    def menu: HTMLElement =
+      val shahoCheck: CheckLabel[String] = CheckLabel[String]("shahokokuho", _("社保国保"))
+      val koukikoureiCheck: CheckLabel[String] = CheckLabel[String]("koukikourei", _("後期高齢"))
+      val kouhiCheck: CheckLabel[String] = CheckLabel[String]("kouhi", _("公費"))
+      div(
+        cls := "reception-hoken-box-menu",
+        shahoCheck.wrap(span),
+        koukikoureiCheck.wrap(span),
+        kouhiCheck.wrap(span),
+        button("戻る", onclick := (() => next(GoBack(state))))
+      )
 
   private def dispShahokokuho(
       shahokokuhoId: Int

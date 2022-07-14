@@ -13,6 +13,7 @@ import java.time.LocalDate
 import dev.myclinic.scala.webclient.{Api, global}
 import scala.util.Success
 import scala.util.Failure
+import org.scalajs.dom.HTMLElement
 
 case class HokenBox(
     hoken: Hoken,
