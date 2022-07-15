@@ -29,9 +29,7 @@ object all:
   type LocalEventUnsubscriber = dev.fujiwara.domq.LocalEventUnsubscriber
   type CompAppendList[C] = dev.fujiwara.domq.CompAppendList[C]
   export dev.fujiwara.domq.CompSortList
-  // type CompSortList[C] = dev.fujiwara.domq.CompSortList[C]
-  type CheckLabel[T] = dev.fujiwara.domq.CheckLabel[T]
-  val CheckLabel = dev.fujiwara.domq.CheckLabel
+  export dev.fujiwara.domq.CheckLabel
   type SearchForm[D] = dev.fujiwara.domq.searchform.SearchForm[D]
   val SearchForm = dev.fujiwara.domq.searchform.SearchForm
   type RadioGroup[T] = dev.fujiwara.domq.RadioGroup[T]

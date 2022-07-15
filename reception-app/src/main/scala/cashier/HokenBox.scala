@@ -41,6 +41,8 @@ case class HokenBox(
     errBox.ele
   )
 
+  def hokenKind: Hoken.HokenKind = Hoken.HokenKind(hoken)
+
   def doOnDelete(): Unit =
     ShowMessage.confirm("この保険を削除していいですか？")(() => {
       (hoken match {

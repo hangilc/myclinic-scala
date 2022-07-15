@@ -269,3 +269,14 @@
   margin-left: 6px;
 }
 
+.reception-hoken-box-menu {
+  display: flex;
+  justify-content: end;
+  align-items: center;
+  margin: 4px 0;
+}
+
+.reception-hoken-box-menu button {
+  margin-left: 10px;
+}
+

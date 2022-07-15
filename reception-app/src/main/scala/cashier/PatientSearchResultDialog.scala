@@ -254,10 +254,12 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       state: State,
       next: Transition => Unit
   ): Unit =
+    import Hoken.*
     val onEdit: Hoken => Unit = hoken => dispatchEditHoken(hoken, state.add(hoken), next)
     val onDelete: Hoken => Unit = hoken => next(GoTo(doHokenHistory(countMaps), state.remove(hoken)))
     val boxWrapper = div
     val boxes = CompSortList[HokenBox](boxWrapper)
+    val dispChoicePublisher = new LocalEventPublisher[(HokenKind, Boolean)]()
     boxes.set(state.hokenList.map(h => HokenBox(h, countMaps, onEdit, onDelete)))
     dlog.body(
       clear,
@@ -269,11 +271,32 @@ case class PatientSearchResultDialog(patients: List[Patient]):
     dlog.commands(
       clear
     )
+    dispChoicePublisher.subscribe(showKind.tupled)
+
+    def showKind(kind: HokenKind, show: Boolean): Unit =
+      boxes.list.foreach(b => if b.hokenKind == kind then b.ele.show(show))
 
     def menu: HTMLElement =
-      val shahoCheck: CheckLabel[String] = CheckLabel[String]("shahokokuho", _("社保国保"))
-      val koukikoureiCheck: CheckLabel[String] = CheckLabel[String]("koukikourei", _("後期高齢"))
-      val kouhiCheck: CheckLabel[String] = CheckLabel[String]("kouhi", _("公費"))
+      val shahoCheck: CheckLabel[String] = CheckLabel[String]("shahokokuho", _("社保国保")).check
+      val koukikoureiCheck: CheckLabel[String] = CheckLabel[String]("koukikourei", _("後期高齢")).check
+      val kouhiCheck: CheckLabel[String] = CheckLabel[String]("kouhi", _("公費")).check
+      shahoCheck.onChange(checked => {
+        dispChoicePublisher.publish((HokenKind.ShahokokuhoKind, checked))
+      })
+      koukikoureiCheck.onChange(checked => {
+        dispChoicePublisher.publish((HokenKind.KoukikoureiKind, checked))
+      })
+      kouhiCheck.onChange(checked => {
+        dispChoicePublisher.publish((HokenKind.KouhiKind, checked))
+      })
+      dispChoicePublisher.subscribe {
+        (kind, show) => kind match {
+          case HokenKind.ShahokokuhoKind => shahoCheck.check(show)
+          case HokenKind.KoukikoureiKind => koukikoureiCheck.check(show)
+          case HokenKind.KouhiKind => kouhiCheck.check(show)
+          case HokenKind.RoujinKind => ()
+        }
+      }
       div(
         cls := "reception-hoken-box-menu",
         shahoCheck.wrap(span),
