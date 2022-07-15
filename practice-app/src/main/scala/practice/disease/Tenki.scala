@@ -7,7 +7,7 @@ import dev.myclinic.scala.model.*
 import java.time.LocalDate
 import dev.myclinic.scala.myclinicutil.DiseaseUtil
 import org.scalajs.dom.HTMLLabelElement
-import dev.fujiwara.dateinput.EditableDate
+import dev.fujiwara.domq.dateinput.EditableDate
 import math.Ordering.Implicits.infixOrderingOps
 import dev.myclinic.scala.webclient.{Api, global}
 import cats.syntax.all.*

@@ -3,8 +3,8 @@ package dev.myclinic.scala.web.practiceapp.practice.disease
 import dev.myclinic.scala.model.*
 import dev.fujiwara.domq.all.{*, given}
 import dev.fujiwara.domq.SelectProxy
-import dev.fujiwara.dateinput.EditableDate
-import dev.fujiwara.dateinput.EditableDateOption
+import dev.fujiwara.domq.dateinput.EditableDate
+import dev.fujiwara.domq.dateinput.EditableDateOption
 import dev.myclinic.scala.myclinicutil.DiseaseUtil
 import dev.myclinic.scala.webclient.{Api, global}
 import scala.language.implicitConversions
