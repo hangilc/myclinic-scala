@@ -1,28 +1,20 @@
 package dev.myclinic.scala.web.reception
 
-import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
-import org.scalajs.dom.document
-import dev.fujiwara.domq.ElementQ.*
-import dev.fujiwara.domq.Html.*
-import dev.fujiwara.domq.Modifiers.{*, given}
-import dev.fujiwara.domq.{ShowMessage}
-import scala.language.implicitConversions
-import dev.myclinic.scala.webclient.Api
-import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
-
-import scala.util.Success
-import scala.util.Failure
-import dev.myclinic.scala.model.{Hotline, AppModelEvent}
-import dev.myclinic.scala.web.appbase.{EventFetcher, EventPublishers}
-import scala.concurrent.Future
-import dev.myclinic.scala.model.AppEvent
+import dev.fujiwara.domq.all.{_, given}
 import dev.myclinic.scala.web.appbase.PageLayout1
-import dev.myclinic.scala.web.appbase.SideMenuService
 import dev.myclinic.scala.web.appbase.SideMenuProcs
+import dev.myclinic.scala.web.appbase.SideMenuService
 import dev.myclinic.scala.web.reception.cashier.Cashier
-import dev.myclinic.scala.web.reception.patient.PatientManagement
 import dev.myclinic.scala.web.reception.records.Records
 import dev.myclinic.scala.web.reception.scan.Scan
+import dev.myclinic.scala.webclient.global
+import org.scalajs.dom.document
+
+import scala.language.implicitConversions
+import scala.scalajs.js.annotation.JSExport
+import scala.scalajs.js.annotation.JSExportTopLevel
+import scala.util.Failure
+import scala.util.Success
 
 @JSExportTopLevel("JsMain")
 object JsMain:
