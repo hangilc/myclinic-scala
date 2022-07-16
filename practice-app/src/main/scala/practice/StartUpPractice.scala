@@ -11,7 +11,7 @@ object StartUpPractice:
   def run(service: PracticeService): Future[Unit] =
     import dev.fujiwara.domq.{Absolute}
     import org.scalajs.dom.document
-    import dev.fujiwara.dateinput.*
+    import dev.fujiwara.domq.dateinput.*
     // given InitNoneConverter with
     //   def convert: Option[LocalDate] = Some(LocalDate.of(1957, 6, 2))
     // service.right.ui.ele(

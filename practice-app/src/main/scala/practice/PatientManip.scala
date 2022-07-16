@@ -10,6 +10,10 @@ import dev.myclinic.scala.web.practiceapp.practice.patientmanip.SearchTextDialog
 import dev.myclinic.scala.web.practiceapp.practice.patientmanip.PatientImageUploadIdalog
 import dev.myclinic.scala.web.practiceapp.practice.patientmanip.GazouListDialog
 import scala.language.implicitConversions
+import dev.fujiwara.domq.SingleTask
+import dev.myclinic.scala.model.Visit
+import dev.myclinic.scala.model.Wqueue
+import dev.myclinic.scala.model.Meisai
 
 object PatientManip:
   val cashierButton = button
@@ -56,29 +60,32 @@ object PatientManip:
       dlog.open()
     )
 
+  private val registerPracticeTask = new SingleTask[Visit]()
+
   def doRegisterPractice(): Unit =
     PracticeBus.currentPatient.foreach(patient =>
-      for
-        _ <- Api.startVisit(patient.patientId, LocalDateTime.now())
-        _ <- RecordsHelper.refreshRecords(PracticeBus.navPageChanged.currentValue)
-      yield ()
+      val fut = Api.startVisit(patient.patientId, LocalDateTime.now())
+      registerPracticeTask.run(fut, _ => 
+        RecordsHelper.refreshRecords(PracticeBus.navPageChanged.currentValue)
+      )
     )
 
   def doEndPatient(): Unit =
     PracticeBus.setPatientVisitState(NoSelection)
 
+  private val cashierTask = new SingleTask[Meisai]
+  private val updateWqueueStateTask = new SingleTask[Wqueue]
+
   def doCashier(): Unit =
     PracticeBus.currentPatientVisitState match {
       case Practicing(patient, visitId) => 
-        for meisai <- Api.getMeisai(visitId)
-        yield
-          val dlog = CashierDialog(meisai, visitId, () =>
-            for
-              _ <- Api.changeWqueueState(visitId, WaitState.WaitCashier)
-              _ <- PracticeBus.setPatientVisitState(PracticeDone(patient, visitId))
-              _ <- PracticeBus.setPatientVisitState(NoSelection)
-            yield ()
-          )
-          dlog.open()
+        cashierTask.run(Api.getMeisai(visitId), meisai =>
+            val dlog = CashierDialog(meisai, visitId, () =>
+              updateWqueueStateTask.run(Api.changeWqueueState(visitId, WaitState.WaitCashier), _ =>
+                PracticeBus.setPatientVisitState(PracticeDone(patient, visitId))
+                PracticeBus.setPatientVisitState(NoSelection)
+              ))
+            dlog.open()
+        )
       case _ => ()
     }

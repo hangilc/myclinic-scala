@@ -2,23 +2,27 @@ package dev.myclinic.scala.web.practiceapp.practice
 
 import scala.concurrent.Future
 import dev.myclinic.scala.webclient.{Api, global}
+import dev.fujiwara.domq.SingleTask
 
 object NavUtil:
-  def refreshNavSetting(): Future[Unit] =
+  private val refreshNavTask = new SingleTask[Int]()
+
+  def refreshNavSetting(): Unit =
     PracticeBus.currentPatient match {
       case Some(patient) =>
-        for
-          nVisits <- Api.countVisitByPatient(patient.patientId)
-          nPages = Nav.calcNumPages(nVisits, PracticeBus.visitsPerPage)
-          curPage = PracticeBus.navPageChanged.currentValue
-          _ <- PracticeBus.navSettingChanged.publish(curPage, nPages)
-          _ <- PracticeBus.navPageChanged.publish(curPage)
-        yield ()
-      case None => 
-        for
-          _ <- PracticeBus.navSettingChanged.publish(0, 0)
-          _ <- PracticeBus.navPageChanged.publish(0)
-        yield ()
+        val fut: Future[Int] = Api.countVisitByPatient(patient.patientId)
+        refreshNavTask.run(
+          fut,
+          nVisits => {
+            val nPages = Nav.calcNumPages(nVisits, PracticeBus.visitsPerPage)
+            val curPage = PracticeBus.navPageChanged.currentValue
+            PracticeBus.navSettingChanged.publish(curPage, nPages)
+            PracticeBus.navPageChanged.publish(curPage)
+          }
+        )
+      case None =>
+        PracticeBus.navSettingChanged.publish(0, 0)
+        PracticeBus.navPageChanged.publish(0)
     }
 
-
+    

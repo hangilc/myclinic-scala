@@ -2,6 +2,7 @@ package dev.myclinic.scala.web.practiceapp.practice
 
 import dev.fujiwara.domq.LocalEventPublisher
 import dev.fujiwara.domq.CachingEventPublisher
+import dev.fujiwara.domq.SingleTask
 import org.scalajs.dom.HTMLElement
 import dev.myclinic.scala.model.*
 import scala.concurrent.Future
@@ -23,14 +24,11 @@ object PracticeBus:
   def currentVisitId: Option[Int] = pvState.visitIdOption
   def currentTempVisitId: Option[Int] = tempVisitIdChanged.currentValue
   def copyTarget: Option[VisitId] = currentVisitId orElse currentTempVisitId
-
-  def setPatientVisitState(newState: PatientVisitState): Future[Unit] =
-    for 
-      _ <- patientVisitChanging.publish((pvState, newState))
-      _ <- tempVisitIdChanged.publish(None)
-      _ = pvState = newState
-      _ <- patientVisitChanged.publish(pvState)
-    yield ()
+  def setPatientVisitState(newState: PatientVisitState): Unit =
+    patientVisitChanging.publish((pvState, newState))
+    tempVisitIdChanged.publish(None)
+    pvState = newState
+    patientVisitChanged.publish(pvState)
     
   val navPageChanged = CachingEventPublisher[Int](0)
   val navSettingChanged = LocalEventPublisher[(Int, Int)]
@@ -50,12 +48,13 @@ object PracticeBus:
 
   private var mishuuList: List[(Visit, Patient, Meisai)] = List.empty
   val mishuuListChanged = LocalEventPublisher[List[(Visit, Patient, Meisai)]]
-  def addMishuu(visit: Visit, patient: Patient, meisai: Meisai): Future[Unit] = 
+  def addMishuu(visit: Visit, patient: Patient, meisai: Meisai): Unit = 
     if mishuuList.contains((visit, patient, meisai)) then Future.successful(())
     else
       mishuuList = (mishuuList :+ (visit, patient, meisai)).sortBy((v, _, _) => v.visitId)
       mishuuListChanged.publish(mishuuList)
-  def clearMishuuList(): Future[Unit] =
+  def clearMishuuList(): Unit =
     mishuuList = List.empty
     mishuuListChanged.publish(mishuuList)
+  patientVisitChanged.subscribe(_ => clearMishuuList())
   
