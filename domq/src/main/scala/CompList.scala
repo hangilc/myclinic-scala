@@ -6,6 +6,7 @@ import dev.fujiwara.domq.Modifiers.{*, given}
 import dev.fujiwara.domq.TypeClasses.{Comp, Dispose}
 import scala.math.Ordered.orderingToOrdered
 import scala.language.implicitConversions
+import dev.fujiwara.domq.TypeClasses.DataProvider
 
 class CompListBase[C](
     remove: HTMLElement => Unit = _.remove()
@@ -21,6 +22,8 @@ class CompListBase[C](
       remove(comp.ele(c))
       disposer.dispose(c)
       comps = pre ++ post.tail
+
+  def remove(c: C): Unit = remove(_ == c)
 
   def find(pred: C => Boolean): Option[C] =
     comps.find(pred)
@@ -84,5 +87,21 @@ case class CompSortList[C: Ordering](val wrapper: HTMLElement)(
     clear()
     cs.foreach(c => wrapper(comp.ele(c)))
     comps = cs
+
+case class CompSortDataList[C, D: Ordering](val wrapper: HTMLElement, ctor: D => C)(
+  using comp: Comp[C], dataProvider: DataProvider[C, D], disposer: Dispose[C]
+):
+  given Ordering[C] = Ordering.by[C, D](c => dataProvider.getData(c))
+  val sortList = CompSortList[C](wrapper)
+  export sortList.{wrapper => _, *}
+
+  def sync(dataList: List[D]): Unit =
+    val dataSet: Set[D] = Set.from(dataList)
+    val compSet: Set[D] = Set.from(list.map(c => dataProvider.getData(c)))
+    compSet.diff(dataSet).foreach(d => remove(c => dataProvider.getData(c) == d))
+    dataSet.diff(compSet).foreach(d => insert(ctor(d)))
+
+
+
 
 

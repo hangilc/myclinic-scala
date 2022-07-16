@@ -52,7 +52,6 @@ class Title(visit: VisitEx):
       meisai <- Api.getMeisai(visit.visitId)
     yield 
       PracticeBus.addMishuu(visit.toVisit, patient, meisai)
-      ShowMessage.showMessage("未収リストに追加しました。")
 
   def doFutanwari(): Unit =
     val dlog = FutanwariDialog(visit.toVisit, dlog => 
