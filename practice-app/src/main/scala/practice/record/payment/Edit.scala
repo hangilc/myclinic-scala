@@ -59,7 +59,7 @@ case class Edit(
     for
       _ <- Api.enterPayment(pay)
     yield
-      PracticeBus.paymentEntered.publish(pay)
+      ()
 
   def doReceiptPdf(): Unit =
     val issuedAt = LocalDateTime.now()

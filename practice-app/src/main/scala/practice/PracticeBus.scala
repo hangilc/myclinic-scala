@@ -42,6 +42,8 @@ object PracticeBus:
   val conductDeleted = LocalEventPublisher[Conduct]
   val chargeUpdated = LocalEventPublisher[Charge]
   val paymentEntered = LocalEventPublisher[Payment]
+  val paymentUpdated = LocalEventPublisher[Payment]
+  val paymentDeleted = LocalEventPublisher[Payment]
   val visitUpdated = LocalEventPublisher[VisitEx]
 
   val hokenInfoChanged = LocalEventPublisher[(VisitId, HokenInfo)]

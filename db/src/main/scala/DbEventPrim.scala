@@ -108,13 +108,13 @@ object DbEventPrim:
     enterAppEvent("wqueue", DELETED, a.asJson.toString)
 
   def logPaymentCreated(a: Payment): ConnectionIO[AppEvent] =
-    enterAppEvent("payment", CREATED, a.asJson.toString)
+    enterAppEvent(Payment.modelSymbol, CREATED, a.asJson.toString)
 
   def logPaymentUpdated(a: Payment): ConnectionIO[AppEvent] =
-    enterAppEvent("payment", UPDATED, a.asJson.toString)
+    enterAppEvent(Payment.modelSymbol, UPDATED, a.asJson.toString)
 
   def logPaymentDeleted(a: Payment): ConnectionIO[AppEvent] =
-    enterAppEvent("payment", DELETED, a.asJson.toString)
+    enterAppEvent(Payment.modelSymbol, DELETED, a.asJson.toString)
 
   def logPatientCreated(a: Patient): ConnectionIO[AppEvent] =
     enterAppEvent("patient", CREATED, a.asJson.toString)

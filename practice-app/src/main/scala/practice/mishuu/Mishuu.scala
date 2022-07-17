@@ -41,7 +41,6 @@ object Mishuu:
   )
 
   PracticeBus.mishuuListChanged.subscribe(list =>
-    println(("mishuu", list))
     if list.isEmpty then ele(displayNone)
     else
       compList.sync(list)

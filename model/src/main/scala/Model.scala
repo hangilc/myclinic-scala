@@ -311,6 +311,11 @@ case class Payment(
     paytime: LocalDateTime
 )
 
+object Payment:
+  val modelSymbol = "payment"
+  given ModelSymbol[Payment] with
+    def getSymbol: String = modelSymbol
+
 trait EffectivePeriodProvider[T]:
   def getValidFrom(t: T): LocalDate
   def getValidUpto(t: T): ValidUpto

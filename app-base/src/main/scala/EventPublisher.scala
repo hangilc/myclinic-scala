@@ -78,7 +78,15 @@ class EventPublishers:
       case (Kouhi.modelSymbol, C) => kouhi.publishCreated(event)
       case (Kouhi.modelSymbol, U) => kouhi.publishUpdated(event)
       case (Kouhi.modelSymbol, D) => kouhi.publishDeleted(event)
+      case (Payment.modelSymbol, C) => onPaymentCreated(event.data.asInstanceOf[Payment])
+      case (Payment.modelSymbol, U) => onPaymentUpdated(event.data.asInstanceOf[Payment])
+      case (Payment.modelSymbol, D) => onPaymentDeleted(event.data.asInstanceOf[Payment])
       case (Hotline.modelSymbol, C) => hotlineCreated.publishCreated(event)
       case _ => ()
     }
+
   def publish(event: HotlineBeep): Unit = hotlineBeep.publish(event)
+
+  def onPaymentCreated(payment: Payment): Unit = ()
+  def onPaymentUpdated(payment: Payment): Unit = ()
+  def onPaymentDeleted(payment: Payment): Unit = ()

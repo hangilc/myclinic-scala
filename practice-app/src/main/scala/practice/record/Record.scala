@@ -19,6 +19,7 @@ import dev.myclinic.scala.web.practiceapp.practice.PracticeBus
 import dev.myclinic.scala.web.practiceapp.practice.record.shinryou.ShinryouMenu
 import dev.myclinic.scala.web.practiceapp.practice.record.conduct.ConductMenu
 import dev.myclinic.scala.web.practiceapp.practice.record.conduct.Conduct
+import dev.myclinic.scala.web.practiceapp.practice.record.payment.Payment
 import java.time.LocalDate
 import scala.language.implicitConversions
 
@@ -110,12 +111,8 @@ class Record(visitEx: VisitEx):
   def onChargeUpdated(updated: Charge): Unit =
     payment.onChargeUpdated(updated)
 
-  def onPaymentEntered(entered: ModelPayment): Unit =
-    payment.onPaymentEntered(entered)
-
-
 object Record:
   given Ordering[Record] = Ordering.by[Record, Int](r => r.visitId).reverse
   given Comp[Record] = _.ele
   given Dispose[Record] =
-    Dispose.nop[Record] + (_.title) + (_.texts) + (_.unsubs)
+    Dispose.nop[Record] + (_.title) + (_.texts) + (_.payment) + (_.unsubs)

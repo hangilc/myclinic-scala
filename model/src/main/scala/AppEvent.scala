@@ -48,6 +48,7 @@ object AppModelEvent:
       case Koukikourei.modelSymbol => as[Koukikourei]
       case Roujin.modelSymbol => as[Roujin]
       case Kouhi.modelSymbol => as[Kouhi]
+      case Payment.modelSymbol => as[Payment]
       case Patient.modelSymbol => as[Patient]
       case Hotline.modelSymbol => as[Hotline]
       case _ =>
