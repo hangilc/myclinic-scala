@@ -72,7 +72,7 @@ object DrawerService:
         for ops <- req.as[List[Op]]
         yield
           val printer = new PdfPrinter(paperSize)
-          val outPath = Config.portalTmpDir.resolve(fileName)
+          val outPath = Config.resolvePortalTmpFile(fileName)
           val outStream = new FileOutputStream(outPath.toString)
           try
             printer.print(
@@ -83,6 +83,17 @@ object DrawerService:
           finally outStream.close()
       Ok(op)
 
+    case req @ POST -> Root / "concat-pdf-files" :? strOutFile(outFile) =>
+      val op =
+        for
+          files <- req.as[List[String]]
+          srcList = files.map(f => Config.resolvePortalTmpFile(f).toString)
+        yield
+          dev.fujiwara.drawer.pdf.Concatenator.concatenate(srcList.asJava, 
+            Config.resolvePortalTmpFile(outFile).toString)
+          true
+      Ok(op)
+
     case GET -> Root / "stamp-pdf" :? strFileName(fileName) +& strStamp(stamp) =>
       val stampInfo: StampInfo = Config.getStampInfo(stamp)
       val opt = new Stamper.StamperOption()
@@ -90,13 +101,12 @@ object DrawerService:
       opt.xPos = stampInfo.xPos
       opt.yPos = stampInfo.yPos
       opt.stampCenterRelative = stampInfo.isImageCenterRelative
-      val dir = Config.portalTmpDir
-      val srcFile = dir.resolve(fileName).toString
-      val tmpFile = dir.resolve(stampFileName(fileName)).toString
+      val srcFile = Config.resolvePortalTmpFile(fileName)
+      val tmpFile = Config.resolvePortalTmpFile(stampFileName(fileName))
       val stamper: Stamper = new Stamper()
-      stamper.putStamp(srcFile, stampInfo.imageFile, tmpFile, opt)
-      java.nio.file.Files.delete(java.nio.file.Path.of(srcFile))
-      java.nio.file.Files.move(java.nio.file.Path.of(tmpFile), java.nio.file.Path.of(srcFile))
+      stamper.putStamp(srcFile.toString, stampInfo.imageFile, tmpFile.toString, opt)
+      java.nio.file.Files.delete(srcFile)
+      java.nio.file.Files.move(tmpFile, srcFile)
       Ok(true)
 
     // case GET -> Root / "stamp-pdf" :? strInFile(inFile) +& strOutFile(outFile) +& strStamp(stamp) =>

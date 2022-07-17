@@ -126,8 +126,13 @@ object Config extends ConfigCirce:
       stampInfo.copy(imageFile = absPath)
     else stampInfo
 
-  def portalTmpDir: Path =
+  private lazy val portalTmpDir: Path =
     Path.of(System.getenv("MYCLINIC_PORTAL_TMP_DIR"))
+
+  def resolvePortalTmpFile(file: String): Path =
+    val p = portalTmpDir.resolve(file).normalize()
+    if p.startsWith(portalTmpDir) then p
+    else throw new RuntimeException("Invalid portal tmp file path: " + file)
 
   def getDiseaseExample: List[DiseaseExample] =
     val file: File = configDir.resolve(s"disease-example.yml").toFile

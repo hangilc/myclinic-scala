@@ -41,3 +41,6 @@ object DrawerApi extends ApiBase:
           "stamp" -> stampName
         )
       )
+
+    def concatPdfFiles(files: List[String], outFile: String): Future[Boolean] =
+      post("concat-pdf-files", Params("out-file" -> outFile), files)

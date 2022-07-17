@@ -59,8 +59,10 @@ object Mishuu:
         _ <- Api.stampPdf(file, "receipt")
       yield file
     ).sequence
+    val outFile = "receipt.pdf"
     for
       files <- op
+      _ <- Api.concatPdfFiles(files, outFile)
     yield ()
 
   def receiptPdfFileName(visit: Visit): String =
