@@ -14,6 +14,7 @@ import org.scalajs.dom.window
 import scala.language.implicitConversions
 import dev.myclinic.scala.web.appbase.ReceiptUtil
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 object Mishuu:
   val itemWrapper = div
@@ -48,6 +49,17 @@ object Mishuu:
       updateSum(sum)
       ele(displayDefault)
   )
+
+  def doFinished(): Unit =
+    val op =
+      val at = LocalDateTime.now()
+      for
+        _ <- (compList.list.map(c => 
+          val payment = Payment(c.visit.visitId, c.meisai.charge, at) 
+          Api.enterPayment(payment)
+        )).sequence_
+      yield 
+        doClose()
 
   def doClose(): Unit =
     bundleFiles.foreach(b => Api.deletePortalTmpFile(b))
