@@ -9,9 +9,11 @@ import dev.myclinic.scala.web.practiceapp.practice.mishuu.MishuuItem.given
 import dev.myclinic.scala.webclient.{Api, global}
 import cats.*
 import cats.syntax.all.*
+import org.scalajs.dom.window
 
 import scala.language.implicitConversions
 import dev.myclinic.scala.web.appbase.ReceiptUtil
+import java.time.LocalDate
 
 object Mishuu:
   val itemWrapper = div
@@ -59,13 +61,21 @@ object Mishuu:
         _ <- Api.stampPdf(file, "receipt")
       yield file
     ).sequence
-    val outFile = "receipt.pdf"
+    val outFile = bundlePdfFileName(compList.list.head.patient.patientId)
     for
       files <- op
       _ <- Api.concatPdfFiles(files, outFile)
-    yield ()
+    yield
+      val url = "/portal-tmp/" + outFile
+      window.open(url, "_blank")
 
   def receiptPdfFileName(visit: Visit): String =
     val at = visit.visitedAt
-    val stamp = String.format("receipt-%04d%02d%02d", at.getYear, at.getMonthValue, at.getDayOfMonth)
-    s"${visit.patientId}-${visit.visitId}-${stamp}.pdf"
+    val stamp = String.format("%04d%02d%02d", at.getYear, at.getMonthValue, at.getDayOfMonth)
+    s"receipt-${visit.patientId}-${visit.visitId}-${stamp}.pdf"
+
+  def bundlePdfFileName(patientId: Int): String =
+    val at = LocalDate.now()
+    val stamp = String.format("%04d%02d%02d", at.getYear, at.getMonthValue, at.getDayOfMonth)
+    s"receipt-bundle-${patientId}-${stamp}.pdf"
+
