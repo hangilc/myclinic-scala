@@ -18,6 +18,9 @@ trait DbVisit extends Mysql:
   def getVisit(visitId: Int): IO[Visit] =
     mysql(Prim.getVisit(visitId).unique)
 
+  def findVisit(visitId: Int): IO[Option[Visit]] =
+    mysql(Prim.getVisit(visitId).option)
+
   def batchGetVisit(visitIds: List[Int]): IO[Map[Int, Visit]] =
     mysql(DbVisitPrim.batchGetVisit(visitIds))
 
@@ -47,4 +50,7 @@ trait DbVisit extends Mysql:
 
   def updateVisit(visit: Visit): IO[AppEvent] =
     mysql(Prim.updateVisit(visit).map(_._1))
+
+  def getLastVisitId(): IO[Int] =
+    mysql(Prim.getLastVisitId())
     

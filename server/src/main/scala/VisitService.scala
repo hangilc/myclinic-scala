@@ -29,6 +29,9 @@ object VisitService extends Publisher:
     case GET -> Root / "get-visit" :? intVisitId(visitId) => 
       Ok(Db.getVisit(visitId))
 
+    case GET -> Root / "find-visit" :? intVisitId(visitId) => 
+      Ok(Db.findVisit(visitId))
+
     case req @ POST -> Root / "batch-get-visit" => 
       Ok(for
         visitIds <- req.as[List[Int]]
@@ -67,5 +70,8 @@ object VisitService extends Publisher:
           _ <- publish(event)
         yield true
       Ok(op)
+
+    case GET -> Root / "get-last-visit-id" =>
+      Ok(Db.getLastVisitId())
 
   }

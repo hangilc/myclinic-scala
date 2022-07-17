@@ -59,6 +59,7 @@ lazy val root = project
     practiceApp,
     rcpt,
     receptionApp,
+    repl,
     server,
     utilJS,
     utilJVM,
@@ -499,3 +500,16 @@ lazy val kanjidate = crossProject(JSPlatform, JVMPlatform)
 
 val kanjidateJVM = kanjidate.jvm
 val kanjidateJS = kanjidate.js
+
+lazy val repl = project
+  .in(file("repl"))
+  .dependsOn(modelJVM)
+  .settings(
+    name := "repl",
+    libraryDependencies ++= Seq(
+      "org.http4s" %% "http4s-dsl" % http4sVersion,
+      "org.http4s" %% "http4s-blaze-client" % http4sVersion,
+      "org.http4s" %% "http4s-circe" % http4sVersion,
+      "io.circe" %%% "circe-core" % circeVersion,
+    )
+  )

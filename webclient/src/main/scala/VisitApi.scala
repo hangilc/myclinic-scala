@@ -16,6 +16,9 @@ object VisitApi extends ApiBase:
     def getVisit(visitId: Int): Future[Visit] =
       get("get-visit", Params("visit-id" -> visitId))
 
+    def findVisit(visitId: Int): Future[Option[Visit]] =
+      get("find-visit", Params("visit-id" -> visitId))
+
     def batchGetVisit(visitIds: List[Int]): Future[Map[Int, Visit]] =
       post("batch-get-visit", Params(), visitIds)
 
@@ -33,3 +36,8 @@ object VisitApi extends ApiBase:
 
     def updateVisit(visit: Visit): Future[Boolean] =
       post("update-visit", Params(), visit)
+
+    def getLastVisitId(): Future[Int] =
+      get("get-last-visit-id", Params())
+
+      

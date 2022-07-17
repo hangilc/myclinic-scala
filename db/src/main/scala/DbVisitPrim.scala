@@ -152,3 +152,8 @@ object DbVisitPrim:
         .sequence
       items = visits.map(visit => (visit.visitId, visit))
     yield Map(items: _*)
+
+  def getLastVisitId(): ConnectionIO[Int] =
+    sql"""
+      select max(visit_id) from visit
+    """.query[Int].unique
