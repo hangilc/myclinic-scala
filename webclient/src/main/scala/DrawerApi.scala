@@ -31,15 +31,13 @@ object DrawerApi extends ApiBase:
       )
 
     def stampPdf(
-        inFileName: String,
-        outFileName: String,
+        fileName: String,
         stampName: String
     ): Future[Boolean] =
       get(
         "stamp-pdf",
         Params(
-          "in-file" -> inFileName,
-          "out-file" -> outFileName,
+          "file-name" -> fileName,
           "stamp" -> stampName
         )
       )

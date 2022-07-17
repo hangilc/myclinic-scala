@@ -71,8 +71,8 @@ case class Edit(
       ops <- Api.drawReceipt(data)
       fileName = s"Receipt-${patient.patientId}-${timestamp}"
       _ <- Api.createPdfFile(ops, "A6_Landscape", fileName + ".pdf")
-      stampFile = fileName + "-stamped"
-      _ <- Api.stampPdf(fileName + ".pdf", stampFile + ".pdf", "receipt")
+      stampFile = fileName
+      _ <- Api.stampPdf(fileName + ".pdf", "receipt")
     yield
       val url = "/portal-tmp/" + stampFile + ".pdf"
       window.open(url, "_blank")

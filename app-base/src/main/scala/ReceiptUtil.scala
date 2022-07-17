@@ -41,7 +41,7 @@ object ReceiptUtil:
   def receiptDrawerOps(data: ReceiptDrawerData): Future[List[Op]] =
     Api.drawReceipt(data)
 
-  def printReceipt(patient: Patient, visit: VisitEx, meisai: Meisai, fileName: String): Future[Unit] =
+  def createReceiptPdf(patient: Patient, visit: VisitEx, meisai: Meisai, fileName: String): Future[Unit] =
     val data = receiptDrawerData(patient, visit, meisai)
     for
       ops <- receiptDrawerOps(data)

@@ -2,12 +2,13 @@ package dev.myclinic.scala.web.practiceapp.practice
 
 import dev.fujiwara.domq.all.{_, given}
 import dev.fujiwara.domq.searchform.*
+import dev.fujiwara.kanjidate.DateUtil
 import dev.fujiwara.kanjidate.KanjiDate
 import dev.myclinic.scala.model.Patient
 import dev.myclinic.scala.model.Visit
 import dev.myclinic.scala.model.WaitState
-import dev.fujiwara.kanjidate.DateUtil
 import dev.myclinic.scala.web.appbase.SideMenuService
+import dev.myclinic.scala.web.practiceapp.practice.mishuu.Mishuu
 import dev.myclinic.scala.webclient.Api
 import dev.myclinic.scala.webclient.global
 import org.scalajs.dom.HTMLElement
@@ -15,10 +16,10 @@ import org.scalajs.dom.HTMLElement
 import java.time.LocalDate
 import java.time.LocalDateTime
 import scala.concurrent.Future
+import scala.language.implicitConversions
 import scala.quoted.FromExpr.NoneFromExpr
 import scala.util.Failure
 import scala.util.Success
-import scala.language.implicitConversions
 
 class PracticeService extends SideMenuService:
   val left = new PracticeMain

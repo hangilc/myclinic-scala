@@ -50,7 +50,7 @@ object DrawerService:
         val json = drawShohousen(text, visit, patient)
         Response(
           body = fs2.Stream.emits(json.getBytes()),
-          headers = Headers(`Content-Type`(MediaType("application", "json")))
+          headers = Headers(`Content-Type`(MediaType.application.json))
         )
 
     case req @ POST -> Root / "shohousen-drawer-text" =>
@@ -83,7 +83,7 @@ object DrawerService:
           finally outStream.close()
       Ok(op)
 
-    case GET -> Root / "stamp-pdf" :? strInFile(inFile) +& strOutFile(outFile) +& strStamp(stamp) =>
+    case GET -> Root / "stamp-pdf" :? strFileName(fileName) +& strStamp(stamp) =>
       val stampInfo: StampInfo = Config.getStampInfo(stamp)
       val opt = new Stamper.StamperOption()
       opt.scale = stampInfo.scale
@@ -91,13 +91,36 @@ object DrawerService:
       opt.yPos = stampInfo.yPos
       opt.stampCenterRelative = stampInfo.isImageCenterRelative
       val dir = Config.portalTmpDir
-      val srcFile = dir.resolve(inFile).toString
-      val dstFile = dir.resolve(outFile).toString
+      val srcFile = dir.resolve(fileName).toString
+      val tmpFile = dir.resolve(stampFileName(fileName)).toString
       val stamper: Stamper = new Stamper()
-      stamper.putStamp(srcFile, stampInfo.imageFile, dstFile, opt)
+      stamper.putStamp(srcFile, stampInfo.imageFile, tmpFile, opt)
+      java.nio.file.Files.delete(java.nio.file.Path.of(srcFile))
+      java.nio.file.Files.move(java.nio.file.Path.of(tmpFile), java.nio.file.Path.of(srcFile))
       Ok(true)
 
+    // case GET -> Root / "stamp-pdf" :? strInFile(inFile) +& strOutFile(outFile) +& strStamp(stamp) =>
+    //   val stampInfo: StampInfo = Config.getStampInfo(stamp)
+    //   val opt = new Stamper.StamperOption()
+    //   opt.scale = stampInfo.scale
+    //   opt.xPos = stampInfo.xPos
+    //   opt.yPos = stampInfo.yPos
+    //   opt.stampCenterRelative = stampInfo.isImageCenterRelative
+    //   val dir = Config.portalTmpDir
+    //   val srcFile = dir.resolve(inFile).toString
+    //   val dstFile = dir.resolve(outFile).toString
+    //   val stamper: Stamper = new Stamper()
+    //   stamper.putStamp(srcFile, stampInfo.imageFile, dstFile, opt)
+    //   Ok(true)
   }
+
+  def stampFileName(src: String): String =
+    val (name, ext) = {
+      val index = src.lastIndexOf(".")
+      if index >= 0 then (src.substring(0, index), src.substring(index))
+      else (src, "")
+    }
+    s"${name}-stamp-tmp${ext}"
 
   def drawShohousen(text: Text, visit: Visit, patient: Patient): String =
     val data = new ShohousenData()
