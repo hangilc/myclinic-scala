@@ -22,6 +22,7 @@ object Mishuu:
     MishuuItem.apply.tupled
   )
   val sumArea = div
+  private var bundleFiles: Set[String] = Set.empty
   val ele = div(
     displayNone,
     cls := "practice-right-widget",
@@ -32,8 +33,8 @@ object Mishuu:
       sumArea,
       div(
         button("領収書PDF", onclick := (() => doReceiptPdf())),
-        button("会計済に"),
-        a("閉じる")
+        button("会計済に", onclick := (doFinished _)),
+        a("閉じる", onclick := (doClose _))
       )
     )
   )
@@ -47,6 +48,10 @@ object Mishuu:
       updateSum(sum)
       ele(displayDefault)
   )
+
+  def doClose(): Unit =
+    bundleFiles.foreach(b => Api.deletePortalTmpFile(b))
+    PracticeBus.clearMishuuList()
 
   def updateSum(value: Int): Unit =
     sumArea(innerText := s"合計 ${value}円")
@@ -68,6 +73,7 @@ object Mishuu:
     yield
       val url = "/portal-tmp/" + outFile
       window.open(url, "_blank")
+      bundleFiles = bundleFiles + outFile
 
   def receiptPdfFileName(visit: Visit): String =
     val at = visit.visitedAt

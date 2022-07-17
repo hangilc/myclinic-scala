@@ -16,4 +16,9 @@ object FileApi extends FetchBase:
       init.method = HttpMethod.POST
       init.body = data
       doFetch("upload-patient-image", Params("patient-id" -> patientId), init)
+
+    def deletePortalTmpFile(fileName: String): Future[Boolean] =
+      val init = new RequestInit{}
+      init.method = HttpMethod.GET
+      doFetch("delete-portal-tmp-file", Params("file-name" -> fileName), init)
       

@@ -54,13 +54,6 @@ object FileService extends DateTimeQueryParam with Publisher:
 
   private def saveToFile(req: Request[IO], path: Path): IO[Response[IO]] =
     Ok(saveToFile(req.body, path).compile.drain.map(_ => true))
-  // Ok(
-  //   req.body
-  //     .through(fs2.io.file.Files[IO].writeAll(path))
-  //     .compile
-  //     .drain
-  //     .map(_ => true)
-  // )
 
   private def saveToFile(
       sin: Stream[IO, Byte],
@@ -151,8 +144,11 @@ object FileService extends DateTimeQueryParam with Publisher:
         fs2.io.file.Files[IO].readAll(loc)
       Ok(op, `Content-Type`(mediaType))
 
-    case req @ GET -> Root / "patient-image" :? intPatientId(patientId) +& strFileName(fileName) =>
-      val file = Path(Config.paperScanDir(patientId)) / sanitizeFileName(fileName)
+    case req @ GET -> Root / "patient-image" :? intPatientId(
+          patientId
+        ) +& strFileName(fileName) =>
+      val file =
+        Path(Config.paperScanDir(patientId)) / sanitizeFileName(fileName)
       StaticFile.fromPath(file, Some(req)).getOrElse(Response(Status.NotFound))
 
     case GET -> Root / "get-covid-2nd-shot-data" :? intPatientId(patientId) =>
@@ -162,23 +158,42 @@ object FileService extends DateTimeQueryParam with Publisher:
     case req @ POST -> Root / "upload-file" :? strDir(dir) =>
       val dirPath = resolveDir(dir)
       req.decode[Multipart[IO]] { m =>
-        Stream.emits(m.parts).covary[IO].flatMap(part => 
-          val filename: String = sanitizeFileName(part.filename.get)
-          saveToFile(part.body, dirPath / filename)
-        ).compile.drain.flatMap(_ => Ok(true))
+        Stream
+          .emits(m.parts)
+          .covary[IO]
+          .flatMap(part =>
+            val filename: String = sanitizeFileName(part.filename.get)
+            saveToFile(part.body, dirPath / filename)
+          )
+          .compile
+          .drain
+          .flatMap(_ => Ok(true))
       }
 
-    case req @ POST -> Root / "upload-patient-image" :? intPatientId(patientId) =>
+    case req @ POST -> Root / "upload-patient-image" :? intPatientId(
+          patientId
+        ) =>
       val nioDirPath = java.nio.file.Path.of(Config.paperScanDir(patientId))
-      if !java.nio.file.Files.exists(nioDirPath) && !nioDirPath.toFile.mkdirs then
-        throw new RuntimeException("Cannot make patient image directory.")
+      if !java.nio.file.Files
+          .exists(nioDirPath) && !nioDirPath.toFile.mkdirs
+      then throw new RuntimeException("Cannot make patient image directory.")
       val dirPath = Path.fromNioPath(nioDirPath)
       req.decode[Multipart[IO]] { m =>
-        Stream.emits(m.parts).covary[IO].flatMap(part => 
-          val filename: String = sanitizeFileName(part.filename.get)
-          saveToFile(part.body, dirPath / filename)
-        ).compile.drain.flatMap(_ => Ok(true))
+        Stream
+          .emits(m.parts)
+          .covary[IO]
+          .flatMap(part =>
+            val filename: String = sanitizeFileName(part.filename.get)
+            saveToFile(part.body, dirPath / filename)
+          )
+          .compile
+          .drain
+          .flatMap(_ => Ok(true))
       }
-      
+
+    case GET -> Root / "delete-portal-tmp-file" :? strFileName(fileName) =>
+      val path = Config.resolvePortalTmpFile(fileName)
+      java.nio.file.Files.delete(path)
+      Ok(true)
 
   }
