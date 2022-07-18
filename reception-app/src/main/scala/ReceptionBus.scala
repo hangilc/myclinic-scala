@@ -14,4 +14,9 @@ object ReceptionBus:
   val visitUpdatedPublisher = new LocalEventPublisher[Visit]
   val visitDeletedPublisher = new LocalEventPublisher[Visit]
 
+  val wqueueCreatedPublisher = new LocalEventPublisher[Wqueue]
+  val wqueueUpdatedPublisher = new LocalEventPublisher[Wqueue]
+  val wqueueDeletedPublisher = new LocalEventPublisher[Wqueue]
+
+
 

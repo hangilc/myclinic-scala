@@ -43,7 +43,7 @@ class ModelEventPublisher[T](using modelSymbol: ModelSymbol[T], dataId: DataId[T
 class EventPublishers:
   val appoint = new ModelEventPublisher[Appoint]
   val appointTime = new ModelEventPublisher[AppointTime]
-  val wqueue = new ModelEventPublisher[Wqueue]
+  // val wqueue = new ModelEventPublisher[Wqueue]
   val shahokokuho = new ModelEventPublisher[Shahokokuho]
   val koukikourei = new ModelEventPublisher[Koukikourei]
   val roujin = new ModelEventPublisher[Roujin]
@@ -63,9 +63,9 @@ class EventPublishers:
       case (AppointTime.modelSymbol, C) => appointTime.publishCreated(event)
       case (AppointTime.modelSymbol, U) => appointTime.publishUpdated(event)
       case (AppointTime.modelSymbol, D) => appointTime.publishDeleted(event)
-      case (Wqueue.modelSymbol, C) => wqueue.publishCreated(event)
-      case (Wqueue.modelSymbol, U) => wqueue.publishUpdated(event)
-      case (Wqueue.modelSymbol, D) => wqueue.publishDeleted(event)
+      case (Wqueue.modelSymbol, C) => onWqueueCreated(event.data.asInstanceOf[Wqueue])
+      case (Wqueue.modelSymbol, U) => onWqueueUpdated(event.data.asInstanceOf[Wqueue])
+      case (Wqueue.modelSymbol, D) => onWqueueDeleted(event.data.asInstanceOf[Wqueue])
       case (Shahokokuho.modelSymbol, C) => shahokokuho.publishCreated(event)
       case (Shahokokuho.modelSymbol, U) => shahokokuho.publishUpdated(event)
       case (Shahokokuho.modelSymbol, D) => shahokokuho.publishDeleted(event)
@@ -90,3 +90,9 @@ class EventPublishers:
   def onPaymentCreated(payment: Payment): Unit = ()
   def onPaymentUpdated(payment: Payment): Unit = ()
   def onPaymentDeleted(payment: Payment): Unit = ()
+  def onWqueueCreated(wqueue: Wqueue): Unit = ()
+  def onWqueueUpdated(wqueue: Wqueue): Unit = ()
+  def onWqueueDeleted(wqueue: Wqueue): Unit = ()
+
+
+

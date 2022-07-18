@@ -4,15 +4,21 @@ import dev.myclinic.scala.web.appbase.{EventFetcher, EventPublishers}
 import dev.myclinic.scala.model.*
 
 object ReceptionEvent:
-  val publishers = new EventPublishers
+  val publishers = new EventPublishers:
+    override def onWqueueCreated(wqueue: Wqueue): Unit =
+      ReceptionBus.wqueueCreatedPublisher.publish(wqueue)
+    override def onWqueueUpdated(wqueue: Wqueue): Unit =
+      ReceptionBus.wqueueUpdatedPublisher.publish(wqueue)
+    override def onWqueueDeleted(wqueue: Wqueue): Unit =
+      ReceptionBus.wqueueDeletedPublisher.publish(wqueue)
 
   given fetcher: EventFetcher = new EventFetcher
-  // fetcher.appModelEventPublisher.subscribe(event => publishers.publish(event))
+  fetcher.appModelEventPublisher.subscribe(event => publishers.publish(event))
   fetcher.hotlineBeepEventPublisher.subscribe(event =>
     publishers.publish(event)
   )
 
-  fetcher.appModelEventPublisher.subscribe(dispatch _)
+  // fetcher.appModelEventPublisher.subscribe(dispatch _)
 
   def dispatch(event: AppModelEvent): Unit =
     print(("event", event))

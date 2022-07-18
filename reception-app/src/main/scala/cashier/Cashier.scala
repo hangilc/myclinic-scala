@@ -21,6 +21,9 @@ import dev.fujiwara.domq.ResourceCleanups
 import dev.myclinic.scala.web.reception.ReceptionBus
 
 class Cashier extends SideMenuService:
+  val unsubs = List(
+    ReceptionBus.wqueueDeletedPublisher.subscribe(onWqueueDeleted)
+  )
   val searchTextInput = input
   val table = new Table
   initTable()
@@ -71,6 +74,12 @@ class Cashier extends SideMenuService:
   override def getElement: HTMLElement = ele(cls := "content")
   override def init(): Future[Unit] = refresh()
   override def onReactivate: Future[Unit] = refresh()
+
+  override def dispose(): Unit =
+    unsubs.foreach(_.proc())
+
+  private def onWqueueDeleted(wqueue: Wqueue): Unit =
+    rows.remove(r => r.wqueue.visitId == wqueue.visitId)
 
   private def onMenu(event: MouseEvent): Unit =
     val m = ContextMenu(
