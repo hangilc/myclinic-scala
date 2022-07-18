@@ -740,25 +740,32 @@ case class PatientSearchResultDialog(patients: List[Patient]):
 
   private def doRegister(state: State, next: Transition => Unit): Unit =
     val patient: Patient = state.patient
-    val panel = new PatientReps(Some(patient)).dispPanel
-    dlog.body(
-      clear,
-      patientBlock(patient, "診察受付"),
-      panel,
-      div("この患者の診察を受け付けますか？")
-    )
-    dlog.commands(
-      clear,
-      button(
-        "受付実行",
-        onclick := (() =>
-          Api.startVisit(patient.patientId, LocalDateTime.now()).onComplete {
-            case Success(_) =>
-              dlog.close()
-              next(GoBack(state))
-            case Failure(ex) => ShowMessage.showError(ex.toString)
-          }
-        )
-      ),
-      button("キャンセル", onclick := (() => next(GoBack(state))))
-    )
+    Api.startVisit(patient.patientId, LocalDateTime.now()).onComplete {
+      case Success(_) =>
+        dlog.close()
+        next(Exit)
+      case Failure(ex) => ShowMessage.showError(ex.toString)
+    }
+
+    // val panel = new PatientReps(Some(patient)).dispPanel
+    // dlog.body(
+    //   clear,
+    //   patientBlock(patient, "診察受付"),
+    //   panel,
+    //   div("この患者の診察を受け付けますか？")
+    // )
+    // dlog.commands(
+    //   clear,
+    //   button(
+    //     "受付実行",
+    //     onclick := (() =>
+    //       Api.startVisit(patient.patientId, LocalDateTime.now()).onComplete {
+    //         case Success(_) =>
+    //           dlog.close()
+    //           next(GoBack(state))
+    //         case Failure(ex) => ShowMessage.showError(ex.toString)
+    //       }
+    //     )
+    //   ),
+    //   button("キャンセル", onclick := (() => next(GoBack(state))))
+    // )

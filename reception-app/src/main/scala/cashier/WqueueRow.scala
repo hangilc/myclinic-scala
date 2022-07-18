@@ -12,6 +12,8 @@ import java.time.LocalDate
 import dev.myclinic.scala.webclient.{Api, global}
 import scala.util.Failure
 import scala.util.Success
+import dev.fujiwara.domq.ResourceCleanups
+import dev.myclinic.scala.web.reception.ReceptionBus
 
 case class WqueueRow(wqueue: Wqueue, visit: Visit, patient: Patient)(using
     DataId[Wqueue],
@@ -40,6 +42,11 @@ case class WqueueRow(wqueue: Wqueue, visit: Visit, patient: Patient)(using
   ele(cls := "reception-cashier-wqueue-table-row")
   updateUI()
 
+  val unsubs = List(ReceptionBus.wqueueUpdatedPublisher.subscribe(onWqueueUpdated))
+
+  private def onWqueueUpdated(wqueue: Wqueue): Unit =
+    ???
+
   private def addCashierButton(): Unit =
     manageCell(button("会計", onclick := (doCashier _)))
 
@@ -55,6 +62,10 @@ case class WqueueRow(wqueue: Wqueue, visit: Visit, patient: Patient)(using
       dlog.open()
 
   private def doDelete(): Unit =
+    val name = s"(${patient.patientId}) ${patient.lastName}${patient.firstName}"
+    ShowMessage.confirm(s"${name}\n本当に、この受付を削除していいですか？")(deleteVisit)
+
+  private def deleteVisit(): Unit =
     (for
       _ <- Api.deleteVisit(wqueue.visitId)
     yield ()).onComplete {
@@ -91,4 +102,5 @@ case class WqueueRow(wqueue: Wqueue, visit: Visit, patient: Patient)(using
 object WqueueRow:
   given Ordering[WqueueRow] = Ordering.by(_.wqueue.visitId)
   given Comp[WqueueRow] = _.ele
-  given Dispose[WqueueRow] = _ => ()
+  given Dispose[WqueueRow] = row => 
+    row.unsubs.foreach(_.proc())

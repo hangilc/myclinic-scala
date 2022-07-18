@@ -22,6 +22,7 @@ import dev.myclinic.scala.web.reception.ReceptionBus
 
 class Cashier extends SideMenuService:
   val unsubs = List(
+    ReceptionBus.wqueueCreatedPublisher.subscribe(onWqueueCreated),
     ReceptionBus.wqueueDeletedPublisher.subscribe(onWqueueDeleted)
   )
   val searchTextInput = input
@@ -61,15 +62,6 @@ class Cashier extends SideMenuService:
       )
     )
   )
-  val cleanups = ResourceCleanups(ele)
-  cleanups.add(ReceptionBus.visitCreatedPublisher.subscribe(newVisit =>
-    for
-      wqueue <- Api.getWqueue(newVisit.visitId)
-      patient <- Api.getPatient(newVisit.patientId)
-    yield
-      addRow(wqueue, newVisit, patient)
-      ()
-  ))
 
   override def getElement: HTMLElement = ele(cls := "content")
   override def init(): Future[Unit] = refresh()
@@ -77,6 +69,12 @@ class Cashier extends SideMenuService:
 
   override def dispose(): Unit =
     unsubs.foreach(_.proc())
+
+  private def onWqueueCreated(wqueue: Wqueue): Unit =
+    for
+      visit <- Api.getVisit(wqueue.visitId)
+      patient <- Api.getPatient(visit.patientId)
+    yield addRow(wqueue, visit, patient)
 
   private def onWqueueDeleted(wqueue: Wqueue): Unit =
     rows.remove(r => r.wqueue.visitId == wqueue.visitId)
