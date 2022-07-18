@@ -15,7 +15,7 @@ import scala.util.Success
 import dev.fujiwara.domq.ResourceCleanups
 import dev.myclinic.scala.web.reception.ReceptionBus
 
-case class WqueueRow(wqueue: Wqueue, visit: Visit, patient: Patient)(using
+case class WqueueRow(var wqueue: Wqueue, visit: Visit, patient: Patient)(using
     DataId[Wqueue],
     ModelSymbol[Wqueue]
 ):
@@ -44,8 +44,11 @@ case class WqueueRow(wqueue: Wqueue, visit: Visit, patient: Patient)(using
 
   val unsubs = List(ReceptionBus.wqueueUpdatedPublisher.subscribe(onWqueueUpdated))
 
-  private def onWqueueUpdated(wqueue: Wqueue): Unit =
-    ???
+  private def onWqueueUpdated(updated: Wqueue): Unit =
+    if updated.visitId == wqueue.visitId then
+      wqueue = updated
+      updateStateLabel()
+      updateManageCell()
 
   private def addCashierButton(): Unit =
     manageCell(button("会計", onclick := (doCashier _)))
@@ -84,8 +87,11 @@ case class WqueueRow(wqueue: Wqueue, visit: Visit, patient: Patient)(using
     }
     addDeleteLink()
 
-  def updateUI(): Unit =
+  private def updateStateLabel(): Unit =
     stateLabelCell(innerText := wqueue.waitState.label)
+
+  def updateUI(): Unit =
+    updateStateLabel()
     patientIdCell(innerText := String.format("%04d", patient.patientId))
     nameCell(innerText := patient.fullName())
     yomiCell(innerText := patient.fullNameYomi())
