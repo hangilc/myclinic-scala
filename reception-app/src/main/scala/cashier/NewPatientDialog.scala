@@ -6,8 +6,9 @@ import dev.myclinic.scala.web.appbase.PatientInputs
 import dev.myclinic.scala.webclient.{Api, global}
 import scala.util.Success
 import scala.util.Failure
+import dev.myclinic.scala.model.Patient
 
-class NewPatientDialog:
+class NewPatientDialog(onEnter: Patient => Unit):
   val inputs = new PatientInputs(None)
   val errBox = ErrorBox()
   val dlog = new ModalDialog3()
@@ -18,7 +19,7 @@ class NewPatientDialog:
     errBox.ele
   )
   dlog.commands(
-    button("入力"), onclick := (onEnter _),
+    button("入力"), onclick := (doEnter _),
     button("キャンセル", onclick := (dlog.close _))
   )
 
@@ -28,14 +29,17 @@ class NewPatientDialog:
   def open(): Unit =
     dlog.open()
 
-  private def onEnter(): Unit =
+  private def doEnter(): Unit =
     inputs.validateForEnter() match {
       case Left(msg) => errBox.show(msg)
       case Right(patient) => 
         (for
-          _ <- Api.enterPatient(patient)
-        yield ()).onComplete {
-          case Success(_) => dlog.close()
+          entered <- Api.enterPatient(patient)
+        yield entered).onComplete {
+          case Success(entered) =>
+            println(("new-patient", entered))
+            dlog.close() 
+            onEnter(entered)
           case Failure(ex) => errBox.show(ex.toString)
         }
     }

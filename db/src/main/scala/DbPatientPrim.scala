@@ -34,7 +34,7 @@ object DbPatientPrim:
         order by last_name_yomi, first_name_yomi
     """.query[Patient]
 
-  def enterPatient(patient: Patient): ConnectionIO[AppEvent] =
+  def enterPatient(patient: Patient): ConnectionIO[(Patient, AppEvent)] =
     val op = sql"""
       insert into patient (last_name, first_name, last_name_yomi, first_name_yomi,
           sex, birth_day, address, phone) 
@@ -45,7 +45,7 @@ object DbPatientPrim:
       patientId <- op.update.withUniqueGeneratedKeys[Int]("patient_id")
       entered <- getPatient(patientId).unique
       event <- DbEventPrim.logPatientCreated(entered)
-    yield event
+    yield (entered, event)
 
   def updatePatient(patient: Patient): ConnectionIO[AppEvent] =
     val op = sql"""

@@ -88,7 +88,10 @@ class Cashier extends SideMenuService:
     m.open(event)
 
   private def doNewPatient(): Unit =
-    val dlog = new NewPatientDialog()
+    val dlog = new NewPatientDialog(newPatient => 
+        val d = new PatientSearchResultDialog(List(newPatient))
+        d.open()
+    )
     dlog.open()
     dlog.initFocus()
 

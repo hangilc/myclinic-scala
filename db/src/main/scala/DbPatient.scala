@@ -39,7 +39,7 @@ trait DbPatient extends Mysql:
   def batchGetPatient(patientIds: List[Int]): IO[Map[Int, Patient]] =
     mysql(DbPatientPrim.batchGetPatient(patientIds))
 
-  def enterPatient(patient: Patient): IO[AppEvent] =
+  def enterPatient(patient: Patient): IO[(Patient, AppEvent)] =
     mysql(Prim.enterPatient(patient))
 
   def updatePatient(patient: Patient): IO[AppEvent] =

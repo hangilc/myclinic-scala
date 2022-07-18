@@ -35,7 +35,7 @@ object PatientApi extends ApiBase:
     def batchGetPatient(patientIds: List[Int]): Future[Map[Int, Patient]] =
       post("batch-get-patient", Params(), patientIds)
 
-    def enterPatient(patient: Patient): Future[Boolean] =
+    def enterPatient(patient: Patient): Future[Patient] =
       post("enter-patient", Params(), patient)
 
     def updatePatient(patient: Patient): Future[Boolean] =

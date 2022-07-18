@@ -257,9 +257,10 @@ object RestService extends DateTimeQueryParam with Publisher:
       Ok {
         for
           patient <- req.as[Patient]
-          event <- Db.enterPatient(patient)
+          result <- Db.enterPatient(patient)
+          (patient, event) = result
           _ <- publish(event)
-        yield true
+        yield patient
       }
 
     case req @ POST -> Root / "update-patient" =>
