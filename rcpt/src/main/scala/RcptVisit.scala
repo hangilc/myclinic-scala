@@ -16,8 +16,6 @@ object RcptVisit:
   def getMeisai(visit: VisitEx)(using
       houkatsuKensa: HoukatsuKensa
   ): Meisai =
-    if !visit.drugs.isEmpty then
-      new RuntimeException("visit drug is not supported")
     var units: List[MeisaiUnit] = List.empty
     visit.shinryouList.foreach(s => {
       val u = MeisaiUnit.fromShinryou(s, visit.visitedAt.toLocalDate)
@@ -25,6 +23,10 @@ object RcptVisit:
     })
     visit.conducts.foreach(c => {
       MeisaiUnit.fromConduct(c).foreach(u => { units = add(u, units) })
+    })
+    visit.drugs.foreach(d => {
+      val u = MeisaiUnit.fromDrug(d)
+      units = add(u, units)
     })
     val items = units
       .groupBy(_.section)

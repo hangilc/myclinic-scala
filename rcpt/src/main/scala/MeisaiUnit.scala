@@ -11,7 +11,7 @@ import scala.collection.mutable.ListBuffer
 import java.time.LocalDate
 import scala.jdk.OptionConverters.*
 
-sealed trait MeisaiUnit:
+trait MeisaiUnit:
   def tanka: Int
   def count: Int
   def label: String
@@ -47,6 +47,14 @@ object MeisaiUnit:
     conduct.shinryouList.map(s => SimpleShinryouUnit(section, s.master))
       ++ conduct.drugs.map(d => ConductDrugUnit(section, d))
       ++ conduct.kizaiList.map(k => ConductKizaiUnit(section, k))
+
+  def fromDrug(drug: DrugEx): MeisaiUnit =
+    import DrugCategory.*
+    drug.category match {
+      case Naifuku => NaifukuUnit(drug)
+      case Gaiyou => GaiyouUnit(drug)
+      case Tonpuku => TonpukuUnit(drug)
+    }
 
 case class SimpleShinryouUnit(
     section: MeisaiSection,

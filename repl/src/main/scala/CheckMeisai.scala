@@ -9,6 +9,7 @@ import org.http4s.circe.CirceEntityDecoder.*
 import dev.myclinic.scala.model.*
 import dev.myclinic.scala.model.jsoncodec.Implicits.given
 import io.circe.Json
+import scala.util.Random
 
 object CheckMeisai:
   def check(): Unit =
@@ -18,7 +19,11 @@ object CheckMeisai:
           lastVisitId <- client.expect[Int](
             "http://localhost:8080/api/get-last-visit-id"
           )
-          _ <- (1 to lastVisitId).toList
+          visitIds = Random.shuffle((1 to lastVisitId).toList).filter(visitId => 
+              !List(90710, 94246).contains(visitId)
+            ).take(20)
+          // visitIds = List(90710)
+          _ <- visitIds
             .map(visitId =>
               for
                 visitOpt <- findVisit(client, visitId)
@@ -32,6 +37,7 @@ object CheckMeisai:
                     if totalTen != origTotalTen then
                       println((visit.patientId, visitId, visit.visitedAt, totalTen, origTotalTen))
                       throw new RuntimeException("different total ten")
+                    else println((visit.patientId, visitId, totalTen, "OK"))
                 }
             )
             .sequence_

@@ -25,7 +25,8 @@ object ZenkakuUtil:
       case (a, i) => a -> (valueStart + i).toChar
     })
 
-  val zenkakuToAlphaMap = alphaToZenkakuMap.map(kv => (kv._2, kv._1))
+  val zenkakuToAlphaMap = 
+    alphaToZenkakuMap.map(kv => (kv._2, kv._1)) ++ Map('－' -> '-')
 
   def toZenkakuChar(ch: Char): Char = alphaToZenkakuMap.getOrElse(ch, ch)
   def toHankakuChar(ch: Char): Char = zenkakuToAlphaMap.getOrElse(ch, ch)
