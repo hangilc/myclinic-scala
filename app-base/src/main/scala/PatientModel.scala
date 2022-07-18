@@ -32,7 +32,8 @@ class PatientInputs(modelOpt: Option[Patient]):
     val init = InitValue(lastNameProp, identity, "")
     val input = new StringInput(init.getInitValue(modelOpt))
     def getLabel: String = lastNameProp.getLabel
-    def getElement: HTMLElement = input.getElement(cls := "last-name-input")
+    def getElement: HTMLElement =
+      input.getElement(cls := "last-name-input", placeholder := "姓")
     def validate() = LastNameValidator.validate(input.getValue)
 
   object firstNameInput
@@ -42,7 +43,8 @@ class PatientInputs(modelOpt: Option[Patient]):
     val init = InitValue(firstNameProp, identity, "")
     val input = new StringInput(init.getInitValue(modelOpt))
     def getLabel: String = firstNameProp.getLabel
-    def getElement: HTMLElement = input.getElement(cls := "first-name-input")
+    def getElement: HTMLElement =
+      input.getElement(cls := "first-name-input", placeholder := "名")
     def validate() = FirstNameValidator.validate(input.getValue)
 
   object lastNameYomiInput
@@ -52,7 +54,8 @@ class PatientInputs(modelOpt: Option[Patient]):
     val init = InitValue(lastNameYomiProp, identity, "")
     val input = new StringInput(init.getInitValue(modelOpt))
     def getLabel: String = lastNameYomiProp.getLabel
-    def getElement: HTMLElement = input.getElement(cls := "last-name-yomi-input")
+    def getElement: HTMLElement =
+      input.getElement(cls := "last-name-yomi-input", placeholder := "姓（よみ）")
     def validate() = LastNameYomiValidator.validate(input.getValue)
 
   object firstNameYomiInput
@@ -62,7 +65,8 @@ class PatientInputs(modelOpt: Option[Patient]):
     val init = InitValue(firstNameYomiProp, identity, "")
     val input = new StringInput(init.getInitValue(modelOpt))
     def getLabel: String = firstNameYomiProp.getLabel
-    def getElement: HTMLElement = input.getElement(cls := "first-name-yomi-input")
+    def getElement: HTMLElement =
+      input.getElement(cls := "first-name-yomi-input", placeholder := "名（よみ）")
     def validate() = FirstNameYomiValidator.validate(input.getValue)
 
   object sexInput
@@ -131,7 +135,7 @@ class PatientInputs(modelOpt: Option[Patient]):
     phoneInput
   )
 
-  val formInputs = 
+  val formInputs =
     modelOpt.fold(formInputsEnter)(m =>
       LabelElement(
         patientIdProp.getLabel,
@@ -175,15 +179,24 @@ class PatientInputs(modelOpt: Option[Patient]):
 object PatientRepFactory:
   import PatientProps.*
 
-  class PatientIdRep(modelOpt: Option[Patient]) extends ModelPropRep(modelOpt, patientIdProp)
-  class LastNameRep(modelOpt: Option[Patient]) extends ModelPropRep(modelOpt, lastNameProp)
-  class FirstNameRep(modelOpt: Option[Patient]) extends ModelPropRep(modelOpt, firstNameProp)
-  class LastNameYomiRep(modelOpt: Option[Patient]) extends ModelPropRep(modelOpt, lastNameYomiProp)
-  class FirstNameYomiRep(modelOpt: Option[Patient]) extends ModelPropRep(modelOpt, firstNameYomiProp)
-  class SexRep(modelOpt: Option[Patient]) extends ModelPropRep(modelOpt, sexProp, stringify = _.rep + "性")
-  class BirthdayRep(modelOpt: Option[Patient]) extends ModelDatePropRep(modelOpt, birthdayProp)
-  class AddressRep(modelOpt: Option[Patient]) extends ModelPropRep(modelOpt, addressProp)
-  class PhoneRep(modelOpt: Option[Patient]) extends ModelPropRep(modelOpt, phoneProp)
+  class PatientIdRep(modelOpt: Option[Patient])
+      extends ModelPropRep(modelOpt, patientIdProp)
+  class LastNameRep(modelOpt: Option[Patient])
+      extends ModelPropRep(modelOpt, lastNameProp)
+  class FirstNameRep(modelOpt: Option[Patient])
+      extends ModelPropRep(modelOpt, firstNameProp)
+  class LastNameYomiRep(modelOpt: Option[Patient])
+      extends ModelPropRep(modelOpt, lastNameYomiProp)
+  class FirstNameYomiRep(modelOpt: Option[Patient])
+      extends ModelPropRep(modelOpt, firstNameYomiProp)
+  class SexRep(modelOpt: Option[Patient])
+      extends ModelPropRep(modelOpt, sexProp, stringify = _.rep + "性")
+  class BirthdayRep(modelOpt: Option[Patient])
+      extends ModelDatePropRep(modelOpt, birthdayProp)
+  class AddressRep(modelOpt: Option[Patient])
+      extends ModelPropRep(modelOpt, addressProp)
+  class PhoneRep(modelOpt: Option[Patient])
+      extends ModelPropRep(modelOpt, phoneProp)
 
 class PatientReps(modelOpt: Option[Patient]):
   import PatientProps.*

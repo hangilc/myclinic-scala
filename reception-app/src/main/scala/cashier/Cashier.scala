@@ -42,7 +42,7 @@ class Cashier extends SideMenuService:
           cls := "reception-cashier-search-button"
         )
       ),
-      button("新規患者", cls := "reception-cashier-new-patient-button"),
+      button("新規患者", cls := "reception-cashier-new-patient-button", onclick := (doNewPatient _)),
       Icons.menu(
         cls := "reception-cashier-menu-icon",
         onclick := (onMenu _),
@@ -86,6 +86,11 @@ class Cashier extends SideMenuService:
       )
     )
     m.open(event)
+
+  private def doNewPatient(): Unit =
+    val dlog = new NewPatientDialog()
+    dlog.open()
+    dlog.initFocus()
 
   private def doSearch(): Unit =
     val text = searchTextInput.value
