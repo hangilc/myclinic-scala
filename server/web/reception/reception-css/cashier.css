@@ -60,17 +60,31 @@
     padding-right: 0.7rem;
 }
 
+.reception-cashier-wqueue-table .col-age {
+    width: 3rem;
+}
+
 .reception-cashier-wqueue-table .cell-birthday {
     font-size: 0.8rem;
     vertical-align: middle;
 }
 
-.reception-cashier-wqueue-table .col-age {
-    width: 3rem;
+.reception-cashier-wqueue-table .col-manip {
+    width: 8rem;
 }
 
-.reception-cashier-wqueue-table .col-manip {
-    width: 3rem;
+.reception-cashier-wqueue-table .cell {
+    text-align: left;
+}
+
+.reception-cashier-wqueue-table .content {
+    display: flex;
+    align-items: center;
+    margin: 0;
+}
+
+.reception-cashier-wqueue-table .cell-manip .content a {
+    margin-left: 4px;
 }
 
 .reception-cashier-search-patient-result-dialog .selection {

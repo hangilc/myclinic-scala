@@ -10,29 +10,31 @@ import dev.fujiwara.kanjidate.KanjiDate
 import dev.fujiwara.kanjidate.DateUtil
 import java.time.LocalDate
 import dev.myclinic.scala.webclient.{Api, global}
+import scala.util.Failure
+import scala.util.Success
 
 case class WqueueRow(wqueue: Wqueue, visit: Visit, patient: Patient)(using
     DataId[Wqueue],
     ModelSymbol[Wqueue]
 ):
-  val stateLabelCell: HTMLElement = Table.cell
-  val patientIdCell: HTMLElement = Table.cell
-  val nameCell: HTMLElement = Table.cell
-  val yomiCell: HTMLElement = Table.cell
-  val sexCell: HTMLElement = Table.cell
-  val birthdayCell: HTMLElement = Table.cell
-  val ageCell: HTMLElement = Table.cell
-  val manageCell: HTMLElement = Table.cell
+  val stateLabelCell: HTMLElement = div
+  val patientIdCell: HTMLElement = div
+  val nameCell: HTMLElement = div
+  val yomiCell: HTMLElement = div
+  val sexCell: HTMLElement = div
+  val birthdayCell: HTMLElement = div
+  val ageCell: HTMLElement = div
+  val manageCell: HTMLElement = div
   val ele = Table.createRow(
     List(
-      stateLabelCell(cls := "cell-state"),
-      patientIdCell(cls := "cell-patient-id"),
-      nameCell(cls := "cell-name"),
-      yomiCell(cls := "cell-yomi"),
-      sexCell(cls := "cell-sex"),
-      ageCell(cls := "cell-age"),
-      birthdayCell(cls := "cell-birthday"),
-      manageCell(cls := "cell-manip")
+      Table.cell(cls := "cell-state cell", stateLabelCell(cls := "content")),
+      Table.cell(cls := "cell-patient-id cell", patientIdCell(cls := "content")),
+      Table.cell(cls := "cell-name cell", nameCell(cls := "content")),
+      Table.cell(cls := "cell-yomi cell", yomiCell(cls := "content")),
+      Table.cell(cls := "cell-sex cell", sexCell(cls := "content")),
+      Table.cell(cls := "cell-age cell", ageCell(cls := "content")),
+      Table.cell(cls := "cell-birthday cell", birthdayCell(cls := "content")),
+      Table.cell(cls := "cell-manip cell", manageCell(cls := "content"))
     )
   )
   ele(cls := "reception-cashier-wqueue-table-row")
@@ -41,6 +43,9 @@ case class WqueueRow(wqueue: Wqueue, visit: Visit, patient: Patient)(using
   private def addCashierButton(): Unit =
     manageCell(button("会計", onclick := (doCashier _)))
 
+  private def addDeleteLink(): Unit =
+    manageCell(a("削除", onclick := (doDelete _)))
+
   private def doCashier(): Unit =
     for
       visitEx <- Api.getVisitEx(visit.visitId)
@@ -48,6 +53,14 @@ case class WqueueRow(wqueue: Wqueue, visit: Visit, patient: Patient)(using
     yield
       val dlog = CashierDialog(meisai, visitEx)
       dlog.open()
+
+  private def doDelete(): Unit =
+    (for
+      _ <- Api.deleteVisit(wqueue.visitId)
+    yield ()).onComplete {
+      case Success (_) => ()
+      case Failure(ex) => ShowMessage.showError("この受付を削除できませんでした。")
+    }
 
   def updateManageCell(): Unit =
     import WaitState.*
@@ -58,6 +71,7 @@ case class WqueueRow(wqueue: Wqueue, visit: Visit, patient: Patient)(using
         addCashierButton()
       case _ => ()
     }
+    addDeleteLink()
 
   def updateUI(): Unit =
     stateLabelCell(innerText := wqueue.waitState.label)
