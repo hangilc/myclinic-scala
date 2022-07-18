@@ -25,6 +25,11 @@ a:hover {
   background-color: #eee
 }
 
+button {
+  margin-top: 2px;
+  margin-bottom: 2px;
+}
+
 button + button {
   margin-left: 3px;
 }

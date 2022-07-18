@@ -3,11 +3,13 @@ package dev.myclinic.scala.web.reception.cashier
 import dev.myclinic.scala.model.*
 import dev.myclinic.scala.web.appbase.EventFetcher
 import dev.fujiwara.domq.all.{*, given}
+import scala.language.implicitConversions
 import dev.fujiwara.domq.DataSource
 import org.scalajs.dom.HTMLElement
 import dev.fujiwara.kanjidate.KanjiDate
 import dev.fujiwara.kanjidate.DateUtil
 import java.time.LocalDate
+import dev.myclinic.scala.webclient.{Api, global}
 
 case class WqueueRow(wqueue: Wqueue, visit: Visit, patient: Patient)(using
     DataId[Wqueue],
@@ -36,6 +38,27 @@ case class WqueueRow(wqueue: Wqueue, visit: Visit, patient: Patient)(using
   ele(cls := "reception-cashier-wqueue-table-row")
   updateUI()
 
+  private def addCashierButton(): Unit =
+    manageCell(button("会計", onclick := (doCashier _)))
+
+  private def doCashier(): Unit =
+    for
+      visitEx <- Api.getVisitEx(visit.visitId)
+      meisai <- Api.getMeisai(visit.visitId)
+    yield
+      val dlog = CashierDialog(meisai, visitEx)
+      dlog.open()
+
+  def updateManageCell(): Unit =
+    import WaitState.*
+    manageCell(clear)
+    wqueue.waitState match {
+      case WaitExam | WaitReExam => ()
+      case WaitCashier => 
+        addCashierButton()
+      case _ => ()
+    }
+
   def updateUI(): Unit =
     stateLabelCell(innerText := wqueue.waitState.label)
     patientIdCell(innerText := String.format("%04d", patient.patientId))
@@ -44,7 +67,7 @@ case class WqueueRow(wqueue: Wqueue, visit: Visit, patient: Patient)(using
     sexCell(innerText := patient.sex.rep)
     ageCell(innerText := age(patient.birthday).toString + "才")
     birthdayCell(innerText := birthday(patient.birthday))
-    manageCell(clear)
+    updateManageCell()
 
   def birthday(d: LocalDate): String = KanjiDate.dateToKanji(d)
 
