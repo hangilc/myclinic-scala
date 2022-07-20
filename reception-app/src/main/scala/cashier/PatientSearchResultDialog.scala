@@ -116,6 +116,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
   private def doDisp(state: State, next: Transition => Unit): Unit =
     val hokenArea = div
     val dispElement = new PatientReps(Some(state.patient)).dispPanel
+    dlog.title(clear, "患者情報")
     dlog.body(
       clear,
       div(
@@ -220,6 +221,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
     yield List.empty[Hoken] ++ shahokokuho ++ koukikourei ++ roujin ++ kouhi
 
   private def hokenHistory(state: State, next: Transition => Unit): Unit =
+    dlog.title(clear, "保険履歴")
     dlog.body(
       clear,
       div("Loading...")
@@ -264,10 +266,11 @@ case class PatientSearchResultDialog(patients: List[Patient]):
     val boxWrapper = div
     val boxes = CompSortList[HokenBox](boxWrapper)
     val dispChoicePublisher = new LocalEventPublisher[(HokenKind, Boolean)]()
+    dlog.title(clear, "保険履歴")
     boxes.set(state.hokenList.map(h => HokenBox(h, countMaps, onEdit, onDelete)))
     dlog.body(
       clear,
-      patientBlock(state.patient, "保険履歴"),
+      patientBlock(state.patient),
       menu,
       boxWrapper,
       menu
@@ -324,9 +327,10 @@ case class PatientSearchResultDialog(patients: List[Patient]):
   ): Unit =
     val panel = new ShahokokuhoReps(Some(shahokokuho)).dispPanel
     val renewButton = button
+    dlog.title(clear, "社保国保")
     dlog.body(
       clear,
-      patientBlock(state.patient, "社保国保"),
+      patientBlock(state.patient),
       panel
     )
     dlog.commands(
@@ -383,9 +387,10 @@ case class PatientSearchResultDialog(patients: List[Patient]):
   ): Unit =
     val inputs = new ShahokokuhoInputs(Some(shahokokuho))
     val errBox = ErrorBox()
+    dlog.title(clear, "社保国保編集")
     dlog.body(
       clear,
-      patientBlock(state.patient, "社保国保編集"),
+      patientBlock(state.patient),
       inputs.formPanel,
       errBox.ele
     )
@@ -423,9 +428,10 @@ case class PatientSearchResultDialog(patients: List[Patient]):
   ): Unit =
     val panel: HTMLElement = new KoukikoureiReps(Some(koukikourei)).dispPanel
     val renewButton = button
+    dlog.title(clear, "後期高齢")
     dlog.body(
       clear,
-      patientBlock(state.patient, "後期高齢"),
+      patientBlock(state.patient),
       panel
     )
     dlog.commands(
@@ -482,9 +488,10 @@ case class PatientSearchResultDialog(patients: List[Patient]):
   ): Unit =
     val inputs = new KoukikoureiInputs(Some(koukikourei))
     val errBox = ErrorBox()
+    dlog.title(clear, "後期高齢編集")
     dlog.body(
       clear,
-      patientBlock(state.patient, "後期高齢編集"),
+      patientBlock(state.patient),
       inputs.formPanel,
       errBox.ele
     )
@@ -522,9 +529,10 @@ case class PatientSearchResultDialog(patients: List[Patient]):
   ): Unit =
     val panel: HTMLElement = new KouhiReps(Some(kouhi)).dispPanel
     val renewButton = button
+    dlog.title(clear, "公費")
     dlog.body(
       clear,
-      patientBlock(state.patient, "公費"),
+      patientBlock(state.patient),
       panel
     )
     dlog.commands(
@@ -578,9 +586,10 @@ case class PatientSearchResultDialog(patients: List[Patient]):
   ): Unit =
     val inputs = new KouhiInputs(Some(kouhi))
     val errBox = ErrorBox()
+    dlog.title(clear, "公費")
     dlog.body(
       clear,
-      patientBlock(state.patient, "公費"),
+      patientBlock(state.patient),
       inputs.formPanel,
       errBox.ele
     )
@@ -608,9 +617,10 @@ case class PatientSearchResultDialog(patients: List[Patient]):
   )(state: State, next: Transition => Unit): Unit =
     val roujin: Roujin = state.getRoujin(roujinId).get
     val panel: HTMLElement = new RoujinReps(Some(roujin)).dispPanel
+    dlog.title(clear, "老人保健")
     dlog.body(
       clear,
-      patientBlock(state.patient, "老人保健"),
+      patientBlock(state.patient),
       panel
     )
     dlog.commands(
@@ -618,10 +628,9 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       button("戻る", onclick := (() => next(GoBack(state))))
     )
 
-  private def patientBlock(patient: Patient, msg: String = ""): HTMLElement =
-    val extra = if msg.isEmpty then "" else s"${msg}："
+  private def patientBlock(patient: Patient): HTMLElement =
     div(
-      innerText := extra + s"(${patient.patientId}) ${patient.lastName} ${patient.firstName}",
+      innerText := s"(${patient.patientId}) ${patient.lastName} ${patient.firstName}",
       cls := "patient-block"
     )
 
@@ -630,9 +639,10 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       cancel: State => Transition = GoBack(_)
   )(state: State, next: Transition => Unit): Unit =
     val errBox = ErrorBox()
+    dlog.title(clear, "新規社保国保")
     dlog.body(
       clear,
-      patientBlock(state.patient, "新規社保国保"),
+      patientBlock(state.patient),
       inputs.formPanel,
       errBox.ele
     )
@@ -665,9 +675,10 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       cancel: State => Transition = GoBack(_)
   )(state: State, next: Transition => Unit): Unit =
     val errBox = ErrorBox()
+    dlog.title(clear, "後期高齢入力")
     dlog.body(
       clear,
-      patientBlock(state.patient, "後期高齢入力"),
+      patientBlock(state.patient),
       inputs.formPanel,
       errBox.ele
     )
@@ -693,9 +704,10 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       cancel: State => Transition = GoBack(_)
   )(state: State, next: Transition => Unit): Unit =
     val errBox = ErrorBox()
+    dlog.title(clear, "公費入力")
     dlog.body(
       clear,
-      patientBlock(state.patient, "公費入力"),
+      patientBlock(state.patient),
       inputs.formPanel,
       errBox.ele
     )
@@ -719,9 +731,10 @@ case class PatientSearchResultDialog(patients: List[Patient]):
   private def editPatient(state: State, next: Transition => Unit): Unit =
     val inputs = new PatientInputs(Some(state.patient))
     val errBox = ErrorBox()
+    dlog.title(clear, "患者情報編集")
     dlog.body(
       clear,
-      patientBlock(state.patient, "患者情報編集"),
+      patientBlock(state.patient),
       inputs.formPanel,
       errBox.ele
     )
