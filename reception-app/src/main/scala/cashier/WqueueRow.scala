@@ -94,7 +94,8 @@ case class WqueueRow(var wqueue: Wqueue, visit: Visit, var patient: Patient)(usi
     }
 
   private def doRecords(): Unit =
-    ???
+    val dlog = new RecordDialog(patient)
+    dlog.open()
 
   def updateManageCell(): Unit =
     import WaitState.*

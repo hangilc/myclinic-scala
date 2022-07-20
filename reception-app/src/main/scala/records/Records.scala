@@ -97,7 +97,8 @@ class Records() extends SideMenuService:
     }
 
   def start(patient: Patient): Unit =
-    val r = RecordUI(patient)
-    for
-      _ <- r.init()
-    yield eRecord(clear, children := List(r.ele))
+    ()
+    // val r = RecordUI(patient)
+    // for
+    //   _ <- r.init()
+    // yield eRecord(clear, children := List(r.ele))

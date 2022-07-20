@@ -1,5 +1,6 @@
 @import url("./reception-css/reception-general.css");
 @import url("./reception-css/cashier.css");
+@import url("./reception-css/cashier-record-dialog.css");
 
 .reception-service-title {
   font-size: 1.5rem;

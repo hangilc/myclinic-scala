@@ -11,4 +11,10 @@ import java.time.{LocalDate, LocalDateTime}
 import org.scalajs.dom.{HTMLElement}
 
 class TextBlock(text: Text):
-  val ele = div(innerText := text.content)
+  val ele = div(innerText := format(text.content))
+
+  def format(content: String): String =
+    if content.startsWith("院外処方\nＲｐ）") then
+      val re = raw"　+".r
+      re.replaceAllIn(content, " ")
+    else content
