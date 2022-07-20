@@ -5,7 +5,6 @@ import dev.myclinic.scala.web.appbase.PageLayout1
 import dev.myclinic.scala.web.appbase.SideMenuProcs
 import dev.myclinic.scala.web.appbase.SideMenuService
 import dev.myclinic.scala.web.reception.cashier.Cashier
-import dev.myclinic.scala.web.reception.records.Records
 import dev.myclinic.scala.web.reception.scan.Scan
 import dev.myclinic.scala.webclient.global
 import org.scalajs.dom.document
@@ -25,7 +24,6 @@ object JsMain:
   ): List[(String, SideMenuProcs => SideMenuService)] =
     List(
       "メイン" -> (_ => new Cashier()),
-      "診療記録" -> (_ => Records()),
       "スキャン" -> (_ => Scan(mock))
     )
 

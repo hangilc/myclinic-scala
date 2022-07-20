@@ -4,6 +4,10 @@
     margin-bottom: 10px;
 }
 
+.reception-cashier-head-box a {
+    margin-left: 4px;
+}
+
 .reception-service-title {
     position: relative;
     top: 2px;

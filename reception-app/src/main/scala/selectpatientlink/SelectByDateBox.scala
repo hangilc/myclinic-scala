@@ -1,4 +1,4 @@
-package dev.myclinic.scala.web.reception.records
+package dev.myclinic.scala.web.reception.selectpatientlink
 
 import dev.myclinic.scala.web.appbase.SideMenuService
 import dev.fujiwara.domq.all.{*, given}

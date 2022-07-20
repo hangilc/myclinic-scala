@@ -1,33 +1,22 @@
-package dev.myclinic.scala.web.reception.records
+package dev.myclinic.scala.web.reception.selectpatientlink
 
-import dev.myclinic.scala.web.appbase.SideMenuService
-import dev.fujiwara.domq.ElementQ.{*, given}
-import dev.fujiwara.domq.Html.{*, given}
-import dev.fujiwara.domq.Modifiers.{*, given}
-import dev.fujiwara.domq.{Icons, ShowMessage, PullDown, PullDownMenu}
+import dev.fujiwara.domq.all.{*, given}
 import scala.language.implicitConversions
 import org.scalajs.dom.{HTMLElement, HTMLInputElement}
 import scala.concurrent.Future
 import org.scalajs.dom.MouseEvent
-import dev.myclinic.scala.webclient.Api
-import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
+import dev.myclinic.scala.webclient.{Api, global}
 
 import dev.myclinic.scala.model.Patient
 import scala.util.Success
 import scala.util.Failure
 import java.time.LocalDate
+import dev.fujiwara.domq.PullDownMenu
 
-class Records() extends SideMenuService:
-  val selectPatientButton = PullDown.createButtonAnchor("患者選択")
-  val eRecord = div()
-  override def getElement: HTMLElement =
-    div(cls := "records", cls := "content")(
-      div(cls := "header")(
-        h1("診療記録"),
-        selectPatientButton(onclick := (onSelectPatient _))
-      ),
-      eRecord
-    )
+class SelectPatientPullDown:
+  val onSelectPublisher = new LocalEventPublisher[Patient]
+  val selectPatientLink = PullDown.createLinkAnchor("診療録")(onclick := (onSelectPatient _))
+  val ele = selectPatientLink
 
   def onSelectPatient(event: MouseEvent): Unit =
     val m = new PullDownMenu()
@@ -40,7 +29,7 @@ class Records() extends SideMenuService:
         "日付別" -> (onSelectByDate _)
       )
     )
-    m.open(c, f => PullDown.locatePullDownMenu(selectPatientButton, f))
+    m.open(c, f => PullDown.locatePullDownMenu(selectPatientLink, f))
 
   def onSelectFromWqueue(): Unit =
     for
@@ -53,31 +42,31 @@ class Records() extends SideMenuService:
       val m = new PullDownMenu()
       val c = PullDown.createContent(() => m.close(), patients.map(
         patient =>
-          patient.fullName("") -> (() => start(patient))
+          patient.fullName("") -> (() => onSelectPublisher.publish(patient))
       ))
-      m.open(c, f => PullDown.locatePullDownMenu(selectPatientButton, f))
+      m.open(c, f => PullDown.locatePullDownMenu(selectPatientLink, f))
     }
 
   def onSelectFromSearch(): Unit =
     val m = new PullDownMenu()
     val box = new SearchPatientBox(patient => {
       m.close()
-      start(patient)
+      onSelectPublisher.publish(patient)
     })
     box.ele(cls := "domq-context-menu")
-    m.open(box.ele, f => PullDown.locatePullDownMenu(selectPatientButton, f))
+    m.open(box.ele, f => PullDown.locatePullDownMenu(selectPatientLink, f))
     
   def onSelectFromRecent(): Unit =
     val m = new PullDownMenu()
     val box = new RecentVisitBox(patient => {
       m.close()
-      start(patient)
+      onSelectPublisher.publish(patient)
     })
     box.ele(cls := "domq-context-menu")
     (for
       _ <- box.init()
     yield {
-      m.open(box.ele, f => PullDown.locatePullDownMenu(selectPatientButton, f))
+      m.open(box.ele, f => PullDown.locatePullDownMenu(selectPatientLink, f))
     }).onComplete {
       case Success(_) => ()
       case Failure(ex) => System.err.println(ex.getMessage)
@@ -87,18 +76,12 @@ class Records() extends SideMenuService:
     val m = new PullDownMenu()
     val box = new SelectByDateBox(patient => {
       m.close()
-      start(patient)
+      onSelectPublisher.publish(patient)
     })
     box.ele(cls := "domq-context-menu")
     for
       _ <- box.init()
     yield {
-      m.open(box.ele, f => PullDown.locatePullDownMenu(selectPatientButton, f))
+      m.open(box.ele, f => PullDown.locatePullDownMenu(selectPatientLink, f))
     }
 
-  def start(patient: Patient): Unit =
-    ()
-    // val r = RecordUI(patient)
-    // for
-    //   _ <- r.init()
-    // yield eRecord(clear, children := List(r.ele))

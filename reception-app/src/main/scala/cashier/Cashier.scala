@@ -19,6 +19,7 @@ import scala.collection.mutable
 import dev.fujiwara.domq.CompSortList
 import dev.fujiwara.domq.ResourceCleanups
 import dev.myclinic.scala.web.reception.ReceptionBus
+import dev.myclinic.scala.web.reception.selectpatientlink.SelectPatientPullDown
 
 class Cashier extends SideMenuService:
   val unsubs = List(
@@ -26,6 +27,11 @@ class Cashier extends SideMenuService:
     ReceptionBus.wqueueDeletedPublisher.subscribe(onWqueueDeleted)
   )
   val searchTextInput = input
+  val recordsMenu = new SelectPatientPullDown()
+  recordsMenu.onSelectPublisher.subscribe(patient => 
+    val dlog = new RecordDialog(patient)
+    dlog.open()
+  )
   val table = new Table
   initTable()
   private val rows = new CompSortList[WqueueRow](table.ele)
@@ -43,6 +49,7 @@ class Cashier extends SideMenuService:
         )
       ),
       button("新規患者", cls := "reception-cashier-new-patient-button", onclick := (doNewPatient _)),
+      recordsMenu.ele,
       Icons.menu(
         cls := "reception-cashier-menu-icon",
         onclick := (onMenu _),
