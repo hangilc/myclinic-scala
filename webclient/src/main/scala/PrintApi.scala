@@ -17,7 +17,7 @@ object PrintApi extends ApiBase:
   trait Api:
     given Decoder[Option[String]] = Decoder.decodeOption[String]
 
-    def beep(): Future[Unit] =
+    def beep(): Future[Boolean] =
       get("beep", Params())
 
     def listPrintSetting(): Future[List[String]] =

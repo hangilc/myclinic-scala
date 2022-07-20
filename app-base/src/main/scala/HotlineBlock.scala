@@ -45,6 +45,7 @@ class HotlineBlock(sendAs: String, sendTo: String)(using fetcher: EventFetcher):
           Api.beep()
       })
       fetcher.hotlineBeepEventPublisher.subscribe(event => {
+        println(("beep", event))
         if event.recipient == sendAs then Api.beep()
       })
 
