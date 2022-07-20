@@ -155,7 +155,11 @@ case class PatientSearchResultDialog(patients: List[Patient]):
         a(
           "新規後期高齢",
           onclick := (() =>
-            next(GoForward(newKoukikourei(new KoukikoureiInputs(None)), state))
+            for
+              inputs <- createKoukikoureiInputs(None)
+            yield
+              next(GoForward(newKoukikourei(inputs), state))
+            ()
           )
         ),
         "|",
@@ -754,25 +758,3 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       case Failure(ex) => ShowMessage.showError(ex.toString)
     }
 
-    // val panel = new PatientReps(Some(patient)).dispPanel
-    // dlog.body(
-    //   clear,
-    //   patientBlock(patient, "診察受付"),
-    //   panel,
-    //   div("この患者の診察を受け付けますか？")
-    // )
-    // dlog.commands(
-    //   clear,
-    //   button(
-    //     "受付実行",
-    //     onclick := (() =>
-    //       Api.startVisit(patient.patientId, LocalDateTime.now()).onComplete {
-    //         case Success(_) =>
-    //           dlog.close()
-    //           next(GoBack(state))
-    //         case Failure(ex) => ShowMessage.showError(ex.toString)
-    //       }
-    //     )
-    //   ),
-    //   button("キャンセル", onclick := (() => next(GoBack(state))))
-    // )
