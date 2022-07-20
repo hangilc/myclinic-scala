@@ -81,6 +81,9 @@ class EventPublishers:
       case (Payment.modelSymbol, C) => onPaymentCreated(event.data.asInstanceOf[Payment])
       case (Payment.modelSymbol, U) => onPaymentUpdated(event.data.asInstanceOf[Payment])
       case (Payment.modelSymbol, D) => onPaymentDeleted(event.data.asInstanceOf[Payment])
+      case (Patient.modelSymbol, C) => onPatientCreated(event.data.asInstanceOf[Patient])
+      case (Patient.modelSymbol, U) => onPatientUpdated(event.data.asInstanceOf[Patient])
+      case (Patient.modelSymbol, D) => onPatientDeleted(event.data.asInstanceOf[Patient])
       case (Hotline.modelSymbol, C) => hotlineCreated.publishCreated(event)
       case _ => ()
     }
@@ -93,6 +96,9 @@ class EventPublishers:
   def onWqueueCreated(wqueue: Wqueue): Unit = ()
   def onWqueueUpdated(wqueue: Wqueue): Unit = ()
   def onWqueueDeleted(wqueue: Wqueue): Unit = ()
+  def onPatientCreated(patient: Patient): Unit = ()
+  def onPatientUpdated(patient: Patient): Unit = ()
+  def onPatientDeleted(patient: Patient): Unit = ()
 
 
 

@@ -14,8 +14,9 @@ import scala.util.Failure
 import scala.util.Success
 import dev.fujiwara.domq.ResourceCleanups
 import dev.myclinic.scala.web.reception.ReceptionBus
+import dev.myclinic.scala.web.reception.scan.PatientSearch
 
-case class WqueueRow(var wqueue: Wqueue, visit: Visit, patient: Patient)(using
+case class WqueueRow(var wqueue: Wqueue, visit: Visit, var patient: Patient)(using
     DataId[Wqueue],
     ModelSymbol[Wqueue]
 ):
@@ -42,7 +43,8 @@ case class WqueueRow(var wqueue: Wqueue, visit: Visit, patient: Patient)(using
   ele(cls := "reception-cashier-wqueue-table-row")
   updateUI()
 
-  val unsubs = List(ReceptionBus.wqueueUpdatedPublisher.subscribe(onWqueueUpdated))
+  val unsubs = List(ReceptionBus.wqueueUpdatedPublisher.subscribe(onWqueueUpdated),
+  ReceptionBus.patientUpdatedPublisher.subscribe(onPatientUpdated))
 
   private def onWqueueUpdated(updated: Wqueue): Unit =
     if updated.visitId == wqueue.visitId then
@@ -50,11 +52,22 @@ case class WqueueRow(var wqueue: Wqueue, visit: Visit, patient: Patient)(using
       updateStateLabel()
       updateManageCell()
 
+  private def onPatientUpdated(updated: Patient): Unit =
+    if updated.patientId == patient.patientId then
+      patient = updated
+      updateUI()
+
   private def addCashierButton(): Unit =
     manageCell(button("会計", onclick := (doCashier _)))
 
   private def addDeleteLink(): Unit =
     manageCell(a("削除", onclick := (doDelete _)))
+
+  private def addRecordsLink(): Unit =
+    manageCell(a("診療録", onclick := (doRecords _)))
+
+  private def addPatientLink(): Unit =
+    manageCell(a("患者", onclick := (doPatient _)))
 
   private def doCashier(): Unit =
     for
@@ -68,6 +81,10 @@ case class WqueueRow(var wqueue: Wqueue, visit: Visit, patient: Patient)(using
     val name = s"(${patient.patientId}) ${patient.lastName}${patient.firstName}"
     ShowMessage.confirm(s"${name}\n本当に、この受付を削除していいですか？")(deleteVisit)
 
+  private def doPatient(): Unit =
+    val dlog = new PatientSearchResultDialog(List(patient))
+    dlog.open()
+
   private def deleteVisit(): Unit =
     (for
       _ <- Api.deleteVisit(wqueue.visitId)
@@ -75,6 +92,9 @@ case class WqueueRow(var wqueue: Wqueue, visit: Visit, patient: Patient)(using
       case Success (_) => ()
       case Failure(ex) => ShowMessage.showError("この受付を削除できませんでした。")
     }
+
+  private def doRecords(): Unit =
+    ???
 
   def updateManageCell(): Unit =
     import WaitState.*
@@ -85,6 +105,8 @@ case class WqueueRow(var wqueue: Wqueue, visit: Visit, patient: Patient)(using
         addCashierButton()
       case _ => ()
     }
+    addRecordsLink()
+    addPatientLink()
     addDeleteLink()
 
   private def updateStateLabel(): Unit =

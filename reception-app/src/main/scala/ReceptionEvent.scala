@@ -11,31 +11,15 @@ object ReceptionEvent:
       ReceptionBus.wqueueUpdatedPublisher.publish(wqueue)
     override def onWqueueDeleted(wqueue: Wqueue): Unit =
       ReceptionBus.wqueueDeletedPublisher.publish(wqueue)
+    override def onPatientCreated(patient: Patient): Unit =
+      ReceptionBus.patientCreatedPublisher.publish(patient)
+    override def onPatientUpdated(patient: Patient): Unit =
+      ReceptionBus.patientUpdatedPublisher.publish(patient)
+    override def onPatientDeleted(patient: Patient): Unit =
+      ReceptionBus.patientDeletedPublisher.publish(patient)
 
   given fetcher: EventFetcher = new EventFetcher
   fetcher.appModelEventPublisher.subscribe(event => publishers.publish(event))
   fetcher.hotlineBeepEventPublisher.subscribe(event =>
     publishers.publish(event)
   )
-
-  // fetcher.appModelEventPublisher.subscribe(dispatch _)
-
-  def dispatch(event: AppModelEvent): Unit =
-    print(("event", event))
-    val C = AppModelEvent.createdSymbol
-    val U = AppModelEvent.updatedSymbol
-    val D = AppModelEvent.deletedSymbol
-    (event.model, event.kind) match
-      case (Patient.modelSymbol, C) =>
-        ReceptionBus.patientCreatedPublisher.publish(event.dataAs[Patient])
-      case (Patient.modelSymbol, U) =>
-        ReceptionBus.patientUpdatedPublisher.publish(event.dataAs[Patient])
-      case (Patient.modelSymbol, D) =>
-        ReceptionBus.patientDeletedPublisher.publish(event.dataAs[Patient])
-      case (Visit.modelSymbol, C) =>
-        ReceptionBus.visitCreatedPublisher.publish(event.dataAs[Visit])
-      case (Visit.modelSymbol, U) =>
-        ReceptionBus.visitUpdatedPublisher.publish(event.dataAs[Visit])
-      case (Visit.modelSymbol, D) =>
-        ReceptionBus.visitDeletedPublisher.publish(event.dataAs[Visit])
-      case _ => ()

@@ -15,7 +15,7 @@ import scala.util.Failure
 
 case class PatientSearchResultDialog(patients: List[Patient]):
   val selection = Selection[Patient](patients, p => div(format(p)))
-  selection.onSelect(patient => start(patient))
+  selection.onSelect(patient => start(patient, disp))
   val dlog = new ModalDialog3()
   dlog.content(cls := "reception-cashier-search-patient-result-dialog")
   dlog.title("患者検索結果")
@@ -23,7 +23,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
   dlog.commands(
     button("閉じる", onclick := (() => dlog.close()))
   )
-  if patients.size == 1 then start(patients.head)
+  if patients.size == 1 then start(patients.head, disp)
 
   def open(): Unit =
     dlog.open()
@@ -92,17 +92,17 @@ case class PatientSearchResultDialog(patients: List[Patient]):
           case GoForward(next, state)  => run(next, state, f :: stack)
           case GoTo(next, state, sfun) => run(next, state, sfun(stack))
           case GoBack(state) =>
-            if stack.isEmpty then System.err.println("stack under flow")
+            if stack.isEmpty then dlog.close()
             else run(stack.head, state, stack.tail)
           case Exit => dlog.close()
         }
     )
 
-  private def start(patient: Patient): Unit =
+  def start(patient: Patient, f: DlogFun): Unit =
     for hokenList <- listHoken(patient.patientId)
     yield
       val state = State(patient, hokenList)
-      run(disp, state, List.empty)
+      run(f, state, List.empty)
 
   private def disp(state: State, next: Transition => Unit): Unit =
     import Hoken.*
@@ -728,7 +728,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       button("キャンセル", onclick := (() => next(cancel(state))))
     )
 
-  private def editPatient(state: State, next: Transition => Unit): Unit =
+  def editPatient(state: State, next: Transition => Unit): Unit =
     val inputs = new PatientInputs(Some(state.patient))
     val errBox = ErrorBox()
     dlog.title(clear, "患者情報編集")
