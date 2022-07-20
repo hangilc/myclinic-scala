@@ -38,11 +38,13 @@ object KoukikoureiProps:
 class KoukikoureiInputs(modelOpt: Option[Koukikourei]):
   import KoukikoureiProps.*
 
+  def defaultKoukikoureiHokenshaBangou: String = ""
+
   object hokenshaBangouInput
       extends LabelProvider
       with ElementProvider
       with DataValidator[HokenshaBangouError.type, String]:
-    val init = InitValue(hokenshaBangouProp, identity, "")
+    val init = InitValue(hokenshaBangouProp, identity, defaultKoukikoureiHokenshaBangou)
     val input = new StringInput(init.getInitValue(modelOpt))
     def getLabel: String = hokenshaBangouProp.getLabel
     def getElement: HTMLElement = input.getElement(cls := "hokensha-input")

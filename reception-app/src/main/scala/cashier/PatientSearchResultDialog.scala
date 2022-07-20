@@ -649,6 +649,13 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       button("キャンセル", onclick := (() => next(cancel(state))))
     )
 
+  private def createKoukikoureiInputs(modelOpt: Option[Koukikourei]): Future[KoukikoureiInputs] =
+    for
+      bangou <- Api.defaultKoukikoureiHokenshaBangou()
+    yield 
+      new KoukikoureiInputs(modelOpt):
+        override def defaultKoukikoureiHokenshaBangou: String = bangou.toString
+
   private def newKoukikourei(
       inputs: KoukikoureiInputs,
       cancel: State => Transition = GoBack(_)

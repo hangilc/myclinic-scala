@@ -142,6 +142,9 @@ object Config extends ConfigCirce:
     readYaml[List[Map[String, String | List[String]]]](file)
       .map(m => DiseaseExample.fromMap(m))
 
+  def defaultKoukikoureiHokenshaBangou: Int =
+    39131156 // 杉並区
+
   def readYaml[T: Decoder](file: File): T =
     val reader: _root_.java.io.Reader = _root_.java.io.FileReader(file)
     try

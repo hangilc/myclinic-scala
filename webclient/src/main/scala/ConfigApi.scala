@@ -17,5 +17,8 @@ object ConfigApi extends ApiBase:
     def listDiseaseExample(): Future[List[DiseaseExample]] =
       get("list-disease-example", Params())
 
+    def defaultKoukikoureiHokenshaBangou(): Future[Int] =
+      get("default-koukikourei-hokensha-bangou", Params())
+
 
       
