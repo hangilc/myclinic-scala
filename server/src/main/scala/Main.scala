@@ -73,11 +73,6 @@ object Main extends IOApp:
   )
   val staticService = fileService[IO](FileService.Config("./web", "/"))
 
-  // val deployTestService: HttpRoutes[IO] =
-  //   if Files.exists(java.nio.file.Path.of("./deploy")) then
-  //     fileService[IO](FileService.Config("./deploy", "/"))
-  //   else HttpRoutes[IO](_ => OptionT.some(Response.notFound[IO]))
-
   def buildServer(
       topic: Topic[IO, WebSocketFrame],
       port: Int,
@@ -92,18 +87,17 @@ object Main extends IOApp:
     builder
       .withHttpWebSocketApp(websocketBuilder =>
         Router(
-          "/appoint" -> HttpRoutes.of[IO] { case GET -> Root =>
-            TemporaryRedirect(Location(uri"/appoint/index.html"))
-          },
-          "/reception" -> HttpRoutes.of[IO] { case GET -> Root =>
-            TemporaryRedirect(Location(uri"/reception/index.html"))
-          },
-          "/practice" -> HttpRoutes.of[IO] { case GET -> Root =>
-            TemporaryRedirect(Location(uri"/practice/index.html"))
-          },
+          // "/appoint" -> HttpRoutes.of[IO] { case GET -> Root =>
+          //   TemporaryRedirect(Location(uri"/appoint/index.html"))
+          // },
+          // "/reception" -> HttpRoutes.of[IO] { case GET -> Root =>
+          //   TemporaryRedirect(Location(uri"/reception/index.html"))
+          // },
+          // "/practice" -> HttpRoutes.of[IO] { case GET -> Root =>
+          //   TemporaryRedirect(Location(uri"/practice/index.html"))
+          // },
           "/api" -> RestService.routes,
           "/ws" -> ws(topic, websocketBuilder),
-          // "/deploy" -> deployTestService,
           "/portal-tmp" -> portalTmpStaticService,
           "/" -> staticService
         ).orNotFound

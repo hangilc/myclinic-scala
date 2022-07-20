@@ -5,6 +5,12 @@
   font-size: 1.5rem;
 }
 
+.domq-date-picker::before {
+  content: "「年」「月」をクリックできます。";
+  font-size: 75%;
+  color: gray;
+}
+
 /* Patient Management ***************************************************************/
 
 .patient-management .search-patient-box {

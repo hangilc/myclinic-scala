@@ -12,6 +12,7 @@ import dev.myclinic.scala.util.ZenkakuUtil
 import cats.data.Validated.Valid
 import cats.data.Validated.Invalid
 import dev.fujiwara.kanjidate.DateUtil
+import dev.myclinic.scala.apputil.HokenUtil
 
 object KoukikoureiProps:
   object koukikoureiIdProp
@@ -95,18 +96,17 @@ class KoukikoureiInputs(modelOpt: Option[Koukikourei]):
       with DataValidator[ValidUptoError.type, ValidUpto]:
     import dev.fujiwara.domq.dateinput.DateInput.Suggest
     val init = InitValue(validUptoProp, identity, ValidUpto(None))
-    given Suggest = Suggest(() => validUptoSuggest)
+    given Suggest = Suggest(() => Some(validUptoSuggest))
     val input = new ValidUptoInput(init.getInitValue(modelOpt))
     def getLabel: String = validUptoProp.getLabel
     def getElement: HTMLElement = input.getElement(cls := "valid-upto-input")
     def validate() = ValidUptoValidator.validate(input.getValue)
 
-  private def validUptoSuggest: Option[LocalDate] =
-    val anchor = validFromInput.validate() match {
-      case Valid(d)   => d
-      case Invalid(_) => LocalDate.now()
+  private def validUptoSuggest: LocalDate =
+    validFromInput.validate() match {
+      case Valid(d)   => HokenUtil.suggestKoukikoureiValidUpto(d)
+      case Invalid(_) => HokenUtil.suggestKoukikoureiValidUpto(LocalDate.now())
     }
-    Some(DateUtil.nextDateOf(7, 31, anchor))
 
   val inputs = (
     hokenshaBangouInput,

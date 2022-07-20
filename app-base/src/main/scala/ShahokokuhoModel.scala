@@ -166,6 +166,7 @@ class ShahokokuhoInputs(modelOpt: Option[Shahokokuho]):
   )
 
   private def validUptoSuggest(): Option[LocalDate] =
+    println(("validUptoSuggest", validFromInput.getValue))
     validFromInput.getValue match {
       case Some(d) => Some(d.plusYears(1).minusDays(1))
       case None    => Some(LocalDate.now())

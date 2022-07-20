@@ -328,7 +328,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
     dlog.commands(
       clear,
       renewButton(
-        "更新",
+        "保険更新",
         displayNone,
         onclick := (() =>
           shahokokuho.validUpto.value.foreach(d => {
@@ -427,7 +427,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
     dlog.commands(
       clear,
       renewButton(
-        "更新",
+        "保険更新",
         displayNone,
         onclick := (() =>
           koukikourei.validUpto.value.foreach(d => {
@@ -526,7 +526,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
     dlog.commands(
       clear,
       renewButton(
-        "更新",
+        "保険更新",
         displayNone,
         onclick := (() =>
           kouhi.validUpto.value.foreach(d => {

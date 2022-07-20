@@ -3,6 +3,7 @@ package dev.myclinic.scala.apputil
 import dev.myclinic.scala.model.*
 import dev.myclinic.scala.util.HokenRep
 import java.time.LocalDate
+import math.Ordered.orderingToOrdered
 
 object HokenUtil:
   def hokenRep(visit: VisitEx): String =
@@ -45,6 +46,18 @@ object HokenUtil:
     List.empty[
       Hoken
     ] ++ shahokokuhoList ++ koukikoureiList ++ roujinList ++ kouhiList
+
+  def suggestKoukikoureiValidUpto(validFrom: LocalDate): LocalDate =
+    if validFrom >= LocalDate.of(2022, 8, 1) && validFrom <= LocalDate.of(
+        2022,
+        9,
+        30
+      )
+    then LocalDate.of(2022, 9, 30)
+    else
+      val a = LocalDate.of(validFrom.getYear, 7, 31)
+      if validFrom <= a then a
+      else a.plusYears(1)
 
   object Ext:
     extension (s: Shahokokuho)
