@@ -180,7 +180,7 @@ object DbVisitExPrim:
       conductIds <- DbConductPrim.listConductIdForVisit(visitId)
       conducts <- listConductEx(conductIds)
       charge <- DbChargePrim.getCharge(visitId).option
-      payment <- DbPaymentPrim.findLastPayment(visitId).option
+      payment <- DbPaymentPrim.getLastPayment(visitId).option
     yield VisitEx(visit, patient, hoken, texts, drugs, shinryouList, conducts, charge, payment)
 
 

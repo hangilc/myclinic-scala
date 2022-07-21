@@ -20,7 +20,7 @@ trait DbPayment extends Mysql:
     """.query[Int].unique)
 
   def findLastPayment(visitId: Int): IO[Option[Payment]] =
-    mysql(DbPaymentPrim.findLastPayment(visitId).option)
+    mysql(DbPaymentPrim.getLastPayment(visitId).option)
 
   def enterPayment(payment: Payment): IO[AppEvent] =
     mysql(DbPaymentPrim.enterPayment(payment))

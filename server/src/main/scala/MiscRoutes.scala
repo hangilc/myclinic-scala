@@ -498,5 +498,12 @@ object MiscService extends DateTimeQueryParam with Publisher:
         yield true
       Ok(op)
 
+    case req @ POST -> Root / "batch-get-charge-payment" =>
+      val op =
+        for
+          visitIds <- req.as[List[Int]]
+          map <- Db.batchGetChargePayment(visitIds)
+        yield map
+      Ok(op)
 
   }

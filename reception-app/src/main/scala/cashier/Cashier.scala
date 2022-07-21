@@ -89,10 +89,15 @@ class Cashier extends SideMenuService:
   private def onMenu(event: MouseEvent): Unit =
     val m = ContextMenu(
       List(
+        "未収処理" -> doMishuu,
         "手書き領収書印刷" -> doPrintBlankReceipt
       )
     )
     m.open(event)
+
+  private def doMishuu(): Unit =
+    val dlog = new MishuuDialog()
+    dlog.open()
 
   private def doNewPatient(): Unit =
     val dlog = new NewPatientDialog(newPatient => 
