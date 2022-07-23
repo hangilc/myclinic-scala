@@ -1,6 +1,7 @@
 package dev.myclinic.scala.web.reception.cashier
 
 import dev.fujiwara.domq.all.{*, given}
+import dev.fujiwara.domq.{Transition, TransitionNode, GoForward, GoBack, GoTo, Exit}
 import scala.language.implicitConversions
 import dev.myclinic.scala.model.*
 import dev.myclinic.scala.webclient.{Api, global}
@@ -70,41 +71,41 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       val hokenId = HokenId(hoken)
       copy(hokenList = hokenList.filter(h => HokenId(h) != hokenId))
 
-  type DlogFun = (State, Transition => Unit) => Unit
+  type DlogFun = TransitionNode[State]
 
-  enum Transition:
-    case GoForward(next: DlogFun, state: State)
-    case GoBack(state: State)
-    case GoTo(
-        next: DlogFun,
-        state: State,
-        stackFun: List[DlogFun] => List[DlogFun] = identity
-    )
-    case Exit
+  // enum Transition:
+  //   case GoForward(next: DlogFun, state: State)
+  //   case GoBack(state: State)
+  //   case GoTo(
+  //       next: DlogFun,
+  //       state: State,
+  //       stackFun: List[DlogFun] => List[DlogFun] = identity
+  //   )
+  //   case Exit
 
-  import Transition.*
+  // import Transition.*
 
-  def run(f: DlogFun, state: State, stack: List[DlogFun]): Unit =
-    f(
-      state,
-      trans =>
-        trans match {
-          case GoForward(next, state)  => run(next, state, f :: stack)
-          case GoTo(next, state, sfun) => run(next, state, sfun(stack))
-          case GoBack(state) =>
-            if stack.isEmpty then dlog.close()
-            else run(stack.head, state, stack.tail)
-          case Exit => dlog.close()
-        }
-    )
+  // def run(f: DlogFun, state: State, stack: List[DlogFun]): Unit =
+  //   f(
+  //     state,
+  //     trans =>
+  //       trans match {
+  //         case GoForward(next, state)  => run(next, state, f :: stack)
+  //         case GoTo(next, state, sfun) => run(next, state, sfun(stack))
+  //         case GoBack(state) =>
+  //           if stack.isEmpty then dlog.close()
+  //           else run(stack.head, state, stack.tail)
+  //         case Exit => dlog.close()
+  //       }
+  //   )
 
   def start(patient: Patient, f: DlogFun): Unit =
     for hokenList <- listHoken(patient.patientId)
     yield
       val state = State(patient, hokenList)
-      run(f, state, List.empty)
+      Transition.run(f, state, List.empty, () => dlog.close())
 
-  private def disp(state: State, next: Transition => Unit): Unit =
+  private def disp(state: State, next: Transition[State] => Unit): Unit =
     import Hoken.*
     doDisp(
       state.copy(
@@ -113,7 +114,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       next
     )
 
-  private def doDisp(state: State, next: Transition => Unit): Unit =
+  private def doDisp(state: State, next: Transition[State] => Unit): Unit =
     val hokenArea = div
     val dispElement = new PatientReps(Some(state.patient)).dispPanel
     dlog.title(clear, "患者情報")
@@ -140,7 +141,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
           "診察受付",
           onclick := (() => next(GoForward(doRegister, state)))
         ),
-        button("閉じる", onclick := (() => next(Exit)))
+        button("閉じる", onclick := (() => next(Exit())))
       ),
       div(
         cls := "domq-mt-4 reception-cashier-patient-search-result-dialog-disp-link-commands",
@@ -178,7 +179,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
   private def dispatchDispHoken(
       hoken: Hoken,
       state: State,
-      next: Transition => Unit
+      next: Transition[State] => Unit
   ): Unit =
     hoken match {
       case s: Shahokokuho =>
@@ -198,7 +199,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
   private def dispatchEditHoken(
     hoken: Hoken,
     state: State,
-    next: Transition => Unit
+    next: Transition[State] => Unit
   ): Unit =
     hoken match {
       case s: Shahokokuho =>
@@ -220,7 +221,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       (_, _, shahokokuho, koukikourei, roujin, kouhi) = result
     yield List.empty[Hoken] ++ shahokokuho ++ koukikourei ++ roujin ++ kouhi
 
-  private def hokenHistory(state: State, next: Transition => Unit): Unit =
+  private def hokenHistory(state: State, next: Transition[State] => Unit): Unit =
     dlog.title(clear, "保険履歴")
     dlog.body(
       clear,
@@ -258,7 +259,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       countMaps: (Map[Int, Int], Map[Int, Int], Map[Int, Int], Map[Int, Int])
   )(
       state: State,
-      next: Transition => Unit
+      next: Transition[State] => Unit
   ): Unit =
     import Hoken.*
     val onEdit: Hoken => Unit = hoken => dispatchEditHoken(hoken, state.add(hoken), next)
@@ -314,7 +315,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
 
   private def dispShahokokuho(
       shahokokuhoId: Int
-  )(state: State, next: Transition => Unit): Unit =
+  )(state: State, next: Transition[State] => Unit): Unit =
     state.getShahokokuho(shahokokuhoId) match {
       case None    => next(GoBack(state))
       case Some(h) => doDispShahokokuho(h, state, next)
@@ -323,7 +324,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
   private def doDispShahokokuho(
       shahokokuho: Shahokokuho,
       state: State,
-      next: Transition => Unit
+      next: Transition[State] => Unit
   ): Unit =
     val panel = new ShahokokuhoReps(Some(shahokokuho)).dispPanel
     val renewButton = button
@@ -374,7 +375,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
 
   private def editShahokokuho(
       shahokokuhoId: Int
-  )(state: State, next: Transition => Unit): Unit =
+  )(state: State, next: Transition[State] => Unit): Unit =
     state.getShahokokuho(shahokokuhoId) match {
       case None    => next(GoBack(state))
       case Some(h) => doEditShahokokuho(h, state, next)
@@ -383,7 +384,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
   private def doEditShahokokuho(
       shahokokuho: Shahokokuho,
       state: State,
-      next: Transition => Unit
+      next: Transition[State] => Unit
   ): Unit =
     val inputs = new ShahokokuhoInputs(Some(shahokokuho))
     val errBox = ErrorBox()
@@ -415,7 +416,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
 
   private def dispKoukikourei(
       koukikoureiId: Int
-  )(state: State, next: Transition => Unit): Unit =
+  )(state: State, next: Transition[State] => Unit): Unit =
     state.getKoukikourei(koukikoureiId) match {
       case Some(k) => doDispKoukikourei(k, state, next)
       case None    => next(GoBack(state))
@@ -424,7 +425,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
   private def doDispKoukikourei(
       koukikourei: Koukikourei,
       state: State,
-      next: Transition => Unit
+      next: Transition[State] => Unit
   ): Unit =
     val panel: HTMLElement = new KoukikoureiReps(Some(koukikourei)).dispPanel
     val renewButton = button
@@ -475,7 +476,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
 
   private def editKoukikourei(
       koukikoureiId: Int
-  )(state: State, next: Transition => Unit): Unit =
+  )(state: State, next: Transition[State] => Unit): Unit =
     state.getKoukikourei(koukikoureiId) match {
       case Some(k) => doEditKoukikourei(k, state, next)
       case None    => next(GoBack(state))
@@ -484,7 +485,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
   private def doEditKoukikourei(
       koukikourei: Koukikourei,
       state: State,
-      next: Transition => Unit
+      next: Transition[State] => Unit
   ): Unit =
     val inputs = new KoukikoureiInputs(Some(koukikourei))
     val errBox = ErrorBox()
@@ -516,7 +517,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
 
   private def dispKouhi(
       kouhiId: Int
-  )(state: State, next: Transition => Unit): Unit =
+  )(state: State, next: Transition[State] => Unit): Unit =
     state.getKouhi(kouhiId) match {
       case Some(k) => doDispKouhi(k, state, next)
       case None    => next(GoBack(state))
@@ -525,7 +526,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
   private def doDispKouhi(
       kouhi: Kouhi,
       state: State,
-      next: Transition => Unit
+      next: Transition[State] => Unit
   ): Unit =
     val panel: HTMLElement = new KouhiReps(Some(kouhi)).dispPanel
     val renewButton = button
@@ -573,7 +574,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
 
   private def editKouhi(
       kouhiId: Int
-  )(state: State, next: Transition => Unit): Unit =
+  )(state: State, next: Transition[State] => Unit): Unit =
     state.getKouhi(kouhiId) match {
       case Some(k) => doEditKouhi(k, state, next)
       case None    => next(GoBack(state))
@@ -582,7 +583,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
   private def doEditKouhi(
       kouhi: Kouhi,
       state: State,
-      next: Transition => Unit
+      next: Transition[State] => Unit
   ): Unit =
     val inputs = new KouhiInputs(Some(kouhi))
     val errBox = ErrorBox()
@@ -614,7 +615,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
 
   private def dispRoujin(
       roujinId: Int
-  )(state: State, next: Transition => Unit): Unit =
+  )(state: State, next: Transition[State] => Unit): Unit =
     val roujin: Roujin = state.getRoujin(roujinId).get
     val panel: HTMLElement = new RoujinReps(Some(roujin)).dispPanel
     dlog.title(clear, "老人保健")
@@ -637,7 +638,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
   private def newShahokokuho(
       inputs: ShahokokuhoInputs,
       cancel: State => Transition = GoBack(_)
-  )(state: State, next: Transition => Unit): Unit =
+  )(state: State, next: Transition[State] => Unit): Unit =
     val errBox = ErrorBox()
     dlog.title(clear, "新規社保国保")
     dlog.body(
@@ -673,7 +674,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
   private def newKoukikourei(
       inputs: KoukikoureiInputs,
       cancel: State => Transition = GoBack(_)
-  )(state: State, next: Transition => Unit): Unit =
+  )(state: State, next: Transition[State] => Unit): Unit =
     val errBox = ErrorBox()
     dlog.title(clear, "後期高齢入力")
     dlog.body(
@@ -702,7 +703,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
   private def newKouhi(
       inputs: KouhiInputs,
       cancel: State => Transition = GoBack(_)
-  )(state: State, next: Transition => Unit): Unit =
+  )(state: State, next: Transition[State] => Unit): Unit =
     val errBox = ErrorBox()
     dlog.title(clear, "公費入力")
     dlog.body(
@@ -728,7 +729,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       button("キャンセル", onclick := (() => next(cancel(state))))
     )
 
-  def editPatient(state: State, next: Transition => Unit): Unit =
+  def editPatient(state: State, next: Transition[State] => Unit): Unit =
     val inputs = new PatientInputs(Some(state.patient))
     val errBox = ErrorBox()
     dlog.title(clear, "患者情報編集")
@@ -762,7 +763,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       button("キャンセル", onclick := (() => next(GoBack(state))))
     )
 
-  private def doRegister(state: State, next: Transition => Unit): Unit =
+  private def doRegister(state: State, next: Transition[State] => Unit): Unit =
     val patient: Patient = state.patient
     Api.startVisit(patient.patientId, LocalDateTime.now()).onComplete {
       case Success(_) =>

@@ -506,4 +506,7 @@ object MiscService extends DateTimeQueryParam with Publisher:
         yield map
       Ok(op)
 
+    case GET -> Root / "list-visit-since" :? intPatientId(patientId) +& dateDate(date) =>
+      Ok(Db.listVisitSince(patientId, date))
+
   }

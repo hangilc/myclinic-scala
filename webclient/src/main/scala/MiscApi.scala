@@ -512,5 +512,8 @@ object MiscApi extends ApiBase:
     def deleteDiseaseEx(diseaseId: Int): Future[Boolean] =
       get("delete-disease-ex", Params("disease-id" -> diseaseId))
 
-    def batchGetChargePayment(visitIds: List[Int]): Future[Map[Int, (Option[Charge], Option[Payment])]] =
+    def batchGetChargePayment(visitIds: List[Int]): Future[List[(Int, Option[Charge], Option[Payment])]] =
       post("batch-get-charge-payment", Params(), visitIds)
+
+    def listVisitSince(patientId: Int, date: LocalDate): Future[List[Visit]] =
+      get("list-visit-since", Params("patient-id" -> patientId, "date" -> date))

@@ -53,4 +53,7 @@ trait DbVisit extends Mysql:
 
   def getLastVisitId(): IO[Int] =
     mysql(Prim.getLastVisitId())
+
+  def listVisitSince(patientId: Int, date: LocalDate): IO[List[Visit]] =
+    mysql(Prim.listVisitSince(patientId, date).to[List])
     

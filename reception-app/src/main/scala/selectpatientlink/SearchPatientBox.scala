@@ -23,6 +23,8 @@ class SearchPatientBox(cb: Patient => Unit):
     selection.ele
   )
 
+  def initFocus(): Unit = searchText.focus()
+
   def onSearch(): Unit =
     val txt = searchText.value.trim
     selection.clear()

@@ -157,3 +157,8 @@ object DbVisitPrim:
     sql"""
       select max(visit_id) from visit
     """.query[Int].unique
+
+  def listVisitSince(patientId: Int, date: LocalDate): Query0[Visit] =
+    sql"""
+      select * from visit where patient_id = ${patientId} and date(v_datetime) >= ${date} order by visit_id desc
+    """.query[Visit]

@@ -385,12 +385,11 @@ object Db
         )
     mysql(op)
 
-  def batchGetChargePayment(visitIds: List[Int]): IO[Map[Int, (Option[Charge], Option[Payment])]] =
+  def batchGetChargePayment(visitIds: List[Int]): IO[List[(Int, Option[Charge], Option[Payment])]] =
     val op =
       for
         charges <- visitIds.map(visitId => DbChargePrim.getCharge(visitId).option).sequence
         payments <- visitIds.map(visitId => DbPaymentPrim.getLastPayment(visitId).option).sequence
       yield 
-        val values = charges.zip(payments)
-        Map.from(visitIds.zip(values))
+        visitIds.zip(charges).zip(payments).map(tuple => (tuple._1._1, tuple._1._2, tuple._2))
     mysql(op)

@@ -43,8 +43,14 @@ trait Model extends DateTime with WaitStateCodec:
   given patientEncoder: Encoder[Patient] = deriveEncoder[Patient]
   given patientDecoder: Decoder[Patient] = deriveDecoder[Patient]
 
-  given Encoder[Option[Patient]] = Encoder.encodeOption[Patient]
-  given Decoder[Option[Patient]] = Decoder.decodeOption[Patient]
+  given optionPatientEncoder: Encoder[Option[Patient]] = Encoder.encodeOption[Patient]
+  given optionPatientDecoder: Decoder[Option[Patient]] = Decoder.decodeOption[Patient]
+
+  given optionChargeEncoder: Encoder[Option[Charge]] = Encoder.encodeOption[Charge]
+  given optionChargeDecoder: Decoder[Option[Charge]] = Decoder.decodeOption[Charge]
+
+  given optionPaymentEncoder: Encoder[Option[Payment]] = Encoder.encodeOption[Payment]
+  given optionPaymentDecoder: Decoder[Option[Payment]] = Decoder.decodeOption[Payment]
 
   given Encoder[Hotline] = deriveEncoder[Hotline]
   given Decoder[Hotline] = deriveDecoder[Hotline]
