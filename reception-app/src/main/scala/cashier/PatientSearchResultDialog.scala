@@ -1,7 +1,7 @@
 package dev.myclinic.scala.web.reception.cashier
 
 import dev.fujiwara.domq.all.{*, given}
-import dev.fujiwara.domq.{Transition, TransitionNode, GoForward, GoBack, GoTo, Exit}
+import dev.fujiwara.domq.transition.*
 import scala.language.implicitConversions
 import dev.myclinic.scala.model.*
 import dev.myclinic.scala.webclient.{Api, global}
@@ -637,7 +637,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
 
   private def newShahokokuho(
       inputs: ShahokokuhoInputs,
-      cancel: State => Transition = GoBack(_)
+      cancel: State => Transition[State] = GoBack(_)
   )(state: State, next: Transition[State] => Unit): Unit =
     val errBox = ErrorBox()
     dlog.title(clear, "新規社保国保")
@@ -673,7 +673,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
 
   private def newKoukikourei(
       inputs: KoukikoureiInputs,
-      cancel: State => Transition = GoBack(_)
+      cancel: State => Transition[State] = GoBack(_)
   )(state: State, next: Transition[State] => Unit): Unit =
     val errBox = ErrorBox()
     dlog.title(clear, "後期高齢入力")
@@ -702,7 +702,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
 
   private def newKouhi(
       inputs: KouhiInputs,
-      cancel: State => Transition = GoBack(_)
+      cancel: State => Transition[State] = GoBack(_)
   )(state: State, next: Transition[State] => Unit): Unit =
     val errBox = ErrorBox()
     dlog.title(clear, "公費入力")
@@ -768,7 +768,7 @@ case class PatientSearchResultDialog(patients: List[Patient]):
     Api.startVisit(patient.patientId, LocalDateTime.now()).onComplete {
       case Success(_) =>
         dlog.close()
-        next(Exit)
+        next(Exit())
       case Failure(ex) => ShowMessage.showError(ex.toString)
     }
 

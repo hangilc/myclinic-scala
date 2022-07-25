@@ -1,4 +1,4 @@
-package dev.fujiwara.domq
+package dev.fujiwara.domq.transition
 
 type TransitionNode[S] = (S, Transition[S] => Unit) => Unit
 
@@ -8,7 +8,7 @@ case class GoBack[S](state: S) extends Transition[S]
 case class GoTo[S](
       next: TransitionNode[S],
       state: S,
-      stackFun: List[TransitionNode[S]] => List[TransitionNode[S]] = identity
+      stackFun: List[TransitionNode[S]] => List[TransitionNode[S]] = (ss: List[TransitionNode[S]]) => ss
   ) extends Transition[S]
 case class Exit[S]() extends Transition[S]
 
