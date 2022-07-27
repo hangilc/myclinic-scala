@@ -517,3 +517,6 @@ object MiscApi extends ApiBase:
 
     def listVisitSince(patientId: Int, date: LocalDate): Future[List[Visit]] =
       get("list-visit-since", Params("patient-id" -> patientId, "date" -> date))
+
+    def enterWqueue(wq: Wqueue): Future[Boolean] =
+      post("enter-wqueue", Params(), wq)

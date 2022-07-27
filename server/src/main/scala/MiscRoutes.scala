@@ -509,4 +509,13 @@ object MiscService extends DateTimeQueryParam with Publisher:
     case GET -> Root / "list-visit-since" :? intPatientId(patientId) +& dateDate(date) =>
       Ok(Db.listVisitSince(patientId, date))
 
+    case req @ POST -> Root / "enter-wqueue" =>
+      val op =
+        for
+          wq <- req.as[Wqueue]
+          event <- Db.enterWqueue(wq)
+          _ <- publish(event)
+        yield true
+      Ok(op)
+
   }
