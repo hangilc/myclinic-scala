@@ -520,3 +520,6 @@ object MiscApi extends ApiBase:
 
     def enterWqueue(wq: Wqueue): Future[Boolean] =
       post("enter-wqueue", Params(), wq)
+
+    def getCharge(visitId: Int): Future[Charge] =
+      get("get-charge", Params("visit-id" -> visitId))

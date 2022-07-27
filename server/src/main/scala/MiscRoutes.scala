@@ -518,4 +518,7 @@ object MiscService extends DateTimeQueryParam with Publisher:
         yield true
       Ok(op)
 
+    case GET -> Root / "get-charge" :? intVisitId(visitId) =>
+      Ok(Db.getCharge(visitId))
+
   }

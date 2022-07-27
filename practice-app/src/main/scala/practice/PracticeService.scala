@@ -233,13 +233,13 @@ class PracticeMainUI:
   val shohouSampleLink = a
   val wholeTextSearchLink = a
   val records = div
-  val ele = div(cls := "practice-main")(
+  val ele = div(cls := "practice-main practice-sidemenu-service-main")(
     header,
     records(cls := "practice-records")
   )
 
   def header: HTMLElement = div(cls := "practice-header")(
-    div("診察", cls := "practice-header-title"),
+    div("診察", cls := "practice-header-title practice-sidemenu-service-title"),
     choice.ele(cls := "practice-header-choice"),
     shohouSampleLink("登録薬剤"),
     wholeTextSearchLink("全文検索")

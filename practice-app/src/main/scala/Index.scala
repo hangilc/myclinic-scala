@@ -19,6 +19,7 @@ import dev.myclinic.scala.web.appbase.PageLayout1
 import dev.myclinic.scala.web.practiceapp.practice.disease.Frame
 import scala.language.implicitConversions
 import dev.myclinic.scala.web.practiceapp.practice.PracticeBus
+import dev.myclinic.scala.web.practiceapp.cashier.CashierService
 
 class JsMain(using EventFetcher):
   val ui = new PageLayout1("practice", "reception")
@@ -35,7 +36,7 @@ class JsMain(using EventFetcher):
   private def sideMenuItems: List[(String, SideMenuProcs => SideMenuService)] =
     List(
       "診察" -> (_ => PracticeService()),
-      "会計" -> (_ => MockSideMenuService("会計")),
+      "会計" -> (_ => CashierService()),
       "受付" -> (_ => MockSideMenuService("受付")),
       "ファックス済処方箋" -> (_ => MockSideMenuService("ファックス済処方箋")),
       "訪問看護" -> (_ => MockSideMenuService("訪問看護")),
