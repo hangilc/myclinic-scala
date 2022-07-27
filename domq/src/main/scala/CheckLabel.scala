@@ -20,6 +20,7 @@ case class CheckLabel[T](value: T, labelStuffer: HTMLLabelElement => Unit):
     checkElement.checked = true
     this
   def check(value: Boolean): Unit = checkElement.checked = value
+  def isChecked: Boolean = checkElement.checked
   def uncheck: this.type = 
     checkElement.checked = false
     this

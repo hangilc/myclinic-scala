@@ -50,39 +50,51 @@ class MishuuDialog:
             chargePays <- Api.batchGetChargePayment(visits.map(_.visitId))
           yield
             println(("visitCharge", chargePays))
-            visits.zip(chargePays)
+            visits
+              .zip(chargePays)
               .map((v, cp) => (v, MishuuDialog.mishuuAmount(cp._2, cp._3)))
-              .collect{
-                case (v, Some(deficit)) => (v, deficit)
+              .collect { case (v, Some(deficit)) =>
+                (v, deficit)
               }
         ).onComplete {
-            case Failure(ex) => errBox.show(ex.toString)
-            case Success(result) => 
-              next(GoForward(showMishuu(search.selection.marked.get, result), state))
-          }
+          case Failure(ex) => errBox.show(ex.toString)
+          case Success(result) =>
+            next(
+              GoForward(showMishuu(search.selection.marked.get, result), state)
+            )
+        }
       )
 
   def showMishuu(patient: Patient, mishuuList: List[(Visit, Int)])(
       state: State,
       next: Edge => Unit
   ): Unit =
+    val checkLabels = mishuuList.map((v, c) =>
+      CheckLabel[Visit](
+        v,
+        _(
+          KanjiDate.dateToKanji(v.visitedAt.toLocalDate),
+          " ",
+          s"${c}円"
+        )
+      )
+    )
+    checkLabels.foreach(_.check(true))
     val errBox = ErrorBox()
     def mishuuItems: List[HTMLElement] =
-      if mishuuList.isEmpty then List(div("未収はありません。"))
-      else mishuuList.map {
-        (v, deficit) => div(
-          KanjiDate.dateToKanji(v.visitedAt.toLocalDate), " ",
-          s"${deficit}円"
-        )
-      }
+      if checkLabels.isEmpty then List(div("未収はありません。"))
+      else checkLabels.map(_.wrap(div))
     def doEnter(): Unit =
       (for
-        _ <- mishuuList.map((v, _) => 
-          val wq = Wqueue(v.visitId, WaitState.WaitCashier) 
-          Api.enterWqueue(wq)
-        ).sequence_
+        _ <- checkLabels
+          .filter(_.isChecked)
+          .map(cl =>
+            val wq = Wqueue(cl.value.visitId, WaitState.WaitCashier)
+            Api.enterWqueue(wq)
+          )
+          .sequence_
       yield ()).onComplete {
-        case Success(_) => next(Exit())
+        case Success(_)  => next(Exit())
         case Failure(ex) => errBox.show(ex.toString)
       }
     dlog.title(clear, "未収処理")
@@ -94,14 +106,18 @@ class MishuuDialog:
     )
     dlog.commands(
       clear,
-      button("会計に加える", onclick := (doEnter _)),
+      if checkLabels.isEmpty then None
+      else Some(button("会計に加える", onclick := (doEnter _))),
       button("閉じる", onclick := (() => next(Exit())))
     )
 
 object MishuuDialog:
-  def mishuuAmount(chargeOpt: Option[Charge], paymentOpt: Option[Payment]): Option[Int] =
+  def mishuuAmount(
+      chargeOpt: Option[Charge],
+      paymentOpt: Option[Payment]
+  ): Option[Int] =
     (chargeOpt, paymentOpt) match {
-      case (Some(_, charge), None) => Some(charge)
+      case (Some(_, charge), None)                              => Some(charge)
       case (Some(_, charge), Some(_, amount, _)) if amount == 0 => Some(charge)
-      case _ => None
+      case _                                                    => None
     }
