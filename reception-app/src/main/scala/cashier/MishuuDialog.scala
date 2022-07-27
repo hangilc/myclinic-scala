@@ -48,14 +48,18 @@ class MishuuDialog:
           for
             visits <- Api.listVisitByPatientReverse(patient.patientId, 0, 10)
             chargePays <- Api.batchGetChargePayment(visits.map(_.visitId))
+            wqList <- Api.listWqueue()
+            wqVisitIds = wqList.map(_.visitId)
           yield
-            println(("visitCharge", chargePays))
+            println(("wqVisitIds", wqVisitIds))
+            println(("visitIds", visits.map(_.visitId)))
             visits
               .zip(chargePays)
               .map((v, cp) => (v, MishuuDialog.mishuuAmount(cp._2, cp._3)))
               .collect { case (v, Some(deficit)) =>
                 (v, deficit)
               }
+              .filter((v, _) => !wqVisitIds.contains(v.visitId))
         ).onComplete {
           case Failure(ex) => errBox.show(ex.toString)
           case Success(result) =>
@@ -82,7 +86,7 @@ class MishuuDialog:
     checkLabels.foreach(_.check(true))
     val errBox = ErrorBox()
     def mishuuItems: List[HTMLElement] =
-      if checkLabels.isEmpty then List(div("未収はありません。"))
+      if checkLabels.isEmpty then List(div("追加する未収はありません。"))
       else checkLabels.map(_.wrap(div))
     def doEnter(): Unit =
       (for
