@@ -3,15 +3,15 @@ package dev.fujiwara.domq
 import org.scalajs.dom.HTMLElement
 import dev.fujiwara.domq.ElementQ.{*, given}
 import dev.fujiwara.domq.Modifiers.{*, given}
-import dev.fujiwara.domq.TypeClasses.{Comp, Dispose}
+import dev.fujiwara.domq.TypeClasses.{Comp, CompList, Dispose, given}
 import scala.math.Ordered.orderingToOrdered
 import scala.language.implicitConversions
 import dev.fujiwara.domq.TypeClasses.DataProvider
 
-class CompListBase[C](
-    remove: HTMLElement => Unit = _.remove()
-)(using comp: Comp[C], disposer: Dispose[C]):
+abstract class CompListBase[C]()(using compList: CompList[C], disposer: Dispose[C]):
   protected var comps: List[C] = List.empty
+
+  def add(c: C): Unit
 
   def list: List[C] = comps
 
@@ -19,8 +19,7 @@ class CompListBase[C](
     val (pre, post) = comps.span(!pred(_))
     if !post.isEmpty then
       val c = post.head
-      remove(comp.ele(c))
-      disposer.dispose(c)
+      removeComp(c)
       comps = pre ++ post.tail
 
   def remove(c: C): Unit = remove(_ == c)
@@ -29,24 +28,23 @@ class CompListBase[C](
     comps.find(pred)
 
   def replace(oldC: C, newC: C): Unit =
-    val (pre, post) = comps.span(_ == oldC)
-    if !post.isEmpty then
-      comp.ele(oldC).replaceBy(comp.ele(newC))
-      disposer.dispose(oldC)
-      comps = pre ++ (newC :: post.tail)
+    remove(oldC)
+    add(newC)
+
+  private def removeComp(c: C): Unit =
+    compList.eles(c).foreach(_.remove())
+    disposer.dispose(c)
 
   def clear(): Unit =
-    comps.foreach(c => {
-      val e = comp.ele(c)
-      remove(e)
-      disposer.dispose(c)
-    })
+    comps.foreach(removeComp)
     comps = List.empty
 
 case class CompAppendList[C](val wrapper: HTMLElement)(using
     comp: Comp[C],
     disposer: Dispose[C]
 ) extends CompListBase[C]:
+  override def add(c: C): Unit = append(c)
+
   def append(c: C): Unit =
     wrapper(comp.ele(c))
     comps = comps :+ c
@@ -71,6 +69,8 @@ case class CompSortList[C: Ordering](val wrapper: HTMLElement)(
   using comp: Comp[C],
   disposer: Dispose[C]
 ) extends CompListBase[C]:
+  override def add(c: C): Unit = insert(c)
+
   def insert(c: C): Unit =
     val (pre, post) = comps.span(t => t < c)
     if post.isEmpty then wrapper(comp.ele(c))
@@ -86,6 +86,31 @@ case class CompSortList[C: Ordering](val wrapper: HTMLElement)(
   def setSorted(cs: List[C]): Unit =
     clear()
     cs.foreach(c => wrapper(comp.ele(c)))
+    comps = cs
+
+case class CompListSortList[C: Ordering](val wrapper: HTMLElement)(
+  using compList: CompList[C],
+  disposer: Dispose[C]
+) extends CompListBase[C]:
+  override def add(c: C): Unit = insert(c)
+  
+  def insert(c: C): Unit =
+    val (pre, post) = comps.span(t => t < c || !compList.eles(t).isEmpty)
+    if post.isEmpty then wrapper(compList.eles(c))
+    else 
+      val a = compList.eles(post.head).head
+      compList.eles(c).foreach(e => a.preInsert(e))
+    comps = pre ++ (c :: post)
+
+  def +=(c: C): Unit = insert(c)
+
+  def set(cs: List[C]): Unit =
+    clear()
+    cs.foreach(insert _)
+
+  def setSorted(cs: List[C]): Unit =
+    clear()
+    cs.foreach(c => wrapper(compList.eles(c)))
     comps = cs
 
 case class CompSortDataList[C, D: Ordering](val wrapper: HTMLElement, ctor: D => C)(

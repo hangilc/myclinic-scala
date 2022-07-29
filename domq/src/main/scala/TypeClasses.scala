@@ -19,6 +19,13 @@ object TypeClasses:
   object Comp:
     given Comp[HTMLElement] = e => e
 
+  trait CompList[T]:
+    def eles(t: T): List[HTMLElement]
+
+  given [C: Comp]: CompList[C] with
+    def eles(c: C): List[HTMLElement] = 
+      List(summon[Comp[C]].ele(c))
+
   trait Dispose[T]:
     def dispose(t: T): Unit
 

@@ -19,7 +19,7 @@ class CashierService extends SideMenuService:
         div("会計", cls := "practice-sidemenu-service-title"),
         workarea(
           cls := "practice-cashier-workarea",
-          table.ele(cls := "practice-cashier-wqueue-table")
+          table.ele
         )
       )
     )
@@ -29,7 +29,11 @@ class CashierService extends SideMenuService:
 
   def refresh(): Future[Unit] =
     for cashiers <- CashierService.listWqueue
-    yield print(cashiers)
+    yield
+      print(("cashiers", cashiers))
+      cashiers.foreach {
+        (wqueue, charge, visit, patient) => table.add(wqueue, visit, patient, charge.charge)
+      }
 
 object CashierService:
   def listWqueue: Future[List[(Wqueue, Charge, Visit, Patient)]] =
