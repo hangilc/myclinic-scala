@@ -31,6 +31,9 @@ class CashierService extends SideMenuService:
     refresh()
   override def onReactivate: Future[Unit] = refresh()
 
+  override def dispose(): Unit =
+    table.dispose()
+
   def refresh(): Future[Unit] =
     for cashiers <- CashierService.listWqueue
     yield

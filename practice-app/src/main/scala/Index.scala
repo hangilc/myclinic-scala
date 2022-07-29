@@ -80,7 +80,6 @@ object JsMain:
 
   val publishers = new EventPublishers:
     override def onPaymentCreated(payment: Payment): Unit = 
-      println(("onPaymentCreated", payment))
       PracticeBus.paymentEntered.publish(payment)
 
   given fetcher: EventFetcher = new EventFetcher

@@ -7,9 +7,15 @@ import dev.fujiwara.domq.TypeClasses.{CompList, Dispose, given}
 import org.scalajs.dom.HTMLElement
 import dev.myclinic.scala.model.*
 import dev.fujiwara.kanjidate.KanjiDate
+import java.time.LocalDateTime
+import dev.myclinic.scala.webclient.{Api, global}
+import dev.myclinic.scala.web.practiceapp.practice.PracticeBus
 
 class WqueueTable:
   import WqueueTable.Item
+  val unsubs = List(
+    PracticeBus.
+  )
   val ele = div(cls := "practice-cashier-wqueue-table", titles)
   val wqueueList = new CompListSortList[Item](ele)
 
@@ -18,6 +24,9 @@ class WqueueTable:
 
   def clear(): Unit =
     wqueueList.clear()
+
+  def dispose(): Unit =
+    ???
 
   def titles: List[HTMLElement] =
     List(
@@ -35,9 +44,19 @@ object WqueueTable:
         eleVisitDate,
         eleCharge,
         div(
-          button("未収会計")
+          button("未収会計", onclick := (onMishuu _))
         )
       )
+
+    private def onMishuu(): Unit =
+      ShowMessage.confirm("この会計を未収処理にしますか？")(doMishuu)
+
+    private def doMishuu(): Unit =
+      val pay = Payment(wqueue.visitId, 0, LocalDateTime.now())
+      for
+        _ <- Api.finishCashier(pay)
+      yield
+        ()
 
     def elePatient: HTMLElement =
       div(s"(${patient.patientId}) ${patient.lastName}${patient.firstName}")
