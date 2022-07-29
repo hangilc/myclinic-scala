@@ -20,19 +20,23 @@ class CashierService extends SideMenuService:
         workarea(
           cls := "practice-cashier-workarea",
           table.ele
+        ),
+        div(
+          button("更新", onclick := (() => { refresh(); () }))
         )
       )
     )
 
-  override def init(): Future[Unit] = refresh()
+  override def init(): Future[Unit] =
+    refresh()
   override def onReactivate: Future[Unit] = refresh()
 
   def refresh(): Future[Unit] =
     for cashiers <- CashierService.listWqueue
     yield
-      print(("cashiers", cashiers))
-      cashiers.foreach {
-        (wqueue, charge, visit, patient) => table.add(wqueue, visit, patient, charge.charge)
+      table.clear()
+      cashiers.foreach { (wqueue, charge, visit, patient) =>
+        table.add(wqueue, visit, patient, charge.charge)
       }
 
 object CashierService:

@@ -10,14 +10,14 @@ import dev.fujiwara.kanjidate.KanjiDate
 
 class WqueueTable:
   import WqueueTable.Item
-  val itemWrapper = div
-  val wqueueList = new CompListSortList[Item](itemWrapper)
-  val ele = div(
-    cls := "practice-cashier-wqueue-table",
-    titles
-  )
+  val ele = div(cls := "practice-cashier-wqueue-table", titles)
+  val wqueueList = new CompListSortList[Item](ele)
+
   def add(wqueue: Wqueue, visit: Visit, patient: Patient, charge: Int): Unit =
     wqueueList.add(Item(wqueue, visit, patient, charge))
+
+  def clear(): Unit =
+    wqueueList.clear()
 
   def titles: List[HTMLElement] =
     List(
@@ -49,3 +49,4 @@ object WqueueTable:
   given Ordering[Item] = Ordering.by(_.wqueue.visitId)
   given CompList[Item] = _.eles
   given Dispose[Item] = _ => ()
+
