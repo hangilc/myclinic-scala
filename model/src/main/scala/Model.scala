@@ -305,6 +305,11 @@ case class Charge(
     charge: Int
 )
 
+object Charge:
+  val modelSymbol = "charge"
+  given ModelSymbol[Charge] with
+    def getSymbol: String = modelSymbol
+
 case class Payment(
     visitId: Int,
     amount: Int,

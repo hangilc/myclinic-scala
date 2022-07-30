@@ -44,6 +44,7 @@ object AppModelEvent:
       case AppointTime.modelSymbol => as[AppointTime]
       case Visit.modelSymbol => as[Visit]
       case Wqueue.modelSymbol => as[Wqueue]
+      case Charge.modelSymbol => as[Charge]
       case Shahokokuho.modelSymbol => as[Shahokokuho]
       case Koukikourei.modelSymbol => as[Koukikourei]
       case Roujin.modelSymbol => as[Roujin]

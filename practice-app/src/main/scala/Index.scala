@@ -87,6 +87,10 @@ object JsMain:
       PracticeBus.wqueueUpdated.publish(wqueue)
     override def onWqueueDeleted(wqueue: Wqueue): Unit = 
       PracticeBus.wqueueDeleted.publish(wqueue)
+    override def onChargeCreated(charge: Charge): Unit =
+      PracticeBus.chargeEntered.publish(charge)
+    override def onChargeUpdated(charge: Charge): Unit =
+      PracticeBus.chargeUpdated.publish(charge)
 
   given fetcher: EventFetcher = new EventFetcher
   fetcher.appModelEventPublisher.subscribe(event => publishers.publish(event))

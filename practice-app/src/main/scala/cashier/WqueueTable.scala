@@ -17,7 +17,8 @@ class WqueueTable:
   val unsubs = List(
     PracticeBus.wqueueEntered.subscribe(onWqueueEntered),
     PracticeBus.wqueueUpdated.subscribe(onWqueueUpdated),
-    PracticeBus.wqueueDeleted.subscribe(onWqueueDeleted)
+    PracticeBus.wqueueDeleted.subscribe(onWqueueDeleted),
+    PracticeBus.chargeUpdated.subscribe(onChargeUpdated),
   )
   val ele = div(cls := "practice-cashier-wqueue-table", titles)
   val wqueueList = new CompListSortList[Item](ele)
@@ -27,10 +28,15 @@ class WqueueTable:
 
   def add(wqueue: Wqueue): Unit =
     for
+      tuple <- collectData(wqueue)
+    yield add.tupled(tuple)
+
+  private def collectData(wqueue: Wqueue): Future[(Wqueue, Visit, Patient, Int)] =
+    for
       visit <- Api.getVisit(wqueue.visitId)
       patient <- Api.getPatient(visit.patientId)
       charge <- Api.getCharge(wqueue.visitId)
-    yield add(wqueue, visit, patient, charge.charge)
+    yield (wqueue, visit, patient, charge.charge)
 
   def clear(): Unit =
     wqueueList.clear()
@@ -50,17 +56,28 @@ class WqueueTable:
     if wqueue.waitState == WaitState.WaitCashier then add(wqueue)
 
   private def onWqueueUpdated(wqueue: Wqueue): Unit =
+    println(("updated", wqueue))
     if wqueue.waitState == WaitState.WaitCashier then
       wqueueList.list
         .find(_.wqueue.visitId == wqueue.visitId)
         .fold(add(wqueue))(item =>
-          val newItem = item.copy(wqueue = wqueue)
-          wqueueList.replace(item, newItem)
+          for
+            data <- collectData(wqueue)
+          yield
+            val newItem = Item.apply.tupled(data)
+            println(("modify", item, newItem))
+            wqueueList.replace(item, newItem)
         )
     else wqueueList.remove(_.wqueue.visitId == wqueue.visitId)
 
   private def onWqueueDeleted(wqueue: Wqueue): Unit =
     wqueueList.remove(_.wqueue.visitId == wqueue.visitId)
+
+  private def onChargeUpdated(charge: Charge): Unit =
+    wqueueList.list.find(_.wqueue.visitId == charge.visitId).foreach(item =>
+      val newItem = Item(item.wqueue, item.visit, item.patient, charge.charge)
+      wqueueList.replace(item, newItem)
+    )
 
 object WqueueTable:
   case class Item(wqueue: Wqueue, visit: Visit, patient: Patient, charge: Int):
