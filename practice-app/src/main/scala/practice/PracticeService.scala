@@ -12,6 +12,7 @@ import dev.myclinic.scala.web.practiceapp.practice.mishuu.Mishuu
 import dev.myclinic.scala.webclient.Api
 import dev.myclinic.scala.webclient.global
 import org.scalajs.dom.HTMLElement
+import dev.myclinic.scala.web.practiceapp.PracticeBus
 
 import java.time.LocalDate
 import java.time.LocalDateTime

@@ -3,6 +3,7 @@ package dev.myclinic.scala.web.practiceapp.practice
 import dev.fujiwara.domq.all.{*, given}
 import dev.myclinic.scala.model.Patient
 import scala.language.implicitConversions
+import dev.myclinic.scala.web.practiceapp.PracticeBus
 
 class PatientDisplay:
   import PatientDisplay as Helper

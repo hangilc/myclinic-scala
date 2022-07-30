@@ -15,7 +15,7 @@ import dev.fujiwara.domq.CompAppendList.given
 import dev.fujiwara.domq.CompSortList
 import dev.fujiwara.domq.CompSortList.given
 import org.scalajs.dom.HTMLElement
-import dev.myclinic.scala.web.practiceapp.practice.PracticeBus
+import dev.myclinic.scala.web.practiceapp.PracticeBus
 import dev.myclinic.scala.web.practiceapp.practice.record.shinryou.ShinryouMenu
 import dev.myclinic.scala.web.practiceapp.practice.record.conduct.ConductMenu
 import dev.myclinic.scala.web.practiceapp.practice.record.conduct.Conduct

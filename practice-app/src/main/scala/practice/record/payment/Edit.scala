@@ -3,7 +3,7 @@ package dev.myclinic.scala.web.practiceapp.practice.record.payment
 import dev.fujiwara.domq.all.{*, given}
 import dev.myclinic.scala.model.*
 import dev.myclinic.scala.webclient.{Api, global}
-import dev.myclinic.scala.web.practiceapp.practice.PracticeBus
+import dev.myclinic.scala.web.practiceapp.PracticeBus
 import java.time.LocalDateTime
 import dev.myclinic.scala.drawerform.receipt.ReceiptDrawerData
 import java.time.LocalDate

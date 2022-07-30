@@ -18,7 +18,7 @@ import dev.myclinic.scala.webclient.global
 import dev.myclinic.scala.web.appbase.PageLayout1
 import dev.myclinic.scala.web.practiceapp.practice.disease.Frame
 import scala.language.implicitConversions
-import dev.myclinic.scala.web.practiceapp.practice.PracticeBus
+import dev.myclinic.scala.web.practiceapp.PracticeBus
 import dev.myclinic.scala.web.practiceapp.cashier.CashierService
 
 class JsMain(using EventFetcher):
@@ -81,6 +81,12 @@ object JsMain:
   val publishers = new EventPublishers:
     override def onPaymentCreated(payment: Payment): Unit = 
       PracticeBus.paymentEntered.publish(payment)
+    override def onWqueueCreated(wqueue: Wqueue): Unit =
+      PracticeBus.wqueueEntered.publish(wqueue)
+    override def onWqueueUpdated(wqueue: Wqueue): Unit =
+      PracticeBus.wqueueUpdated.publish(wqueue)
+    override def onWqueueDeleted(wqueue: Wqueue): Unit = 
+      PracticeBus.wqueueDeleted.publish(wqueue)
 
   given fetcher: EventFetcher = new EventFetcher
   fetcher.appModelEventPublisher.subscribe(event => publishers.publish(event))

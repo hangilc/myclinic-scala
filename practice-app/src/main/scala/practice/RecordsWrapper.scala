@@ -6,6 +6,7 @@ import dev.myclinic.scala.webclient.{Api, global}
 import scala.concurrent.Future
 import dev.myclinic.scala.web.practiceapp.practice.record.Record
 import org.scalajs.dom.HTMLElement
+import dev.myclinic.scala.web.practiceapp.PracticeBus
 
 class RecordsWrapper:
   import RecordsWrapper as Helper

@@ -5,13 +5,14 @@ import java.time.LocalDateTime
 import dev.fujiwara.kanjidate.KanjiDate
 import org.scalajs.dom.HTMLElement
 import dev.myclinic.scala.model.VisitEx
-import dev.myclinic.scala.web.practiceapp.practice.{PracticeBus, NavUtil}
+import dev.myclinic.scala.web.practiceapp.practice.NavUtil
 import dev.myclinic.scala.webclient.{Api, global}
 import scala.util.Success
 import scala.util.Failure
 import dev.myclinic.scala.practiceapp.practice.record.title.RcptDetailDialog
 import dev.myclinic.scala.web.practiceapp.practice.record.title.FutanwariDialog
 import scala.language.implicitConversions
+import dev.myclinic.scala.web.practiceapp.PracticeBus
 
 class Title(visit: VisitEx):
   import Title as Helper

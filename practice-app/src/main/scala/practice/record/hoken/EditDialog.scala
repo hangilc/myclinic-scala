@@ -6,7 +6,7 @@ import dev.myclinic.scala.model.*
 import dev.myclinic.scala.apputil.HokenUtil.Ext.*
 import org.scalajs.dom.HTMLElement
 import dev.myclinic.scala.webclient.{Api, global}
-import dev.myclinic.scala.web.practiceapp.practice.PracticeBus
+import dev.myclinic.scala.web.practiceapp.PracticeBus
 import scala.language.implicitConversions
 
 class EditDialog(

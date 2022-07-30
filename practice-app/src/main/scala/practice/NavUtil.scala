@@ -3,6 +3,7 @@ package dev.myclinic.scala.web.practiceapp.practice
 import scala.concurrent.Future
 import dev.myclinic.scala.webclient.{Api, global}
 import dev.fujiwara.domq.SingleTask
+import dev.myclinic.scala.web.practiceapp.PracticeBus
 
 object NavUtil:
   private val refreshNavTask = new SingleTask[Int]()

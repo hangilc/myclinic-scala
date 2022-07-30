@@ -9,7 +9,7 @@ import java.time.LocalDate
 import dev.myclinic.scala.webclient.{Api, global}
 import dev.myclinic.scala.model.CreateConductRequest
 import dev.myclinic.scala.model.ConductKind
-import dev.myclinic.scala.web.practiceapp.practice.PracticeBus
+import dev.myclinic.scala.web.practiceapp.PracticeBus
 import dev.myclinic.scala.model.IyakuhinMaster
 import scala.util.Try
 import scala.concurrent.Future

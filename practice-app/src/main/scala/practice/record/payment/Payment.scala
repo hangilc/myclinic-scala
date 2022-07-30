@@ -4,7 +4,7 @@ import dev.myclinic.scala.web.practiceapp.practice.record.payment.Disp
 import dev.fujiwara.domq.all.{*, given}
 import dev.myclinic.scala.model.{Payment as ModelPayment, *}
 import scala.language.implicitConversions
-import dev.myclinic.scala.web.practiceapp.practice.PracticeBus
+import dev.myclinic.scala.web.practiceapp.PracticeBus
 
 case class Payment(
     var chargeOption: Option[Charge],

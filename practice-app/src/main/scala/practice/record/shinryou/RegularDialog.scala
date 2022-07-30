@@ -3,7 +3,7 @@ package dev.myclinic.scala.web.practiceapp.practice.record.shinryou
 import dev.fujiwara.domq.all.{*, given}
 import dev.myclinic.scala.webclient.{Api, global}
 import java.time.LocalDate
-import dev.myclinic.scala.web.practiceapp.practice.PracticeBus
+import dev.myclinic.scala.web.practiceapp.PracticeBus
 import dev.myclinic.scala.model.ShinryouEx
 import dev.myclinic.scala.model.CreateConductRequest
 import dev.myclinic.scala.model.ConductKind

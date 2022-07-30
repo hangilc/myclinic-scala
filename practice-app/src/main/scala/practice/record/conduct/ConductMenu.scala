@@ -2,7 +2,7 @@ package dev.myclinic.scala.web.practiceapp.practice.record.conduct
 
 import dev.fujiwara.domq.all.{*, given}
 import java.time.LocalDate
-import dev.myclinic.scala.web.practiceapp.practice.PracticeBus
+import dev.myclinic.scala.web.practiceapp.PracticeBus
 import cats.data.EitherT
 import cats.syntax.all.*
 import scala.concurrent.Future

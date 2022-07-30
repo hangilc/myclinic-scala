@@ -9,12 +9,14 @@ import dev.myclinic.scala.model.*
 import dev.fujiwara.kanjidate.KanjiDate
 import java.time.LocalDateTime
 import dev.myclinic.scala.webclient.{Api, global}
-import dev.myclinic.scala.web.practiceapp.practice.PracticeBus
+import dev.myclinic.scala.web.practiceapp.PracticeBus
 
 class WqueueTable:
   import WqueueTable.Item
   val unsubs = List(
-    PracticeBus.
+    PracticeBus.wqueueEntered.subscribe(onWqueueEntered),
+    PracticeBus.wqueueUpdated.subscribe(onWqueueUpdated),
+    PracticeBus.wqueueDeleted.subscribe(onWqueueDeleted),
   )
   val ele = div(cls := "practice-cashier-wqueue-table", titles)
   val wqueueList = new CompListSortList[Item](ele)
@@ -26,7 +28,7 @@ class WqueueTable:
     wqueueList.clear()
 
   def dispose(): Unit =
-    ???
+    unsubs.foreach(_.proc())
 
   def titles: List[HTMLElement] =
     List(
@@ -35,6 +37,15 @@ class WqueueTable:
       div("請求額"),
       div("操作")
     )
+
+  private def onWqueueEntered(wqueue: Wqueue): Unit =
+    ()
+
+  private def onWqueueUpdated(wqueue: Wqueue): Unit =
+    ()
+
+  private def onWqueueDeleted(wqueue: Wqueue): Unit =
+    ()
 
 object WqueueTable:
   case class Item(wqueue: Wqueue, visit: Visit, patient: Patient, charge: Int):

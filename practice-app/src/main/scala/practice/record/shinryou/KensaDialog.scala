@@ -5,7 +5,7 @@ import cats.data.EitherT
 import dev.myclinic.scala.webclient.{Api, global}
 import java.time.LocalDate
 import cats.syntax.all.*
-import dev.myclinic.scala.web.practiceapp.practice.PracticeBus
+import dev.myclinic.scala.web.practiceapp.PracticeBus
 import dev.myclinic.scala.web.practiceapp.practice.record.CodeResolver
 import dev.myclinic.scala.web.practiceapp.practice.record.CreateHelper
 import scala.language.implicitConversions

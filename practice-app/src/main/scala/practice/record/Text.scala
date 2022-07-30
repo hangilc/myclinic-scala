@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 import dev.fujiwara.kanjidate.KanjiDate
 import dev.myclinic.scala.model.Text as ModelText
 import dev.myclinic.scala.webclient.{Api, global}
-import dev.myclinic.scala.web.practiceapp.practice.PracticeBus
+import dev.myclinic.scala.web.practiceapp.PracticeBus
 import org.scalajs.dom.HTMLElement
 import dev.myclinic.scala.web.appbase.PrintDialog
 import dev.fujiwara.scala.drawer.PaperSize

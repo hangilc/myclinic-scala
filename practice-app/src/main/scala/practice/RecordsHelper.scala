@@ -3,6 +3,7 @@ package dev.myclinic.scala.web.practiceapp.practice
 import dev.myclinic.scala.webclient.{Api, global}
 import scala.concurrent.Future
 import dev.fujiwara.domq.SingleTask
+import dev.myclinic.scala.web.practiceapp.PracticeBus
 
 object RecordsHelper:
   private val refreshRecordsTask = new SingleTask[Int]()

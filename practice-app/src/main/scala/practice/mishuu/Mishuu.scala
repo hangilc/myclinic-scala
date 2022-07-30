@@ -3,7 +3,7 @@ package dev.myclinic.scala.web.practiceapp.practice.mishuu
 import dev.fujiwara.domq.CompSortDataList
 import dev.fujiwara.domq.all.{_, given}
 import dev.myclinic.scala.model.*
-import dev.myclinic.scala.web.practiceapp.practice.PracticeBus
+import dev.myclinic.scala.web.practiceapp.PracticeBus
 import dev.myclinic.scala.web.practiceapp.practice.mishuu.MishuuItem
 import dev.myclinic.scala.web.practiceapp.practice.mishuu.MishuuItem.given
 import dev.myclinic.scala.webclient.{Api, global}

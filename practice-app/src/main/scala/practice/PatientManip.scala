@@ -14,6 +14,7 @@ import dev.fujiwara.domq.SingleTask
 import dev.myclinic.scala.model.Visit
 import dev.myclinic.scala.model.Wqueue
 import dev.myclinic.scala.model.Meisai
+import dev.myclinic.scala.web.practiceapp.PracticeBus
 
 object PatientManip:
   val cashierButton = button

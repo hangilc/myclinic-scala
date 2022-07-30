@@ -1,4 +1,4 @@
-package dev.myclinic.scala.web.practiceapp.practice
+package dev.myclinic.scala.web.practiceapp
 
 import dev.fujiwara.domq.LocalEventPublisher
 import dev.fujiwara.domq.CachingEventPublisher
@@ -8,6 +8,8 @@ import dev.myclinic.scala.model.*
 import scala.concurrent.Future
 import dev.myclinic.scala.webclient.global
 import scala.language.implicitConversions
+import dev.myclinic.scala.web.practiceapp.practice.PatientVisitState
+import dev.myclinic.scala.web.practiceapp.practice.NoSelection
 
 object PracticeBus:
   val addRightWidgetRequest = LocalEventPublisher[HTMLElement]
@@ -44,6 +46,9 @@ object PracticeBus:
   val paymentEntered = LocalEventPublisher[Payment]
   val paymentUpdated = LocalEventPublisher[Payment]
   val paymentDeleted = LocalEventPublisher[Payment]
+  val wqueueEntered = LocalEventPublisher[Wqueue]
+  val wqueueUpdated = LocalEventPublisher[Wqueue]
+  val wqueueDeleted = LocalEventPublisher[Wqueue]
   val visitUpdated = LocalEventPublisher[VisitEx]
 
   val hokenInfoChanged = LocalEventPublisher[(VisitId, HokenInfo)]

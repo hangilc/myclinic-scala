@@ -3,7 +3,7 @@ package dev.myclinic.scala.web.practiceapp.practice.record
 import dev.fujiwara.domq.all.{*, given}
 import dev.myclinic.scala.model.{Text as ModelText}
 import dev.myclinic.scala.webclient.{Api, global}
-import dev.myclinic.scala.web.practiceapp.practice.PracticeBus
+import dev.myclinic.scala.web.practiceapp.PracticeBus
 import scala.language.implicitConversions
 
 class TextEnter(visitId: Int):
