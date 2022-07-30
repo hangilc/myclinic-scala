@@ -192,6 +192,9 @@ object PullDown:
   ): HTMLElement =
     pullDown(createButtonAnchor(label), close => createContent(close, commands))
 
+  def attachPullDown(e: HTMLElement, commands: List[(String, () => Unit)]): Unit =
+    pullDown(e, close => createContent(close, commands))
+
   def createLinkAnchor(label: String): HTMLElement =
     a(cls := "domq-pull-down link")(
       label,
