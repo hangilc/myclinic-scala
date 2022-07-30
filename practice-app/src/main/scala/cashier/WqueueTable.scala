@@ -10,19 +10,27 @@ import dev.fujiwara.kanjidate.KanjiDate
 import java.time.LocalDateTime
 import dev.myclinic.scala.webclient.{Api, global}
 import dev.myclinic.scala.web.practiceapp.PracticeBus
+import scala.concurrent.Future
 
 class WqueueTable:
   import WqueueTable.Item
   val unsubs = List(
     PracticeBus.wqueueEntered.subscribe(onWqueueEntered),
     PracticeBus.wqueueUpdated.subscribe(onWqueueUpdated),
-    PracticeBus.wqueueDeleted.subscribe(onWqueueDeleted),
+    PracticeBus.wqueueDeleted.subscribe(onWqueueDeleted)
   )
   val ele = div(cls := "practice-cashier-wqueue-table", titles)
   val wqueueList = new CompListSortList[Item](ele)
 
   def add(wqueue: Wqueue, visit: Visit, patient: Patient, charge: Int): Unit =
     wqueueList.add(Item(wqueue, visit, patient, charge))
+
+  def add(wqueue: Wqueue): Unit =
+    for
+      visit <- Api.getVisit(wqueue.visitId)
+      patient <- Api.getPatient(visit.patientId)
+      charge <- Api.getCharge(wqueue.visitId)
+    yield add(wqueue, visit, patient, charge.charge)
 
   def clear(): Unit =
     wqueueList.clear()
@@ -39,17 +47,24 @@ class WqueueTable:
     )
 
   private def onWqueueEntered(wqueue: Wqueue): Unit =
-    ()
+    if wqueue.waitState == WaitState.WaitCashier then add(wqueue)
 
   private def onWqueueUpdated(wqueue: Wqueue): Unit =
-    ()
+    if wqueue.waitState == WaitState.WaitCashier then
+      wqueueList.list
+        .find(_.wqueue.visitId == wqueue.visitId)
+        .fold(add(wqueue))(item =>
+          val newItem = item.copy(wqueue = wqueue)
+          wqueueList.replace(item, newItem)
+        )
+    else wqueueList.remove(_.wqueue.visitId == wqueue.visitId)
 
   private def onWqueueDeleted(wqueue: Wqueue): Unit =
-    ()
+    wqueueList.remove(_.wqueue.visitId == wqueue.visitId)
 
 object WqueueTable:
   case class Item(wqueue: Wqueue, visit: Visit, patient: Patient, charge: Int):
-    val eles: List[HTMLElement] = 
+    val eles: List[HTMLElement] =
       List(
         elePatient,
         eleVisitDate,
@@ -64,10 +79,8 @@ object WqueueTable:
 
     private def doMishuu(): Unit =
       val pay = Payment(wqueue.visitId, 0, LocalDateTime.now())
-      for
-        _ <- Api.finishCashier(pay)
-      yield
-        ()
+      for _ <- Api.finishCashier(pay)
+      yield ()
 
     def elePatient: HTMLElement =
       div(s"(${patient.patientId}) ${patient.lastName}${patient.firstName}")
@@ -79,4 +92,3 @@ object WqueueTable:
   given Ordering[Item] = Ordering.by(_.wqueue.visitId)
   given CompList[Item] = _.eles
   given Dispose[Item] = _ => ()
-
