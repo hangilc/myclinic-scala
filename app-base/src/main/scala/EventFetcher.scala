@@ -19,10 +19,14 @@ import java.time.LocalDateTime
 import org.scalajs.dom.WebSocket
 import org.scalajs.dom.CloseEvent
 import dev.fujiwara.domq.LocalEventPublisher
+import scala.util.Try
+import scala.scalajs.js.timers
 
 class EventFetcher:
-  val appModelEventPublisher: LocalEventPublisher[AppModelEvent] = LocalEventPublisher[AppModelEvent]
-  val hotlineBeepEventPublisher: LocalEventPublisher[HotlineBeep] = LocalEventPublisher[HotlineBeep]
+  val appModelEventPublisher: LocalEventPublisher[AppModelEvent] =
+    LocalEventPublisher[AppModelEvent]
+  val hotlineBeepEventPublisher: LocalEventPublisher[HotlineBeep] =
+    LocalEventPublisher[HotlineBeep]
 
   private var events: Vector[AppModelEvent] = Vector.empty
 
@@ -36,6 +40,7 @@ class EventFetcher:
 
   var nextEventId: Int = 0
   var wsOpt: Option[WebSocket] = None
+  private var retryConnectTimeout = 1
   def start(): Future[Unit] =
     for nextEventIdValue <- Api.getNextAppEventId()
     yield
@@ -44,24 +49,41 @@ class EventFetcher:
 
   private def connect(): Unit =
     if wsOpt.isEmpty then
-      println("ws-connect")
-      val ws = new dom.WebSocket(url)
-      ws.onopen = { (e: dom.Event) =>
-        println("ws-open")
-        if wsOpt.isEmpty then
-          wsOpt = Some(ws)
-          ws.onclose = (e: dom.CloseEvent) => {
-            wsOpt = None
-            println("ws-close")
-            connect()
-          }
-      }
-      ws.onmessage = { (e: dom.MessageEvent) =>
-        {
-          val msg = e.data.asInstanceOf[String]
-          println(("ws-message", msg))
-          handleMessage(msg)
+      println("Websocket connecting ...")
+      Try {
+        val ws = new dom.WebSocket(url)
+        println(("ws", ws))
+        println("Websocket created")
+        ws.onopen = { (e: dom.Event) =>
+          println("Websocket opened")
+          retryConnectTimeout = 1
+          if wsOpt.isEmpty then
+            wsOpt = Some(ws)
+            ws.onclose = (e: dom.CloseEvent) => {
+              println("Websocket closed")
+              wsOpt = None
+              retryConnectTimeout = 1
+              timers.setTimeout(retryConnectTimeout * 1000)(connect())
+            }
+          else ws.close(1000, "no use")
         }
+        ws.onmessage = { (e: dom.MessageEvent) =>
+          {
+            val msg = e.data.asInstanceOf[String]
+            println(("ws-message", msg))
+            handleMessage(msg)
+          }
+        }
+        ws.onerror = { (e: dom.ErrorEvent) =>
+          println("Websocket error")
+          retryConnectTimeout = (retryConnectTimeout * 2).min(15)
+          timers.setTimeout(retryConnectTimeout * 1000)(connect())
+        }
+      } match {
+        case Success(_) => ()
+        case Failure(_) =>
+          retryConnectTimeout = (retryConnectTimeout * 2).min(15)
+          timers.setTimeout(retryConnectTimeout * 1000)(connect())
       }
 
   def isRelevant(appEvent: AppEvent): Boolean = true
@@ -79,15 +101,16 @@ class EventFetcher:
     decode[EventType](msg) match {
       case Right(event) =>
         event match {
-          case appEvent @ _: AppEvent       => 
+          case appEvent @ _: AppEvent =>
             handleAppEvent(appEvent)
             println(("app-event", msg))
-          case hotlineBeep @ _: HotlineBeep => hotlineBeepEventPublisher.publish(hotlineBeep)
+          case hotlineBeep @ _: HotlineBeep =>
+            hotlineBeepEventPublisher.publish(hotlineBeep)
           case eventIdNotice: EventIdNotice =>
-            if eventIdNotice.currentEventId >= nextEventId then 
+            if eventIdNotice.currentEventId >= nextEventId then
               drainEvents()
               println(("drained", eventIdNotice.currentEventId))
-          case _: HeartBeat => 
+          case _: HeartBeat =>
             println("heart-beat")
             wsOpt.foreach(ws => ws.send("heart-beat"))
             ()
@@ -96,14 +119,15 @@ class EventFetcher:
     }
 
   private def drainEvents(): Unit =
-    val op = for events <- Api.listAppEventSince(nextEventId)
+    val op =
+      for events <- Api.listAppEventSince(nextEventId)
       yield events.foreach(event => {
         val modelEvent = AppModelEvent.from(event)
         onNewAppEvent(modelEvent)
         nextEventId = event.appEventId + 1
       })
     op.onComplete {
-      case Success(_) => ()
+      case Success(_)  => ()
       case Failure(ex) => System.err.println(ex.getMessage)
     }
 
