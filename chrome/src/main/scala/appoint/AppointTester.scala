@@ -20,6 +20,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import scala.concurrent.duration.Duration.apply
 import java.time.Duration
+import org.openqa.selenium.By
 
 object Util:
   val baseUrl: String = "http://localhost:8080"
@@ -79,6 +80,19 @@ class AppointTester:
     val wait = new WebDriverWait(driver, Duration.ofSeconds(2))
     wait.until(drv => box.slots.length == prevSlots + 1)
     println("OK: testEnter")
+
+  def testCancel(): Unit =
+    val slot = findOccupiedSlot
+    slot.e.click()
+    driver.findElement(By.xpath("//div[@class='domq-modal']//button[text()='予約取消実行']")).click()
+    driver.findElement(By.xpath("//div[@class='domq-modal']//button[text()='はい']")).click()
+    val wait = new WebDriverWait(driver, Duration.ofSeconds(2))
+    wait.until(ExpectedConditions.invisibilityOf(slot.e))
+    println("OK: cancel")
+
+  def findOccupiedSlot: AppointSlotElement =
+    val es = driver.findElements(ByClassName("appoint-slot")).asScala.toList
+    new AppointSlotElement(es(0))
 
   def findVacantAppointBox: AppointTimeBoxElement =
     val cols = driver
