@@ -21,6 +21,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import scala.concurrent.duration.Duration.apply
 import java.time.Duration
 import org.openqa.selenium.By
+import org.openqa.selenium.chrome.ChromeOptions
 
 object Util:
   val baseUrl: String = "http://localhost:8080"
@@ -62,7 +63,9 @@ object Util:
 class AppointTester:
   import Util.*
   confirmTesting()
-  val driver = new ChromeDriver()
+  val opts = new ChromeOptions()
+  opts.addArguments("--headless")
+  val driver = new ChromeDriver(opts)
   driver.get(s"${baseUrl}/appoint/")
 
   def close(): Unit =
