@@ -40,7 +40,9 @@ class EventFetcher:
 
   var nextEventId: Int = 0
   var wsOpt: Option[WebSocket] = None
+  private var isDraining = false
   private var retryConnectTimeout = 1
+
   def start(): Future[Unit] =
     for nextEventIdValue <- Api.getNextAppEventId()
     yield
@@ -71,7 +73,7 @@ class EventFetcher:
           {
             val msg = e.data.asInstanceOf[String]
             println(("ws-message", msg))
-            handleMessage(msg)
+            if !isDraining then handleMessage(msg)
           }
         }
         ws.onerror = { (e: dom.ErrorEvent) =>
@@ -119,17 +121,22 @@ class EventFetcher:
     }
 
   private def drainEvents(): Unit =
+    isDraining = true
     val op =
       for events <- Api.listAppEventSince(nextEventId)
       yield events.foreach(event => {
         val modelEvent = AppModelEvent.from(event)
-        onNewAppEvent(modelEvent)
-        nextEventId = event.appEventId + 1
+        if event.appEventId >= nextEventId then
+          nextEventId = event.appEventId + 1
+          onNewAppEvent(modelEvent)
       })
-    op.onComplete {
-      case Success(_)  => ()
-      case Failure(ex) => System.err.println(ex.getMessage)
-    }
+    op.onComplete(r =>
+      isDraining = false
+      r match {
+        case Success(_)  => ()
+        case Failure(ex) => System.err.println(ex.getMessage)
+      }
+    )
 
   private def handleAppEvent(appEvent: AppEvent): Unit =
     if isRelevant(appEvent) then
