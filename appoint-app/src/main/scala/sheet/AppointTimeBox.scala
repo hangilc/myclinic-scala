@@ -32,7 +32,8 @@ class AppointTimeBox(
     div(
       cls := "appoint-time-box",
       cls := s"appoint-time-id-${appointTime.appointTimeId}",
-      css(style => style.cursor = "pointer")
+      css(style => style.cursor = "pointer"),
+      attr("data-time") := attrDataTime
     )(eTimeRep, eKindRep, slotsWrapper)
   ele(onclick := (onElementClick _))
   CustomEvents.appointPostDeleted.handle(
@@ -63,6 +64,11 @@ class AppointTimeBox(
   dsrc.startSync(ele)
 
   def numSlots: Int = slots.size
+
+  private def attrDataTime: String =
+    val from = Misc.formatAppointTime(appointTime.fromTime)
+    val upto = Misc.formatAppointTime(appointTime.untilTime)
+    s"${from}-${upto}"
 
   private def updateUI(): Unit =
     if !kindCssClass.isEmpty then ele(cls :- kindCssClass)
