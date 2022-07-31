@@ -162,7 +162,7 @@ object MakeAppointDialog:
       val inputArea = div
       val workArea = div
       val searchForm = form
-      val input = inputText(width := "100%")
+      val input = inputText(width := "100%", cls := "name-input")
       val searchIcon = Icons.search
       val searchResult = Selection[Patient]()
       private val searchResultWrapper = div(displayNone)

@@ -513,3 +513,17 @@ lazy val repl = project
       "io.circe" %%% "circe-core" % circeVersion,
     )
   )
+
+lazy val chrome = project
+  .in(file("chrome"))
+  .dependsOn(modelJVM)
+  .settings(
+    name := "chrome",
+    libraryDependencies ++= Seq(
+      "org.seleniumhq.selenium" % "selenium-chrome-driver" % "4.3.0",
+      "org.http4s" %% "http4s-dsl" % http4sVersion,
+      "org.http4s" %% "http4s-blaze-client" % http4sVersion,
+      "org.http4s" %% "http4s-circe" % http4sVersion,
+      "io.circe" %%% "circe-core" % circeVersion,
+    )
+  )

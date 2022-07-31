@@ -31,19 +31,3 @@ object AdminAppointSheet:
   def doFillAppointTimes(from: LocalDate, upto: LocalDate): Unit =
     Api.fillAppointTimes(from, upto)
 
-//class AdminAppointSheet(using EventFetcher) extends AppointSheet:
-// val cog = Icons.cog(Icons.defaultStyle)
-// TopMenu.topMenuBox(cog)
-// cog(onclick := onCogClick)
-
-// override def makeAppointColumn(date: LocalDate, op: ClinicOperation): AppointColumn =
-//   new AdminAppointColumn(date, op)
-
-// def onCogClick(event: MouseEvent): Unit =
-//   ContextMenu(List("予約枠わりあて" -> doFillAppointTimes)).open(event)
-
-// def doFillAppointTimes(): Unit =
-//   println(("date-range", dateRange))
-//   dateRange.map {
-//     case (from, upto) => Api.fillAppointTimes(from, upto)
-//   }

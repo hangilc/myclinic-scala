@@ -121,7 +121,7 @@ object RestService extends DateTimeQueryParam with Publisher:
       yield (true)
       Ok(op)
 
-    case POST -> Root / "fill-appoint-times" :? dateFrom(from) +& dateUpto(
+    case GET -> Root / "fill-appoint-times" :? dateFrom(from) +& dateUpto(
           upto
         ) =>
       val op = for

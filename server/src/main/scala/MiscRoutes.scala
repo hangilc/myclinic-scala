@@ -521,4 +521,11 @@ object MiscService extends DateTimeQueryParam with Publisher:
     case GET -> Root / "get-charge" :? intVisitId(visitId) =>
       Ok(Db.getCharge(visitId))
 
+    case GET -> Root / "is-test" =>
+      val op =
+        for
+          patientOpt <- Db.findPatient(1)
+        yield patientOpt.fold(false)(p => p.lastName == "Shinryou" && p.firstName == "Tarou")
+      Ok(op)
+
   }

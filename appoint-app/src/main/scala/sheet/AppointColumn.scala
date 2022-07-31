@@ -29,7 +29,7 @@ case class AppointColumn(date: LocalDate, op: ClinicOperation)(using
   val dateElement = div
   val vacantKindsArea = span
   val kenshinArea = span
-  val ele = div(cls := "appoint-column", cls := op.code)(
+  val ele = div(cls := "appoint-column", cls := op.code, attr("data-date") := date.toString)(
     dateElement(cls := "date")(
       dateRep(date),
       vacantKindsArea,
