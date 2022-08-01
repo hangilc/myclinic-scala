@@ -22,55 +22,15 @@ import scala.concurrent.duration.Duration.apply
 import java.time.Duration
 import org.openqa.selenium.By
 import org.openqa.selenium.chrome.ChromeOptions
+import dev.myclinic.scala.chrome.Config
+import dev.myclinic.scala.chrome.Tester
 
-object Util:
-  val baseUrl: String = "http://localhost:8080"
+class AppointTester(
+    baseUrl: String = Config.baseUrl,
+    headless: Boolean = Config.headless
+) extends Tester(baseUrl, headless):
 
-  def apiUrl(path: String): String =
-    s"${baseUrl}/api${path}"
-
-  def isTesting: Boolean =
-    BlazeClientBuilder[IO].resource
-      .use { client =>
-        for
-          patientOpt <- client.expect[Option[Patient]](
-            apiUrl("/find-patient?patient-id=1")
-          )
-        yield patientOpt.fold(false)(p =>
-          p.lastName == "Shinryou" && p.firstName == "Tarou"
-        )
-      }
-      .unsafeRunSync()
-
-  def rest[T](f: Client[IO] => IO[T]): T =
-    BlazeClientBuilder[IO].resource.use(f).unsafeRunSync()
-
-  def confirmTesting(): Unit =
-    if !isTesting then throw new RuntimeException("Not a testing server")
-
-  type QueryValue = LocalDate
-
-  def params(map: (String, QueryValue)*): String =
-    "?" + map
-      .map((key, value) =>
-        val v = value match {
-          case d: LocalDate => d.toString
-        }
-        s"${key}=${v}"
-      )
-      .mkString("&")
-
-class AppointTester:
-  import Util.*
-  confirmTesting()
-  val opts = new ChromeOptions()
-  opts.addArguments("--headless")
-  val driver = new ChromeDriver(opts)
-  driver.get(s"${baseUrl}/appoint/")
-
-  def close(): Unit =
-    driver.close()
-
+  open(baseUrl + "/appoint/")
   def testEnter(): Unit =
     val box = findVacantAppointBox
     val prevSlots = box.slots.length
@@ -87,8 +47,14 @@ class AppointTester:
   def testCancel(): Unit =
     val slot = findOccupiedSlot
     slot.e.click()
-    driver.findElement(By.xpath("//div[@class='domq-modal']//button[text()='予約取消実行']")).click()
-    driver.findElement(By.xpath("//div[@class='domq-modal']//button[text()='はい']")).click()
+    driver
+      .findElement(
+        By.xpath("//div[@class='domq-modal']//button[text()='予約取消実行']")
+      )
+      .click()
+    driver
+      .findElement(By.xpath("//div[@class='domq-modal']//button[text()='はい']"))
+      .click()
     val wait = new WebDriverWait(driver, Duration.ofSeconds(2))
     wait.until(ExpectedConditions.invisibilityOf(slot.e))
     println("OK: cancel")

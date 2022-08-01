@@ -22,5 +22,16 @@ import scala.concurrent.duration.Duration.apply
 import java.time.Duration
 import org.openqa.selenium.By
 import org.openqa.selenium.chrome.ChromeOptions
+import dev.myclinic.scala.chrome.Config
+import dev.myclinic.scala.chrome.Tester
 
-class ReceptionTester
+class ReceptionTester(baseUrl: String = Config.baseUrl, headless: Boolean = Config.headless)
+  extends Tester(baseUrl, headless):
+  open(baseUrl + "/reception/")
+  def testSearchPatient(): Unit =
+    driver.findElement(ByClassName("reception-cashier-search-text-input"))
+      .sendKeys("1\n")
+    val patientDialog = PatientDialog(driver)
+    confirm(patientDialog.patientId == "1")
+    patientDialog.close()
+
