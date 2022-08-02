@@ -18,6 +18,47 @@ import org.http4s.circe.CirceEntityDecoder._
 import java.time.{LocalDate, LocalTime}
 import org.http4s.{EntityDecoder, EntityEncoder}
 import dev.fujiwara.kanjidate.DateUtil
+import io.circe.Encoder
+import io.circe.Decoder
+import org.http4s.blaze.client.BlazeClientBuilder
+
+case class MyClient(baseUri: Uri = Uri.unsafeFromString("http://localhost:8080")):
+  import MyClient.*
+  val baseApiUri: Uri = removeEndingSlash(baseUri / "api")
+
+  def apiUri[K: QueryParamKeyLike, V: QueryParamEncoder](
+      command: String,
+      params: Map[K, V]
+  ): Uri =
+    baseApiUri.addSegment(command).withQueryParams(params)
+
+  def request[T: Decoder, B: Encoder](method: Method, uri: Uri, body: B): Request[IO] =
+    Request[IO](method, uri).withEntity(body)
+
+  def run[T: Decoder](req: Request[IO]): T =
+    BlazeClientBuilder[IO].resource.use(_.expect[T](req)).unsafeRunSync()
+
+object MyClient:
+  def addEndingSlash(uri: Uri): Uri =
+    uri.withPath(uri.path.addEndsWithSlash)
+
+  def removeEndingSlash(uri: Uri): Uri =
+    uri.withPath(uri.path.dropEndsWithSlash)
+
+  def addPathWithEndingSlash(uri: Uri, path: String): Uri =
+    uri.withPath(uri.path.addSegment(path).addEndsWithSlash)
+
+  def landingPage(baseUri: Uri, prog: String): Uri =
+    addPathWithEndingSlash(baseUri, prog)
+
+  def appointAppLandingPage(baseUri: Uri): Uri =
+    landingPage(baseUri, "appoint")
+
+  def receptionAppLandingPage(baseUri: Uri): Uri =
+    landingPage(baseUri, "reception")
+
+  def practiceAppLandingPage(baseUri: Uri): Uri =
+    landingPage(baseUri, "practice")
 
 object Client:
   val client: Client[IO] =
@@ -87,6 +128,7 @@ object Client:
     splitAppointTime(at, at.fromTime.plusMinutes(30))
     val appointTimes = listAppointTimes(at.date)
     val appoint1 = appointTimes.find(_.fromTime == at.fromTime).get
-    val appoint2 = appointTimes.find(_.fromTime == at.fromTime.plusMinutes(30)).get
+    val appoint2 =
+      appointTimes.find(_.fromTime == at.fromTime.plusMinutes(30)).get
     updateAppointTime(appoint1.copy(capacity = 7))
     updateAppointTime(appoint2.copy(capacity = 7))
