@@ -24,13 +24,20 @@ import org.openqa.selenium.By
 import org.openqa.selenium.chrome.ChromeOptions
 import dev.myclinic.scala.chrome.Config
 import dev.myclinic.scala.chrome.Tester
+import org.http4s.Uri
 
 class AppointTester(
-    baseUrl: String = Config.baseUrl,
+    baseUrl: Uri = Config.baseUrl,
     headless: Boolean = Config.headless
 ) extends Tester(baseUrl, headless):
 
-  open(baseUrl + "/appoint/")
+  open(
+    baseUrl
+      .copy(path =
+        baseUrl.path.addSegment(Uri.Path.Segment("appoint")).addEndsWithSlash
+      )
+      .toString
+  )
   def testEnter(): Unit =
     val box = findVacantAppointBox
     val prevSlots = box.slots.length
@@ -79,6 +86,6 @@ class AppointTester(
   def fillAppointTimes(from: LocalDate, upto: LocalDate): Unit =
     rest(client =>
       client.expect[Boolean](
-        apiUrl("/fill-appoint-times" + params("from" -> from, "upto" -> upto))
+        apiUri("/fill-appoint-times" + params("from" -> from, "upto" -> upto))
       )
     )

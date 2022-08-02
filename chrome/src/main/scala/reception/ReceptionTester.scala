@@ -24,10 +24,11 @@ import org.openqa.selenium.By
 import org.openqa.selenium.chrome.ChromeOptions
 import dev.myclinic.scala.chrome.Config
 import dev.myclinic.scala.chrome.Tester
+import org.http4s.Uri
 
-class ReceptionTester(baseUrl: String = Config.baseUrl, headless: Boolean = Config.headless)
+class ReceptionTester(baseUrl: Uri = Config.baseUrl, headless: Boolean = Config.headless)
   extends Tester(baseUrl, headless):
-  open(baseUrl + "/reception/")
+  open(baseUrl.copy(path = baseUrl.path.addSegment(Uri.Path.Segment("reception")).addEndsWithSlash).toString)
   def testSearchPatient(): Unit =
     driver.findElement(ByClassName("reception-cashier-search-text-input"))
       .sendKeys("1\n")
