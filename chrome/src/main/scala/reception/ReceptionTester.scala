@@ -34,4 +34,12 @@ class ReceptionTester(baseUrl: String = Config.baseUrl, headless: Boolean = Conf
     val patientDialog = PatientDialog(driver)
     confirm(patientDialog.patientId == "1")
     patientDialog.close()
+    println("OK: search patient")
+
+  def ensureSearchPatients(): Unit =
+    val tmpls: List[(Int, String, String)] =
+      Range(2, 5).toList.map(i => (i, "Test", s"Number${i}"))
+    tmpls.foreach{ (patientId, lastName, firstName) =>
+      val pOpt = findPatient(patientId)
+    }
 

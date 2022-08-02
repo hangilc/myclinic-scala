@@ -2,16 +2,25 @@ package dev.myclinic.scala.chrome
 
 import org.openqa.selenium.chrome.{ChromeDriver, ChromeOptions}
 import org.http4s.client.Client
+import org.http4s.dsl.{io => _}
+import org.http4s.client.dsl.io.*
+import org.http4s.implicits.*
+import org.http4s.circe.*
 import org.http4s.circe.CirceEntityDecoder.*
+import org.http4s.circe.CirceEntityEncoder.*
 import cats.effect.*
 import cats.syntax.all.*
-import org.http4s.blaze.client.BlazeClientBuilder
-import dev.myclinic.scala.model.Patient
+import org.http4s.blaze.client.*
+import dev.myclinic.scala.model.*
 import dev.myclinic.scala.model.jsoncodec.Implicits.given
 import java.time.LocalDate
 import cats.effect.unsafe.implicits.global
 import org.openqa.selenium.WebElement
 import org.openqa.selenium.By
+import io.circe.syntax.*
+import org.http4s.Uri
+import org.http4s.Method
+import org.http4s.Request
 
 class Tester(
     baseUrl: String,
@@ -61,4 +70,11 @@ class Tester(
   def confirm(bool: Boolean): Unit =
     if !bool then throw new RuntimeException("Failed to confirm")
 
+  def findPatient(patientId: Int): Option[Patient] =
+    rest[Option[Patient]](_.expect[Option[Patient]](apiUrl(s"/find-patient?patient-id=${patientId}")))
+
+  def enterPatient(patient: Patient): Patient =
+    val req = Request[IO](method = Method.POST, uri = Uri.unsafeFromString(apiUrl("/enter-patient")))
+        .withEntity(patient)
+    rest[Patient](client => client.expect[Patient](req))
 
