@@ -10,6 +10,7 @@ import org.openqa.selenium.By.ByClassName
 import org.openqa.selenium.By.ByCssSelector
 import scala.jdk.CollectionConverters.*
 import org.openqa.selenium.By.ByXPath
+import java.time.LocalDate
 
 case class DatePickerElement(e: WebElement, driver: ChromeDriver):
   def yearSpan: WebElement = e.findElement(
@@ -43,20 +44,29 @@ case class DatePickerElement(e: WebElement, driver: ChromeDriver):
     items.find(e => e.getText() == t).get.click()
     ElementUtil.waitForDisappear(driver, monthList)
 
-  def chooseDay(day: Int): Unit =
-    val de: WebElement = ElementUtil.waitFor(
+  def waitForDay(day: Int): WebElement =
+    ElementUtil.waitFor(
       driver,
       e,
       ByXPath(
-        "//*[@class='domq-date-picker-dates-tab']" + 
-        "//*[@class='domq-date-picker-date-box' and not(@class='pre-month') and not(@class='post-month')" +
-        s" and @data-date='${day}']"
-        //".domq-date-picker-dates-tab .domq-date-picker-date-box:not(.pre-month):not(.post-month)"
+        "//*[contains(@class,'domq-date-picker-dates-tab')]" 
+        + "//*[contains(@class,'domq-date-picker-date-box')" 
+        + " and not(contains(@class,'pre-month'))" 
+        + " and not(contains(@class,'post-month'))" 
+        + s" and @data-date='${day}'"
+        + "]"
       )
     )
+
+  def chooseDay(day: Int): Unit =
+    val de: WebElement = waitForDay(day)
     de.click()
-    println(("choose-day", day))
     ElementUtil.waitForDisappear(driver, e)
+
+  def set(date: LocalDate): Unit =
+    chooseYear(date.getYear)
+    chooseMonth(date.getMonthValue)
+    chooseDay(date.getDayOfMonth)
 
 object DatePickerElement:
   def apply(driver: ChromeDriver): DatePickerElement =

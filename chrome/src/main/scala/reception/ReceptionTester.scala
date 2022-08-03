@@ -43,6 +43,11 @@ class ReceptionTester(
   def newPatientButton: WebElement =
     driver.findElement(ByClassName("reception-cashier-new-patient-button"))
 
+  def testAll(): Unit =
+    testSearchPatient()
+    testSearchPatientMulti()
+    testNewPatient()
+
   def testSearchPatient(): Unit =
     searchTextInput.sendKeys("1\n")
     val patientDialog = PatientDialog(driver)
@@ -84,6 +89,17 @@ class ReceptionTester(
       TestUtil.randomPhone
     )
     dlog.setInputs(p)
+    dlog.enter()
+    val searched: List[Patient] = client.searchPatient(
+      s"${p.lastName} ${p.firstName}"
+    )
+    // println(("p", p))
+    // println(("searched", searched))
+    confirm(!searched.isEmpty)
+    val searchedLastPatientId: Int = searched.map(_.patientId).max
+    val searchedLast: Patient = searched.find(_.patientId == searchedLastPatientId).get
+    confirm(p.copy(patientId = searchedLast.patientId) == searchedLast)
+    println("OK: new patient")
 
   def ensureSearchPatients(): Unit =
     val patients: List[Patient] = client.searchPatient("Test Number")
