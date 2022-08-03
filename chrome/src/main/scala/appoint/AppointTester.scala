@@ -25,19 +25,13 @@ import org.openqa.selenium.chrome.ChromeOptions
 import dev.myclinic.scala.chrome.Config
 import dev.myclinic.scala.chrome.Tester
 import org.http4s.Uri
+import dev.myclinic.scala.client.MyClient
 
 class AppointTester(
-    baseUrl: Uri = Config.baseUrl,
+    baseUri: Uri = Config.baseUrl,
     headless: Boolean = Config.headless
-) extends Tester(baseUrl, headless):
-
-  open(
-    baseUrl
-      .copy(path =
-        baseUrl.path.addSegment(Uri.Path.Segment("appoint")).addEndsWithSlash
-      )
-      .toString
-  )
+) extends Tester(baseUri, headless):
+  open(MyClient.appointAppLandingPage(baseUri).toString)
   def testEnter(): Unit =
     val box = findVacantAppointBox
     val prevSlots = box.slots.length
@@ -78,14 +72,14 @@ class AppointTester(
     val c = new AppointColumnElement(cols(0))
     if c.e.findElements(ByCssSelector(".appoint-time-box.vacant")).isEmpty then
       val d = c.date
-      fillAppointTimes(d, d)
+      client.fillAppointTimes(d, d)
     new AppointTimeBoxElement(
       c.e.findElement(ByCssSelector(".appoint-time-box.vacant"))
     )
 
-  def fillAppointTimes(from: LocalDate, upto: LocalDate): Unit =
-    rest(client =>
-      client.expect[Boolean](
-        apiUri("/fill-appoint-times" + params("from" -> from, "upto" -> upto))
-      )
-    )
+  // def fillAppointTimes(from: LocalDate, upto: LocalDate): Unit =
+  //   rest(client =>
+  //     client.expect[Boolean](
+  //       apiUri("/fill-appoint-times" + params("from" -> from, "upto" -> upto))
+  //     )
+  //   )

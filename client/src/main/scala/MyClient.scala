@@ -40,6 +40,8 @@ case class MyClient(
     run[Patient](_.getPatient(patientId))
   def findPatient(patientId: Int): Option[Patient] =
     run[Option[Patient]](_.findPatient(patientId))
+  def fillAppointTimes(from: LocalDate, upto: LocalDate): Boolean =
+    run[Boolean](_.fillAppointTimes(from, upto))
 
 object MyClient:
   def addEndingSlash(uri: Uri): Uri =
@@ -97,6 +99,8 @@ class MyRequest(baseApiUri: Uri, client: Client[IO]):
   private def run[T: Decoder](req: Request[IO]): IO[T] =
     client.expect[T](req)
 
+  given QueryParamEncoder[LocalDate] = d => QueryParameterValue(d.toString)
+
   def getPatient(patientId: Int): IO[Patient] =
     run[Patient](get("get-patient", Map("patient-id" -> patientId)))
 
@@ -105,6 +109,9 @@ class MyRequest(baseApiUri: Uri, client: Client[IO]):
 
   def enterPatient(patient: Patient): IO[Patient] =
     run[Patient](post("enter-patient", patient))
+
+  def fillAppointTimes(from: LocalDate, upto: LocalDate): IO[Boolean] =
+    run[Boolean](get("fill-appoint-times", Map("from" -> from, "upto" -> upto)))
 
 // object Client:
 //   val client: Client[IO] =

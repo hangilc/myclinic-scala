@@ -25,10 +25,11 @@ import org.openqa.selenium.chrome.ChromeOptions
 import dev.myclinic.scala.chrome.Config
 import dev.myclinic.scala.chrome.Tester
 import org.http4s.Uri
+import dev.myclinic.scala.client.MyClient
 
-class ReceptionTester(baseUrl: Uri = Config.baseUrl, headless: Boolean = Config.headless)
-  extends Tester(baseUrl, headless):
-  open(baseUrl.copy(path = baseUrl.path.addSegment(Uri.Path.Segment("reception")).addEndsWithSlash).toString)
+class ReceptionTester(baseUri: Uri = Config.baseUrl, headless: Boolean = Config.headless)
+  extends Tester(baseUri, headless):
+  open(MyClient.receptionAppLandingPage(baseUri).toString)
   def testSearchPatient(): Unit =
     driver.findElement(ByClassName("reception-cashier-search-text-input"))
       .sendKeys("1\n")
@@ -41,6 +42,6 @@ class ReceptionTester(baseUrl: Uri = Config.baseUrl, headless: Boolean = Config.
     val tmpls: List[(Int, String, String)] =
       Range(2, 5).toList.map(i => (i, "Test", s"Number${i}"))
     tmpls.foreach{ (patientId, lastName, firstName) =>
-      val pOpt = findPatient(patientId)
+      val pOpt = client.findPatient(patientId)
     }
 
