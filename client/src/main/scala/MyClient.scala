@@ -40,6 +40,10 @@ case class MyClient(
     run[Patient](_.getPatient(patientId))
   def findPatient(patientId: Int): Option[Patient] =
     run[Option[Patient]](_.findPatient(patientId))
+  def enterPatient(patient: Patient): Patient =
+    run[Patient](_.enterPatient(patient))
+  def searchPatient(text: String): List[Patient] =
+    run[List[Patient]](_.searchPatient(text))
   def fillAppointTimes(from: LocalDate, upto: LocalDate): Boolean =
     run[Boolean](_.fillAppointTimes(from, upto))
 
@@ -109,6 +113,9 @@ class MyRequest(baseApiUri: Uri, client: Client[IO]):
 
   def enterPatient(patient: Patient): IO[Patient] =
     run[Patient](post("enter-patient", patient))
+
+  def searchPatient(text: String): IO[List[Patient]] =
+    run[(Int, List[Patient])](get("search-patient", Map("text" -> text))).map(_._2)
 
   def fillAppointTimes(from: LocalDate, upto: LocalDate): IO[Boolean] =
     run[Boolean](get("fill-appoint-times", Map("from" -> from, "upto" -> upto)))

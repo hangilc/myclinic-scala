@@ -53,3 +53,4 @@ class Tester(
   def confirm(bool: Boolean): Unit =
     if !bool then throw new RuntimeException("Failed to confirm")
 
+

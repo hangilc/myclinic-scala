@@ -30,18 +30,43 @@ import dev.myclinic.scala.client.MyClient
 class ReceptionTester(baseUri: Uri = Config.baseUrl, headless: Boolean = Config.headless)
   extends Tester(baseUri, headless):
   open(MyClient.receptionAppLandingPage(baseUri).toString)
-  def testSearchPatient(): Unit =
+
+  def searchTextInput: WebElement =
     driver.findElement(ByClassName("reception-cashier-search-text-input"))
-      .sendKeys("1\n")
+
+  def searchButton: WebElement =
+    driver.findElement(ByClassName("reception-cashier-search-button"))
+
+  def testSearchPatient(): Unit =
+    searchTextInput.sendKeys("1\n")
     val patientDialog = PatientDialog(driver)
     confirm(patientDialog.patientId == "1")
     patientDialog.close()
     println("OK: search patient")
 
+  def testSearchPatientMulti(): Unit =
+    ensureSearchPatients()
+    searchTextInput.sendKeys("Test Number")
+    searchButton.click()
+    val dlog = PatientDialog(driver)
+    val texts: List[String] = dlog.searchResultTexts
+    confirm(Range(2, 5).toList.forall(i =>
+      val t = s"Test Number${i}"
+      texts.find(_.contains(t)).isDefined
+    ))
+    dlog.close()
+    println("OK: search patient multi")
+
+
+
   def ensureSearchPatients(): Unit =
-    val tmpls: List[(Int, String, String)] =
-      Range(2, 5).toList.map(i => (i, "Test", s"Number${i}"))
-    tmpls.foreach{ (patientId, lastName, firstName) =>
-      val pOpt = client.findPatient(patientId)
-    }
+    val patients: List[Patient] = client.searchPatient("Test Number")
+    def exists(i: Int): Boolean =
+      patients.find(p => p.lastName == "Test" && p.firstName == s"Number${i}").isDefined
+    def mkPatient(i: Int): Patient =
+      Patient(0, "Test", s"Number${i}", "", "", Sex.Male, LocalDate.of(2000, 1, 1), "", "")
+    Range(2, 5).foreach(i =>
+      if !exists(i) then
+        client.enterPatient(mkPatient(i))
+    )
 

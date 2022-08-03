@@ -4,19 +4,26 @@ import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.By.ByClassName
 import org.openqa.selenium.WebElement
 import org.openqa.selenium.By
-import dev.myclinic.scala.chrome.ElementBase
 import org.openqa.selenium.support.ui.WebDriverWait
 import java.time.Duration
 import org.openqa.selenium.support.ui.ExpectedConditions
+import scala.jdk.CollectionConverters.*
+import dev.myclinic.scala.chrome.ElementUtil
 
-class PatientDialog(e: WebElement) extends ElementBase(e):
+class PatientDialog(e: WebElement):
   def patientId: String =
     val value =
       e.findElement(By.xpath("//span[text()='患者番号']/following-sibling::span"))
     value.getText
 
   def close(): Unit =
-    findButtonByText("閉じる").click()
+    ElementUtil.getButtonByText(e, "閉じる").click()
+
+  def searchResultTexts: List[String] =
+    e.findElements(By.cssSelector("div.domq-modal-dialog3-body div.domq-selection div.domq-selection-item"))
+      .asScala
+      .toList
+      .map(_.getText)
 
 object PatientDialog:
   def apply(driver: ChromeDriver): PatientDialog =
