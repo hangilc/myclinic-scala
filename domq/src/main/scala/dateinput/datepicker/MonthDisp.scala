@@ -44,7 +44,7 @@ case class MonthDisp(var month: Int):
   def doMonthClick(event: MouseEvent): Unit =
     val (x, y) = Absolute.clickPos(event)
     val monthList = MonthList()
-    monthList.ele(cls := "domq-background-white")
+    monthList.ele(cls := "domq-background-white domq-date-picker-month-list")
     Absolute.position(monthList.ele)
     val close: () => Unit = Absolute.openWithScreen(monthList.ele, e => {
       Absolute.setLeftOf(e, x + 8)

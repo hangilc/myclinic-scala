@@ -34,7 +34,7 @@ case class YearDisp(var year: Int):
 
   private def doYearClick(event: MouseEvent): Unit =
     val yearList = YearList(1926, LocalDate.now().getYear + 6)
-    yearList.ele(cls := "domq-background-white")
+    yearList.ele(cls := "domq-background-white domq-date-picker-year-list")
     Absolute.position(yearList.ele)
     val close = Absolute.openWithScreen(yearList.ele, e => {
       val (x, y) = Absolute.clickPos(event)

@@ -26,9 +26,12 @@ import dev.myclinic.scala.chrome.Config
 import dev.myclinic.scala.chrome.Tester
 import org.http4s.Uri
 import dev.myclinic.scala.client.MyClient
+import dev.myclinic.scala.chrome.TestUtil
 
-class ReceptionTester(baseUri: Uri = Config.baseUrl, headless: Boolean = Config.headless)
-  extends Tester(baseUri, headless):
+class ReceptionTester(
+    baseUri: Uri = Config.baseUrl,
+    headless: Boolean = Config.headless
+) extends Tester(baseUri, headless):
   open(MyClient.receptionAppLandingPage(baseUri).toString)
 
   def searchTextInput: WebElement =
@@ -36,6 +39,9 @@ class ReceptionTester(baseUri: Uri = Config.baseUrl, headless: Boolean = Config.
 
   def searchButton: WebElement =
     driver.findElement(ByClassName("reception-cashier-search-button"))
+
+  def newPatientButton: WebElement =
+    driver.findElement(ByClassName("reception-cashier-new-patient-button"))
 
   def testSearchPatient(): Unit =
     searchTextInput.sendKeys("1\n")
@@ -57,16 +63,46 @@ class ReceptionTester(baseUri: Uri = Config.baseUrl, headless: Boolean = Config.
     dlog.close()
     println("OK: search patient multi")
 
-
+  def testNewPatient(): Unit =
+    newPatientButton.click()
+    val dlog = NewPatientDialog(driver)
+    val i: Int = TestUtil.randomInt(0, 999)
+    val lastName = String.format("Number%03d", i)
+    val p = Patient(
+      0,
+      "TestNew",
+      lastName,
+      "TestNewYomi",
+      s"${lastName}Yomi",
+      TestUtil.randomSex,
+      LocalDate.of(
+        TestUtil.randomInt(1950, 2010),
+        TestUtil.randomInt(1, 12),
+        TestUtil.randomInt(1, 28)
+      ),
+      TestUtil.randomString(12),
+      TestUtil.randomPhone
+    )
+    dlog.setInputs(p)
 
   def ensureSearchPatients(): Unit =
     val patients: List[Patient] = client.searchPatient("Test Number")
     def exists(i: Int): Boolean =
-      patients.find(p => p.lastName == "Test" && p.firstName == s"Number${i}").isDefined
+      patients
+        .find(p => p.lastName == "Test" && p.firstName == s"Number${i}")
+        .isDefined
     def mkPatient(i: Int): Patient =
-      Patient(0, "Test", s"Number${i}", "", "", Sex.Male, LocalDate.of(2000, 1, 1), "", "")
+      Patient(
+        0,
+        "Test",
+        s"Number${i}",
+        "",
+        "",
+        Sex.Male,
+        LocalDate.of(2000, 1, 1),
+        "",
+        ""
+      )
     Range(2, 5).foreach(i =>
-      if !exists(i) then
-        client.enterPatient(mkPatient(i))
+      if !exists(i) then client.enterPatient(mkPatient(i))
     )
-

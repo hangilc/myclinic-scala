@@ -12,7 +12,7 @@ class NewPatientDialog(onEnter: Patient => Unit):
   val inputs = new PatientInputs(None)
   val errBox = ErrorBox()
   val dlog = new ModalDialog3()
-  dlog.content(cls := "practice-new-patient-dialog")
+  dlog.content(cls := "reception-new-patient-dialog")
   dlog.title("新規患者")
   dlog.body(
     inputs.formPanel,
