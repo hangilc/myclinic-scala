@@ -516,7 +516,7 @@ lazy val repl = project
 
 lazy val chrome = project
   .in(file("chrome"))
-  .dependsOn(modelJVM)
+  .dependsOn(modelJVM, client)
   .settings(
     name := "chrome",
     libraryDependencies ++= Seq(
