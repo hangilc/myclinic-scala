@@ -22,21 +22,18 @@ import io.circe.Encoder
 import io.circe.Decoder
 import org.http4s.blaze.client.BlazeClientBuilder
 
-case class MyClient(baseUri: Uri = Uri.unsafeFromString("http://localhost:8080")):
+case class MyClient(
+    baseUri: Uri = Uri.unsafeFromString("http://localhost:8080")
+):
   import MyClient.*
   val baseApiUri: Uri = removeEndingSlash(baseUri / "api")
+  val myApiUri = new MyApiUri(baseApiUri)
 
-  def apiUri[K: QueryParamKeyLike, V: QueryParamEncoder](
-      command: String,
-      params: Map[K, V]
-  ): Uri =
-    baseApiUri.addSegment(command).withQueryParams(params)
-
-  def request[T: Decoder, B: Encoder](method: Method, uri: Uri, body: B): Request[IO] =
-    Request[IO](method, uri).withEntity(body)
-
-  def run[T: Decoder](req: Request[IO]): T =
-    BlazeClientBuilder[IO].resource.use(_.expect[T](req)).unsafeRunSync()
+  def run[T](f: Api => IO[T]): T =
+    BlazeClientBuilder[IO].resource.use( client =>
+      val api = new Api(client, myApiUri)
+      f(api)
+    ).unsafeRunSync()
 
 object MyClient:
   def addEndingSlash(uri: Uri): Uri =
@@ -59,6 +56,37 @@ object MyClient:
 
   def practiceAppLandingPage(baseUri: Uri): Uri =
     landingPage(baseUri, "practice")
+
+class MyApiUri(baseApiUri: Uri):
+  private def apiUri[K: QueryParamKeyLike, V: QueryParamEncoder](
+      command: String,
+      params: Map[K, V]
+  ): Uri =
+    baseApiUri.addSegment(command).withQueryParams(params)
+
+  def getPatient(patientId: Int): Uri =
+    apiUri("get-patient", Map("patient-id" -> patientId))
+
+class Api(client: Client[IO], apiUri: MyApiUri):
+  private def request[T: Decoder, B: Encoder](
+      method: Method,
+      uri: Uri,
+      body: Option[B]
+  ): Request[IO] =
+    val req = Request[IO](method, uri)
+    body.fold(req)(b => req.withEntity(b))
+
+  private def get[T: Decoder](uri: Uri): IO[T] =
+    client.expect[T](request[T, Unit](Method.GET, uri, None))
+
+  private def post[T: Decoder, B: Encoder](
+      uri: Uri,
+      body: B
+  ): IO[T] =
+    client.expect[T](request[T, B](Method.POST, uri, Some(body)))
+
+  def getPatient(patientId: Int): IO[Patient] =
+    get[Patient](apiUri.getPatient(patientId))
 
 object Client:
   val client: Client[IO] =
