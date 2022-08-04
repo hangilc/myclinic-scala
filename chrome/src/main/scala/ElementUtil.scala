@@ -27,6 +27,8 @@ object ElementUtil:
       ExpectedConditions.invisibilityOf(e)
     )
 
+  def xpathContainsClass(className: String): String =
+    s"contains(concat(' ', @class, ' '), ' ${className} ')"
     
     
 
