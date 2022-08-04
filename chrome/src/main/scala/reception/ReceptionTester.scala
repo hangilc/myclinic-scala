@@ -101,6 +101,10 @@ class ReceptionTester(
     disp.close()
     println("OK: new patient")
 
+  def testRecordMenu(): Unit =
+    val main = ReceptionMain(driver)
+    main.recordLink.click()
+
   def ensureSearchPatients(): Unit =
     val patients: List[Patient] = client.searchPatient("Test Number")
     def exists(i: Int): Boolean =

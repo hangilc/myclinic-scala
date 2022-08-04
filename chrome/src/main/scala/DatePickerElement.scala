@@ -12,6 +12,7 @@ import scala.jdk.CollectionConverters.*
 import org.openqa.selenium.By.ByXPath
 import java.time.LocalDate
 import dev.myclinic.scala.chrome.ElementUtil.xpathContainsClass
+import org.openqa.selenium.support.pagefactory.ByChained
 
 case class DatePickerElement(e: WebElement, driver: ChromeDriver):
   def yearSpan: WebElement = e.findElement(
@@ -46,15 +47,13 @@ case class DatePickerElement(e: WebElement, driver: ChromeDriver):
     ElementUtil.waitForDisappear(driver, monthList)
 
   def waitForDay(day: Int): WebElement =
-    val cls1 = xpathContainsClass("domq-date-picker-dates-tab")
-    val cls2 = xpathContainsClass("domq-date-picker-date-box")
-    val clsPre = xpathContainsClass("pre-month")
-    val clsPost = xpathContainsClass("post-month")
     ElementUtil.waitFor(
       driver,
       e,
-      ByXPath(
-        s"//*[${cls1}]//*[${cls2} and @data-date='${day}' and not(${clsPre}) and not(${clsPost})]"
+      ByCssSelector(
+        "div.domq-date-picker-dates-tab"
+          + " div.domq-date-picker-date-box:not(.pre-month):not(.post-month)"
+          + s"[data-date='${day}']"
       )
     )
 
