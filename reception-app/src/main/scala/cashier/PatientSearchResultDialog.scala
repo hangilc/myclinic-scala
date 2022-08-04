@@ -20,7 +20,10 @@ case class PatientSearchResultDialog(patients: List[Patient]):
   val dlog = new ModalDialog3()
   dlog.content(cls := "reception-cashier-search-patient-result-dialog")
   dlog.title("患者検索結果")
-  dlog.body(selection.ele(cls := "selection"))
+  dlog.body(
+    cls := "search-result-mode",
+    selection.ele(cls := "selection")
+  )
   dlog.commands(
     button("閉じる", onclick := (() => dlog.close()))
   )
@@ -72,32 +75,6 @@ case class PatientSearchResultDialog(patients: List[Patient]):
       copy(hokenList = hokenList.filter(h => HokenId(h) != hokenId))
 
   type DlogFun = TransitionNode[State]
-
-  // enum Transition:
-  //   case GoForward(next: DlogFun, state: State)
-  //   case GoBack(state: State)
-  //   case GoTo(
-  //       next: DlogFun,
-  //       state: State,
-  //       stackFun: List[DlogFun] => List[DlogFun] = identity
-  //   )
-  //   case Exit
-
-  // import Transition.*
-
-  // def run(f: DlogFun, state: State, stack: List[DlogFun]): Unit =
-  //   f(
-  //     state,
-  //     trans =>
-  //       trans match {
-  //         case GoForward(next, state)  => run(next, state, f :: stack)
-  //         case GoTo(next, state, sfun) => run(next, state, sfun(stack))
-  //         case GoBack(state) =>
-  //           if stack.isEmpty then dlog.close()
-  //           else run(stack.head, state, stack.tail)
-  //         case Exit => dlog.close()
-  //       }
-  //   )
 
   def start(patient: Patient, f: DlogFun): Unit =
     for hokenList <- listHoken(patient.patientId)

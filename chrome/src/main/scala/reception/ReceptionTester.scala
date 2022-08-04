@@ -50,22 +50,22 @@ class ReceptionTester(
 
   def testSearchPatient(): Unit =
     searchTextInput.sendKeys("1\n")
-    val patientDialog = PatientDialog(driver)
-    confirm(patientDialog.patientId == "1")
-    patientDialog.close()
+    val patientDisp = PatientDialog(driver).asPatientDisp
+    confirm(patientDisp.patientId == "1")
+    patientDisp.close()
     println("OK: search patient")
 
   def testSearchPatientMulti(): Unit =
     ensureSearchPatients()
     searchTextInput.sendKeys("Test Number")
     searchButton.click()
-    val dlog = PatientDialog(driver)
-    val texts: List[String] = dlog.searchResultTexts
+    val mode = PatientDialog(driver).asSearchResult
+    val texts: List[String] = mode.searchResultTexts
     confirm(Range(2, 5).toList.forall(i =>
       val t = s"Test Number${i}"
       texts.find(_.contains(t)).isDefined
     ))
-    dlog.close()
+    mode.close()
     println("OK: search patient multi")
 
   def testNewPatient(): Unit =
@@ -93,12 +93,12 @@ class ReceptionTester(
     val searched: List[Patient] = client.searchPatient(
       s"${p.lastName} ${p.firstName}"
     )
-    // println(("p", p))
-    // println(("searched", searched))
     confirm(!searched.isEmpty)
     val searchedLastPatientId: Int = searched.map(_.patientId).max
     val searchedLast: Patient = searched.find(_.patientId == searchedLastPatientId).get
     confirm(p.copy(patientId = searchedLast.patientId) == searchedLast)
+    val disp = PatientDialog(driver).asPatientDisp
+    disp.close()
     println("OK: new patient")
 
   def ensureSearchPatients(): Unit =
