@@ -209,7 +209,8 @@ object PullDown:
 
   def createContent(
       close: () => Unit,
-      items: List[(String, () => Unit)]
+      items: List[(String, () => Unit)],
+      menuItemsWrapperClass: String = ""
   ): HTMLElement =
     def anchor(label: String, f: () => Unit): HTMLElement =
       a(
@@ -219,7 +220,7 @@ object PullDown:
           f()
         })
       )
-    div(cls := "domq-context-menu")(
+    div(cls := "domq-context-menu", cls := menuItemsWrapperClass)(
       children :=
         items.map({ case (label, f) =>
           div(anchor(label, f))

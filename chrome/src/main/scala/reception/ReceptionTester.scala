@@ -103,7 +103,8 @@ class ReceptionTester(
 
   def testRecordMenu(): Unit =
     val main = ReceptionMain(driver)
-    main.recordLink.click()
+    val menu = main.openRecordMenu
+    menu.close()
 
   def ensureSearchPatients(): Unit =
     val patients: List[Patient] = client.searchPatient("Test Number")

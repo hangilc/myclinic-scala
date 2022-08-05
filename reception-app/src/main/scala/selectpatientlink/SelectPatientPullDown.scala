@@ -27,7 +27,8 @@ class SelectPatientPullDown:
         "患者検索" -> (onSelectFromSearch _),
         "最近の診察" -> (onSelectFromRecent _),
         "日付別" -> (onSelectByDate _)
-      )
+      ),
+      "record-menu-items"
     )
     m.open(c, f => PullDown.locatePullDownMenu(selectPatientLink, f))
 

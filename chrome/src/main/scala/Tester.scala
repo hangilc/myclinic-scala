@@ -29,12 +29,14 @@ import dev.myclinic.scala.client.MyClient
 
 class Tester(
     baseUri: Uri,
-    headless: Boolean
+    headless: Boolean,
+    chromeBinary: Option[String] = Tester.probeBinary
 ):
   val client = MyClient(baseUri)
   confirmTesting()
   val opts = new ChromeOptions()
   if headless then opts.addArguments("--headless")
+  chromeBinary.foreach(binary => opts.setBinary(binary))
   val driver: ChromeDriver = new ChromeDriver(opts)
 
   def open(url: String): Unit =
@@ -52,5 +54,10 @@ class Tester(
 
   def confirm(bool: Boolean): Unit =
     if !bool then throw new RuntimeException("Failed to confirm")
+
+object Tester:
+  def probeBinary: Option[String] =
+    val e = System.getenv("MYCLINIC_CHROMEDRIVER_BINARY")
+    if e != null then Some(e) else None
 
 
