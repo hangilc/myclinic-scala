@@ -9,14 +9,18 @@ import org.openqa.selenium.By.ByCssSelector
 import org.openqa.selenium.By.ByXPath
 import org.openqa.selenium.By.ByLinkText
 import org.openqa.selenium.By.ByTagName
+import scala.jdk.CollectionConverters.*
 
 case class ReceptionMain(e: WebElement, driver: ChromeDriver):
-  val headBox: WebElement = e.findElement(ByClassName("reception-cashier-head-box"))
+  val headBox: WebElement =
+    e.findElement(ByClassName("reception-cashier-head-box"))
 
-  val recordLink: WebElement = headBox.findElement(ByChained(
-    ByCssSelector("a.domq-pull-down"),
-    ByXPath("self::*[text()='診療録']")
-  ))
+  val recordLink: WebElement = headBox.findElement(
+    ByChained(
+      ByCssSelector("a.domq-pull-down"),
+      ByXPath("self::*[text()='診療録']")
+    )
+  )
 
   def openRecordMenu: RecordMenuItems =
     recordLink.click()
@@ -26,8 +30,12 @@ case class ReceptionMain(e: WebElement, driver: ChromeDriver):
     def select(name: String): Unit =
       e.findElement(ByLinkText(name)).click()
 
+    def selectFromWqueue: FromWqueue =
+      select("受付患者")
+      FromWqueue(driver)
+
     def close(): Unit =
-      driver.findElement(ByTagName("html")).click()
+      ElementUtil.topDomqScreen(driver).click()
       ElementUtil.waitForDisappear(driver, e)
 
   object RecordMenuItems:
@@ -37,10 +45,24 @@ case class ReceptionMain(e: WebElement, driver: ChromeDriver):
       val e = ElementUtil.waitFor(driver, ByClassName(className))
       new RecordMenuItems(e, driver)
 
+  case class FromWqueue(e: WebElement, driver: ChromeDriver):
+    def close(): Unit =
+      ElementUtil.closePullDown(e, driver)
+
+    def patientLinks: List[WebElement] =
+      e.findElements(ByCssSelector("a")).asScala.toList
+
+  object FromWqueue:
+    def apply(driver: ChromeDriver): FromWqueue =
+      val e = ElementUtil.waitFor(
+        driver,
+        ByCssSelector("body > div.domq-floating-element div.wqueue-patient-list")
+      )
+      FromWqueue(e, driver)
+
 object ReceptionMain:
   val className = "reception-cashier-service"
 
   def apply(driver: ChromeDriver): ReceptionMain =
     val e = ElementUtil.waitFor(driver, ByClassName(className))
     new ReceptionMain(e, driver)
-

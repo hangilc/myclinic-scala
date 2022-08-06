@@ -12,7 +12,7 @@ import org.scalajs.dom.document
 class FloatingElement(content: HTMLElement, onHide: () => Unit = () => ()):
   val ele: HTMLElement = div(css(style => {
     style.position = "absolute"
-  }))(content)
+  }), cls := "domq-floating-element")(content)
 
   def getRect: DocRect = Geometry.getRect(ele)
   def leftTop: DocPoint = getRect.leftTop

@@ -7,12 +7,19 @@ import org.openqa.selenium.support.ui.WebDriverWait
 import org.openqa.selenium.WebDriver
 import java.time.Duration
 import org.openqa.selenium.support.ui.ExpectedConditions
+import org.openqa.selenium.By.ByClassName
+import scala.jdk.CollectionConverters.*
+import org.openqa.selenium.chrome.ChromeDriver
 
 object ElementUtil:
   def getButtonByText(wrapper: WebElement, text: String): WebElement =
     wrapper.findElement(By.xpath(s"//button[text()='${text}']"))
 
-  def waitFor(driver: WebDriver, wrapper: SearchContext, locator: By): WebElement =
+  def waitFor(
+      driver: WebDriver,
+      wrapper: SearchContext,
+      locator: By
+  ): WebElement =
     val wait = new WebDriverWait(driver, Duration.ofSeconds(2))
     wait.until[WebElement](
       ExpectedConditions.visibilityOfElementLocated(locator)
@@ -29,6 +36,26 @@ object ElementUtil:
 
   def xpathContainsClass(className: String): String =
     s"contains(concat(' ', @class, ' '), ' ${className} ')"
-    
-    
 
+  def topZIndexOf(eles: List[WebElement]): WebElement =
+    eles
+      .sortBy(e =>
+        e.getCssValue("z-index") match {
+          case "auto" => -1
+          case z      => z.toInt
+        }
+      )
+      .reverse
+      .last
+
+  def topDomqScreen(driver: ChromeDriver): WebElement =
+    println(("screens", driver.findElements(ByClassName("domq-screen")).size))
+    topZIndexOf(driver.findElements(ByClassName("domq-screen")).asScala.toList)
+
+  def closePullDown(e: WebElement, driver: ChromeDriver): Unit =
+    ElementUtil.topDomqScreen(driver).click()
+    ElementUtil.waitForDisappear(driver, e)
+
+  def closeByButton(e: WebElement, driver: ChromeDriver): Unit =
+    getButtonByText(e, "閉じる").click()
+    waitForDisappear(driver, e)
