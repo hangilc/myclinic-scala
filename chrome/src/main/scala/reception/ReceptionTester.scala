@@ -104,8 +104,9 @@ class ReceptionTester(
   def testRecordMenu(): Unit =
     val main = ReceptionMain(driver)
     val menu = main.openRecordMenu
-    menu.close()
-    println("OK: record menu")
+    menu.select("受付患者")
+    // menu.close()
+    // println("OK: record menu")
 
   def ensureSearchPatients(): Unit =
     val patients: List[Patient] = client.searchPatient("Test Number")

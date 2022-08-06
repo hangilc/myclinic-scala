@@ -44,7 +44,7 @@ class SelectPatientPullDown:
       val c = PullDown.createContent(() => m.close(), patients.map(
         patient =>
           patient.fullName("") -> (() => onSelectPublisher.publish(patient))
-      ))
+      ), "wqueue-patient-list")
       m.open(c, f => PullDown.locatePullDownMenu(selectPatientLink, f))
     }
 

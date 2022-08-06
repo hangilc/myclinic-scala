@@ -23,6 +23,9 @@ case class ReceptionMain(e: WebElement, driver: ChromeDriver):
     RecordMenuItems(driver)
 
   case class RecordMenuItems(e: WebElement, driver: ChromeDriver):
+    def select(name: String): Unit =
+      e.findElement(ByLinkText(name)).click()
+
     def close(): Unit =
       driver.findElement(ByTagName("html")).click()
       ElementUtil.waitForDisappear(driver, e)
