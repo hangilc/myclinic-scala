@@ -12,4 +12,4 @@ object Config:
 
   lazy val headless: Boolean =
     val envVal: String = System.getenv("MYCLINIC_CHROME_HEADLESS")
-    envVal == null || envVal.toUpperCase != "FALSE"
+    envVal == null || envVal.toUpperCase == "TRUE"

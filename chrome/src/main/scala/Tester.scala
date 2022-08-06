@@ -26,6 +26,7 @@ import org.http4s.QueryParamEncoder
 import io.circe.Encoder
 import io.circe.Decoder
 import dev.myclinic.scala.client.MyClient
+import org.openqa.selenium.chrome.ChromeDriverLogLevel
 
 class Tester(
     baseUri: Uri,
@@ -37,12 +38,16 @@ class Tester(
   val opts = new ChromeOptions()
   if headless then opts.addArguments("--headless")
   chromeBinary.foreach(binary => opts.setBinary(binary))
+  opts.setLogLevel(ChromeDriverLogLevel.WARNING)
   val driver: ChromeDriver = new ChromeDriver(opts)
 
   def open(url: String): Unit =
     println(("open", url))
     driver.get(url)
-  def close(): Unit = driver.quit()
+
+  def close(): Unit = 
+    driver.close()
+    driver.quit()
 
   def isTesting: Boolean =
     client.findPatient(1).fold(false)(p =>
