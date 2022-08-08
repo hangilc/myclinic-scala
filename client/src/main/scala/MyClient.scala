@@ -21,6 +21,7 @@ import dev.fujiwara.kanjidate.DateUtil
 import io.circe.Encoder
 import io.circe.Decoder
 import org.http4s.blaze.client.BlazeClientBuilder
+import java.time.LocalDateTime
 
 case class MyClient(
     baseUri: Uri = Uri.unsafeFromString("http://localhost:8080")
@@ -44,6 +45,8 @@ case class MyClient(
     run[Patient](_.enterPatient(patient))
   def searchPatient(text: String): List[Patient] =
     run[List[Patient]](_.searchPatient(text))
+  def listWqueue: List[Wqueue] =
+    run(_.listWqueue)
   def fillAppointTimes(from: LocalDate, upto: LocalDate): Boolean =
     run[Boolean](_.fillAppointTimes(from, upto))
 
@@ -81,11 +84,28 @@ class MyRequest(baseApiUri: Uri, client: Client[IO]):
   ): Uri =
     apiUri(command).withQueryParams(params)
 
+  private def apiUri2[K: QueryParamKeyLike, V: QueryParamEncoder](
+      command: String,
+      params: (K, V)*
+  ): Uri =
+    params.foldLeft(apiUri(command)) { case (uri, (k, v)) =>
+      uri.withQueryParam(k, v)
+    }
+
   private def get[K: QueryParamKeyLike, V: QueryParamEncoder](
       command: String,
       params: Map[K, V]
   ): Request[IO] =
     Request[IO](Method.GET, apiUri(command, params))
+
+  private def get(uri: Uri): Request[IO] =
+    Request[IO](Method.GET, uri)
+
+  private def get2[K: QueryParamKeyLike, V: QueryParamEncoder](
+      command: String,
+      params: (K, V)*
+  ): Request[IO] =
+    Request[IO](Method.GET, apiUri2(command, params: _*))
 
   private def post[B: Encoder](
       command: String,
@@ -104,6 +124,8 @@ class MyRequest(baseApiUri: Uri, client: Client[IO]):
     client.expect[T](req)
 
   given QueryParamEncoder[LocalDate] = d => QueryParameterValue(d.toString)
+  given QueryParamEncoder[LocalDateTime] =
+    t => QueryParameterValue(DateUtil.dateTimeToString(t))
 
   def getPatient(patientId: Int): IO[Patient] =
     run[Patient](get("get-patient", Map("patient-id" -> patientId)))
@@ -115,7 +137,17 @@ class MyRequest(baseApiUri: Uri, client: Client[IO]):
     run[Patient](post("enter-patient", patient))
 
   def searchPatient(text: String): IO[List[Patient]] =
-    run[(Int, List[Patient])](get("search-patient", Map("text" -> text))).map(_._2)
+    run[(Int, List[Patient])](get("search-patient", Map("text" -> text)))
+      .map(_._2)
+
+  def listWqueue: IO[List[Wqueue]] =
+    run[List[Wqueue]](get("list-wqueue", Map.empty[String, String]))
+
+  def startVisit(patientId: Int, at: LocalDateTime): IO[Visit] =
+    val uri = apiUri("start-visit")
+      .withQueryParam("patient-id", patientId)
+      .withQueryParam("at", at)
+    run[Visit](get(uri))
 
   def fillAppointTimes(from: LocalDate, upto: LocalDate): IO[Boolean] =
     run[Boolean](get("fill-appoint-times", Map("from" -> from, "upto" -> upto)))
