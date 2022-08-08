@@ -105,6 +105,7 @@ class ReceptionTester(
   def testRecordMenu(): Unit =
     testRecordMenuFromWqueue()
     testRecordMenuSearchPatient()
+    testRecordMenuRecentVisits()
 
   def testRecordMenuFromWqueue(): Unit =
     if client.listWqueue.isEmpty then
@@ -131,6 +132,19 @@ class ReceptionTester(
     val record = RecordDialog(driver)
     record.close()
     println("OK: record menu (search patient)")
+
+  def testRecordMenuRecentVisits(): Unit =
+    if client.countVisitByPatient(1) == 0 then
+      client.startVisit(1, LocalDateTime.now())
+    val main = ReceptionMain(driver)
+    val menu = main.openRecordMenu
+    val visits = menu.selectRecentVisits
+    val items: List[WebElement] = visits.selection.items
+    confirm(items.length > 0)
+    items(0).click()
+    val record = RecordDialog(driver)
+    record.close()
+    println("OK: record menu (recent visits)")
 
   def ensureSearchPatients(): Unit =
     val patients: List[Patient] = client.searchPatient("Test Number")

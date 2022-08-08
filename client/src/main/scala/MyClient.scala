@@ -51,6 +51,9 @@ case class MyClient(
     run(_.startVisit(patientId, at))
   def countVisitByPatient(patientId: Int): Int =
     run(_.countVisitByPatient(patientId))
+  def listRecentVisit(offset: Int, count: Int): List[Visit] = run(
+    _.listRecentVisit(offset, count)
+  )
   def fillAppointTimes(from: LocalDate, upto: LocalDate): Boolean =
     run[Boolean](_.fillAppointTimes(from, upto))
 
@@ -117,6 +120,10 @@ class MyRequest(baseApiUri: Uri, client: Client[IO]):
   given QueryParamEncoder[LocalDateTime] =
     t => QueryParameterValue(DateUtil.dateTimeToString(t))
 
+  extension [T: Decoder](uri: Uri)
+    def runGet: IO[T] =
+      run[T](get(uri))
+
   def getPatient(patientId: Int): IO[Patient] =
     run[Patient](get("get-patient", Map("patient-id" -> patientId)))
 
@@ -140,8 +147,15 @@ class MyRequest(baseApiUri: Uri, client: Client[IO]):
     run[Visit](get(uri))
 
   def countVisitByPatient(patientId: Int): IO[Int] =
-    val uri = apiUri("count-visit-by-patient").withQueryParam("patient-id", patientId)
+    val uri =
+      apiUri("count-visit-by-patient").withQueryParam("patient-id", patientId)
     run[Int](get(uri))
+
+  def listRecentVisit(offset: Int, count: Int): IO[List[Visit]] =
+    apiUri("list-recent-visit")
+      .withQueryParam("offset", offset)
+      .withQueryParam("count", count)
+      .runGet
 
   def fillAppointTimes(from: LocalDate, upto: LocalDate): IO[Boolean] =
     run[Boolean](get("fill-appoint-times", Map("from" -> from, "upto" -> upto)))

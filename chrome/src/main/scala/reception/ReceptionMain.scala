@@ -14,6 +14,8 @@ import org.openqa.selenium.WebDriver
 import org.openqa.selenium.support.ui.WebDriverWait
 import java.time.Duration
 import org.openqa.selenium.support.ui.ExpectedConditions
+import dev.myclinic.scala.chrome.SelectionElement.apply
+import dev.myclinic.scala.chrome.SelectionElement
 
 case class ReceptionMain(e: WebElement, driver: ChromeDriver):
   val headBox: WebElement =
@@ -41,6 +43,10 @@ case class ReceptionMain(e: WebElement, driver: ChromeDriver):
     def selectBySearchPatient: SearchPatient =
       select("患者検索")
       SearchPatient(driver)
+
+    def selectRecentVisits: RecentVisits =
+      select("最近の診察")
+      RecentVisits(driver)
 
     def close(): Unit =
       ElementUtil.topDomqScreen(driver).click()
@@ -88,6 +94,18 @@ case class ReceptionMain(e: WebElement, driver: ChromeDriver):
         ByCssSelector("body > div.domq-floating-element div.records-search-patient-box")
       )
       SearchPatient(e, driver)
+
+  case class RecentVisits(e: WebElement, driver: ChromeDriver):
+    def selection = SelectionElement(e, driver)
+
+  object RecentVisits:
+    def apply(driver: ChromeDriver): RecentVisits =
+      val e = ElementUtil.waitFor(
+        driver,
+        ByCssSelector("body > div.domq-floating-element div.records-recent-visit-box")
+      )
+      RecentVisits(e, driver)
+
 
 object ReceptionMain:
   val className = "reception-cashier-service"
