@@ -28,6 +28,9 @@ class Selection[T](using config: SelectionConfig):
   private val unselectEventPublisher = LocalEventPublisher[Unit]
   private var items: List[SelectionItem[T]] = List.empty
   private var markedValue: Option[T] = None
+  private var dataVersion: Int = 0
+
+  updateVersion()
 
   def onSelect(handler: T => Unit): Unit =
     selectEventPublisher.subscribe(handler)
@@ -41,11 +44,18 @@ class Selection[T](using config: SelectionConfig):
     unselectEventPublisher.subscribe(_ => handler())
   private def publishUnselect(): Unit = unselectEventPublisher.publish(())
 
+  private def updateVersion(): Unit =
+    ele(attr("data-version") := dataVersion.toString)
+
   def add(itemElement: HTMLElement, value: T): Unit =
     val item = SelectionItem(itemElement, value)
     items = items :+ item
     item.ele(onclick := (() => onItemClick(item)))
     ele(item.ele)
+
+  def addDone(): Unit =
+    dataVersion += 1
+    updateVersion()
 
   def addAll(args: List[(HTMLElement, T)]): Unit =
     args.foreach {

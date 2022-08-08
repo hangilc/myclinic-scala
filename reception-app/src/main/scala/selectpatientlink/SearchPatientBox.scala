@@ -27,15 +27,16 @@ class SearchPatientBox(cb: Patient => Unit):
 
   def onSearch(): Unit =
     val txt = searchText.value.trim
-    selection.clear()
     for
       (gen, patients) <- Api.searchPatient(txt)
     yield {
       searchText.value = ""
+      selection.clear()
       patients.foreach(patient => {
         val label = String.format("(%04d) %s", patient.patientId, patient.fullName(""))
         selection.add(div(innerText := label), patient)
       })
+      selection.addDone()
     }
 
 

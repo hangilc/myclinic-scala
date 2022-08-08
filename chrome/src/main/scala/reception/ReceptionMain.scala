@@ -11,6 +11,9 @@ import org.openqa.selenium.By.ByLinkText
 import org.openqa.selenium.By.ByTagName
 import scala.jdk.CollectionConverters.*
 import org.openqa.selenium.WebDriver
+import org.openqa.selenium.support.ui.WebDriverWait
+import java.time.Duration
+import org.openqa.selenium.support.ui.ExpectedConditions
 
 case class ReceptionMain(e: WebElement, driver: ChromeDriver):
   val headBox: WebElement =
@@ -65,7 +68,18 @@ case class ReceptionMain(e: WebElement, driver: ChromeDriver):
       )
       FromWqueue(e, driver)
 
-  case class SearchPatient(e: WebElement, driver: ChromeDriver)
+  case class SearchPatient(e: WebElement, driver: ChromeDriver):
+    val input: WebElement = e.findElement(ByTagName("input"))
+    val select: WebElement = e.findElement(ByClassName("domq-selection"))
+
+    def getVersion: Int = select.getAttribute("data-version").toInt    
+    def waitForVersion(ver: Int): Unit =
+      val wait = new WebDriverWait(driver, Duration.ofSeconds(2))
+      wait.until[Boolean](
+        _ => getVersion == 1
+      )
+    def items: List[WebElement] =
+      select.findElements(ByClassName("domq-selection-item")).asScala.toList
 
   object SearchPatient:
     def apply(driver: ChromeDriver): SearchPatient =
