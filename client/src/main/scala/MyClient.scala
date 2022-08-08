@@ -47,6 +47,10 @@ case class MyClient(
     run[List[Patient]](_.searchPatient(text))
   def listWqueue: List[Wqueue] =
     run(_.listWqueue)
+  def startVisit(patientId: Int, at: LocalDateTime): Visit =
+    run(_.startVisit(patientId, at))
+  def countVisitByPatient(patientId: Int): Int =
+    run(_.countVisitByPatient(patientId))
   def fillAppointTimes(from: LocalDate, upto: LocalDate): Boolean =
     run[Boolean](_.fillAppointTimes(from, upto))
 
@@ -84,14 +88,6 @@ class MyRequest(baseApiUri: Uri, client: Client[IO]):
   ): Uri =
     apiUri(command).withQueryParams(params)
 
-  private def apiUri2[K: QueryParamKeyLike, V: QueryParamEncoder](
-      command: String,
-      params: (K, V)*
-  ): Uri =
-    params.foldLeft(apiUri(command)) { case (uri, (k, v)) =>
-      uri.withQueryParam(k, v)
-    }
-
   private def get[K: QueryParamKeyLike, V: QueryParamEncoder](
       command: String,
       params: Map[K, V]
@@ -100,12 +96,6 @@ class MyRequest(baseApiUri: Uri, client: Client[IO]):
 
   private def get(uri: Uri): Request[IO] =
     Request[IO](Method.GET, uri)
-
-  private def get2[K: QueryParamKeyLike, V: QueryParamEncoder](
-      command: String,
-      params: (K, V)*
-  ): Request[IO] =
-    Request[IO](Method.GET, apiUri2(command, params: _*))
 
   private def post[B: Encoder](
       command: String,
@@ -148,6 +138,10 @@ class MyRequest(baseApiUri: Uri, client: Client[IO]):
       .withQueryParam("patient-id", patientId)
       .withQueryParam("at", at)
     run[Visit](get(uri))
+
+  def countVisitByPatient(patientId: Int): IO[Int] =
+    val uri = apiUri("count-visit-by-patient").withQueryParam("patient-id", patientId)
+    run[Int](get(uri))
 
   def fillAppointTimes(from: LocalDate, upto: LocalDate): IO[Boolean] =
     run[Boolean](get("fill-appoint-times", Map("from" -> from, "upto" -> upto)))

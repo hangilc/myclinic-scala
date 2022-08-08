@@ -27,6 +27,7 @@ import dev.myclinic.scala.chrome.Tester
 import org.http4s.Uri
 import dev.myclinic.scala.client.MyClient
 import dev.myclinic.scala.chrome.TestUtil
+import java.time.LocalDateTime
 
 class ReceptionTester(
     baseUri: Uri = Config.baseUrl,
@@ -102,13 +103,29 @@ class ReceptionTester(
     println("OK: new patient")
 
   def testRecordMenu(): Unit =
+    testRecordMenuFromWqueue()
+    testRecordMenuSearchPatient()
+
+  def testRecordMenuFromWqueue(): Unit =
+    if client.listWqueue.isEmpty then
+      client.startVisit(1, LocalDateTime.now())
     val main = ReceptionMain(driver)
     val menu = main.openRecordMenu
     val fromWqueue = menu.selectFromWqueue
     fromWqueue.patientLinks(0).click()
     val record = RecordDialog(driver)
     record.close()
-    println("OK: record menu")
+    println("OK: record menu (from wqueue)")
+
+  def testRecordMenuSearchPatient(): Unit =
+    if client.countVisitByPatient(1) == 0 then
+      client.startVisit(1, LocalDateTime.now())
+    val main = ReceptionMain(driver)
+    val menu = main.openRecordMenu
+    val searchPatient = menu.selectBySearchPatient
+    println("OK: record menu (search patient)")
+    
+
 
   def ensureSearchPatients(): Unit =
     val patients: List[Patient] = client.searchPatient("Test Number")

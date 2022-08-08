@@ -10,6 +10,7 @@ import org.openqa.selenium.By.ByXPath
 import org.openqa.selenium.By.ByLinkText
 import org.openqa.selenium.By.ByTagName
 import scala.jdk.CollectionConverters.*
+import org.openqa.selenium.WebDriver
 
 case class ReceptionMain(e: WebElement, driver: ChromeDriver):
   val headBox: WebElement =
@@ -33,6 +34,10 @@ case class ReceptionMain(e: WebElement, driver: ChromeDriver):
     def selectFromWqueue: FromWqueue =
       select("受付患者")
       FromWqueue(driver)
+
+    def selectBySearchPatient: SearchPatient =
+      select("患者検索")
+      SearchPatient(driver)
 
     def close(): Unit =
       ElementUtil.topDomqScreen(driver).click()
@@ -59,6 +64,16 @@ case class ReceptionMain(e: WebElement, driver: ChromeDriver):
         ByCssSelector("body > div.domq-floating-element div.wqueue-patient-list")
       )
       FromWqueue(e, driver)
+
+  case class SearchPatient(e: WebElement, driver: ChromeDriver)
+
+  object SearchPatient:
+    def apply(driver: ChromeDriver): SearchPatient =
+      val e = ElementUtil.waitFor(
+        driver,
+        ByCssSelector("body > div.domq-floating-element div.records-search-patient-box")
+      )
+      SearchPatient(e, driver)
 
 object ReceptionMain:
   val className = "reception-cashier-service"
