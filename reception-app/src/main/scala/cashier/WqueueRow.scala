@@ -66,9 +66,6 @@ case class WqueueRow(var wqueue: Wqueue, visit: Visit, var patient: Patient)(usi
   private def addRecordsLink(): Unit =
     manageCell(a("診療録", onclick := (doRecords _)))
 
-  // private def addPatientLink(): Unit =
-  //   manageCell(a("患者", onclick := (doPatient _)))
-
   private def addMenuPullDown(): Unit =
     val icon = Icons.menuAlt1
     val commands: List[(String, () => Unit)] = List(
@@ -76,7 +73,7 @@ case class WqueueRow(var wqueue: Wqueue, visit: Visit, var patient: Patient)(usi
       "削除" -> doDelete
     )
     PullDown.attachPullDown(icon, commands)
-    manageCell(icon)
+    manageCell(icon(cls := "domq-cursor-pointer"))
 
   private def doCashier(): Unit =
     for
