@@ -48,6 +48,8 @@ case class ReceptionMain(e: WebElement, driver: ChromeDriver):
       select("最近の診察")
       RecentVisits(driver)
 
+    def select
+
     def close(): Unit =
       ElementUtil.topDomqScreen(driver).click()
       ElementUtil.waitForDisappear(driver, e)
