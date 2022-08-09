@@ -106,6 +106,15 @@ case class ReceptionMain(e: WebElement, driver: ChromeDriver):
       )
       RecentVisits(e, driver)
 
+  case class ByDate(e: WebElement, driver: ChromeDriver)
+
+  object ByDate:
+    def apply(driver: ChromeDriver): ByDate =
+      val e = ElementUtil.waitFor(
+        driver,
+        ByCssSelector("body > div.domq-floating-element div.records-select-by-date-box")
+      )
+      ByDate(e, driver)
 
 object ReceptionMain:
   val className = "reception-cashier-service"
