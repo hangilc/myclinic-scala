@@ -10,21 +10,9 @@ import dev.myclinic.scala.chrome.ElementUtil
 import org.openqa.selenium.By
 
 class AppointTest extends ChromeTest:
+  val page: AppointLandingPage = AppointLandingPage(factory)
 
-  case class FixtureParam(driver: ChromeDriver, page: AppointLandingPage)
-
-  def createParam(factory: DriverFactory): FixtureParam =
-    FixtureParam(
-      factory.driver,
-      AppointLandingPage(factory)
-    )
-
-  def getParam(factory: DriverFactory): FixtureParam = 
-    FixtureParam(factory.driver, AppointLandingPage(factory))
-
-  test("testing enter"){ f =>
-    val driver: ChromeDriver = f.driver
-    val page: AppointLandingPage = f.page
+  test("testing enter"){
     val box = page.findVacantAppointBox
     val prevSlots = box.slots.length
     box.e.click()
@@ -36,9 +24,7 @@ class AppointTest extends ChromeTest:
     ElementUtil.waitUntil(driver, drv => box.slots.length == prevSlots + 1)
   }
 
-  test("testing cancel"){ f =>
-    val driver: ChromeDriver = f.driver
-    val page: AppointLandingPage = f.page
+  test("testing cancel"){
     val slot = page.findOccupiedSlot
     slot.e.click()
     driver

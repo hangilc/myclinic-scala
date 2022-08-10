@@ -1,20 +1,14 @@
 package test
 
-import org.scalatest.funsuite.FixtureAnyFunSuite
-import org.scalatest.Outcome
+import org.scalatest.funsuite.AnyFunSuite
 import dev.myclinic.scala.chrome.DriverFactory
-import cats.instances.try_
 import org.openqa.selenium.chrome.ChromeDriver
+import org.scalatest.BeforeAndAfterAll
 
-abstract class ChromeTest() extends FixtureAnyFunSuite:
-  def createParam(factory: DriverFactory): FixtureParam
+abstract class ChromeTest() extends AnyFunSuite with BeforeAndAfterAll:
+  val factory: DriverFactory = new DriverFactory()
+  val driver: ChromeDriver = factory.driver
 
-  override protected def withFixture(test: OneArgTest): Outcome = 
-    val factory: DriverFactory = new DriverFactory()
-    val driver: ChromeDriver = factory.driver
-    val param = createParam(factory)
-    try
-      withFixture(test.toNoArgTest(param))
-    finally 
-      driver.close()
-      driver.quit()
+  override def afterAll(): Unit =
+    driver.close()
+    driver.quit()
