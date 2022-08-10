@@ -146,6 +146,17 @@ class ReceptionTester(
     record.close()
     println("OK: record menu (recent visits)")
 
+  def testRecordMenuByDate(): Unit =
+    if client.listVisitByDate(LocalDate.now()).length == 0 then
+      client.startVisit(1, LocalDateTime.now())
+    val main = ReceptionMain(driver)
+    val menu = main.openRecordMenu
+    val byDate = menu.selectByDate
+    byDate.selection.items(0).click()
+    val record = RecordDialog(driver)
+    record.close()
+    println("OK: record menu (by date)")
+
   def ensureSearchPatients(): Unit =
     val patients: List[Patient] = client.searchPatient("Test Number")
     def exists(i: Int): Boolean =

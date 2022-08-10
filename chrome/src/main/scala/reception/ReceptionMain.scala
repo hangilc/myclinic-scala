@@ -48,7 +48,9 @@ case class ReceptionMain(e: WebElement, driver: ChromeDriver):
       select("最近の診察")
       RecentVisits(driver)
 
-    def select
+    def selectByDate: ByDate =
+      select("日付別")
+      ByDate(driver)
 
     def close(): Unit =
       ElementUtil.topDomqScreen(driver).click()
@@ -108,7 +110,8 @@ case class ReceptionMain(e: WebElement, driver: ChromeDriver):
       )
       RecentVisits(e, driver)
 
-  case class ByDate(e: WebElement, driver: ChromeDriver)
+  case class ByDate(e: WebElement, driver: ChromeDriver):
+    def selection = SelectionElement(e.findElement(ByClassName("domq-selection")), driver)
 
   object ByDate:
     def apply(driver: ChromeDriver): ByDate =

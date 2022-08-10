@@ -51,9 +51,10 @@ case class MyClient(
     run(_.startVisit(patientId, at))
   def countVisitByPatient(patientId: Int): Int =
     run(_.countVisitByPatient(patientId))
-  def listRecentVisit(offset: Int, count: Int): List[Visit] = run(
-    _.listRecentVisit(offset, count)
-  )
+  def listRecentVisit(offset: Int, count: Int): List[Visit] =
+    run(_.listRecentVisit(offset, count))
+  def listVisitByDate(date: LocalDate): List[Visit] = 
+    run(_.listVisitByDate(date))
   def fillAppointTimes(from: LocalDate, upto: LocalDate): Boolean =
     run[Boolean](_.fillAppointTimes(from, upto))
 
@@ -155,6 +156,11 @@ class MyRequest(baseApiUri: Uri, client: Client[IO]):
     apiUri("list-recent-visit")
       .withQueryParam("offset", offset)
       .withQueryParam("count", count)
+      .runGet
+
+  def listVisitByDate(at: LocalDate): IO[List[Visit]] =
+    apiUri("list-visit-by-date")
+      .withQueryParam("at", at)
       .runGet
 
   def fillAppointTimes(from: LocalDate, upto: LocalDate): IO[Boolean] =
