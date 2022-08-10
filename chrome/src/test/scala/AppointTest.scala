@@ -9,7 +9,7 @@ import org.openqa.selenium.By.ByClassName
 import dev.myclinic.scala.chrome.ElementUtil
 import org.openqa.selenium.By
 
-class AppointTest extends ChromeTest:
+class AppointTest extends TestBase:
   val page: AppointLandingPage = AppointLandingPage(factory)
 
   test("testing enter"){
