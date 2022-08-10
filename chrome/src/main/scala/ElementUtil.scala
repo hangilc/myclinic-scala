@@ -15,6 +15,13 @@ object ElementUtil:
   def getButtonByText(wrapper: WebElement, text: String): WebElement =
     wrapper.findElement(By.xpath(s"//button[text()='${text}']"))
 
+  def waitUntil(
+    driver: WebDriver,
+    f: WebDriver => Boolean
+  ): Unit =
+    val wait = new WebDriverWait(driver, Duration.ofSeconds(2))
+    wait.until[Boolean](driver => f(driver))
+
   def waitFor(
       driver: WebDriver,
       wrapper: SearchContext,

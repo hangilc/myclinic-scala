@@ -526,5 +526,8 @@ lazy val chrome = project
       "org.http4s" %% "http4s-blaze-client" % http4sVersion,
       "org.http4s" %% "http4s-circe" % http4sVersion,
       "io.circe" %%% "circe-core" % circeVersion,
+      "org.scalatest" %% "scalatest" % "3.2.13" % "test",
+      "org.scalatest" %% "scalatest-funsuite" % "3.2.13" % "test"
     )
   )
+
