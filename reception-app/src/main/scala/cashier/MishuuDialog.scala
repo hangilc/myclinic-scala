@@ -25,9 +25,19 @@ class MishuuDialog:
     Transition.run[State](searchNode, State(), List.empty, () => dlog.close())
 
   def searchNode(state: State, next: Edge => Unit): Unit =
-    val enter = button
-    val search = new SearchPatientBox(_ => enter(disabled := false))
     val errBox = ErrorBox()
+    def onSelectPatient(patient: Patient): Unit =
+    (for
+      result <- Api.listMishuuForPatient(patient.patientId, 10)
+    yield result.map {
+      (visit, charge) => (visit, charge.charge)
+    }).onComplete {
+      case Failure(ex) => errBox.show(ex.toString)
+      case Success(result) =>
+        next(GoForward(showMishuu(patient, result), state))
+    }
+    val enter = button
+    val search = new SearchPatientBox(_ => enter(disabled := false), patient => onSelectPatient(patient))
     dlog.title(clear, "未収処理（患者検索）")
     dlog.body(
       clear,
@@ -41,33 +51,37 @@ class MishuuDialog:
     )
     search.initFocus()
 
+    // def onEnter(): Unit =
+    //   search.selection.marked.foreach(patient =>
+    //     val since = LocalDate.now().minusYears(1)
+    //     (
+    //       for
+    //         visits <- Api.listVisitByPatientReverse(patient.patientId, 0, 10)
+    //         chargePays <- Api.batchGetChargePayment(visits.map(_.visitId))
+    //         wqList <- Api.listWqueue()
+    //         wqVisitIds = wqList.map(_.visitId)
+    //       yield
+    //         println(("wqVisitIds", wqVisitIds))
+    //         println(("visitIds", visits.map(_.visitId)))
+    //         visits
+    //           .zip(chargePays)
+    //           .map((v, cp) => (v, MishuuDialog.mishuuAmount(cp._2, cp._3)))
+    //           .collect { case (v, Some(deficit)) =>
+    //             (v, deficit)
+    //           }
+    //           .filter((v, _) => !wqVisitIds.contains(v.visitId))
+    //     ).onComplete {
+    //       case Failure(ex) => errBox.show(ex.toString)
+    //       case Success(result) =>
+    //         next(
+    //           GoForward(showMishuu(search.selection.marked.get, result), state)
+    //         )
+    //     }
+    //   )
+
     def onEnter(): Unit =
-      search.selection.marked.foreach(patient =>
-        val since = LocalDate.now().minusYears(1)
-        (
-          for
-            visits <- Api.listVisitByPatientReverse(patient.patientId, 0, 10)
-            chargePays <- Api.batchGetChargePayment(visits.map(_.visitId))
-            wqList <- Api.listWqueue()
-            wqVisitIds = wqList.map(_.visitId)
-          yield
-            println(("wqVisitIds", wqVisitIds))
-            println(("visitIds", visits.map(_.visitId)))
-            visits
-              .zip(chargePays)
-              .map((v, cp) => (v, MishuuDialog.mishuuAmount(cp._2, cp._3)))
-              .collect { case (v, Some(deficit)) =>
-                (v, deficit)
-              }
-              .filter((v, _) => !wqVisitIds.contains(v.visitId))
-        ).onComplete {
-          case Failure(ex) => errBox.show(ex.toString)
-          case Success(result) =>
-            next(
-              GoForward(showMishuu(search.selection.marked.get, result), state)
-            )
-        }
-      )
+      search.selection.marked.foreach(patient => onSelectPatient(patient))
+
 
   def showMishuu(patient: Patient, mishuuList: List[(Visit, Int)])(
       state: State,

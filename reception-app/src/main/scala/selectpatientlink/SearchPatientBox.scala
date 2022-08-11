@@ -11,7 +11,7 @@ import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
 
 import dev.myclinic.scala.model.Patient
 
-class SearchPatientBox(cb: Patient => Unit):
+class SearchPatientBox(cb: Patient => Unit, onSingleResult: Patient => Unit = _ => ()):
   val searchText = inputText()
   val selection = Selection[Patient](onSelect = cb)
   val ele = div(cls := "records-search-patient-box")(
@@ -37,6 +37,7 @@ class SearchPatientBox(cb: Patient => Unit):
         selection.add(div(innerText := label), patient)
       })
       selection.addDone()
+      if patients.size == 1 then onSingleResult(patients(0))
     }
 
 
