@@ -63,5 +63,11 @@ class ReceptionTest extends TestBase:
     val items: List[Int] = show.checkboxes.map(_.getAttribute("data-visit-id").toInt)
     confirm(items == mishuuList.map(_._1.visitId))
     show.enter()
+    val wqList = client.listWqueue
+    mishuuList.foreach {
+      case (visit, charge) =>
+        confirm(wqList.find(wq => wq.visitId == visit.visitId).isDefined)
+        client.finishCashier(Payment(visit.visitId, charge.charge, LocalDateTime.now()))
+    }
     Thread.sleep(6000)
   }
