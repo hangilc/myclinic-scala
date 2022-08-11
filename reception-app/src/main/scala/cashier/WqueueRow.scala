@@ -79,8 +79,9 @@ case class WqueueRow(var wqueue: Wqueue, visit: Visit, var patient: Patient)(usi
     for
       visitEx <- Api.getVisitEx(visit.visitId)
       meisai <- Api.getMeisai(visit.visitId)
+      charge <- Api.getCharge(visit.visitId)
     yield
-      val dlog = CashierDialog(meisai, visitEx)
+      val dlog = CashierDialog(meisai, visitEx, charge.charge)
       dlog.open()
 
   private def doDelete(): Unit =

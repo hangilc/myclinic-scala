@@ -6,6 +6,8 @@ import dev.myclinic.scala.chrome.TestUtil
 import dev.myclinic.scala.model.Patient
 import java.time.LocalDateTime
 import dev.myclinic.scala.model.Payment
+import dev.myclinic.scala.model.Visit
+import dev.myclinic.scala.model.Charge
 
 class ReceptionTest extends TestBase:
   val page = ReceptionLandingPage(factory)
@@ -51,8 +53,15 @@ class ReceptionTest extends TestBase:
     if client.listMishuuForPatient(1, 10).isEmpty then
       val visit = client.startVisit(1, LocalDateTime.now())
       client.enterChargeValue(visit.visitId, 1000)
-      client.enterPayment(Payment(visit.visitId, 0, LocalDateTime.now()))
+      client.finishCashier(Payment(visit.visitId, 0, LocalDateTime.now()))
+    val mishuuList: List[(Visit, Charge)] = client.listMishuuForPatient(1, 10)
     val menu = page.openCashierMenu
     val dlog = menu.selectMishuuDialog
+    val search = dlog.asSearch
+    search.textInput.sendKeys("1\n")
+    val show = dlog.asShow
+    val items: List[Int] = show.checkboxes.map(_.getAttribute("data-visit-id").toInt)
+    confirm(items == mishuuList.map(_._1.visitId))
+    show.enter()
     Thread.sleep(6000)
   }

@@ -61,6 +61,8 @@ case class MyClient(
     run(_.enterChargeValue(visitId, chargeValue))
   def enterPayment(payment: Payment): Boolean =
     run(_.enterPayment(payment))
+  def finishCashier(payment: Payment): Boolean =
+    run(_.finishCashier(payment))
   def fillAppointTimes(from: LocalDate, upto: LocalDate): Boolean =
     run[Boolean](_.fillAppointTimes(from, upto))
 
@@ -190,6 +192,10 @@ class MyRequest(baseApiUri: Uri, client: Client[IO]):
 
   def enterPayment(payment: Payment): IO[Boolean] =
     apiUri("enter-payment")
+      .runPost(payment)
+
+  def finishCashier(payment: Payment): IO[Boolean] =
+    apiUri("finish-cashier")
       .runPost(payment)
 
   def fillAppointTimes(from: LocalDate, upto: LocalDate): IO[Boolean] =

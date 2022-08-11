@@ -30,7 +30,7 @@ object ElementUtil:
   ): WebElement =
     val wait = new WebDriverWait(driver, Duration.ofSeconds(2))
     wait.until[WebElement](
-      ExpectedConditions.visibilityOfElementLocated(locator)
+      _ => wrapper.findElement(locator)
     )
 
   def waitFor(driver: WebDriver, locator: By): WebElement =

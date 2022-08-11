@@ -17,8 +17,9 @@ import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
 import scala.util.Success
 import scala.util.Failure
 import dev.fujiwara.kanjidate.KanjiDate
+import dev.myclinic.scala.util.NumberUtil
 
-class CashierDialog(meisai: Meisai, visit: VisitEx):
+class CashierDialog(meisai: Meisai, visit: VisitEx, chargeValue: Int):
   val patient: Patient = visit.patient
   val at: LocalDate = visit.visitedAt.toLocalDate
   val table = Table()
@@ -106,4 +107,6 @@ class CashierDialog(meisai: Meisai, visit: VisitEx):
     s"(${patient.patientId}) ${patient.fullName()}（${patient.fullNameYomi()})"
   private def summaryLine: String =
     s"総点：${meisai.totalTen}点、負担割：${meisai.futanWari}割"
-  private def chargeLine: String = s"請求額：${meisai.charge}円"
+  private def chargeLine: String = 
+    import NumberUtil.*
+    s"請求額：${chargeValue.format}円"

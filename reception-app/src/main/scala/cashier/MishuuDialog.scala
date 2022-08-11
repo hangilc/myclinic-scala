@@ -27,17 +27,19 @@ class MishuuDialog:
   def searchNode(state: State, next: Edge => Unit): Unit =
     val errBox = ErrorBox()
     def onSelectPatient(patient: Patient): Unit =
-    (for
-      result <- Api.listMishuuForPatient(patient.patientId, 10)
-    yield result.map {
-      (visit, charge) => (visit, charge.charge)
-    }).onComplete {
-      case Failure(ex) => errBox.show(ex.toString)
-      case Success(result) =>
-        next(GoForward(showMishuu(patient, result), state))
-    }
+      (for result <- Api.listMishuuForPatient(patient.patientId, 10)
+      yield result.map { (visit, charge) =>
+        (visit, charge.charge)
+      }).onComplete {
+        case Failure(ex) => errBox.show(ex.toString)
+        case Success(result) =>
+          next(GoForward(showMishuu(patient, result), state))
+      }
     val enter = button
-    val search = new SearchPatientBox(_ => enter(disabled := false), patient => onSelectPatient(patient))
+    val search = new SearchPatientBox(
+      _ => enter(disabled := false),
+      patient => onSelectPatient(patient)
+    )
     dlog.title(clear, "未収処理（患者検索）")
     dlog.body(
       clear,
@@ -82,13 +84,12 @@ class MishuuDialog:
     def onEnter(): Unit =
       search.selection.marked.foreach(patient => onSelectPatient(patient))
 
-
   def showMishuu(patient: Patient, mishuuList: List[(Visit, Int)])(
       state: State,
       next: Edge => Unit
   ): Unit =
     val checkLabels = mishuuList.map((v, c) =>
-      CheckLabel[Visit](
+      val cl = CheckLabel[Visit](
         v,
         _(
           KanjiDate.dateToKanji(v.visitedAt.toLocalDate),
@@ -96,6 +97,10 @@ class MishuuDialog:
           s"${c}円"
         )
       )
+      cl.checkElement(
+        attr("data-visit-id") := v.visitId.toString
+      )
+      cl
     )
     checkLabels.foreach(_.check(true))
     val errBox = ErrorBox()
@@ -104,8 +109,11 @@ class MishuuDialog:
       else checkLabels.map(_.wrap(div))
     def doEnter(): Unit =
       (for
+        wqList <- Api.listWqueue()
+        wqVisitIds = wqList.map(_.visitId)
         _ <- checkLabels
           .filter(_.isChecked)
+          .filter(cl => !wqVisitIds.contains(cl.value.visitId))
           .map(cl =>
             val wq = Wqueue(cl.value.visitId, WaitState.WaitCashier)
             Api.enterWqueue(wq)
@@ -119,7 +127,10 @@ class MishuuDialog:
     dlog.body(
       clear,
       s"(${patient.patientId}) ${patient.lastName}${patient.firstName}",
-      mishuuItems,
+      div(
+        cls := "mishuu-items-wrapper",
+        mishuuItems
+      ),
       errBox.ele
     )
     dlog.commands(

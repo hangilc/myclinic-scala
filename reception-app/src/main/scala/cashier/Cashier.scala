@@ -183,6 +183,7 @@ class Cashier extends SideMenuService:
     for
       meisai <- Api.getMeisai(visitId)
       visit <- Api.getVisitEx(visitId)
+      charge <- Api.getCharge(visit.visitId)
     yield {
-      CashierDialog(meisai, visit).open()
+      CashierDialog(meisai, visit, charge.charge).open()
     }
