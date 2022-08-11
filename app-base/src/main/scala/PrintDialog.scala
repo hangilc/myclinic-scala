@@ -55,7 +55,7 @@ class PrintDialog(
       button("キャンセル", onclick := (() => dlog.close()))
     )
   )
-  dlog.dialog(cls := "pring-dialog")
+  dlog.dialog(cls := "print-dialog")
 
   def initSetting(): Future[Unit] =
     for

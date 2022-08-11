@@ -26,9 +26,11 @@ object ElementUtil:
   def waitFor(
       driver: WebDriver,
       wrapper: SearchContext,
-      locator: By
+      locator: By,
+      seconds: Int = 2
   ): WebElement =
-    val wait = new WebDriverWait(driver, Duration.ofSeconds(2))
+    val wait = new WebDriverWait(driver, Duration.ofSeconds(seconds))
+    println(("wainting-for", seconds))
     wait.until[WebElement](
       _ => wrapper.findElement(locator)
     )

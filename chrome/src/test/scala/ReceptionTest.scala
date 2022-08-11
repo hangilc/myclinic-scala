@@ -69,5 +69,11 @@ class ReceptionTest extends TestBase:
         confirm(wqList.find(wq => wq.visitId == visit.visitId).isDefined)
         client.finishCashier(Payment(visit.visitId, charge.charge, LocalDateTime.now()))
     }
-    Thread.sleep(6000)
+  }
+
+  test("blank receipt"){
+    val menu = page.openCashierMenu
+    val dlog = menu.selectBlankReceipt
+    println(("dlog", dlog))
+    dlog.cancel()
   }
