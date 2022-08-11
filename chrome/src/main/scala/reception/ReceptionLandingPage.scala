@@ -24,6 +24,12 @@ class ReceptionLandingPage(e: WebElement, client: MyClient, driver: ChromeDriver
   def newPatientButton: WebElement =
     driver.findElement(ByClassName("reception-cashier-new-patient-button"))
 
+  def cashierMenuIcon: WebElement =
+    e.findElement(ByClassName("reception-cashier-menu-icon"))
+
+  def openCashierMenu: CashierMenu =
+    cashierMenuIcon.click()
+    CashierMenu(driver)
 
 object ReceptionLandingPage:
   def apply(factory: DriverFactory): ReceptionLandingPage =

@@ -21,7 +21,7 @@ class MishuuDialog:
   val dlog = new ModalDialog3()
 
   def open(): Unit =
-    dlog.open()
+    dlog.open(Some("mishuu-dialog"))
     Transition.run[State](searchNode, State(), List.empty, () => dlog.close())
 
   def searchNode(state: State, next: Edge => Unit): Unit =

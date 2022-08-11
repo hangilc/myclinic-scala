@@ -93,7 +93,7 @@ class Cashier extends SideMenuService:
         "手書き領収書印刷" -> doPrintBlankReceipt
       )
     )
-    m.open(event)
+    m.open(event, Some("reception-cashier-context-menu"))
 
   private def doMishuu(): Unit =
     val dlog = new MishuuDialog()

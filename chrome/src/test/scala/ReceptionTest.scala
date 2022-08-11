@@ -4,6 +4,8 @@ import dev.myclinic.scala.chrome.reception.*
 import dev.myclinic.scala.chrome.reception.ReceptionLandingPage.*
 import dev.myclinic.scala.chrome.TestUtil
 import dev.myclinic.scala.model.Patient
+import java.time.LocalDateTime
+import dev.myclinic.scala.model.Payment
 
 class ReceptionTest extends TestBase:
   val page = ReceptionLandingPage(factory)
@@ -43,4 +45,14 @@ class ReceptionTest extends TestBase:
     confirm(p.copy(patientId = searchedLast.patientId) == searchedLast)
     val disp = PatientDialog(driver).asPatientDisp
     disp.close()
+  }
+
+  test("mishuu dialog"){
+    if client.listMishuuForPatient(1, 10).isEmpty then
+      val visit = client.startVisit(1, LocalDateTime.now())
+      client.enterChargeValue(visit.visitId, 1000)
+      client.enterPayment(Payment(visit.visitId, 0, LocalDateTime.now()))
+    val menu = page.openCashierMenu
+    val dlog = menu.selectMishuuDialog
+    Thread.sleep(6000)
   }

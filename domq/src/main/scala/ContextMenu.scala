@@ -25,7 +25,7 @@ class ContextMenu:
       style.padding = "10px"
       style.zIndex = zIndexMenu.toString
       style.visibility = "hidden"
-    }))
+    }), cls := "domq-context-menu")
 
   def makeScreen(): HTMLElement =
     div(css(style => {
@@ -56,14 +56,14 @@ class ContextMenu:
     windowHeight
   )
 
-  def open(event: MouseEvent): Unit =
+  def open(event: MouseEvent, className: Option[String] = None): Unit =
     document.body(
       screen(onclick := ((e: MouseEvent) => {
         e.preventDefault()
         e.stopPropagation()
         close()
       })),
-      menu
+      menu(cls := className)
     )
     val (x, y) = calcPlacement(
       event.clientX,

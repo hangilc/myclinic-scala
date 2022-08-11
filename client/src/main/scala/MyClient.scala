@@ -57,6 +57,10 @@ case class MyClient(
     run(_.listVisitByDate(date))
   def listMishuuForPatient(patientId: Int, nVisits: Int): List[(Visit, Charge)] =
     run(_.listMishuuForPatient(patientId, nVisits))
+  def enterChargeValue(visitId: Int, chargeValue: Int): Charge =
+    run(_.enterChargeValue(visitId, chargeValue))
+  def enterPayment(payment: Payment): Boolean =
+    run(_.enterPayment(payment))
   def fillAppointTimes(from: LocalDate, upto: LocalDate): Boolean =
     run[Boolean](_.fillAppointTimes(from, upto))
 
@@ -116,6 +120,9 @@ class MyRequest(baseApiUri: Uri, client: Client[IO]):
   ): Request[IO] =
     Request[IO](Method.POST, apiUri(command, params)).withEntity(body)
 
+  private def post[E: Encoder, T: Decoder](uri: Uri, body: E): Request[IO] =
+    Request[IO](Method.POST, uri).withEntity(body)
+
   private def run[T: Decoder](req: Request[IO]): IO[T] =
     client.expect[T](req)
 
@@ -126,6 +133,10 @@ class MyRequest(baseApiUri: Uri, client: Client[IO]):
   extension [T: Decoder](uri: Uri)
     def runGet: IO[T] =
       run[T](get(uri))
+
+  extension [E: Encoder, T: Decoder](uri: Uri)
+    def runPost(body: E): IO[T] =
+      run[T](post(uri, body))
 
   def getPatient(patientId: Int): IO[Patient] =
     run[Patient](get("get-patient", Map("patient-id" -> patientId)))
@@ -170,6 +181,16 @@ class MyRequest(baseApiUri: Uri, client: Client[IO]):
       .withQueryParam("patient-id", patientId)
       .withQueryParam("n-visits", nVisits)
       .runGet
+
+  def enterChargeValue(visitId: Int, chargeValue: Int): IO[Charge] =
+    apiUri("enter-charge-value")
+      .withQueryParam("visit-id", visitId)
+      .withQueryParam("charge-value", chargeValue)
+      .runGet
+
+  def enterPayment(payment: Payment): IO[Boolean] =
+    apiUri("enter-payment")
+      .runPost(payment)
 
   def fillAppointTimes(from: LocalDate, upto: LocalDate): IO[Boolean] =
     run[Boolean](get("fill-appoint-times", Map("from" -> from, "upto" -> upto)))

@@ -13,12 +13,12 @@ class ModalDialog:
   val content: HTMLElement = div(cls := "domq-modal-dialog-content")
   content(maxHeight := (window.innerHeight - 60).toString + "px")
 
-  def open(): Unit =
+  def open(className: Option[String] = None): Unit =
     if !zIndexScreen.isDefined then
       zIndexScreen = Some(ZIndexManager.alloc())
       zIndexContent = Some(ZIndexManager.alloc())
       screen(zIndex := zIndexScreen)
-      content(zIndex := zIndexContent)
+      content(zIndex := zIndexContent, cls := className)
       document.body(screen, content)
 
   def close(): Unit =

@@ -10,6 +10,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions
 import org.openqa.selenium.By.ByClassName
 import scala.jdk.CollectionConverters.*
 import org.openqa.selenium.chrome.ChromeDriver
+import org.openqa.selenium.By.ByCssSelector
 
 object ElementUtil:
   def getButtonByText(wrapper: WebElement, text: String): WebElement =
@@ -40,6 +41,9 @@ object ElementUtil:
     wait.until(
       ExpectedConditions.invisibilityOf(e)
     )
+
+  def waitForModalDialog(driver: WebDriver, className: String): WebElement =
+    waitFor(driver, ByCssSelector(s"body > div.domq-modal-dialog-content.${className}"))
 
   def xpathContainsClass(className: String): String =
     s"contains(concat(' ', @class, ' '), ' ${className} ')"
