@@ -393,3 +393,6 @@ object Db
       yield 
         visitIds.zip(charges).zip(payments).map(tuple => (tuple._1._1, tuple._1._2, tuple._2))
     mysql(op)
+
+  def listMishuuForPatient(patientId: Int, nVisits: Int): IO[List[(Visit, Charge)]] =
+    mysql(DbPrim.listMishuuForPatient(patientId, nVisits))

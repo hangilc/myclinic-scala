@@ -42,6 +42,7 @@ object MiscService extends DateTimeQueryParam with Publisher:
   object intKouhiId extends QueryParamDecoderMatcher[Int]("kouhi-id")
   object intTextId extends QueryParamDecoderMatcher[Int]("text-id")
   object intDiseaseId extends QueryParamDecoderMatcher[Int]("disease-id")
+  object intNVisits extends QueryParamDecoderMatcher[Int]("n-visits")
   object strText extends QueryParamDecoderMatcher[String]("text")
   object strEndReason extends QueryParamDecoderMatcher[String]("end-reason")
 
@@ -521,11 +522,14 @@ object MiscService extends DateTimeQueryParam with Publisher:
     case GET -> Root / "get-charge" :? intVisitId(visitId) =>
       Ok(Db.getCharge(visitId))
 
-    case GET -> Root / "is-test" =>
-      val op =
-        for
-          patientOpt <- Db.findPatient(1)
-        yield patientOpt.fold(false)(p => p.lastName == "Shinryou" && p.firstName == "Tarou")
-      Ok(op)
+    case GET -> Root / "list-mishuu-for-patient" :? intPatientId(patientId) +& intNVisits(nVisits) =>
+      Ok(Db.listMishuuForPatient(patientId, nVisits))
+
+    // case GET -> Root / "is-test" =>
+    //   val op =
+    //     for
+    //       patientOpt <- Db.findPatient(1)
+    //     yield patientOpt.fold(false)(p => p.lastName == "Shinryou" && p.firstName == "Tarou")
+    //   Ok(op)
 
   }

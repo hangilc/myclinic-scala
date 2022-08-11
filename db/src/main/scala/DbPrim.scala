@@ -1,7 +1,8 @@
 package dev.myclinic.scala.db
 
 import dev.myclinic.scala.model.*
-import cats._
+import cats.*
+import cats.syntax.all.*
 import cats.implicits._
 import doobie._
 import doobie.implicits._
@@ -94,4 +95,18 @@ object DbPrim:
       (disease, bMaster) = dex
       adjEx <- listDiseaseAdjEx(disease.diseaseId)
     yield (disease, bMaster, adjEx)
+
+  def listMishuuForPatient(patientId: Int, nVisits: Int): ConnectionIO[List[(Visit, Charge)]] =
+    for
+      visits <- DbVisitPrim.listByPatientReverse(patientId, 0, nVisits)
+      charges <- visits.map(visit => DbChargePrim.getCharge(visit.visitId).option).sequence
+      payments <- visits.map(visit => DbPaymentPrim.getLastPayment(visit.visitId).option).sequence
+    yield 
+      (visits.zip(charges).zip(payments) map {
+        case ((visit, Some(charge)), Some(payment)) if payment.amount == 0 => Some((visit, charge))
+        case _ => None
+      }) collect {
+        case Some((visit, charge)) => (visit, charge)
+      }
+    
 

@@ -523,3 +523,6 @@ object MiscApi extends ApiBase:
 
     def getCharge(visitId: Int): Future[Charge] =
       get("get-charge", Params("visit-id" -> visitId))
+
+    def listMishuuForPatient(patientId: Int, nVisits: Int): Future[List[(Visit, Charge)]] =
+      get("list-mishuu-for-patient", Params("patient-id" -> patientId, "n-visits" -> nVisits))
