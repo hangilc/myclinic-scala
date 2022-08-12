@@ -63,6 +63,8 @@ case class MyClient(
     run(_.enterPayment(payment))
   def finishCashier(payment: Payment): Boolean =
     run(_.finishCashier(payment))
+  def changeWqueueState(visitId: Int, state: WaitState): Wqueue =
+    run(_.changeWqueueState(visitId, state))
   def fillAppointTimes(from: LocalDate, upto: LocalDate): Boolean =
     run[Boolean](_.fillAppointTimes(from, upto))
 
@@ -197,6 +199,12 @@ class MyRequest(baseApiUri: Uri, client: Client[IO]):
   def finishCashier(payment: Payment): IO[Boolean] =
     apiUri("finish-cashier")
       .runPost(payment)
+
+  def changeWqueueState(visitId: Int, state: WaitState): IO[Wqueue] =
+    apiUri("change-wqueue-state")
+      .withQueryParam("visit-id", visitId)
+      .withQueryParam("wqueue-state", state.code)
+      .runGet
 
   def fillAppointTimes(from: LocalDate, upto: LocalDate): IO[Boolean] =
     run[Boolean](get("fill-appoint-times", Map("from" -> from, "upto" -> upto)))

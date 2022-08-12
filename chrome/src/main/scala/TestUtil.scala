@@ -4,6 +4,8 @@ import scala.util.Random
 import dev.myclinic.scala.model.Sex
 import dev.myclinic.scala.model.Patient
 import java.time.LocalDate
+import dev.myclinic.scala.client.MyClient
+import dev.myclinic.scala.model.WaitState
 
 object TestUtil:
   lazy val rand: Random = Random()
@@ -137,3 +139,7 @@ object TestUtil:
       TestUtil.randomString(12),
       TestUtil.randomPhone
     )
+
+  def endVisit(client: MyClient, visitId: Int, charge: Int): Unit =
+    client.enterChargeValue(visitId, charge)
+    client.changeWqueueState(visitId, WaitState.WaitCashier)

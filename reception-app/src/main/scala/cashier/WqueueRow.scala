@@ -40,7 +40,7 @@ case class WqueueRow(var wqueue: Wqueue, visit: Visit, var patient: Patient)(usi
       Table.cell(cls := "cell-manip cell", manageCell(cls := "content"))
     )
   )
-  ele(cls := "reception-cashier-wqueue-table-row")
+  ele(cls := "reception-cashier-wqueue-table-row", attr("data-visit-id") := wqueue.visitId.toString)
   updateUI()
 
   val unsubs = List(ReceptionBus.wqueueUpdatedPublisher.subscribe(onWqueueUpdated),

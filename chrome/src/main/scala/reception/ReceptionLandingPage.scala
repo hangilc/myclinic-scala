@@ -31,6 +31,9 @@ class ReceptionLandingPage(e: WebElement, client: MyClient, driver: ChromeDriver
     cashierMenuIcon.click()
     CashierMenu(driver)
 
+  def wqueueTable: WqueueTable =
+    WqueueTable(driver, e)
+
 object ReceptionLandingPage:
   def apply(factory: DriverFactory): ReceptionLandingPage =
     val driver: ChromeDriver = factory.driver
