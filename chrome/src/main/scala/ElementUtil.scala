@@ -14,7 +14,7 @@ import org.openqa.selenium.By.ByCssSelector
 
 object ElementUtil:
   def getButtonByText(wrapper: WebElement, text: String): WebElement =
-    wrapper.findElement(By.xpath(s"//button[text()='${text}']"))
+    wrapper.findElement(By.xpath(s".//button[text()='${text}']"))
 
   def waitUntil(
     driver: WebDriver,

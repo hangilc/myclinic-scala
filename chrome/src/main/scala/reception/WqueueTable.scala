@@ -13,6 +13,8 @@ import org.openqa.selenium.support.ui.ExpectedConditions
 import dev.myclinic.scala.model.Patient
 import dev.myclinic.scala.model.Sex
 import java.time.LocalDate
+import org.openqa.selenium.support.pagefactory.ByChained
+import org.openqa.selenium.By.ByXPath
 
 class WqueueTable(e: WebElement, driver: ChromeDriver):
   def waitForRow(visitId: Int): WqueueTable.Row =
@@ -21,10 +23,21 @@ class WqueueTable(e: WebElement, driver: ChromeDriver):
     )
     new WqueueTable.Row(ele, driver)
 
+  def waitForRowWithCashierButton(visitId: Int): WqueueTable.Row =
+    ElementUtil.waitFor(driver, e,
+      ByChained(
+        ByCssSelector(s"div.reception-cashier-wqueue-table-row[data-visit-id='${visitId}']"),
+        ByXPath("//button[text()='会計']")
+      )
+    )
+    waitForRow(visitId)
+
 object WqueueTable:
   def apply(driver: ChromeDriver, wrapper: WebElement): WqueueTable =
     val e = ElementUtil.waitFor(driver, wrapper, ByClassName("reception-cashier-wqueue-table"))
     new WqueueTable(e, driver)
 
-  class Row(val e: WebElement, driver: ChromeDriver)
+  class Row(val e: WebElement, driver: ChromeDriver):
+    def cashierButton: WebElement = 
+      ElementUtil.getButtonByText(e, "会計")
 

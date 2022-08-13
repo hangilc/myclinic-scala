@@ -9,6 +9,7 @@ import dev.myclinic.scala.model.Payment
 import dev.myclinic.scala.model.Visit
 import dev.myclinic.scala.model.Charge
 import dev.myclinic.scala.chrome.ElementUtil
+import dev.myclinic.scala.chrome.PrintDialog
 
 class ReceptionTest2 extends TestBase:
   val page = ReceptionLandingPage(factory)
@@ -19,5 +20,19 @@ class ReceptionTest2 extends TestBase:
     val row = table.waitForRow(visit.visitId)
     TestUtil.endVisit(client, visit.visitId, 0)
     client.finishCashier(Payment(visit.visitId, 0, LocalDateTime.now()))
+    ElementUtil.waitForDisappear(driver, row.e)
+  }
+
+  test("cashier"){
+    val visit = client.startVisit(1, LocalDateTime.now())
+    TestUtil.endVisit(client, visit.visitId, 1000)
+    val table: WqueueTable = page.wqueueTable
+    val row = table.waitForRowWithCashierButton(visit.visitId)
+    row.cashierButton.click()
+    val cashierDialog = CashierDialog(driver)
+    cashierDialog.printReceiptButton.click()
+    val printDialog = PrintDialog(driver)
+    printDialog.cancel()
+    cashierDialog.finishCashierButton.click()
     ElementUtil.waitForDisappear(driver, row.e)
   }
