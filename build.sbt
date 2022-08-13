@@ -12,7 +12,7 @@ val http4sVersion = "0.23.12"
 val doobieVersion = "1.0.0-RC2"
 val circeVersion = "0.14.2"
 val circeYamlVersion = "0.14.1"
-val scalaJavaTimeVersion = "2.3.0"
+val scalaJavaTimeVersion = "2.4.0"
 val scalaJSDomVersion = "2.2.0"
 val catsVersion = "2.8.0"
 val macrotaskExecutorVersion = "1.0.0"
@@ -175,7 +175,8 @@ lazy val util = crossProject(JSPlatform, JVMPlatform)
     scalaJSUseMainModuleInitializer := false,
     zonesFilter := { (z: String) => z == "Asia/Tokyo" },
     libraryDependencies ++= Seq(
-      "io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion
+      "io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion,
+      "io.github.cquiroz" %%% "scala-java-time-tzdb" % scalaJavaTimeVersion,
     )
   )
 
@@ -295,7 +296,7 @@ lazy val appointAdmin = project
 
 lazy val receptionApp = project
   .in(file("reception-app"))
-  .enablePlugins(ScalaJSPlugin)
+  .enablePlugins(ScalaJSPlugin, TzdbPlugin)
   .dependsOn(
     domq,
     modelJS,
@@ -314,9 +315,12 @@ lazy val receptionApp = project
       (rootDir.value / "server" / "web" / "reception" / "scalajs"),
     Compile / fullLinkJS / scalaJSLinkerOutputDirectory :=
       (rootDir.value / "server" / "web" / "reception" / "scalajs"),
+    zonesFilter := { (z: String) => z == "Asia/Tokyo" },
     libraryDependencies ++= Seq(
       "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion,
-      "org.scala-js" %%% "scala-js-macrotask-executor" % macrotaskExecutorVersion
+      "org.scala-js" %%% "scala-js-macrotask-executor" % macrotaskExecutorVersion,
+      "io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion,
+      "io.github.cquiroz" %%% "scala-java-time-tzdb" % scalaJavaTimeVersion,
     )
   )
 
@@ -445,7 +449,8 @@ lazy val drawer = crossProject(JVMPlatform, JSPlatform)
     scalaJSUseMainModuleInitializer := false,
     zonesFilter := { (z: String) => z == "Asia/Tokyo" },
     libraryDependencies ++= Seq(
-      "io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion
+      "io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion,
+      "io.github.cquiroz" %%% "scala-java-time-tzdb" % scalaJavaTimeVersion,
     )
   )
   .jvmSettings(
@@ -474,7 +479,8 @@ lazy val drawerform = crossProject(JVMPlatform, JSPlatform)
     scalaJSUseMainModuleInitializer := false,
     zonesFilter := { (z: String) => z == "Asia/Tokyo" },
     libraryDependencies ++= Seq(
-      "io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion
+      "io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion,
+      "io.github.cquiroz" %%% "scala-java-time-tzdb" % scalaJavaTimeVersion,
     )
   )
   .jvmSettings(
@@ -494,7 +500,8 @@ lazy val kanjidate = crossProject(JSPlatform, JVMPlatform)
     scalaJSUseMainModuleInitializer := false,
     zonesFilter := { (z: String) => z == "Asia/Tokyo" },
     libraryDependencies ++= Seq(
-      "io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion
+      "io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion,
+      "io.github.cquiroz" %%% "scala-java-time-tzdb" % scalaJavaTimeVersion,
     )
   )
 

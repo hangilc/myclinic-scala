@@ -55,7 +55,9 @@ class SideMenu(
     clearCurrent()
     item.activate(wrapper, procs).onComplete {
       case Success(_)  => current = Some(item)
-      case Failure(ex) => ShowMessage.showError(ex.getMessage)
+      case Failure(ex) => 
+        ex.printStackTrace()
+        ShowMessage.showError(ex.getMessage)
     }
 
 object SideMenu:
