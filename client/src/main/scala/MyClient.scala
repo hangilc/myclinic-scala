@@ -65,6 +65,12 @@ case class MyClient(
     run(_.finishCashier(payment))
   def changeWqueueState(visitId: Int, state: WaitState): Wqueue =
     run(_.changeWqueueState(visitId, state))
+  def listShahokokuho(patientId: Int): List[Shahokokuho] =
+    run(_.listShahokokuho(patientId))
+  def listKoukikourei(patientId: Int): List[Koukikourei] =
+    run(_.listKoukikourei(patientId))
+  def listKouhi(patientId: Int): List[Kouhi] =
+    run(_.listKouhi(patientId))
   def fillAppointTimes(from: LocalDate, upto: LocalDate): Boolean =
     run[Boolean](_.fillAppointTimes(from, upto))
 
@@ -204,6 +210,21 @@ class MyRequest(baseApiUri: Uri, client: Client[IO]):
     apiUri("change-wqueue-state")
       .withQueryParam("visit-id", visitId)
       .withQueryParam("wqueue-state", state.code)
+      .runGet
+
+  def listShahokokuho(patientId: Int): IO[List[Shahokokuho]] =
+    apiUri("list-shahokokuho")
+      .withQueryParam("patient-id", patientId)
+      .runGet
+
+  def listKoukikourei(patientId: Int): IO[List[Koukikourei]] =
+    apiUri("list-koukikourei")
+      .withQueryParam("patient-id", patientId)
+      .runGet
+
+  def listKouhi(patientId: Int): IO[List[Kouhi]] =
+    apiUri("list-kouhi")
+      .withQueryParam("patient-id", patientId)
       .runGet
 
   def fillAppointTimes(from: LocalDate, upto: LocalDate): IO[Boolean] =

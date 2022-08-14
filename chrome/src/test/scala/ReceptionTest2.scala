@@ -10,6 +10,7 @@ import dev.myclinic.scala.model.Visit
 import dev.myclinic.scala.model.Charge
 import dev.myclinic.scala.chrome.ElementUtil
 import dev.myclinic.scala.chrome.PrintDialog
+import dev.myclinic.scala.model.Shahokokuho
 
 class ReceptionTest2 extends TestBase:
   val page = ReceptionLandingPage(factory)
@@ -35,4 +36,21 @@ class ReceptionTest2 extends TestBase:
     printDialog.cancel()
     cashierDialog.finishCashierButton.click()
     ElementUtil.waitForDisappear(driver, row.e)
+  }
+
+  test("new shahokokuho"){
+    val patient = client.enterPatient(TestUtil.mockPatient())
+    page.searchTextInput.sendKeys(s"${patient.patientId}\n")
+    val dlog = PatientDialog(driver)
+    var disp = dlog.asPatientDisp
+    disp.newShahokokuhoLink.click()
+    val shahoDlog = ShahokokuhoDialog(driver)
+    val shaho = TestUtil.mockShahokokuho(patient.patientId)
+    shahoDlog.set(shaho)
+    shahoDlog.enter()
+    disp = dlog.asPatientDisp
+    val hokenList: List[Shahokokuho] = client.listShahokokuho(patient.patientId)
+    val entered = hokenList(0)
+    assert(shaho.copy(entered.shahokokuhoId) == entered)
+    disp.close()
   }

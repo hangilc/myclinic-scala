@@ -6,6 +6,8 @@ import dev.myclinic.scala.model.Patient
 import java.time.LocalDate
 import dev.myclinic.scala.client.MyClient
 import dev.myclinic.scala.model.WaitState
+import dev.myclinic.scala.model.Shahokokuho
+import dev.myclinic.scala.model.ValidUpto
 
 object TestUtil:
   lazy val rand: Random = Random()
@@ -138,6 +140,22 @@ object TestUtil:
       ),
       TestUtil.randomString(12),
       TestUtil.randomPhone
+    )
+
+  def mockShahokokuho(patientId: Int): Shahokokuho =
+    val validFrom = LocalDate.now().minusMonths(1).withDayOfMonth(1)
+    val validUpto = ValidUpto(Some(validFrom.plusYears(1).minusDays(1)))
+    Shahokokuho(
+      0,
+      patientId,
+      randomDigits(6).toInt,
+      hirakanaSeq.take(3).mkString,
+      randomDigits(2),
+      randomInt(0, 1),
+      validFrom,
+      validUpto,
+      randomInt(0, 3),
+      randomDigits(2)
     )
 
   def endVisit(client: MyClient, visitId: Int, charge: Int): Unit =

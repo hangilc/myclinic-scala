@@ -16,6 +16,9 @@ object ElementUtil:
   def getButtonByText(wrapper: WebElement, text: String): WebElement =
     wrapper.findElement(By.xpath(s".//button[text()='${text}']"))
 
+  def getInputByLabel(wrapper: WebElement, text: String): WebElement =
+    wrapper.findElement(By.xpath(s".//label[text()='${text}']/preceding-sibling::input"))
+
   def waitUntil(
     driver: WebDriver,
     f: WebDriver => Boolean
