@@ -12,6 +12,7 @@ import dev.myclinic.scala.chrome.ElementUtil
 import dev.myclinic.scala.chrome.PrintDialog
 import dev.myclinic.scala.model.Shahokokuho
 import dev.myclinic.scala.model.Koukikourei
+import dev.myclinic.scala.model.Kouhi
 
 class ReceptionTest2 extends TestBase:
   val page = ReceptionLandingPage(factory)
@@ -70,6 +71,24 @@ class ReceptionTest2 extends TestBase:
     val hokenList: List[Koukikourei] = client.listKoukikourei(patient.patientId)
     val entered = hokenList(0)
     assert(koukikourei.copy(entered.koukikoureiId) == entered)
+    disp.close()
+  }
+
+  test("new kouhi"){
+    val patient = client.enterPatient(TestUtil.mockPatient())
+    val kouhi = TestUtil.mockKouhi(patient.patientId)
+    page.searchTextInput.sendKeys(s"${patient.patientId}\n")
+    val dlog = PatientDialog(driver)
+    var disp = dlog.asPatientDisp
+    disp.newKouhiLink.click()
+    val formDialog = KouhiDialog(driver)
+    formDialog.set(kouhi)
+    formDialog.enter()
+    disp = dlog.asPatientDisp
+    val hokenList: List[Kouhi] = client.listKouhi(patient.patientId)
+    val entered = hokenList(0)
+    assert(kouhi.copy(entered.kouhiId) == entered)
+    Thread.sleep(10000)
     disp.close()
   }
 

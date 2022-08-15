@@ -9,6 +9,7 @@ import dev.myclinic.scala.model.WaitState
 import dev.myclinic.scala.model.Shahokokuho
 import dev.myclinic.scala.model.ValidUpto
 import dev.myclinic.scala.model.Koukikourei
+import dev.myclinic.scala.model.Kouhi
 
 object TestUtil:
   lazy val rand: Random = Random()
@@ -170,6 +171,18 @@ object TestUtil:
       randomInt(1, 3),
       validFrom,
       validUpto
+    )
+
+  def mockKouhi(patientId: Int): Kouhi =
+    val validFrom = LocalDate.now().minusYears(1).withMonth(7).withDayOfMonth(1)
+    val validUpto = ValidUpto(Some(validFrom.plusYears(2).minusDays(1)))
+    Kouhi(
+      0,
+      randomDigits(8).toInt,
+      randomDigits(8).toInt,
+      validFrom,
+      validUpto,
+      patientId
     )
 
   def endVisit(client: MyClient, visitId: Int, charge: Int): Unit =
