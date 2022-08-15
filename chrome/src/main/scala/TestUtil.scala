@@ -8,6 +8,7 @@ import dev.myclinic.scala.client.MyClient
 import dev.myclinic.scala.model.WaitState
 import dev.myclinic.scala.model.Shahokokuho
 import dev.myclinic.scala.model.ValidUpto
+import dev.myclinic.scala.model.Koukikourei
 
 object TestUtil:
   lazy val rand: Random = Random()
@@ -156,6 +157,19 @@ object TestUtil:
       validUpto,
       randomInt(0, 3),
       randomDigits(2)
+    )
+
+  def mockKoukikourei(patientId: Int): Koukikourei =
+    val validFrom = LocalDate.now().minusYears(1).withMonth(7).withDayOfMonth(1)
+    val validUpto = ValidUpto(Some(validFrom.plusYears(2).minusDays(1)))
+    Koukikourei(
+      0,
+      patientId,
+      randomDigits(8),
+      randomDigits(8),
+      randomInt(1, 3),
+      validFrom,
+      validUpto
     )
 
   def endVisit(client: MyClient, visitId: Int, charge: Int): Unit =

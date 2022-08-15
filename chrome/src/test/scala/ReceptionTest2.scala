@@ -11,6 +11,7 @@ import dev.myclinic.scala.model.Charge
 import dev.myclinic.scala.chrome.ElementUtil
 import dev.myclinic.scala.chrome.PrintDialog
 import dev.myclinic.scala.model.Shahokokuho
+import dev.myclinic.scala.model.Koukikourei
 
 class ReceptionTest2 extends TestBase:
   val page = ReceptionLandingPage(factory)
@@ -54,3 +55,22 @@ class ReceptionTest2 extends TestBase:
     assert(shaho.copy(entered.shahokokuhoId) == entered)
     disp.close()
   }
+
+  test("new koukikourei"){
+    val patient = client.enterPatient(TestUtil.mockPatient())
+    val koukikourei = TestUtil.mockKoukikourei(patient.patientId)
+    page.searchTextInput.sendKeys(s"${patient.patientId}\n")
+    val dlog = PatientDialog(driver)
+    var disp = dlog.asPatientDisp
+    disp.newKoukikoureiLink.click()
+    val formDialog = KoukikoureiDialog(driver)
+    formDialog.set(koukikourei)
+    formDialog.enter()
+    disp = dlog.asPatientDisp
+    val hokenList: List[Koukikourei] = client.listKoukikourei(patient.patientId)
+    val entered = hokenList(0)
+    assert(koukikourei.copy(entered.koukikoureiId) == entered)
+    disp.close()
+  }
+
+

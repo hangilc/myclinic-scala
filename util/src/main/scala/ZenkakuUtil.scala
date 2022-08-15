@@ -51,3 +51,7 @@ object ZenkakuUtil:
 
   val convertToZenkakuDigits: String => String =
     toZenkakuFun(c => c >= '0' && c <= '9')
+
+  object Ext:
+    extension (s: String)
+      def toZenkaku: String = ZenkakuUtil.toZenkaku(s)

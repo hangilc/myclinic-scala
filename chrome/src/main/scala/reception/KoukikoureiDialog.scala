@@ -16,26 +16,26 @@ import dev.myclinic.scala.chrome.DatePickerElement.apply
 import dev.myclinic.scala.chrome.DatePickerElement
 import dev.myclinic.scala.model.ValidUpto
 import org.openqa.selenium.By.ByClassName
+import dev.myclinic.scala.model.Koukikourei
 
-class ShahokokuhoDialog(e: WebElement, driver: ChromeDriver):
-  def hokenshaBangouInput: WebElement = e.findElement(ByCssSelector("input.hokensha-bangou-input"))
-  def hihokenshaKigouInput: WebElement = e.findElement(ByCssSelector("input.hihokensha-kigou-input"))
-  def hihokenshaBangouInput: WebElement = e.findElement(ByCssSelector("input.hihokensha-bangou-input"))
-  def edabanInput: WebElement = e.findElement(ByCssSelector("input.edaban-input"))
-  def honninInput: WebElement = ElementUtil.getInputByLabel(e, "本人")
-  def kazokuInput: WebElement = ElementUtil.getInputByLabel(e, "家族")
+class KoukikoureiDialog(e: WebElement, driver: ChromeDriver):
+  def hokenshaInput: WebElement = e.findElement(ByClassName("hokensha-input"))
+  def hihokenshaInput: WebElement = e.findElement(ByClassName("hihokensha-input"))
+  def futanWariInput(n: Int): WebElement = 
+    import dev.myclinic.scala.util.ZenkakuUtil.Ext.*
+    val label = s"${n}割".toZenkaku
+    ElementUtil.getInputByLabel(e, label)
   def validFromCalendarIcon: WebElement =
     e.findElement(ByCssSelector("div.valid-from-input svg.domq-calendar-icon"))
   def validUptoCalendarIcon: WebElement =
     e.findElement(ByCssSelector("div.valid-upto-input svg.domq-calendar-icon"))
   def validUptoClearIcon: WebElement =
     e.findElement(ByCssSelector("div.valid-upto-input svg.domq-x-circle-icon"))
-  def notKoureiInput: WebElement = ElementUtil.getInputByLabel(e, "高齢でない")
-  def kourei1wariInput: WebElement = ElementUtil.getInputByLabel(e, "１割")
-  def kourei2wariInput: WebElement = ElementUtil.getInputByLabel(e, "２割")
-  def kourei3wariInput: WebElement = ElementUtil.getInputByLabel(e, "３割")
   def enterButton: WebElement = ElementUtil.getButtonByText(e, "入力")
   def cancelButton: WebElement = ElementUtil.getButtonByText(e, "キャンセル")
+
+  def setFutanWari(f: Int): Unit =
+    futanWariInput(f).click()
 
   def setValidFrom(d: LocalDate): Unit =
     validFromCalendarIcon.click()
@@ -52,37 +52,22 @@ class ShahokokuhoDialog(e: WebElement, driver: ChromeDriver):
         if icon.getCssValue("display") != "none" then
           icon.click()
     }
-
-  def setKourei(kourei: Int): Unit =
-    kourei match {
-      case 0 => notKoureiInput.click()
-      case 1 => kourei1wariInput.click()
-      case 2 => kourei2wariInput.click()
-      case 3 => kourei3wariInput.click()
-      case _ => sys.error("Unknown kourei")
-    }
-
-  def set(shahokokuho: Shahokokuho): Unit =
-    hokenshaBangouInput.sendKeys(shahokokuho.hokenshaBangou.toString)
-    hihokenshaKigouInput.sendKeys(shahokokuho.hihokenshaKigou)
-    hihokenshaBangouInput.sendKeys(shahokokuho.hihokenshaBangou)
-    edabanInput.sendKeys(shahokokuho.edaban)
-    if shahokokuho.isHonnin then
-      honninInput.click()
-    else
-      kazokuInput.click()
-    setValidFrom(shahokokuho.validFrom)
-    setValidUpto(shahokokuho.validUpto)
-    setKourei(shahokokuho.koureiStore)
+  def set(k: Koukikourei): Unit =
+    hokenshaInput.clear()
+    hokenshaInput.sendKeys(k.hokenshaBangou)
+    hihokenshaInput.sendKeys(k.hihokenshaBangou)
+    setFutanWari(k.futanWari)
+    setValidFrom(k.validFrom)
+    setValidUpto(k.validUpto)
 
   def enter(): Unit =
     enterButton.click()
 
-  def cancel(): Unit =
+  def cancel(): Unit = 
     cancelButton.click()
 
-object ShahokokuhoDialog:
-  def apply(driver: ChromeDriver): ShahokokuhoDialog =
+object KoukikoureiDialog:
+  def apply(driver: ChromeDriver): KoukikoureiDialog =
     val e = ElementUtil.waitFor(
       driver,
       ByCssSelector(
@@ -92,6 +77,6 @@ object ShahokokuhoDialog:
     ElementUtil.waitFor(
       driver,
       e,
-      ByClassName("shahokokuho-form")
+      ByClassName("koukikourei-form")
     )
-    new ShahokokuhoDialog(e, driver)
+    new KoukikoureiDialog(e, driver)
