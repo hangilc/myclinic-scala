@@ -41,8 +41,10 @@ class HotlineBlock(sendAs: String, sendTo: String)(using fetcher: EventFetcher):
       )
       fetcher.appModelEventPublisher.subscribe(event => {
         if isHotlineCreatedEvent(event.model, event.kind) then
-          handleHotline(event.dataAs[Hotline])
-          Api.beep()
+          val hotline = event.dataAs[Hotline]
+          handleHotline(hotline)
+          if hotline.sender != sendAs then
+            Api.beep()
       })
       fetcher.hotlineBeepEventPublisher.subscribe(event => {
         println(("beep", event))
@@ -59,8 +61,9 @@ class HotlineBlock(sendAs: String, sendTo: String)(using fetcher: EventFetcher):
     for
       line <- myMessage(hotline)
     yield
-      ui.messages.value += line
-      ui.messages.scrollTop = ui.messages.scrollHeight
+      ui.messages.value = line + ui.messages.value
+      // ui.messages.scrollTop = ui.messages.scrollHeight
+      ui.messages.scrollTop = 0
 
   private def isRelevant(who: String): Boolean =
     who == sendAs || who == sendTo
