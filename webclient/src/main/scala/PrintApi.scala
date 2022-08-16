@@ -18,6 +18,7 @@ object PrintApi extends ApiBase:
     given Decoder[Option[String]] = Decoder.decodeOption[String]
 
     def beep(): Future[Boolean] =
+      println("local-beep")
       get("beep", Params())
 
     def listPrintSetting(): Future[List[String]] =
