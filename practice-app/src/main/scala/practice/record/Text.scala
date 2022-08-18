@@ -95,6 +95,7 @@ case class TextEdit(
         |> FormatShohousen.parse
         |> ((shohou: Shohou) => shohou.formatForSave)
       else content
+    to be done!
     val t = new ModelText(text.textId, text.visitId, newContent)
     for
       _ <- Api.updateText(t)
