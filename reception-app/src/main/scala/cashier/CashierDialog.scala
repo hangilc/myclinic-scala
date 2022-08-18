@@ -69,7 +69,8 @@ class CashierDialog(meisai: Meisai, visit: VisitEx, chargeValue: Int):
   def doPrintReceipt(): Unit =
     val data = ReceiptDrawerData()
     data.setPatient(patient)
-    data.charge = meisai.charge
+    // data.charge = meisai.charge
+    data.charge = chargeValue
     data.visitDate = KanjiDate.dateToKanji(at, formatYoubi = _ => "")
     data.issueDate = KanjiDate.dateToKanji(LocalDate.now(), formatYoubi = _ => "")
     data.hoken = HokenUtil.hokenRep(visit)
