@@ -89,9 +89,13 @@ case class TextEdit(
   def onEnter(): Unit =
     import dev.myclinic.scala.util.FunUtil.*
     val content: String = ta.value
-      |> FormatShohousen.parse
-      |> ((shohou: Shohou) => shohou.formatForSave)
-    val t = new ModelText(text.textId, text.visitId, content)
+    val newContent: String =
+      if FormatShohousen.isShohou(content) then
+        content
+        |> FormatShohousen.parse
+        |> ((shohou: Shohou) => shohou.formatForSave)
+      else content
+    val t = new ModelText(text.textId, text.visitId, newContent)
     for
       _ <- Api.updateText(t)
       up <- Api.getText(t.textId)
