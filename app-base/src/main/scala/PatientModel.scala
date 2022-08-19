@@ -8,6 +8,8 @@ import PatientValidator.*
 import org.scalajs.dom.HTMLElement
 import dev.fujiwara.validator.section.Implicits.*
 import java.time.LocalDate
+import dev.fujiwara.kanjidate.KanjiDate
+import dev.fujiwara.kanjidate.DateUtil
 
 object PatientProps:
   object patientIdProp extends ModelProp[Patient, Int]("患者番号", _.patientId)
@@ -192,7 +194,15 @@ object PatientRepFactory:
   class SexRep(modelOpt: Option[Patient])
       extends ModelPropRep(modelOpt, sexProp, stringify = _.rep + "性")
   class BirthdayRep(modelOpt: Option[Patient])
-      extends ModelDatePropRep(modelOpt, birthdayProp)
+      extends ModelDatePropRep(
+        modelOpt,
+        birthdayProp,
+        stringify = d => {
+          val drep = KanjiDate.dateToKanji(d)
+          val age = DateUtil.calcAge(d, LocalDate.now())
+          s"${drep}（${age}才）"
+        }
+      )
   class AddressRep(modelOpt: Option[Patient])
       extends ModelPropRep(modelOpt, addressProp)
   class PhoneRep(modelOpt: Option[Patient])
