@@ -6,19 +6,20 @@ import java.time.LocalDate
 
 object FutanWari:
   def calcFutanWari(visit: VisitEx): Int =
-    Should be fixed!
     visit.toVisit.futanWariOverride match {
       case Some(futanWari) => futanWari
       case None => {
         var futanWari = 10
         def update(value: Int): Unit =
           futanWari = Math.min(futanWari, value)
+        def set(value: Int): Unit =
+          futanWari = value
         visit.shahokokuho.foreach(shahokokuho => {
           val birthday: LocalDate = visit.patient.birthday
           val rcptAge =
             RcptUtil.calcRcptAge(birthday, visit.visitedAt.toLocalDate)
           update(calcShahokokuhoFutanWariByAge(rcptAge))
-          shahokokuho.koureiFutanWari.foreach(update(_))
+          shahokokuho.koureiFutanWari.filter(_ > 0).foreach(set)
         })
         visit.roujin.foreach(roujin => update(roujin.futanWari))
         visit.koukikourei.foreach(koukikourei => update(koukikourei.futanWari))
