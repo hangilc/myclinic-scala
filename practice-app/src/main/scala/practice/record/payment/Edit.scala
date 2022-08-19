@@ -10,6 +10,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import org.scalajs.dom.window
 import scala.language.implicitConversions
+import scala.concurrent.Future
 
 case class Edit(
     chargeOption: Option[Charge],
@@ -41,6 +42,7 @@ case class Edit(
       button("キャンセル", onclick := (doCancel _))
     )
   )
+  newChargeInput.value = meisai.charge.toString
 
   def doCancel(): Unit =
     ele.replaceBy(Disp(chargeOption, paymentOption, visitId).ele)
@@ -51,13 +53,20 @@ case class Edit(
       case Some(newCharge) => 
         for
           updated <- Api.updateChargeValue(visitId, newCharge)
+          wqueueOpt <- Api.findWqueue(visitId)
+          _ <- wqueueOpt match {
+            case Some(wqueue) => Future.successful(())
+            case None => 
+              val newWqueue = Wqueue(visitId, WaitState.WaitCashier)
+              Api.enterWqueue(newWqueue)
+          }
         yield PracticeBus.chargeUpdated.publish(updated)
     }
 
   def doNoPayment(): Unit =
     val pay = Payment(visitId, 0, LocalDateTime.now())
     for
-      _ <- Api.enterPayment(pay)
+      _ <- Api.finishCashier(pay)
     yield
       ()
 
