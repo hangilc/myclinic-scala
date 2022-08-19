@@ -132,6 +132,11 @@ object DrawerService:
   def drawShohousen(text: Text, visit: Visit, patient: Patient): String =
     val data = new ShohousenData()
     data.setClinicInfo(clinicInfoDTO(clinicInfo))
+    data.setHoken(hokenDTO)
+    data.setPatient(patientDTO)
+    data.setFutanWari(futanWari)
+    data.setKoufuDate(koufuDate)
+    data.setValidUptoDate(validUptoDate)
     val c = FormatShohousen.parse(text.content).formatForPrint
     data.setDrugs(c)
     val drawer = new ShohousenDrawer()
