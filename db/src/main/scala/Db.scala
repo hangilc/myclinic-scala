@@ -72,6 +72,12 @@ object Db
       events <- proc()
     yield events
 
+  def deleteVisitFromReception(visitId: Int): IO[List[AppEvent]] =
+    val op = 
+      for
+        wqueue <- DbWqueuePrim.getWqeueue(visitId).option
+        _ = 
+
   def finishCashier(payment: Payment): IO[List[AppEvent]] =
     mysql(for
       paymentEvent <- DbPaymentPrim.enterPayment(payment)

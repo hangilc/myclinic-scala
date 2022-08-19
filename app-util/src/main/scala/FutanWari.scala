@@ -6,6 +6,7 @@ import java.time.LocalDate
 
 object FutanWari:
   def calcFutanWari(visit: VisitEx): Int =
+    Should be fixed!
     visit.toVisit.futanWariOverride match {
       case Some(futanWari) => futanWari
       case None => {
