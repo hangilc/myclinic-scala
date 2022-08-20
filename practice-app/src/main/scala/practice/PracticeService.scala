@@ -98,6 +98,7 @@ class PracticeMain:
       val sel = Selection[(Patient, Visit)]()
       sel.clear()
       sel.addAll(pairs, pair => formatPatient(pair._1))
+      sel.addDone()
       val d = new ModalDialog3
       d.title("受付患者選択")
       d.body(sel.ele(cls := "practice-select-from-registered-selection"))

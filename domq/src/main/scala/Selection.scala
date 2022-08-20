@@ -56,6 +56,8 @@ class Selection[T](using config: SelectionConfig):
   def addDone(): Unit =
     dataVersion += 1
     updateVersion()
+    if items.size == 1 then
+      mark(items.head.value)
 
   def addAll(args: List[(HTMLElement, T)]): Unit =
     args.foreach {
