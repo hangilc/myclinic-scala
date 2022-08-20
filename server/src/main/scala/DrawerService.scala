@@ -28,6 +28,9 @@ import scala.collection.JavaConverters.*
 import dev.fujiwara.scala.drawer.ToJavaOp
 import dev.myclinic.scala.config.StampInfo
 import dev.fujiwara.drawer.pdf.Stamper
+import dev.myclinic.scala.model.HokenInfo
+import dev.myclinic.scala.apputil.FutanWari
+import java.time.LocalDate
 
 object DrawerService:
   object intTextId extends QueryParamDecoderMatcher[Int]("text-id")
@@ -129,14 +132,16 @@ object DrawerService:
     }
     s"${name}-stamp-tmp${ext}"
 
-  def drawShohousen(text: Text, visit: Visit, patient: Patient): String =
+  def drawShohousen(text: Text, visit: Visit, patient: Patient, hokenInfo: HokenInfo,
+    koufuDate: LocalDate, validUptoDate: Option[LocalDate]): String =
+    import dev.myclinic.scala.javalib.convs.Convs.*
     val data = new ShohousenData()
     data.setClinicInfo(clinicInfoDTO(clinicInfo))
-    data.setHoken(hokenDTO)
-    data.setPatient(patientDTO)
-    data.setFutanWari(futanWari)
+    data.setHoken(hokenInfo.toDTO)
+    data.setPatient(patient.toDTO)
+    data.setFutanWari(FutanWari.calcFutanWari(patient, visit, hokenInfo))
     data.setKoufuDate(koufuDate)
-    data.setValidUptoDate(validUptoDate)
+    validUptoDate.foreach(d => data.setValidUptoDate(d))
     val c = FormatShohousen.parse(text.content).formatForPrint
     data.setDrugs(c)
     val drawer = new ShohousenDrawer()

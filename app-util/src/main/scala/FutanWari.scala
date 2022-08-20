@@ -1,12 +1,38 @@
 package dev.myclinic.scala.apputil
 
-import dev.myclinic.scala.model.VisitEx
+import dev.myclinic.scala.model.*
 import dev.myclinic.scala.util.RcptUtil
 import java.time.LocalDate
 
 object FutanWari:
   def calcFutanWari(visit: VisitEx): Int =
-    visit.toVisit.futanWariOverride match {
+    calcFutanWari(visit.patient, visit.toVisit, visit.hoken)
+    // visit.toVisit.futanWariOverride match {
+    //   case Some(futanWari) => futanWari
+    //   case None => {
+    //     var futanWari = 10
+    //     def update(value: Int): Unit =
+    //       futanWari = Math.min(futanWari, value)
+    //     def set(value: Int): Unit =
+    //       futanWari = value
+    //     visit.shahokokuho.foreach(shahokokuho => {
+    //       val birthday: LocalDate = visit.patient.birthday
+    //       val rcptAge =
+    //         RcptUtil.calcRcptAge(birthday, visit.visitedAt.toLocalDate)
+    //       update(calcShahokokuhoFutanWariByAge(rcptAge))
+    //       shahokokuho.koureiFutanWari.filter(_ > 0).foreach(set)
+    //     })
+    //     visit.roujin.foreach(roujin => update(roujin.futanWari))
+    //     visit.koukikourei.foreach(koukikourei => update(koukikourei.futanWari))
+    //     visit.kouhiList.foreach(kouhi =>
+    //       update(kouhiFutanWari(kouhi.futansha))
+    //     )
+    //     futanWari
+    //   }
+    // }
+
+  def calcFutanWari(patient: Patient, visit: Visit, hokenInfo: HokenInfo): Int =
+    visit.futanWariOverride match {
       case Some(futanWari) => futanWari
       case None => {
         var futanWari = 10
@@ -14,16 +40,16 @@ object FutanWari:
           futanWari = Math.min(futanWari, value)
         def set(value: Int): Unit =
           futanWari = value
-        visit.shahokokuho.foreach(shahokokuho => {
-          val birthday: LocalDate = visit.patient.birthday
+        hokenInfo.shahokokuho.foreach(shahokokuho => {
+          val birthday: LocalDate = patient.birthday
           val rcptAge =
             RcptUtil.calcRcptAge(birthday, visit.visitedAt.toLocalDate)
           update(calcShahokokuhoFutanWariByAge(rcptAge))
           shahokokuho.koureiFutanWari.filter(_ > 0).foreach(set)
         })
-        visit.roujin.foreach(roujin => update(roujin.futanWari))
-        visit.koukikourei.foreach(koukikourei => update(koukikourei.futanWari))
-        visit.kouhiList.foreach(kouhi =>
+        hokenInfo.roujin.foreach(roujin => update(roujin.futanWari))
+        hokenInfo.koukikourei.foreach(koukikourei => update(koukikourei.futanWari))
+        hokenInfo.kouhiList.foreach(kouhi =>
           update(kouhiFutanWari(kouhi.futansha))
         )
         futanWari

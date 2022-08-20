@@ -386,7 +386,7 @@ lazy val rcpt = project
 
 lazy val javalib = project
   .in(file("javalib"))
-  .dependsOn(modelJVM)
+  .dependsOn(modelJVM, appUtilJVM)
   .settings(
     name := "javalib",
     version := "1.0.0-SHANPSHOT",
@@ -398,6 +398,7 @@ lazy val javalib = project
       "com.fasterxml.jackson.core" % "jackson-annotations" % jacksonVersion,
       "com.fasterxml.jackson.dataformat" % "jackson-dataformat-yaml" % jacksonVersion,
       "com.fasterxml.jackson.dataformat" % "jackson-dataformat-xml" % jacksonVersion,
+      "dev.fujiwara" % "drawer" % "1.0.0-SNAPSHOT",
     )
   )
 

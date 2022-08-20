@@ -1,8 +1,9 @@
 package dev.myclinic.scala.javalib.convs
 
-import dev.myclinic.vertx.dto.*
+import dev.fujiwara.dto.*
 import dev.myclinic.scala.model.*
 import java.time.LocalDate
+import dev.myclinic.scala.apputil.HokenUtil
 
 object Convs:
   extension (p: PatientDTO)
@@ -88,3 +89,16 @@ object Convs:
       dto.validFrom = m.validFrom.toString
       dto.validUpto = validUptoToString(m.validUpto)
       dto
+
+  extension (m: HokenInfo)
+    def toDTO: HokenDTO =
+      val dto = new HokenDTO()
+      dto.shahokokuho = m.shahokokuho.fold(null)(_.toDTO)
+      dto.koukikourei = m.koukikourei.fold(null)(_.toDTO)
+      dto.roujin = m.roujin.fold(null)(_.toDTO)
+      dto.kouhi1 = m.kouhiList.lift(0).fold(null)(_.toDTO)
+      dto.kouhi2 = m.kouhiList.lift(1).fold(null)(_.toDTO)
+      dto.kouhi3 = m.kouhiList.lift(2).fold(null)(_.toDTO)
+      dto.rep = HokenUtil.hokenRep(m)
+      dto
+    
