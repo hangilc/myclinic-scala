@@ -31,6 +31,7 @@ import dev.fujiwara.drawer.pdf.Stamper
 import dev.myclinic.scala.model.HokenInfo
 import dev.myclinic.scala.apputil.FutanWari
 import java.time.LocalDate
+import scala.concurrent.Future
 
 object DrawerService:
   object intTextId extends QueryParamDecoderMatcher[Int]("text-id")
@@ -43,30 +44,33 @@ object DrawerService:
   val clinicInfo = Config.getClinicInfo
   val objectMapper = dev.fujiwara.drawer.op.JsonCodec.createMapper()
 
+  def handleShohousenDraw(text: Text): IO[Response[IO]] =
+    for
+      visit <- Db.getVisit(text.visitId)
+      patient <- Db.getPatient(visit.patientId)
+      hokenInfo <- Db.getHokenInfo(visit.visitId)
+    yield
+      val issuedAt: LocalDate = LocalDate.now()
+      val validUpto: Option[LocalDate] = None
+      val json = drawShohousen(text, visit, patient, hokenInfo, issuedAt, validUpto)
+      Response[IO](
+        body = fs2.Stream.emits(json.getBytes()),
+        headers = Headers(`Content-Type`(MediaType.application.json))
+      )
+
+
   def routes = HttpRoutes.of[IO] {
     case GET -> Root / "shohousen-drawer" :? intTextId(textId) =>
       for
         text <- Db.getText(textId)
-        visit <- Db.getVisit(text.visitId)
-        patient <- Db.getPatient(visit.patientId)
-      yield
-        val json = drawShohousen(text, visit, patient)
-        Response(
-          body = fs2.Stream.emits(json.getBytes()),
-          headers = Headers(`Content-Type`(MediaType.application.json))
-        )
+        resp <- handleShohousenDraw(text)
+      yield resp
 
     case req @ POST -> Root / "shohousen-drawer-text" =>
       for
         text <- req.as[Text]
-        visit <- Db.getVisit(text.visitId)
-        patient <- Db.getPatient(visit.patientId)
-      yield
-        val json = drawShohousen(text, visit, patient)
-        Response(
-          body = fs2.Stream.emits(json.getBytes()),
-          headers = Headers(`Content-Type`(MediaType("application", "json")))
-        )
+        resp <- handleShohousenDraw(text)
+      yield resp
 
     case req @ POST -> Root / "create-pdf-file" :? strPaperSize(
           paperSize
