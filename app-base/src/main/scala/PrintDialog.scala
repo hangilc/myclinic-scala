@@ -25,7 +25,8 @@ class PrintDialog(
     width: Double,
     height: Double,
     viewBox: String,
-    prefKind: String = "手動"
+    prefKind: String = "手動",
+    onDone: () => Unit = () => ()
 ):
   val svg =
     DrawerSvg.drawerJsonToSvg(ops.asJson.toString, width, height, viewBox)
@@ -56,6 +57,7 @@ class PrintDialog(
     )
   )
   dlog.dialog(cls := "print-dialog")
+  dlog.onClose(bool => onDone())
 
   def initSetting(): Future[Unit] =
     for
@@ -111,7 +113,8 @@ object PrintDialog:
       ops: List[Op],
       paperSize: PaperSize,
       prefKind: String = "手動",
-      adjustScale: Double = 1.0
+      adjustScale: Double = 1.0,
+      onDone: () => Unit = () => ()
   ): PrintDialog =
     val (w, h) =
       if paperSize.isLandscape then (defaultHeight, defaultWidth)
@@ -122,5 +125,6 @@ object PrintDialog:
       w * adjustScale,
       h * adjustScale,
       s"0, 0, ${paperSize.width}, ${paperSize.height}",
-      prefKind
+      prefKind,
+      onDone
     )

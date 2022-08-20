@@ -135,7 +135,8 @@ case class TextEdit(
     for
       ops <- Api.shohousenDrawer(text.textId)
     yield
-      val dlog = PrintDialog("処方箋印刷", ops, PaperSize.A5, "shohousen")
+      val dlog = PrintDialog("処方箋印刷", ops, PaperSize.A5, "shohousen",
+        onDone = () => onDone(text))
       dlog.open()
 
   def doViewShohousen(): Unit =
