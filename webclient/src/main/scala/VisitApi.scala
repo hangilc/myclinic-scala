@@ -25,6 +25,9 @@ object VisitApi extends ApiBase:
     def deleteVisit(visitId: Int): Future[Boolean] =
       get("delete-visit", Params("visit-id" -> visitId))
 
+    def deleteVisitFromPatient(visitId: Int): Future[Boolean] =
+      get("delete-visit-from-reception", Params("visit-id" -> visitId))
+
     def getVisitEx(visitId: Int): Future[VisitEx] =
       get("get-visit-ex", Params("visit-id" -> visitId))
 

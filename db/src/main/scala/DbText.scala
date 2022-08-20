@@ -14,11 +14,6 @@ import java.time.temporal.ChronoUnit
 import java.util.regex.Pattern
 
 trait DbText extends Mysql:
-  def countTextForVisit(visitId: Int): IO[Int] =
-    mysql(sql"""
-      select count(*) from visit_text where visit_id = ${visitId}
-    """.query[Int].unique)
-
   def batchGetText(visitIds: List[Int]): IO[Map[Int, List[Text]]] =
     mysql(
       visitIds

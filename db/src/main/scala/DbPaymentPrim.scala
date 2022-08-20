@@ -10,6 +10,11 @@ import dev.myclinic.scala.db.DoobieMapping._
 
 
 object DbPaymentPrim:
+  def countPaymentForVisit(visitId: Int): ConnectionIO[Int] =
+    sql"""
+      select count(*) from visit_payment where visit_id = ${visitId}
+    """.query[Int].unique
+
   def enterPayment(payment: Payment): ConnectionIO[AppEvent] =
     val op = sql"""
       insert into visit_payment (visit_id, amount, paytime)

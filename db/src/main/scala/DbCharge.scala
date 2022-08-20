@@ -14,11 +14,6 @@ import java.time.temporal.ChronoUnit
 import java.util.regex.Pattern
 
 trait DbCharge extends Mysql:
-  def countChargeForVisit(visitId: Int): IO[Int] =
-    mysql(sql"""
-      select count(*) from visit_charge where visit_id = ${visitId}
-    """.query[Int].unique)
-
   def findCharge(visitId: Int): IO[Option[Charge]] =
     mysql(Prim.getCharge(visitId).option)
 

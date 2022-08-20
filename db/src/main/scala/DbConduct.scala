@@ -14,11 +14,6 @@ import java.time.temporal.ChronoUnit
 import java.util.regex.Pattern
 
 trait DbConduct extends Mysql:
-  def countConductForVisit(visitId: Int): IO[Int] =
-    mysql(sql"""
-      select count(*) from visit_conduct where visit_id = ${visitId}
-    """.query[Int].unique)
-
 
   def listConductForVisit(visitId: Int): IO[List[Conduct]] =
     mysql(Prim.listConductForVisit(visitId))

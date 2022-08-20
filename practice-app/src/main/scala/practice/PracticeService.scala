@@ -21,6 +21,7 @@ import scala.language.implicitConversions
 import scala.quoted.FromExpr.NoneFromExpr
 import scala.util.Failure
 import scala.util.Success
+import dev.myclinic.scala.util.NumberUtil.format
 
 class PracticeService extends SideMenuService:
   val left = new PracticeMain
@@ -83,6 +84,14 @@ class PracticeMain:
   def searchShohouSample(): Unit =
     ShohouSampleDialog.open()
 
+  private def startExam(patient: Patient, visit: Visit): Unit =
+    for
+      _ <- Api.changeWqueueState(visit.visitId, WaitState.InExam)
+    yield
+      PracticeBus.setPatientVisitState(
+        Practicing(patient, visit.visitId)
+      )
+
   def selectFromRegistered(): Unit =
     for pairs <- PracticeService.listRegisteredPatientForPractice
     yield
@@ -99,10 +108,7 @@ class PracticeMain:
             sel.marked.foreach(pair =>
               d.close()
               pair match {
-                case (patient, visit) =>
-                  PracticeBus.setPatientVisitState(
-                    Practicing(patient, visit.visitId)
-                  )
+                case (patient, visit) => startExam(patient, visit)
               }
             )
           )

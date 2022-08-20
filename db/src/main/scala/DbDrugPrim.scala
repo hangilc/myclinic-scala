@@ -14,6 +14,11 @@ import java.time.LocalTime
 import java.time.temporal.ChronoUnit
 
 object DbDrugPrim:
+  def countDrugForVisit(visitId: Int): ConnectionIO[Int] =
+    sql"""
+      select count(*) from visit_drug where visit_id = ${visitId}
+    """.query[Int].unique
+
   def listDrugForVisit(visitId: Int): ConnectionIO[List[Drug]] =
     sql"""
       select * from visit_drug where visit_id = ${visitId} order by drug_id

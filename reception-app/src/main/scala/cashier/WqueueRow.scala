@@ -94,7 +94,7 @@ case class WqueueRow(var wqueue: Wqueue, visit: Visit, var patient: Patient)(usi
 
   private def deleteVisit(): Unit =
     (for
-      _ <- Api.deleteVisit(wqueue.visitId)
+      _ <- Api.deleteVisitFromPatient(wqueue.visitId)
     yield ()).onComplete {
       case Success (_) => ()
       case Failure(ex) => ShowMessage.showError("この受付を削除できませんでした。")

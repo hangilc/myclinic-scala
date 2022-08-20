@@ -19,6 +19,11 @@ object DbConductPrim:
   private val cConductId = Fragment.const("id")
   private val cVisitId = Fragment.const("visit_id")
 
+  def countConductForVisit(visitId: Int): ConnectionIO[Int] =
+    sql"""
+      select count(*) from visit_conduct where visit_id = ${visitId}
+    """.query[Int].unique
+
   def listConductForVisit(visitId: Int): ConnectionIO[List[Conduct]] =
     sql"""
       select * from $tConduct where $cVisitId = ${visitId} order by $cConductId

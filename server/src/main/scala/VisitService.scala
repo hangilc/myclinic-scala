@@ -47,6 +47,15 @@ object VisitService extends Publisher:
       }
       Ok(op)
 
+    case GET -> Root / "delete-visit-from-reception" :? intVisitId(visitId) =>
+      val op = {
+        for
+          events <- Db.deleteVisitFromReception(visitId)
+          _ <- publishAll(events)
+        yield true
+      }
+      Ok(op)
+
     case GET -> Root / "get-visit-ex" :? intVisitId(visitId) =>
       Ok(Db.getVisitEx(visitId))
 

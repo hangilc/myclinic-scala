@@ -14,10 +14,5 @@ import java.time.temporal.ChronoUnit
 import java.util.regex.Pattern
 
 trait DbDrug extends Mysql:
-  def countDrugForVisit(visitId: Int): IO[Int] =
-    mysql(sql"""
-      select count(*) from visit_drug where visit_id = ${visitId}
-    """.query[Int].unique)
-
   def listDrugForVisit(visitId: Int): IO[List[Drug]] =
     mysql(Prim.listDrugForVisit(visitId))

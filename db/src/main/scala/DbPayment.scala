@@ -14,11 +14,6 @@ import java.time.temporal.ChronoUnit
 import java.util.regex.Pattern
 
 trait DbPayment extends Mysql:
-  def countPaymentForVisit(visitId: Int): IO[Int] =
-    mysql(sql"""
-      select count(*) from visit_payment where visit_id = ${visitId}
-    """.query[Int].unique)
-
   def findLastPayment(visitId: Int): IO[Option[Payment]] =
     mysql(DbPaymentPrim.getLastPayment(visitId).option)
 

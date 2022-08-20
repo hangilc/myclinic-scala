@@ -42,7 +42,7 @@ class Title(visit: VisitEx):
     ),
     pullDown.link(cls := "practice-visit-title-manip")
   )
-  PracticeBus.currentVisitId.foreach(currentVisitId => 
+  PracticeBus.currentVisitId.foreach(currentVisitId =>
     if visit.visitId == currentVisitId then ele(cls := "current-visit")
   )
   adaptToTempVisitId(PracticeBus.currentTempVisitId)
@@ -51,31 +51,32 @@ class Title(visit: VisitEx):
     for
       patient <- Api.getPatient(visit.patientId)
       meisai <- Api.getMeisai(visit.visitId)
-    yield 
-      PracticeBus.addMishuu(visit.toVisit, patient, meisai)
+    yield PracticeBus.addMishuu(visit.toVisit, patient, meisai)
 
   def doFutanwari(): Unit =
-    val dlog = FutanwariDialog(visit.toVisit, dlog => 
-      dlog.close()
-      for
-        vex <- Api.getVisitEx(visit.visitId)
-      yield PracticeBus.visitUpdated.publish(vex)
+    val dlog = FutanwariDialog(
+      visit.toVisit,
+      dlog =>
+        dlog.close()
+        for vex <- Api.getVisitEx(visit.visitId)
+        yield PracticeBus.visitUpdated.publish(vex)
     )
     dlog.open()
 
   def doRcptDetail(): Unit =
-    for
-      meisai <- Api.getMeisai(visit.visitId)
+    for meisai <- Api.getMeisai(visit.visitId)
     yield
       val dlog = RcptDetailDialog(meisai)
       dlog.open()
 
   def doDeleteVisit(): Unit =
-    val visitId = visit.visitId
-    Api.deleteVisit(visitId).onComplete {
-      case Success(_) => NavUtil.refreshNavSetting()
-      case Failure(ex) => ShowMessage.showError(ex.getMessage)
-    }
+    ShowMessage.confirm("この診察を削除しますか？")(() =>
+      val visitId = visit.visitId
+      Api.deleteVisit(visitId).onComplete {
+        case Success(_)  => NavUtil.refreshNavSetting()
+        case Failure(ex) => ShowMessage.showError(ex.getMessage)
+      }
+    )
 
   def setTempVisitId(): Unit =
     if PracticeBus.currentVisitId.isEmpty then
@@ -89,7 +90,6 @@ class Title(visit: VisitEx):
         else ele(cls :- "temp-visit")
     }
 
-
 object Title:
   def formatVisitTime(at: LocalDateTime): String =
     val p1 = KanjiDate.dateToKanji(
@@ -99,5 +99,5 @@ object Title:
     val p2 = KanjiDate.timeToKanji(at.toLocalTime)
     p1 + p2
 
-  given Dispose[Title] = 
+  given Dispose[Title] =
     Dispose.nop[Title] + (_.unsubscribers)

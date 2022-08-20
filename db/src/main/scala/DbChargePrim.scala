@@ -15,6 +15,11 @@ import java.time.temporal.ChronoUnit
 import doobie.free.resultset
 
 object DbChargePrim:
+  def countChargeForVisit(visitId: Int): ConnectionIO[Int] =
+    sql"""
+      select count(*) from visit_charge where visit_id = ${visitId}
+    """.query[Int].unique
+
   def getCharge(visitId: Int): Query0[Charge] =
     sql"""
       select * from visit_charge where visit_id = ${visitId}

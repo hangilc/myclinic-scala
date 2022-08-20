@@ -14,6 +14,11 @@ import java.time.LocalTime
 import java.time.temporal.ChronoUnit
 
 object DbTextPrim:
+  def countTextForVisit(visitId: Int): ConnectionIO[Int] =
+    sql"""
+      select count(*) from visit_text where visit_id = ${visitId}
+    """.query[Int].unique
+
   def listTextForVisit(visitId: Int): ConnectionIO[List[Text]] =
     sql"""
       select * from visit_text where visit_id = $visitId order by text_id
