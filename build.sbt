@@ -386,11 +386,12 @@ lazy val rcpt = project
 
 lazy val javalib = project
   .in(file("javalib"))
+  .dependsOn(modelJVM)
   .settings(
     name := "javalib",
     version := "1.0.0-SHANPSHOT",
-    crossPaths := false,
-    autoScalaLibrary := false,
+    // crossPaths := false,
+    // autoScalaLibrary := false,
     libraryDependencies ++= Seq(
       "org.slf4j" % "slf4j-api" % slf4jVersion,
       "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion,
