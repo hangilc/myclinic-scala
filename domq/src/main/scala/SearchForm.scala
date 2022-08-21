@@ -45,6 +45,7 @@ class SearchFormEngine[Input, Trigger, T](
   def setItems(result: List[T]): Unit =
     selection.clear()
     selection.addAll(result.map(v => (toElement(v), v)))
+    selection.addDone()
 
   def selected: Option[T] = selection.marked
 
