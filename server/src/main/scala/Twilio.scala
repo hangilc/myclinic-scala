@@ -19,6 +19,12 @@ object Twilio:
     ).identity(identity).grant(grant).build()
     token.toJwt()
 
+    /*
+      let device = new Twilio.Device(token, { edge: "tokyo" })
+      let call = device.connect({ params: { phone: "+81...." }})
+      device.disconnectAll()
+    */
+
 
 
 
