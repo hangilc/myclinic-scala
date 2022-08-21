@@ -72,7 +72,8 @@ class EventFetcher:
         ws.onmessage = { (e: dom.MessageEvent) =>
           {
             val msg = e.data.asInstanceOf[String]
-            println(("ws-message", msg))
+            if !msg.contains("heart-beat") then
+              println(("ws-message", msg))
             if !isDraining then handleMessage(msg)
           }
         }
@@ -113,7 +114,7 @@ class EventFetcher:
               drainEvents()
               println(("drained", eventIdNotice.currentEventId))
           case _: HeartBeat =>
-            println("heart-beat")
+            // println("heart-beat")
             wsOpt.foreach(ws => ws.send("heart-beat"))
             ()
         }
