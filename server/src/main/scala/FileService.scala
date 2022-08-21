@@ -196,4 +196,6 @@ object FileService extends DateTimeQueryParam with Publisher:
       java.nio.file.Files.delete(path)
       Ok(true)
 
+    case GET -> Root / "get-webphone-token" => Ok(TwilioUtil.getWebphoneToken())
+
   }

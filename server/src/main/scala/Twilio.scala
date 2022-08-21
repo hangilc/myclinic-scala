@@ -4,8 +4,8 @@ import com.twilio.jwt.accesstoken.AccessToken
 import com.twilio.jwt.accesstoken.ChatGrant
 import com.twilio.jwt.accesstoken.VoiceGrant
 
-object Twilio:
-  def webphoneToken: String =
+object TwilioUtil:
+  def getWebphoneToken(): String =
     val accountSid = System.getenv("TWILIO_SID")
     val apiKey = System.getenv("TWILIO_WEBPHONE_API_SID")
     val apiSecret = System.getenv("TWILIO_WEBPHONE_API_SECRET")
