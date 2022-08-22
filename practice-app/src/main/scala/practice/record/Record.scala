@@ -90,8 +90,9 @@ class Record(visitEx: VisitEx):
     )
 
   def onTextEntered(text: ModelText): Unit =
-    val t = Text(text)
-    texts.append(t)
+    if text.visitId == visitId then
+      val t = Text(text)
+      texts.append(t)
 
   def onHokenInfoChanged(newHoken: HokenInfo): Unit =
     updateHoken(newHoken)
