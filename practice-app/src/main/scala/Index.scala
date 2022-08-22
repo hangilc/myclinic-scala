@@ -33,6 +33,8 @@ class JsMain(using EventFetcher):
   yield
     StartUp.run(this)
 
+  println(dev.myclinic.scala.web.practiceapp.practice.Twilio)
+
   private def sideMenuItems: List[(String, SideMenuProcs => SideMenuService)] =
     List(
       "診察" -> (_ => PracticeService()),
