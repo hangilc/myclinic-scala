@@ -6,7 +6,8 @@ import scala.scalajs.js.annotation.JSGlobal
 @js.native
 @JSGlobal
 object Twilio extends js.Object:
-  class Device extends js.Object
+  @js.native
+  class Device(token: String) extends js.Object
 
 
 

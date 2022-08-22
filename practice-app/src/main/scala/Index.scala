@@ -34,6 +34,7 @@ class JsMain(using EventFetcher):
     StartUp.run(this)
 
   println(dev.myclinic.scala.web.practiceapp.practice.Twilio)
+  println(new dev.myclinic.scala.web.practiceapp.practice.Twilio.Device(""))
 
   private def sideMenuItems: List[(String, SideMenuProcs => SideMenuService)] =
     List(
