@@ -21,4 +21,9 @@ object FileApi extends FetchBase:
       val init = new RequestInit{}
       init.method = HttpMethod.GET
       doFetch("delete-portal-tmp-file", Params("file-name" -> fileName), init)
+
+    def getWebphoneToken(): Future[String] =
+      val init = new RequestInit{}
+      init.method = HttpMethod.GET
+      doFetch("get-webphone-token", Params(), init)
       

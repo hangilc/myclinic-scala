@@ -20,6 +20,7 @@ import dev.myclinic.scala.web.practiceapp.practice.disease.Frame
 import scala.language.implicitConversions
 import dev.myclinic.scala.web.practiceapp.PracticeBus
 import dev.myclinic.scala.web.practiceapp.cashier.CashierService
+import dev.myclinic.scala.util.NumberUtil.format
 
 class JsMain(using EventFetcher):
   val ui = new PageLayout1("practice", "reception")
@@ -33,14 +34,16 @@ class JsMain(using EventFetcher):
   yield
     StartUp.run(this)
   {
-    import practice.Twilio
+    import _root_.dev.myclinic.scala.webclient.{Api, global}
     import scala.scalajs.js
-    import js.JSConverters.*
-    val dev = new Twilio.Device("tok", js.Dynamic.literal(edge = "tokyo"))
-    println(dev.state)
-    println(dev.isBusy)
-    println(dev.token)
-    dev.disconnectAll()
+    for
+      tok <- Api.getWebphoneToken()
+    yield
+      val dev = new practice.Twilio.Device(tok, js.Dynamic.literal(edge = "tokyo"))
+      // dev.connect(js.Dynamic.literal(
+      //   params = js.Dynamic.literal(phone = "")
+      // ))
+      dev.connect()
   }
 
   private def sideMenuItems: List[(String, SideMenuProcs => SideMenuService)] =
