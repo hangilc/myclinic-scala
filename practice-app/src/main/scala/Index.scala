@@ -32,9 +32,16 @@ class JsMain(using EventFetcher):
     _ <- Frame.init()
   yield
     StartUp.run(this)
-
-  println(dev.myclinic.scala.web.practiceapp.practice.Twilio)
-  println(new dev.myclinic.scala.web.practiceapp.practice.Twilio.Device(""))
+  {
+    import practice.Twilio
+    import scala.scalajs.js
+    import js.JSConverters.*
+    val dev = new Twilio.Device("tok", js.Dynamic.literal(edge = "tokyo"))
+    println(dev.state)
+    println(dev.isBusy)
+    println(dev.token)
+    dev.disconnectAll()
+  }
 
   private def sideMenuItems: List[(String, SideMenuProcs => SideMenuService)] =
     List(

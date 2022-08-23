@@ -7,7 +7,8 @@ import scala.scalajs.js.annotation.JSGlobal
 @JSGlobal
 object Twilio extends js.Object:
   @js.native
-  class Device(token: String) extends js.Object
-
-
-
+  class Device(val token: String, options: js.Dynamic)
+      extends js.Object:
+    def state: String = js.native
+    def isBusy: Boolean = js.native
+    def disconnectAll(): Unit = js.native
