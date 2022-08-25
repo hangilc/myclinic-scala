@@ -48,8 +48,8 @@ case class Tenki(
       val endDate: LocalDate = (currents.list
         .foldLeft(None: Option[LocalDate])((acc, item) =>
           (acc, item.checkLabel.selected) match {
-            case (None, s)    => s.map(_._2)
-            case (Some(d), None) => Some(d)
+            case (None, s)          => s.map(_._2)
+            case (Some(d), None)    => Some(d)
             case (Some(a), Some(b)) => Some(a.max(b._2))
           }
         ))
@@ -59,10 +59,8 @@ case class Tenki(
   )
 
   def doWeek(event: MouseEvent): Unit =
-    if event.shiftKey then
-      endDateEle.init(endDate.plusDays(-7))
-    else
-      endDateEle.init(endDate.plusDays(7))
+    if event.shiftKey then endDateEle.init(endDate.plusDays(-7))
+    else endDateEle.init(endDate.plusDays(7))
 
   def doToday(): Unit =
     endDateEle.init(LocalDate.now())
@@ -77,16 +75,31 @@ case class Tenki(
     endReasonGroup.selected
 
   def doEnter(): Unit =
-    val diseaseIds = currents.list.map(_.checkLabel.selected).collect {
-      case Some((diseaseId, _)) => diseaseId
-    }
     val reason: DiseaseEndReason = endReason
+    val pairs: List[(Int, DiseaseEndReason)] =
+      currents.list.filter(_.checkLabel.isChecked).map(item =>
+        (
+          item.diseaseId,
+          if item.isSusp && reason == DiseaseEndReason.Cured then
+            DiseaseEndReason.Stopped
+          else reason
+        )
+      )
     for
-      _ <- diseaseIds.map(diseaseId => Api.endDisease(diseaseId, endDate, reason)).sequence_
+      _ <- pairs
+          .map(pair => pair match {
+            case (diseaseId, reason) => Api.endDisease(diseaseId, endDate, reason)
+          })
+        .sequence_
     yield onDone(this)
 
 object Tenki:
-  case class Item(label: String, diseaseId: Int, startDate: LocalDate):
+  case class Item(
+      label: String,
+      diseaseId: Int,
+      startDate: LocalDate,
+      isSusp: Boolean
+  ):
     val checkLabel =
       CheckLabel[(Int, LocalDate)]((diseaseId, startDate), stuffLabel _)
     val ele = div(
@@ -110,8 +123,13 @@ object Tenki:
       Item(
         DiseaseUtil.diseaseNameOf(m, adjList.map(_._2)),
         d.diseaseId,
-        d.startDate
+        d.startDate,
+        hasSusp(adjList)
       )
+    private def hasSusp(
+        adjList: List[(DiseaseAdj, ShuushokugoMaster)]
+    ): Boolean =
+      adjList.find(p => p._2.name == "の疑い").isDefined
 
     given Comp[Item] = _.ele
     given Dispose[Item] = _ => ()
