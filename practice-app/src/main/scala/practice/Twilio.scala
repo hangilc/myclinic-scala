@@ -15,8 +15,5 @@ object Twilio extends js.Object:
     def connect(options: js.Any): Promise[Call] = js.native
     def disconnectAll(): Unit = js.native
 
-    def connectTo(phone: String): Promise[Call] =
-      this.connect(Map("params" -> Map("phone" -> phone)))
-    
   @js.native
   class Call extends js.Object

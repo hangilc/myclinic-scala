@@ -33,18 +33,18 @@ class JsMain(using EventFetcher):
     _ <- Frame.init()
   yield
     StartUp.run(this)
-  {
-    import _root_.dev.myclinic.scala.webclient.{Api, global}
-    import scala.scalajs.js
-    for
-      tok <- Api.getWebphoneToken()
-    yield
-      val dev = new practice.Twilio.Device(tok, js.Dynamic.literal(edge = "tokyo"))
-      // dev.connect(js.Dynamic.literal(
-      //   params = js.Dynamic.literal(phone = "")
-      // ))
-      dev.connect()
-  }
+  // {
+  //   import _root_.dev.myclinic.scala.webclient.{Api, global}
+  //   import scala.scalajs.js
+  //   for
+  //     tok <- Api.getWebphoneToken()
+  //   yield
+  //     val dev = new practice.Twilio.Device(tok, js.Dynamic.literal(edge = "tokyo"))
+  //     // dev.connect(js.Dynamic.literal(
+  //     //   params = js.Dynamic.literal(phone = "")
+  //     // ))
+  //     dev.connect()
+  // }
 
   private def sideMenuItems: List[(String, SideMenuProcs => SideMenuService)] =
     List(

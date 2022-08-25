@@ -224,7 +224,7 @@ object PracticeService:
     )
 
   def isForPractice(wstate: WaitState): Boolean =
-    wstate == WaitState.WaitExam || wstate == WaitState.WaitReExam
+    wstate == WaitState.WaitExam || wstate == WaitState.WaitReExam || wstate == WaitState.InExam
 
   def listRegisteredPatientForPractice: Future[List[(Patient, Visit)]] =
     for (gen, wqList, visitMap, patientMap) <- Api.listWqueueFull()
