@@ -80,7 +80,8 @@ lazy val formatshohousen = crossProject(JSPlatform, JVMPlatform)
   .settings(
     name := "formatshohousen"
   )
-  .jvmSettings(
+  // .jvmSettings(
+  .settings(
     libraryDependencies ++= Seq(
       "org.scalatest" %% "scalatest" % scalaTestVersion % "test"
     ),

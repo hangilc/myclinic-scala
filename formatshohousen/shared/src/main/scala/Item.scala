@@ -19,7 +19,8 @@ case class Item(
           lsize
         )
       ) ++ usage.fold(List.empty)(u => {
-        Formatter.breakTabLine(u.usage, u.daysTimes, ctx.altTabPos - ipre.size, lsize)
+        val nd = Item.countLeadingDigits(u.daysTimes)
+        Formatter.breakTabLine(u.usage, u.daysTimes, ctx.altTabPos - ipre.size - nd, lsize)
       }) ++ more.flatMap(m => Formatter.breakLine(m, lsize))
     Formatter.indent(ipre, bpre, lines)
 
