@@ -67,3 +67,6 @@ object Item:
       case r => (None, r)
     }
     Item(drugs, usage, more)
+
+  def countLeadingDigits(s: String): Int =
+    s.takeWhile(c => c >= '０' && c <= '９').size

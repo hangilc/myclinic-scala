@@ -13,7 +13,6 @@ class FormatTest extends AnyFunSuite:
     val p = FormatShohousen.parse(s)
     assert(p.isInstanceOf[ShohouRegular])
     val r = p.asInstanceOf[ShohouRegular]
-    println(("shohou", r.parts))
     val d = p.formatForDisp
     val e = """院外処方
       |Ｒｐ）
