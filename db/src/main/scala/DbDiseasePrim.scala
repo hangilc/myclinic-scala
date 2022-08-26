@@ -46,7 +46,7 @@ object DbDiseasePrim:
   def updateDisease(d: Disease): ConnectionIO[AppEvent] =
     val op = sql"""
         update disease set shoubyoumeicode = ${d.shoubyoumeicode}, 
-        start_date = ${d.startDate}, end_date = ${d.endDate}, end_reason = ${d.endReasonStore})
+        start_date = ${d.startDate}, end_date = ${d.endDate}, end_reason = ${d.endReasonStore}
         where disease_id = ${d.diseaseId}
       """
     for

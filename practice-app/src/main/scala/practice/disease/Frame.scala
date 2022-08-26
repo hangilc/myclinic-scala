@@ -24,7 +24,7 @@ case class Frame(patientId: Int):
   def current(): Unit =
     for list <- Api.listCurrentDiseaseEx(patientId)
     yield
-      val c = Current(list)
+      val c = Current(list, modify)
       body(clear, c.ele)
 
   def add(): Unit =

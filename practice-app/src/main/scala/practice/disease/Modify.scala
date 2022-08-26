@@ -81,6 +81,7 @@ case class Modify(
 
   private def doByoumeiSelected(m: ByoumeiMaster): Unit =
     byoumeiMaster = m
+    disease = disease.copy(shoubyoumeicode = m.shoubyoumeicode)
     updateNameUI()
 
   private def doShuushokugoSelected(m: ShuushokugoMaster): Unit =
