@@ -61,6 +61,8 @@ input[disabled]+label {
 
 textarea {
   padding: 4px;
+  resize: vertical;
+  line-height: 1.5;
 }
 
 textarea:focus {
