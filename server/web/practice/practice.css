@@ -71,10 +71,6 @@ button {
   margin-bottom: 10px;
 }
 
-.practice-right-widget .body {
-  
-}
-
 .practice-visit {
   margin-bottom: 10px;
 }
@@ -86,7 +82,7 @@ button {
   justify-content: space-between
 }
 
-.practice-visit-title.current-visit {
+.practice-visit.current .practice-visit-title {
   background-color: #ff9;
 }
 
@@ -133,6 +129,11 @@ button {
   height: 14rem;
   padding: 5px;
   font-size: 1rem;
+}
+
+.practice-visit.current .practice-text-disp {
+  border-left: 3px solid orange;
+  padding-left: 3px;
 }
 
 .practice-shohou-sample-dialog-ta {

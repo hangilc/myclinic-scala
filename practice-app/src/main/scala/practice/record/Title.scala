@@ -42,9 +42,9 @@ class Title(visit: VisitEx):
     ),
     pullDown.link(cls := "practice-visit-title-manip")
   )
-  PracticeBus.currentVisitId.foreach(currentVisitId =>
-    if visit.visitId == currentVisitId then ele(cls := "current-visit")
-  )
+  // PracticeBus.currentVisitId.foreach(currentVisitId =>
+  //   if visit.visitId == currentVisitId then ele(cls := "current-visit")
+  // )
   adaptToTempVisitId(PracticeBus.currentTempVisitId)
 
   def doAddToMishuu(): Unit =

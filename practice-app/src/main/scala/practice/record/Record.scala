@@ -35,7 +35,7 @@ class Record(visitEx: VisitEx):
   val conductList: CompAppendList[Conduct] = CompAppendList[Conduct](conductWrapper)
   val textMenu = TextMenu()
   textMenu.newText.subscribe(_ => doNewText())
-  val ele = div(cls := "practice-visit")(
+  val ele = div(cls := "practice-visit", cls := (if isCurrent then Some("current") else None))(
     title.ele,
     div(
       cls := "practice-visit-record",
@@ -50,6 +50,9 @@ class Record(visitEx: VisitEx):
   updateHoken(visitEx.hoken)
   shinryouList.set(visitEx.shinryouList.map(s => Shinryou(s)))
   conductList.set(visitEx.conducts.map(c => Conduct(c)))
+
+  private def isCurrent: Boolean =
+    PracticeBus.currentVisitId == Some(visitId)
 
   def doNewText(): Unit =
     val editor = TextEnter(visitEx.visitId)
