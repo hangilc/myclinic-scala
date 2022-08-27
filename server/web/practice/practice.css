@@ -307,3 +307,14 @@ button {
   width: 4rem;
 }
 
+.practice-patient-display {
+  margin: 10px 0;
+}
+
+.practice-patient-display a.detail-link {
+  margin-left: 10px;
+}
+
+.practice-patient-display div.patient-detail {
+  margin: 10px;
+}
