@@ -17,8 +17,8 @@ import scala.language.implicitConversions
 
 class HotlineBlock(sendAs: String, sendTo: String)(using fetcher: EventFetcher):
   val ui = new HotlineBlockUI
-  ui.sendButton(onclick := (() => onSend(ui.messageInput.value.trim)))
-  ui.rogerButton(onclick := (() => onSend("了解")))
+  ui.sendButton(onclick := (() => onSend(ui.messageInput.value.trim, true)))
+  ui.rogerButton(onclick := (() => onSend("了解", false)))
   ui.beepButton(onclick := (() => { Api.hotlineBeep(sendTo); () }))
   ui.regularsLink.setBuilder(regulars)
   ui.patientsLink.setBuilder(() => patients)
@@ -79,11 +79,12 @@ class HotlineBlock(sendAs: String, sendTo: String)(using fetcher: EventFetcher):
     yield
       s"${rep}> ${hotline.message}\n"
 
-  private def onSend(msg: String): Unit =
+  private def onSend(msg: String, clearInput: Boolean): Unit =
     if !msg.isEmpty then
       val h = Hotline(msg, sendAs, sendTo)
       Api.postHotline(h).onComplete {
-        case Success(_)  => ui.messageInput.value = ""
+        case Success(_)  => 
+          if clearInput then ui.messageInput.value = ""
         case Failure(ex) => ShowMessage.showError(ex.getMessage)
       }
 
