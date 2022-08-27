@@ -318,3 +318,9 @@ button {
 .practice-patient-display div.patient-detail {
   margin: 10px;
 }
+
+.practice-select-patient-by-date .patient-item.current {
+  font-weight: bold;
+}
+
+

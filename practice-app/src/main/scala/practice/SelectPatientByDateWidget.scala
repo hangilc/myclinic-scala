@@ -17,6 +17,7 @@ class SelectPatientByDateWidget:
   val dateSpan = span
   val patientsDiv = div
   val content = div(
+    cls := "practice-select-patient-by-date",
     dateSpan,
     patientsDiv,
     div(
@@ -38,13 +39,23 @@ class SelectPatientByDateWidget:
     items.foreach (item => item match {
       case (patient, visit) => 
         val e = div(
+          cls := "patient-item",
+          attr("data-visit-id") := visit.visitId.toString,
           a(Helper.formatPatient(patient), onclick := (() => onItemClick(patient, visit)))
         )
         patientsDiv(e)
     })
 
+  private def removeCurrent(): Unit =
+    content.qSelectorAll(".patient-item.current").foreach(e => e(cls :- "current"))
+
+  private def setCurrent(visitId: Int): Unit =
+    content.qSelector(s"div.patient-item[data-visit-id='${visitId}']").foreach(e => e(cls := "current"))
+
   def onItemClick(patient: Patient, visit: Visit): Unit =
+    removeCurrent()
     patientSelected.publish(patient)
+    setCurrent(visit.visitId)
 
   private def doClose(): Unit =
     PracticeBus.removeRightWidgetRequest.publish(widget)
