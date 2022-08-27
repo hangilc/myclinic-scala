@@ -39,7 +39,8 @@ class PracticeService extends SideMenuService:
   override def init(): Future[Unit] =
     StartUpPractice.run(this)
 
-  PracticeBus.addRightWidgetRequest.subscribe(ele => right.ele(ele))
+  PracticeBus.addRightWidgetRequest.subscribe(w => right.ele(w.ele))
+  PracticeBus.removeRightWidgetRequest.subscribe(w => w.remove())
   PracticeBus.patientVisitChanging.subscribe {
     case (Practicing(_, visitId), NoSelection) =>
       Api.changeWqueueState(visitId, WaitState.WaitReExam)
@@ -212,7 +213,7 @@ class PracticeMain:
     widget.patientSelected.subscribe(patient =>
       PracticeBus.setPatientVisitState(Browsing(patient))
     )
-    PracticeBus.addRightWidgetRequest.publish(widget.ele)
+    PracticeBus.addRightWidgetRequest.publish(widget.widget)
 
 object PracticeService:
   def listRegisteredPatient(): Future[List[(Patient, Visit)]] =

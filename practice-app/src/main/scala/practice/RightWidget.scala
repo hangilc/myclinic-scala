@@ -10,3 +10,6 @@ case class RightWidget(title: String, content: HTMLElement):
     div(cls := "practice-right-widget-content", content)
   )
 
+  def remove(): Unit =
+    ele.remove()
+

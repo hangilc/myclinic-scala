@@ -10,9 +10,11 @@ import dev.myclinic.scala.webclient.global
 import scala.language.implicitConversions
 import dev.myclinic.scala.web.practiceapp.practice.PatientVisitState
 import dev.myclinic.scala.web.practiceapp.practice.NoSelection
+import dev.myclinic.scala.web.practiceapp.practice.RightWidget
 
 object PracticeBus:
-  val addRightWidgetRequest = LocalEventPublisher[HTMLElement]
+  val addRightWidgetRequest = LocalEventPublisher[RightWidget]
+  val removeRightWidgetRequest = LocalEventPublisher[RightWidget]
 
   type VisitId = Int
 

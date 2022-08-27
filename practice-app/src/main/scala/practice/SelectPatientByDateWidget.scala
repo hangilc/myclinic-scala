@@ -8,6 +8,7 @@ import dev.myclinic.scala.model.Patient
 import dev.myclinic.scala.model.Visit
 import scala.concurrent.Future
 import scala.language.implicitConversions
+import dev.myclinic.scala.web.practiceapp.PracticeBus
 
 class SelectPatientByDateWidget:
   import SelectPatientByDateWidget as Helper
@@ -17,7 +18,11 @@ class SelectPatientByDateWidget:
   val patientsDiv = div
   val content = div(
     dateSpan,
-    patientsDiv
+    patientsDiv,
+    div(
+      cls := "domq-text-align-end",
+      button("閉じる", onclick := (doClose _))
+    )
   )
   val widget = RightWidget("日付別患者リスト", content)
   def ele = widget.ele
@@ -40,6 +45,9 @@ class SelectPatientByDateWidget:
 
   def onItemClick(patient: Patient, visit: Visit): Unit =
     patientSelected.publish(patient)
+
+  private def doClose(): Unit =
+    PracticeBus.removeRightWidgetRequest.publish(widget)
 
 object SelectPatientByDateWidget:
   def formatDate(date: LocalDate): String =
