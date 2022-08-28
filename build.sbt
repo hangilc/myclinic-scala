@@ -22,7 +22,12 @@ val fs2Version = "3.2.8"
 val scalaLoggingVersion = "3.9.4"
 val scalaTestVersion = "3.2.10"
 
-ThisBuild / scalacOptions ++= Seq("-deprecation", "-encoding", "UTF-8", "-feature")
+ThisBuild / scalacOptions ++= Seq(
+  "-deprecation",
+  "-encoding",
+  "UTF-8",
+  "-feature"
+)
 ThisBuild / javacOptions ++= Seq("-encoding", "UTF-8")
 
 val rootDir = ThisBuild / baseDirectory
@@ -172,7 +177,12 @@ lazy val util = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Pure)
   .in(file("util"))
   .jsSettings(
-    scalaJSUseMainModuleInitializer := false,
+    scalaJSUseMainModuleInitializer := false
+  )
+  .settings(
+    libraryDependencies ++= Seq(
+      "org.scalatest" %% "scalatest" % scalaTestVersion % "test"
+    )
   )
 
 val utilJS = util.js
@@ -205,7 +215,7 @@ lazy val server = project
       "org.http4s" %% "http4s-dsl" % http4sVersion,
       "org.http4s" %% "http4s-circe" % http4sVersion,
       "dev.fujiwara" % "drawer" % "1.0.0-SNAPSHOT",
-      "com.twilio.sdk" % "twilio" % "8.34.1",
+      "com.twilio.sdk" % "twilio" % "8.34.1"
     )
   )
 
@@ -313,7 +323,7 @@ lazy val receptionApp = project
       (rootDir.value / "server" / "web" / "reception" / "scalajs"),
     libraryDependencies ++= Seq(
       "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion,
-      "org.scala-js" %%% "scala-js-macrotask-executor" % macrotaskExecutorVersion,
+      "org.scala-js" %%% "scala-js-macrotask-executor" % macrotaskExecutorVersion
     )
   )
 
@@ -400,7 +410,7 @@ lazy val javalib = project
       "com.fasterxml.jackson.core" % "jackson-annotations" % jacksonVersion,
       "com.fasterxml.jackson.dataformat" % "jackson-dataformat-yaml" % jacksonVersion,
       "com.fasterxml.jackson.dataformat" % "jackson-dataformat-xml" % jacksonVersion,
-      "dev.fujiwara" % "drawer" % "1.0.0-SNAPSHOT",
+      "dev.fujiwara" % "drawer" % "1.0.0-SNAPSHOT"
     )
   )
 
@@ -440,7 +450,7 @@ lazy val drawer = crossProject(JVMPlatform, JSPlatform)
     )
   )
   .jsSettings(
-    scalaJSUseMainModuleInitializer := false,
+    scalaJSUseMainModuleInitializer := false
   )
   .jvmSettings(
     libraryDependencies ++= Seq(
@@ -464,7 +474,7 @@ lazy val drawerform = crossProject(JVMPlatform, JSPlatform)
     )
   )
   .jsSettings(
-    scalaJSUseMainModuleInitializer := false,
+    scalaJSUseMainModuleInitializer := false
   )
   .jvmSettings(
     libraryDependencies ++= Seq(
@@ -479,7 +489,7 @@ lazy val kanjidate = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Pure)
   .in(file("kanjidate"))
   .jsSettings(
-    scalaJSUseMainModuleInitializer := false,
+    scalaJSUseMainModuleInitializer := false
   )
 
 val kanjidateJVM = kanjidate.jvm
@@ -494,7 +504,7 @@ lazy val repl = project
       "org.http4s" %% "http4s-dsl" % http4sVersion,
       "org.http4s" %% "http4s-blaze-client" % http4sVersion,
       "org.http4s" %% "http4s-circe" % http4sVersion,
-      "io.circe" %%% "circe-core" % circeVersion,
+      "io.circe" %%% "circe-core" % circeVersion
     )
   )
 
@@ -520,11 +530,10 @@ lazy val timejs = project
   .enablePlugins(ScalaJSPlugin, TzdbPlugin)
   .settings(
     dbVersion := TzdbPlugin.Version("2022a"),
-    zonesFilter := ((z: String) => z == "Asia/Tokyo" ),
+    zonesFilter := ((z: String) => z == "Asia/Tokyo"),
     libraryDependencies ++= Seq(
       "org.scalatest" %%% "scalatest" % "3.2.13" % "test",
       "org.scalatest" %%% "scalatest-funsuite" % "3.2.13" % "test",
-      "io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion,
+      "io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion
     )
   )
-

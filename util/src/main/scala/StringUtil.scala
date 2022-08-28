@@ -13,6 +13,24 @@ object StringUtil:
     }
     (pre, chunks)
 
+  def classify[T, U](
+      pat: Regex,
+      src: String,
+      matched: String => T,
+      unmatched: String => U
+  ): List[T | U] =
+    val startEnds: List[(Int, Int)] =
+      pat.findAllMatchIn(src).toList.map(m => (m.start, m.end))
+    val (last, list) = startEnds.foldLeft((0, List.empty[T | U]))((acc, item) =>
+      (acc, item) match {
+        case ((prevPos, list), (start, end)) =>
+          val us: String = src.substring(prevPos, start)
+          val ms: String = src.substring(start, end)
+          (end, list :+ unmatched(us) :+ matched(ms))
+      }
+    )
+    list :+ unmatched(src.substring(last, src.size))
+
   def collectIndexIter(
       t: String,
       start: Int,

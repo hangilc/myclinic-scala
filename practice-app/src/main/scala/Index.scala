@@ -91,32 +91,32 @@ object JsMain:
   def main(): Unit =
     val jsMain = new JsMain
     document.body(jsMain.ui.ele) 
-    {
-      import _root_.dev.myclinic.scala.web.practiceapp.practice.twilio.*
-      import _root_.dev.myclinic.scala.webclient.{Api, global}
-      for tok <- Api.getWebphoneToken()
-      yield 
-        try {
-        val device = Device(tok, new DeviceOptions(edge = Some("tokyo")))
-        device.onError(e => println(e.causes))
-        (for
-          call <- device
-            .connect(new ConnectOptions(params = Map("phone" -> "+81117")))
-        yield
-          println(("call", call, call.status))
-          call.onError(e => println(e.causes))
-          _root_.scala.scalajs.js.timers.setTimeout(15000) {
-            call.disconnect()
-          }
-          call.onDisconnect(_ => println("disconnected"))
-        ).onComplete {
-          case Success(_) => ()
-          case Failure(ex) => System.err.println(ex)
-        }
-        } catch {
-          case ex: Throwable => System.err.println(ex)
-        }
-    }
+    // {
+    //   import _root_.dev.myclinic.scala.web.practiceapp.practice.twilio.*
+    //   import _root_.dev.myclinic.scala.webclient.{Api, global}
+    //   for tok <- Api.getWebphoneToken()
+    //   yield 
+    //     try {
+    //     val device = Device(tok, new DeviceOptions(edge = Some("tokyo")))
+    //     device.onError(e => println(e.causes))
+    //     (for
+    //       call <- device
+    //         .connect(new ConnectOptions(params = Map("phone" -> "+81117")))
+    //     yield
+    //       println(("call", call, call.status))
+    //       call.onError(e => println(e.causes))
+    //       _root_.scala.scalajs.js.timers.setTimeout(15000) {
+    //         call.disconnect()
+    //       }
+    //       call.onDisconnect(_ => println("disconnected"))
+    //     ).onComplete {
+    //       case Success(_) => ()
+    //       case Failure(ex) => System.err.println(ex)
+    //     }
+    //     } catch {
+    //       case ex: Throwable => System.err.println(ex)
+    //     }
+    // }
 
   val publishers = new EventPublishers:
     override def onPaymentCreated(payment: Payment): Unit =

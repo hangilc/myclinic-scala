@@ -11,6 +11,8 @@ import scala.language.implicitConversions
 import dev.myclinic.scala.web.practiceapp.practice.PatientVisitState
 import dev.myclinic.scala.web.practiceapp.practice.NoSelection
 import dev.myclinic.scala.web.practiceapp.practice.RightWidget
+import dev.myclinic.scala.web.practiceapp.practice.twilio.TwilioPhone
+import dev.myclinic.scala.webclient.{Api, global}
 
 object PracticeBus:
   val addRightWidgetRequest = LocalEventPublisher[RightWidget]
@@ -67,4 +69,6 @@ object PracticeBus:
     mishuuList = List.empty
     mishuuListChanged.publish(mishuuList)
   patientVisitChanged.subscribe(_ => clearMishuuList())
+
+  val twilioPhone = new TwilioPhone(Api.getWebphoneToken)
   

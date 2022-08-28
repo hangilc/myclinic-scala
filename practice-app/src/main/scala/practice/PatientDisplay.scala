@@ -7,6 +7,9 @@ import dev.myclinic.scala.web.practiceapp.PracticeBus
 import dev.fujiwara.kanjidate.DateUtil
 import java.time.LocalDate
 import dev.fujiwara.domq.DispPanel
+import scala.util.matching.Regex
+import dev.myclinic.scala.util.StringUtil
+import org.scalajs.dom.HTMLElement
 
 class PatientDisplay:
   import PatientDisplay as Helper
@@ -27,11 +30,17 @@ class PatientDisplay:
   val unsubscribe = PracticeBus.patientVisitChanged.subscribe(state =>
     state.patientOption match {
       case Some(patient) =>
+        detailWrapper(displayNone)
         nameSpan(innerText := Helper.formatPatient(patient))
         addressPart(innerText := patient.address)
-        phonePart(innerText := patient.phone)
+        phonePart(clear, Helper.parsePhone(patient.phone))
         ele(displayDefault)
-      case None => ele(displayNone)
+      case None => 
+        detailWrapper(displayNone)
+        nameSpan(clear)
+        addressPart(clear)
+        phonePart(clear)
+        ele(displayNone)
     }
   )
 
@@ -51,3 +60,38 @@ object PatientDisplay:
       DateUtil.calcAge(patient.birthday, LocalDate.now()),
       patient.sex.rep
     )
+
+  case class PhoneNumber(s: String)
+  case class PhoneText(s: String)
+
+  val phonePattern: Regex = raw"\+?[0-9-]+".r
+
+  def canonicalPhoneNumber(s: String): Option[String] =
+    val canonical: Regex = raw"\+81\d{9}".r
+    val tokyo: Regex = raw"\d{8}".r
+    val local: Regex = raw"0(\d{9,10})".r
+    s.replace("-", "") match {
+      case canonical(s) => Some(s)
+      case tokyo(s) => Some(s"+813${s}")
+      case local(s) => Some(s"+81${s}")
+      case _ => None
+    }
+
+  def parsePhone(phone: String): List[HTMLElement] =
+    StringUtil.classify(
+      phonePattern,
+      phone,
+      PhoneNumber.apply,
+      PhoneText.apply
+    ).flatMap {
+      case PhoneText(s) => 
+        s.trim match {
+          case "" => List.empty
+          case s => List(span(s))
+        }
+      case PhoneNumber(s) =>
+        canonicalPhoneNumber(s) match {
+          case Some(s) => List(span(s))
+          case None => List(span("NO: " + s))
+        }
+    }
