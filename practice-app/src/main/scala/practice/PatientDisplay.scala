@@ -91,7 +91,15 @@ object PatientDisplay:
         }
       case PhoneNumber(s) =>
         canonicalPhoneNumber(s) match {
-          case Some(s) => List(span(s))
-          case None => List(span("NO: " + s))
+          case Some(phone) => 
+            List(
+              span(s),
+              button("発信", onclick := (() => {
+                PracticeBus.twilioPhone.call(phone)
+                ()
+              })),
+              button("終了", onclick := (() => PracticeBus.twilioPhone.hangup()))
+            )
+          case None => List(span(s))
         }
     }
