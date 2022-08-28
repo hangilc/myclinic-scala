@@ -90,6 +90,20 @@ object JsMain:
   def main(): Unit =
     val jsMain = new JsMain
     document.body(jsMain.ui.ele)
+    {
+      import _root_.dev.myclinic.scala.web.practiceapp.practice.twilio.*
+      import _root_.dev.myclinic.scala.webclient.{Api, global}
+      for
+        tok <- Api.getWebphoneToken()
+      yield
+        val device = Device(tok, new DeviceOptions(edge = Some("tokyo")))
+        println(device)
+        for
+         call <- device.connect(new ConnectOptions(params = Map("phone" -> ""))).toFuture
+        yield _root_.scala.scalajs.js.timers.setTimeout(20000){
+          call.disconnect()
+        }
+    }
 
   val publishers = new EventPublishers:
     override def onPaymentCreated(payment: Payment): Unit = 
