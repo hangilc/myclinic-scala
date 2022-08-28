@@ -10,6 +10,8 @@ import dev.fujiwara.domq.DispPanel
 import scala.util.matching.Regex
 import dev.myclinic.scala.util.StringUtil
 import org.scalajs.dom.HTMLElement
+import dev.myclinic.scala.web.practiceapp.practice.twilio.Call
+import dev.myclinic.scala.webclient.global
 
 class PatientDisplay:
   import PatientDisplay as Helper
@@ -90,15 +92,18 @@ object PatientDisplay:
           case s => List(span(s))
         }
       case PhoneNumber(s) =>
+        var call: Option[Call] = None
         canonicalPhoneNumber(s) match {
           case Some(phone) => 
             List(
               span(s),
               button("発信", onclick := (() => {
-                PracticeBus.twilioPhone.call(phone)
+                for
+                  c <- PracticeBus.twilioPhone.call(phone)
+                yield call = Some(c)
                 ()
               })),
-              button("終了", onclick := (() => PracticeBus.twilioPhone.hangup()))
+              button("終了", onclick := (() => call.foreach(_.disconnect())))
             )
           case None => List(span(s))
         }
