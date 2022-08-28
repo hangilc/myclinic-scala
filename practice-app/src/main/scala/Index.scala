@@ -21,18 +21,19 @@ import scala.language.implicitConversions
 import dev.myclinic.scala.web.practiceapp.PracticeBus
 import dev.myclinic.scala.web.practiceapp.cashier.CashierService
 import dev.myclinic.scala.util.NumberUtil.format
+import scala.util.Success
+import scala.util.Failure
 
 class JsMain(using EventFetcher):
   val ui = new PageLayout1("practice", "reception")
   ui.banner("診察")
   ui.sideMenu.addItems(sideMenuItems)
   document.body(ui.ele)
-  for 
+  for
     _ <- ui.hotline.init()
     _ <- JsMain.fetcher.start()
     _ <- Frame.init()
-  yield
-    StartUp.run(this)
+  yield StartUp.run(this)
   // {
   //   import _root_.dev.myclinic.scala.webclient.{Api, global}
   //   import scala.scalajs.js
@@ -89,30 +90,42 @@ object JsMain:
   @JSExport
   def main(): Unit =
     val jsMain = new JsMain
-    document.body(jsMain.ui.ele)
+    document.body(jsMain.ui.ele) 
     {
       import _root_.dev.myclinic.scala.web.practiceapp.practice.twilio.*
       import _root_.dev.myclinic.scala.webclient.{Api, global}
-      for
-        tok <- Api.getWebphoneToken()
-      yield
+      for tok <- Api.getWebphoneToken()
+      yield 
+        try {
         val device = Device(tok, new DeviceOptions(edge = Some("tokyo")))
-        println(device)
-        for
-         call <- device.connect(new ConnectOptions(params = Map("phone" -> ""))).toFuture
-        yield _root_.scala.scalajs.js.timers.setTimeout(20000){
-          call.disconnect()
+        device.onError(e => println(e.causes))
+        (for
+          call <- device
+            .connect(new ConnectOptions(params = Map("phone" -> "+81117")))
+        yield
+          println(("call", call, call.status))
+          call.onError(e => println(e.causes))
+          _root_.scala.scalajs.js.timers.setTimeout(15000) {
+            call.disconnect()
+          }
+          call.onDisconnect(_ => println("disconnected"))
+        ).onComplete {
+          case Success(_) => ()
+          case Failure(ex) => System.err.println(ex)
+        }
+        } catch {
+          case ex: Throwable => System.err.println(ex)
         }
     }
 
   val publishers = new EventPublishers:
-    override def onPaymentCreated(payment: Payment): Unit = 
+    override def onPaymentCreated(payment: Payment): Unit =
       PracticeBus.paymentEntered.publish(payment)
     override def onWqueueCreated(wqueue: Wqueue): Unit =
       PracticeBus.wqueueEntered.publish(wqueue)
     override def onWqueueUpdated(wqueue: Wqueue): Unit =
       PracticeBus.wqueueUpdated.publish(wqueue)
-    override def onWqueueDeleted(wqueue: Wqueue): Unit = 
+    override def onWqueueDeleted(wqueue: Wqueue): Unit =
       PracticeBus.wqueueDeleted.publish(wqueue)
     override def onChargeCreated(charge: Charge): Unit =
       PracticeBus.chargeEntered.publish(charge)
@@ -121,4 +134,6 @@ object JsMain:
 
   given fetcher: EventFetcher = new EventFetcher
   fetcher.appModelEventPublisher.subscribe(event => publishers.publish(event))
-  fetcher.hotlineBeepEventPublisher.subscribe(event => publishers.publish(event))
+  fetcher.hotlineBeepEventPublisher.subscribe(event =>
+    publishers.publish(event)
+  )
