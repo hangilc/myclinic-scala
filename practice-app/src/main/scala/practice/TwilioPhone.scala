@@ -5,13 +5,28 @@ import dev.myclinic.scala.webclient.global
 import scala.util.matching.Regex
 
 class TwilioPhone(getToken: () => Future[String]):
-  def call(phoneNumber: String): Future[Call] =
-    println(("calling to: ", phoneNumber))
-    for
-      token <- getToken()
-      device = new Device(token, new DeviceOptions(edge = Some("tokyo")))
-      call <- device.connect(ConnectOptions(params = Map("phone" -> phoneNumber)))
-    yield call
+  private var deviceOpt: Option[Device] = None
+
+  private def setDevice(device: Device): Unit =
+    deviceOpt = Some(device)
+  private def clearDevice(): Unit =
+    deviceOpt = None
+
+  def call(phoneNumber: String): Boolean =
+    deviceOpt.fold({
+      println(("calling to: ", phoneNumber))
+      for
+        token <- getToken()
+        device = new Device(token, new DeviceOptions(edge = Some("tokyo")))
+        _ = setDevice(device)
+        call <- device.connect(ConnectOptions(params = Map("phone" -> phoneNumber)))
+      yield
+        call.onDisconnect(_ => clearDevice())
+      true
+    })(_ => false)
+
+  def hangup(): Unit =
+    deviceOpt.foreach(_.disconnectAll())
 
 object TwilioPhone:
   def canonicalPhoneNumber(s: String): Option[String] =

@@ -12,7 +12,6 @@ import dev.myclinic.scala.webclient.global
 
 case class PhoneService() extends SideMenuService:
   val phoneNumberInput = input
-  var callOpt: Option[Call] = None
   override def getElement: HTMLElement =
     div(
       cls := "practice-phone practice-sidemenu-service-main",
@@ -23,13 +22,7 @@ case class PhoneService() extends SideMenuService:
         button("発信", onclick := (doCall _)),
         button(
           "終了",
-          (
-              _ =>
-                callOpt.foreach(c =>
-                  c.disconnect()
-                  callOpt = None
-                )
-          )
+          onclick := (() => PracticeBus.twilioPhone.hangup())
         )
       )
     )
@@ -38,6 +31,6 @@ case class PhoneService() extends SideMenuService:
     TwilioPhone
       .canonicalPhoneNumber(phoneNumberInput.value.trim)
       .foreach(pn =>
-        for call <- PracticeBus.twilioPhone.call(pn)
-        yield callOpt = Some(call)
+        if !PracticeBus.twilioPhone.call(pn) then
+          ShowMessage.showError("電話を使用できません。")
       )

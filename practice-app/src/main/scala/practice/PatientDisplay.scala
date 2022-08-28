@@ -38,7 +38,7 @@ class PatientDisplay:
         addressPart(innerText := patient.address)
         phonePart(clear, Helper.parsePhone(patient.phone))
         ele(displayDefault)
-      case None => 
+      case None =>
         detailWrapper(displayNone)
         nameSpan(clear)
         addressPart(clear)
@@ -70,31 +70,36 @@ object PatientDisplay:
   val phonePattern: Regex = raw"\+?[0-9-]+".r
 
   def parsePhone(phone: String): List[HTMLElement] =
-    StringUtil.classify(
-      phonePattern,
-      phone,
-      PhoneNumber.apply,
-      PhoneText.apply
-    ).flatMap {
-      case PhoneText(s) => 
-        s.trim match {
-          case "" => List.empty
-          case s => List(span(s))
-        }
-      case PhoneNumber(s) =>
-        var call: Option[Call] = None
-        TwilioPhone.canonicalPhoneNumber(s) match {
-          case Some(phone) => 
-            List(
-              span(s),
-              button("発信", onclick := (() => {
-                for
-                  c <- PracticeBus.twilioPhone.call(phone)
-                yield call = Some(c)
-                ()
-              })),
-              button("終了", onclick := (() => call.foreach(_.disconnect())))
-            )
-          case None => List(span(s))
-        }
-    }
+    StringUtil
+      .classify(
+        phonePattern,
+        phone,
+        PhoneNumber.apply,
+        PhoneText.apply
+      )
+      .flatMap {
+        case PhoneText(s) =>
+          s.trim match {
+            case "" => List.empty
+            case s  => List(span(s))
+          }
+        case PhoneNumber(s) =>
+          TwilioPhone.canonicalPhoneNumber(s) match {
+            case Some(phone) =>
+              List(
+                span(s),
+                button(
+                  "発信",
+                  onclick := (() => {
+                    if !PracticeBus.twilioPhone.call(phone) then
+                      ShowMessage.showError("電話を使用できません。")
+                  })
+                ),
+                button(
+                  "終了",
+                  onclick := (() => PracticeBus.twilioPhone.hangup())
+                )
+              )
+            case None => List(span(s))
+          }
+      }
