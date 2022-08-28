@@ -5,6 +5,7 @@ import dev.myclinic.scala.webclient.global
 
 class TwilioPhone(getToken: () => Future[String]):
   def call(phoneNumber: String): Future[Call] =
+    println(("calling to: ", phoneNumber))
     for
       token <- getToken()
       device = new Device(token, new DeviceOptions(edge = Some("tokyo")))
