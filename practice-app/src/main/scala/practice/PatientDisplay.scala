@@ -12,6 +12,7 @@ import dev.myclinic.scala.util.StringUtil
 import org.scalajs.dom.HTMLElement
 import dev.myclinic.scala.web.practiceapp.practice.twilio.Call
 import dev.myclinic.scala.webclient.global
+import dev.myclinic.scala.web.practiceapp.practice.twilio.TwilioPhone
 
 class PatientDisplay:
   import PatientDisplay as Helper
@@ -68,17 +69,6 @@ object PatientDisplay:
 
   val phonePattern: Regex = raw"\+?[0-9-]+".r
 
-  def canonicalPhoneNumber(s: String): Option[String] =
-    val canonical: Regex = raw"\+81\d{9}".r
-    val tokyo: Regex = raw"\d{8}".r
-    val local: Regex = raw"0(\d{9,10})".r
-    s.replace("-", "") match {
-      case canonical(s) => Some(s)
-      case tokyo(s) => Some(s"+813${s}")
-      case local(s) => Some(s"+81${s}")
-      case _ => None
-    }
-
   def parsePhone(phone: String): List[HTMLElement] =
     StringUtil.classify(
       phonePattern,
@@ -93,7 +83,7 @@ object PatientDisplay:
         }
       case PhoneNumber(s) =>
         var call: Option[Call] = None
-        canonicalPhoneNumber(s) match {
+        TwilioPhone.canonicalPhoneNumber(s) match {
           case Some(phone) => 
             List(
               span(s),

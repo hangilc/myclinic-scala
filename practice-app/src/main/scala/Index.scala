@@ -20,6 +20,7 @@ import dev.myclinic.scala.web.practiceapp.practice.disease.Frame
 import scala.language.implicitConversions
 import dev.myclinic.scala.web.practiceapp.PracticeBus
 import dev.myclinic.scala.web.practiceapp.cashier.CashierService
+import dev.myclinic.scala.web.practiceapp.phone.PhoneService
 import dev.myclinic.scala.util.NumberUtil.format
 import scala.util.Success
 import scala.util.Failure
@@ -46,7 +47,8 @@ class JsMain(using EventFetcher):
       "ファックス送信" -> (_ => MockSideMenuService("ファックス送信")),
       "印刷設定" -> (_ => MockSideMenuService("印刷設定")),
       "紹介状" -> (_ => MockSideMenuService("紹介状")),
-      "診断書" -> (_ => MockSideMenuService("診断書"))
+      "診断書" -> (_ => MockSideMenuService("診断書")),
+      "電話" -> (_ => PhoneService())
     )
 
 object PracticeSideMenu:
