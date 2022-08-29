@@ -158,6 +158,6 @@ object Text:
   def extractHikitsugi(s: String): String =
     val pat = "\\n\\s*\\n".r
     pat.findFirstMatchIn(s) match {
-      case None    => ""
+      case None    => s
       case Some(m) => s.substring(0, m.start)
     }

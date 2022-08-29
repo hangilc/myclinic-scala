@@ -6,6 +6,7 @@ import dev.fujiwara.domq.all.{*, given}
 import dev.fujiwara.domq.{Geometry, Icons, FloatingElement, Screen}
 import scala.language.implicitConversions
 import org.scalajs.dom.MouseEvent
+import org.scalajs.dom.window
 import scala.concurrent.Future
 import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits.global
 
@@ -136,6 +137,9 @@ object PullDown:
 
   def locatePullDownMenu(anchor: HTMLElement, f: FloatingElement): Unit =
     val rect = Geometry.getRect(anchor)
+    println(("anchor-rect", rect))
+    println(("window-inner-width", window.innerWidth))
+    println(("window-inner-height", window.innerHeight))
     val p = rect.leftBottom.shiftY(4)
     f.leftTop = p
 
