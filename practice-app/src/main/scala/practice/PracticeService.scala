@@ -133,7 +133,7 @@ class PracticeMain:
     d.commands(
       button(
         "診察登録",
-        onclick := (() => {
+        onclick := (() => ShowMessage.confirm("診察登録をしますか？"){ () =>
           d.close()
           search.selected.foreach(patient => startVisit(patient))
         })
