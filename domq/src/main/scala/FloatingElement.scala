@@ -17,8 +17,16 @@ class FloatingElement(content: HTMLElement, onHide: () => Unit = () => ()):
   def getRect: DocRect = Geometry.getRect(ele)
   def leftTop: DocPoint = getRect.leftTop
   def leftTop_=(p: DocPoint) =
-    Geometry.setElementLeft(ele, p.x)
-    Geometry.setElementTop(ele, p.y)
+    left = p.x
+    top = p.y
+  def left: DocCoord = getRect.left
+  def left_=(value: DocCoord) = Geometry.setElementLeft(ele, value)
+  def top: DocCoord = getRect.top
+  def top_=(value: DocCoord) = Geometry.setElementTop(ele, value)
+  def right: DocCoord = getRect.right
+  def right_=(value: DocCoord) = Geometry.setElementRight(ele, value)
+  def bottom: DocCoord = getRect.bottom
+  def bottom_=(value: DocCoord) = Geometry.setElementBottom(ele, value)
 
   def show(): Unit = document.body(ele)
   def hide(): Unit = 

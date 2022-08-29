@@ -5,7 +5,7 @@ import org.scalajs.dom.{document, window}
 import org.scalajs.dom.ClientRect
 
 object Geometry:
-  opaque type DocCoord = Double
+  type DocCoord = Double
 
   extension (c: DocCoord)
     def -(d: DocCoord): Double = c - d
@@ -66,3 +66,20 @@ object Geometry:
 
   def setElementBottom(ele: HTMLElement, value: DocCoord): Unit =
     ele.style.bottom = s"${value}px"
+
+  def windowRect: DocRect =
+    val w = window.innerWidth
+    val h = window.innerHeight
+    DocRect(0, 0, w, h)
+
+  def isWindowLeftOverflow(eRect: DocRect): Boolean =
+    eRect.left < 0
+
+  def isWindowTopOverflow(eRect: DocRect): Boolean =
+    eRect.top < 0
+
+  def isWindowRightOverflow(eRect: DocRect, wRect: DocRect): Boolean =
+    eRect.right > wRect.right
+
+  def isWindowBottomOverflow(eRect: DocRect, wRect: DocRect): Boolean =
+    eRect.bottom > wRect.bottom

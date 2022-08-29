@@ -41,7 +41,10 @@ class PullDownMenu:
     ZIndexManager.release(zIndexMenu)
     ZIndexManager.release(zIndexScreen)
 
-class PullDownLink(label: String, wrapperPostConstruct: HTMLElement => Unit = (_ => ())):
+class PullDownLink(
+    label: String,
+    wrapperPostConstruct: HTMLElement => Unit = (_ => ())
+):
   private var builder
       : (HTMLElement, PullDown.CloseFun, PullDown.Callback) => Unit =
     (wrapper, close, cb) => cb()
@@ -94,9 +97,6 @@ class PullDownLink(label: String, wrapperPostConstruct: HTMLElement => Unit = (_
       wrapper(anchor)
     }
 
-// object PullDownLink:
-//   def apply(label: String): PullDownLink = new PullDownLink(label)
-
 object PullDown:
   type CloseFun = () => Unit
   type Callback = () => Unit
@@ -136,12 +136,15 @@ object PullDown:
     )
 
   def locatePullDownMenu(anchor: HTMLElement, f: FloatingElement): Unit =
+    val w = Geometry.windowRect
     val rect = Geometry.getRect(anchor)
-    println(("anchor-rect", rect))
-    println(("window-inner-width", window.innerWidth))
-    println(("window-inner-height", window.innerHeight))
-    val p = rect.leftBottom.shiftY(4)
-    f.leftTop = p
+    f.leftTop = rect.leftBottom.shiftY(4)
+    if Geometry.isWindowLeftOverflow(f.getRect) then
+      f.left = 4
+    if Geometry.isWindowBottomOverflow(f.getRect, w) then
+      f.bottom = rect.top - 4
+    if Geometry.isWindowRightOverflow(f.getRect, w) then
+      f.right = w.right - 4
 
   def pullDown(
       anchor: HTMLElement,
@@ -196,7 +199,10 @@ object PullDown:
   ): HTMLElement =
     pullDown(createButtonAnchor(label), close => createContent(close, commands))
 
-  def attachPullDown(e: HTMLElement, commands: List[(String, () => Unit)]): Unit =
+  def attachPullDown(
+      e: HTMLElement,
+      commands: List[(String, () => Unit)]
+  ): Unit =
     pullDown(e, close => createContent(close, commands))
 
   def createLinkAnchor(label: String): HTMLElement =
