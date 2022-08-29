@@ -48,7 +48,8 @@ class JsMain(using EventFetcher):
       "印刷設定" -> (_ => MockSideMenuService("印刷設定")),
       "紹介状" -> (_ => MockSideMenuService("紹介状")),
       "診断書" -> (_ => MockSideMenuService("診断書")),
-      "電話" -> (_ => PhoneService())
+      "電話" -> (_ => PhoneService()),
+      "Dev" -> (_ => dev.myclinic.scala.web.practiceapp.devservice.DevGeometryService()),
     )
 
 object PracticeSideMenu:
