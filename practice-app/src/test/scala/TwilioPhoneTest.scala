@@ -4,7 +4,7 @@ import org.scalatest.funsuite.AnyFunSuite
 
 class TwilioPhoneTest extends AnyFunSuite:
   test("local"){
-    assert(TwilioPhone.canonicalPhoneNumber("0312344321") == Some("+81312344321"))
+    assert(TwilioPhone.canonicalPhoneNumber("03-1234-4321") == Some("+81312344321"))
   }
 
   test("canonical"){

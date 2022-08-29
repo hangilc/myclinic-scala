@@ -351,7 +351,8 @@ lazy val practiceApp = project
       (rootDir.value / "server" / "web" / "practice" / "scalajs"),
     libraryDependencies ++= Seq(
       "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion,
-      "org.scala-js" %%% "scala-js-macrotask-executor" % macrotaskExecutorVersion
+      "org.scala-js" %%% "scala-js-macrotask-executor" % macrotaskExecutorVersion,
+      "org.scalatest" %%% "scalatest-funsuite" % "3.2.13" % "test"
     )
   )
 
