@@ -15,20 +15,6 @@ class FloatingElement(content: HTMLElement, onRemove: () => Unit = () => ()):
     style.display = "hidden"
   }), cls := "domq-floating-element")(content)
 
-  // def getRect: DocRect = Geometry.getRect(ele)
-  // def leftTop: DocPoint = getRect.leftTop
-  // def leftTop_=(p: DocPoint) =
-  //   left = p.x
-  //   top = p.y
-  // def left: DocCoord = getRect.left
-  // def left_=(value: DocCoord) = Geometry.setElementLeft(ele, value)
-  // def top: DocCoord = getRect.top
-  // def top_=(value: DocCoord) = Geometry.setElementTop(ele, value)
-  // def right: DocCoord = getRect.right
-  // def right_=(value: DocCoord) = Geometry.setElementRight(ele, value)
-  // def bottom: DocCoord = getRect.bottom
-  // def bottom_=(value: DocCoord) = Geometry.setElementBottom(ele, value)
-
   def insert(): Unit =
     document.body(ele)
 
@@ -40,4 +26,23 @@ class FloatingElement(content: HTMLElement, onRemove: () => Unit = () => ()):
     onRemove()
 
   def isShown: Boolean = ele.parentElement != null
+
+  def isWindowLeftOverflow: Boolean =
+    val r = ele.getBoundingClientRect()
+    r.left < 0
+
+  def isWindowTopOverflow: Boolean =
+    val r = ele.getBoundingClientRect()
+    r.top < 0
+
+  def isWindowRightOverflow: Boolean =
+    val w = Geometry.viewportWidth
+    val r = ele.getBoundingClientRect()
+    r.left + r.width > w
+
+  def isWindowBottomOverflow: Boolean =
+    val h = Geometry.viewportHeight
+    val r = ele.getBoundingClientRect()
+    r.top + r.height > h
+
   

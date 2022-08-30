@@ -89,12 +89,19 @@ object PullDown:
     val r = Geometry.rectInViewport(anchor)
     fe.ele.style.left = s"${r.left + Geometry.windowScrollX}px"
     fe.ele.style.top = s"${r.top + r.height + 4}px"
+    if fe.isWindowLeftOverflow then
+      fe.ele.style.right = ""
+      fe.ele.style.left = "4px"
+    else if fe.isWindowRightOverflow then
+      fe.ele.style.left = ""
+      fe.ele.style.right = "4px"
+    if fe.isTopOverflow: then
+      ???
 
   def pullDownLink(
       label: String,
       commands: List[(String, () => Unit)]
   ): HTMLElement =
-    //pullDown(createLinkAnchor(label), close => createContent(close, commands))
     PullDown(a(label), () => Future.successful((commands))).anchor
 
   def pullDownLink(

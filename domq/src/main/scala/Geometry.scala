@@ -22,3 +22,4 @@ object Geometry:
 
   def windowScrollY: Double =
     window.scrollY
+
