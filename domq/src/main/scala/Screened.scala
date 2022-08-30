@@ -23,12 +23,13 @@ class Screened(
   )
 
   def open(): Unit =
+    f.insert()
     locator(f)
     document.body(screen)
     f.show()
 
   def close(): Unit =
-    f.hide()
+    f.remove()
     screen.remove()
     ZIndexManager.release(zIndexMenu)
     ZIndexManager.release(zIndexScreen)

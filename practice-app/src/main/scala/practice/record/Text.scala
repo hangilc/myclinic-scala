@@ -37,10 +37,11 @@ class TextDisp(text: ModelText):
     cls := "practice-text-disp"
   )
 
-  def createContent: String = 
+  def createContent: String =
     text.content match {
       case "" => "（空白）"
-      case c if FormatShohousen.isShohou(c) => FormatShohousen.parse(c).formatForDisp
+      case c if FormatShohousen.isShohou(c) =>
+        FormatShohousen.parse(c).formatForDisp
       case c => c
     }
 
@@ -77,14 +78,13 @@ case class TextEdit(
     if test then yes else no
 
   def shohouLink: HTMLElement =
-    val pullDown = new PullDownLink("処方箋")
-    pullDown.setBuilder(
+    PullDown.pullDownLink(
+      "処方箋",
       List(
         "処方箋発行" -> (doShohousen _),
         "編集中表示" -> (doViewShohousen _)
       )
     )
-    pullDown.link
 
   def onEnter(): Unit =
     import dev.myclinic.scala.util.FunUtil.*
@@ -92,8 +92,8 @@ case class TextEdit(
     val newContent: String =
       if FormatShohousen.isShohou(content) then
         content
-        |> FormatShohousen.parse
-        |> ((shohou: Shohou) => shohou.formatForSave)
+          |> FormatShohousen.parse
+          |> ((shohou: Shohou) => shohou.formatForSave)
       else content
     val t = new ModelText(text.textId, text.visitId, newContent)
     for
@@ -132,18 +132,21 @@ case class TextEdit(
     }
 
   def doShohousen(): Unit =
-    for
-      ops <- Api.shohousenDrawer(text.textId)
+    for ops <- Api.shohousenDrawer(text.textId)
     yield
-      val dlog = PrintDialog("処方箋印刷", ops, PaperSize.A5, "shohousen",
-        onDone = () => onDone(text))
+      val dlog = PrintDialog(
+        "処方箋印刷",
+        ops,
+        PaperSize.A5,
+        "shohousen",
+        onDone = () => onDone(text)
+      )
       dlog.open()
 
   def doViewShohousen(): Unit =
     val c = FormatShohousen.parse(ta.value).formatForSave
     val t = text.copy(content = c)
-    for
-      ops <- Api.shohousenDrawerText(t)
+    for ops <- Api.shohousenDrawerText(t)
     yield
       val dlog = PrintDialog("処方箋表示", ops, PaperSize.A5, "shohousen")
       dlog.open()

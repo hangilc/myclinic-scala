@@ -13,12 +13,11 @@ import scala.concurrent.Future
 import scala.language.implicitConversions
 
 case class ShinryouMenu(at: LocalDate, visitId: Int):
-  val auxMenu = PullDownLink("その他")
-  auxMenu.setBuilder(auxMenuItems)
+  val auxMenu = PullDown.pullDownLink("その他", auxMenuItems)
 
   val ele = div(
     a("[診療行為]", onclick := (doRegular _)),
-    auxMenu.ele
+    auxMenu
   )
 
   def auxMenuItems: List[(String, () => Unit)] =

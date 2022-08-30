@@ -28,6 +28,8 @@ case class DevGeometryService() extends SideMenuService:
       println(style.right)
     ))
     document.body(b)
-    println(("b width", b.offsetWidth))
-    b.style.left = 
+    println(("b", b.getBoundingClientRect().left))
+    println(("b", b.getBoundingClientRect().width))
+    b.style.left = s"${ww - b.getBoundingClientRect().width}px"
+
 
