@@ -23,7 +23,7 @@ class PullDownMenu:
   val zIndexMenu = ZIndexManager.alloc()
 
   def open(content: HTMLElement, locate: FloatingElement => Unit): Unit =
-    wrapper(content)
+    wrapper(content, cls := "domq-pull-down-wrapper")
     screen(zIndex := zIndexScreen)(
       onclick := ((e: MouseEvent) => {
         e.preventDefault()
@@ -71,32 +71,22 @@ class PullDown(
     val pm = new PullDownMenu()
     for items <- mkMenu()
     yield
-      val contents: List[HTMLElement] = items.map { (t, c) =>
-        {
-          a(
-            t,
-            onclick := { () =>
-              pm.close()
-              c()
-            }
-          )
-        }
-      }
-      pm.open(div(contents), fe => PullDown.locate(anchor, fe))
+      val content: HTMLElement = pm.createContent(items)
+      pm.open(content, fe => PullDown.locate(anchor, fe))
 
 object PullDown:
   def locate(anchor: HTMLElement, fe: FloatingElement): Unit =
-    val r = Geometry.rectInViewport(anchor)
-    fe.ele.style.left = s"${r.left + Geometry.windowScrollX}px"
-    fe.ele.style.top = s"${r.top + r.height + 4}px"
-    if fe.isWindowLeftOverflow then
-      fe.ele.style.right = ""
-      fe.ele.style.left = "4px"
-    else if fe.isWindowRightOverflow then
-      fe.ele.style.left = ""
-      fe.ele.style.right = "4px"
-    if fe.isTopOverflow: then
-      ???
+    val anchorRect: Geometry.Rect = Geometry.rectInDoc(anchor)
+    fe.setLeft(anchorRect.left)
+    fe.setTop(anchorRect.bottom + 4)
+    if fe.isWindowBottomOverflow then
+      val frec: Geometry.Rect = Geometry.rectInViewport(fe.ele)
+      fe.setTop(anchorRect.top - frec.height - 4)
+    if fe.isWindowRightOverflow then
+      val frec: Geometry.Rect = Geometry.rectInViewport(fe.ele)
+      fe.setLeft(anchorRect.left - frec.width - 4)
+    else if fe.isWindowLeftOverflow then
+      fe.setLeft(anchorRect.right + 4)
 
   def pullDownLink(
       label: String,

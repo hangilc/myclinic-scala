@@ -27,6 +27,14 @@ class FloatingElement(content: HTMLElement, onRemove: () => Unit = () => ()):
 
   def isShown: Boolean = ele.parentElement != null
 
+  def setLeft(left: Double): Unit =
+    ele.style.right = ""
+    ele.style.left = s"${left}px"
+
+  def setTop(top: Double): Unit =
+    ele.style.bottom = ""
+    ele.style.top = s"${top}px"
+
   def isWindowLeftOverflow: Boolean =
     val r = ele.getBoundingClientRect()
     r.left < 0
