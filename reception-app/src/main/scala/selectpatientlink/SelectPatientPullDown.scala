@@ -20,17 +20,15 @@ class SelectPatientPullDown:
 
   def onSelectPatient(event: MouseEvent): Unit =
     val m = new PullDownMenu()
-    val c = PullDown.createContent(
-      () => m.close(),
+    val c = m.createContent(
       List(
         "受付患者" -> (onSelectFromWqueue _),
         "患者検索" -> (onSelectFromSearch _),
         "最近の診察" -> (onSelectFromRecent _),
         "日付別" -> (onSelectByDate _)
-      ),
-      "record-menu-items"
-    )
-    m.open(c, f => PullDown.locatePullDownMenu(selectPatientLink, f))
+      )
+    )(cls := "record-menu-items")
+    m.open(c, f => PullDown.locate(selectPatientLink, f))
 
   def onSelectFromWqueue(): Unit =
     for
@@ -41,11 +39,11 @@ class SelectPatientPullDown:
       val patients =
         wqueue.map(wq => visitMap(wq.visitId).patientId).map(patientMap(_))
       val m = new PullDownMenu()
-      val c = PullDown.createContent(() => m.close(), patients.map(
+      val c = m.createContent(patients.map(
         patient =>
           patient.fullName("") -> (() => onSelectPublisher.publish(patient))
-      ), "wqueue-patient-list")
-      m.open(c, f => PullDown.locatePullDownMenu(selectPatientLink, f))
+      ))(cls := "wqueue-patient-list")
+      m.open(c, f => PullDown.locate(selectPatientLink, f))
     }
 
   def onSelectFromSearch(): Unit =
@@ -55,7 +53,7 @@ class SelectPatientPullDown:
       onSelectPublisher.publish(patient)
     })
     box.ele(cls := "domq-context-menu")
-    m.open(box.ele, f => PullDown.locatePullDownMenu(selectPatientLink, f))
+    m.open(box.ele, f => PullDown.locate(selectPatientLink, f))
     
   def onSelectFromRecent(): Unit =
     val m = new PullDownMenu()
@@ -67,7 +65,7 @@ class SelectPatientPullDown:
     (for
       _ <- box.init()
     yield {
-      m.open(box.ele, f => PullDown.locatePullDownMenu(selectPatientLink, f))
+      m.open(box.ele, f => PullDown.locate(selectPatientLink, f))
     }).onComplete {
       case Success(_) => ()
       case Failure(ex) => System.err.println(ex.getMessage)
@@ -83,6 +81,6 @@ class SelectPatientPullDown:
     for
       _ <- box.init()
     yield {
-      m.open(box.ele, f => PullDown.locatePullDownMenu(selectPatientLink, f))
+      m.open(box.ele, f => PullDown.locate(selectPatientLink, f))
     }
 

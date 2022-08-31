@@ -20,8 +20,8 @@ class HotlineBlock(sendAs: String, sendTo: String)(using fetcher: EventFetcher):
   ui.sendButton(onclick := (() => onSend(ui.messageInput.value.trim, true)))
   ui.rogerButton(onclick := (() => onSend("了解", false)))
   ui.beepButton(onclick := (() => { Api.hotlineBeep(sendTo); () }))
-  ui.regularsLink.setBuilder(regulars)
-  ui.patientsLink.setBuilder(() => patients)
+  PullDown.attachPullDown(ui.regularsLink, regulars)
+  PullDown.attachPullDown(ui.patientsLink, (() => patients))
 
   def ele = ui.ele
   def init(): Future[Unit] =
@@ -126,13 +126,12 @@ object HotlineBlock:
     hotlineInput.selectionEnd = pos
 
 class HotlineBlockUI:
-  import dev.fujiwara.domq.PullDownLink
   val messageInput: HTMLTextAreaElement = textarea
   val sendButton = button
   val rogerButton = button
   val beepButton = button
-  val regularsLink = PullDownLink("常用")
-  val patientsLink = PullDownLink("患者")
+  val regularsLink = a("常用")
+  val patientsLink = a("患者")
   val messages = textarea
   val ele =
     div(cls := "hotline-block")(
@@ -141,8 +140,8 @@ class HotlineBlockUI:
         sendButton("送信"),
         rogerButton("了解"),
         beepButton("Beep"),
-        regularsLink.link,
-        patientsLink.link
+        regularsLink,
+        patientsLink
       ),
       messages(
         cls := "hotline-block-messages",

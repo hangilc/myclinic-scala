@@ -60,7 +60,7 @@ class PracticeService extends SideMenuService:
 class PracticeMain:
   val ui = new PracticeMainUI
   def ele = ui.ele
-  ui.choice.setBuilder(
+  PullDown.attachPullDown(ui.choice, 
     List(
       "受付患者選択" -> (selectFromRegistered _),
       "患者検索" -> (selectBySearchPatient _),
@@ -238,7 +238,7 @@ object PracticeService:
       )
 
 class PracticeMainUI:
-  val choice = PullDownLink("患者選択")
+  val choice = a("患者選択")
   val shohouSampleLink = a
   val wholeTextSearchLink = a
   val records = div
@@ -249,7 +249,7 @@ class PracticeMainUI:
 
   def header: HTMLElement = div(cls := "practice-header")(
     div("診察", cls := "practice-header-title practice-sidemenu-service-title"),
-    choice.ele(cls := "practice-header-choice"),
+    choice(cls := "practice-header-choice"),
     shohouSampleLink("登録薬剤"),
     wholeTextSearchLink("全文検索")
   )

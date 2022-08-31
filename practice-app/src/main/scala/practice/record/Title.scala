@@ -20,11 +20,8 @@ class Title(visit: VisitEx):
   val unsubscribers = List(
     PracticeBus.tempVisitIdChanged.subscribe(adaptToTempVisitId _)
   )
-  val pullDown = PullDownLink(
+  val pullDown = PullDown.pullDownLink(
     "操作",
-    wrapperPostConstruct = (e => e(cls := "practice-visit-title-pulldown"))
-  )
-  pullDown.setBuilder(
     List(
       "この診察を削除" -> (doDeleteVisit _),
       "暫定診察に設定" -> (setTempVisitId _),
@@ -33,18 +30,17 @@ class Title(visit: VisitEx):
       "負担割オーバーライド" -> (doFutanwari _),
       "未収リストへ" -> (doAddToMishuu _)
     )
-  )
+  )(cls := "practice-visit-title-pulldown")
+
   val ele = div(
     cls := "practice-visit-title",
     span(
       cls := "practice-visit-title-date",
       innerText := Helper.formatVisitTime(at)
     ),
-    pullDown.link(cls := "practice-visit-title-manip")
+    pullDown(cls := "practice-visit-title-manip")
   )
-  // PracticeBus.currentVisitId.foreach(currentVisitId =>
-  //   if visit.visitId == currentVisitId then ele(cls := "current-visit")
-  // )
+  
   adaptToTempVisitId(PracticeBus.currentTempVisitId)
 
   def doAddToMishuu(): Unit =

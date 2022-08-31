@@ -13,10 +13,9 @@ import dev.myclinic.scala.web.practiceapp.practice.record.CreateHelper
 import scala.language.implicitConversions
 
 case class ConductMenu(at: LocalDate, visitId: Int):
-  val link = PullDownLink("処置")
-  link.setBuilder(menuItems)
+  val link = PullDown.pullDownLink("処置", menuItems)
   val workarea = div
-  val ele = div(link.ele, workarea)
+  val ele = div(link, workarea)
 
   def menuItems: List[(String, () => Unit)] =
     List(
