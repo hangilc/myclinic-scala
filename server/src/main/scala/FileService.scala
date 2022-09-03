@@ -116,20 +116,22 @@ object FileService extends DateTimeQueryParam with Publisher:
       val dir = Config.paperScanDir(patientId)
       val loc = Path(new java.io.File(dir).getPath)
       val op =
-        fs2.io.file
-          .Files[IO]
-          .list(loc)
-          .evalMap(path =>
-            fs2.io.file
-              .Files[IO]
-              .getBasicFileAttributes(path)
-              .map(attr =>
-                val ctime = FileInfo.fromTimestamp(attr.creationTime)
-                FileInfo(path.fileName.toString, ctime, attr.size)
-              )
-          )
-          .compile
-          .toList
+        for list <- 
+          fs2.io.file
+            .Files[IO]
+            .list(loc)
+            .evalMap(path =>
+              fs2.io.file
+                .Files[IO]
+                .getBasicFileAttributes(path)
+                .map(attr =>
+                  val ctime = FileInfo.fromTimestamp(attr.creationTime)
+                  FileInfo(path.fileName.toString, ctime, attr.size)
+                )
+            )
+            .compile
+            .toList
+        yield list.sortBy(fi => fi.createdAt).reverse
       Ok(op)
 
     case GET -> Root / "get-patient-image" :? intPatientId(
