@@ -32,4 +32,5 @@ object ShohouSampleDialog:
       button("閉じる", onclick := (dlog.close _))
     )
     dlog.open()
+    searchForm.initFocus()
 
