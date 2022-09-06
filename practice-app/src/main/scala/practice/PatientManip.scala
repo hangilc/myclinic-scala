@@ -95,15 +95,28 @@ object PatientManip:
   private val updateWqueueStateTask = new SingleTask[Wqueue]
 
   def doCashier(): Unit =
-    PracticeBus.currentPatientVisitState match {
-      case Practicing(patient, visitId) => 
+    PracticeBus.currentPatientState match {
+      case Some(State(patientId, Some(visitId))) => {
         cashierTask.run(Api.getMeisai(visitId), meisai =>
             val dlog = CashierDialog(meisai, visitId, () =>
               updateWqueueStateTask.run(Api.changeWqueueState(visitId, WaitState.WaitCashier), _ =>
-                PracticeBus.setPatientVisitState(PracticeDone(patient, visitId))
-                PracticeBus.setPatientVisitState(NoSelection)
+                PracticeBus.patientStateController.endPatient()
               ))
             dlog.open()
         )
+      }
       case _ => ()
     }
+
+    // PracticeBus.currentPatientVisitState match {
+    //   case Practicing(patient, visitId) => 
+    //     cashierTask.run(Api.getMeisai(visitId), meisai =>
+    //         val dlog = CashierDialog(meisai, visitId, () =>
+    //           updateWqueueStateTask.run(Api.changeWqueueState(visitId, WaitState.WaitCashier), _ =>
+    //             PracticeBus.setPatientVisitState(PracticeDone(patient, visitId))
+    //             PracticeBus.setPatientVisitState(NoSelection)
+    //           ))
+    //         dlog.open()
+    //     )
+    //   case _ => ()
+    // }

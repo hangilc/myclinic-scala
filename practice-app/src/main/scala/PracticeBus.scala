@@ -12,6 +12,7 @@ import dev.myclinic.scala.web.practiceapp.practice.RightWidget
 import dev.myclinic.scala.web.practiceapp.practice.twilio.TwilioPhone
 import dev.myclinic.scala.webclient.{Api, global}
 import dev.myclinic.scala.web.practiceapp.practice.PatientStateController
+import dev.myclinic.scala.web.practiceapp.practice.PatientStateController.State
 import dev.myclinic.scala.web.practiceapp.practice.TempVisitController
 import dev.fujiwara.domq.SubscriberChannel
 
@@ -26,6 +27,7 @@ object PracticeBus:
   def patientClosingSubscriberChannel = patientStateController.patientClosingSubscriberChannel
   def currentPatient: Option[Patient] = patientStateController.currentPatient
   def currentVisitId: Option[Int] = patientStateController.currentVisitId
+  def currentPatientState: Option[State] = patientStateController.currentState
   val tempVisitController = new TempVisitController(patientStateController)
   def tempVisitIdChangedSubscriberChannel: SubscriberChannel[Option[Int]] =
     tempVisitController.tempVisitIdChangedSubscriberChannel

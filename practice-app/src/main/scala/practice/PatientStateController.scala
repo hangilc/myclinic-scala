@@ -18,6 +18,7 @@ class PatientStateController:
 
   def currentPatient: Option[Patient] = cur.map(_.patient)
   def currentVisitId: Option[Int] = cur.fold(None)(_.visitId)
+  def currentState: Option[State] = cur
 
   def patientStartingSubscriberChannel: SubscriberChannel[State] =
     patientStartingPublisher
