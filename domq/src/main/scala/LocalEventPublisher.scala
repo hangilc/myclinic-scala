@@ -6,10 +6,12 @@ import scala.util.Try
 import scala.util.Success
 import scala.util.Failure
 
+trait SubscriberChannel[T]:
+  def subscribe(handler: T => Unit): LocalEventUnsubscriber
 
-class LocalEventPublisher[T]:
+class LocalEventPublisher[T] extends SubscriberChannel[T]:
   private var subscribers: List[T => Unit] = List.empty
-  def subscribe(handler: T => Unit): LocalEventUnsubscriber =
+  override def subscribe(handler: T => Unit): LocalEventUnsubscriber =
     subscribers = subscribers :+ handler
     LocalEventUnsubscriber(() => {
       subscribers = subscribers.filter(_ != handler)
