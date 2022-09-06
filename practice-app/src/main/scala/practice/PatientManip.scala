@@ -15,6 +15,7 @@ import dev.myclinic.scala.model.Visit
 import dev.myclinic.scala.model.Wqueue
 import dev.myclinic.scala.model.Meisai
 import dev.myclinic.scala.web.practiceapp.PracticeBus
+import dev.myclinic.scala.web.practiceapp.practice.PatientStateController.State
 
 object PatientManip:
   val cashierButton = button
@@ -30,15 +31,30 @@ object PatientManip:
     a("画像一覧", onclick := (doGazouList _))
   )
 
-  PracticeBus.patientVisitChanged.subscribe {
-    case NoSelection => ele(displayNone)
-    case Browsing(_) | PracticeDone(_, _) =>
-      ele(displayDefault)
-      cashierButton(enabled := false)
-    case Practicing(_, _) =>
-      ele(displayDefault)
-      cashierButton(enabled := true)
-  }
+  PracticeBus.patientStartingSubscriberChannel.subscribe(s => {
+    ele(displayDefault)
+    s match {
+      case State(patient, Some(visitId)) => {
+        cashierButton(enabled := true)
+      }
+      case State(patient, None) => {
+        cashierButton(enabled := false)
+      }
+    }
+  })
+  PracticeBus.patientClosingSubscriberChannel.subscribe(_ => {
+    ele(displayNone)
+  })
+
+  // PracticeBus.patientVisitChanged.subscribe {
+  //   case NoSelection => ele(displayNone)
+  //   case Browsing(_) | PracticeDone(_, _) =>
+  //     ele(displayDefault)
+  //     cashierButton(enabled := false)
+  //   case Practicing(_, _) =>
+  //     ele(displayDefault)
+  //     cashierButton(enabled := true)
+  // }
 
   def doGazouList(): Unit =
     PracticeBus.currentPatient.map(_.patientId).foreach(patientId => 
@@ -72,7 +88,8 @@ object PatientManip:
     )
 
   def doEndPatient(): Unit =
-    PracticeBus.setPatientVisitState(NoSelection)
+    // PracticeBus.setPatientVisitState(NoSelection)
+    PracticeBus.patientStateController.endPatient()
 
   private val cashierTask = new SingleTask[Meisai]
   private val updateWqueueStateTask = new SingleTask[Wqueue]

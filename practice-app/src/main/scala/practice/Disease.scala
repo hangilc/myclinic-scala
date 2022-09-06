@@ -9,13 +9,22 @@ import dev.myclinic.scala.web.practiceapp.PracticeBus
 object Disease:
   val ele = div()
 
-  PracticeBus.patientVisitChanged.subscribe { state =>
-    PracticeBus.currentPatient match {
-      case None => ele(clear)
-      case Some(patient) => 
-        val frame = Frame(patient.patientId)
-        frame.current()
-        ele(clear, frame.ele)
-    }
-  }
+  PracticeBus.patientStartingSubscriberChannel.subscribe(s => {
+    val frame = Frame(s.patient.patientId)
+    frame.current()
+    ele(clear, frame.ele)
 
+  })
+  PracticeBus.patientClosingSubscriberChannel.subscribe(s => {
+    ele(clear)
+  })
+
+  // PracticeBus.patientVisitChanged.subscribe { state =>
+  //   PracticeBus.currentPatient match {
+  //     case None => ele(clear)
+  //     case Some(patient) =>
+  //       val frame = Frame(patient.patientId)
+  //       frame.current()
+  //       ele(clear, frame.ele)
+  //   }
+  // }

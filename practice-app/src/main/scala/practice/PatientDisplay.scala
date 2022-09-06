@@ -30,24 +30,43 @@ class PatientDisplay:
     detailWrapper(displayNone, cls := "patient-detail", detailDisp.ele)
   )
 
-  val unsubscribe = PracticeBus.patientVisitChanged.subscribe(state =>
-    state.patientOption match {
-      case Some(patient) =>
-        detailWrapper(displayNone)
-        nameSpan(innerText := Helper.formatPatient(patient))
-        addressPart(innerText := patient.address)
-        phonePart(clear, Helper.parsePhone(patient.phone))
-        ele(displayDefault)
-      case None =>
-        detailWrapper(displayNone)
-        nameSpan(clear)
-        addressPart(clear)
-        phonePart(clear)
-        ele(displayNone)
-    }
+  val unsubs: List[LocalEventUnsubscriber] = List(
+    PracticeBus.patientStartingSubscriberChannel.subscribe(s => {
+      val patient: Patient = s.patient
+      detailWrapper(displayNone)
+      nameSpan(innerText := Helper.formatPatient(patient))
+      addressPart(innerText := patient.address)
+      phonePart(clear, Helper.parsePhone(patient.phone))
+      ele(displayDefault)
+
+    }),
+    PracticeBus.patientClosingSubscriberChannel.subscribe(s => {
+      detailWrapper(displayNone)
+      nameSpan(clear)
+      addressPart(clear)
+      phonePart(clear)
+      ele(displayNone)
+    })
   )
 
-  def dispose: Unit = unsubscribe.unsubscribe()
+  // val unsubscribe = PracticeBus.patientVisitChanged.subscribe(state =>
+  //   state.patientOption match {
+  //     case Some(patient) =>
+  //       detailWrapper(displayNone)
+  //       nameSpan(innerText := Helper.formatPatient(patient))
+  //       addressPart(innerText := patient.address)
+  //       phonePart(clear, Helper.parsePhone(patient.phone))
+  //       ele(displayDefault)
+  //     case None =>
+  //       detailWrapper(displayNone)
+  //       nameSpan(clear)
+  //       addressPart(clear)
+  //       phonePart(clear)
+  //       ele(displayNone)
+  //   }
+  // )
+
+  def dispose: Unit = unsubs.foreach(_.unsubscribe())
 
   private def onDetail(): Unit =
     detailWrapper.toggle()

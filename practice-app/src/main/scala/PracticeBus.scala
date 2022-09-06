@@ -8,11 +8,12 @@ import dev.myclinic.scala.model.*
 import scala.concurrent.Future
 import dev.myclinic.scala.webclient.global
 import scala.language.implicitConversions
-import dev.myclinic.scala.web.practiceapp.practice.PatientVisitState
-import dev.myclinic.scala.web.practiceapp.practice.NoSelection
 import dev.myclinic.scala.web.practiceapp.practice.RightWidget
 import dev.myclinic.scala.web.practiceapp.practice.twilio.TwilioPhone
 import dev.myclinic.scala.webclient.{Api, global}
+import dev.myclinic.scala.web.practiceapp.practice.PatientStateController
+import dev.myclinic.scala.web.practiceapp.practice.TempVisitController
+import dev.fujiwara.domq.SubscriberChannel
 
 object PracticeBus:
   val addRightWidgetRequest = LocalEventPublisher[RightWidget]
@@ -20,21 +21,29 @@ object PracticeBus:
 
   type VisitId = Int
 
-  private var pvState: PatientVisitState = NoSelection
+  val patientStateController = new PatientStateController()
+  def patientStartingSubscriberChannel = patientStateController.patientStartingSubscriberChannel
+  def patientClosingSubscriberChannel = patientStateController.patientClosingSubscriberChannel
+  def currentPatient: Option[Patient] = patientStateController.currentPatient
+  def currentVisitId: Option[Int] = patientStateController.currentVisitId
+  val tempVisitController = new TempVisitController(patientStateController)
+  def tempVisitIdChangedSubscriberChannel: SubscriberChannel[Option[Int]] =
+    tempVisitController.tempVisitIdChangedSubscriberChannel
+  def currentTempVisitId: Option[Int] = tempVisitController.currentTempVisitId
 
-  val patientVisitChanging = LocalEventPublisher[(PatientVisitState, PatientVisitState)]
-  val patientVisitChanged = LocalEventPublisher[PatientVisitState]
-  val tempVisitIdChanged = CachingEventPublisher[Option[Int]](None)
-  def currentPatientVisitState: PatientVisitState = pvState
-  def currentPatient: Option[Patient] = pvState.patientOption
-  def currentVisitId: Option[Int] = pvState.visitIdOption
-  def currentTempVisitId: Option[Int] = tempVisitIdChanged.currentValue
-  def copyTarget: Option[VisitId] = currentVisitId orElse currentTempVisitId
-  def setPatientVisitState(newState: PatientVisitState): Unit =
-    patientVisitChanging.publish((pvState, newState))
-    tempVisitIdChanged.publish(None)
-    pvState = newState
-    patientVisitChanged.publish(pvState)
+  // val patientVisitChanging = LocalEventPublisher[(PatientVisitState, PatientVisitState)]
+  // val patientVisitChanged = LocalEventPublisher[PatientVisitState]
+  // val tempVisitIdChanged = CachingEventPublisher[Option[Int]](None)
+  // def currentPatientVisitState: PatientVisitState = pvState
+  // def currentPatient: Option[Patient] = pvState.patientOption
+  // def currentVisitId: Option[Int] = pvState.visitIdOption
+  // def currentTempVisitId: Option[Int] = tempVisitIdChanged.currentValue
+  // def copyTarget: Option[VisitId] = currentVisitId orElse currentTempVisitId
+  // def setPatientVisitState(newState: PatientVisitState): Unit =
+  //   patientVisitChanging.publish((pvState, newState))
+  //   tempVisitIdChanged.publish(None)
+  //   pvState = newState
+  //   patientVisitChanged.publish(pvState)
     
   val navPageChanged = CachingEventPublisher[Int](0)
   val navSettingChanged = LocalEventPublisher[(Int, Int)]
@@ -68,7 +77,7 @@ object PracticeBus:
   def clearMishuuList(): Unit =
     mishuuList = List.empty
     mishuuListChanged.publish(mishuuList)
-  patientVisitChanged.subscribe(_ => clearMishuuList())
+  patientClosingSubscriberChannel.subscribe(s => clearMishuuList())
 
   val twilioPhone = new TwilioPhone(Api.getWebphoneToken)
   
