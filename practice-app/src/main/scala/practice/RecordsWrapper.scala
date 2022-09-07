@@ -6,6 +6,7 @@ import dev.myclinic.scala.webclient.{Api, global}
 import scala.concurrent.Future
 import dev.myclinic.scala.web.practiceapp.practice.record.Record
 import org.scalajs.dom.HTMLElement
+import org.scalajs.dom.document
 import dev.myclinic.scala.web.practiceapp.PracticeBus
 
 class RecordsWrapper:
@@ -23,7 +24,6 @@ class RecordsWrapper:
     PracticeBus.conductEntered.subscribe(onConductEntered _),
     PracticeBus.conductDeleted.subscribe(onConductDeleted _),
     PracticeBus.chargeUpdated.subscribe(onChargeUpdated _),
-    // PracticeBus.paymentEntered.subscribe(onPaymentEntered _),
     PracticeBus.visitUpdated.subscribe(onVisitUpdated _)
   )
 
@@ -52,7 +52,8 @@ class RecordsWrapper:
               val rec = new Record(ex)
               records += rec
           }))
-        yield ()
+        yield
+          document.documentElement.scrollTop = 0
     }
 
   def findRecord(visitId: Int): Option[Record] = records.find(_.visitId == visitId)
