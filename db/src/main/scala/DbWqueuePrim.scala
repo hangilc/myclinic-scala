@@ -63,7 +63,7 @@ object DbWqueuePrim:
   def tryChangeWqueueState(visitId: Int, newWaitState: WaitState): ConnectionIO[Option[(AppEvent, Wqueue)]] =
     for
       wqOpt <- getWqueue(visitId).option
-      result <- wqOpt.fold(ConnectionIO(None))(wq => changeWqueueState(wq, newWaitState).map(Some(_)))
+      result <- wqOpt.fold(None.pure[ConnectionIO])(wq => changeWqueueState(wq, newWaitState).map(Some(_)))
     yield ???
 
   private def changeWqueueState(wq: Wqueue, newWaitState: WaitState): ConnectionIO[(AppEvent, Wqueue)] =
