@@ -18,14 +18,18 @@ class Title(visit: VisitEx):
   import Title as Helper
   def at: LocalDateTime = visit.visitedAt
   val unsubscribers = List(
-    PracticeBus.tempVisitIdChanged.subscribe(adaptToTempVisitId _)
+    PracticeBus.tempVisitIdChangedSubscriberChannel.subscribe(
+      adaptToTempVisitId _
+    )
   )
   val pullDown = PullDown.pullDownLink(
     "操作",
     List(
       "この診察を削除" -> (doDeleteVisit _),
       "暫定診察に設定" -> (setTempVisitId _),
-      "暫定診察の解除" -> (() => { PracticeBus.tempVisitIdChanged.publish(None); () }),
+      "暫定診察の解除" -> (() => {
+        PracticeBus.tempVisitController.clearTempVisitId()
+      }),
       "診療明細" -> (doRcptDetail _),
       "負担割オーバーライド" -> (doFutanwari _),
       "未収リストへ" -> (doAddToMishuu _)
@@ -40,7 +44,7 @@ class Title(visit: VisitEx):
     ),
     pullDown(cls := "practice-visit-title-manip")
   )
-  
+
   adaptToTempVisitId(PracticeBus.currentTempVisitId)
 
   def doAddToMishuu(): Unit =
@@ -69,14 +73,22 @@ class Title(visit: VisitEx):
     ShowMessage.confirm("この診察を削除しますか？")(() =>
       val visitId = visit.visitId
       Api.deleteVisit(visitId).onComplete {
-        case Success(_)  => NavUtil.refreshNavSetting()
+        case Success(_) =>
+          (PracticeBus.currentVisitId, PracticeBus.currentTempVisitId) match {
+            case (Some(currentVisitId), None) if currentVisitId == visitId =>
+              PracticeBus.patientStateController.startPatient(visit.patient, None)
+            case (None, Some(currentTempVisitId)) if currentTempVisitId == visitId => 
+              PracticeBus.tempVisitController.clearTempVisitId()
+              NavUtil.refreshNavSetting()
+            case _ => NavUtil.refreshNavSetting()
+          }
         case Failure(ex) => ShowMessage.showError(ex.getMessage)
       }
     )
 
   def setTempVisitId(): Unit =
-    if PracticeBus.currentVisitId.isEmpty then
-      PracticeBus.tempVisitIdChanged.publish(Some(visit.visitId))
+    if !PracticeBus.tempVisitController.setTempVisitId(visit.visitId) then
+      ShowMessage.showError("暫定診察を設定できませんでした。")
 
   def adaptToTempVisitId(optTempVisitId: Option[Int]): Unit =
     optTempVisitId match {

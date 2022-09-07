@@ -82,13 +82,19 @@ object PatientManip:
   def doRegisterPractice(): Unit =
     PracticeBus.currentPatient.foreach(patient =>
       val fut = Api.startVisit(patient.patientId, LocalDateTime.now())
-      registerPracticeTask.run(fut, _ => 
-        RecordsHelper.refreshRecords(PracticeBus.navPageChanged.currentValue)
+      registerPracticeTask.run(fut, visit => 
+        PracticeBus.currentPatientState match {
+          case Some(State(patient, None)) => 
+            PracticeBus.patientStateController.startPatient(patient, Some(visit.visitId))
+          case Some(State(patient, Some(visitId))) =>
+            val cur = PracticeBus.navPageChanged.currentValue
+            RecordsHelper.refreshRecords(Some(patient), cur)
+          case None => ()
+        }
       )
     )
 
   def doEndPatient(): Unit =
-    // PracticeBus.setPatientVisitState(NoSelection)
     PracticeBus.patientStateController.endPatient()
 
   private val cashierTask = new SingleTask[Meisai]
@@ -100,7 +106,7 @@ object PatientManip:
         cashierTask.run(Api.getMeisai(visitId), meisai =>
             val dlog = CashierDialog(meisai, visitId, () =>
               updateWqueueStateTask.run(Api.changeWqueueState(visitId, WaitState.WaitCashier), _ =>
-                PracticeBus.patientStateController.endPatient()
+                PracticeBus.patientStateController.endPatient(WaitState.WaitCashier)
               ))
             dlog.open()
         )

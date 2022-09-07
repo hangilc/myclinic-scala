@@ -32,6 +32,7 @@ object PracticeBus:
   def tempVisitIdChangedSubscriberChannel: SubscriberChannel[Option[Int]] =
     tempVisitController.tempVisitIdChangedSubscriberChannel
   def currentTempVisitId: Option[Int] = tempVisitController.currentTempVisitId
+  def copyTarget: Option[VisitId] = currentVisitId orElse currentTempVisitId
 
   // val patientVisitChanging = LocalEventPublisher[(PatientVisitState, PatientVisitState)]
   // val patientVisitChanged = LocalEventPublisher[PatientVisitState]

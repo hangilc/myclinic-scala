@@ -41,21 +41,27 @@ class PracticeService extends SideMenuService:
 
   PracticeBus.addRightWidgetRequest.subscribe(w => right.ele(w.ele))
   PracticeBus.removeRightWidgetRequest.subscribe(w => w.remove())
-  PracticeBus.patientVisitChanging.subscribe {
-    case (Practicing(_, visitId), NoSelection) =>
-      Api.changeWqueueState(visitId, WaitState.WaitReExam)
-    case _ => Future.successful(())
-  }
+  // PracticeBus.patientVisitChanging.subscribe {
+  //   case (Practicing(_, visitId), NoSelection) =>
+  //     Api.changeWqueueState(visitId, WaitState.WaitReExam)
+  //   case _ => Future.successful(())
+  // }
 
   def calcNumPages(total: Int): Int =
     val itemsPerPage = PracticeBus.visitsPerPage
     (total + itemsPerPage - 1) / itemsPerPage
 
-  PracticeBus.patientVisitChanged.subscribe {
-    case NoSelection | Browsing(_) | Practicing(_, _) =>
-      RecordsHelper.refreshRecords(0)
-    case _ => Future.successful(())
-  }
+  PracticeBus.patientStartingSubscriberChannel.subscribe(s => {
+    RecordsHelper.refreshRecords(Some(s.patient), 0)
+  })
+  PracticeBus.patientClosingSubscriberChannel.subscribe(_ => {
+    RecordsHelper.refreshRecords(None, 0)
+  })
+  // PracticeBus.patientVisitChanged.subscribe {
+  //   case NoSelection | Browsing(_) | Practicing(_, _) =>
+  //     RecordsHelper.refreshRecords(0)
+  //   case _ => Future.successful(())
+  // }
 
 class PracticeMain:
   val ui = new PracticeMainUI
@@ -86,12 +92,13 @@ class PracticeMain:
     ShohouSampleDialog.open()
 
   private def startExam(patient: Patient, visit: Visit): Unit =
-    for
-      _ <- Api.changeWqueueState(visit.visitId, WaitState.InExam)
-    yield
-      PracticeBus.setPatientVisitState(
-        Practicing(patient, visit.visitId)
-      )
+    PracticeBus.patientStateController.startPatient(patient, Some(visit.visitId))
+    // for
+    //   _ <- Api.changeWqueueState(visit.visitId, WaitState.InExam)
+    // yield
+    //   PracticeBus.setPatientVisitState(
+    //     Practicing(patient, visit.visitId)
+    //   )
 
   def selectFromRegistered(): Unit =
     for pairs <- PracticeService.listRegisteredPatientForPractice
@@ -143,7 +150,8 @@ class PracticeMain:
         onclick := (() => {
           d.close()
           search.selected.foreach(patient =>
-            PracticeBus.setPatientVisitState(Browsing(patient))
+            PracticeBus.patientStateController.startPatient(patient, None)
+            // PracticeBus.setPatientVisitState(Browsing(patient))
           )
         })
       ),
@@ -197,7 +205,8 @@ class PracticeMain:
         onclick := (() => {
           d.close()
           selection.marked.foreach(visitPatient =>
-            PracticeBus.setPatientVisitState(Browsing(visitPatient(1)))
+            PracticeBus.patientStateController.startPatient(visitPatient._2, None)
+            // PracticeBus.setPatientVisitState(Browsing(visitPatient(1)))
           )
         })
       ),
@@ -211,7 +220,8 @@ class PracticeMain:
   def selectByDate(): Unit =
     val widget = new SelectPatientByDateWidget()
     widget.patientSelected.subscribe(patient =>
-      PracticeBus.setPatientVisitState(Browsing(patient))
+      PracticeBus.patientStateController.startPatient(patient, None)
+      // PracticeBus.setPatientVisitState(Browsing(patient))
     )
     PracticeBus.addRightWidgetRequest.publish(widget.widget)
 

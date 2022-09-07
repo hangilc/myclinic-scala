@@ -28,31 +28,38 @@ class PatientStateController:
 
   def startPatient(patient: Patient, visitId: Option[Int]): Unit =
     for
-      _ <- closeCurrent()
-      newState = State(patient, visitId)
-      _ = patientStartingPublisher.publish(newState)
-      _ <- newState.visitId.fold(Future.successful(()))(visitId =>
-        Api.changeWqueueState(visitId, WaitState.InExam)
-      )
-    yield cur = Some(newState)
-      
+      _ <- endPatient()
+      _ <- {
+        val newState = State(patient, visitId)
+        cur = Some(newState)
+        patientStartingPublisher.publish(newState)
+        newState.visitId.fold(Future.successful(()))(visitId =>
+            Api.changeWqueueState(visitId, WaitState.InExam)
+          )
+      }
+    yield ()
 
   def endPatient(): Future[Unit] =
-    closeCurrent()
+    endPatient(WaitState.WaitReExam)
 
-  private def closeCurrent(): Future[Unit] =
-    val op = cur match {
+  def endPatient(state: WaitState): Future[Unit] =
+    closeCurrent(state)
+
+  private def closeCurrent(state: WaitState): Future[Unit] =
+    val curSave = cur
+    cur = None
+    val op = curSave match {
       case None => Future.successful(())
       case Some(s @ State(patientId, None)) =>
         patientClosingPublisher.publish(s)
         Future.successful(())
       case Some(s @ State(patientId, Some(visitId))) =>
         patientClosingPublisher.publish(s)
-        Api.changeWqueueState(visitId, WaitState.WaitReExam).map(_ => ())
+        Api.changeWqueueState(visitId, state).map(_ => ())
     }
     for
       _ <- op
-    yield cur = None
+    yield ()
 
 object PatientStateController:
   case class State(patient: Patient, visitId: Option[Int])

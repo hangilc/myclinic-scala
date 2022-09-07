@@ -60,12 +60,23 @@ object DbWqueuePrim:
       event <- DbEventPrim.logWqueueUpdated(wq)
     yield event
 
+  def tryChangeWqueueState(visitId: Int, newWaitState: WaitState): ConnectionIO[Option[(AppEvent, Wqueue)]] =
+    for
+      wqOpt <- getWqueue(visitId).option
+      result <- wqOpt.fold(ConnectionIO(None))(wq => changeWqueueState(wq, newWaitState).map(Some(_)))
+    yield ???
+
+  private def changeWqueueState(wq: Wqueue, newWaitState: WaitState): ConnectionIO[(AppEvent, Wqueue)] =
+    val newWq = wq.copy(waitState = newWaitState)
+    for
+      event <- updateWqueue(newWq)
+    yield (event, newWq)
+
   def changeWqueueState(visitId: Int, newWaitState: WaitState): ConnectionIO[(AppEvent, Wqueue)] =
     for
       wq <- getWqueue(visitId).unique
-      newWq = wq.copy(waitState = newWaitState)
-      event <- updateWqueue(newWq)
-    yield (event, newWq)
+      result <- changeWqueueState(wq, newWaitState)
+    yield result
 
   def listWqueue(): Query0[Wqueue] =
     sql"""

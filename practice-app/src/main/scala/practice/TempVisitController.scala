@@ -31,3 +31,7 @@ class TempVisitController(patientStateController: PatientStateController):
       tempVisitId = Some(visitId)
       publisher.publish(tempVisitId)
       true
+
+  def clearTempVisitId(): Unit =
+    tempVisitId = None
+    publisher.publish(tempVisitId)

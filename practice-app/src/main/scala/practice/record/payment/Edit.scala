@@ -55,7 +55,8 @@ case class Edit(
           updated <- Api.updateChargeValue(visitId, newCharge)
           wqueueOpt <- Api.findWqueue(visitId)
           _ <- wqueueOpt match {
-            case Some(wqueue) => Future.successful(())
+            case Some(wqueue) => 
+              Api.changeWqueueState(visitId, WaitState.WaitCashier)
             case None => 
               val newWqueue = Wqueue(visitId, WaitState.WaitCashier)
               Api.enterWqueue(newWqueue)
