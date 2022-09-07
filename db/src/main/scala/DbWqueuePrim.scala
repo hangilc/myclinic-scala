@@ -64,7 +64,7 @@ object DbWqueuePrim:
     for
       wqOpt <- getWqueue(visitId).option
       result <- wqOpt.fold(None.pure[ConnectionIO])(wq => changeWqueueState(wq, newWaitState).map(Some(_)))
-    yield ???
+    yield result
 
   private def changeWqueueState(wq: Wqueue, newWaitState: WaitState): ConnectionIO[(AppEvent, Wqueue)] =
     val newWq = wq.copy(waitState = newWaitState)

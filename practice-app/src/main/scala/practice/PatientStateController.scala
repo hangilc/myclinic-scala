@@ -26,7 +26,12 @@ class PatientStateController:
   def patientClosingSubscriberChannel: SubscriberChannel[State] =
     patientClosingPublisher
 
-  def startPatient(patient: Patient, visitId: Option[Int]): Unit =
+  def startPatient(
+      patient: Patient,
+      visitId: Option[Int],
+      modifier: State => State = identity
+  ): Unit =
+    cur = cur.map(modifier(_))
     for
       _ <- endPatient()
       _ <- {
@@ -34,13 +39,13 @@ class PatientStateController:
         cur = Some(newState)
         patientStartingPublisher.publish(newState)
         newState.visitId.fold(Future.successful(()))(visitId =>
-            Api.changeWqueueState(visitId, WaitState.InExam)
-          )
+          Api.changeWqueueState(visitId, WaitState.InExam)
+        )
       }
     yield ()
 
   def endPatient(): Future[Unit] =
-    endPatient(WaitState.WaitReExam)
+    closeCurrent(WaitState.WaitReExam)
 
   def endPatient(state: WaitState): Future[Unit] =
     closeCurrent(state)
@@ -57,10 +62,8 @@ class PatientStateController:
         patientClosingPublisher.publish(s)
         Api.changeWqueueState(visitId, state).map(_ => ())
     }
-    for
-      _ <- op
+    for _ <- op
     yield ()
 
 object PatientStateController:
   case class State(patient: Patient, visitId: Option[Int])
-

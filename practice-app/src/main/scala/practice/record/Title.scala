@@ -76,7 +76,8 @@ class Title(visit: VisitEx):
         case Success(_) =>
           (PracticeBus.currentVisitId, PracticeBus.currentTempVisitId) match {
             case (Some(currentVisitId), None) if currentVisitId == visitId =>
-              PracticeBus.patientStateController.startPatient(visit.patient, None)
+              PracticeBus.patientStateController.startPatient(visit.patient, None,
+                _.copy(visitId = None))
             case (None, Some(currentTempVisitId)) if currentTempVisitId == visitId => 
               PracticeBus.tempVisitController.clearTempVisitId()
               NavUtil.refreshNavSetting()
