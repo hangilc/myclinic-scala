@@ -13,6 +13,7 @@ import org.scalajs.dom.HTMLElement
 import dev.myclinic.scala.web.practiceapp.practice.twilio.Call
 import dev.myclinic.scala.webclient.global
 import dev.myclinic.scala.web.practiceapp.practice.twilio.TwilioPhone
+import dev.fujiwara.kanjidate.KanjiDate
 
 class PatientDisplay:
   import PatientDisplay as Helper
@@ -49,23 +50,6 @@ class PatientDisplay:
     })
   )
 
-  // val unsubscribe = PracticeBus.patientVisitChanged.subscribe(state =>
-  //   state.patientOption match {
-  //     case Some(patient) =>
-  //       detailWrapper(displayNone)
-  //       nameSpan(innerText := Helper.formatPatient(patient))
-  //       addressPart(innerText := patient.address)
-  //       phonePart(clear, Helper.parsePhone(patient.phone))
-  //       ele(displayDefault)
-  //     case None =>
-  //       detailWrapper(displayNone)
-  //       nameSpan(clear)
-  //       addressPart(clear)
-  //       phonePart(clear)
-  //       ele(displayNone)
-  //   }
-  // )
-
   def dispose: Unit = unsubs.foreach(_.unsubscribe())
 
   private def onDetail(): Unit =
@@ -74,11 +58,12 @@ class PatientDisplay:
 object PatientDisplay:
   def formatPatient(patient: Patient): String =
     String.format(
-      "[%d] %s（%s%s）%d才 %s性",
+      "[%d] %s（%s%s）%s生 %d才 %s性",
       patient.patientId,
       patient.fullName(),
       patient.lastNameYomi,
       patient.firstNameYomi,
+      KanjiDate.dateToKanji(patient.birthday),
       DateUtil.calcAge(patient.birthday, LocalDate.now()),
       patient.sex.rep
     )
