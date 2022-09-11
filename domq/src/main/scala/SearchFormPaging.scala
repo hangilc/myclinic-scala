@@ -19,7 +19,7 @@ case class SearchFormPaging[T](
     navUI: NavUI
 )(using config: SearchFormPagingConfig, selectionConfig: SelectionConfig):
   val form = Html.form
-  val input = Html.input
+  val input = Html.input(attr("type") := "text")
   val button = Html.button(attr("type") := "submit")
   val selection = Selection[T]()
   val engine = Nav(navUI)

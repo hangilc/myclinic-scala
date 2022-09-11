@@ -7,6 +7,7 @@ import dev.myclinic.scala.model.*
 import dev.myclinic.scala.webclient.{Api, global}
 import dev.fujiwara.domq.SearchFormPagingConfig
 import dev.fujiwara.kanjidate.KanjiDate
+import org.scalajs.dom.HTMLElement
 
 class WholeTextSearchDialog:
   import WholeTextSearchDialog.{NavUI, Item}
@@ -23,10 +24,12 @@ class WholeTextSearchDialog:
         (t, v, p, text)
       }
     },
-    (text, visit, patient, searchText) => Item(text, visit, patient, searchText).ele,
+    (text, visit, patient, searchText) =>
+      Item(text, visit, patient, searchText).ele,
     new NavUI()
   )
   form.form(button("閉じる", onclick := (() => dlog.close())))
+  dlog.content(cls := "practice-whole-text-search-dialog")
   dlog.title("全文検索")
   dlog.body(form.ele)
 
@@ -39,21 +42,40 @@ object WholeTextSearchDialog:
     val dlog = new WholeTextSearchDialog()
     dlog.open()
 
-  case class Item(text: Text, visit: Visit, patient: Patient, searchText: String):
+  case class Item(
+      text: Text,
+      visit: Visit,
+      patient: Patient,
+      searchText: String
+  ):
     val ele = div(
+      cls := "item",
       div(
-        span(String.format("[%d] %s", patient.patientId, patient.fullName())),
-        span(KanjiDate.dateToKanji(visit.visitedAt.toLocalDate))
+        cls := "patient-visit",
+        span(
+          cls := "patient",
+          String.format("[%d] %s", patient.patientId, patient.fullName())
+        ),
+        span(cls := "visit", KanjiDate.dateToKanji(visit.visitedAt.toLocalDate))
       ),
       div(
-        text.content
+        cls := "content",
+        formatContent(text.content, searchText)
       )
     )
 
-  case class NavUI( ) extends dev.fujiwara.domq.NavUI:
+    def formatContent(content: String, searchText: String): HTMLElement =
+      val h = content.replace(
+        searchText,
+        s"<span class='match'>${searchText}</span>"
+      )
+      div(innerHTML := h)
+
+  case class NavUI() extends dev.fujiwara.domq.NavUI:
     val gotoFirstLink = None
     val gotoPrevLink = Some(a("<"))
     val gotoNextLink = Some(a(">"))
     val gotoLastLink = None
     val infoWrapper = Some(span)
-    val ele = div(cls := "nav", gotoPrevLink.get, infoWrapper.get, gotoNextLink.get)    
+    val ele =
+      div(cls := "nav", gotoPrevLink.get, infoWrapper.get, gotoNextLink.get)

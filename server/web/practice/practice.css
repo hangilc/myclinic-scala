@@ -327,4 +327,43 @@ button {
   max-height: 1300px;
 }
 
+.practice-whole-text-search-dialog {
+  width: 400px;
+}
+
+.practice-whole-text-search-dialog .domq-selection {
+  max-height: 500px;
+}
+
+.practice-whole-text-search-dialog .item {
+  border: 1px solid gray;
+  border-radius: 6px;
+  margin: 10px 0;
+  padding: 10px;
+}
+
+.practice-whole-text-search-dialog .domq-modal-dialog3-body form {
+  margin-bottom: 6px;
+}
+
+.practice-whole-text-search-dialog .patient-visit {
+  border-bottom: 1px solid gray;
+}
+
+.practice-whole-text-search-dialog .patient {
+  font-weight: bold;
+  color: green;
+}
+
+.practice-whole-text-search-dialog .visit {
+  margin-left: 10px;
+}
+
+.practice-whole-text-search-dialog .content {
+  margin-top: 10px;
+}
+
+.practice-whole-text-search-dialog .content .match {
+  color: #ff0800;
+}
 
