@@ -30,7 +30,7 @@ case class GazouListDialog(patientId: Int, files: List[FileInfo]):
       val link = a("別のタブで開く", href := url, attr("target") := "_blank")
       display(clear, link)
     else
-      val img = Html.img
+      val img = Html.img(cls := "practice-patient-image")
       img.src = url
       display(clear, img)
 

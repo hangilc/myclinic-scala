@@ -323,4 +323,8 @@ button {
   font-weight: bold;
 }
 
+.practice-patient-image {
+  max-height: 1300px;
+}
+
 
