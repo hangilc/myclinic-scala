@@ -19,12 +19,3 @@ object Disease:
     ele(clear)
   })
 
-  // PracticeBus.patientVisitChanged.subscribe { state =>
-  //   PracticeBus.currentPatient match {
-  //     case None => ele(clear)
-  //     case Some(patient) =>
-  //       val frame = Frame(patient.patientId)
-  //       frame.current()
-  //       ele(clear, frame.ele)
-  //   }
-  // }

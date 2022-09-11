@@ -16,7 +16,7 @@ object PaymentStatus:
     (chargeOption, lastPayment) match {
       case (None, _) => NotYet
       case (Some(_), None) => NoPayment
-      case (Some(_), Some(pay)) if pay.amount == 0 => NoPayment
+      case (Some(charge), Some(pay)) if charge.charge > 0 && pay.amount == 0 => NoPayment
       case (Some(charge), Some(payment)) if charge.charge > payment.amount => UnderPayment
       case (Some(charge), Some(payment)) if charge.charge < payment.amount => OverPayment
       case _ => Done

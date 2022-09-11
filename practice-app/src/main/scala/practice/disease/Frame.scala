@@ -33,6 +33,7 @@ case class Frame(patientId: Int):
       val dates = visits.map(_.visitedAt.toLocalDate)
       val c = Add(patientId, dates, Frame.examples)
       body(clear, c.ele)
+      c.searchForm.initFocus()
 
   def tenki(): Unit =
     for list <- Api.listCurrentDiseaseEx(patientId)
