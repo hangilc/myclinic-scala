@@ -34,7 +34,7 @@ class PracticeService extends SideMenuService:
         ),
         a("患者選択", cls := "practice-header-choice", cb := PatientSelector.init),
         a("登録薬剤", onclick := (() => ShohouSampleDialog.open())),
-        a("全文検索")
+        a("全文検索", onclick := (() => WholeTextSearchDialog.open()))
       ),
       div(
         new PatientDisplay().ele,
