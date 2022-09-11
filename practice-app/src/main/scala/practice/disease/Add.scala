@@ -11,6 +11,7 @@ import scala.concurrent.Future
 import cats.syntax.all.*
 import scala.language.implicitConversions
 import dev.fujiwara.domq.dateinput.DateInputDialog
+import dev.fujiwara.domq.SelectionConfig
 
 case class Add(
     patientId: Int,
@@ -24,8 +25,11 @@ case class Add(
   val startDateSpan = span
   val startDateWorkarea = div
   type SearchType = ByoumeiMaster | ShuushokugoMaster | DiseaseExample
+  val selConfig: SelectionConfig = new SelectionConfig{
+    override def invokeHandlerOnSingleResult: Boolean = true
+  }
   val searchForm: SearchForm[SearchType] =
-    SearchForm[SearchType](searchElement _, doSearch _)
+    SearchForm[SearchType](searchElement _, doSearch _)(using selConfig)
   searchForm.onSelect(doSelect _)
   enum SearchKind:
     case Byoumei, Shuushokugo

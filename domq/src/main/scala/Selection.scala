@@ -17,6 +17,7 @@ case class SelectionItem[T](ele: HTMLElement, value: T)(using modifier: Selectio
 trait SelectionConfig:
   def itemCssClass: Option[String] = Some(SelectionConfig.defaultItemCssClass)
   def selectionCssClass: Option[String] = Some(SelectionConfig.defaultSelectionCssClass)
+  def invokeHandlerOnSingleResult: Boolean = false
 
 object SelectionConfig:
   val defaultItemCssClass: String = "domq-selection-item"
@@ -57,7 +58,10 @@ class Selection[T](using config: SelectionConfig):
     dataVersion += 1
     updateVersion()
     if items.size == 1 then
-      mark(items.head.value)
+      val item = items.head
+      mark(item.value)
+      if config.invokeHandlerOnSingleResult then
+        publishSelect(item.value)
 
   def addAll(args: List[(HTMLElement, T)]): Unit =
     args.foreach {

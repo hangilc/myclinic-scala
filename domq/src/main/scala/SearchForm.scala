@@ -119,5 +119,5 @@ object SearchForm:
   def apply[T](using SelectionConfig)(
       toLabel: T => String,
       search: String => Future[List[T]]
-  ): SearchForm[T] =
-    new SearchForm(t => div(innerText := toLabel(t)), search)
+  )(using selectionConfig: SelectionConfig): SearchForm[T] =
+    new SearchForm[T](t => div(innerText := toLabel(t)), search)(using selectionConfig)
