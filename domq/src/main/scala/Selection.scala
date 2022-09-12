@@ -18,6 +18,7 @@ trait SelectionConfig:
   def itemCssClass: Option[String] = Some(SelectionConfig.defaultItemCssClass)
   def selectionCssClass: Option[String] = Some(SelectionConfig.defaultSelectionCssClass)
   def invokeHandlerOnSingleResult: Boolean = false
+  def enableSingleResultAutoSelect: Boolean = true
 
 object SelectionConfig:
   val defaultItemCssClass: String = "domq-selection-item"
@@ -57,7 +58,7 @@ class Selection[T](using config: SelectionConfig):
   def addDone(): Unit =
     dataVersion += 1
     updateVersion()
-    if items.size == 1 then
+    if items.size == 1 && config.enableSingleResultAutoSelect then
       val item = items.head
       mark(item.value)
       if config.invokeHandlerOnSingleResult then

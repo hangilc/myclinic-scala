@@ -14,7 +14,7 @@ object FormatUtil:
   val commandStartChar = '@'
   val commandStart = commandStartChar.toString
   val localCommandStart = commandStart + "_"
-  val itemStartPattern = raw"(?:^|\n)$digit+[）]$space*".r
+  val itemStartPattern = raw"(?:^|\n)[ 　]?$digit+[）]$space*".r
   val leadingSpacesPattern = s"^$space+".r
   val commandPrefixPattern = s"^＠.*?：".r
 
