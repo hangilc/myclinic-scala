@@ -13,6 +13,8 @@ import dev.myclinic.scala.webclient.{Api, global}
 import cats.syntax.all.*
 import org.scalajs.dom.MouseEvent
 import scala.language.implicitConversions
+import dev.fujiwara.domq.dateinput.DatePicker
+import dev.fujiwara.domq.dateinput.DateInput
 
 case class Tenki(
     list: List[(Disease, ByoumeiMaster, List[(DiseaseAdj, ShuushokugoMaster)])],
@@ -22,7 +24,8 @@ case class Tenki(
   val curWrapper = div
   val currents: CompAppendList[Item] =
     CompAppendList[Item](curWrapper, list.map(Item.apply.tupled(_)))
-  val endDateEle = EditableDate(LocalDate.now(), title = "終了日")
+  // val endDateEle = EditableDate(LocalDate.now(), title = "終了日")
+  val endDateEle = DateInput(LocalDate.now(), title = "終了日")
   def endDate: LocalDate = endDateEle.value
   val endReasonGroup = RadioGroup[DiseaseEndReason](
     List(
@@ -33,7 +36,8 @@ case class Tenki(
   )
   val ele = div(
     curWrapper,
-    div(endDateEle.ele, Icons.calendar(cls := "cursor-pointer")),
+    endDateEle.ele,
+    // div(endDateEle.ele, Icons.calendar(cls := "cursor-pointer", onclick := (onCalendar _))),
     div(
       a("週", onclick := (doWeek _)),
       a("今日", onclick := (doToday _)),
