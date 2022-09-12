@@ -1,1 +1,0 @@
-ssh -t changclinic-server -t "cd myclinic-scala-server && rm -f current && ln -s dev current"
