@@ -40,4 +40,11 @@ class ModalDialog3 extends ModalDialog:
   val commands: HTMLElement = div(cls := "domq-modal-dialog3-commands")
   content(title, body, commands)
 
+  def setTitle(s: String): Unit =
+    title(
+      cls := "has-x",
+      div(s, cls := "title-text"),
+      Icons.x(cls := "x-icon", onclick := (close _))
+    )
+
 

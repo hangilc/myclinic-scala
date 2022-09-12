@@ -21,9 +21,8 @@ case class PatientImagesDialog(patient: Patient, files: List[FileInfo]):
     files.map(mkItem),
     (onSelect _)
   )(using selectConfig)
-  dlog.title(s"保存画像（${patient.fullName()}）")
+  dlog.setTitle(s"保存画像（${patient.fullName()}）")
   dlog.body(
-    div(button("閉じる", onclick := (() => dlog.close()))),
     select.ele
   )
 
@@ -54,7 +53,7 @@ object PatientImagesDialog:
     val img = Html.img(cls := "practice-patient-image")
     img.src = url
     val dlog = new ModalDialog3()
-    dlog.title("画像閲覧")
+    dlog.setTitle("画像閲覧")
     dlog.body(
       div(button("閉じる", onclick := (() => dlog.close()))),
       div(s"(${patient.patientId}) ${patient.fullName()}"),
