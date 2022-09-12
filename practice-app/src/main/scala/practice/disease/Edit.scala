@@ -12,7 +12,7 @@ case class Edit(
 ):
   import Edit.{Item, Disp}
   val disp = Disp()
-  val selection = Selection[Item](list.map(Item.apply.tupled(_)), _.ele)
+  val selection = Selection.make[Item](list.map(Item.apply.tupled(_)), _.ele)
   selection.addSelectEventHandler(item =>
     disp.disease = Some(item.disease)
     disp.byoumeiMaster = Some(item.byoumeiMaster)

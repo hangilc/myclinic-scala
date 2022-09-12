@@ -15,7 +15,7 @@ import scala.util.Success
 import scala.util.Failure
 
 case class PatientSearchResultDialog(patients: List[Patient]):
-  val selection = Selection[Patient](patients, p => div(format(p)))
+  val selection = Selection.make[Patient](patients, p => div(format(p)))
   selection.onSelect(patient => start(patient, disp))
   val dlog = new ModalDialog3()
   dlog.content(cls := "reception-cashier-search-patient-result-dialog")
@@ -149,7 +149,9 @@ case class PatientSearchResultDialog(patients: List[Patient]):
           )
         ),
         "|",
-        a("保険履歴", onclick := (() => next(GoForward(hokenHistory, state))))
+        a("保険履歴", onclick := (() => next(GoForward(hokenHistory, state)))),
+        "|",
+        a("保存画像", onclick := (() => PatientImagesDialog.open(state.patient)))
       )
     )
 

@@ -7,7 +7,7 @@ import dev.fujiwara.kanjidate.KanjiDate
 import java.time.LocalDate
 
 case class YearList(from: Int, upto: Int):
-  val selection = Selection[Int](
+  val selection = Selection.make[Int](
     (from to upto).toList,
     year => div(format(year), cls := "domq-word-break-keep-all")
   )

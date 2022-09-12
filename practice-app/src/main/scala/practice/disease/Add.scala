@@ -151,7 +151,7 @@ case class Add(
     KanjiDate.dateToKanji(d)
 
   def dateSelect =
-    val sel = Selection[LocalDate](visitDates, d => div(formatDate(d)))
+    val sel = Selection.make[LocalDate](visitDates, d => div(formatDate(d)))
     sel.addSelectEventHandler(d =>
       onDateSelect(d)
       sel.ele.remove()

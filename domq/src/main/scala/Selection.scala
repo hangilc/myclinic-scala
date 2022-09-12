@@ -117,11 +117,15 @@ object Selection:
   )(using SelectionConfig): Selection[T] =
     val sel = Selection[T]()
     sel.addAll(items)
+    sel.addDone()
     sel.addSelectEventHandler(onSelect)
     sel
-  def apply[T](values: List[T], render: T => HTMLElement): Selection[T] =
+  def make[T](values: List[T], render: T => HTMLElement)(
+    using SelectionConfig
+  ): Selection[T] =
     val sel = Selection[T]()
     sel.addAll(values.map(v => (render(v), v)))
+    sel.addDone()
     sel
 
   given SelectionConfig = new SelectionConfig{}

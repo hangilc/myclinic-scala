@@ -46,16 +46,6 @@ object PatientManip:
     ele(displayNone)
   })
 
-  // PracticeBus.patientVisitChanged.subscribe {
-  //   case NoSelection => ele(displayNone)
-  //   case Browsing(_) | PracticeDone(_, _) =>
-  //     ele(displayDefault)
-  //     cashierButton(enabled := false)
-  //   case Practicing(_, _) =>
-  //     ele(displayDefault)
-  //     cashierButton(enabled := true)
-  // }
-
   def doGazouList(): Unit =
     PracticeBus.currentPatient.map(_.patientId).foreach(patientId => 
       for
@@ -114,15 +104,3 @@ object PatientManip:
       case _ => ()
     }
 
-    // PracticeBus.currentPatientVisitState match {
-    //   case Practicing(patient, visitId) => 
-    //     cashierTask.run(Api.getMeisai(visitId), meisai =>
-    //         val dlog = CashierDialog(meisai, visitId, () =>
-    //           updateWqueueStateTask.run(Api.changeWqueueState(visitId, WaitState.WaitCashier), _ =>
-    //             PracticeBus.setPatientVisitState(PracticeDone(patient, visitId))
-    //             PracticeBus.setPatientVisitState(NoSelection)
-    //           ))
-    //         dlog.open()
-    //     )
-    //   case _ => ()
-    // }
