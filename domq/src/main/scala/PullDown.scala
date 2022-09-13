@@ -63,7 +63,8 @@ class PullDownMenu:
 
 class PullDown(
     val anchor: HTMLElement,
-    mkMenu: () => Future[List[(String, () => Unit)]]
+    mkMenu: () => Future[List[(String, () => Unit)]],
+    contentCallback: HTMLElement => Unit = (_ => ())
 ):
   anchor(onclick := (onClick _))
 
@@ -72,6 +73,7 @@ class PullDown(
     for items <- mkMenu()
     yield
       val content: HTMLElement = pm.createContent(items)
+      contentCallback(content)
       pm.open(content, fe => PullDown.locate(anchor, fe))
 
 object PullDown:
@@ -111,6 +113,13 @@ object PullDown:
       commands: List[(String, () => Unit)]
   ): Unit =
     PullDown(e, () => Future.successful(commands))
+
+  def attachPullDownWithCallback(
+      e: HTMLElement,
+      commands: List[(String, () => Unit)],
+      callback: HTMLElement => Unit
+  ): Unit =
+    PullDown(e, () => Future.successful(commands), callback)
 
   def attachPullDown(
       e: HTMLElement,

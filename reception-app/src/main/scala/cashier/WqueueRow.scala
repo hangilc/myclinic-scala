@@ -72,7 +72,7 @@ case class WqueueRow(var wqueue: Wqueue, visit: Visit, var patient: Patient)(usi
       "患者" -> doPatient,
       "削除" -> doDelete
     )
-    PullDown.attachPullDown(icon, commands)
+    PullDown.attachPullDownWithCallback(icon, commands, c => c(cls := "reception-cashier-wqueue-row-commands"))
     manageCell(icon(cls := "domq-cursor-pointer"))
 
   private def doCashier(): Unit =

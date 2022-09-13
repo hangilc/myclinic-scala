@@ -87,6 +87,14 @@
     margin: 0;
 }
 
+.reception-cashier-wqueue-table-row:nth-child(odd) {
+    background-color: #eee;
+}
+
+.domq-pull-down-wrapper .reception-cashier-wqueue-row-commands a {
+    color: #007bff;
+}
+
 .reception-cashier-search-patient-result-dialog .selection {
     max-width: 240px;
 }
