@@ -192,6 +192,10 @@ button {
   padding-left: 5px;
 }
 
+.practice-shinryou-search-dialog .domq-search-form-selection {
+  width: 300px;
+}
+
 .practice-widget {
   margin: 6px 0;
   border: 1px solid gray;

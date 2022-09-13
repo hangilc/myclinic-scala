@@ -14,6 +14,7 @@ case class SearchDialog(at: LocalDate, visitId: Int):
     text => Api.searchShinryouMaster(text, at)
   )
   val dlog = new ModalDialog3()
+  dlog.content(cls := "practice-shinryou-search-dialog")
   dlog.title("診療行為検索入力")
   dlog.body(form.ele)
   dlog.commands(
