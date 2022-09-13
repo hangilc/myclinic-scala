@@ -20,6 +20,7 @@ case class Edit(
     disp.updateUI()  
   )
   val ele = div(
+    cls := "practice-disease-edit",
     disp.ele,
     div(button("編集", onclick := (doEdit _))),
     selection.ele
@@ -37,8 +38,22 @@ object Edit:
       byoumeiMaster: ByoumeiMaster,
       adjList: List[(DiseaseAdj, ShuushokugoMaster)]
   ):
+    val name = DiseaseUtil.diseaseNameOf(byoumeiMaster, adjList.map(_._2))
+    val tenki = disease.endReason.label
+    val range = disease.endReason match {
+      case DiseaseEndReason.NotEnded => KanjiDate.dateToKanji(disease.startDate)
+      case _ => 
+        val a = KanjiDate.dateToKanji(disease.startDate)
+        val b = disease.endDate.value.fold("")(d => KanjiDate.dateToKanji(d))
+        s"${a} - ${b}"
+    }
     val ele = div(
-      DiseaseUtil.diseaseNameOf(byoumeiMaster, adjList.map(_._2))
+      span(name, cls := "byoumei"),
+      "（",
+      span(tenki, cls := "tenki"),
+      "、",
+      span(range, cls := "span"),
+      "）"
     )
 
   case class Disp(

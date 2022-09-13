@@ -367,3 +367,12 @@ button {
   color: #ff0800;
 }
 
+.practice-disease-edit .byoumei {
+  font-weight: bold;
+  color: #ff0800;
+}
+
+.practice-disease-edit .tenki {
+  font-weight: bold;
+  color: green;
+}
