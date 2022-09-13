@@ -21,8 +21,11 @@ case class SearchDialog(at: LocalDate, visitId: Int):
     button("閉じる", onclick := (() => dlog.close()))
   )
 
-  def open: Unit =
+  def open(): Unit =
     dlog.open()
+
+  def initFocus(): Unit =
+    form.initFocus()
 
   def doEnter(): Unit =
     form.selected.foreach(master => {

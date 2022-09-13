@@ -48,7 +48,8 @@ case class ShinryouMenu(at: LocalDate, visitId: Int):
 
   def doSearch(): Unit =
     val dlog = SearchDialog(at, visitId)
-    dlog.open
+    dlog.open()
+    dlog.initFocus()
 
   def doDeleteDuplicate(): Unit =
     for
