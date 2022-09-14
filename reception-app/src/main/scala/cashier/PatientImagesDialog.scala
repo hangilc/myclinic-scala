@@ -48,7 +48,14 @@ case class PatientImagesDialog(patient: Patient, files: List[FileInfo]):
       display(url, patient, file.name)
 
   def doFilter(): Unit =
-    ()
+    val txt = filterInput.value.trim
+    val filtered: List[FileInfo] = 
+      if !txt.isEmpty then
+        files.filter(_.name.contains(txt))
+      else files
+    select.clear()
+    select.addAll(filtered.map(mkItem(_)))
+    select.addDone()
 
 object PatientImagesDialog:
   def open(patient: Patient): Unit =
