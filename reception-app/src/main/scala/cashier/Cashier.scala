@@ -26,7 +26,7 @@ class Cashier extends SideMenuService:
     ReceptionBus.wqueueCreatedPublisher.subscribe(onWqueueCreated),
     ReceptionBus.wqueueDeletedPublisher.subscribe(onWqueueDeleted)
   )
-  val searchTextInput = input
+  val searchTextInput = inputText
   val recordsMenu = new SelectPatientPullDown()
   recordsMenu.onSelectPublisher.subscribe(patient => 
     val dlog = new RecordDialog(patient)

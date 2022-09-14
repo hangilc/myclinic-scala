@@ -21,10 +21,19 @@ case class PatientImagesDialog(patient: Patient, files: List[FileInfo]):
     files.map(mkItem),
     (onSelect _)
   )(using selectConfig)
+  val filterArea = div
+  val filterInput = inputText
   dlog.setTitle(s"保存画像（${patient.fullName()}）")
   dlog.body(
+    filterArea(
+      displayNone,
+      span("フィルター", cls := "filter-label"),
+      filterInput,
+      button("適用", onclick := (doFilter _))
+    ),
     select.ele
   )
+  if files.size > 10 then filterArea(displayDefault)
 
   def open(): Unit =
     dlog.open()
@@ -37,6 +46,9 @@ case class PatientImagesDialog(patient: Patient, files: List[FileInfo]):
       window.open(url, "_blank")
     else
       display(url, patient, file.name)
+
+  def doFilter(): Unit =
+    ()
 
 object PatientImagesDialog:
   def open(patient: Patient): Unit =
@@ -55,7 +67,6 @@ object PatientImagesDialog:
     val dlog = new ModalDialog3()
     dlog.setTitle("画像閲覧")
     dlog.body(
-      div(button("閉じる", onclick := (() => dlog.close()))),
       div(s"(${patient.patientId}) ${patient.fullName()}"),
       div(filename),
       div(

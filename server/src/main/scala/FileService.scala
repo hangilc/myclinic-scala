@@ -126,6 +126,8 @@ object FileService extends DateTimeQueryParam with Publisher:
                 .getBasicFileAttributes(path)
                 .map(attr =>
                   val ctime = FileInfo.fromTimestamp(attr.creationTime)
+                  println(path.fileName)
+                  println(attr.creationTime)
                   FileInfo(path.fileName.toString, ctime, attr.size)
                 )
             )
