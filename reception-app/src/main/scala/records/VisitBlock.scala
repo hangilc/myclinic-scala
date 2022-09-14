@@ -44,6 +44,8 @@ class VisitBlock(visit: VisitEx):
     )
   )
 
+  def visitId: Int = visit.visitId
+
   def chargeElement(chargeOption: Option[Charge]): HTMLElement =
     chargeOption match {
       case None => div("（未請求）")

@@ -16,7 +16,8 @@ import dev.fujiwara.domq.ResourceCleanups
 import dev.myclinic.scala.web.reception.ReceptionBus
 import dev.myclinic.scala.web.reception.scan.PatientSearch
 
-case class WqueueRow(var wqueue: Wqueue, visit: Visit, var patient: Patient)(using
+case class WqueueRow(var wqueue: Wqueue, visit: Visit, var patient: Patient)(
+    using
     DataId[Wqueue],
     ModelSymbol[Wqueue]
 ):
@@ -31,7 +32,8 @@ case class WqueueRow(var wqueue: Wqueue, visit: Visit, var patient: Patient)(usi
   val ele = Table.createRow(
     List(
       Table.cell(cls := "cell-state cell", stateLabelCell(cls := "content")),
-      Table.cell(cls := "cell-patient-id cell", patientIdCell(cls := "content")),
+      Table
+        .cell(cls := "cell-patient-id cell", patientIdCell(cls := "content")),
       Table.cell(cls := "cell-name cell", nameCell(cls := "content")),
       Table.cell(cls := "cell-yomi cell", yomiCell(cls := "content")),
       Table.cell(cls := "cell-sex cell", sexCell(cls := "content")),
@@ -40,11 +42,16 @@ case class WqueueRow(var wqueue: Wqueue, visit: Visit, var patient: Patient)(usi
       Table.cell(cls := "cell-manip cell", manageCell(cls := "content"))
     )
   )
-  ele(cls := "reception-cashier-wqueue-table-row", attr("data-visit-id") := wqueue.visitId.toString)
+  ele(
+    cls := "reception-cashier-wqueue-table-row",
+    attr("data-visit-id") := wqueue.visitId.toString
+  )
   updateUI()
 
-  val unsubs = List(ReceptionBus.wqueueUpdatedPublisher.subscribe(onWqueueUpdated),
-  ReceptionBus.patientUpdatedPublisher.subscribe(onPatientUpdated))
+  val unsubs = List(
+    ReceptionBus.wqueueUpdatedPublisher.subscribe(onWqueueUpdated),
+    ReceptionBus.patientUpdatedPublisher.subscribe(onPatientUpdated)
+  )
 
   private def onWqueueUpdated(updated: Wqueue): Unit =
     if updated.visitId == wqueue.visitId then
@@ -64,7 +71,7 @@ case class WqueueRow(var wqueue: Wqueue, visit: Visit, var patient: Patient)(usi
     manageCell(a("削除", onclick := (doDelete _)))
 
   private def addRecordsLink(): Unit =
-    manageCell(a("診療録", onclick := (doRecords _)))
+    manageCell(a("診療録", onclick := (() => doRecords(wqueue.visitId))))
 
   private def addMenuPullDown(): Unit =
     val icon = Icons.menuAlt1
@@ -72,7 +79,11 @@ case class WqueueRow(var wqueue: Wqueue, visit: Visit, var patient: Patient)(usi
       "患者" -> doPatient,
       "削除" -> doDelete
     )
-    PullDown.attachPullDownWithCallback(icon, commands, c => c(cls := "reception-cashier-wqueue-row-commands"))
+    PullDown.attachPullDownWithCallback(
+      icon,
+      commands,
+      c => c(cls := "reception-cashier-wqueue-row-commands")
+    )
     manageCell(icon(cls := "domq-cursor-pointer"))
 
   private def doCashier(): Unit =
@@ -93,15 +104,14 @@ case class WqueueRow(var wqueue: Wqueue, visit: Visit, var patient: Patient)(usi
     dlog.open()
 
   private def deleteVisit(): Unit =
-    (for
-      _ <- Api.deleteVisitFromPatient(wqueue.visitId)
+    (for _ <- Api.deleteVisitFromPatient(wqueue.visitId)
     yield ()).onComplete {
-      case Success (_) => ()
+      case Success(_)  => ()
       case Failure(ex) => ShowMessage.showError("この受付を削除できませんでした。")
     }
 
-  private def doRecords(): Unit =
-    val dlog = new RecordDialog(patient)
+  private def doRecords(visitId: Int): Unit =
+    val dlog = new RecordDialog(patient, visitId)
     dlog.open()
 
   def updateManageCell(): Unit =
@@ -109,14 +119,12 @@ case class WqueueRow(var wqueue: Wqueue, visit: Visit, var patient: Patient)(usi
     manageCell(clear)
     wqueue.waitState match {
       case WaitExam | WaitReExam => ()
-      case WaitCashier => 
+      case WaitCashier =>
         addCashierButton()
       case _ => ()
     }
     addRecordsLink()
     addMenuPullDown()
-    // addPatientLink()
-    // addDeleteLink()
 
   private def updateStateLabel(): Unit =
     stateLabelCell(innerText := wqueue.waitState.label)
@@ -139,5 +147,4 @@ case class WqueueRow(var wqueue: Wqueue, visit: Visit, var patient: Patient)(usi
 object WqueueRow:
   given Ordering[WqueueRow] = Ordering.by(_.wqueue.visitId)
   given Comp[WqueueRow] = _.ele
-  given Dispose[WqueueRow] = row => 
-    row.unsubs.foreach(_.proc())
+  given Dispose[WqueueRow] = row => row.unsubs.foreach(_.proc())

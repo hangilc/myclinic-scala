@@ -199,6 +199,10 @@
   padding: 3px 6px;
 }
 
+.visit-block.focus .visit-title {
+  background-color: orange;
+}
+
 .visit-block .visit-record {
   display: grid;
   grid-template-columns: 50% 50%;

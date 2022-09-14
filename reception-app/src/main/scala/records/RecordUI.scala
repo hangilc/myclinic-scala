@@ -18,8 +18,7 @@ import scala.util.Failure
 import java.time.LocalDate
 import dev.myclinic.scala.util.Misc.countPages
 
-class RecordUI(patientId: Int):
-  // val patientBlock = PatientBlock(patient)
+class RecordUI(patientId: Int, visitBlockModifier: VisitBlock => Unit = (_ => ())):
   val eRecords: HTMLElement = div()
   var totalVisits: Int = 0
   var itemsPerPage = 10
@@ -27,7 +26,6 @@ class RecordUI(patientId: Int):
   val navs: List[RecordNav] =
     List(new RecordNav(gotoPage _), new RecordNav(gotoPage _))
   val ele = div(cls := "record")(
-    // patientBlock.ele,
     navs(0).ele(cls := "records-nav"),
     eRecords(cls := "records"),
     navs(1).ele(cls := "records-nav")
@@ -64,5 +62,10 @@ class RecordUI(patientId: Int):
       setVisits(visits)
     }
 
+  def mkVisitBlock(visitEx: VisitEx): VisitBlock =
+    val b = VisitBlock(visitEx)
+    visitBlockModifier(b)
+    b
+
   def setVisits(visits: List[VisitEx]): Unit =
-    eRecords(clear, children := visits.map(VisitBlock(_).ele))
+    eRecords(clear, children := visits.map(mkVisitBlock(_).ele))
