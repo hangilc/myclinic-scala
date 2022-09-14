@@ -126,14 +126,13 @@ object FileService extends DateTimeQueryParam with Publisher:
                 .getBasicFileAttributes(path)
                 .map(attr =>
                   val ctime = FileInfo.fromTimestamp(attr.creationTime)
-                  println(path.fileName)
-                  println(attr.creationTime)
                   FileInfo(path.fileName.toString, ctime, attr.size)
                 )
             )
             .compile
             .toList
-        yield list.sortBy(fi => fi.createdAt).reverse
+        yield 
+          list.sortBy(fi => fi.createdAt).reverse
       Ok(op)
 
     case GET -> Root / "get-patient-image" :? intPatientId(
