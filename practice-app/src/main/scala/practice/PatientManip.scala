@@ -47,19 +47,22 @@ object PatientManip:
   })
 
   def doGazouList(): Unit =
-    PracticeBus.currentPatient.map(_.patientId).foreach(patientId => 
-      for
-        files <- Api.listPatientImage(patientId)
-      yield
-        val dlog = GazouListDialog(patientId, files)
-        dlog.open()
-    )
+    PracticeBus.currentPatient
+      .map(_.patientId)
+      .foreach(patientId =>
+        for files <- Api.listPatientImage(patientId)
+        yield
+          val dlog = GazouListDialog(patientId, files)
+          dlog.open()
+      )
 
   def doImageUpload(): Unit =
-    PracticeBus.currentPatient.map(_.patientId).foreach(patientId => 
-      val dlog = PatientImageUploadIdalog(patientId)
-      dlog.open()
-    )
+    PracticeBus.currentPatient
+      .map(_.patientId)
+      .foreach(patientId =>
+        val dlog = PatientImageUploadIdalog(patientId)
+        dlog.open()
+      )
 
   def doSearchText(): Unit =
     PracticeBus.currentPatient.foreach(patient =>
@@ -72,15 +75,18 @@ object PatientManip:
   def doRegisterPractice(): Unit =
     PracticeBus.currentPatient.foreach(patient =>
       val fut = Api.startVisit(patient.patientId, LocalDateTime.now())
-      registerPracticeTask.run(fut, visit => 
-        PracticeBus.currentPatientState match {
-          case Some(State(patient, None)) => 
-            PracticeBus.patientStateController.startPatient(patient, Some(visit.visitId))
-          case Some(State(patient, Some(visitId))) =>
-            val cur = PracticeBus.navPageChanged.currentValue
-            RecordsHelper.refreshRecords(Some(patient), cur)
-          case None => ()
-        }
+      registerPracticeTask.run(
+        fut,
+        visit =>
+          PracticeBus.currentPatientState match {
+            case Some(State(patient, None)) =>
+              PracticeBus.patientStateController
+                .startPatient(patient, Some(visit.visitId))
+            case Some(State(patient, Some(visitId))) =>
+              val cur = PracticeBus.navPageChanged.currentValue
+              RecordsHelper.refreshRecords(Some(patient), cur)
+            case None => ()
+          }
       )
     )
 
@@ -88,19 +94,23 @@ object PatientManip:
     PracticeBus.patientStateController.endPatient()
 
   private val cashierTask = new SingleTask[Meisai]
-  private val updateWqueueStateTask = new SingleTask[Wqueue]
 
   def doCashier(): Unit =
     PracticeBus.currentPatientState match {
       case Some(State(patientId, Some(visitId))) => {
-        cashierTask.run(Api.getMeisai(visitId), meisai =>
-            val dlog = CashierDialog(meisai, visitId, () =>
-              updateWqueueStateTask.run(Api.changeWqueueState(visitId, WaitState.WaitCashier), _ =>
-                PracticeBus.patientStateController.endPatient(WaitState.WaitCashier)
-              ))
+        cashierTask.run(
+          Api.getMeisai(visitId),
+          meisai =>
+            val dlog = CashierDialog(
+              meisai,
+              visitId,
+              () =>
+                PracticeBus.patientStateController.endPatient(
+                  WaitState.WaitCashier
+                )
+            )
             dlog.open()
         )
       }
       case _ => ()
     }
-

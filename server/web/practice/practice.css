@@ -71,6 +71,10 @@ button {
   margin-bottom: 10px;
 }
 
+.practice-records-wrapper {
+  margin-top: 10px;
+}
+
 .practice-visit {
   margin-bottom: 10px;
 }
@@ -379,4 +383,19 @@ button {
 .practice-disease-edit .tenki {
   font-weight: bold;
   color: green;
+}
+
+.practice-cashier-dialog .change-charge-form {
+  border: 1px solid gray;
+  border-radius: 4px;
+  padding: 10px;
+}
+
+.practice-cashier-dialog .en-label {
+  margin-left: 2px;
+  margin-right: 6px;
+}
+
+.practice-cashier-dialog .mishuu-check-label-wrapper {
+  margin-right: 6px;
 }

@@ -11,7 +11,7 @@ import dev.myclinic.scala.web.practiceapp.PracticeBus
 
 class RecordsWrapper:
   import RecordsWrapper as Helper
-  val ele = div()
+  val ele = div(cls := "practice-records-wrapper")
   val records: CompSortList[Record] = new CompSortList[Record](ele)
 
   val unsubscribers = List(
