@@ -10,7 +10,7 @@ import dev.myclinic.scala.model.Payment
 import java.time.LocalDateTime
 import dev.myclinic.scala.model.WaitState
 
-case class CashierDialog(meisai: Meisai, visitId: Int, onDone: () => Unit):
+case class CashierDialog(meisai: Meisai, visitId: Int, onDone: Option[WaitState] => Unit):
   private var chargeValue: Int = meisai.charge
   val formWrapper = div
   val chargeWrapper = span
@@ -83,7 +83,8 @@ case class CashierDialog(meisai: Meisai, visitId: Int, onDone: () => Unit):
       _ <- Api.enterChargeValue(visitId, chargeValue)
       _ <- Api.changeWqueueState(visitId, WaitState.WaitCashier)
     yield
-      finishEnter()
+      dlog.close()
+      onDone(Some(WaitState.WaitCashier))
 
   def doMishuuEnter(): Unit =
     for 
@@ -93,11 +94,8 @@ case class CashierDialog(meisai: Meisai, visitId: Int, onDone: () => Unit):
         Api.finishCashier(pay)
       }
     yield
-      finishEnter()
-
-  def finishEnter(): Unit =
-    dlog.close()
-    onDone()
+      dlog.close()
+      onDone(None)
 
   def open(): Unit =
     dlog.open()

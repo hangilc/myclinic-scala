@@ -45,12 +45,15 @@ class PatientStateController:
     yield ()
 
   def endPatient(): Future[Unit] =
-    closeCurrent(WaitState.WaitReExam)
+    closeCurrent(Some(WaitState.WaitReExam))
 
   def endPatient(state: WaitState): Future[Unit] =
-    closeCurrent(state)
+    closeCurrent(Some(state))
 
-  private def closeCurrent(state: WaitState): Future[Unit] =
+  def endPatient(stateOpt: Option[WaitState]): Future[Unit] =
+    closeCurrent(stateOpt)
+
+  private def closeCurrent(stateOpt: Option[WaitState]): Future[Unit] =
     val curSave = cur
     cur = None
     val op = curSave match {
@@ -59,8 +62,14 @@ class PatientStateController:
         patientClosingPublisher.publish(s)
         Future.successful(())
       case Some(s @ State(patientId, Some(visitId))) =>
-        patientClosingPublisher.publish(s)
-        Api.changeWqueueState(visitId, state).map(_ => ())
+        stateOpt match {
+          case None =>
+            patientClosingPublisher.publish(s)
+            Future.successful(())
+          case Some(state) =>
+            patientClosingPublisher.publish(s)
+            Api.changeWqueueState(visitId, state).map(_ => ())
+        }
     }
     for _ <- op
     yield ()

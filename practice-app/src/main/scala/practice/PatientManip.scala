@@ -104,10 +104,8 @@ object PatientManip:
             val dlog = CashierDialog(
               meisai,
               visitId,
-              () =>
-                PracticeBus.patientStateController.endPatient(
-                  WaitState.WaitCashier
-                )
+              stateOpt =>
+                PracticeBus.patientStateController.endPatient(stateOpt)
             )
             dlog.open()
         )
