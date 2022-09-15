@@ -15,6 +15,7 @@ import dev.myclinic.scala.web.practiceapp.practice.PatientStateController
 import dev.myclinic.scala.web.practiceapp.practice.PatientStateController.State
 import dev.myclinic.scala.web.practiceapp.practice.TempVisitController
 import dev.fujiwara.domq.SubscriberChannel
+import dev.myclinic.scala.web.appbase.reception.ReceptionSubscriberChannels
 
 object PracticeBus:
   val addRightWidgetRequest = LocalEventPublisher[RightWidget]
@@ -34,20 +35,6 @@ object PracticeBus:
   def currentTempVisitId: Option[Int] = tempVisitController.currentTempVisitId
   def copyTarget: Option[VisitId] = currentVisitId orElse currentTempVisitId
 
-  // val patientVisitChanging = LocalEventPublisher[(PatientVisitState, PatientVisitState)]
-  // val patientVisitChanged = LocalEventPublisher[PatientVisitState]
-  // val tempVisitIdChanged = CachingEventPublisher[Option[Int]](None)
-  // def currentPatientVisitState: PatientVisitState = pvState
-  // def currentPatient: Option[Patient] = pvState.patientOption
-  // def currentVisitId: Option[Int] = pvState.visitIdOption
-  // def currentTempVisitId: Option[Int] = tempVisitIdChanged.currentValue
-  // def copyTarget: Option[VisitId] = currentVisitId orElse currentTempVisitId
-  // def setPatientVisitState(newState: PatientVisitState): Unit =
-  //   patientVisitChanging.publish((pvState, newState))
-  //   tempVisitIdChanged.publish(None)
-  //   pvState = newState
-  //   patientVisitChanged.publish(pvState)
-    
   val navPageChanged = CachingEventPublisher[Int](0)
   val navSettingChanged = LocalEventPublisher[(Int, Int)]
 
@@ -67,6 +54,7 @@ object PracticeBus:
   val wqueueUpdated = LocalEventPublisher[Wqueue]
   val wqueueDeleted = LocalEventPublisher[Wqueue]
   val visitUpdated = LocalEventPublisher[VisitEx]
+  val patientUpdated = LocalEventPublisher[Patient]
 
   val hokenInfoChanged = LocalEventPublisher[(VisitId, HokenInfo)]
 
@@ -83,4 +71,12 @@ object PracticeBus:
   patientClosingSubscriberChannel.subscribe(s => clearMishuuList())
 
   val twilioPhone = new TwilioPhone(Api.getWebphoneToken)
+
+  def receptionSubscriberChannels: ReceptionSubscriberChannels =
+    new ReceptionSubscriberChannels:
+      def wqueueCreatedChannel = wqueueEntered
+      def wqueueUpdatedChannel = wqueueUpdated
+      def wqueueDeletedChannel = wqueueDeleted
+      def patientUpdatedChannel = patientUpdated
+    
   

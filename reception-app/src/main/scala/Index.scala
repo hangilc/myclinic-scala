@@ -4,7 +4,7 @@ import dev.fujiwara.domq.all.{_, given}
 import dev.myclinic.scala.web.appbase.PageLayout1
 import dev.myclinic.scala.web.appbase.SideMenuProcs
 import dev.myclinic.scala.web.appbase.SideMenuService
-import dev.myclinic.scala.web.reception.cashier.Cashier
+import dev.myclinic.scala.web.appbase.reception.Cashier
 import dev.myclinic.scala.web.reception.scan.Scan
 import dev.myclinic.scala.webclient.global
 import org.scalajs.dom.document
@@ -14,6 +14,7 @@ import scala.scalajs.js.annotation.JSExport
 import scala.scalajs.js.annotation.JSExportTopLevel
 import scala.util.Failure
 import scala.util.Success
+import dev.myclinic.scala.web.appbase.reception.ReceptionSubscriberChannels
 
 @JSExportTopLevel("JsMain")
 object JsMain:
@@ -23,7 +24,10 @@ object JsMain:
       mock: Boolean
   ): List[(String, SideMenuProcs => SideMenuService)] =
     List(
-      "メイン" -> (_ => new Cashier()),
+      "メイン" -> (_ => {
+        given ReceptionSubscriberChannels = ReceptionBus.subscriberChannels
+        new Cashier()
+      }),
       "スキャン" -> (_ => Scan(mock))
     )
 

@@ -16,6 +16,11 @@ body {
   box-sizing: border-box;
 }
 
+a {
+  color: #007bff;
+  word-break: keep-all;
+}
+
 a, a:link, a:visited, a:hover, a:active {
   text-decoration: none;
   padding: 2px;
@@ -28,6 +33,7 @@ a:hover {
 button {
   margin-top: 2px;
   margin-bottom: 2px;
+  min-height: 1.68rem;
 }
 
 button + button {

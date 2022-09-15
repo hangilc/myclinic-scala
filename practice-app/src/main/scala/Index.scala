@@ -24,6 +24,8 @@ import dev.myclinic.scala.web.practiceapp.phone.PhoneService
 import dev.myclinic.scala.util.NumberUtil.format
 import scala.util.Success
 import scala.util.Failure
+import dev.myclinic.scala.web.appbase.reception.ReceptionSubscriberChannels
+import dev.myclinic.scala.web.appbase.reception.Cashier
 
 class JsMain(using EventFetcher):
   val ui = new PageLayout1("practice", "reception")
@@ -40,7 +42,10 @@ class JsMain(using EventFetcher):
     List(
       "診察" -> (_ => PracticeService()),
       "会計" -> (_ => CashierService()),
-      "受付" -> (_ => MockSideMenuService("受付")),
+      "受付" -> (_ => {
+        given ReceptionSubscriberChannels = PracticeBus.receptionSubscriberChannels
+        new Cashier()
+      }),
       "ファックス済処方箋" -> (_ => MockSideMenuService("ファックス済処方箋")),
       "訪問看護" -> (_ => MockSideMenuService("訪問看護")),
       "主治医意見書" -> (_ => MockSideMenuService("主治医意見書")),
@@ -96,6 +101,8 @@ object JsMain:
       PracticeBus.chargeEntered.publish(charge)
     override def onChargeUpdated(charge: Charge): Unit =
       PracticeBus.chargeUpdated.publish(charge)
+    override def onPatientUpdated(patient: Patient): Unit =
+      PracticeBus.patientUpdated.publish(patient)
 
   given fetcher: EventFetcher = new EventFetcher
   fetcher.appModelEventPublisher.subscribe(event => publishers.publish(event))

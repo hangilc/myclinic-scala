@@ -1,7 +1,3 @@
-@import url("./reception-css/reception-general.css");
-@import url("./reception-css/cashier.css");
-@import url("./reception-css/cashier-record-dialog.css");
-
 .reception-service-title {
   font-size: 1.5rem;
 }
@@ -10,6 +6,15 @@
   content: "「年」「月」をクリックできます。";
   font-size: 75%;
   color: gray;
+}
+
+#page-layout1-banner {
+  background-color: #17a2b8;
+  color: white;
+}
+
+.table .header {
+  font-weight: bold;
 }
 
 /* Patient Management ***************************************************************/
