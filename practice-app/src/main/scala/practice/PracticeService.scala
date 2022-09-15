@@ -81,8 +81,11 @@ object PatientSelector:
     )
 
   private def startVisit(patient: Patient): Unit =
-    for visit <- Api.startVisit(patient.patientId, LocalDateTime.now())
-    yield println(visit)
+    for 
+      visit <- Api.startVisit(patient.patientId, LocalDateTime.now())
+    yield 
+      if PracticeBus.currentVisitId.isEmpty then
+        PracticeBus.patientStateController.startPatient(patient, Some(visit.visitId))
 
   def searchShohouSample(): Unit =
     ShohouSampleDialog.open()
