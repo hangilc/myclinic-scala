@@ -82,6 +82,15 @@ body {
   background-color: #e7feff;
 }
 
+.appoint-time-box.appoint-covid-vac-pfizer-om {
+  border: 2px solid green
+}
+
+.appoint-time-box.appoint-covid-vac-pfizer-om.vacant {
+  border: 2px solid green;
+  background-color: #efe;
+}
+
 .appoint-time-box.appoint-covid-vac-moderna {
   border: 2px solid orange
 }
