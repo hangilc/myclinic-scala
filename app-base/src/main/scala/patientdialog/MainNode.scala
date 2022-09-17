@@ -16,7 +16,6 @@ case class Main(state: State) extends TransNode[State](state):
     dlog.changeTitle("患者情報")
     val hokenArea = div
     val dispElement = new PatientReps(Some(state.patient)).dispPanel
-    dlog.title(clear, "患者情報")
     dlog.body(
       clear,
       div(
