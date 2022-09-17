@@ -390,9 +390,9 @@ object Icons:
       cls := "domq-icon",
     )(paths: _*)
 
-  private def makeIcon(
-    size: String,
-    color: String,
-    ds: List[String]
-  ): HTMLElement = ???
+  // private def makeIcon(
+  //   size: String,
+  //   color: String,
+  //   ds: List[String]
+  // ): HTMLElement = ???
 

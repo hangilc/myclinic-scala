@@ -73,6 +73,7 @@
 .domq-modal-dialog3-title.has-x {
   display: flex;
   justify-content: space-between;
+  align-items: center;
 }
 
 .domq-modal-dialog3-title .x-icon {

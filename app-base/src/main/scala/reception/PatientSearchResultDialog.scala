@@ -13,11 +13,16 @@ import dev.myclinic.scala.web.appbase.*
 import org.scalajs.dom.HTMLElement
 import scala.util.Success
 import scala.util.Failure
+import dev.myclinic.scala.web.appbase.patientdialog.PatientDialog
 
 case class PatientSearchResultDialog(patients: List[Patient]):
-  val selection = Selection.make[Patient](patients, p => div(format(p)))
-  selection.onSelect(patient => start(patient, disp))
   val dlog = new ModalDialog3()
+  val selection = Selection.make[Patient](patients, p => div(format(p)))
+  selection.onSelect(patient => {
+    dlog.close()
+    PatientDialog.open(patient)
+    // start(patient, disp)
+  })
   dlog.content(cls := "reception-cashier-search-patient-result-dialog")
   dlog.title("患者検索結果")
   dlog.body(
