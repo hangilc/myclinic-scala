@@ -66,7 +66,7 @@ case class Main(state: State) extends TransNode[State](state):
               inputs <- createKoukikoureiInputs(None)
             yield
               {
-                // next(GoForward(newKoukikourei(inputs), state))
+                goForward(s => NewKoukikoureiNode(state, inputs))
               }
             ()
           )
