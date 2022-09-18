@@ -20,7 +20,7 @@ case class NewShahokokuhoNode(state: State) extends TransNode[State](state):
     val inputs = new ShahokokuhoInputs(None)
     val errBox = ErrorBox()
     val dlog = state.dialog
-    dlog.title(clear, "新規社保国保")
+    dlog.changeTitle("新規社保国保")
     dlog.body(
       clear,
       patientBlock(state.patient),

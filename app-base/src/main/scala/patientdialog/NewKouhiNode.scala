@@ -15,13 +15,14 @@ import dev.myclinic.scala.web.appbase.PatientInputs
 import Common.*
 import dev.myclinic.scala.web.appbase.ShahokokuhoInputs
 import dev.myclinic.scala.web.appbase.KoukikoureiInputs
+import dev.myclinic.scala.web.appbase.KouhiInputs
 
-case class NewKoukikoureiNode(state: State, inputs: KoukikoureiInputs)
-    extends TransNode[State](state):
+case class NewKouhiNode(state: State) extends TransNode[State](state):
   override def init(): Unit =
+    val inputs = new KouhiInputs(None)
     val errBox = ErrorBox()
     val dlog = state.dialog
-    dlog.changeTitle("後期高齢入力")
+    dlog.changeTitle("公費入力")
     dlog.body(
       clear,
       patientBlock(state.patient),
@@ -35,8 +36,8 @@ case class NewKoukikoureiNode(state: State, inputs: KoukikoureiInputs)
         onclick := (() =>
           inputs.validateForEnter(state.patient.patientId) match {
             case Left(msg) => errBox.show(msg)
-            case Right(formKoukikourei) =>
-              for entered <- Api.enterKoukikourei(formKoukikourei)
+            case Right(formKouhi) =>
+              for entered <- Api.enterKouhi(formKouhi)
               yield goBack(state.add(entered))
           }
           ()

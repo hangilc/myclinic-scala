@@ -75,7 +75,7 @@ case class Main(state: State) extends TransNode[State](state):
         a(
           "新規公費",
           onclick := (() => {
-            // next(GoForward(newKouhi(new KouhiInputs(None)), state))
+            goForward(NewKouhiNode.apply)
           })
         ),
         "|",
