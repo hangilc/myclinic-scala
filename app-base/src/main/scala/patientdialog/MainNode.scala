@@ -8,6 +8,9 @@ import dev.myclinic.scala.web.appbase.PatientReps
 import dev.myclinic.scala.apputil.HokenUtil
 import dev.myclinic.scala.webclient.{Api, global}
 import dev.myclinic.scala.web.appbase.reception.PatientImagesDialog
+import java.time.LocalDateTime
+import scala.util.Success
+import scala.util.Failure
 
 case class Main(state: State) extends TransNode[State](state):
   import Common.*
@@ -38,7 +41,7 @@ case class Main(state: State) extends TransNode[State](state):
         button(
           "診察受付",
           onclick := (() => {
-            // next(GoForward(doRegister, state))
+            doRegister()
           })
         ),
         button("閉じる", onclick := (() => goExit()))
@@ -46,13 +49,12 @@ case class Main(state: State) extends TransNode[State](state):
       div(
         cls := "domq-mt-4 reception-cashier-patient-search-result-dialog-disp-link-commands",
         a("編集", onclick := (() => {
-          // next(GoForward(editPatient, state))
+          goForward(EditPatientNode.apply, state)
         })),
         "|",
         a(
           "新規社保国保",
           onclick := (() => {
-            // next(GoForward(newShahokokuho(new ShahokokuhoInputs(None)), state))
           })
         ),
         "|",
@@ -106,5 +108,13 @@ case class Main(state: State) extends TransNode[State](state):
         // next(GoForward(dispRoujin(r.roujinId), state))
         ()
     }
+
+  private def doRegister(): Unit =
+    val patient: Patient = state.patient
+    Api.startVisit(patient.patientId, LocalDateTime.now()).onComplete {
+      case Success(_) => goExit()
+      case Failure(ex) => ShowMessage.showError(ex.toString)
+    }
+
 
 
