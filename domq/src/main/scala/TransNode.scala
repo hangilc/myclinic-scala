@@ -9,8 +9,11 @@ abstract class TransNode[T](state: T):
   var onGoExit: (newState: T) => Unit = _ => ???
   def init(): Unit
   def goForward(tmpl: T => TransNode[T], newState: T): Unit = onGoForward(tmpl, newState)
+  def goForward(tmpl: T => TransNode[T]): Unit = goForward(tmpl, state)
   def goReplacing(tmpl: T => TransNode[T], newState: T): Unit = onGoReplacing(tmpl, newState)
+  def goReplacing(tmpl: T => TransNode[T]): Unit = goReplacing(tmpl, state)
   def goBack(newState: T): Unit = onGoBack(newState)
+  def goBack(): Unit = goBack(state)
   def goExit(): Unit = onGoExit(state)
 
 class TransNodeRuntime[T]:

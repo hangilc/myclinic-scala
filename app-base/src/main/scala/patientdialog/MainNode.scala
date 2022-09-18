@@ -55,6 +55,7 @@ case class Main(state: State) extends TransNode[State](state):
         a(
           "新規社保国保",
           onclick := (() => {
+            goForward(NewShahokokuhoNode.apply, state)
           })
         ),
         "|",
