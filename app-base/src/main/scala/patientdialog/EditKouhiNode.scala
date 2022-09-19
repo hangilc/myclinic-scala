@@ -15,7 +15,35 @@ import dev.myclinic.scala.web.appbase.PatientInputs
 import Common.*
 import dev.myclinic.scala.web.appbase.KouhiInputs
 
-case class EditKouhiNode(hoken: Kouhi, state: State)
+case class EditKouhiNode(kouhi: Kouhi, state: State)
     extends TransNode[State](state):
   override def init(): Unit =
-    ???
+    val dlog = state.dialog
+    val inputs = new KouhiInputs(Some(kouhi))
+    val errBox = ErrorBox()
+    dlog.changeTitle("公費")
+    dlog.body(
+      clear,
+      patientBlock(state.patient),
+      inputs.formPanel,
+      errBox.ele
+    )
+    dlog.commands(
+      clear,
+      button(
+        "入力",
+        onclick := (() =>
+          inputs.validateForUpdate() match {
+            case Right(formKouhi) =>
+              for
+                _ <- Api.updateKouhi(formKouhi)
+                updated <- Api.getKouhi(kouhi.kouhiId)
+              yield 
+                goBack(state.add(updated))
+            case Left(msg) => errBox.show(msg)
+          }
+          ()
+        )
+      ),
+      button("戻る", onclick := (() => goBack()))
+    )

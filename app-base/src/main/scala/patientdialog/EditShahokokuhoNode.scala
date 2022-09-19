@@ -21,7 +21,7 @@ case class EditShahokokuhoNode(shahokokuho: Shahokokuho, state: State)
     val dlog = state.dialog
     val inputs = new ShahokokuhoInputs(Some(shahokokuho))
     val errBox = ErrorBox()
-    dlog.title(clear, "社保国保編集")
+    dlog.changeTitle("社保国保編集")
     dlog.body(
       clear,
       patientBlock(state.patient),
