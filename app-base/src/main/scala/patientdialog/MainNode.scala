@@ -29,7 +29,7 @@ case class Main(state: State) extends TransNode[State](state):
           state.hokenList.map(h => {
             a(
               HokenUtil.hokenRep(h),
-              onclick := (() => dispatchDispHoken(h, state))
+              onclick := (() => dispatchDispHoken(h))
             )
           })
         )
@@ -80,7 +80,7 @@ case class Main(state: State) extends TransNode[State](state):
         ),
         "|",
         a("保険履歴", onclick := (() => {
-          // next(GoForward(hokenHistory, state))
+          goForward(HokenHistoryNode.apply)
         })),
         "|",
         a("保存画像", onclick := (() => PatientImagesDialog.open(state.patient)))
@@ -88,25 +88,16 @@ case class Main(state: State) extends TransNode[State](state):
     )
 
   private def dispatchDispHoken(
-      hoken: Hoken,
-      state: State
+      hoken: Hoken
   ): Unit =
     hoken match {
       case s: Shahokokuho =>
-        // next(
-        //   GoForward(dispShahokokuho(s.shahokokuhoId), state)
-        // )
-        ()
+        goForward(state => EditShahokokuhoNode(s, state))
       case k: Koukikourei =>
-        // next(
-        //   GoForward(dispKoukikourei(k.koukikoureiId), state)
-        // )
-        ()
+        goForward(state => EditKoukikoureiNode(k, state))
       case k: Kouhi =>
-        // next(GoForward(dispKouhi(k.kouhiId), state))
-        ()
+        goForward(state => EditKouhiNode(k, state))
       case r: Roujin =>
-        // next(GoForward(dispRoujin(r.roujinId), state))
         ()
     }
 

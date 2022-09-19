@@ -14,6 +14,7 @@ import org.scalajs.dom.HTMLElement
 import scala.util.Success
 import scala.util.Failure
 import dev.myclinic.scala.web.appbase.patientdialog.PatientDialog
+import dev.myclinic.scala.web.appbase.patientdialog.HokenBox
 
 case class PatientSearchResultDialog(patients: List[Patient]):
   val dlog = new ModalDialog3()

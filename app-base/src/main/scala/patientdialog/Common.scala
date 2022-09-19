@@ -7,6 +7,7 @@ import dev.myclinic.scala.web.appbase.KoukikoureiInputs
 import dev.fujiwara.domq.all.{*, given}
 import scala.language.implicitConversions
 import org.scalajs.dom.HTMLElement
+import java.time.LocalDate
 
 object Common:
   def createKoukikoureiInputs(modelOpt: Option[Koukikourei]): Future[KoukikoureiInputs] =
@@ -22,6 +23,9 @@ object Common:
       cls := "patient-block"
     )
 
-
-
+  def listCurrentHoken(patientId: Int): Future[List[Hoken]] =
+    for
+      result <- Api.getPatientHoken(patientId, LocalDate.now())
+      (_, _, shahokokuho, koukikourei, roujin, kouhi) = result
+    yield List.empty[Hoken] ++ shahokokuho ++ koukikourei ++ roujin ++ kouhi
 

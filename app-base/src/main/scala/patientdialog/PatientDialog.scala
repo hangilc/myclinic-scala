@@ -9,15 +9,28 @@ import dev.myclinic.scala.util.NumberUtil.format
 import scala.concurrent.Future
 import dev.myclinic.scala.webclient.{Api, global}
 import java.time.LocalDate
+import Common.*
 
-case class State(dialog: ModalDialog3, patient: Patient, hokenList: List[Hoken]):
+case class State(
+    dialog: ModalDialog3,
+    patient: Patient,
+    hokenList: List[Hoken]
+):
+  import Hoken.HokenId
   def add(hoken: Hoken): State =
-    copy(hokenList = hokenList :+ hoken)
+    val hokenId = HokenId(hoken)
+    val (pre, post) = hokenList.span(h => HokenId(h) != hokenId)
+    val newList =
+      if post.isEmpty then pre :+ hoken
+      else (pre :+ hoken) ++ post.tail
+    copy(hokenList = newList)
+  def remove(hoken: Hoken): State =
+    val hokenId = HokenId(hoken)
+    copy(hokenList = hokenList.filter(h => HokenId(h) != hokenId))
 
 object PatientDialog:
   def open(patient: Patient): Unit =
-    for
-      hokenList <- listHoken(patient.patientId)
+    for hokenList <- listCurrentHoken(patient.patientId)
     yield
       val dialog = new ModalDialog3()
       dialog.setTitle("")
@@ -25,11 +38,3 @@ object PatientDialog:
       val runtime = new TransNodeRuntime[State]
       runtime.run(s => Main(s), state, s => s.dialog.close())
       dialog.open()
-
-  private def listHoken(patientId: Int): Future[List[Hoken]] =
-    for
-      result <- Api.getPatientHoken(patientId, LocalDate.now())
-      (_, _, shahokokuho, koukikourei, roujin, kouhi) = result
-    yield List.empty[Hoken] ++ shahokokuho ++ koukikourei ++ roujin ++ kouhi
-
-

@@ -1,4 +1,4 @@
-package dev.myclinic.scala.web.appbase.reception
+package dev.myclinic.scala.web.appbase.patientdialog
 
 import dev.myclinic.scala.apputil.HokenUtil
 
