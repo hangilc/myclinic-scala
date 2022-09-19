@@ -26,6 +26,7 @@ class SelectByDateBox(cb: Patient => Unit):
     div("日付別", cls := "title"),
     dateInput.ele,
     div(
+      cls := "nav",
       a("今日", onclick := (() => advance(_ => LocalDate.now()))),
       a("前へ", onclick := (() => advance(_.plusDays(1)))),
       a("次へ", onclick := (() => advance(_.plusDays(-1))))

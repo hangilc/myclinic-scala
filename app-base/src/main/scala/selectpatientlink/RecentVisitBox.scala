@@ -20,6 +20,7 @@ class RecentVisitBox(cb: Patient => Unit):
   val ele: HTMLElement = div(cls := "records-recent-visit-box")(
     div("最近の診察", cls := "title"),
     div(
+      cls := "nav",
       a("最初", onclick := (onFirst _)),
       a("前へ", onclick := (onPrev _)),
       a("次へ", onclick := (onNext _)),
