@@ -8,14 +8,15 @@ import dev.fujiwara.domq.all.{*, given}
 import scala.language.implicitConversions
 import org.scalajs.dom.HTMLElement
 import java.time.LocalDate
+import dev.myclinic.scala.util.Misc
 
 object Common:
-  def createKoukikoureiInputs(modelOpt: Option[Koukikourei]): Future[KoukikoureiInputs] =
-    for
-      bangou <- Api.defaultKoukikoureiHokenshaBangou()
-    yield 
-      new KoukikoureiInputs(modelOpt):
-        override def defaultKoukikoureiHokenshaBangou: String = bangou.toString
+  def createKoukikoureiInputs(
+      modelOpt: Option[Koukikourei]
+  ): Future[KoukikoureiInputs] =
+    for bangou <- Api.defaultKoukikoureiHokenshaBangou()
+    yield new KoukikoureiInputs(modelOpt):
+      override def defaultKoukikoureiHokenshaBangou: String = bangou.toString
 
   def patientBlock(patient: Patient): HTMLElement =
     div(
@@ -29,3 +30,38 @@ object Common:
       (_, _, shahokokuho, koukikourei, roujin, kouhi) = result
     yield List.empty[Hoken] ++ shahokokuho ++ koukikourei ++ roujin ++ kouhi
 
+  private class InvalidCheckingDigitDialog(
+      onProceed: () => Unit
+  ):
+    val dlog = new ModalDialog3()
+    dlog.setTitle( "エラー")
+    dlog.body(
+      div("保険証番号が正しくないようです。"),
+      div("（検証番号エラー）")
+    )
+    dlog.commands(
+      button(
+        "このまま入力",
+        onclick := (() => {
+          dlog.close()
+          onProceed()
+        })
+      ),
+      button(
+        "戻る",
+        onclick := (() => {
+          dlog.close()
+        })
+      )
+    )
+
+    def open(): Unit = dlog.open()
+
+  def checkKenshoDigit(
+      bangou: Int,
+      onProceed: () => Unit
+  ): Unit =
+    if Misc.HokenUtil.hasValidCheckingDigit(bangou) then onProceed()
+    else
+      val dlog = new InvalidCheckingDigitDialog(onProceed)
+      dlog.open()

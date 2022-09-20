@@ -36,11 +36,13 @@ case class EditShahokokuhoNode(shahokokuho: Shahokokuho, state: State)
           inputs.validateForUpdate() match {
             case Left(msg) => errBox.show(msg)
             case Right(newShahokokuho) =>
-              for
-                _ <- Api.updateShahokokuho(newShahokokuho)
-                updated <- Api.getShahokokuho(shahokokuho.shahokokuhoId)
-              yield 
-                goBack(state.add(updated))
+              checkKenshoDigit(newShahokokuho.hokenshaBangou, () => {
+                for
+                  _ <- Api.updateShahokokuho(newShahokokuho)
+                  updated <- Api.getShahokokuho(shahokokuho.shahokokuhoId)
+                yield 
+                  goBack(state.add(updated))
+              })
               ()
           }
         )

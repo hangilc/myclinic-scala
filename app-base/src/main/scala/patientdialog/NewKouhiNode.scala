@@ -37,8 +37,10 @@ case class NewKouhiNode(state: State) extends TransNode[State](state):
           inputs.validateForEnter(state.patient.patientId) match {
             case Left(msg) => errBox.show(msg)
             case Right(formKouhi) =>
-              for entered <- Api.enterKouhi(formKouhi)
-              yield goBack(state.add(entered))
+              checkKenshoDigit(formKouhi.futansha, () => {
+                for entered <- Api.enterKouhi(formKouhi)
+                yield goBack(state.add(entered))
+              })
           }
           ()
         )

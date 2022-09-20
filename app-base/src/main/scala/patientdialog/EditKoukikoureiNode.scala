@@ -35,11 +35,13 @@ case class EditKoukikoureiNode(koukikourei: Koukikourei, state: State)
         onclick := (() =>
           inputs.validateForUpdate() match {
             case Right(formKoukikourei) =>
-              for
-                _ <- Api.updateKoukikourei(formKoukikourei)
-                updated <- Api.getKoukikourei(koukikourei.koukikoureiId)
-              yield 
-                goBack(state.add(updated))
+              checkKenshoDigit(formKoukikourei.hokenshaBangou.toInt, () => {
+                for
+                  _ <- Api.updateKoukikourei(formKoukikourei)
+                  updated <- Api.getKoukikourei(koukikourei.koukikoureiId)
+                yield 
+                  goBack(state.add(updated))
+              })
             case Left(msg) => errBox.show(msg)
           }
           ()

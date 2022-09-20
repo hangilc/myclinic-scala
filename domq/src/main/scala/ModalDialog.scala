@@ -35,6 +35,7 @@ class ModalDialog:
       )
 
 class ModalDialog3 extends ModalDialog:
+  self =>
   val title: HTMLElement = div(cls := "domq-modal-dialog3-title")
   val body: HTMLElement = div(cls := "domq-modal-dialog3-body")
   val commands: HTMLElement = div(cls := "domq-modal-dialog3-commands")
@@ -43,7 +44,7 @@ class ModalDialog3 extends ModalDialog:
   private val titleSpan = span
   private val xIcon = Icons.x
 
-  def setTitle(s: String, onXIconClick: () => Unit = (close _)): Unit =
+  def setTitle(s: String, onXIconClick: () => Unit = (() => close())): Unit =
     title(
       clear,
       cls := "has-x",

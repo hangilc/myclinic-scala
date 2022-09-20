@@ -36,8 +36,10 @@ case class NewKoukikoureiNode(state: State, inputs: KoukikoureiInputs)
           inputs.validateForEnter(state.patient.patientId) match {
             case Left(msg) => errBox.show(msg)
             case Right(formKoukikourei) =>
-              for entered <- Api.enterKoukikourei(formKoukikourei)
-              yield goBack(state.add(entered))
+              checkKenshoDigit(formKoukikourei.hokenshaBangou.toInt, () => {
+                for entered <- Api.enterKoukikourei(formKoukikourei)
+                yield goBack(state.add(entered))
+              })
           }
           ()
         )

@@ -23,7 +23,6 @@ class TransNodeRuntime[T]:
     forward(tmpl, state, onExit)
 
   private def setupAndInit(t: TransNode[T], onExit: T => Unit): Unit =
-    println("enter setupAndInit")
     t.onGoForward = (tmpl, s) => forward(tmpl, s, onExit)
     t.onGoReplacing = (tmpl, s) => replacing(tmpl, s, onExit)
     t.onGoBack = (s) => backward(s, onExit)

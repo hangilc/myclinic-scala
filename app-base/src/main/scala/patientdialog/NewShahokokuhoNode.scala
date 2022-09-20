@@ -20,6 +20,7 @@ case class NewShahokokuhoNode(state: State) extends TransNode[State](state):
     val inputs = new ShahokokuhoInputs(None)
     val errBox = ErrorBox()
     val dlog = state.dialog
+    println("enter new shahokokuho")
     dlog.changeTitle("新規社保国保")
     dlog.body(
       clear,
@@ -35,13 +36,17 @@ case class NewShahokokuhoNode(state: State) extends TransNode[State](state):
           inputs.validateForEnter(state.patient.patientId) match {
             case Left(msg) => errBox.show(msg)
             case Right(shahokokuho) =>
-              for entered <- Api.enterShahokokuho(shahokokuho)
-              yield goBack(state.add(entered))
+              println(("new shahokokuho", shahokokuho))
+              checkKenshoDigit(
+                shahokokuho.hokenshaBangou,
+                () => {
+                  for entered <- Api.enterShahokokuho(shahokokuho)
+                  yield goBack(state.add(entered))
+                }
+              )
           }
           ()
         )
       ),
       button("キャンセル", onclick := (() => goBack()))
     )
-
-

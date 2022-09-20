@@ -20,6 +20,7 @@ import dev.fujiwara.domq.CompSortList
 import dev.fujiwara.domq.ResourceCleanups
 import dev.myclinic.scala.web.appbase.selectpatientlink.SelectPatientPullDown
 import dev.fujiwara.domq.SubscriberChannel
+import dev.myclinic.scala.web.appbase.patientdialog.PatientDialog
 
 class Cashier(
 )(using
@@ -119,11 +120,15 @@ class Cashier(
     val text = searchTextInput.value
     for patients <- Api.searchPatientSmart(text)
     yield
-      if patients.size == 0 then ShowMessage.showMessage("該当する患者がありませんでした。")
-      else
-        val dlog = PatientSearchResultDialog(patients)
-        dlog.open()
-        searchTextInput.value = ""
+      patients.size match {
+        case 0 => ShowMessage.showMessage("該当する患者がありませんでした。")
+        case 1 => PatientDialog.open(patients.head)
+        case _ => {
+          val dlog = PatientSearchResultDialog(patients)
+          dlog.open()
+        }
+      }
+      searchTextInput.value = ""
 
   private def doPrintBlankReceipt(): Unit =
     val f =
