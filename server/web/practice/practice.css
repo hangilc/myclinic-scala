@@ -406,4 +406,5 @@ button {
 
 .phonebook .phone-number {
   color: #007bff;
+  cursor: pointer;
 }

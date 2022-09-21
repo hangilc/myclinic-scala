@@ -1,7 +1,7 @@
 package dev.myclinic.scala.web.practiceapp.phone
 
 import dev.myclinic.scala.web.appbase.SideMenuService
-import org.scalajs.dom.HTMLElement
+import org.scalajs.dom.{HTMLElement, window}
 
 import dev.fujiwara.domq.all.{*, given}
 import scala.language.implicitConversions
@@ -22,10 +22,13 @@ case class PhoneService() extends SideMenuService:
       div(
         "電話番号：",
         phoneNumberInput,
-        button("発信", onclick := (doCall _)),
+        button("発信", onclick := (() => doCall(phoneNumberInput.value))),
         button(
           "終了",
-          onclick := (() => PracticeBus.twilioPhone.hangup())
+          onclick := (() => {
+            PracticeBus.twilioPhone.hangup()
+            phoneNumberInput.value = ""
+          })
         )
       ),
       phonebookArea(
@@ -37,15 +40,23 @@ case class PhoneService() extends SideMenuService:
     for
       phonebook <- Api.getPhonebook()
     yield
-      val src: String = StringUtil.classify[String, String](TwilioPhone.PhoneNumberPattern.all, phonebook,
-        n => s"<span class='phone-number'>${n}</span>",
-        t => t
-      ).mkString("")
-      phonebookArea(innerHTML := src)
+      StringUtil.classify[Unit, Unit](raw"[0-9-]+".r, phonebook,
+        n => 
+          if isPhoneNumber(n) then
+            phonebookArea(span(n, cls := "phone-number", onclick := (() => {
+              phoneNumberInput.value = n
+              window.scrollTo(0, 0)
+            })))
+          else phonebookArea(n),
+        t => phonebookArea(t)
+      )
 
-  def doCall(): Unit =
+  def isPhoneNumber(s: String): Boolean =
+    TwilioPhone.canonicalPhoneNumber(s).isDefined
+
+  def doCall(num: String): Unit =
     TwilioPhone
-      .canonicalPhoneNumber(phoneNumberInput.value.trim)
+      .canonicalPhoneNumber(num.trim)
       .foreach(pn =>
         if !PracticeBus.twilioPhone.call(pn) then
           ShowMessage.showError("電話を使用できません。")
