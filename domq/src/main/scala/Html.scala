@@ -29,6 +29,7 @@ object Html:
   def select = create[HTMLSelectElement]("select")
   def option = create[HTMLOptionElement]("option")
   def textarea = create[HTMLTextAreaElement]("textarea")
+  def pre = create[HTMLPreElement]("pre")
 
   def inputText = input(attr("type") := "text")
   def checkbox = input(attr("type") := "checkbox")

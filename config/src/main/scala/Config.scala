@@ -5,9 +5,7 @@ import _root_.java.nio.file.Files
 import _root_.java.nio.file.Path
 import cats.instances.try_
 import com.typesafe.scalalogging.Logger
-import dev.myclinic.java
 import dev.myclinic.scala.clinicop.AdHocHolidayRange
-import dev.myclinic.scala.model.ClinicInfo
 import dev.myclinic.scala.model.DiseaseExample
 import io.circe.Decoder
 import io.circe.Decoder.Result
@@ -18,27 +16,14 @@ import io.circe.syntax.*
 import io.circe.yaml.parser
 
 import scala.io.Source
+import scala.util.Try
 
-object Config extends ConfigCirce:
+val Config = new Configurator()
+
+class Configurator extends JavaConfigurator with FileConfigurator:
   val logger = Logger(getClass.getName)
-  val config = new java.Config()
   val dataDir = Path.of(System.getenv("MYCLINIC_DATA_DIR"))
   val configDir = dataDir.resolve("config")
-
-  def getClinicInfo: ClinicInfo =
-    val jc = config.getClinicInfo()
-    ClinicInfo(
-      jc.name,
-      jc.postalCode,
-      jc.address,
-      jc.tel,
-      jc.fax,
-      jc.todoufukencode,
-      jc.tensuuhyoucode,
-      jc.kikancode,
-      jc.homepage,
-      jc.doctorName
-    )
 
   private lazy val scanDir: String = System.getenv("MYCLINIC_PAPER_SCAN_DIR")
 
@@ -47,22 +32,15 @@ object Config extends ConfigCirce:
 
   def paperScanDir(patientId: Int): String =
     val d = paperScanRoot.resolve(patientId.toString)
-    // val d = Path.of(scanDir, patientId.toString)
     if !Files.exists(d) then d.toFile.mkdirs
     d.toString
 
+  given Encoder[AdHocHolidayRange] = deriveEncoder[AdHocHolidayRange]
+  given Decoder[AdHocHolidayRange] = deriveDecoder[AdHocHolidayRange]
+  given Decoder[StampInfo] = deriveDecoder[StampInfo]
+
   def adHocHolidayRanges: List[AdHocHolidayRange] =
-    val file = dataDir.resolve("adhoc-holidays.yaml").toFile
-    val reader: _root_.java.io.Reader = _root_.java.io.FileReader(file)
-    try
-      parser
-        .parse(reader)
-        .flatMap(_.as[List[AdHocHolidayRange]])
-        .getOrElse({
-          logger.error("Failed to read AdHocholidayRange")
-          List.empty
-        })
-    finally reader.close()
+    readDataYamlFile("adhoc-holidays.yaml")
 
   def getShohouSamples: List[String] =
     val file = dataDir.resolve("shohou-sample.txt")
@@ -145,18 +123,12 @@ object Config extends ConfigCirce:
   def defaultKoukikoureiHokenshaBangou: Int =
     39131156 // 杉並区
 
-  def readYaml[T: Decoder](file: File): T =
-    val reader: _root_.java.io.Reader = _root_.java.io.FileReader(file)
-    try
-      parser
-        .parse(reader)
-        .flatMap(_.as[T])
-        .getOrElse(
-          throw new RuntimeException("Failed to read: " + file.toString)
-        )
-    finally reader.close()
+  private def readDataFile(file: String): String =
+    fileContent(dataDir.resolve(file))
 
-trait ConfigCirce:
-  given Encoder[AdHocHolidayRange] = deriveEncoder[AdHocHolidayRange]
-  given Decoder[AdHocHolidayRange] = deriveDecoder[AdHocHolidayRange]
-  given Decoder[StampInfo] = deriveDecoder[StampInfo]
+  private def readDataYamlFile[T](file: String)(using Decoder[T]): T =
+    readYaml[T](dataDir.resolve(file).toFile)
+
+  def phonebook: String =
+    Try(readDataFile("phonebook.txt")).getOrElse("")
+

@@ -399,3 +399,11 @@ button {
 .practice-cashier-dialog .mishuu-check-label-wrapper {
   margin-right: 6px;
 }
+
+.phonebook {
+  font-size: 1rem;
+}
+
+.phonebook .phone-number {
+  color: #007bff;
+}

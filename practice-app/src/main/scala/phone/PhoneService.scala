@@ -8,10 +8,13 @@ import scala.language.implicitConversions
 import dev.myclinic.scala.web.practiceapp.practice.twilio.Call
 import dev.myclinic.scala.web.practiceapp.practice.twilio.TwilioPhone
 import dev.myclinic.scala.web.practiceapp.PracticeBus
-import dev.myclinic.scala.webclient.global
+import dev.myclinic.scala.webclient.{Api, global}
+import scala.concurrent.Future
+import dev.myclinic.scala.util.StringUtil
 
 case class PhoneService() extends SideMenuService:
-  val phoneNumberInput = input
+  val phoneNumberInput = inputText
+  val phonebookArea = pre
   override def getElement: HTMLElement =
     div(
       cls := "practice-phone practice-sidemenu-service-main",
@@ -24,8 +27,21 @@ case class PhoneService() extends SideMenuService:
           "終了",
           onclick := (() => PracticeBus.twilioPhone.hangup())
         )
+      ),
+      phonebookArea(
+        cls := "phonebook"
       )
     )
+
+  override def init(): Future[Unit] =
+    for
+      phonebook <- Api.getPhonebook()
+    yield
+      val src: String = StringUtil.classify[String, String](TwilioPhone.PhoneNumberPattern.all, phonebook,
+        n => s"<span class='phone-number'>${n}</span>",
+        t => t
+      ).mkString("")
+      phonebookArea(innerHTML := src)
 
   def doCall(): Unit =
     TwilioPhone

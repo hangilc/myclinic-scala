@@ -20,5 +20,8 @@ object ConfigApi extends ApiBase:
     def defaultKoukikoureiHokenshaBangou(): Future[Int] =
       get("default-koukikourei-hokensha-bangou", Params())
 
+    def getPhonebook(): Future[String] =
+      get("get-phonebook", Params());
+
 
       

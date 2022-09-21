@@ -35,6 +35,7 @@ object ConfigService:
     case GET -> Root / "get-shinryou-kensa" => Ok(shinryouKensa)
     case GET -> Root / "list-disease-example" => Ok(Config.getDiseaseExample)
     case GET -> Root / "default-koukikourei-hokensha-bangou" => Ok(Config.defaultKoukikoureiHokenshaBangou)
+    case GET -> Root / "get-phonebook" => Ok(Config.phonebook)
 
   }
 
