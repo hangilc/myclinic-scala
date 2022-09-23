@@ -213,6 +213,7 @@ lazy val server = project
       //"ch.qos.logback" % "logback-classic" % "1.1.3" % "runtime",
       "org.http4s" %% "http4s-blaze-server" % http4sVersion,
       "org.http4s" %% "http4s-dsl" % http4sVersion,
+      "org.http4s" %% "http4s-server" % http4sVersion,
       "org.http4s" %% "http4s-circe" % http4sVersion,
       "dev.fujiwara" % "drawer" % "1.0.0-SNAPSHOT",
       "com.twilio.sdk" % "twilio" % "8.34.1"

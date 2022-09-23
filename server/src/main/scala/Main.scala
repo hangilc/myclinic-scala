@@ -13,6 +13,7 @@ import org.http4s.dsl.io._
 import org.http4s.headers.Location
 import org.http4s.implicits._
 import org.http4s.server.Router
+import org.http4s.server.middleware.*
 import org.http4s.server.staticcontent.FileService
 import org.http4s.server.staticcontent.fileService
 import org.http4s.server.websocket.WebSocketBuilder
@@ -86,21 +87,12 @@ object Main extends IOApp:
       builder = builder.withSslContext(sslContextOption.get)
     builder
       .withHttpWebSocketApp(websocketBuilder =>
-        Router(
-          // "/appoint" -> HttpRoutes.of[IO] { case GET -> Root =>
-          //   TemporaryRedirect(Location(uri"/appoint/index.html"))
-          // },
-          // "/reception" -> HttpRoutes.of[IO] { case GET -> Root =>
-          //   TemporaryRedirect(Location(uri"/reception/index.html"))
-          // },
-          // "/practice" -> HttpRoutes.of[IO] { case GET -> Root =>
-          //   TemporaryRedirect(Location(uri"/practice/index.html"))
-          // },
+        CORS.policy.withAllowOriginAll(Router(
           "/api" -> RestService.routes,
           "/ws" -> ws(topic, websocketBuilder),
           "/portal-tmp" -> portalTmpStaticService,
           "/" -> staticService
-        ).orNotFound
+        )).orNotFound
       )
       .resource
       .use(_ => {
