@@ -10,8 +10,12 @@ function mkKey(map){
   if( isKokuho(hokenshaBangou) ){
     const sub1 = isKokuhoProper(hokenshaBangou) ? "prop" : "kouki";
     const loc = isKennai(hokenshaBangou) ? "kennai" : "kengai"
-    const taishoku = isTaishoku(hokenshaBangou) ? "taishoku": "kokuho";
-    return `K:${sub1}:${loc}:${taishoku}`;
+    if( isKokuhoProper(hokenshaBangou ) ){
+      const taishoku = isTaishoku(hokenshaBangou) ? "taishoku": "kokuho";
+      return `K:${sub1}:${loc}:${taishoku}`;
+    } else {
+      return `K:${sub1}:${loc}`;
+    }
   } else {
     return `S`;
   }
@@ -66,6 +70,9 @@ function report() {
   console.log(`　　　　　　　国保 -- ${kokuhoEntrySummary("K:prop:kengai:kokuho")}`);
   console.log(`　　　　　　退職者 -- ${kokuhoEntrySummary("K:prop:kengai:taishoku")}`);
   console.log(`　　　　　　　　計 -- ${kokuhoTotal("K:prop:kengai")}`);
+  console.log("　　後期高齢者分");
+  console.log(`　　　　都内分     -- ${kokuhoEntrySummary("K:kouki:kennai")}`)
+  console.log(`　　　　都外分     -- ${kokuhoEntrySummary("K:kouki:kengai")}`)
 }
 
 function kokuhoEntrySummary(key){
