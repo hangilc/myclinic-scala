@@ -1,40 +1,28 @@
+const { BADNAME } = require("dns");
 const fs = require("fs");
 const { exit } = require("process");
 const { parseString} = require("xml2js");
 
-const kokuhoSummary = {
-  kokuhoProper: {
-    kennai: createEntry(),
-    kengai: createEntry()
-  },
-  koukikourei: {
-    kennai: createEntry(),
-    kengai: createEntry()
-  }
-}
+const seikyuuMap = { };
 
-function dispatchKokuho(map){
-  if( isKoukikourei(map.hokenshaBangou) ){
-    if( isKennai(map.hokenshaBangou) ){
-      addToEntry(kokuhoSummary.koukikourei.kennai, map);
-    } else {
-      addToEntry(kokuhoSummary.koukikourei.kengai, map);
-    }
+function mkKey(map){
+  const hokenshaBangou = map.hokenshaBangou;
+  if( isKokuho(hokenshaBangou) ){
+    const sub1 = isKokuhoProper(hokenshaBangou) ? "prop" : "kouki";
+    const loc = isKennai(hokenshaBangou) ? "kennai" : "kengai"
+    const taishoku = isTaishoku(hokenshaBangou) ? "taishoku": "kokuho";
+    return `K:${sub1}:${loc}:${taishoku}`;
   } else {
-    if( isKennai(map.hokenshaBangou) ){
-      addToEntry(kokuhoSummary.kokuhoProper.kennai, map);
-    } else {
-      addToEntry(kokuhoSummary.kokuhoProper.kengai, map);
-    }
+    return `S`;
   }
 }
 
 function dispatch(map){
-  if( isKokuho(map.hokenshaBangou) || isKoukikourei(map.hokenshaBangou)){
-    dispatchKokuho(map);
-  } else {
-
+  const key = mkKey(map);
+  if( !(key in seikyuuMap) ){
+    seikyuuMap[key] = [];
   }
+  seikyuuMap[key].push(map);
 }
 
 const dataFile = process.argv[2];
@@ -58,11 +46,51 @@ fs.readFile(dataFile, "UTF-8", (err, text) => {
   }
 });
 
+function pad(n, len) {
+  let s = n.toString()
+  for(let i=s.length;i<len;i++){
+    s = " " + s;
+  }
+  return s;
+}
+
 function report() {
-  console.dir(kokuhoSummary);
+  console.dir(seikyuuMap);
   console.log("国保 ===================================");
   console.log("　　国保分");
-  console.log("　　　　都内文")
+  console.log("　　　　都内分")
+  console.log(`　　　　　　　国保 -- ${kokuhoEntrySummary("K:prop:kennai:kokuho")}`);
+  console.log(`　　　　　　退職者 -- ${kokuhoEntrySummary("K:prop:kennai:taishoku")}`);
+  console.log(`　　　　　　　　計 -- ${kokuhoTotal("K:prop:kennai")}`);
+  console.log("　　　　都外分")
+  console.log(`　　　　　　　国保 -- ${kokuhoEntrySummary("K:prop:kengai:kokuho")}`);
+  console.log(`　　　　　　退職者 -- ${kokuhoEntrySummary("K:prop:kengai:taishoku")}`);
+  console.log(`　　　　　　　　計 -- ${kokuhoTotal("K:prop:kengai")}`);
+}
+
+function kokuhoEntrySummary(key){
+  return kokuhoReport(seikyuuMap[key] || [])
+}
+
+function kokuhoReport(list) {
+  const rep = {
+    kensuu: list.length,
+    tensuu: list.map(s => s.tensuu).reduce((a, b) => a + b, 0),
+    kouhi: list.filter(s => s.hasKouhi).length
+  }
+  return `件数：${pad(rep.kensuu, 4)}, 点数：${pad(rep.tensuu, 6)}, 公費併用：${pad(rep.kouhi, 2)}`;
+}
+
+function kokuhoTotal(prefix) {
+  const list = ["kokuho", "taishoku"].map(k => `${prefix}:${k}`).flatMap(k => seikyuuMap[k] || []);
+  return kokuhoReport(list);
+}
+
+function kokuhoSumReport(a, b){
+  a = Object.assign({}, a);
+  a.kensuu += b.kensuu;
+  a.tensuu += b.tensuu;
+  a.kouhi += b.kouhi;
 }
 
 function mapSeikyuu(seikyuu) {
@@ -82,10 +110,14 @@ function isKennai(hokenshaBangou){
 }
 
 function hasKouhi(map){
-  return map["公費1負担者番号"] || map["公費2負担者番号"];
+  return !!(map["公費1負担者番号"] || map["公費2負担者番号"]);
 }
 
 function isKokuho(hokenshaBangou) {
+  return isKokuhoProper(hokenshaBangou) || isKoukikourei(hokenshaBangou);
+}
+
+function isKokuhoProper(hokenshaBangou) {
   const n = hokenshaBangou;
   if (n >= 10000 && n <= 999999) return true;
   if (n >= 67000000 && n <= 67999999) return true;
@@ -95,6 +127,11 @@ function isKokuho(hokenshaBangou) {
 function isKoukikourei(hokenshaBangou) {
   const n = hokenshaBangou;
   return n >= 39000000 && n <= 39999999;
+}
+
+function isTaishoku(hokenshaBangou) {
+  const n = hokenshaBangou;
+  return n > 67000000  
 }
 
 function createEntry() {
