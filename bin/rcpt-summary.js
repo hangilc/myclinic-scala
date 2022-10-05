@@ -4,6 +4,7 @@ const { exit } = require("process");
 const { parseString} = require("xml2js");
 
 const seikyuuMap = { };
+let shahoTotal1 = 0;
 
 function mkKey(map){
   const hokenshaBangou = map.hokenshaBangou;
@@ -17,7 +18,33 @@ function mkKey(map){
       return `K:${sub1}:${loc}`;
     }
   } else {
-    return `S`;
+    let futan;
+    switch(map.hokenFutan){
+      case "高齢９": 
+      case "高齢８": {
+        futan = "kourei";
+        break;
+      }
+      case "高齢７": {
+        futan = "kourei7";
+        break;
+      }
+      case "本人": {
+        futan = "honnin";
+        break;
+      }
+      case "家族": {
+        futan = "kazoku";
+        break;
+      }
+      case "三才未満": {
+        futan = "child";
+        break;
+      }
+      default: throw new Error(`Cannot handle futan: ${map.hokenFutan}`)
+    }
+    const tandoku = map.hasKouhi ? "heiyou" : "tandoku";
+    return `S:${futan}:${tandoku}`;
   }
 }
 
@@ -37,7 +64,7 @@ fs.readFile(dataFile, "UTF-8", (err, text) => {
   } else {
     parseString(text, (err, xml) => {
       const head = xml["レセプト"];
-      console.log("月：", head["元号"][0], head["年"][0], "年", head["月"][0], "月");
+      console.log("　月：", head["元号"][0], head["年"][0], "年", head["月"][0], "月");
       console.log("件数：", xml["レセプト"]["請求"].length);
       const shaho = [];
       const seikyuuList = xml["レセプト"]["請求"];
@@ -59,20 +86,37 @@ function pad(n, len) {
 }
 
 function report() {
-  console.dir(seikyuuMap);
   console.log("国保 ===================================");
-  console.log("　　国保分");
-  console.log("　　　　都内分")
-  console.log(`　　　　　　　国保 -- ${kokuhoEntrySummary("K:prop:kennai:kokuho")}`);
-  console.log(`　　　　　　退職者 -- ${kokuhoEntrySummary("K:prop:kennai:taishoku")}`);
-  console.log(`　　　　　　　　計 -- ${kokuhoTotal("K:prop:kennai")}`);
-  console.log("　　　　都外分")
-  console.log(`　　　　　　　国保 -- ${kokuhoEntrySummary("K:prop:kengai:kokuho")}`);
-  console.log(`　　　　　　退職者 -- ${kokuhoEntrySummary("K:prop:kengai:taishoku")}`);
-  console.log(`　　　　　　　　計 -- ${kokuhoTotal("K:prop:kengai")}`);
-  console.log("　　後期高齢者分");
-  console.log(`　　　　都内分     -- ${kokuhoEntrySummary("K:kouki:kennai")}`)
-  console.log(`　　　　都外分     -- ${kokuhoEntrySummary("K:kouki:kengai")}`)
+  console.log("国保分");
+  console.log("　　都内分")
+  console.log(`　　　　　国保 -- ${kokuhoEntrySummary("K:prop:kennai:kokuho")}`);
+  console.log(`　　　　退職者 -- ${kokuhoEntrySummary("K:prop:kennai:taishoku")}`);
+  console.log(`　　　　　　計 -- ${kokuhoTotal("K:prop:kennai")}`);
+  console.log("　　都外分")
+  console.log(`　　　　　国保 -- ${kokuhoEntrySummary("K:prop:kengai:kokuho")}`);
+  console.log(`　　　　退職者 -- ${kokuhoEntrySummary("K:prop:kengai:taishoku")}`);
+  console.log(`　　　　　　計 -- ${kokuhoTotal("K:prop:kengai")}`);
+  console.log("後期高齢者分");
+  console.log(`　　都内分     -- ${kokuhoEntrySummary("K:kouki:kennai")}`)
+  console.log(`　　都外分     -- ${kokuhoEntrySummary("K:kouki:kengai")}`)
+
+  console.log("");
+  console.log("社保 ===================================");
+  console.log("医療保険")
+  console.log(`　　70以上一般、公費併用 -- ${shahoSummary("S:kourei:heiyou")}`);
+  console.log(`　　70以上一般、単独　　 -- ${shahoSummary("S:kourei:tandoku")}`);
+  console.log(`　　70以上７割、公費併用 -- ${shahoSummary("S:kourei7:heiyou")}`);
+  console.log(`　　70以上７割、単独　　 -- ${shahoSummary("S:kourei7:tandoku")}`);
+  console.log(`　　本人、公費併用　　　 -- ${shahoSummary("S:honnin:heiyou")}`);
+  console.log(`　　本人、単独　　　　　 -- ${shahoSummary("S:honnin:tandoku")}`);
+  console.log(`　　家族、公費併用　　　 -- ${shahoSummary("S:kazoku:heiyou")}`);
+  console.log(`　　家族、単独　　　　　 -- ${shahoSummary("S:kazoku:tandoku")}`);
+  console.log(`　　六歳、公費併用　　　 -- ${shahoSummary("S:child:heiyou")}`);
+  console.log(`　　六歳、単独　　　　　 -- ${shahoSummary("S:child:tandoku")}`);
+  console.log(`　　(1) 合計：${shahoTotal1}`);
+  console.log("公費負担");
+  console.log(`　　(2) 合計：${shahoTotal2()}`)
+  
 }
 
 function kokuhoEntrySummary(key){
@@ -85,7 +129,7 @@ function kokuhoReport(list) {
     tensuu: list.map(s => s.tensuu).reduce((a, b) => a + b, 0),
     kouhi: list.filter(s => s.hasKouhi).length
   }
-  return `件数：${pad(rep.kensuu, 4)}, 点数：${pad(rep.tensuu, 6)}, 公費併用：${pad(rep.kouhi, 2)}`;
+  return `件数：${pad(rep.kensuu, 3)}, 点数：${pad(rep.tensuu, 6)}, 公費併用：${pad(rep.kouhi, 2)}`;
 }
 
 function kokuhoTotal(prefix) {
@@ -93,20 +137,41 @@ function kokuhoTotal(prefix) {
   return kokuhoReport(list);
 }
 
-function kokuhoSumReport(a, b){
-  a = Object.assign({}, a);
-  a.kensuu += b.kensuu;
-  a.tensuu += b.tensuu;
-  a.kouhi += b.kouhi;
+function shahoSummary(key) {
+  const list = seikyuuMap[key] || [];
+  shahoTotal1 += list.length;
+  return shahoReport(list);
+}
+
+function shahoReport(list) {
+  if( list.length === 0 ){
+    return "";
+  }
+  const nissuu = list.map(s => s.nissuu).reduce((a, b) => a + b, 0);
+  const tensuu = list.map(s => s.tensuu).reduce((a, b) => a + b, 0);
+  return `件数：${pad(list.length, 3)}, 実日数：${pad(nissuu, 2)}, 点数：${pad(tensuu, 6)}`;
+}
+
+function filterSeikyuu(keyTest) {
+  return Object.keys(seikyuuMap).filter(key => keyTest(key))
+    .flatMap(key => seikyuuMap[key] || []);
+}
+
+function shahoTotal2() {
+  const list = filterSeikyuu(key => key.startsWith("S:")).filter(s => s.hasKouhi);
+  const tensuu = list.map(s => s.tensuu).reduce((a, b) => a + b, 0);
+  return `件数：${pad(list.length, 3)}, 点数：${tensuu}`
 }
 
 function mapSeikyuu(seikyuu) {
-  const visits = seikyuu["受診"][0]["診療"];
-  const tensuu = visits.map(v => parseInt(v["点数"][0])).reduce((a, b) => a + b, 0);
+  const visits = seikyuu["受診"];
+  const tensuu = visits.flatMap(v => v["診療"]).map(s => parseInt(s["点数"][0])).reduce((a, b) => a + b, 0);
   return {
     hokenshaBangou: parseInt(seikyuu["保険者番号"][0]),
     tensuu,
     hasKouhi: hasKouhi(seikyuu),
+    hokenFutan: seikyuu["保険負担"][0],
+    nissuu: seikyuu["受診"].length
   };
 }
 
@@ -141,18 +206,3 @@ function isTaishoku(hokenshaBangou) {
   return n > 67000000  
 }
 
-function createEntry() {
-  return {
-    kensuu: 0,
-    tensuu: 0,
-    kouhi: 0
-  };
-}
-
-function addToEntry(entry, map) {
-  entry.kensuu += 1;
-  entry.tensuu += map.tensuu;
-  if( map.hasKouhi ){
-    entry.kouhi += 1;
-  }
-}
