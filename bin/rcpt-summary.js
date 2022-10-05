@@ -4,6 +4,7 @@ const { exit } = require("process");
 const { parseString} = require("xml2js");
 
 const seikyuuMap = { };
+let kokuhoTotalKensuu = 0;
 let shahoTotal1 = 0;
 
 function mkKey(map){
@@ -116,11 +117,23 @@ function report() {
   console.log(`　　(1) 合計：${shahoTotal1}`);
   console.log("公費負担");
   console.log(`　　(2) 合計：${shahoTotal2()}`)
+
+  if( Object.values(seikyuuMap).map(s => s.length).reduce(add, 0) == kokuhoTotalKensuu + shahoTotal1 ){
+    console.log("Total check OK");
+  } else {
+    console.error("Total check failed");
+  }
   
 }
 
+function add(a, b){
+  return a + b;
+}
+
 function kokuhoEntrySummary(key){
-  return kokuhoReport(seikyuuMap[key] || [])
+  const list = seikyuuMap[key] || []
+  kokuhoTotalKensuu += list.length;
+  return kokuhoReport(list)
 }
 
 function kokuhoReport(list) {
