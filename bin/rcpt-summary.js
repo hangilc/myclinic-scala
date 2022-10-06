@@ -171,6 +171,7 @@ function report() {
     formatShahoReport(shahoSubCtx.kensuu, shahoSubCtx.nissuu, shahoSubCtx.tensuu));
   console.log(`　　(1) 合計：${shahoCtx.kensuu}`);
   console.log("公費負担");
+  printShahoKouhiFutan();
   console.log(`　　(2) 合計：${shahoTotal2()}`)
 
   if( Object.values(seikyuuMap).map(s => s.length).reduce(add, 0) == kokuhoTotalKensuu + shahoCtx.kensuu ){
@@ -248,6 +249,33 @@ function filterSeikyuu(keyTest) {
     .flatMap(key => seikyuuMap[key] || []);
 }
 
+function printShahoKouhiFutan() {
+  const list = filterSeikyuu(key => key.startsWith("S:")).filter(s => s.hasKouhi);
+  const map = {};
+  list.forEach(seikyuu => {
+    const kouhi = seikyuu.kouhi;
+    const key = Math.floor(kouhi / 1000000).toString();
+    if( !(key in map) ){
+      map[key] = {
+        kensuu: 0,
+        nissuu: 0,
+        tensuu: 0
+      }
+    }
+    const bind = map[key];
+    bind.kensuu += 1;
+    bind.nissuu += seikyuu.nissuu;
+    bind.tensuu += seikyuu.tensuu
+  })
+  Object.keys(map).sort().forEach(key => {
+    const bind = map[key];
+    const repKensuu = `件数：${pad(bind.kensuu, 2)}`;
+    const repNissuu = `日数：${pad(bind.nissuu, 2)}`;
+    const repTensuu = `点数：${pad(bind.tensuu, 5)}`;
+    console.log(`      公費（${key}）  ${repKensuu}, ${repNissuu}, ${repTensuu}`)
+  });
+}
+
 function shahoTotal2() {
   const list = filterSeikyuu(key => key.startsWith("S:")).filter(s => s.hasKouhi);
   const tensuu = list.map(s => s.tensuu).reduce((a, b) => a + b, 0);
@@ -257,10 +285,12 @@ function shahoTotal2() {
 function mapSeikyuu(seikyuu) {
   const visits = seikyuu["受診"];
   const tensuu = visits.flatMap(v => v["診療"]).map(s => parseInt(s["点数"][0])).reduce((a, b) => a + b, 0);
+  const kouhi = getKouhi(seikyuu);
   return {
     hokenshaBangou: parseInt(seikyuu["保険者番号"][0]),
     tensuu,
-    hasKouhi: hasKouhi(seikyuu),
+    kouhi,
+    hasKouhi: !!kouhi,
     hokenFutan: seikyuu["保険負担"][0],
     nissuu: seikyuu["受診"].length
   };
@@ -272,8 +302,8 @@ function isKennai(hokenshaBangou){
   return fuken == 13; // 東京
 }
 
-function hasKouhi(map){
-  return !!(map["公費1負担者番号"] || map["公費2負担者番号"]);
+function getKouhi(map){
+  return map["公費1負担者番号"] || map["公費2負担者番号"];
 }
 
 function isKokuho(hokenshaBangou) {
