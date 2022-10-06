@@ -5,7 +5,6 @@ const { parseString} = require("xml2js");
 
 const seikyuuMap = { };
 let kokuhoTotalKensuu = 0;
-let shahoTotal1 = 0;
 
 function mkKey(map){
   const hokenshaBangou = map.hokenshaBangou;
@@ -78,12 +77,47 @@ fs.readFile(dataFile, "UTF-8", (err, text) => {
   }
 });
 
-function pad(n, len) {
+function pad(n, len, c = " ") {
   let s = n.toString()
   for(let i=s.length;i<len;i++){
-    s = " " + s;
+    s = c + s;
   }
   return s;
+}
+
+class ShahoContext {
+  kensuu = 0;
+}
+
+class ShahoSubContext {
+  map = {};
+
+  add(seikyuu) {
+    const hoken = pad(Math.floor(seikyuu.hokenshaBangou / 1000000), 2, "0");
+    if( !(hoken in this.map) ){
+      this.map[hoken] = {
+        kensuu: 0,
+        nissuu: 0,
+        tensuu: 0
+      }
+    }
+    const bind = this.map[hoken];
+    bind.kensuu += 1;
+    bind.nissuu += seikyuu.nissuu;
+    bind.tensuu += seikyuu.tensuu;
+  }
+
+  get kensuu() {
+    return Object.values(this.map).map(e => e.kensuu).reduce(add, 0);
+  }
+
+  get nissuu() {
+    return Object.values(this.map).map(e => e.nissuu).reduce(add, 0);
+  }
+
+  get tensuu() {
+    return Object.values(this.map).map(e => e.tensuu).reduce(add, 0);
+  }
 }
 
 function report() {
@@ -101,24 +135,45 @@ function report() {
   console.log(`　　都内分     -- ${kokuhoEntrySummary("K:kouki:kennai")}`)
   console.log(`　　都外分     -- ${kokuhoEntrySummary("K:kouki:kengai")}`)
 
+  let shahoCtx = new ShahoContext();
   console.log("");
   console.log("社保 ===================================");
   console.log("医療保険")
-  console.log(`　　70以上一般、公費併用 -- ${shahoSummary("S:kourei:heiyou")}`);
-  console.log(`　　70以上一般、単独　　 -- ${shahoSummary("S:kourei:tandoku")}`);
-  console.log(`　　70以上７割、公費併用 -- ${shahoSummary("S:kourei7:heiyou")}`);
-  console.log(`　　70以上７割、単独　　 -- ${shahoSummary("S:kourei7:tandoku")}`);
-  console.log(`　　本人、公費併用　　　 -- ${shahoSummary("S:honnin:heiyou")}`);
-  console.log(`　　本人、単独　　　　　 -- ${shahoSummary("S:honnin:tandoku")}`);
-  console.log(`　　家族、公費併用　　　 -- ${shahoSummary("S:kazoku:heiyou")}`);
-  console.log(`　　家族、単独　　　　　 -- ${shahoSummary("S:kazoku:tandoku")}`);
-  console.log(`　　六歳、公費併用　　　 -- ${shahoSummary("S:child:heiyou")}`);
-  console.log(`　　六歳、単独　　　　　 -- ${shahoSummary("S:child:tandoku")}`);
-  console.log(`　　(1) 合計：${shahoTotal1}`);
+  console.log("　　70以上一般、公費併用 -- " + shahoHeiyouSummary("S:kourei:heiyou", shahoCtx));
+  console.log("　　70以上一般、単独　　");
+  let shahoSubCtx = new ShahoSubContext();
+  printShahoSubs("S:kourei:tandoku", shahoSubCtx, shahoCtx);
+  console.log("　　　　　　　　　　　　 -- " +
+    formatShahoReport(shahoSubCtx.kensuu, shahoSubCtx.nissuu, shahoSubCtx.tensuu));
+  console.log(`　　70以上７割、公費併用 -- ${shahoHeiyouSummary("S:kourei7:heiyou", shahoCtx)}`);
+  console.log("　　70以上７割、単独　　");
+  shahoSubCtx = new ShahoSubContext();
+  printShahoSubs("S:kourei7:tandoku", shahoSubCtx, shahoCtx);
+  console.log("　　　　　　　　　　　　 -- " +
+    formatShahoReport(shahoSubCtx.kensuu, shahoSubCtx.nissuu, shahoSubCtx.tensuu));
+  console.log(`　　本人、公費併用　　　 -- ${shahoHeiyouSummary("S:honnin:heiyou", shahoCtx)}`);
+  console.log("　　本人、単独　　　　　");
+  shahoSubCtx = new ShahoSubContext();
+  printShahoSubs("S:honnin:tandoku", shahoSubCtx, shahoCtx);
+  console.log("　　　　　　　　　　　　 -- " +
+    formatShahoReport(shahoSubCtx.kensuu, shahoSubCtx.nissuu, shahoSubCtx.tensuu));
+  console.log(`　　家族、公費併用　　　 -- ${shahoHeiyouSummary("S:kazoku:heiyou", shahoCtx)}`);
+  console.log(`　　家族、単独　　　　　`);
+  shahoSubCtx = new ShahoSubContext();
+  printShahoSubs("S:kazoku:tandoku", shahoSubCtx, shahoCtx);
+  console.log("　　　　　　　　　　　　 -- " +
+    formatShahoReport(shahoSubCtx.kensuu, shahoSubCtx.nissuu, shahoSubCtx.tensuu));
+  console.log(`　　六歳、公費併用　　　 -- ${shahoHeiyouSummary("S:child:heiyou", shahoCtx)}`);
+  console.log(`　　六歳、単独　　　　　`);
+  shahoSubCtx = new ShahoSubContext();
+  printShahoSubs("S:child:tandoku", shahoSubCtx, shahoCtx);
+  console.log("　　　　　　　　　　　　 -- " +
+    formatShahoReport(shahoSubCtx.kensuu, shahoSubCtx.nissuu, shahoSubCtx.tensuu));
+  console.log(`　　(1) 合計：${shahoCtx.kensuu}`);
   console.log("公費負担");
   console.log(`　　(2) 合計：${shahoTotal2()}`)
 
-  if( Object.values(seikyuuMap).map(s => s.length).reduce(add, 0) == kokuhoTotalKensuu + shahoTotal1 ){
+  if( Object.values(seikyuuMap).map(s => s.length).reduce(add, 0) == kokuhoTotalKensuu + shahoCtx.kensuu ){
     console.log("Total check OK");
   } else {
     console.error("Total check failed");
@@ -128,6 +183,12 @@ function report() {
 
 function add(a, b){
   return a + b;
+}
+
+function seikyuuWithPrefix(prefix){
+  return Object.keys(seikyuuMap)
+    .filter(k => k.startsWith(prefix))
+    .flatMap(k => seikyuuMap[k]);
 }
 
 function kokuhoEntrySummary(key){
@@ -150,9 +211,9 @@ function kokuhoTotal(prefix) {
   return kokuhoReport(list);
 }
 
-function shahoSummary(key) {
+function shahoHeiyouSummary(key, shahoCtx) {
   const list = seikyuuMap[key] || [];
-  shahoTotal1 += list.length;
+  shahoCtx.kensuu += list.length;
   return shahoReport(list);
 }
 
@@ -162,7 +223,24 @@ function shahoReport(list) {
   }
   const nissuu = list.map(s => s.nissuu).reduce((a, b) => a + b, 0);
   const tensuu = list.map(s => s.tensuu).reduce((a, b) => a + b, 0);
-  return `件数：${pad(list.length, 3)}, 実日数：${pad(nissuu, 2)}, 点数：${pad(tensuu, 6)}`;
+  return formatShahoReport(list.length, nissuu, tensuu);
+}
+
+function formatShahoReport(kensuu, nissuu, tensuu) {
+  return `件数：${pad(kensuu, 3)}, 実日数：${pad(nissuu, 2)}, 点数：${pad(tensuu, 6)}`;
+}
+
+function printShahoSubs(prefix, subCtx, ctx){
+  const list = seikyuuWithPrefix(prefix);
+  list.forEach(seikyuu => subCtx.add(seikyuu));
+  Object.keys(subCtx.map).sort().forEach(hoken => {
+    const bind = subCtx.map[hoken];
+    const repKensuu = `件数：${pad(bind.kensuu, 2)}`;
+    const repNissuu = `日数：${pad(bind.nissuu, 2)}`;
+    const repTensuu = `点数：${pad(bind.tensuu, 5)}`;
+    console.log(`      保険（${hoken}）  ${repKensuu}, ${repNissuu}, ${repTensuu}`)
+  });
+  ctx.kensuu += subCtx.kensuu;
 }
 
 function filterSeikyuu(keyTest) {
