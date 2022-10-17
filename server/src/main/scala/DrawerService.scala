@@ -50,7 +50,8 @@ object DrawerService:
       patient <- Db.getPatient(visit.patientId)
       hokenInfo <- Db.getHokenInfo(visit.visitId)
     yield
-      val issuedAt: LocalDate = LocalDate.now()
+      // val issuedAt: LocalDate = LocalDate.now()
+      val issuedAt: LocalDate = visit.visitedAt.toLocalDate();
       val validUpto: Option[LocalDate] = None
       val json = drawShohousen(text, visit, patient, hokenInfo, issuedAt, validUpto)
       Response[IO](
