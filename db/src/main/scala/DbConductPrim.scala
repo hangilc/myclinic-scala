@@ -51,6 +51,17 @@ object DbConductPrim:
       event <- DbEventPrim.logConductCreated(entered)
     yield (event, entered)
 
+  def updateConduct(c: Conduct): ConnectionIO[AppEvent] =
+    val op = sql"""
+      update visit_conduct set kind = ${c.kindStore} where id = ${c.conductId}
+    """
+    for
+      affected <- op.update.run
+      _ = if affected != 1 then throw new RuntimeException(s"Failed to update conduct: ${c.conductId}")
+      updated <- getConduct(c.conductId).unique
+      event <- DbEventPrim.logConductUpdated(updated)
+    yield event
+
   def createConduct(
       visitId: Int,
       kind: Int,

@@ -25,6 +25,7 @@ object Db
     with DbDrug
     with DbShinryou
     with DbConduct
+    with DbGazouLabel
     with DbConductDrug
     with DbConductShinryou
     with DbConductKizai

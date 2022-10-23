@@ -46,7 +46,8 @@ object DbConductKizaiPrim:
       id <- op.update.withUniqueGeneratedKeys[Int]("id")
       entered <- getConductKizai(id).unique
       event <- DbEventPrim.logConductKizaiCreated(entered)
-    yield (event, entered)
+    yield 
+      (event, entered)
 
   def deleteConductKizai(conductKizaiId: Int): ConnectionIO[AppEvent] =
     val op = sql"""

@@ -20,3 +20,7 @@ trait DbConduct extends Mysql:
 
   def getConduct(conductId: Int): IO[Conduct] =
     mysql(Prim.getConduct(conductId).unique)
+
+  def updateConduct(conduct: Conduct): IO[AppEvent] =
+    mysql(Prim.updateConduct(conduct))
+    

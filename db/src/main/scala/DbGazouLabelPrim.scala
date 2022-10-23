@@ -24,6 +24,15 @@ object DbGazouLabelPrim:
       event <- DbEventPrim.logGazouLabelCreated(gl)
     yield event
 
+  def updateGazouLabel(gl: GazouLabel): ConnectionIO[AppEvent] =
+    val op = sql"""
+      update visit_gazou_label set label = ${gl.label} where visit_conduct_id = ${gl.conductId}
+    """
+    for
+      _ <- op.update.run
+      event <- DbEventPrim.logGazouLabelUpdated(gl)
+    yield event
+
   def deleteGazouLabel(conductId: Int): ConnectionIO[AppEvent] =
     val op = sql"""
       delete from visit_gazou_label where visit_conduct_id = ${conductId}

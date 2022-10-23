@@ -27,3 +27,7 @@ trait DbConductDrug extends Mysql:
 
   def enterConductDrug(conductDrug: ConductDrug): IO[(AppEvent, ConductDrug)] =
     mysql(Prim.enterConductDrug(conductDrug))
+
+  def deleteConductDrug(conductDrugId: Int): IO[AppEvent] =
+    mysql(Prim.deleteConductDrug(conductDrugId))
+

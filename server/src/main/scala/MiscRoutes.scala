@@ -570,4 +570,47 @@ object MiscService extends DateTimeQueryParam with Publisher:
 
     case GET -> Root / "get-conduct" :? intConductId(conductId) =>
       Ok(Db.getConduct(conductId))
+
+    case GET -> Root / "delete-conduct-shinryou" :? intConductShinryouId(conductShinryouId) =>
+      val op =
+        for 
+          event <- Db.deleteConductShinryou(conductShinryouId)
+          _ <- publish(event)
+        yield true
+      Ok(op)
+
+    case GET -> Root / "delete-conduct-drug" :? intConductDrugId(conductDrugId) =>
+      val op =
+        for 
+          event <- Db.deleteConductDrug(conductDrugId)
+          _ <- publish(event)
+        yield true
+      Ok(op)
+
+    case GET -> Root / "delete-conduct-kizai" :? intConductKizaiId(conductKizaiId) =>
+      val op =
+        for 
+          event <- Db.deleteConductKizai(conductKizaiId)
+          _ <- publish(event)
+        yield true
+      Ok(op)
+
+    case req @ POST -> Root / "update-conduct" =>
+      val op =
+        for
+          conduct <- req.as[Conduct]
+          event <- Db.updateConduct(conduct)
+          _ <- publish(event)
+        yield true
+      Ok(op)
+
+    case req @ POST -> Root / "set-gazou-label" =>
+      val op =
+        for 
+          gl <- req.as[GazouLabel]
+          event <- Db.setGazouLabel(gl.conductId, gl.label)
+          _ <- publish(event)
+        yield true
+      Ok(op)
+
   }
