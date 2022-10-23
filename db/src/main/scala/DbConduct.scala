@@ -17,3 +17,6 @@ trait DbConduct extends Mysql:
 
   def listConductForVisit(visitId: Int): IO[List[Conduct]] =
     mysql(Prim.listConductForVisit(visitId))
+
+  def getConduct(conductId: Int): IO[Conduct] =
+    mysql(Prim.getConduct(conductId).unique)

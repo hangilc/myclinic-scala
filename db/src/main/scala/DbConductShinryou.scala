@@ -24,3 +24,6 @@ trait DbConductShinryou extends Mysql:
 
   def listConductShinryouIdForConduct(conductId: Int): IO[List[Int]] =
     mysql(Prim.listConductShinryouIdForConduct(conductId))
+
+  def enterConductShinryou(conductShinryou: ConductShinryou): IO[(AppEvent, ConductShinryou)] =
+    mysql(Prim.enterConductShinryou(conductShinryou))

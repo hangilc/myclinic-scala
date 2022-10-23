@@ -48,3 +48,6 @@ trait DbKizaiMaster extends Mysql:
         ${m.validFrom}, ${m.validUpto}
       )
     """.update.run.void)
+
+  def searchKizaiMaster(text: String, at: LocalDate): IO[List[KizaiMaster]] =
+    mysql(Prim.searchKizaiMaster(text, at).to[List])

@@ -29,4 +29,14 @@ object DbKizaiMasterPrim:
   def findKizaicodeByName(name: String, at: LocalDate): Query0[Int] =
     getKizaiMasterByName(name, at).map(_.kizaicode)
 
+  def searchKizaiMaster(text: String, at: LocalDate): Query0[KizaiMaster] =
+    val like = s"%${text}%"
+    sql"""
+      select * from tokuteikizai_master_arch
+        where name like ${like} 
+        and valid_from <= ${at}
+        and (valid_upto = '0000-00-00' or ${at} <= valid_upto)
+        order by yomi
+    """.query[KizaiMaster]
+
 

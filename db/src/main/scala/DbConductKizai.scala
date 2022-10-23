@@ -24,3 +24,6 @@ trait DbConductKizai extends Mysql:
 
   def listConductKizaiIdForConduct(conductId: Int): IO[List[Int]] =
     mysql(Prim.listConductKizaiIdForConduct(conductId))
+
+  def enterConductKizai(conductKizai: ConductKizai): IO[(AppEvent, ConductKizai)] =
+    mysql(Prim.enterConductKizai(conductKizai))

@@ -43,6 +43,10 @@ object MiscService extends DateTimeQueryParam with Publisher:
   object intTextId extends QueryParamDecoderMatcher[Int]("text-id")
   object intDiseaseId extends QueryParamDecoderMatcher[Int]("disease-id")
   object intNVisits extends QueryParamDecoderMatcher[Int]("n-visits")
+  object intConductShinryouId extends QueryParamDecoderMatcher[Int]("conduct-shinryou-id")
+  object intConductDrugId extends QueryParamDecoderMatcher[Int]("conduct-drug-id")
+  object intConductKizaiId extends QueryParamDecoderMatcher[Int]("conduct-kizai-id")
+  object intConductId extends QueryParamDecoderMatcher[Int]("conduct-id")
   object strText extends QueryParamDecoderMatcher[String]("text")
   object strEndReason extends QueryParamDecoderMatcher[String]("end-reason")
 
@@ -525,11 +529,45 @@ object MiscService extends DateTimeQueryParam with Publisher:
     case GET -> Root / "list-mishuu-for-patient" :? intPatientId(patientId) +& intNVisits(nVisits) =>
       Ok(Db.listMishuuForPatient(patientId, nVisits))
 
-    // case GET -> Root / "is-test" =>
-    //   val op =
-    //     for
-    //       patientOpt <- Db.findPatient(1)
-    //     yield patientOpt.fold(false)(p => p.lastName == "Shinryou" && p.firstName == "Tarou")
-    //   Ok(op)
+    case req @ POST -> Root / "enter-conduct-shinryou" =>
+      val op =
+        for
+          cs <- req.as[ConductShinryou]
+          result <- Db.enterConductShinryou(cs)
+          (event, entered) = result
+          _ <- publish(event)
+        yield entered
+      Ok(op)
 
+    case req @ POST -> Root / "enter-conduct-drug" =>
+      val op =
+        for
+          cs <- req.as[ConductDrug]
+          result <- Db.enterConductDrug(cs)
+          (event, entered) = result
+          _ <- publish(event)
+        yield entered
+      Ok(op)
+
+    case req @ POST -> Root / "enter-conduct-kizai" =>
+      val op =
+        for
+          cs <- req.as[ConductKizai]
+          result <- Db.enterConductKizai(cs)
+          (event, entered) = result
+          _ <- publish(event)
+        yield entered
+      Ok(op)
+
+    case GET -> Root / "get-conduct-shinryou-ex" :? intConductShinryouId(conductShinryouId) =>
+      Ok(Db.getConductShinryouEx(conductShinryouId))
+
+    case GET -> Root / "get-conduct-drug-ex" :? intConductDrugId(conductDrugId) =>
+      Ok(Db.getConductDrugEx(conductDrugId))
+
+    case GET -> Root / "get-conduct-kizai-ex" :? intConductKizaiId(conductKizaiId) =>
+      Ok(Db.getConductKizaiEx(conductKizaiId))
+
+    case GET -> Root / "get-conduct" :? intConductId(conductId) =>
+      Ok(Db.getConduct(conductId))
   }
