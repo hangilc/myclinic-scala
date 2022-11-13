@@ -613,4 +613,7 @@ object MiscService extends DateTimeQueryParam with Publisher:
         yield true
       Ok(op)
 
+    case GET -> Root / "search-presc-example-full" :? strText(text) =>
+      Ok(Db.searchPrescExampleFull(text))
+
   }

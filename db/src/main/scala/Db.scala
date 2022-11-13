@@ -50,7 +50,7 @@ object Db
   def deleteVisitFromReception(visitId: Int): IO[List[AppEvent]] =
     mysql(for
       wqueue <- DbWqueuePrim.getWqueue(visitId).unique
-      _ = if wqueue.waitState != WaitState.WaitExam then 
+      _ = if wqueue.waitState != WaitState.WaitExam then
         throw new RuntimeException("診察待ちでないので削除できません。")
       events <- DbPrim.deleteVisit(visitId)
     yield events)
@@ -351,31 +351,65 @@ object Db
       yield List(diseaseEvent) ++ adjEvents
     mysql(op)
 
-  def batchCountHokenUsage(shahokokuhoIds: List[Int], koukikoureiIds: List[Int], roujinIds: List[Int], kouhiIds: List[Int]):
-    IO[(Map[Int, Int], Map[Int, Int], Map[Int, Int], Map[Int, Int])] =
-    val op = 
-      for
-        shahokokuhoCounts <- shahokokuhoIds.map(id => DbShahokokuhoPrim.countShahokokuhoUsage(id)).sequence
-        koukikoureiCounts <- koukikoureiIds.map(id => DbKoukikoureiPrim.countKoukikoureiUsage(id)).sequence
-        roujinCounts <- roujinIds.map(id => DbRoujinPrim.countRoujinUsage(id)).sequence
-        kouhiCounts <- kouhiIds.map(id => DbKouhiPrim.countKouhiUsage(id)).sequence
-      yield
-        (
-          Map[Int, Int](shahokokuhoIds.zip(shahokokuhoCounts): _*),
-          Map[Int, Int](koukikoureiIds.zip(koukikoureiCounts): _*),
-          Map[Int, Int](roujinIds.zip(roujinCounts): _*),
-          Map[Int, Int](kouhiIds.zip(kouhiCounts): _*)
-        )
-    mysql(op)
-
-  def batchGetChargePayment(visitIds: List[Int]): IO[List[(Int, Option[Charge], Option[Payment])]] =
+  def batchCountHokenUsage(
+      shahokokuhoIds: List[Int],
+      koukikoureiIds: List[Int],
+      roujinIds: List[Int],
+      kouhiIds: List[Int]
+  ): IO[(Map[Int, Int], Map[Int, Int], Map[Int, Int], Map[Int, Int])] =
     val op =
       for
-        charges <- visitIds.map(visitId => DbChargePrim.getCharge(visitId).option).sequence
-        payments <- visitIds.map(visitId => DbPaymentPrim.getLastPayment(visitId).option).sequence
-      yield 
-        visitIds.zip(charges).zip(payments).map(tuple => (tuple._1._1, tuple._1._2, tuple._2))
+        shahokokuhoCounts <- shahokokuhoIds
+          .map(id => DbShahokokuhoPrim.countShahokokuhoUsage(id))
+          .sequence
+        koukikoureiCounts <- koukikoureiIds
+          .map(id => DbKoukikoureiPrim.countKoukikoureiUsage(id))
+          .sequence
+        roujinCounts <- roujinIds
+          .map(id => DbRoujinPrim.countRoujinUsage(id))
+          .sequence
+        kouhiCounts <- kouhiIds
+          .map(id => DbKouhiPrim.countKouhiUsage(id))
+          .sequence
+      yield (
+        Map[Int, Int](shahokokuhoIds.zip(shahokokuhoCounts): _*),
+        Map[Int, Int](koukikoureiIds.zip(koukikoureiCounts): _*),
+        Map[Int, Int](roujinIds.zip(roujinCounts): _*),
+        Map[Int, Int](kouhiIds.zip(kouhiCounts): _*)
+      )
     mysql(op)
 
-  def listMishuuForPatient(patientId: Int, nVisits: Int): IO[List[(Visit, Charge)]] =
+  def batchGetChargePayment(
+      visitIds: List[Int]
+  ): IO[List[(Int, Option[Charge], Option[Payment])]] =
+    val op =
+      for
+        charges <- visitIds
+          .map(visitId => DbChargePrim.getCharge(visitId).option)
+          .sequence
+        payments <- visitIds
+          .map(visitId => DbPaymentPrim.getLastPayment(visitId).option)
+          .sequence
+      yield visitIds
+        .zip(charges)
+        .zip(payments)
+        .map(tuple => (tuple._1._1, tuple._1._2, tuple._2))
+    mysql(op)
+
+  def listMishuuForPatient(
+      patientId: Int,
+      nVisits: Int
+  ): IO[List[(Visit, Charge)]] =
     mysql(DbPrim.listMishuuForPatient(patientId, nVisits))
+
+  def searchPrescExampleFull(
+      text: String
+  ): IO[List[(PrescExample, IyakuhinMaster)]] =
+    val name = s"%${text}%"
+    val op = sql"""
+      select e.*, m.* from presc_example as e inner join iyakuhin_master_arch as m
+        on e.m_iyakuhincode = m.iyakuhincode
+        where e.m_master_valid_from = m.valid_from 
+        and m.name like ${name}
+    """.query[(PrescExample, IyakuhinMaster)].to[List]
+    mysql(op)

@@ -229,5 +229,8 @@ trait Model extends DateTime with WaitStateCodec:
   given Encoder[DiseaseEnterData] = deriveEncoder[DiseaseEnterData]
   given Decoder[DiseaseEnterData] = deriveDecoder[DiseaseEnterData]
 
+  given Encoder[PrescExample] = deriveEncoder[PrescExample]
+  given Decoder[PrescExample] = deriveDecoder[PrescExample]
+
 
 

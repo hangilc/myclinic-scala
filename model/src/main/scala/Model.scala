@@ -631,3 +631,14 @@ case class DiseaseEnterData(
   startDate: LocalDate,
   adjCodes: List[Int]
 )
+
+case class PrescExample(
+  prescExampleId: Int,
+  iyakuhincode: Int,
+  masterValidFrom: LocalDate,
+  amount: String,
+  usage: String,
+  days: Int,
+  category: Int,
+  comment: String
+)
