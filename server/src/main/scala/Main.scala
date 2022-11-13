@@ -113,9 +113,21 @@ object Main extends IOApp:
       .flatMap(_ => IO.never)
       .as(ExitCode.Success)
 
+  def sslServerPort(): Int =
+    try
+      System.getenv("MYCLINIC_SSL_SERVER_PORT").toInt
+    catch
+      case _ => 8443
+
+  def nonSslServerPort(): Int =
+    try
+      System.getenv("MYCLINIC_NON_SSL_SERVER_PORT").toInt
+    catch
+      case _ => 8080
+      
   override def run(args: List[String]): IO[ExitCode] =
     val cmdArgs = CmdArgs(args)
-    val port = if cmdArgs.ssl then 8443 else 8080
+    val port = if cmdArgs.ssl then sslServerPort() else nonSslServerPort()
     val sslContextOption: Option[SSLContext] =
       if cmdArgs.ssl then
         Some(
