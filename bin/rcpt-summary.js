@@ -3,6 +3,8 @@ const fs = require("fs");
 const { exit } = require("process");
 const { parseString} = require("xml2js");
 
+// Usage: node rcpt-summary.js data-file
+
 const seikyuuMap = { };
 let kokuhoTotalKensuu = 0;
 
