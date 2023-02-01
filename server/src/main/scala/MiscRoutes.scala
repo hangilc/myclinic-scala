@@ -301,7 +301,7 @@ object MiscService extends DateTimeQueryParam with Publisher:
           result <- Db.enterKoukikourei(koukikourei)
           (entered, event) = result
           _ <- publish(event)
-        yield koukikourei
+        yield entered
       )
 
     case req @ POST -> Root / "update-koukikourei" =>
