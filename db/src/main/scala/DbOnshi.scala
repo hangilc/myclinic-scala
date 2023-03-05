@@ -16,6 +16,9 @@ trait DbOnshi extends Mysql:
   def getOnshi(visitId: Int): IO[Onshi] = 
     mysql(DbOnshiPrim.getOnshi(visitId).unique)
 
+  def findOnshi(visitId: Int): IO[Option[Onshi]] =
+    mysql(DbOnshiPrim.getOnshi(visitId).option);
+
   def enterOnshi(onshi: Onshi): IO[AppEvent] =
     mysql(DbOnshiPrim.enterOnshi(onshi))
 

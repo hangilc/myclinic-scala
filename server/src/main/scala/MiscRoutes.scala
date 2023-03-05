@@ -619,6 +619,9 @@ object MiscService extends DateTimeQueryParam with Publisher:
     case GET -> Root / "get-onshi" :? intVisitId(visitId) =>
       Ok(Db.getOnshi(visitId))
 
+    case GET -> Root / "find-onshi" :? intVisitId(visitId) =>
+      Ok(Db.findOnshi(visitId))
+
     case req @ POST -> Root / "enter-onshi" =>
       val op = 
         for
