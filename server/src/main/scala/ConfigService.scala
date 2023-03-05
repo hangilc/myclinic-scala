@@ -23,6 +23,8 @@ object ConfigService:
   lazy val masterNameMap = Config.getMasterNameMap
   lazy val masterTransition = Config.getMasterTransition
   object stringText extends QueryParamDecoderMatcher[String]("text")
+  object stringKey extends QueryParamDecoderMatcher[String]("key")
+  object stringValue extends QueryParamDecoderMatcher[String]("value")
 
   def routes = HttpRoutes.of[IO] {
     case GET -> Root / "get-clinic-info" => Ok(clinicInfo)
@@ -36,6 +38,10 @@ object ConfigService:
     case GET -> Root / "list-disease-example" => Ok(Config.getDiseaseExample)
     case GET -> Root / "default-koukikourei-hokensha-bangou" => Ok(Config.defaultKoukikoureiHokenshaBangou)
     case GET -> Root / "get-phonebook" => Ok(Config.phonebook)
+    case GET -> Root / "dict-get" :? stringKey(key) => Ok(Config.getDictValue(key))
+    case GET -> Root / "dict-set" :? stringKey(key) +& stringValue(value) =>
+      Config.setDictValue(key, value)
+      Ok(true)
 
   }
 

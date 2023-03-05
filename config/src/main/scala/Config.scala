@@ -123,6 +123,21 @@ class Configurator extends JavaConfigurator with FileConfigurator:
   def defaultKoukikoureiHokenshaBangou: Int =
     39131156 // 杉並区
 
+  def getDictValue(key: String): String =
+    val file: File = dataDir.resolve("dict.yaml").toFile
+    if !Files.exists(file.toPath()) then
+      Files.writeString(file.toPath(), "{}")
+      ""
+    else
+      readYaml[Map[String, String]](file).getOrElse(key, "")
+
+  def setDictValue(key: String, value: String) =
+    val file: File = dataDir.resolve("dict.yaml").toFile
+    if !Files.exists(file.toPath()) then
+      Files.writeString(file.toPath(), "")
+    val dict = readYaml[Map[String, String]](file)
+    writeYaml(file, dict.updated(key, value))
+
   private def readDataFile(file: String): String =
     fileContent(dataDir.resolve(file))
 

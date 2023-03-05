@@ -9,6 +9,7 @@ import io.circe.HCursor
 import io.circe.generic.semiauto._
 import io.circe.syntax.*
 import io.circe.yaml.parser
+import io.circe.yaml.printer
 import java.nio.file.Path
 import java.nio.file.Files
 
@@ -23,6 +24,10 @@ trait FileConfigurator:
           throw new RuntimeException("Failed to read: " + file.toString)
         )
     finally reader.close()
+
+  def writeYaml[T: Encoder](file: File, value: T) =
+    val s = printer.print(value.asJson)
+    Files.writeString(file.toPath(), s)
 
   def fileContent(path: Path): String =
     Files.readString(path)

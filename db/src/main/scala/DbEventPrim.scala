@@ -260,7 +260,3 @@ object DbEventPrim:
   def logOnshiDeleted(a: Onshi): ConnectionIO[AppEvent] =
     enterAppEvent("onshi", DELETED, a.asJson.toString)
 
-
-
-
-
