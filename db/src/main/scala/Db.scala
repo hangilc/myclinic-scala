@@ -42,7 +42,8 @@ object Db
     with DbVisitEx
     with DbDisease
     with DbByoumeiMaster
-    with DbShuushokugoMaster:
+    with DbShuushokugoMaster
+    with DbOnshi:
 
   def deleteVisit(visitId: Int): IO[List[AppEvent]] =
     mysql(DbPrim.deleteVisit(visitId))

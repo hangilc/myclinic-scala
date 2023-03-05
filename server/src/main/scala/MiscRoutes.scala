@@ -616,4 +616,33 @@ object MiscService extends DateTimeQueryParam with Publisher:
     case GET -> Root / "search-presc-example-full" :? strText(text) =>
       Ok(Db.searchPrescExampleFull(text))
 
+    case GET -> Root / "get-onshi" :? intVisitId(visitId) =>
+      Ok(Db.getOnshi(visitId))
+
+    case req @ POST -> Root / "enter-onshi" =>
+      val op = 
+        for
+          onshi <- req.as[Onshi]
+          event <- Db.enterOnshi(onshi)
+          _ <- publish(event)
+        yield true
+      Ok(op)
+
+    case req @ POST -> Root / "update-onshi" =>
+      val op = 
+        for
+          onshi <- req.as[Onshi]
+          event <- Db.updateOnshi(onshi)
+          _ <- publish(event)
+        yield true
+      Ok(op)
+
+    case GET -> Root / "delete-onshi" :? intVisitId(visitId) =>
+      val op =
+        for
+          event <- Db.deleteOnshi(visitId)
+          _ <- publish(event)
+        yield true
+      Ok(op)
+
   }

@@ -232,5 +232,8 @@ trait Model extends DateTime with WaitStateCodec:
   given Encoder[PrescExample] = deriveEncoder[PrescExample]
   given Decoder[PrescExample] = deriveDecoder[PrescExample]
 
+  given Encoder[Onshi] = deriveEncoder[Onshi]
+  given Decoder[Onshi] = deriveDecoder[Onshi]
+
 
 

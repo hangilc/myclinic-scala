@@ -251,6 +251,15 @@ object DbEventPrim:
   def logDiseaseAdjDeleted(a: DiseaseAdj): ConnectionIO[AppEvent] =
     enterAppEvent("diseaseAdj", DELETED, a.asJson.toString)
 
+  def logOnshiCreated(a: Onshi): ConnectionIO[AppEvent] =
+    enterAppEvent("onshi", CREATED, a.asJson.toString)
+
+  def logOnshiUpdated(a: Onshi): ConnectionIO[AppEvent] =
+    enterAppEvent("onshi", UPDATED, a.asJson.toString)
+
+  def logOnshiDeleted(a: Onshi): ConnectionIO[AppEvent] =
+    enterAppEvent("onshi", DELETED, a.asJson.toString)
+
 
 
 

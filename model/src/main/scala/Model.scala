@@ -642,3 +642,8 @@ case class PrescExample(
   category: Int,
   comment: String
 )
+
+case class Onshi(
+  visitId: Int,
+  kakunin: String,
+)
