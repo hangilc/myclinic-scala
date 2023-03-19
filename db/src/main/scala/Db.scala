@@ -62,6 +62,23 @@ object Db
       wqEventOpt <- DbWqueuePrim.tryDeleteWqueue(payment.visitId)
     yield List(paymentEvent) ++ wqEventOpt.toList)
 
+  def startVisitWithHoken(
+      patientId: Int,
+      at: LocalDateTime,
+      shahokokuhoId: Int,
+      koukikoureiId: Int,
+      kouhiIds: List[Int]
+  ): IO[(Visit, List[AppEvent])] =
+    mysql(
+      DbPrim.startVisitWithHoken(
+        patientId,
+        at,
+        shahokokuhoId,
+        koukikoureiId,
+        kouhiIds
+      )
+    )
+
   def startVisit(
       patientId: Int,
       at: LocalDateTime
@@ -77,33 +94,15 @@ object Db
           .listAvailableKoukikourei(patientId, date)
           .map(_.headOption)
         koukikoureiId = koukikoureiOpt.map(_.koukikoureiId).getOrElse(0)
-        roujinOpt <- DbRoujinPrim
-          .listAvailableRoujin(patientId, date)
-          .map(_.headOption)
-        roujinId = roujinOpt.map(_.roujinId).getOrElse(0)
         kouhiList <- DbKouhiPrim.listAvailableKouhi(patientId, date)
-        kouhi1Id = kouhiList.map(_.kouhiId).get(0).getOrElse(0)
-        kouhi2Id = kouhiList.map(_.kouhiId).get(1).getOrElse(0)
-        kouhi3Id = kouhiList.map(_.kouhiId).get(2).getOrElse(0)
-        enterVisitResult <-
-          val visit = Visit(
-            0,
-            patientId,
-            at,
-            shahokokuhoId,
-            roujinId,
-            kouhi1Id,
-            kouhi2Id,
-            kouhi3Id,
-            koukikoureiId,
-            None
-          )
-          DbVisitPrim.enterVisit(visit)
-        (visitCreatedEvent, enteredVisit) = enterVisitResult
-        wqCreatedEvent <-
-          val wqueue = Wqueue(enteredVisit.visitId, WaitState.WaitExam)
-          DbWqueuePrim.enterWqueue(wqueue)
-      yield (enteredVisit, List(visitCreatedEvent, wqCreatedEvent))
+        ret <- DbPrim.startVisitWithHoken(
+          patientId,
+          at,
+          shahokokuhoId,
+          koukikoureiId,
+          kouhiList.map(_.kouhiId)
+        )
+      yield ret
     )
 
   def deleteShahokokuho(shahokokuhoId: Int): IO[AppEvent] =

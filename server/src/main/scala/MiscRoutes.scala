@@ -43,9 +43,12 @@ object MiscService extends DateTimeQueryParam with Publisher:
   object intTextId extends QueryParamDecoderMatcher[Int]("text-id")
   object intDiseaseId extends QueryParamDecoderMatcher[Int]("disease-id")
   object intNVisits extends QueryParamDecoderMatcher[Int]("n-visits")
-  object intConductShinryouId extends QueryParamDecoderMatcher[Int]("conduct-shinryou-id")
-  object intConductDrugId extends QueryParamDecoderMatcher[Int]("conduct-drug-id")
-  object intConductKizaiId extends QueryParamDecoderMatcher[Int]("conduct-kizai-id")
+  object intConductShinryouId
+      extends QueryParamDecoderMatcher[Int]("conduct-shinryou-id")
+  object intConductDrugId
+      extends QueryParamDecoderMatcher[Int]("conduct-drug-id")
+  object intConductKizaiId
+      extends QueryParamDecoderMatcher[Int]("conduct-kizai-id")
   object intConductId extends QueryParamDecoderMatcher[Int]("conduct-id")
   object strText extends QueryParamDecoderMatcher[String]("text")
   object strEndReason extends QueryParamDecoderMatcher[String]("end-reason")
@@ -156,8 +159,28 @@ object MiscService extends DateTimeQueryParam with Publisher:
           result <- Db.startVisit(patientId, at)
           (visit, events) = result
           _ <- publishAll(events)
-        yield 
-          visit
+        yield visit
+      Ok(op)
+
+    case req @ POST -> Root / "start-visit-with-hoken" :? intPatientId(
+          patientId
+        ) +& atDateTime(
+          at
+        ) =>
+      val op =
+        for
+          hokenIdSet <- req.as[HokenIdSet]
+          kouhiIds = hokenIdSet.kouhiIds()
+          result <- Db.startVisitWithHoken(
+            patientId,
+            at,
+            hokenIdSet.shahokokuhoId,
+            hokenIdSet.koukikoureiId,
+            kouhiIds
+          )
+          (visit, events) = result
+          _ <- publishAll(events)
+        yield visit
       Ok(op)
 
     case GET -> Root / "find-available-shahokokuho" :? intPatientId(
@@ -207,18 +230,22 @@ object MiscService extends DateTimeQueryParam with Publisher:
     case GET -> Root / "list-kouhi" :? intPatientId(patientId) =>
       Ok(Db.listKouhi(patientId))
 
-    case GET -> Root / "count-shahokokuho-usage" :? intShahokokuhoId(shahokokuhoId) =>
+    case GET -> Root / "count-shahokokuho-usage" :? intShahokokuhoId(
+          shahokokuhoId
+        ) =>
       Ok(Db.countShahokokuhoUsage(shahokokuhoId))
-    
-    case GET -> Root / "count-koukikourei-usage" :? intKoukikoureiId(koukikoureiId) =>
+
+    case GET -> Root / "count-koukikourei-usage" :? intKoukikoureiId(
+          koukikoureiId
+        ) =>
       Ok(Db.countKoukikoureiUsage(koukikoureiId))
-    
+
     case GET -> Root / "count-roujin-usage" :? intRoujinId(roujinId) =>
       Ok(Db.countRoujinUsage(roujinId))
-    
+
     case GET -> Root / "count-kouhi-usage" :? intKouhiId(kouhiId) =>
       Ok(Db.countKouhiUsage(kouhiId))
-    
+
     case req @ POST -> Root / "batch-count-hoken-usage" =>
       val op =
         for
@@ -478,7 +505,7 @@ object MiscService extends DateTimeQueryParam with Publisher:
     case GET -> Root / "end-disease" :? intDiseaseId(diseaseId) +& dateEnd(
           endDate
         ) +& strEndReason(endReason) =>
-      val op = 
+      val op =
         for
           event <- Db.endDisease(diseaseId, endDate, endReason)
           _ <- publish(event)
@@ -486,7 +513,7 @@ object MiscService extends DateTimeQueryParam with Publisher:
       Ok(op)
 
     case req @ POST -> Root / "update-disease-ex" =>
-      val op = 
+      val op =
         for
           body <- req.as[(Disease, List[Int])]
           (disease, shuushokugocodes) = body
@@ -496,7 +523,7 @@ object MiscService extends DateTimeQueryParam with Publisher:
       Ok(op)
 
     case GET -> Root / "delete-disease-ex" :? intDiseaseId(diseaseId) =>
-      val op = 
+      val op =
         for
           events <- Db.deleteDiseaseEx(diseaseId)
           _ <- publishAll(events)
@@ -511,7 +538,9 @@ object MiscService extends DateTimeQueryParam with Publisher:
         yield map
       Ok(op)
 
-    case GET -> Root / "list-visit-since" :? intPatientId(patientId) +& dateDate(date) =>
+    case GET -> Root / "list-visit-since" :? intPatientId(
+          patientId
+        ) +& dateDate(date) =>
       Ok(Db.listVisitSince(patientId, date))
 
     case req @ POST -> Root / "enter-wqueue" =>
@@ -526,7 +555,9 @@ object MiscService extends DateTimeQueryParam with Publisher:
     case GET -> Root / "get-charge" :? intVisitId(visitId) =>
       Ok(Db.getCharge(visitId))
 
-    case GET -> Root / "list-mishuu-for-patient" :? intPatientId(patientId) +& intNVisits(nVisits) =>
+    case GET -> Root / "list-mishuu-for-patient" :? intPatientId(
+          patientId
+        ) +& intNVisits(nVisits) =>
       Ok(Db.listMishuuForPatient(patientId, nVisits))
 
     case req @ POST -> Root / "enter-conduct-shinryou" =>
@@ -559,37 +590,49 @@ object MiscService extends DateTimeQueryParam with Publisher:
         yield entered
       Ok(op)
 
-    case GET -> Root / "get-conduct-shinryou-ex" :? intConductShinryouId(conductShinryouId) =>
+    case GET -> Root / "get-conduct-shinryou-ex" :? intConductShinryouId(
+          conductShinryouId
+        ) =>
       Ok(Db.getConductShinryouEx(conductShinryouId))
 
-    case GET -> Root / "get-conduct-drug-ex" :? intConductDrugId(conductDrugId) =>
+    case GET -> Root / "get-conduct-drug-ex" :? intConductDrugId(
+          conductDrugId
+        ) =>
       Ok(Db.getConductDrugEx(conductDrugId))
 
-    case GET -> Root / "get-conduct-kizai-ex" :? intConductKizaiId(conductKizaiId) =>
+    case GET -> Root / "get-conduct-kizai-ex" :? intConductKizaiId(
+          conductKizaiId
+        ) =>
       Ok(Db.getConductKizaiEx(conductKizaiId))
 
     case GET -> Root / "get-conduct" :? intConductId(conductId) =>
       Ok(Db.getConduct(conductId))
 
-    case GET -> Root / "delete-conduct-shinryou" :? intConductShinryouId(conductShinryouId) =>
+    case GET -> Root / "delete-conduct-shinryou" :? intConductShinryouId(
+          conductShinryouId
+        ) =>
       val op =
-        for 
+        for
           event <- Db.deleteConductShinryou(conductShinryouId)
           _ <- publish(event)
         yield true
       Ok(op)
 
-    case GET -> Root / "delete-conduct-drug" :? intConductDrugId(conductDrugId) =>
+    case GET -> Root / "delete-conduct-drug" :? intConductDrugId(
+          conductDrugId
+        ) =>
       val op =
-        for 
+        for
           event <- Db.deleteConductDrug(conductDrugId)
           _ <- publish(event)
         yield true
       Ok(op)
 
-    case GET -> Root / "delete-conduct-kizai" :? intConductKizaiId(conductKizaiId) =>
+    case GET -> Root / "delete-conduct-kizai" :? intConductKizaiId(
+          conductKizaiId
+        ) =>
       val op =
-        for 
+        for
           event <- Db.deleteConductKizai(conductKizaiId)
           _ <- publish(event)
         yield true
@@ -606,7 +649,7 @@ object MiscService extends DateTimeQueryParam with Publisher:
 
     case req @ POST -> Root / "set-gazou-label" =>
       val op =
-        for 
+        for
           gl <- req.as[GazouLabel]
           event <- Db.setGazouLabel(gl.conductId, gl.label)
           _ <- publish(event)
@@ -623,7 +666,7 @@ object MiscService extends DateTimeQueryParam with Publisher:
       Ok(Db.findOnshi(visitId))
 
     case req @ POST -> Root / "enter-onshi" =>
-      val op = 
+      val op =
         for
           onshi <- req.as[Onshi]
           event <- Db.enterOnshi(onshi)
@@ -632,7 +675,7 @@ object MiscService extends DateTimeQueryParam with Publisher:
       Ok(op)
 
     case req @ POST -> Root / "update-onshi" =>
-      val op = 
+      val op =
         for
           onshi <- req.as[Onshi]
           event <- Db.updateOnshi(onshi)

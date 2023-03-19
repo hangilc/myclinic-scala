@@ -229,7 +229,9 @@ case class HokenIdSet(
     kouhi1Id: Int,
     kouhi2Id: Int,
     kouhi3Id: Int
-)
+):
+  def kouhiIds(): List[Int] = 
+    List(kouhi1Id, kouhi2Id, kouhi3Id).filter(_ > 0)
 
 enum DrugCategory(val code: Int):
   case Naifuku extends DrugCategory(0)

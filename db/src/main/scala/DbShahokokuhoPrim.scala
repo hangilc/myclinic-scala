@@ -19,6 +19,10 @@ object DbShahokokuhoPrim:
       select * from hoken_shahokokuho where shahokokuho_id = $shahokokuhoId
     """.query[Shahokokuho]
 
+  def getShahokokuhoOpt(shahokokuhoId: Int): ConnectionIO[Option[Shahokokuho]] =
+    if shahokokuhoId == 0 then None.pure[ConnectionIO]
+    else getShahokokuho(shahokokuhoId).unique.map(Some.apply)
+
   def listAvailableShahokokuho(patientId: Int, at: LocalDate): ConnectionIO[List[Shahokokuho]] =
     sql"""
       select * from hoken_shahokokuho where patient_id = ${patientId} 

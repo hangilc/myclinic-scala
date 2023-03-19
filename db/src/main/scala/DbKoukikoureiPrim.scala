@@ -19,6 +19,10 @@ object DbKoukikoureiPrim:
       select * from hoken_koukikourei where koukikourei_id = $koukikoureiId
     """.query[Koukikourei]
 
+  def getKoukikoureiOpt(koukikoureiId: Int): ConnectionIO[Option[Koukikourei]] =
+    if koukikoureiId == 0 then None.pure[ConnectionIO]
+    else getKoukikourei(koukikoureiId).unique.map(Some.apply)
+
   def listAvailableKoukikourei(
       patientId: Int,
       at: LocalDate

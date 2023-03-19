@@ -15,6 +15,7 @@ import dev.myclinic.scala.db.DbConductPrim.countConductForVisit
 import dev.myclinic.scala.db.DbChargePrim.countChargeForVisit
 import dev.myclinic.scala.db.DbPaymentPrim.countPaymentForVisit
 import cats.data.EitherT
+import java.time.LocalDateTime
 
 object DbPrim:
   type ShinryouId = Int
@@ -152,3 +153,54 @@ object DbPrim:
     }) collect { case Some((visit, charge)) =>
       (visit, charge)
     }
+
+  def startVisitWithHoken(
+      patientId: Int,
+      at: LocalDateTime,
+      shahokokuhoId: Int,
+      koukikoureiId: Int,
+      kouhiIds: List[Int]
+  ): ConnectionIO[(Visit, List[AppEvent])] =
+    val date = at.toLocalDate
+    for
+      shahokokuho <- DbShahokokuhoPrim.getShahokokuhoOpt(shahokokuhoId)
+      _ = shahokokuho.foreach(h =>
+        if !h.isValidAt(date) then
+          throw new RuntimeException("Not valid at: " + date)
+      )
+      koukikourei <- DbKoukikoureiPrim.getKoukikoureiOpt(koukikoureiId)
+      _ = koukikourei.foreach(h =>
+        if !h.isValidAt(date) then
+          throw new RuntimeException("Not valid at: " + date)
+      )
+      kouhiList <- kouhiIds
+        .map(kouhiId => DbKouhiPrim.getKouhi(kouhiId).unique)
+        .sequence
+      _ = kouhiList.foreach(h =>
+        if !h.isValidAt(date) then
+          throw new RuntimeException("Not valid at: " + date)
+      )
+      roujinId = 0
+      kouhi1Id = kouhiList.map(_.kouhiId).get(0).getOrElse(0)
+      kouhi2Id = kouhiList.map(_.kouhiId).get(1).getOrElse(0)
+      kouhi3Id = kouhiList.map(_.kouhiId).get(2).getOrElse(0)
+      enterVisitResult <-
+        val visit = Visit(
+          0,
+          patientId,
+          at,
+          shahokokuhoId,
+          roujinId,
+          kouhi1Id,
+          kouhi2Id,
+          kouhi3Id,
+          koukikoureiId,
+          None
+        )
+        DbVisitPrim.enterVisit(visit)
+      (visitCreatedEvent, enteredVisit) = enterVisitResult
+      wqCreatedEvent <-
+        val wqueue = Wqueue(enteredVisit.visitId, WaitState.WaitExam)
+        DbWqueuePrim.enterWqueue(wqueue)
+    yield (enteredVisit, List(visitCreatedEvent, wqCreatedEvent))
+
