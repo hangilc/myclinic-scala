@@ -47,4 +47,10 @@ object DbOnshiPrim:
       _ = if affected != 1 then throw new RuntimeException("Delete onshi failed.")
       event <- DbEventPrim.logOnshiDeleted(onshi)
     yield event
+
+  def batchProbeOnshi(visitIds: List[Int]): ConnectionIO[List[Int]] =
+    for
+      checked <- visitIds.map(visitId => getOnshi(visitId).option).sequence
+    yield visitIds.zip(checked).filter((visitId, opt) => opt.isDefined).map(_(0))
+    
   

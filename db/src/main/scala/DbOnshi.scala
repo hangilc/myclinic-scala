@@ -28,3 +28,6 @@ trait DbOnshi extends Mysql:
   def deleteOnshi(visitId: Int): IO[AppEvent] =
     mysql(DbOnshiPrim.deleteOnshi((visitId)))
 
+  def batchProbeOnshi(visitIds: List[Int]): IO[List[Int]] =
+    mysql(DbOnshiPrim.batchProbeOnshi(visitIds))
+

@@ -691,4 +691,12 @@ object MiscService extends DateTimeQueryParam with Publisher:
         yield true
       Ok(op)
 
+    case req @ POST -> Root / "batch-probe-onshi" =>
+      val op =
+        for
+          visitIds <- req.as[List[Int]]
+          checked <- Db.batchProbeOnshi(visitIds)
+        yield checked
+      Ok(op)
+
   }
