@@ -53,4 +53,15 @@ object DbOnshiPrim:
       checked <- visitIds.map(visitId => getOnshi(visitId).option).sequence
     yield visitIds.zip(checked).filter((visitId, opt) => opt.isDefined).map(_(0))
     
-  
+  def setOnshi(onshi: Onshi): ConnectionIO[List[AppEvent]] =
+    for
+      opt <- getOnshi(onshi.visitId).option
+      delEvent <- opt.map(_ => deleteOnshi(onshi.visitId)).sequence
+      entEvent <- enterOnshi(onshi)
+    yield delEvent.fold(List())(List(_)) ++ List(entEvent)
+    
+  def clearOnshi(visitId: Int): ConnectionIO[Option[AppEvent]] =
+    for
+      opt <- getOnshi(visitId).option
+      delEvent <- opt.map(_ => deleteOnshi(visitId)).sequence
+    yield delEvent

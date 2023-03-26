@@ -665,31 +665,51 @@ object MiscService extends DateTimeQueryParam with Publisher:
     case GET -> Root / "find-onshi" :? intVisitId(visitId) =>
       Ok(Db.findOnshi(visitId))
 
-    case req @ POST -> Root / "enter-onshi" =>
+    case req @ POST -> Root / "set-onshi" =>
       val op =
         for
           onshi <- req.as[Onshi]
-          event <- Db.enterOnshi(onshi)
-          _ <- publish(event)
+          events <- Db.setOnshi(onshi)
+          _ <- publishAll(events)
         yield true
       Ok(op)
 
-    case req @ POST -> Root / "update-onshi" =>
+    case GET -> Root / "clear-onshi" :? intVisitId(visitId) =>
       val op =
         for
-          onshi <- req.as[Onshi]
-          event <- Db.updateOnshi(onshi)
-          _ <- publish(event)
+          event <- Db.clearOnshi(visitId)
+          _ <- event match {
+            case Some(e) => publish(e)
+            case None => ().pure[IO]
+          }
         yield true
       Ok(op)
 
-    case GET -> Root / "delete-onshi" :? intVisitId(visitId) =>
-      val op =
-        for
-          event <- Db.deleteOnshi(visitId)
-          _ <- publish(event)
-        yield true
-      Ok(op)
+    // case req @ POST -> Root / "enter-onshi" =>
+    //   val op =
+    //     for
+    //       onshi <- req.as[Onshi]
+    //       event <- Db.enterOnshi(onshi)
+    //       _ <- publish(event)
+    //     yield true
+    //   Ok(op)
+
+    // case req @ POST -> Root / "update-onshi" =>
+    //   val op =
+    //     for
+    //       onshi <- req.as[Onshi]
+    //       event <- Db.updateOnshi(onshi)
+    //       _ <- publish(event)
+    //     yield true
+    //   Ok(op)
+
+    // case GET -> Root / "delete-onshi" :? intVisitId(visitId) =>
+    //   val op =
+    //     for
+    //       event <- Db.deleteOnshi(visitId)
+    //       _ <- publish(event)
+    //     yield true
+    //   Ok(op)
 
     case req @ POST -> Root / "batch-probe-onshi" =>
       val op =
