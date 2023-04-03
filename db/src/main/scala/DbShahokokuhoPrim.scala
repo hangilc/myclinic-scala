@@ -53,6 +53,8 @@ object DbShahokokuhoPrim:
     yield (entered, event)
     
   def updateShahokokuho(d: Shahokokuho): ConnectionIO[AppEvent] =
+    println("update shahokokuho")
+    println(d)
     val op = sql"""
       update hoken_shahokokuho set
         patient_id = ${d.patientId}, hokensha_bangou = ${d.hokenshaBangou},

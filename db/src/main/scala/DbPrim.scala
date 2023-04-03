@@ -219,7 +219,7 @@ object DbPrim:
       shahokokuhoEvents <- shahokokuhoList
         .map(shahokokuho => {
           val update = shahokokuho.copy(validUpto = ValidUpto(Some(endDate)))
-          DbShahokokuhoPrim.updateShahokokuho(shahokokuho)
+          DbShahokokuhoPrim.updateShahokokuho(update)
         })
         .sequence
       koukikoureiList <- DbKoukikoureiPrim.listAvailableKoukikourei(
@@ -229,7 +229,7 @@ object DbPrim:
       koukikoureiEvents <- koukikoureiList
         .map(koukikourei => {
           val update = koukikourei.copy(validUpto = ValidUpto(Some(endDate)))
-          DbKoukikoureiPrim.updateKoukikourei(koukikourei)
+          DbKoukikoureiPrim.updateKoukikourei(update)
         })
         .sequence
       enterResult <- DbShahokokuhoPrim.enterShahokokuho(hoken)
@@ -250,7 +250,7 @@ object DbPrim:
       shahokokuhoEvents <- shahokokuhoList
         .map(shahokokuho => {
           val update = shahokokuho.copy(validUpto = ValidUpto(Some(endDate)))
-          DbShahokokuhoPrim.updateShahokokuho(shahokokuho)
+          DbShahokokuhoPrim.updateShahokokuho(update)
         })
         .sequence
       koukikoureiList <- DbKoukikoureiPrim.listAvailableKoukikourei(
@@ -260,7 +260,7 @@ object DbPrim:
       koukikoureiEvents <- koukikoureiList
         .map(koukikourei => {
           val update = koukikourei.copy(validUpto = ValidUpto(Some(endDate)))
-          DbKoukikoureiPrim.updateKoukikourei(koukikourei)
+          DbKoukikoureiPrim.updateKoukikourei(update)
         })
         .sequence
       enterResult <- DbKoukikoureiPrim.enterKoukikourei(hoken)
