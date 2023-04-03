@@ -413,3 +413,10 @@ object Db
         and m.name like ${name}
     """.query[(PrescExample, IyakuhinMaster)].to[List]
     mysql(op)
+
+  def newShahokokuho(shahokokuho: Shahokokuho): IO[(Shahokokuho, List[AppEvent])] =
+    mysql(DbPrim.newShahokokuho(shahokokuho))
+
+  def newKoukikourei(koukikourei: Koukikourei): IO[(Koukikourei, List[AppEvent])] =
+    mysql(DbPrim.newKoukikourei(koukikourei))
+    

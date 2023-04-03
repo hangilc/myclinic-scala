@@ -16,6 +16,7 @@ import dev.myclinic.scala.db.DbChargePrim.countChargeForVisit
 import dev.myclinic.scala.db.DbPaymentPrim.countPaymentForVisit
 import cats.data.EitherT
 import java.time.LocalDateTime
+import java.time.LocalDate
 
 object DbPrim:
   type ShinryouId = Int
@@ -28,12 +29,12 @@ object DbPrim:
     ): EitherT[ConnectionIO, String, Unit] =
       EitherT(chk(visitId).map(c => if c > 0 then Left(err) else Right(())))
     def proc(): ConnectionIO[List[AppEvent]] =
-        for
-          wqueueEventOpt <- DbWqueuePrim.tryDeleteWqueue(visitId)
-          visit <- DbVisitPrim.getVisit(visitId).unique
-          _ <- DbVisitPrim.deleteVisit(visitId)
-          visitEvent <- DbEventPrim.logVisitDeleted(visit)
-        yield wqueueEventOpt.toList :+ visitEvent
+      for
+        wqueueEventOpt <- DbWqueuePrim.tryDeleteWqueue(visitId)
+        visit <- DbVisitPrim.getVisit(visitId).unique
+        _ <- DbVisitPrim.deleteVisit(visitId)
+        visitEvent <- DbEventPrim.logVisitDeleted(visit)
+      yield wqueueEventOpt.toList :+ visitEvent
     val op = List(
       check(countTextForVisit, "テキストがあるため、削除できません。"),
       check(countDrugForVisit, "処方があるため、削除できません。"),
@@ -204,3 +205,64 @@ object DbPrim:
         DbWqueuePrim.enterWqueue(wqueue)
     yield (enteredVisit, List(visitCreatedEvent, wqCreatedEvent))
 
+  def newShahokokuho(
+      hoken: Shahokokuho
+  ): ConnectionIO[(Shahokokuho, List[AppEvent])] =
+    val patientId = hoken.patientId
+    val startDate: LocalDate = hoken.validFrom
+    val endDate: LocalDate = startDate.minusDays(1);
+    for
+      shahokokuhoList <- DbShahokokuhoPrim.listAvailableShahokokuho(
+        patientId,
+        startDate
+      )
+      shahokokuhoEvents <- shahokokuhoList
+        .map(shahokokuho => {
+          val update = shahokokuho.copy(validUpto = ValidUpto(Some(endDate)))
+          DbShahokokuhoPrim.updateShahokokuho(shahokokuho)
+        })
+        .sequence
+      koukikoureiList <- DbKoukikoureiPrim.listAvailableKoukikourei(
+        patientId,
+        startDate
+      )
+      koukikoureiEvents <- koukikoureiList
+        .map(koukikourei => {
+          val update = koukikourei.copy(validUpto = ValidUpto(Some(endDate)))
+          DbKoukikoureiPrim.updateKoukikourei(koukikourei)
+        })
+        .sequence
+      enterResult <- DbShahokokuhoPrim.enterShahokokuho(hoken)
+      (entered, enterEvent) = enterResult
+    yield (entered, List(enterEvent) ++ shahokokuhoEvents ++ koukikoureiEvents)
+
+  def newKoukikourei(
+      hoken: Koukikourei,
+  ): ConnectionIO[(Koukikourei, List[AppEvent])] =
+    val patientId = hoken.patientId
+    val startDate: LocalDate = hoken.validFrom
+    val endDate: LocalDate = startDate.minusDays(1);
+    for
+      shahokokuhoList <- DbShahokokuhoPrim.listAvailableShahokokuho(
+        patientId,
+        startDate
+      )
+      shahokokuhoEvents <- shahokokuhoList
+        .map(shahokokuho => {
+          val update = shahokokuho.copy(validUpto = ValidUpto(Some(endDate)))
+          DbShahokokuhoPrim.updateShahokokuho(shahokokuho)
+        })
+        .sequence
+      koukikoureiList <- DbKoukikoureiPrim.listAvailableKoukikourei(
+        patientId,
+        startDate
+      )
+      koukikoureiEvents <- koukikoureiList
+        .map(koukikourei => {
+          val update = koukikourei.copy(validUpto = ValidUpto(Some(endDate)))
+          DbKoukikoureiPrim.updateKoukikourei(koukikourei)
+        })
+        .sequence
+      enterResult <- DbKoukikoureiPrim.enterKoukikourei(hoken)
+      (entered, enterEvent) = enterResult
+    yield (entered, List(enterEvent) ++ shahokokuhoEvents ++ koukikoureiEvents)

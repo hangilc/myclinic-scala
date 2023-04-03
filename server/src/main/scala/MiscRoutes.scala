@@ -685,38 +685,32 @@ object MiscService extends DateTimeQueryParam with Publisher:
         yield true
       Ok(op)
 
-    // case req @ POST -> Root / "enter-onshi" =>
-    //   val op =
-    //     for
-    //       onshi <- req.as[Onshi]
-    //       event <- Db.enterOnshi(onshi)
-    //       _ <- publish(event)
-    //     yield true
-    //   Ok(op)
-
-    // case req @ POST -> Root / "update-onshi" =>
-    //   val op =
-    //     for
-    //       onshi <- req.as[Onshi]
-    //       event <- Db.updateOnshi(onshi)
-    //       _ <- publish(event)
-    //     yield true
-    //   Ok(op)
-
-    // case GET -> Root / "delete-onshi" :? intVisitId(visitId) =>
-    //   val op =
-    //     for
-    //       event <- Db.deleteOnshi(visitId)
-    //       _ <- publish(event)
-    //     yield true
-    //   Ok(op)
-
     case req @ POST -> Root / "batch-probe-onshi" =>
       val op =
         for
           visitIds <- req.as[List[Int]]
           checked <- Db.batchProbeOnshi(visitIds)
         yield checked
+      Ok(op)
+
+    case req @ POST -> Root / "new-shahokokuho" =>
+      val op =
+        for 
+          shahokokuho <- req.as[Shahokokuho]
+          result <- Db.newShahokokuho(shahokokuho)
+          (entered, events) = result
+          _ <- publishAll(events)
+        yield entered
+      Ok(op)
+
+    case req @ POST -> Root / "new-koukikourei" =>
+      val op =
+        for
+          koukikourei <- req.as[Koukikourei]
+          result <- Db.newKoukikourei(koukikourei)
+          (entered, events) = result
+          _ <- publishAll(events)
+        yield entered
       Ok(op)
 
   }
