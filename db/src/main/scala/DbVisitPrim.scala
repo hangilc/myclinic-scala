@@ -163,19 +163,22 @@ object DbVisitPrim:
       select * from visit where patient_id = ${patientId} and date(v_datetime) >= ${date} order by visit_id desc
     """.query[Visit]
 
-  def listVisitIdByShahokokuhoReverse(shahokokuhoId: Int): ConnectionIO[List[Int]] =
+  def shahokokuhoUsageSince(shahokokuhoId: Int, date: LocalDate): ConnectionIO[List[Visit]] =
     sql"""
-      select visit_id from visit where shahokokuho_id = ${shahokokuhoId} order by visit_id desc
-    """.query[Int].to[List]
+      select * from visit where shahokokuho_id = ${shahokokuhoId} 
+      and DATE(v_datetime) >= ${date} order by visit_id
+    """.query[Visit].to[List]
 
-  def listVisitIdByKoukikoureiReverse(koukikoureiId: Int): ConnectionIO[List[Int]] =
+  def koukikoureiUsageSince(koukikoureiId: Int, date: LocalDate): ConnectionIO[List[Visit]] =
     sql"""
-      select visit_id from visit where koukikourei_id = ${koukikoureiId} order by visit_id desc
-    """.query[Int].to[List]
+      select * from visit where koukikourei_id = ${koukikoureiId} 
+      and DATE(v_datetime) >= ${date} order by visit_id
+    """.query[Visit].to[List]
 
-  def listVisitIdByKouhiReverse(kouhiId: Int): ConnectionIO[List[Int]] =
+  def kouhiUsageSince(kouhiId: Int, date: LocalDate): ConnectionIO[List[Visit]] =
     sql"""
-      select visit_id from visit where kouhi_1_id = ${kouhiId} 
-      or kouhi_2_id = ${kouhiId} or kouhi_3_id = ${kouhiId}
-      order by visit_id desc
-    """.query[Int].to[List]
+      select * from visit 
+      where kouhi_1_id = ${kouhiId}  or kouhi_2_id = ${kouhiId} or kouhi_3_id = ${kouhiId}
+      and DATE(v_datetime) >= ${date} order by visit_id
+    """.query[Visit].to[List]
+

@@ -680,7 +680,7 @@ object MiscService extends DateTimeQueryParam with Publisher:
           event <- Db.clearOnshi(visitId)
           _ <- event match {
             case Some(e) => publish(e)
-            case None => ().pure[IO]
+            case None    => ().pure[IO]
           }
         yield true
       Ok(op)
@@ -695,7 +695,7 @@ object MiscService extends DateTimeQueryParam with Publisher:
 
     case req @ POST -> Root / "new-shahokokuho" =>
       val op =
-        for 
+        for
           shahokokuho <- req.as[Shahokokuho]
           result <- Db.newShahokokuho(shahokokuho)
           (entered, events) = result
@@ -713,13 +713,19 @@ object MiscService extends DateTimeQueryParam with Publisher:
         yield entered
       Ok(op)
 
-    case GET -> Root / "list-visit-id-by-shahokokuho-reverse" :? intShahokokuhoId(shahokokuhoId) =>
-      Ok(Db.listVisitIdByShahokokuhoReverse(shahokokuhoId))
+    case GET -> Root / "shahokokuho-usage-since" :? intShahokokuhoId(
+          shahokokuhoId
+        ) +& dateDate(date) =>
+      Ok(Db.shahokokuhoUsageSince(shahokokuhoId, date))
 
-    case GET -> Root / "list-visit-id-by-koukikourei-reverse" :? intKoukikoureiId(koukikoureiId) =>
-      Ok(Db.listVisitIdByKoukikoureiReverse(koukikoureiId))
+    case GET -> Root / "koukikourei-usage-since" :? intKoukikoureiId(
+          koukikoureiId
+        ) +& dateDate(date) =>
+      Ok(Db.koukikoureiUsageSince(koukikoureiId, date))
 
-    case GET -> Root / "list-visit-id-by-kouhi-reverse" :? intKouhiId(kouhiId) =>
-      Ok(Db.listVisitIdByKouhiReverse(kouhiId))
+    case GET -> Root / "kouhi-usage-since" :? intKouhiId(
+          kouhiId
+        ) +& dateDate(date) =>
+      Ok(Db.kouhiUsageSince(kouhiId, date))
 
   }
