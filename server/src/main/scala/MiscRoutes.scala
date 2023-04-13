@@ -713,4 +713,13 @@ object MiscService extends DateTimeQueryParam with Publisher:
         yield entered
       Ok(op)
 
+    case GET -> Root / "list-visit-id-by-shahokokuho-reverse" :? intShahokokuhoId(shahokokuhoId) =>
+      Ok(Db.listVisitIdByShahokokuhoReverse(shahokokuhoId))
+
+    case GET -> Root / "list-visit-id-by-koukikourei-reverse" :? intKoukikoureiId(koukikoureiId) =>
+      Ok(Db.listVisitIdByKoukikoureiReverse(koukikoureiId))
+
+    case GET -> Root / "list-visit-id-by-kouhi-reverse" :? intKouhiId(kouhiId) =>
+      Ok(Db.listVisitIdByKouhiReverse(kouhiId))
+
   }
