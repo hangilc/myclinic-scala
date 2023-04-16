@@ -31,10 +31,11 @@ object DbPrim:
     def proc(): ConnectionIO[List[AppEvent]] =
       for
         wqueueEventOpt <- DbWqueuePrim.tryDeleteWqueue(visitId)
+        onshiEventOpt <- DbOnshiPrim.clearOnshi(visitId)
         visit <- DbVisitPrim.getVisit(visitId).unique
         _ <- DbVisitPrim.deleteVisit(visitId)
         visitEvent <- DbEventPrim.logVisitDeleted(visit)
-      yield wqueueEventOpt.toList :+ visitEvent
+      yield wqueueEventOpt.toList ++ onshiEventOpt.toList :+ visitEvent
     val op = List(
       check(countTextForVisit, "テキストがあるため、削除できません。"),
       check(countDrugForVisit, "処方があるため、削除できません。"),
