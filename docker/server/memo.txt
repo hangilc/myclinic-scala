@@ -1,3 +1,4 @@
+1.0.5 -- delete visit deletes onshi
 1.0.4 -- added shahokokuho-usage-since, ...
 1.0.3 -- added newShahokokuho and newKoukikourei
 1.0.2 -- added onshi service
