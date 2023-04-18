@@ -50,6 +50,8 @@ object MiscService extends DateTimeQueryParam with Publisher:
   object intConductKizaiId
       extends QueryParamDecoderMatcher[Int]("conduct-kizai-id")
   object intConductId extends QueryParamDecoderMatcher[Int]("conduct-id")
+  object intYear extends QueryParamDecoderMatcher[Int]("year")
+  object intMonth extends QueryParamDecoderMatcher[Int]("month")
   object strText extends QueryParamDecoderMatcher[String]("text")
   object strEndReason extends QueryParamDecoderMatcher[String]("end-reason")
 
@@ -727,5 +729,9 @@ object MiscService extends DateTimeQueryParam with Publisher:
           kouhiId
         ) +& dateDate(date) =>
       Ok(Db.kouhiUsageSince(kouhiId, date))
+
+    case GET -> Root / "list-visit-id-by-patient-and-month" :? intPatientId(patientId)
+          +& intYear(year) +& intMonth(month) => 
+      Ok(Db.listVisitIdByPatientAndMonth(patientId, year, month))
 
   }

@@ -182,3 +182,10 @@ object DbVisitPrim:
       and DATE(v_datetime) >= ${date} order by visit_id
     """.query[Visit].to[List]
 
+  def listVisitIdByPatientAndMonth(patientId: Int, year: Int, month: Int): ConnectionIO[List[Int]] =
+    sql"""
+      select visit_id from visit where patient_id = ${patientId} and YEAR(v_datetime) = ${year} 
+      and MONTH(v_datetime) = ${month} order by visit_id
+    """.query[Int].to[List]
+
+
