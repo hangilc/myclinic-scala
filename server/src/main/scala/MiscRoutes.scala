@@ -720,18 +720,35 @@ object MiscService extends DateTimeQueryParam with Publisher:
         ) +& dateDate(date) =>
       Ok(Db.shahokokuhoUsageSince(shahokokuhoId, date))
 
+    case GET -> Root / "shahokokuho-usage" :? intShahokokuhoId(
+          shahokokuhoId
+        ) =>
+      Ok(Db.shahokokuhoUsage(shahokokuhoId))
+
     case GET -> Root / "koukikourei-usage-since" :? intKoukikoureiId(
           koukikoureiId
         ) +& dateDate(date) =>
       Ok(Db.koukikoureiUsageSince(koukikoureiId, date))
+
+    case GET -> Root / "koukikourei-usage" :? intKoukikoureiId(
+          koukikoureiId
+        ) =>
+      Ok(Db.koukikoureiUsage(koukikoureiId))
 
     case GET -> Root / "kouhi-usage-since" :? intKouhiId(
           kouhiId
         ) +& dateDate(date) =>
       Ok(Db.kouhiUsageSince(kouhiId, date))
 
-    case GET -> Root / "list-visit-id-by-patient-and-month" :? intPatientId(patientId)
-          +& intYear(year) +& intMonth(month) => 
+    case GET -> Root / "kouhi-usage" :? intKouhiId(
+          kouhiId
+        ) =>
+      Ok(Db.kouhiUsage(kouhiId))
+
+    case GET -> Root / "list-visit-id-by-patient-and-month" :? intPatientId(
+          patientId
+        )
+        +& intYear(year) +& intMonth(month) =>
       Ok(Db.listVisitIdByPatientAndMonth(patientId, year, month))
 
   }

@@ -169,10 +169,22 @@ object DbVisitPrim:
       and DATE(v_datetime) >= ${date} order by visit_id
     """.query[Visit].to[List]
 
+  def shahokokuhoUsage(shahokokuhoId: Int): ConnectionIO[List[Visit]] =
+    sql"""
+      select * from visit where shahokokuho_id = ${shahokokuhoId} 
+      order by visit_id
+    """.query[Visit].to[List]
+
   def koukikoureiUsageSince(koukikoureiId: Int, date: LocalDate): ConnectionIO[List[Visit]] =
     sql"""
       select * from visit where koukikourei_id = ${koukikoureiId} 
       and DATE(v_datetime) >= ${date} order by visit_id
+    """.query[Visit].to[List]
+
+  def koukikoureiUsage(koukikoureiId: Int): ConnectionIO[List[Visit]] =
+    sql"""
+      select * from visit where koukikourei_id = ${koukikoureiId} 
+      order by visit_id
     """.query[Visit].to[List]
 
   def kouhiUsageSince(kouhiId: Int, date: LocalDate): ConnectionIO[List[Visit]] =
@@ -180,6 +192,13 @@ object DbVisitPrim:
       select * from visit 
       where kouhi_1_id = ${kouhiId}  or kouhi_2_id = ${kouhiId} or kouhi_3_id = ${kouhiId}
       and DATE(v_datetime) >= ${date} order by visit_id
+    """.query[Visit].to[List]
+
+  def kouhiUsage(kouhiId: Int): ConnectionIO[List[Visit]] =
+    sql"""
+      select * from visit 
+      where kouhi_1_id = ${kouhiId}  or kouhi_2_id = ${kouhiId} or kouhi_3_id = ${kouhiId}
+      order by visit_id
     """.query[Visit].to[List]
 
   def listVisitIdByPatientAndMonth(patientId: Int, year: Int, month: Int): ConnectionIO[List[Int]] =

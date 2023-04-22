@@ -60,12 +60,21 @@ trait DbVisit extends Mysql:
   def shahokokuhoUsageSince(shahokokuhoId: Int, date: LocalDate): IO[List[Visit]] =
     mysql(Prim.shahokokuhoUsageSince(shahokokuhoId, date))
 
+  def shahokokuhoUsage(shahokokuhoId: Int): IO[List[Visit]] =
+    mysql(Prim.shahokokuhoUsage(shahokokuhoId))
+
   def koukikoureiUsageSince(koukikoureiId: Int, date: LocalDate): IO[List[Visit]] =
     mysql(Prim.koukikoureiUsageSince(koukikoureiId, date))
+
+  def koukikoureiUsage(koukikoureiId: Int): IO[List[Visit]] =
+    mysql(Prim.koukikoureiUsage(koukikoureiId))
 
   def kouhiUsageSince(kouhiId: Int, date: LocalDate): IO[List[Visit]] =
     mysql(Prim.kouhiUsageSince(kouhiId, date))
   
+  def kouhiUsage(kouhiId: Int): IO[List[Visit]] =
+    mysql(Prim.kouhiUsage(kouhiId))
+
   def listVisitIdByPatientAndMonth(patientId: Int, year: Int, month: Int): IO[List[Int]] =
     mysql(Prim.listVisitIdByPatientAndMonth(patientId, year, month))
 
