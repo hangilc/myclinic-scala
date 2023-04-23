@@ -420,3 +420,10 @@ object Db
   def newKoukikourei(koukikourei: Koukikourei): IO[(Koukikourei, List[AppEvent])] =
     mysql(DbPrim.newKoukikourei(koukikourei))
     
+  def batchEnterOrUpdateHoken(
+      shahokokuhoList: List[Shahokokuho],
+      koukikoureiList: List[Koukikourei]
+  ): IO[(List[Shahokokuho], List[Koukikourei], List[AppEvent])] =
+    mysql(DbPrim.batchEnterOrUpdateHoken(shahokokuhoList, koukikoureiList))
+
+    

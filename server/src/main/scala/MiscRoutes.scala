@@ -751,4 +751,16 @@ object MiscService extends DateTimeQueryParam with Publisher:
         +& intYear(year) +& intMonth(month) =>
       Ok(Db.listVisitIdByPatientAndMonth(patientId, year, month))
 
+    case req @ POST -> Root / "batch-enter-or-update-hoken" =>
+      val op =
+        for
+          lists <- req.as[HokenLists]
+          r <- Db.batchEnterOrUpdateHoken(lists.shahokokuhoList, lists.koukikoureiList)
+          s = r._1
+          k = r._2
+          e = r._3
+          _ <- publishAll(e)
+        yield (s, k)
+      Ok(op)
+
   }

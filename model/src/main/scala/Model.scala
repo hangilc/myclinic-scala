@@ -649,3 +649,8 @@ case class Onshi(
   visitId: Int,
   kakunin: String,
 )
+
+case class HokenLists(
+  shahokokuhoList: List[Shahokokuho],
+  koukikoureiList: List[Koukikourei],
+)

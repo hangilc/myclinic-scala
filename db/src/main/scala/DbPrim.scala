@@ -238,7 +238,7 @@ object DbPrim:
     yield (entered, List(enterEvent) ++ shahokokuhoEvents ++ koukikoureiEvents)
 
   def newKoukikourei(
-      hoken: Koukikourei,
+      hoken: Koukikourei
   ): ConnectionIO[(Koukikourei, List[AppEvent])] =
     val patientId = hoken.patientId
     val startDate: LocalDate = hoken.validFrom
@@ -267,3 +267,28 @@ object DbPrim:
       enterResult <- DbKoukikoureiPrim.enterKoukikourei(hoken)
       (entered, enterEvent) = enterResult
     yield (entered, List(enterEvent) ++ shahokokuhoEvents ++ koukikoureiEvents)
+
+  def batchEnterOrUpdateHoken(
+      shahokokuhoList: List[Shahokokuho],
+      koukikoureiList: List[Koukikourei]
+  ): ConnectionIO[(List[Shahokokuho], List[Koukikourei], List[AppEvent])] =
+    for
+      r1 <- shahokokuhoList
+        .map(shahokokuho =>
+          DbShahokokuhoPrim.enterOrUpdateShahokokuho(shahokokuho)
+        )
+        .sequence
+      shahokokuhoDb = r1.map(_._1)
+      shahokokuhoEvents = r1.map(_._2)
+      r2 <- koukikoureiList
+        .map(koukikourei =>
+          DbKoukikoureiPrim.enterOrUpdateKoukikourei(koukikourei)
+        )
+        .sequence
+      koukikoureiDb = r2.map(_._1)
+      koukikoureiEvents = r2.map(_._2)
+    yield (
+      shahokokuhoDb,
+      koukikoureiDb,
+      shahokokuhoEvents ++ koukikoureiEvents
+    )

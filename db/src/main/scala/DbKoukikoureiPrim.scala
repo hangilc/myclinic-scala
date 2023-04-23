@@ -89,3 +89,9 @@ object DbKoukikoureiPrim:
     sql"""
       select count(*) from visit where koukikourei_id = ${koukikoureiId}
     """.query[Int].unique
+
+  def enterOrUpdateKoukikourei(koukikourei: Koukikourei): ConnectionIO[(Koukikourei, AppEvent)] =
+    if koukikourei.koukikoureiId == 0 then 
+      enterKoukikourei(koukikourei)
+    else 
+      updateKoukikourei(koukikourei).map((koukikourei, _))

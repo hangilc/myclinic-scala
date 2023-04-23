@@ -23,7 +23,10 @@ object DbShahokokuhoPrim:
     if shahokokuhoId == 0 then None.pure[ConnectionIO]
     else getShahokokuho(shahokokuhoId).unique.map(Some.apply)
 
-  def listAvailableShahokokuho(patientId: Int, at: LocalDate): ConnectionIO[List[Shahokokuho]] =
+  def listAvailableShahokokuho(
+      patientId: Int,
+      at: LocalDate
+  ): ConnectionIO[List[Shahokokuho]] =
     sql"""
       select * from hoken_shahokokuho where patient_id = ${patientId} 
         and valid_from <= ${at}
@@ -51,7 +54,7 @@ object DbShahokokuhoPrim:
       entered <- getShahokokuho(id).unique
       event <- DbEventPrim.logShahokokuhoCreated(entered)
     yield (entered, event)
-    
+
   def updateShahokokuho(d: Shahokokuho): ConnectionIO[AppEvent] =
     println("update shahokokuho")
     println(d)
@@ -69,7 +72,8 @@ object DbShahokokuhoPrim:
     """
     for
       affected <- op.update.run
-      _ = if affected != 1 then throw new RuntimeException("Update shahokokuho failed.")
+      _ = if affected != 1 then
+        throw new RuntimeException("Update shahokokuho failed.")
       updated <- getShahokokuho(d.shahokokuhoId).unique
       event <- DbEventPrim.logShahokokuhoUpdated(updated)
     yield event
@@ -81,7 +85,10 @@ object DbShahokokuhoPrim:
     for
       target <- getShahokokuho(shahokokuhoId).unique
       affected <- op.update.run
-      _ = if affected != 1 then throw new RuntimeException(s"Failed to delete shahokokuho: ${shahokokuhoId}")
+      _ = if affected != 1 then
+        throw new RuntimeException(
+          s"Failed to delete shahokokuho: ${shahokokuhoId}"
+        )
       event <- DbEventPrim.logShahokokuhoDeleted(target)
     yield event
 
@@ -89,3 +96,9 @@ object DbShahokokuhoPrim:
     sql"""
       select count(*) from visit where shahokokuho_id = ${shahokokuhoId}
     """.query[Int].unique
+
+  def enterOrUpdateShahokokuho(shahokokuho: Shahokokuho): ConnectionIO[(Shahokokuho, AppEvent)] =
+    if shahokokuho.shahokokuhoId == 0 then 
+      enterShahokokuho(shahokokuho)
+    else 
+      updateShahokokuho(shahokokuho).map((shahokokuho, _))
