@@ -95,3 +95,16 @@ object DbKoukikoureiPrim:
       enterKoukikourei(koukikourei)
     else 
       updateKoukikourei(koukikourei).map((koukikourei, _))
+
+  def countKoukikoureiUsageBefore(koukikoureiId: Int, date: LocalDate): ConnectionIO[Int] =
+    sql"""
+      select count(*) from visit where koukikourei_id = ${koukikoureiId}
+      and DATE(v_datetime) < ${date}
+    """.query[Int].unique
+
+  def countKoukikoureiUsageAfter(koukikoureiId: Int, date: LocalDate): ConnectionIO[Int] =
+    sql"""
+      select count(*) from visit where koukikourei_id = ${koukikoureiId}
+      and DATE(v_datetime) > ${date}
+    """.query[Int].unique
+

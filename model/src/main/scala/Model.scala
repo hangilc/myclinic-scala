@@ -13,7 +13,9 @@ import scala.concurrent.duration.FiniteDuration
 import dev.fujiwara.kanjidate.DateUtil
 import dev.myclinic.scala.util.HokenRep
 
-case class ValidUpto(value: Option[LocalDate])
+case class ValidUpto(value: Option[LocalDate]):
+  def isEqualOrAfter(d: LocalDate): Boolean =
+    value.fold(true)(v => d <= v)
 
 object ValidUpto:
   given Conversion[ValidUpto, LocalDate] with

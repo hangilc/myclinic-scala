@@ -102,3 +102,16 @@ object DbShahokokuhoPrim:
       enterShahokokuho(shahokokuho)
     else 
       updateShahokokuho(shahokokuho).map((shahokokuho, _))
+
+  def countShahokokuhoUsageBefore(shahokokuhoId: Int, date: LocalDate): ConnectionIO[Int] =
+    sql"""
+      select count(*) from visit where shahokokuho_id = ${shahokokuhoId}
+      and DATE(v_datetime) < ${date}
+    """.query[Int].unique
+
+  def countShahokokuhoUsageAfter(shahokokuhoId: Int, date: LocalDate): ConnectionIO[Int] =
+    sql"""
+      select count(*) from visit where shahokokuho_id = ${shahokokuhoId}
+      and DATE(v_datetime) > ${date}
+    """.query[Int].unique
+

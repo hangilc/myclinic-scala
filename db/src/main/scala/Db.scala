@@ -414,16 +414,94 @@ object Db
     """.query[(PrescExample, IyakuhinMaster)].to[List]
     mysql(op)
 
-  def newShahokokuho(shahokokuho: Shahokokuho): IO[(Shahokokuho, List[AppEvent])] =
+  def newShahokokuho(
+      shahokokuho: Shahokokuho
+  ): IO[(Shahokokuho, List[AppEvent])] =
     mysql(DbPrim.newShahokokuho(shahokokuho))
 
-  def newKoukikourei(koukikourei: Koukikourei): IO[(Koukikourei, List[AppEvent])] =
+  def newKoukikourei(
+      koukikourei: Koukikourei
+  ): IO[(Koukikourei, List[AppEvent])] =
     mysql(DbPrim.newKoukikourei(koukikourei))
-    
+
   def batchEnterOrUpdateHoken(
       shahokokuhoList: List[Shahokokuho],
       koukikoureiList: List[Koukikourei]
   ): IO[(List[Shahokokuho], List[Koukikourei], List[AppEvent])] =
     mysql(DbPrim.batchEnterOrUpdateHoken(shahokokuhoList, koukikoureiList))
 
-    
+  def updateShahokokuho(shahokokuho: Shahokokuho): IO[AppEvent] =
+    if !shahokokuho.validUpto.isEqualOrAfter(shahokokuho.validFrom) then
+      throw new RuntimeException("Inconsistent shahokokuho validFrom/validUpto")
+    val op =
+      for
+        cBefore <- DbShahokokuhoPrim.countShahokokuhoUsageBefore(
+          shahokokuho.shahokokuhoId,
+          shahokokuho.validFrom
+        )
+        _ = if cBefore > 0 then
+          throw new RuntimeException("Shahokokuho is used before validFrom")
+        cAfter <- shahokokuho.validUpto.value.fold(0.pure[ConnectionIO])(
+          validUpto => {
+            DbShahokokuhoPrim.countShahokokuhoUsageAfter(
+              shahokokuho.shahokokuhoId,
+              validUpto
+            )
+          }
+        )
+        _ = if cAfter > 0 then
+          throw new RuntimeException("Shahokokuho is used after validUpto")
+        event <- DbShahokokuhoPrim.updateShahokokuho(shahokokuho)
+      yield event
+    mysql(op)
+
+  def updateKoukikourei(koukikourei: Koukikourei): IO[AppEvent] =
+    if !koukikourei.validUpto.isEqualOrAfter(koukikourei.validFrom) then
+      throw new RuntimeException("Inconsistent koukikourei validFrom/validUpto")
+    val op =
+      for
+        cBefore <- DbKoukikoureiPrim.countKoukikoureiUsageBefore(
+          koukikourei.koukikoureiId,
+          koukikourei.validFrom
+        )
+        _ = if cBefore > 0 then
+          throw new RuntimeException("Koukikourei is used before validFrom")
+        cAfter <- koukikourei.validUpto.value.fold(0.pure[ConnectionIO])(
+          validUpto => {
+            DbKoukikoureiPrim.countKoukikoureiUsageAfter(
+              koukikourei.koukikoureiId,
+              validUpto
+            )
+          }
+        )
+        _ = if cAfter > 0 then
+          throw new RuntimeException("Koukikourei is used after validUpto")
+        event <- DbKoukikoureiPrim.updateKoukikourei(koukikourei)
+      yield event
+    mysql(op)
+
+  def updateKouhi(kouhi: Kouhi): IO[AppEvent] =
+    if !kouhi.validUpto.isEqualOrAfter(kouhi.validFrom) then
+      throw new RuntimeException("Inconsistent kouhi validFrom/validUpto")
+    val op =
+      for
+        cBefore <- DbKouhiPrim.countKouhiUsageBefore(
+          kouhi.kouhiId,
+          kouhi.validFrom
+        )
+        _ = if cBefore > 0 then
+          throw new RuntimeException("Kouhi is used before validFrom")
+        cAfter <- kouhi.validUpto.value.fold(0.pure[ConnectionIO])(
+          validUpto => {
+            DbKouhiPrim.countKouhiUsageAfter(
+              kouhi.kouhiId,
+              validUpto
+            )
+          }
+        )
+        _ = if cAfter > 0 then
+          throw new RuntimeException("Kouhi is used after validUpto")
+        event <- DbKouhiPrim.updateKouhi(kouhi)
+      yield event
+    mysql(op)
+

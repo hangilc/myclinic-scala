@@ -81,5 +81,29 @@ object DbKouhiPrim:
 
   def countKouhiUsage(kouhiId: Int): ConnectionIO[Int] =
     sql"""
-      select count(*) from visit where kouhi_1_id = ${kouhiId} or kouhi_2_id = ${kouhiId} or kouhi_3_id = ${kouhiId}
+      select count(*) from visit 
+      where kouhi_1_id = ${kouhiId} 
+      or kouhi_2_id = ${kouhiId} 
+      or kouhi_3_id = ${kouhiId}
     """.query[Int].unique
+
+  def countKouhiUsageBefore(kouhiId: Int, date: LocalDate): ConnectionIO[Int] =
+    sql"""
+      select count(*) from visit 
+      where (
+        kouhi_1_id = ${kouhiId} 
+        or kouhi_2_id = ${kouhiId} 
+       or kouhi_3_id = ${kouhiId}
+      ) and DATE(v_datetime) < ${date}
+    """.query[Int].unique
+
+  def countKouhiUsageAfter(kouhiId: Int, date: LocalDate): ConnectionIO[Int] =
+    sql"""
+      select count(*) from visit 
+      where (
+        kouhi_1_id = ${kouhiId} 
+        or kouhi_2_id = ${kouhiId} 
+       or kouhi_3_id = ${kouhiId}
+      ) and DATE(v_datetime) > ${date}
+    """.query[Int].unique
+
