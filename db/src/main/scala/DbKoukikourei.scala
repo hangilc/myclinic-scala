@@ -25,12 +25,15 @@ trait DbKoukikourei extends Mysql:
   def enterKoukikourei(koukikourei: Koukikourei): IO[(Koukikourei, AppEvent)] =
     mysql(DbKoukikoureiPrim.enterKoukikourei(koukikourei))
 
-  // def updateKoukikourei(koukikourei: Koukikourei): IO[AppEvent] =
-  //   mysql(DbKoukikoureiPrim.updateKoukikourei(koukikourei))
-
   def getKoukikourei(koukikoureiId: Int): IO[Koukikourei] =
     mysql(DbKoukikoureiPrim.getKoukikourei(koukikoureiId).unique)
 
   def countKoukikoureiUsage(koukikoureiId: Int): IO[Int] =
     mysql(DbKoukikoureiPrim.countKoukikoureiUsage(koukikoureiId))
+
+  def countKoukikoureiUsageBefore(koukikoureiId: Int, date: LocalDate): IO[Int] =
+    mysql(DbKoukikoureiPrim.countKoukikoureiUsageBefore(koukikoureiId, date))
+
+  def countKoukikoureiUsageAfter(koukikoureiId: Int, date: LocalDate): IO[Int] =
+    mysql(DbKoukikoureiPrim.countKoukikoureiUsageAfter(koukikoureiId, date))
 

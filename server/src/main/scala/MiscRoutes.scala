@@ -237,16 +237,46 @@ object MiscService extends DateTimeQueryParam with Publisher:
         ) =>
       Ok(Db.countShahokokuhoUsage(shahokokuhoId))
 
+    case GET -> Root / "count-shahokokuho-usage-before" :? intShahokokuhoId(
+          shahokokuhoId
+        ) +& dateDate(date) =>
+      Ok(Db.countShahokokuhoUsageBefore(shahokokuhoId, date))
+
+    case GET -> Root / "count-shahokokuho-usage-after" :? intShahokokuhoId(
+          shahokokuhoId
+        ) +& dateDate(date) =>
+      Ok(Db.countShahokokuhoUsageAfter(shahokokuhoId, date))
+
     case GET -> Root / "count-koukikourei-usage" :? intKoukikoureiId(
           koukikoureiId
         ) =>
       Ok(Db.countKoukikoureiUsage(koukikoureiId))
+
+    case GET -> Root / "count-koukikourei-usage-before" :? intKoukikoureiId(
+          koukikoureiId
+        ) +& dateDate(date) =>
+      Ok(Db.countKoukikoureiUsageBefore(koukikoureiId, date))
+
+    case GET -> Root / "count-koukikourei-usage-after" :? intKoukikoureiId(
+          koukikoureiId
+        ) +& dateDate(date) =>
+      Ok(Db.countKoukikoureiUsageAfter(koukikoureiId, date))
 
     case GET -> Root / "count-roujin-usage" :? intRoujinId(roujinId) =>
       Ok(Db.countRoujinUsage(roujinId))
 
     case GET -> Root / "count-kouhi-usage" :? intKouhiId(kouhiId) =>
       Ok(Db.countKouhiUsage(kouhiId))
+
+    case GET -> Root / "count-kouhi-usage-before" :? intKouhiId(
+          kouhiId
+        ) +& dateDate(date) =>
+      Ok(Db.countKouhiUsageBefore(kouhiId, date))
+
+    case GET -> Root / "count-kouhi-usage-after" :? intKouhiId(
+          kouhiId
+        ) +& dateDate(date) =>
+      Ok(Db.countKouhiUsageAfter(kouhiId, date))
 
     case req @ POST -> Root / "batch-count-hoken-usage" =>
       val op =

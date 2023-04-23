@@ -22,12 +22,15 @@ trait DbKouhi extends Mysql:
   def enterKouhi(kouhi: Kouhi): IO[(Kouhi, AppEvent)] =
     mysql(DbKouhiPrim.enterKouhi(kouhi))
 
-  // def updateKouhi(kouhi: Kouhi): IO[AppEvent] =
-  //   mysql(DbKouhiPrim.updateKouhi(kouhi))
-
   def getKouhi(kouhiId: Int): IO[Kouhi] =
     mysql(DbKouhiPrim.getKouhi(kouhiId).unique)
 
   def countKouhiUsage(kouhiId: Int): IO[Int] =
     mysql(DbKouhiPrim.countKouhiUsage(kouhiId))
+
+  def countKouhiUsageBefore(kouhiId: Int, date: LocalDate): IO[Int] =
+    mysql(DbKouhiPrim.countKouhiUsageBefore(kouhiId, date))
+
+  def countKouhiUsageAfter(kouhiId: Int, date: LocalDate): IO[Int] =
+    mysql(DbKouhiPrim.countKouhiUsageAfter(kouhiId, date))
 
