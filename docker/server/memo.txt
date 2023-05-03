@@ -1,3 +1,4 @@
+1.0.9 -- removed valid usage check in hoken update
 1.0.8 -- added hoken usage
 1.0.7 -- extended hoken API
 1.0.6 -- added listVisitIdByPatientAndMonth
