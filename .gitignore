@@ -13,3 +13,5 @@ project/target/
 *.class
 /work/
 node_modules/
+local-bin/
+
