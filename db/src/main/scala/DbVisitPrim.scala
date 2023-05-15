@@ -207,4 +207,11 @@ object DbVisitPrim:
       and MONTH(v_datetime) = ${month} order by visit_id
     """.query[Int].to[List]
 
+  def listVisitByMonth(year: Int, month: Int): ConnectionIO[List[Visit]] =
+    sql"""
+      select * from visit where YEAR(v_datetime) = ${year} and MONTH(v_datetime) = ${month}
+      order by v_datetime
+    """.query[Visit].to[List]
+
+
 

@@ -793,4 +793,7 @@ object MiscService extends DateTimeQueryParam with Publisher:
         yield (s, k)
       Ok(op)
 
+    case GET -> Root / "list-visit-by-month" :? intYear(year) +& intMonth(month) =>
+      Ok(Db.listVisitByMonth(year, month))
+
   }
