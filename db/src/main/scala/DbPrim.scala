@@ -292,3 +292,23 @@ object DbPrim:
       koukikoureiDb,
       shahokokuhoEvents ++ koukikoureiEvents
     )
+
+  def getHokenInfoForVisit(visitId: Int): ConnectionIO[HokenInfo] =
+    for
+      visit <- DbVisitPrim.getVisit(visitId).unique
+      shahokokuhoOpt <- if visit.shahokokuhoId === 0 then
+        None.pure[ConnectionIO] else DbShahokokuhoPrim
+          .getShahokokuho(visit.shahokokuhoId)
+          .unique
+          .map(Some.apply)
+      koukikoureiOpt <- if visit.koukikoureiId === 0 then
+        None.pure[ConnectionIO] else DbKoukikoureiPrim
+          .getKoukikourei(visit.koukikoureiId)
+          .unique
+          .map(Some.apply)
+      kouhiList <- List(visit.kouhi1Id, visit.kouhi2Id, visit.kouhi3Id)
+        .filter(_ > 0)
+        .map(DbKouhiPrim.getKouhi(_).unique)
+        .sequence
+    yield HokenInfo(shahokokuhoOpt, None, koukikoureiOpt, kouhiList)
+    

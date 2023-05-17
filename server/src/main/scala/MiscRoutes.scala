@@ -796,4 +796,7 @@ object MiscService extends DateTimeQueryParam with Publisher:
     case GET -> Root / "list-visit-by-month" :? intYear(year) +& intMonth(month) =>
       Ok(Db.listVisitByMonth(year, month))
 
+    case GET -> Root / "get-hoken-info-for-visit" :? intVisitId(visitId) =>
+      Ok(Db.getHokenInfoForVisit(visitId))
+
   }
