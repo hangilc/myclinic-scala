@@ -29,7 +29,9 @@ object MiscService extends DateTimeQueryParam with Publisher:
   object dateDate extends QueryParamDecoderMatcher[LocalDate]("date")
   object dateAt extends QueryParamDecoderMatcher[LocalDate]("at")
   object dateEnd extends QueryParamDecoderMatcher[LocalDate]("end-date")
-  object atDateTime extends QueryParamDecoderMatcher[LocalDateTime]("at")
+  object dateFrom extends QueryParamDecoderMatcher[LocalDate]("from")
+  object dateUpto extends QueryParamDecoderMatcher[LocalDate]("upto")
+  object dateTimeAt extends QueryParamDecoderMatcher[LocalDateTime]("at")
   object intVisitId extends QueryParamDecoderMatcher[Int]("visit-id")
   object intOffset extends QueryParamDecoderMatcher[Int]("offset")
   object intCount extends QueryParamDecoderMatcher[Int]("count")
@@ -153,7 +155,7 @@ object MiscService extends DateTimeQueryParam with Publisher:
         r.withContentType(`Content-Type`(new MediaType("application", "json")))
       )
 
-    case GET -> Root / "start-visit" :? intPatientId(patientId) +& atDateTime(
+    case GET -> Root / "start-visit" :? intPatientId(patientId) +& dateTimeAt(
           at
         ) =>
       val op =
@@ -166,7 +168,7 @@ object MiscService extends DateTimeQueryParam with Publisher:
 
     case req @ POST -> Root / "start-visit-with-hoken" :? intPatientId(
           patientId
-        ) +& atDateTime(
+        ) +& dateTimeAt(
           at
         ) =>
       val op =
@@ -798,5 +800,9 @@ object MiscService extends DateTimeQueryParam with Publisher:
 
     case GET -> Root / "get-hoken-info-for-visit" :? intVisitId(visitId) =>
       Ok(Db.getHokenInfoForVisit(visitId))
+
+    case GET -> Root / "list-disease-active-at" :? intPatientId(patientId) +& dateFrom(from)
+          +& dateUpto(upto) =>
+      Ok(Db.listDiseaseActiveAt(patientId, from, upto))
 
   }

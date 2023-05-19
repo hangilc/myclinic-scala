@@ -51,11 +51,11 @@ object DbDiseasePrim:
       """
     for
       affected <- op.update.run
-      _ = if affected != 1 then throw new RuntimeException(s"Failed to update disease: ${d.diseaseId}")
+      _ = if affected != 1 then
+        throw new RuntimeException(s"Failed to update disease: ${d.diseaseId}")
       updated <- getDisease(d.diseaseId).unique
       event <- DbEventPrim.logDiseaseUpdated(updated)
     yield event
-
 
   def endDisease(
       diseaseId: Int,
@@ -68,7 +68,8 @@ object DbDiseasePrim:
     """
     for
       affected <- op.update.run
-      _ = if affected != 1 then throw new RuntimeException(s"Failed to update disease: ${diseaseId}")
+      _ = if affected != 1 then
+        throw new RuntimeException(s"Failed to update disease: ${diseaseId}")
       updated <- getDisease(diseaseId).unique
       event <- DbEventPrim.logDiseaseUpdated(updated)
     yield event
@@ -80,7 +81,23 @@ object DbDiseasePrim:
     for
       disease <- getDisease(diseaseId).unique
       affected <- op.update.run
-      _ = if affected != 1 then throw new RuntimeException(s"Failed to delete disease: ${diseaseId}.")
+      _ = if affected != 1 then
+        throw new RuntimeException(s"Failed to delete disease: ${diseaseId}.")
       event <- DbEventPrim.logDiseaseDeleted(disease)
     yield event
 
+  def listDiseaseActiveAt(
+      patientId: Int,
+      from: LocalDate,
+      upto: LocalDate
+  ): ConnectionIO[List[Disease]] =
+    sql"""
+      select * from disease where patient_id = ${patientId}
+      and 
+      (
+        (end_date = '0000-00-00' or end_date >= ${from})
+        and 
+        (start_date <= ${upto})
+      )
+
+    """.query[Disease].to[List]

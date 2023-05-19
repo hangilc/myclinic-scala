@@ -17,5 +17,16 @@ trait DbDisease extends Mysql:
   def listCurrentDisease(patientId: Int): IO[List[Disease]] =
     mysql(DbDiseasePrim.listCurrentDisease(patientId).to[List])
 
-  def endDisease(diseaseId: Int, endDate: LocalDate, endReason: String): IO[AppEvent] =
+  def endDisease(
+      diseaseId: Int,
+      endDate: LocalDate,
+      endReason: String
+  ): IO[AppEvent] =
     mysql(DbDiseasePrim.endDisease(diseaseId, endDate, endReason))
+
+  def listDiseaseActiveAt(
+      patientId: Int,
+      from: LocalDate,
+      upto: LocalDate
+  ): IO[List[Disease]] =
+    mysql(DbDiseasePrim.listDiseaseActiveAt(patientId, from, upto))
