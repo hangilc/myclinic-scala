@@ -58,11 +58,11 @@ object KouhiValidator:
           ValidatedResult[JukyuushaError.type, Int],
           ValidatedResult[ValidFromError.type, LocalDate],
           ValidatedResult[ValidUptoError.type, ValidUpto],
-          ValidatedResult[PatientIdError.type, Int]
+          ValidatedResult[PatientIdError.type, Int],
       )
   ): ValidatedResult[KouhiError, Kouhi] =
     val dm: ValidatedResult[KouhiError, Int] = Valid(0)
-    (dm *: rs).tupled
+    (dm *: rs ++ Tuple1(Valid(None))).tupled
       .map(_.tail)
       .map(Kouhi.apply.tupled)
       |> ConsistentValidRangeValidator.validate

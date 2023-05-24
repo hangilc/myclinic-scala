@@ -541,7 +541,8 @@ case class Kouhi(
     jukyuusha: Int,
     validFrom: LocalDate,
     validUpto: ValidUpto,
-    patientId: Int
+    patientId: Int,
+    memo: Option[String],
 ):
   def validUptoOption: Option[LocalDate] = validUpto.value
   def isValidAt(at: LocalDate): Boolean =

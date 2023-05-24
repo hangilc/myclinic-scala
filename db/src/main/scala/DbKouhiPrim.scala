@@ -40,9 +40,9 @@ object DbKouhiPrim:
     val op = sql"""
       insert into kouhi 
         (patient_id, futansha, jukyuusha, 
-        valid_from, valid_upto)
+        valid_from, valid_upto, memo)
         values (${d.patientId}, ${d.futansha}, ${d.jukyuusha},
-        ${d.validFrom}, ${d.validUpto})
+        ${d.validFrom}, ${d.validUpto}, ${d.memo})
     """
     for
       id <- op.update.withUniqueGeneratedKeys[Int]("kouhi_id")
@@ -57,7 +57,8 @@ object DbKouhiPrim:
         futansha = ${d.futansha},
         jukyuusha = ${d.jukyuusha},
         valid_from = ${d.validFrom},
-        valid_upto = ${d.validUpto}
+        valid_upto = ${d.validUpto},
+        memo = ${d.memo}
         where kouhi_id = ${d.kouhiId}
     """
     for
