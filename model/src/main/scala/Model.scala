@@ -260,7 +260,7 @@ case class Shinryou(
     shinryouId: Int,
     visitId: Int,
     shinryoucode: Int,
-    memo: Option[String],
+    memo: Option[String] = None,
 )
 
 enum ConductKind(val code: Int, val rep: String):
