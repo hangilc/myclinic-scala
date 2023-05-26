@@ -259,7 +259,8 @@ case class Drug(
 case class Shinryou(
     shinryouId: Int,
     visitId: Int,
-    shinryoucode: Int
+    shinryoucode: Int,
+    memo: Option[String],
 )
 
 enum ConductKind(val code: Int, val rep: String):

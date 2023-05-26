@@ -11,7 +11,8 @@ case class Patient(
   sex: Sex,
   birthday: LocalDate,
   address: String,
-  phone: String
+  phone: String,
+  memo: Option[String] = None,
 ):
   def fullName(sep: String = " "): String = 
       s"${lastName}${sep}${firstName}"

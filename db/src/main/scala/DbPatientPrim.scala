@@ -37,9 +37,9 @@ object DbPatientPrim:
   def enterPatient(patient: Patient): ConnectionIO[(Patient, AppEvent)] =
     val op = sql"""
       insert into patient (last_name, first_name, last_name_yomi, first_name_yomi,
-          sex, birth_day, address, phone) 
+          sex, birth_day, address, phone, memo) 
         values (${patient.lastName}, ${patient.firstName}, ${patient.lastNameYomi}, ${patient.firstNameYomi},
-          ${patient.sex.code}, ${patient.birthday}, ${patient.address}, ${patient.phone})
+          ${patient.sex.code}, ${patient.birthday}, ${patient.address}, ${patient.phone}, ${patient.memo})
     """
     for
       patientId <- op.update.withUniqueGeneratedKeys[Int]("patient_id")
@@ -58,6 +58,7 @@ object DbPatientPrim:
         birth_day = ${patient.birthday},
         address = ${patient.address},
         phone = ${patient.phone}
+        memo = ${patient.memo}
       where patient_id = ${patient.patientId}
     """
     for
