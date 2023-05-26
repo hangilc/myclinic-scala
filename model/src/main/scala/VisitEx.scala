@@ -106,6 +106,7 @@ case class ShinryouEx(
     shinryouId: Int,
     visitId: Int,
     shinryoucode: Int,
+    memo: Option[String],
     master: ShinryouMaster
 ):
   def toShinryou: Shinryou =
@@ -117,6 +118,7 @@ object ShinryouEx:
       shinryou.shinryouId,
       shinryou.visitId,
       shinryou.shinryoucode,
+      shinryou.memo,
       master
     )
 
