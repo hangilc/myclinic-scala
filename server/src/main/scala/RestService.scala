@@ -328,6 +328,16 @@ object RestService extends DateTimeQueryParam with Publisher:
         yield entered
       Ok(op)
 
+    case req @ POST -> Root / "update-shinryou" =>
+      val op =
+        for
+          shinryou <- req.as[Shinryou]
+          result <- Db.updateShinryou(shinryou)
+          (event, updated) = result
+          _ <- publish(event)
+        yield updated
+      Ok(op)
+
     case req @ POST -> Root / "batch-enter-shinryou" :? intVisitId(visitId) =>
       val op =
         for

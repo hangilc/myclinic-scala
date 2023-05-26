@@ -50,6 +50,21 @@ object DbShinryouPrim:
       event <- DbEventPrim.logShinryouCreated(entered)
     yield (event, entered)
 
+  def updateShinryou(shinryou: Shinryou): ConnectionIO[(AppEvent, Shinryou)] =
+    val op = sql"""
+      update visit_shinryou set 
+      shinryoucode = ${shinryou.shinryoucode},
+      memo = ${shinryou.memo}
+      where shinryou_id = ${shinryou.shinryouId}
+    """
+    for
+      affected <- op.update.run
+      _ = if affected != 1 then
+        throw new RuntimeException("update shinryou failed")
+      updated <- getShinryou(shinryou.shinryouId).unique
+      event <- DbEventPrim.logShinryouUpdated(updated)
+    yield (event, updated)
+
   def deleteShinryou(shinryouId: Int): ConnectionIO[AppEvent] =
     val op = sql"""
       delete from visit_shinryou where shinryou_id = ${shinryouId}
@@ -57,8 +72,7 @@ object DbShinryouPrim:
     for
       shinryou <- getShinryou(shinryouId).unique
       affected <- op.update.run
-      _ = if affected != 1 then throw new RuntimeException(s"Failed to delete shinryou: ${shinryouId}")
+      _ = if affected != 1 then
+        throw new RuntimeException(s"Failed to delete shinryou: ${shinryouId}")
       event <- DbEventPrim.logShinryouDeleted(shinryou)
     yield event
-
-
