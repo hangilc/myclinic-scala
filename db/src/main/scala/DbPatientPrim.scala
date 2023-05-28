@@ -57,7 +57,7 @@ object DbPatientPrim:
         sex = ${patient.sex.code},
         birth_day = ${patient.birthday},
         address = ${patient.address},
-        phone = ${patient.phone}
+        phone = ${patient.phone},
         memo = ${patient.memo}
       where patient_id = ${patient.patientId}
     """
