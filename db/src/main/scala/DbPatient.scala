@@ -44,3 +44,6 @@ trait DbPatient extends Mysql:
 
   def updatePatient(patient: Patient): IO[AppEvent] =
     mysql(Prim.updatePatient(patient))
+
+  def listPatientByOnshiName(onshiName: String): IO[List[Patient]] =
+    mysql(Prim.listPatientByOnshiName(onshiName))        

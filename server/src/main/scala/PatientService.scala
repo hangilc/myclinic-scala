@@ -44,4 +44,7 @@ object PatientService:
           map <- Db.batchGetPatient(patientIds)
         yield map
       )
+
+    case GET -> Root / "list-patient-by-onshi-name" :? strText(text) =>
+      Ok(Db.listPatientByOnshiName(text))
   }

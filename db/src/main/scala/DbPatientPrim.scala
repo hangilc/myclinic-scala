@@ -76,3 +76,9 @@ object DbPatientPrim:
         .sequence
       items = patients.map(patient => (patient.patientId, patient))
     yield Map(items: _*)
+
+  def listPatientByOnshiName(onshiName: String): ConnectionIO[List[Patient]] =
+    sql"""
+      select * from patient where JSON_EXTRACT(memo, '$$."onshi-name"') = ${onshiName}
+      order by last_name_yomi, first_name_yomi
+    """.query[Patient].to[List]
