@@ -174,7 +174,8 @@ case class ConductShinryouEx(
     conductShinryouId: Int,
     conductId: Int,
     shinryoucode: Int,
-    master: ShinryouMaster
+    master: ShinryouMaster,
+    memo: Option[String] = None
 )
 
 object ConductShinryouEx:

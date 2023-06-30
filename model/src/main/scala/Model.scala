@@ -290,7 +290,8 @@ case class ConductDrug(
 case class ConductShinryou(
     conductShinryouId: Int,
     conductId: Int,
-    shinryoucode: Int
+    shinryoucode: Int,
+    memo: Option[String] = None,
 )
 
 case class ConductKizai(

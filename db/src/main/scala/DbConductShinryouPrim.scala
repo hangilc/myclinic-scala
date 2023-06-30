@@ -38,7 +38,8 @@ object DbConductShinryouPrim:
   def enterConductShinryou(cs: ConductShinryou): ConnectionIO[(AppEvent, ConductShinryou)] =
     val op = sql"""
       insert into visit_conduct_shinryou set visit_conduct_id = ${cs.conductId},
-        shinryoucode = ${cs.shinryoucode}
+        shinryoucode = ${cs.shinryoucode},
+        memo = ${cs.memo}
     """
     for 
       conduct <- DbConductPrim.getConduct(cs.conductId).unique
