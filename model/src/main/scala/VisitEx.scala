@@ -184,7 +184,8 @@ object ConductShinryouEx:
       s.conductShinryouId,
       s.conductId,
       s.shinryoucode,
-      master
+      master,
+      s.memo,
     )
 
 case class ConductKizaiEx(
