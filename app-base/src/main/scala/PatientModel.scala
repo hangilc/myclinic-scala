@@ -23,6 +23,7 @@ object PatientProps:
   object birthdayProp extends ModelProp[Patient, LocalDate]("生年月日", _.birthday)
   object addressProp extends ModelProp[Patient, String]("住所", _.address)
   object phoneProp extends ModelProp[Patient, String]("電話", _.phone)
+  object memoProp extends ModelProp[Patient, Option[String]]("メモ", _.memo)
 
 class PatientInputs(modelOpt: Option[Patient]):
   import PatientProps.*
@@ -109,6 +110,16 @@ class PatientInputs(modelOpt: Option[Patient]):
       with ElementProvider
       with DataValidator[PhoneError.type, String]:
     val init = InitValue(phoneProp, identity, "")
+    val input = new StringInput(init.getInitValue(modelOpt))
+    def getLabel: String = phoneProp.getLabel
+    def getElement: HTMLElement = input.getElement(cls := "phone-input")
+    def validate() = PhoneValidator.validate(input.getValue)
+
+  object memoInput 
+    extends LabelProvider
+    with ElementProvider
+    with DataValidator[MemoError.type, Option[String]]:
+    val init = InitValue(memoProp, identity, None)
     val input = new StringInput(init.getInitValue(modelOpt))
     def getLabel: String = phoneProp.getLabel
     def getElement: HTMLElement = input.getElement(cls := "phone-input")

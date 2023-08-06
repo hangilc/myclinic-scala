@@ -22,6 +22,7 @@ object PatientValidator:
   object BirthdayError extends PatientError
   object AddressError extends PatientError
   object PhoneError extends PatientError
+  object MemoError extends PatientError
 
   object PatientIdValidator extends DatabaseIdValidator(PatientIdError, "患者番号")
   
@@ -56,7 +57,7 @@ object PatientValidator:
     def validate(address: String): Result[String] =
       notNull(address)
 
-  object PhoneValidator extends SectionValidator(PhoneError, "住所"):
+  object PhoneValidator extends SectionValidator(PhoneError, "電話"):
     def validate(phone: String): Result[String] =
       notNull(phone)
 
@@ -70,11 +71,10 @@ object PatientValidator:
     ValidatedResult[BirthdayError.type, LocalDate],
     ValidatedResult[AddressError.type, String],
     ValidatedResult[PhoneError.type, String],
+    ValidatedResult[MemoError.type, Option[String]]
   )): ValidatedResult[PatientError, Patient] =
     val results = ((Valid(1): ValidatedResult[PatientError, Int]) *: rs).tupled.map(_.tail)
     results.map(Patient.apply.tupled)
-
-
 
 // import cats.*
 // import cats.syntax.*
