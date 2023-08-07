@@ -169,13 +169,18 @@ object DbVisitExPrim:
     kouhiIds.map(DbKouhiPrim.getKouhi(_).unique).sequence
 
   def getVisitEx(visitId: Int): ConnectionIO[VisitEx] =
+    println("enter getVisitEx")
     for
       visit <- DbVisitPrim.getVisit(visitId).unique
+      _ = println("after visit")
       patient <- DbPatientPrim.getPatient(visit.patientId).unique
+      _ = println("after patient")
       hoken <- DbHokenPrim.getHokenInfo(visit)
       texts <- DbTextPrim.listTextForVisit(visitId)
       drugIds <- DbDrugPrim.listDrugIdForVisit(visitId)
       drugs <- listDrugEx(drugIds)
+      _ = println("drugs")
+      _ = println(drugs)
       shinryouList <- listShinryouExForVisit(visitId)
       conductIds <- DbConductPrim.listConductIdForVisit(visitId)
       conducts <- listConductEx(conductIds)
