@@ -110,7 +110,7 @@ object DbAppointPrim:
     
     for 
       affected <- op.update.run
-      _ = assert(affected == 1, "Failed to update appoint.")
+      _ = assert(affected == 1, s"Failed to update appoint. $affected" )
       updated <- getAppoint(a.appointId).unique
     yield updated
 
