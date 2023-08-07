@@ -19,6 +19,8 @@ object MysqlExecutor:
   url += "&serverTimezone=JST"
   url += "&useSSL=false"
 
+  println("jdbc-utl: " + url)
+
   val xa = Transactor.fromDriverManager[IO](
     "com.mysql.cj.jdbc.Driver",
     url,
