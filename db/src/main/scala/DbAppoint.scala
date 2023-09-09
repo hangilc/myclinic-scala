@@ -247,21 +247,28 @@ trait DbAppoint extends Mysql:
   def listAppointsForDate(date: LocalDate): IO[List[Appoint]] =
     mysql(Prim.listAppointsForDate(date).to[List])
 
-  def appointHistoryAt(appointTimeId: Int): IO[List[AppEvent]] =
-    mysql(
-      sql"""
-      select * from app_event where model = 'appoint' order by app_event_id desc
-    """.query[AppEvent]
-        .stream
-        .filter(e => {
-          decode[Appoint](e.data) match {
-            case Right(a) => a.appointTimeId == appointTimeId
-            case Left(_) => false
-          }
-        })
-        .compile
-        .toList
-    )
+  // def appointHistoryAt(appointTimeId: Int): IO[List[AppEvent]] =
+  //   mysql(
+  //     sql"""
+  //     select * from app_event where model = 'appoint' order by app_event_id desc
+  //   """.query[AppEvent]
+  //       .stream
+  //       .filter(e => {
+  //         decode[Appoint](e.data) match {
+  //           case Right(a) => a.appointTimeId == appointTimeId
+  //           case Left(_) => false
+  //         }
+  //       })
+  //       .compile
+  //       .toList
+  //   )
+
+  def appointHistoryAt(appointTimeId: Int): IO[List[AppEvent]] = 
+    val op = sql"""
+      select * from app_event where model = 'appoint' and 
+      json_extract(data, '$$.appointTimeId') = ${appointTimeId} order by app_event_id
+    """.query[AppEvent].to[List]
+    mysql(op)
 
   def searchAppointByPatientName(text: String): IO[List[(Appoint, AppointTime)]] =
     mysql(Prim.searchAppointByPatientName(text).to[List])

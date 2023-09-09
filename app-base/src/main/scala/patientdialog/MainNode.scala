@@ -15,7 +15,6 @@ import scala.util.Failure
 case class Main(state: State) extends TransNode[State](state):
   import Common.*
   override def init(): Unit =
-    println("ENTER MAIN")
     val dlog = state.dialog
     dlog.changeTitle("患者情報")
     val hokenArea = div

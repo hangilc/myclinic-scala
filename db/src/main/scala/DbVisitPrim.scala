@@ -15,7 +15,6 @@ import java.util.regex.Pattern
 
 object DbVisitPrim:
   def getVisit(visitId: Int): Query0[Visit] =
-    println("eneter getVisit")
     sql"""
       select * from visit where visit_id = ${visitId}
     """.query[Visit]
