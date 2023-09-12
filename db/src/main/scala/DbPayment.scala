@@ -19,3 +19,6 @@ trait DbPayment extends Mysql:
 
   def enterPayment(payment: Payment): IO[AppEvent] =
     mysql(DbPaymentPrim.enterPayment(payment))
+
+  def listPayment(visitId: Int): IO[List[Payment]] =
+    mysql(DbPaymentPrim.listPayment(visitId).to[List])

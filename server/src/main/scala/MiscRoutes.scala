@@ -505,6 +505,9 @@ object MiscService extends DateTimeQueryParam with Publisher:
         yield true
       Ok(op)
 
+    case GET -> Root / "list-payment" :? intVisitId(visitId) =>
+      Ok(Db.listPayment(visitId))
+
     case GET -> Root / "list-current-disease-ex" :? intPatientId(patientId) =>
       Ok(Db.listCurrentDiseaseEx(patientId))
 
