@@ -1,3 +1,4 @@
+1.0.11 -- added list-payment
 1.0.10 -- adapted to db migration
 1.0.9 -- removed valid usage check in hoken update
 1.0.8 -- added hoken usage
@@ -8,3 +9,4 @@
 1.0.3 -- added newShahokokuho and newKoukikourei
 1.0.2 -- added onshi service
 
+docker push hangilc/myclinic-scala:[VERSION]
