@@ -32,6 +32,8 @@ import dev.myclinic.scala.model.HokenInfo
 import dev.myclinic.scala.apputil.FutanWari
 import java.time.LocalDate
 import scala.concurrent.Future
+import dev.myclinic.scala.model.Shahokokuho
+import dev.myclinic.scala.util.ZenkakuUtil
 
 object DrawerService:
   object intTextId extends QueryParamDecoderMatcher[Int]("text-id")
@@ -44,6 +46,21 @@ object DrawerService:
   val clinicInfo = Config.getClinicInfo
   val objectMapper = dev.fujiwara.drawer.op.JsonCodec.createMapper()
 
+  def adjustHokenInfo(src: HokenInfo): HokenInfo =
+    val shahokokuho = src.shahokokuho.map(shahokokuho => {
+      Shahokokuho.apply(shahokokuho.shahokokuhoId, shahokokuho.patientId, shahokokuho.hokenshaBangou,
+        ZenkakuUtil.toHankaku(shahokokuho.hihokenshaKigou),
+        ZenkakuUtil.toHankaku(shahokokuho.hihokenshaBangou),
+        shahokokuho.honninStore, shahokokuho.validFrom, shahokokuho.validUpto,
+        shahokokuho.koureiStore,
+        ZenkakuUtil.toHankaku((shahokokuho.edaban))
+        )
+    })
+    val koukikourei = src.koukikourei.map(koukikourei => {
+      koukikourei
+    })
+    HokenInfo.apply(shahokokuho, src.roujin, koukikourei, src.kouhiList)
+
   def handleShohousenDraw(text: Text): IO[Response[IO]] =
     for
       visit <- Db.getVisit(text.visitId)
@@ -53,7 +70,7 @@ object DrawerService:
       // val issuedAt: LocalDate = LocalDate.now()
       val issuedAt: LocalDate = visit.visitedAt.toLocalDate();
       val validUpto: Option[LocalDate] = None
-      val json = drawShohousen(text, visit, patient, hokenInfo, issuedAt, validUpto)
+      val json = drawShohousen(text, visit, patient, adjustHokenInfo(hokenInfo), issuedAt, validUpto)
       Response[IO](
         body = fs2.Stream.emits(json.getBytes()),
         headers = Headers(`Content-Type`(MediaType.application.json))
