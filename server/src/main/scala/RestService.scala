@@ -437,6 +437,9 @@ object RestService extends DateTimeQueryParam with Publisher:
         ) +& intPatientId(patientId) =>
       Ok(Db.countSearchTextForPatient(text, patientId))
 
+    case GET -> Root / "list-text-for-visit" :? intVisitId(visitId) =>
+      Ok(Db.listTextForVisit(visitId))
+
     case GET -> Root / "resolve-byoumei-master-by-name" :? strName(
           name
         ) +& dateAt(at) =>

@@ -65,3 +65,6 @@ trait DbText extends Mysql:
 
   def countSearchTextForPatient(text: String, patientId: Int): IO[Int] =
     mysql(DbTextPrim.countSearchTextForPatient(text, patientId))
+
+  def listTextForVisit(visitId: Int): IO[List[Text]] =
+    mysql(DbTextPrim.listTextForVisit(visitId))
