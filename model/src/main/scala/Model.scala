@@ -659,3 +659,8 @@ case class HokenLists(
   shahokokuhoList: List[Shahokokuho],
   koukikoureiList: List[Koukikourei],
 )
+
+case class PatientSummary(
+  patientId: Int,
+  content: String,
+)

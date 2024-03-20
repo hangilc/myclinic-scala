@@ -48,7 +48,8 @@ object RestService extends DateTimeQueryParam with Publisher:
   object intShinryouId extends QueryParamDecoderMatcher[Int]("shinryou-id")
   object intShinryoucode extends QueryParamDecoderMatcher[Int]("shinryoucode")
   object intByoumeicode extends QueryParamDecoderMatcher[Int]("byoumeicode")
-  object intShuushokugocode extends QueryParamDecoderMatcher[Int]("shuushokugocode")
+  object intShuushokugocode
+      extends QueryParamDecoderMatcher[Int]("shuushokugocode")
   object intConductId extends QueryParamDecoderMatcher[Int]("conduct-id")
   object intChargeValue extends QueryParamDecoderMatcher[Int]("charge-value")
   object intWqueueState extends QueryParamDecoderMatcher[Int]("wqueue-state")
@@ -459,6 +460,17 @@ object RestService extends DateTimeQueryParam with Publisher:
           shuushokugocode
         ) +& dateAt(at) =>
       Ok(Helper.resolveShuushokugocode(shuushokugocode, at))
+
+    case GET -> Root / "find-patient-summary" :? intPatientId(patientId) =>
+      Ok(Db.findPatientSummary(patientId))
+
+    case req @ POST -> Root / "enter-patient-summary" =>
+      val op =
+        for
+          createReq <- req.as[PatientSummary]
+          _ <- Db.enterPatientSummary(createReq)
+        yield true
+      Ok(op)
 
   } <+> PatientService.routes <+> VisitService.routes <+> MiscService.routes
     <+> ConfigService.routes <+> FileService.routes

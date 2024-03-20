@@ -238,5 +238,8 @@ trait Model extends DateTime with WaitStateCodec:
   given Encoder[HokenLists] = deriveEncoder[HokenLists]
   given Decoder[HokenLists] = deriveDecoder[HokenLists]
 
+  given Encoder[PatientSummary] = deriveEncoder[PatientSummary]
+  given Decoder[PatientSummary] = deriveDecoder[PatientSummary]
+
 
 
