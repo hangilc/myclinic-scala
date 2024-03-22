@@ -472,6 +472,14 @@ object RestService extends DateTimeQueryParam with Publisher:
         yield true
       Ok(op)
 
+    case req @ POST -> Root / "set-patient-summary" =>
+      val op =
+        for
+          createReq <- req.as[PatientSummary]
+          _ <- Db.setPatientSummary(createReq)
+        yield true
+      Ok(op)
+
   } <+> PatientService.routes <+> VisitService.routes <+> MiscService.routes
     <+> ConfigService.routes <+> FileService.routes
     <+> DrawerService.routes <+> MasterService.routes

@@ -18,3 +18,17 @@ object DbPatientSummaryPrim:
     val op = sql"""insert into patient_summary (patient_id, content) 
       values (${summary.patientId}, ${summary.content})"""
     op.update.run.map(_ => ())
+
+  def updatePatientSummary(summary: PatientSummary): ConnectionIO[Unit] =
+    val op = sql"""
+      update patient_summary set content = ${summary.content} where patient_id = ${summary.patientId}
+    """
+    op.update.run.map(_ => ())
+
+  def setPatientSummary(summary: PatientSummary): ConnectionIO[Unit] =
+    for
+      s <- getPatientSummary(summary.patientId).option
+      _ <- s match
+        case Some(_) => updatePatientSummary(summary)
+        case None => enterPatientSummary(summary)
+    yield ()

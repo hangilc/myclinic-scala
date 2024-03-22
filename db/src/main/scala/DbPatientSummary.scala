@@ -11,3 +11,9 @@ trait DbPatientSummary extends Mysql:
 
   def enterPatientSummary(summary: PatientSummary): IO[Unit] =
     mysql(DbPatientSummaryPrim.enterPatientSummary(summary))
+
+  def updatePatientSummary(summary: PatientSummary): IO[Unit] =
+    mysql(DbPatientSummaryPrim.updatePatientSummary(summary))
+
+  def setPatientSummary(summary: PatientSummary): IO[Unit] =
+    mysql(DbPatientSummaryPrim.setPatientSummary(summary))
