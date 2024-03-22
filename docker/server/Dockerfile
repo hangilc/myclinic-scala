@@ -1,4 +1,4 @@
-FROM amazoncorretto:11
+FROM amazoncorretto:17
 
 COPY ./target/pack/ /server/
 # RUN mkdir /server/web
