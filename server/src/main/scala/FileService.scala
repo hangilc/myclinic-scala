@@ -11,6 +11,7 @@ import org.http4s.multipart.*
 import org.http4s.circe._
 import org.http4s.circe.CirceEntityEncoder._
 import org.http4s.circe.CirceEntityDecoder._
+import org.http4s.Charset.`UTF-8`
 import io.circe._
 import io.circe.syntax._
 import fs2.concurrent.Topic
@@ -200,5 +201,15 @@ object FileService extends DateTimeQueryParam with Publisher:
       Ok(true)
 
     case GET -> Root / "get-webphone-token" => Ok(TwilioUtil.getWebphoneToken())
+
+    case GET -> Root / "list-pharma-addr" => 
+      val path = Config.configDir.resolve("pharma-addr.json")
+      val op = fs2.io.file.Files[IO].readAll(Path.fromNioPath(path))
+      Ok(op, `Content-Type`(MediaType.application.json))
+
+    case GET -> Root / "list-pharma-data" =>
+      val path = Path(sys.env.get("MYCLINIC_PHARMACY_LIST").get)
+      val op = fs2.io.file.Files[IO].readAll(path)
+      Ok(op, `Content-Type`(MediaType.text.plain, `UTF-8`))
 
   }

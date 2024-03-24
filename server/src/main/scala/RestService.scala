@@ -480,6 +480,9 @@ object RestService extends DateTimeQueryParam with Publisher:
         yield true
       Ok(op)
 
+    case GET -> Root / "list-visit-id-in-date-interval" :? dateFrom(fromDate) +& dateUpto(uptoDate) =>
+      Ok(Db.listVisitIdInDateInterval(fromDate, uptoDate))
+
   } <+> PatientService.routes <+> VisitService.routes <+> MiscService.routes
     <+> ConfigService.routes <+> FileService.routes
     <+> DrawerService.routes <+> MasterService.routes

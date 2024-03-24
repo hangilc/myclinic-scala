@@ -51,12 +51,16 @@ object DbVisitPrim:
     """
     for
       affected <- op.update.run
-      _ = if affected != 1 then throw new RuntimeException("update visit failed")
+      _ = if affected != 1 then
+        throw new RuntimeException("update visit failed")
       updated <- getVisit(visit.visitId).unique
       event <- DbEventPrim.logVisitUpdated(updated)
     yield (event, updated)
 
-  def updateHokenIds(visitId: Int, hokenIdSet: HokenIdSet): ConnectionIO[AppEvent] =
+  def updateHokenIds(
+      visitId: Int,
+      hokenIdSet: HokenIdSet
+  ): ConnectionIO[AppEvent] =
     for
       visit <- getVisit(visitId).unique
       newVisit = visit.copy(
@@ -163,7 +167,10 @@ object DbVisitPrim:
       select * from visit where patient_id = ${patientId} and date(v_datetime) >= ${date} order by visit_id desc
     """.query[Visit]
 
-  def shahokokuhoUsageSince(shahokokuhoId: Int, date: LocalDate): ConnectionIO[List[Visit]] =
+  def shahokokuhoUsageSince(
+      shahokokuhoId: Int,
+      date: LocalDate
+  ): ConnectionIO[List[Visit]] =
     sql"""
       select * from visit where shahokokuho_id = ${shahokokuhoId} 
       and DATE(v_datetime) >= ${date} order by visit_id
@@ -175,7 +182,10 @@ object DbVisitPrim:
       order by visit_id
     """.query[Visit].to[List]
 
-  def koukikoureiUsageSince(koukikoureiId: Int, date: LocalDate): ConnectionIO[List[Visit]] =
+  def koukikoureiUsageSince(
+      koukikoureiId: Int,
+      date: LocalDate
+  ): ConnectionIO[List[Visit]] =
     sql"""
       select * from visit where koukikourei_id = ${koukikoureiId} 
       and DATE(v_datetime) >= ${date} order by visit_id
@@ -187,7 +197,10 @@ object DbVisitPrim:
       order by visit_id
     """.query[Visit].to[List]
 
-  def kouhiUsageSince(kouhiId: Int, date: LocalDate): ConnectionIO[List[Visit]] =
+  def kouhiUsageSince(
+      kouhiId: Int,
+      date: LocalDate
+  ): ConnectionIO[List[Visit]] =
     sql"""
       select * from visit 
       where kouhi_1_id = ${kouhiId}  or kouhi_2_id = ${kouhiId} or kouhi_3_id = ${kouhiId}
@@ -201,7 +214,11 @@ object DbVisitPrim:
       order by visit_id
     """.query[Visit].to[List]
 
-  def listVisitIdByPatientAndMonth(patientId: Int, year: Int, month: Int): ConnectionIO[List[Int]] =
+  def listVisitIdByPatientAndMonth(
+      patientId: Int,
+      year: Int,
+      month: Int
+  ): ConnectionIO[List[Int]] =
     sql"""
       select visit_id from visit where patient_id = ${patientId} and YEAR(v_datetime) = ${year} 
       and MONTH(v_datetime) = ${month} order by visit_id
@@ -213,5 +230,10 @@ object DbVisitPrim:
       order by v_datetime
     """.query[Visit].to[List]
 
-
-
+  def listVisitIdInDateInterval(
+      fromDate: LocalDate,
+      uptoDate: LocalDate
+  ): ConnectionIO[List[Int]] =
+    sql"""select visit_id from visit where date(v_datetime) >= ${fromDate} and date(v_datetime) <= ${uptoDate}"""
+      .query[Int]
+      .to[List]

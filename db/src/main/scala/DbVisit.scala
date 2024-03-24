@@ -80,3 +80,6 @@ trait DbVisit extends Mysql:
 
   def listVisitByMonth(year: Int, month: Int): IO[List[Visit]] =
     mysql(Prim.listVisitByMonth(year, month))
+
+  def listVisitIdInDateInterval(fromDate: LocalDate, uptoDate: LocalDate): IO[List[Int]] =
+    mysql(Prim.listVisitIdInDateInterval(fromDate, uptoDate))
