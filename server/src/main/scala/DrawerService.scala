@@ -34,6 +34,7 @@ import java.time.LocalDate
 import scala.concurrent.Future
 import dev.myclinic.scala.model.Shahokokuho
 import dev.myclinic.scala.util.ZenkakuUtil
+import fs2.io.readOutputStream
 
 object DrawerService:
   object intTextId extends QueryParamDecoderMatcher[Int]("text-id")
@@ -143,6 +144,10 @@ object DrawerService:
       java.nio.file.Files.delete(srcFile)
       java.nio.file.Files.move(tmpFile, srcFile)
       Ok(true)
+
+    case GET -> Root / "drawer-pdf" =>
+      val op = readOutputStream(1024)(out => IO.pure(0x1a))
+      Ok(op)
 
   }
 
