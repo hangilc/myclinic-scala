@@ -3,6 +3,7 @@ package dev.myclinic.scala.server
 import cats.*
 import cats.syntax.*
 import cats.effect.*
+import cats.implicits.toTraverseOps
 import org.http4s._
 import org.http4s.dsl.io._
 import org.http4s.implicits._
@@ -13,6 +14,7 @@ import org.http4s.circe.CirceEntityDecoder._
 import org.http4s.EntityEncoder._
 import io.circe._
 import io.circe.syntax._
+import io.circe.Decoder.decodeList
 import dev.myclinic.scala.db.Db
 import dev.myclinic.scala.config.Config
 import dev.fujiwara.drawer.forms.shohousen.{ShohousenData, ShohousenDrawer}
@@ -160,24 +162,30 @@ object DrawerService:
       Ok(true)
 
     case req @ POST -> Root / "drawer-pdf" :? strPaperSize(paperSize) =>
-      println("enter drawer-pdf")
-      for opsList <- req.as[List[List[Op]]]
-      yield
-        val printer = new PdfPrinter(paperSize)
-        val outStream = new PipedOutputStream()
-        val inStream = new PipedInputStream(outStream)
-        val cvt: Op => dev.fujiwara.drawer.op.Op = a => ToJavaOp.convert(a)
-        val javaOpsList = opsList.map(ops => ops.map(op => cvt(op)))
-        val javaOpsList2 = javaOpsList.map(ops => ops.asJava)
-        val pages = new java.util.ArrayList(javaOpsList2.asJava)
-        printer.print(
-          pages,
-          outStream
-        )
-        Response[IO](
-          body = readInputStream(IO(inStream), 1024, true),
-          headers = Headers(`Content-Type`(MediaType.text.plain))
-        )
+      for
+        opsList <- req.as[List[Op]]
+        _ = println(opsList)
+        // javaOpsList = opsList.map(_.map(_.as[Op]).sequence).sequence
+        // _ = println(javaOpsList)
+      yield Response()
+
+    // yield
+    //   val printer = new PdfPrinter(paperSize)
+    //   val outStream = new PipedOutputStream()
+    //   val inStream = new PipedInputStream(outStream)
+    //   val cvt: Op => dev.fujiwara.drawer.op.Op = a => ToJavaOp.convert(a)
+    //   val javaOpsList = opsList.map(ops => ops.map(op => cvt(op)))
+    //   val javaOpsList2 = javaOpsList.map(ops => ops.asJava)
+    //   val pages = new java.util.ArrayList(javaOpsList2.asJava)
+    //   printer.print(
+    //     pages,
+    //     outStream
+    //   )
+    //   Response[IO](
+    //     body = readInputStream(IO(inStream), 1024, true),
+    //     headers = Headers(`Content-Type`(MediaType.text.plain))
+    //   )
+
     // Ok(op, `Content-Type`(MediaType.application.pdf))
     // val op = readOutputStream(1024)(out => IO { out.write("Hello".getBytes()); out.close() })
     // Ok(op, `Content-Type`(MediaType.text.plain))
