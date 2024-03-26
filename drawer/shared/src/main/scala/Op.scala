@@ -63,13 +63,11 @@ object Op:
         .flatMap(code => {
           code match {
             case "move_to"        =>
-              println("move_to")
               for
                 x <- iter.next.as[Double]
                 y <- iter.next.as[Double]
               yield OpMoveTo(x, y)
             case "line_to"        =>
-              println("line_to")
               for
                 x <- iter.next.as[Double]
                 y <- iter.next.as[Double]
