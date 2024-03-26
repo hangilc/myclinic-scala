@@ -215,7 +215,7 @@ lazy val server = project
       "org.http4s" %% "http4s-dsl" % http4sVersion,
       "org.http4s" %% "http4s-server" % http4sVersion,
       "org.http4s" %% "http4s-circe" % http4sVersion,
-      "dev.fujiwara" % "drawer" % "1.0.0-SNAPSHOT",
+      "dev.fujiwara" % "drawer" % "1.0.1-SNAPSHOT",
       "com.twilio.sdk" % "twilio" % "8.34.1"
     )
   )

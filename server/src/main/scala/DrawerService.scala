@@ -160,15 +160,17 @@ object DrawerService:
       Ok(true)
 
     case req @ POST -> Root / "drawer-pdf" :? strPaperSize(paperSize) =>
+      println("enter drawer-pdf")
       for opsList <- req.as[List[List[Op]]]
       yield
         val printer = new PdfPrinter(paperSize)
         val outStream = new PipedOutputStream()
         val inStream = new PipedInputStream(outStream)
         val cvt: Op => dev.fujiwara.drawer.op.Op = a => ToJavaOp.convert(a)
-        val pages = opsList.map(ops => ops.map(cvt).asJava).asJava
+        val javaOpsList = opsList.map(ops => ops.map(op => cvt(op)))
+        val javaOpsList2 = javaOpsList.map(ops => ops.asJava)
+        val pages = new java.util.ArrayList(javaOpsList2.asJava)
         printer.print(
-          List[dev.fujiwara.drawer.op.Op]().asJava,
           pages,
           outStream
         )
@@ -176,7 +178,7 @@ object DrawerService:
           body = readInputStream(IO(inStream), 1024, true),
           headers = Headers(`Content-Type`(MediaType.text.plain))
         )
-      // Ok(op, `Content-Type`(MediaType.application.pdf))
+    // Ok(op, `Content-Type`(MediaType.application.pdf))
     // val op = readOutputStream(1024)(out => IO { out.write("Hello".getBytes()); out.close() })
     // Ok(op, `Content-Type`(MediaType.text.plain))
 
