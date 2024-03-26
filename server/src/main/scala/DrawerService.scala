@@ -10,6 +10,7 @@ import org.http4s.headers._
 import org.http4s.circe._
 import org.http4s.circe.CirceEntityEncoder._
 import org.http4s.circe.CirceEntityDecoder._
+import org.http4s.EntityEncoder._
 import io.circe._
 import io.circe.syntax._
 import dev.myclinic.scala.db.Db
@@ -34,7 +35,9 @@ import java.time.LocalDate
 import scala.concurrent.Future
 import dev.myclinic.scala.model.Shahokokuho
 import dev.myclinic.scala.util.ZenkakuUtil
-import fs2.io.readOutputStream
+import fs2.io.{readOutputStream, readInputStream}
+import java.io.PipedOutputStream
+import java.io.PipedInputStream
 
 object DrawerService:
   object intTextId extends QueryParamDecoderMatcher[Int]("text-id")
@@ -49,13 +52,18 @@ object DrawerService:
 
   def adjustHokenInfo(src: HokenInfo): HokenInfo =
     val shahokokuho = src.shahokokuho.map(shahokokuho => {
-      Shahokokuho.apply(shahokokuho.shahokokuhoId, shahokokuho.patientId, shahokokuho.hokenshaBangou,
+      Shahokokuho.apply(
+        shahokokuho.shahokokuhoId,
+        shahokokuho.patientId,
+        shahokokuho.hokenshaBangou,
         ZenkakuUtil.toHankaku(shahokokuho.hihokenshaKigou),
         ZenkakuUtil.toHankaku(shahokokuho.hihokenshaBangou),
-        shahokokuho.honninStore, shahokokuho.validFrom, shahokokuho.validUpto,
+        shahokokuho.honninStore,
+        shahokokuho.validFrom,
+        shahokokuho.validUpto,
         shahokokuho.koureiStore,
         ZenkakuUtil.toHankaku((shahokokuho.edaban))
-        )
+      )
     })
     val koukikourei = src.koukikourei.map(koukikourei => {
       koukikourei
@@ -71,12 +79,18 @@ object DrawerService:
       // val issuedAt: LocalDate = LocalDate.now()
       val issuedAt: LocalDate = visit.visitedAt.toLocalDate();
       val validUpto: Option[LocalDate] = None
-      val json = drawShohousen(text, visit, patient, adjustHokenInfo(hokenInfo), issuedAt, validUpto)
+      val json = drawShohousen(
+        text,
+        visit,
+        patient,
+        adjustHokenInfo(hokenInfo),
+        issuedAt,
+        validUpto
+      )
       Response[IO](
         body = fs2.Stream.emits(json.getBytes()),
         headers = Headers(`Content-Type`(MediaType.application.json))
       )
-
 
   def routes = HttpRoutes.of[IO] {
     case GET -> Root / "shohousen-drawer" :? intTextId(textId) =>
@@ -145,9 +159,23 @@ object DrawerService:
       java.nio.file.Files.move(tmpFile, srcFile)
       Ok(true)
 
-    case GET -> Root / "drawer-pdf" =>
-      val op = readOutputStream(1024)(out => IO.pure(0x1a))
-      Ok(op)
+    case req @ POST -> Root / "drawer-pdf" :? strPaperSize(paperSize) =>
+      for ops <- req.as[List[Op]]
+      yield
+        val printer = new PdfPrinter(paperSize)
+        val outStream = new PipedOutputStream()
+        val inStream = new PipedInputStream(outStream)
+        printer.print(
+          List(ops.map(ToJavaOp.convert(_)).asJava).asJava,
+          outStream
+        )
+        Response[IO](
+          body = readInputStream(IO(inStream), 1024, true),
+          headers = Headers(`Content-Type`(MediaType.text.plain))
+        )
+      // Ok(op, `Content-Type`(MediaType.application.pdf))
+    // val op = readOutputStream(1024)(out => IO { out.write("Hello".getBytes()); out.close() })
+    // Ok(op, `Content-Type`(MediaType.text.plain))
 
   }
 
@@ -159,8 +187,14 @@ object DrawerService:
     }
     s"${name}-stamp-tmp${ext}"
 
-  def drawShohousen(text: Text, visit: Visit, patient: Patient, hokenInfo: HokenInfo,
-    koufuDate: LocalDate, validUptoDate: Option[LocalDate]): String =
+  def drawShohousen(
+      text: Text,
+      visit: Visit,
+      patient: Patient,
+      hokenInfo: HokenInfo,
+      koufuDate: LocalDate,
+      validUptoDate: Option[LocalDate]
+  ): String =
     import dev.myclinic.scala.javalib.convs.Convs.*
     val data = new ShohousenData()
     data.setClinicInfo(clinicInfoDTO(clinicInfo))
