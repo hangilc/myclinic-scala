@@ -119,4 +119,4 @@ object Op:
           }
         })
 
-  given Decoder[List[Op]] = deriveDecoder
+  // given Decoder[List[Op]] = deriveDecoder
