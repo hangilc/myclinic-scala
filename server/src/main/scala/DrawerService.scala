@@ -160,13 +160,16 @@ object DrawerService:
       Ok(true)
 
     case req @ POST -> Root / "drawer-pdf" :? strPaperSize(paperSize) =>
-      for ops <- req.as[List[Op]]
+      for opsList <- req.as[List[List[Op]]]
       yield
         val printer = new PdfPrinter(paperSize)
         val outStream = new PipedOutputStream()
         val inStream = new PipedInputStream(outStream)
+        val cvt: Op => dev.fujiwara.drawer.op.Op = a => ToJavaOp.convert(a)
+        val pages = opsList.map(ops => ops.map(cvt).asJava).asJava
         printer.print(
-          List(ops.map(ToJavaOp.convert(_)).asJava).asJava,
+          List[dev.fujiwara.drawer.op.Op]().asJava,
+          pages,
           outStream
         )
         Response[IO](
