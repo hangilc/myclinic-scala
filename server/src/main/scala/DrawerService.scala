@@ -40,6 +40,7 @@ import dev.myclinic.scala.util.ZenkakuUtil
 import fs2.io.{readOutputStream, readInputStream}
 import java.io.PipedOutputStream
 import java.io.PipedInputStream
+import java.util.ArrayList
 
 object DrawerService:
   object intTextId extends QueryParamDecoderMatcher[Int]("text-id")
@@ -94,6 +95,12 @@ object DrawerService:
         headers = Headers(`Content-Type`(MediaType.application.json))
       )
 
+  def opsListAsJava(
+      opsList: List[List[Op]]
+  ): java.util.List[java.util.List[dev.fujiwara.drawer.op.Op]] =
+    val cvt: Op => dev.fujiwara.drawer.op.Op = a => ToJavaOp.convert(a)
+    opsList.map(ops => ops.map(cvt).asJava).asJava
+
   def routes = HttpRoutes.of[IO] {
     case GET -> Root / "shohousen-drawer" :? intTextId(textId) =>
       for
@@ -119,6 +126,25 @@ object DrawerService:
           try
             printer.print(
               List(ops.map(ToJavaOp.convert(_)).asJava).asJava,
+              outStream
+            )
+            true
+          finally outStream.close()
+      Ok(op)
+
+    case req @ POST -> Root / "create-multi-page-pdf-file" :? strPaperSize(
+          paperSize
+        ) +& strFileName(fileName) =>
+      val op =
+        for opsListReq <- req.as[List[List[Op]]]
+        yield
+          val opsList = opsListAsJava((opsListReq))
+          val printer = new PdfPrinter(paperSize)
+          val outPath = Config.resolvePortalTmpFile(fileName)
+          val outStream = new FileOutputStream(outPath.toString)
+          try
+            printer.print(
+              opsList,
               outStream
             )
             true
