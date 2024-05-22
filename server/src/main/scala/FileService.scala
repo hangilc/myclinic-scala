@@ -31,6 +31,7 @@ import scala.io.Source
 import org.typelevel.ci.CIString
 import dev.myclinic.scala.model.Patient
 import dev.myclinic.scala.db.Db
+import java.nio.ByteBuffer
 
 object FileService extends DateTimeQueryParam with Publisher:
   object intPatientId extends QueryParamDecoderMatcher[Int]("patient-id")
@@ -226,6 +227,9 @@ object FileService extends DateTimeQueryParam with Publisher:
       val op = Stream
         .eval(textPath)
         .flatMap(path => fs2.io.file.Files[IO].readAll(path))
-        .onError(t => Stream.fromIterator[IO]("".getBytes().toIterator, 8))
-      Ok(op, `Content-Type`(MediaType.text.plain, `UTF-8`))
+        .handleErrorWith(t => Stream("".getBytes()*).covary[IO])
+        .through(text.utf8.decode)
+        // .through(encoder[IO, String])
+      // Ok(op, `Content-Type`(MediaType.text.plain, `UTF-8`))
+      Ok(op, `Content-Type`(MediaType.application.json))
   }
