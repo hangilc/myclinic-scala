@@ -29,6 +29,8 @@ import java.time.LocalDate
 import java.io.File
 import scala.io.Source
 import org.typelevel.ci.CIString
+import dev.myclinic.scala.model.Patient
+import dev.myclinic.scala.db.Db
 
 object FileService extends DateTimeQueryParam with Publisher:
   object intPatientId extends QueryParamDecoderMatcher[Int]("patient-id")
@@ -117,23 +119,23 @@ object FileService extends DateTimeQueryParam with Publisher:
       val dir = Config.paperScanDir(patientId)
       val loc = Path(new java.io.File(dir).getPath)
       val op =
-        for list <- 
-          fs2.io.file
-            .Files[IO]
-            .list(loc)
-            .evalMap(path =>
-              fs2.io.file
-                .Files[IO]
-                .getBasicFileAttributes(path)
-                .map(attr =>
-                  val ctime = FileInfo.fromTimestamp(attr.creationTime)
-                  FileInfo(path.fileName.toString, ctime, attr.size)
-                )
-            )
-            .compile
-            .toList
-        yield 
-          list.sortBy(fi => fi.createdAt).reverse
+        for
+          list <-
+            fs2.io.file
+              .Files[IO]
+              .list(loc)
+              .evalMap(path =>
+                fs2.io.file
+                  .Files[IO]
+                  .getBasicFileAttributes(path)
+                  .map(attr =>
+                    val ctime = FileInfo.fromTimestamp(attr.creationTime)
+                    FileInfo(path.fileName.toString, ctime, attr.size)
+                  )
+              )
+              .compile
+              .toList
+        yield list.sortBy(fi => fi.createdAt).reverse
       Ok(op)
 
     case GET -> Root / "get-patient-image" :? intPatientId(
@@ -202,7 +204,7 @@ object FileService extends DateTimeQueryParam with Publisher:
 
     case GET -> Root / "get-webphone-token" => Ok(TwilioUtil.getWebphoneToken())
 
-    case GET -> Root / "list-pharma-addr" => 
+    case GET -> Root / "list-pharma-addr" =>
       val path = Config.configDir.resolve("pharma-addr.json")
       val op = fs2.io.file.Files[IO].readAll(Path.fromNioPath(path))
       Ok(op, `Content-Type`(MediaType.application.json))
@@ -212,4 +214,18 @@ object FileService extends DateTimeQueryParam with Publisher:
       val op = fs2.io.file.Files[IO].readAll(path)
       Ok(op, `Content-Type`(MediaType.text.plain, `UTF-8`))
 
+    case GET -> Root / "get-shujii-master-text" :? intPatientId(patientId) =>
+      val shujiiDir = Path(sys.env.get("MYCLINIC_SHUJII_DIR").get)
+      val textPath = for
+        patient <- Db.getPatient(patientId)
+        name = s"${patient.lastName}${patient.firstName}"
+        patientDir = shujiiDir / s"${name}-${patient.patientId}"
+        result = patientDir / s"${name}.txt"
+        _ = println(result)
+      yield result
+      val op = Stream
+        .eval(textPath)
+        .flatMap(path => fs2.io.file.Files[IO].readAll(path))
+        .onError(t => Stream.fromIterator[IO]("".getBytes().toIterator, 8))
+      Ok(op, `Content-Type`(MediaType.text.plain, `UTF-8`))
   }
