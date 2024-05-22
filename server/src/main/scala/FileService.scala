@@ -32,6 +32,7 @@ import org.typelevel.ci.CIString
 import dev.myclinic.scala.model.Patient
 import dev.myclinic.scala.db.Db
 import java.nio.ByteBuffer
+import java.nio.file.StandardOpenOption
 
 object FileService extends DateTimeQueryParam with Publisher:
   object intPatientId extends QueryParamDecoderMatcher[Int]("patient-id")
@@ -221,15 +222,24 @@ object FileService extends DateTimeQueryParam with Publisher:
         patient <- Db.getPatient(patientId)
         name = s"${patient.lastName}${patient.firstName}"
         patientDir = shujiiDir / s"${name}-${patient.patientId}"
-        result = patientDir / s"${name}.txt"
-        _ = println(result)
-      yield result
+      yield patientDir / s"${name}.txt"
       val op = Stream
         .eval(textPath)
         .flatMap(path => fs2.io.file.Files[IO].readAll(path))
         .handleErrorWith(t => Stream("".getBytes()*).covary[IO])
         .through(text.utf8.decode)
-        // .through(encoder[IO, String])
-      // Ok(op, `Content-Type`(MediaType.text.plain, `UTF-8`))
       Ok(op, `Content-Type`(MediaType.application.json))
+
+    case req @ POST -> Root / "save-shujii-master-text" :? intPatientId(patientId) =>
+      val shujiiDir = Path(sys.env.get("MYCLINIC_SHUJII_DIR").get)
+      val op = for
+        content <- req.as[String]
+        patient <- Db.getPatient(patientId)
+        name = s"${patient.lastName}${patient.firstName}"
+        patientDir = shujiiDir / s"${name}-${patient.patientId}"
+        textPath = patientDir / s"${name}.txt"
+        _ = patientDir.toNioPath.toFile.mkdirs()
+        _ = java.nio.file.Files.write(textPath.toNioPath, content.getBytes(), StandardOpenOption.CREATE)
+      yield true
+      Ok(op)
   }
