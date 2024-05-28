@@ -230,7 +230,9 @@ object FileService extends DateTimeQueryParam with Publisher:
         .through(text.utf8.decode)
       Ok(op, `Content-Type`(MediaType.application.json))
 
-    case req @ POST -> Root / "save-shujii-master-text" :? intPatientId(patientId) =>
+    case req @ POST -> Root / "save-shujii-master-text" :? intPatientId(
+          patientId
+        ) =>
       val shujiiDir = Path(sys.env.get("MYCLINIC_SHUJII_DIR").get)
       val op = for
         content <- req.as[String]
@@ -239,7 +241,43 @@ object FileService extends DateTimeQueryParam with Publisher:
         patientDir = shujiiDir / s"${name}-${patient.patientId}"
         textPath = patientDir / s"${name}.txt"
         _ = patientDir.toNioPath.toFile.mkdirs()
-        _ = java.nio.file.Files.write(textPath.toNioPath, content.getBytes(), StandardOpenOption.CREATE)
+        _ = java.nio.file.Files.write(
+          textPath.toNioPath,
+          content.getBytes(),
+          StandardOpenOption.CREATE
+        )
       yield true
       Ok(op)
+
+    case GET -> Root / "get-ryouyou-keikakusho-master-text" :? intPatientId(
+          patientId
+        ) =>
+      val dir =
+        Path.fromNioPath(Config.configDir.resolve("ryouyou-keikakusho"));
+      val textPath = dir / s"RK-${patientId}.json"
+      val s =
+        for
+          _ <- Stream.eval(fs2.io.file.Files[IO].createDirectories(dir))
+          bytes <- fs2.io.file.Files[IO].readAll(textPath)
+        yield bytes
+      val o = s
+        .handleErrorWith(t => Stream("[]".getBytes()*).covary[IO])
+        .through(text.utf8.decode)
+      Ok(o, `Content-Type`(MediaType.application.json))
+
+    case req @ POST -> Root / "save-ryouyou-keikakusho-master-text" :? intPatientId(
+          patientId
+        ) =>
+      val dir =
+        Path.fromNioPath(Config.configDir.resolve("ryouyou-keikakusho"));
+      val textPath = dir / s"RK-${patientId}.json"
+      val s =
+        for
+          _ <- Stream.eval(fs2.io.file.Files[IO].createDirectories(dir))
+          bytes <- req.body
+        yield bytes
+      val o =
+        s.through(fs2.io.file.Files[IO].writeAll(textPath)) ++ (Stream.emit(true).covary[IO])
+      Ok(o, `Content-Type`(MediaType.application.json))
+
   }
