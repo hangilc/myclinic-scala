@@ -12,6 +12,7 @@ import org.http4s.circe._
 import org.http4s.circe.CirceEntityEncoder._
 import org.http4s.circe.CirceEntityDecoder._
 import org.http4s.Charset.`UTF-8`
+import io.circe
 import io.circe._
 import io.circe.syntax._
 import fs2.concurrent.Topic
@@ -261,8 +262,7 @@ object FileService extends DateTimeQueryParam with Publisher:
           bytes <- fs2.io.file.Files[IO].readAll(textPath)
         yield bytes
       val o = s
-        .handleErrorWith(t => Stream("[]".getBytes()*).covary[IO])
-        .through(text.utf8.decode)
+        .handleErrorWith(t => Stream("null".getBytes()*).covary[IO])
       Ok(o, `Content-Type`(MediaType.application.json))
 
     case req @ POST -> Root / "save-ryouyou-keikakusho-master-text" :? intPatientId(
