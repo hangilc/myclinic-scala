@@ -40,6 +40,7 @@ object Main extends IOApp:
         {
           val validFrom = LocalDate.parse(validFromArg)
           CSVStream(new File(masterCSV))
+            .filter(_.size() > 1)
             .map(ShinryouMasterCSV.from(_))
             .filter(rec =>
               rec.kubun != HenkouKubunHaishi && rec.kubun != HenkouKubunMasshou
@@ -54,6 +55,7 @@ object Main extends IOApp:
         {
           val validFrom = LocalDate.parse(validFromArg)
           CSVStream(new File(masterCSV))
+            .filter(_.size() > 1)
             .map(KizaiMasterCSV.from(_))
             .filter(rec =>
               rec.kubun != HenkouKubunHaishi && rec.kubun != HenkouKubunMasshou
