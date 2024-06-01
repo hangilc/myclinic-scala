@@ -1,0 +1,5 @@
+#!/bin/bash
+
+sbt masterDb/pack
+echo "master-db packed to master-db/target/pack"
+echo "invoke as: $ master-db/target/pack/bin/main"
