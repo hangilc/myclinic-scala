@@ -22,6 +22,8 @@ import org.http4s.websocket.WebSocketFrame.Text
 import dev.myclinic.scala.appoint.admin.AppointAdmin
 import java.time.LocalDateTime
 import doobie.free.resultset
+import javax.swing.text.AbstractDocument.Content
+import fs2.text.utf8
 
 object RestService extends DateTimeQueryParam with Publisher:
 
@@ -482,6 +484,17 @@ object RestService extends DateTimeQueryParam with Publisher:
 
     case GET -> Root / "list-visit-id-in-date-interval" :? dateFrom(fromDate) +& dateUpto(uptoDate) =>
       Ok(Db.listVisitIdInDateInterval(fromDate, uptoDate))
+
+    case GET -> Root / "get-config" :? strName(name) =>
+      Ok(Db.getConfig(name))
+
+    case req @ POST -> Root / "set-config" :? strName(name) =>
+      val op =
+        for
+          content <- req.as[Json]
+          _ <- Db.setConfig(name, content)
+        yield true
+      Ok(op)
 
   } <+> PatientService.routes <+> VisitService.routes <+> MiscService.routes
     <+> ConfigService.routes <+> FileService.routes
