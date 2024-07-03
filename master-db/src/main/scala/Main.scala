@@ -51,6 +51,21 @@ object Main extends IOApp:
             .drain
         }.as[ExitCode](ExitCode.Success)
 
+      case "install-iyakuhin" :: validFromArg :: masterCSV :: _ =>
+        {
+          val validFrom = LocalDate.parse(validFromArg)
+          CSVStream(new File(masterCSV))
+            .filter(_.size() > 1)
+            .map(IyakuhinMasterCSV.from(_))
+            .filter(rec =>
+              rec.kubun != HenkouKubunHaishi && rec.kubun != HenkouKubunMasshou
+            )
+            .map(rec => rec.toMaster(validFrom))
+            .evalMap(m => Db.enterIyakuhinMaster(m))
+            .compile
+            .drain
+        }.as[ExitCode](ExitCode.Success)
+
       case "install-kizai" :: validFromArg :: masterCSV :: _ =>
         {
           val validFrom = LocalDate.parse(validFromArg)

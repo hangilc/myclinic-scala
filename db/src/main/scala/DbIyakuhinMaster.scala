@@ -19,14 +19,24 @@ trait DbIyakuhinMaster extends Mysql:
   def getIyakuhinMaster(iyakuhincode: Int, at: LocalDate): IO[IyakuhinMaster] =
     mysql(Prim.getIyakuhinMaster(iyakuhincode, at).unique)
 
-  def findIyakuhinMaster(iyakuhincode: Int, at: LocalDate): IO[Option[IyakuhinMaster]] =
+  def findIyakuhinMaster(
+      iyakuhincode: Int,
+      at: LocalDate
+  ): IO[Option[IyakuhinMaster]] =
     mysql(Prim.getIyakuhinMaster(iyakuhincode, at).option)
 
-  def findIyakuhinMasterByName(name: String, at: LocalDate): IO[Option[IyakuhinMaster]] =
+  def findIyakuhinMasterByName(
+      name: String,
+      at: LocalDate
+  ): IO[Option[IyakuhinMaster]] =
     mysql(Prim.getIyakuhinMasterByName(name, at).option)
 
-  def batchResolveIyakuhinMaster(iyakuhincodes: List[Int], at: LocalDate): IO[Map[Int, IyakuhinMaster]] =
-    val op = iyakuhincodes.map(code => DbIyakuhinMasterPrim.getIyakuhinMaster(code, at).unique)
+  def batchResolveIyakuhinMaster(
+      iyakuhincodes: List[Int],
+      at: LocalDate
+  ): IO[Map[Int, IyakuhinMaster]] =
+    val op = iyakuhincodes
+      .map(code => DbIyakuhinMasterPrim.getIyakuhinMaster(code, at).unique)
       .sequence
       .map(items => Map(items.map(m => (m.iyakuhincode, m)): _*))
     mysql(op)
@@ -37,5 +47,19 @@ trait DbIyakuhinMaster extends Mysql:
       where valid_upto = '0000-00-00'
     """.update.run)
 
-  def searchIyakuhinMaster(text: String, at: LocalDate): IO[List[IyakuhinMaster]] =
+  def searchIyakuhinMaster(
+      text: String,
+      at: LocalDate
+  ): IO[List[IyakuhinMaster]] =
     mysql(Prim.searchIyakuhinMaster(text, at).to[List])
+
+  def enterIyakuhinMaster(m: IyakuhinMaster): IO[Unit] =
+    mysql(sql"""
+      insert into iyakuhin_master_arch 
+      (iyakuhincode, yakkacode, name, yomi, unit, yakka, madoku, kouhatsu, zaikei,
+      valid_from, valid_upto)
+      values 
+      (${m.iyakuhincode}, ${m.yakkacode}, ${m.name}, ${m.yomi}, ${m.unit}, ${m.yakka},
+      ${m.madoku}, ${m.kouhatsu}, ${m.zaikei},
+      ${m.validFrom}, ${m.validUpto})
+    """.update.run.void)
