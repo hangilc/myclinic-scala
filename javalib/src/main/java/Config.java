@@ -36,6 +36,10 @@ public class Config {
         public String postalCode;
         @JsonProperty("doctor-name")
         public String doctorName;
+        @JsonProperty("doctor-last-name")
+        public String doctorLastName;
+        @JsonProperty("doctor-first-name")
+        public String doctorFirstName;
     }
 
     private static class DiseaseExampleMixIn {

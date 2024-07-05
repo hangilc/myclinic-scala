@@ -18,5 +18,7 @@ class JavaConfigurator:
       jc.tensuuhyoucode,
       jc.kikancode,
       jc.homepage,
-      jc.doctorName
+      jc.doctorName,
+      jc.doctorLastName,
+      jc.doctorFirstName
     )

@@ -12,6 +12,8 @@ public class ClinicInfoDTO {
     public String kikancode;
     public String homepage;
     public String doctorName;
+    public String doctorLastName;
+    public String doctorFirstName;
 
     @Override
     public String toString() {
@@ -26,6 +28,8 @@ public class ClinicInfoDTO {
                 ", kikancode='" + kikancode + '\'' +
                 ", homepage='" + homepage + '\'' +
                 ", doctorName='" + doctorName + '\'' +
+                ", doctorLastName='" + doctorLastName + '\'' +
+                ", doctorFirstName='" + doctorFirstName + '\'' +
                 '}';
     }
 }

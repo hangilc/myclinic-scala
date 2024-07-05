@@ -589,7 +589,9 @@ case class ClinicInfo(
     tensuuhyoucode: String,
     kikancode: String,
     homepage: String,
-    doctorName: String
+    doctorName: String,
+    doctorLastName: String,
+    doctorFirstName: String,
 )
 
 // should be 'case class', because == operator is used
