@@ -221,7 +221,8 @@ object Visit:
 case class Text(
     textId: Int,
     visitId: Int,
-    content: String
+    content: String,
+    memo: Option[String],
 )
 
 case class HokenIdSet(
