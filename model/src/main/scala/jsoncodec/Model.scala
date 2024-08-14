@@ -241,5 +241,8 @@ trait Model extends DateTime with WaitStateCodec:
   given Encoder[PatientSummary] = deriveEncoder[PatientSummary]
   given Decoder[PatientSummary] = deriveDecoder[PatientSummary]
 
+  given Encoder[UsageMaster] = deriveEncoder[UsageMaster]
+  given Decoder[UsageMaster] = deriveDecoder[UsageMaster]
+
 
 

@@ -496,6 +496,19 @@ object RestService extends DateTimeQueryParam with Publisher:
         yield true
       Ok(op)
 
+    case GET -> Root / "select-usage-master-by-usage-name" :? strName(name) =>
+      Ok(Db.selectUsageMasterByUsageName(name))
+
+    case GET -> Root / "list-usage-master-kubun-name" =>
+      Ok(Db.listUsageMasterKubunName())
+
+    case GET -> Root / "list-usage-master-detail-kubun-name" =>
+      Ok(Db.listUsageMasterDetailKubunName())
+
+    case GET -> Root / "list-usage-master-timing-name" =>
+      Ok(Db.listUsageMasterTimingName())
+
+
   } <+> PatientService.routes <+> VisitService.routes <+> MiscService.routes
     <+> ConfigService.routes <+> FileService.routes
     <+> DrawerService.routes <+> MasterService.routes

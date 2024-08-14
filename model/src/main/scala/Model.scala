@@ -667,3 +667,21 @@ case class PatientSummary(
   patientId: Int,
   content: String,
 )
+
+case class UsageMaster(
+    usage_code: String,
+    kubun_code: String,
+    kubun_name: String,
+    detail_kubun_code: String,
+    detail_kubun_name: String,
+    timing_code: String,
+    timing_name: String,
+    usage_name: String,
+    usage_code_kubun: String,
+    tonpuku_condition: String,
+    admin_timing: String,
+    admin_time: String,
+    admin_interval: String,
+    admin_location: String,
+    usage_kana: String,
+)
