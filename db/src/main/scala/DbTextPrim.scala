@@ -31,7 +31,9 @@ object DbTextPrim:
 
   def enterText(text: Text): ConnectionIO[(Text, AppEvent)] =
     val q = sql"""
-      insert into visit_text (visit_id, content) values (${text.visitId}, ${text.content}) 
+      insert into visit_text (visit_id, content, memo) 
+      values 
+      (${text.visitId}, ${text.content}, ${text.memo}) 
     """
     for
       id <- q.update.withUniqueGeneratedKeys[Int]("text_id")
@@ -41,7 +43,8 @@ object DbTextPrim:
 
   def updateText(text: Text): ConnectionIO[AppEvent] =
     val q = sql"""
-      update visit_text set content = ${text.content} where text_id = ${text.textId}
+      update visit_text set content = ${text.content}, memo = ${text.memo} 
+      where text_id = ${text.textId}
     """
     for
       affected <- q.update.run

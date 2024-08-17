@@ -13,8 +13,12 @@ object DbConfigsPrim:
       select content from configs where name = ${name}
     """.query[String].map(parse(_).getOrElse(Json.Null))
 
-  def setConfig(name: String, content: Json): ConnectionIO[Boolean] =
+  def updateConfig(name: String, content: Json): ConnectionIO[Boolean] =
     sql"""
       update configs set content = ${content.toString} where name = ${name}
-    """.update.run.map(_ => true)
+    """.update.run.map(_ == 1)
 
+  def enterConfig(name: String, content: Json): ConnectionIO[Boolean] =
+    sql"""
+      insert into configs (name, content) values (${name}, ${content.toString()})
+    """.update.run.map(_ == 1)

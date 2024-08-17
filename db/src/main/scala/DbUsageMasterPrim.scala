@@ -16,7 +16,6 @@ import java.time.temporal.ChronoUnit
 object DbUsageMasterPrim:
   def selectUsageMasterByUsageName(name: String): ConnectionIO[List[UsageMaster]] =
     val search = s"%${name}%"
-    println(f"search ${search}")
     sql"""
       select * from usage_master where usage_name like ${search} order by usage_code
     """.query[UsageMaster].to[List]
