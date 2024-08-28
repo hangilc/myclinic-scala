@@ -244,5 +244,8 @@ trait Model extends DateTime with WaitStateCodec:
   given Encoder[UsageMaster] = deriveEncoder[UsageMaster]
   given Decoder[UsageMaster] = deriveDecoder[UsageMaster]
 
+  given Encoder[DrawerPdfWithStampRequest] = deriveEncoder[DrawerPdfWithStampRequest]
+  given Decoder[DrawerPdfWithStampRequest] = deriveDecoder[DrawerPdfWithStampRequest]
+
 
 

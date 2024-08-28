@@ -110,7 +110,7 @@ val myclinicutilJVM = myclinicutil.jvm
 lazy val model = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Pure)
   .in(file("model"))
-  .dependsOn(util, holidayjp, clinicop)
+  .dependsOn(util, holidayjp, clinicop, drawer)
   .settings(
     name := "model",
     libraryDependencies ++= Seq(

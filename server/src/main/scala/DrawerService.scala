@@ -31,6 +31,7 @@ import scala.collection.JavaConverters.*
 import dev.fujiwara.scala.drawer.ToJavaOp
 import dev.myclinic.scala.config.StampInfo
 import dev.fujiwara.drawer.pdf.Stamper
+import dev.fujiwara.drawer.pdf.Stamper2
 import dev.myclinic.scala.model.HokenInfo
 import dev.myclinic.scala.apputil.FutanWari
 import java.time.LocalDate
@@ -41,6 +42,8 @@ import fs2.io.{readOutputStream, readInputStream}
 import java.io.PipedOutputStream
 import java.io.PipedInputStream
 import java.util.ArrayList
+import dev.myclinic.scala.model.DrawerPdfWithStampRequest
+import java.util.Base64
 
 object DrawerService:
   object intTextId extends QueryParamDecoderMatcher[Int]("text-id")
@@ -205,6 +208,32 @@ object DrawerService:
           ),
           headers = Headers(`Content-Type`(MediaType.text.plain))
         )
+
+    case req @ POST -> Root / "create-pdf-file-with-stamp" =>
+      val op =
+        for body <- req.as[DrawerPdfWithStampRequest]
+        yield
+          val printer = new PdfPrinter(body.paperSize)
+          val srcFile = body.outFile + ".tmp"
+          val srcPath = Config.resolvePortalTmpFile(srcFile)
+          val outPath = Config.resolvePortalTmpFile(body.outFile)
+          val cvt: Op => dev.fujiwara.drawer.op.Op = a => ToJavaOp.convert(a)
+          val javaOpsList = body.opsList.map(ops => ops.map(op => cvt(op)))
+          val javaOpsList2 = javaOpsList.map(ops => ops.asJava)
+          val pages = new java.util.ArrayList(javaOpsList2.asJava)
+          val stamp = Base64.getDecoder().decode(body.stamp)
+          val stampOpt = new Stamper2.StamperOption()
+          stampOpt.xPos = body.left
+          stampOpt.yPos = body.top
+          stampOpt.width = body.width
+          stampOpt.height = body.height
+          printer.print(
+            pages,
+            srcPath.toString()
+          )
+          Stamper2.putStampAtPage(srcPath.toString(), stamp, outPath.toString(), stampOpt , body.page)
+          true
+      Ok(op)
   }
 
   def stampFileName(src: String): String =
