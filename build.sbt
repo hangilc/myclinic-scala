@@ -39,7 +39,7 @@ lazy val root = project
   .aggregate(
     appUtil,
     // appbase,
-    // appointAdmin,
+    appointAdmin,
     // appointApp,
     // client,
     clinicop,
@@ -47,10 +47,8 @@ lazy val root = project
     db,
     // domq,
     drawerscala,
-    // drawerformJS,
-    // drawerformJVM,
-    // formatshohousenJS,
-    // formatshohousenJVM,
+    drawerform,
+    formatshohousen,
     holidayjp,
     javalib,
     kanjidate,
@@ -75,23 +73,17 @@ lazy val root = project
     publishLocal := {}
   )
 
-// lazy val formatshohousen = crossProject(JSPlatform, JVMPlatform)
-//   .crossType(CrossType.Full)
-//   .in(file("formatshohousen"))
-//   .dependsOn(util)
-//   .settings(
-//     name := "formatshohousen"
-//   )
-//   // .jvmSettings(
-//   .settings(
-//     libraryDependencies ++= Seq(
-//       "org.scalatest" %% "scalatest" % scalaTestVersion % "test"
-//     ),
-//     Test / logBuffered := false
-//   )
+lazy val formatshohousen = project
+  .in(file("formatshohousen"))
+  .dependsOn(util)
+  .settings(
+    name := "formatshohousen",
+    libraryDependencies ++= Seq(
+      "org.scalatest" %% "scalatest" % scalaTestVersion % "test"
+    ),
+    Test / logBuffered := false
+  )
 
-// val formatshohousenJS = formatshohousen.js
-// val formatshohousenJVM = formatshohousen.jvm
 
 // lazy val myclinicutil = crossProject(JSPlatform, JVMPlatform)
 //   .crossType(CrossType.Full)
@@ -183,14 +175,14 @@ lazy val server = project
     db,
     model,
     util,
-    // appointAdmin,
+    appointAdmin,
     clinicop,
     rcpt,
     javalib,
     config,
     drawerscala,
-    // drawerformJVM,
-    // formatshohousenJVM
+    drawerform,
+    formatshohousen
   )
   .settings(
     name := "server",
@@ -284,10 +276,9 @@ lazy val server = project
 //     )
 //   )
 
-// lazy val appointAdmin = project
-//   .in(file("appoint-admin"))
-//   .dependsOn(modelJVM, db, utilJVM, clinicopJVM)
-//   .settings()
+lazy val appointAdmin = project
+  .in(file("appoint-admin"))
+  .dependsOn(model, db, util, clinicop)
 
 // lazy val receptionApp = project
 //   .in(file("reception-app"))
@@ -419,26 +410,18 @@ lazy val drawerscala = project
     )
   )
 
-// lazy val drawerform = crossProject(JVMPlatform, JSPlatform)
-//   .crossType(CrossType.Full)
-//   .in(file("drawerform"))
-//   .dependsOn(model, kanjidate)
-//   .settings(
-//     name := "drawerform",
-//     libraryDependencies ++= Seq(
-//       "io.circe" %%% "circe-core" % circeVersion,
-//       "io.circe" %%% "circe-generic" % circeVersion,
-//       "io.circe" %%% "circe-parser" % circeVersion
-//     )
-//   )
-//   .jsSettings(
-//     scalaJSUseMainModuleInitializer := false
-//   )
-//   .jvmSettings(
-//     libraryDependencies ++= Seq(
-//       "dev.fujiwara" % "drawer" % "1.0.0-SNAPSHOT"
-//     )
-//   )
+lazy val drawerform = project
+  .in(file("drawerform"))
+  .dependsOn(model, kanjidate)
+  .settings(
+    name := "drawerform",
+    libraryDependencies ++= Seq(
+      "io.circe" %% "circe-core" % circeVersion,
+      "io.circe" %% "circe-generic" % circeVersion,
+      "io.circe" %% "circe-parser" % circeVersion,
+      "dev.fujiwara" % "drawer" % "1.0.0-SNAPSHOT"
+    )
+  )
 
 // val drawerformJVM = drawerform.jvm
 // val drawerformJS = drawerform.js
