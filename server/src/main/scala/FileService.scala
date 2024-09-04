@@ -203,13 +203,13 @@ object FileService extends DateTimeQueryParam with Publisher:
     case req @ POST -> Root / "decode-base64-to-file" :? strFileName(
           fileName
         ) =>
-      val path = Config.resolvePortalTmpFile(fileName)
+      val path = Path.fromNioPath(Config.resolvePortalTmpFile(fileName))
       // val op =
       //   for bytes <- req.body
       //   yield true
       // Ok(op)
       req.body
-        .through(fs2.text.utf8Decode)
+        .through(fs2.text.utf8.decode)
         .through(fs2.text.base64.decode)
         .through(fs2.io.file.Files[IO].writeAll(path))
         .compile
