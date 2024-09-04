@@ -1,6 +1,6 @@
 val ESVersion = org.scalajs.linker.interface.ESVersion
 
-ThisBuild / scalaVersion := "3.3.3"
+ThisBuild / scalaVersion := "3.1.3"
 ThisBuild / version := "0.1.0-SNAPSHOT"
 ThisBuild / organization := "dev.myclinic.scala"
 ThisBuild / organizationName := "myclinic"

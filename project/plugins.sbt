@@ -8,4 +8,4 @@ addSbtPlugin("org.scala-js"       % "sbt-scalajs" % "1.10.0")
 // addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "1.1.0")
 addSbtPlugin("org.xerial.sbt" % "sbt-pack" % "0.14") 
 addDependencyTreePlugin
-ThisBuild / libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always
+// ThisBuild / libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always
