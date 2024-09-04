@@ -1,11 +1,10 @@
 val ESVersion = org.scalajs.linker.interface.ESVersion
 
-ThisBuild / scalaVersion := "3.1.3"
+ThisBuild / scalaVersion := "3.3.3"
 ThisBuild / version := "0.1.0-SNAPSHOT"
 ThisBuild / organization := "dev.myclinic.scala"
 ThisBuild / organizationName := "myclinic"
 ThisBuild / resolvers += Resolver.mavenLocal
-// ThisBuild / scalaJSLinkerConfig ~= (_.withESFeatures(_.withESVersion(ESVersion.ES2018)))
 
 val mysqlVersion = "6.0.6"
 val http4sVersion = "0.23.12"
@@ -29,8 +28,6 @@ ThisBuild / scalacOptions ++= Seq(
   "-feature",
 )
 ThisBuild / javacOptions ++= Seq("-encoding", "UTF-8")
-
-Global / semanticdbEnabled := false
 
 val rootDir = ThisBuild / baseDirectory
 
@@ -379,7 +376,7 @@ lazy val javalib = project
       "com.fasterxml.jackson.core" % "jackson-annotations" % jacksonVersion,
       "com.fasterxml.jackson.dataformat" % "jackson-dataformat-yaml" % jacksonVersion,
       "com.fasterxml.jackson.dataformat" % "jackson-dataformat-xml" % jacksonVersion,
-      "dev.fujiwara" % "drawer" % "1.0.0-SNAPSHOT"
+      "dev.fujiwara" % "drawer" % "1.0.1-SNAPSHOT"
     )
   )
 
