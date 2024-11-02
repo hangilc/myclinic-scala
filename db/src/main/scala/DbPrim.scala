@@ -32,16 +32,17 @@ object DbPrim:
       for
         wqueueEventOpt <- DbWqueuePrim.tryDeleteWqueue(visitId)
         onshiEventOpt <- DbOnshiPrim.clearOnshi(visitId)
+        chargeEventOpt <- DbChargePrim.tryDeleteCharge(visitId)
         visit <- DbVisitPrim.getVisit(visitId).unique
         _ <- DbVisitPrim.deleteVisit(visitId)
         visitEvent <- DbEventPrim.logVisitDeleted(visit)
-      yield wqueueEventOpt.toList ++ onshiEventOpt.toList :+ visitEvent
+      yield wqueueEventOpt.toList ++ onshiEventOpt.toList ++ chargeEventOpt.toList :+ visitEvent
     val op = List(
       check(countTextForVisit, "テキストがあるため、削除できません。"),
       check(countDrugForVisit, "処方があるため、削除できません。"),
       check(countShinryouForVisit, "診療行為があるため、削除できません。"),
       check(countConductForVisit, "処置があるため、削除できません。"),
-      check(countChargeForVisit, "請求があるため、削除できません。"),
+      // check(countChargeForVisit, "請求があるため、削除できません。"),
       check(countPaymentForVisit, "支払い記録があるため、削除できません。")
     ).sequence_.value
     for
