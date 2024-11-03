@@ -1,5 +1,3 @@
-// val ESVersion = org.scalajs.linker.interface.ESVersion
-
 ThisBuild / scalaVersion := "3.1.3"
 ThisBuild / version := "0.1.0-SNAPSHOT"
 ThisBuild / organization := "dev.myclinic.scala"
@@ -25,7 +23,7 @@ ThisBuild / scalacOptions ++= Seq(
   "-deprecation",
   "-encoding",
   "UTF-8",
-  "-feature",
+  "-feature"
 )
 ThisBuild / javacOptions ++= Seq("-encoding", "UTF-8")
 
@@ -35,14 +33,10 @@ lazy val root = project
   .in(file("."))
   .aggregate(
     appUtil,
-    // appbase,
     appointAdmin,
-    // appointApp,
-    // client,
     clinicop,
     config,
     db,
-    // domq,
     drawerscala,
     drawerform,
     formatshohousen,
@@ -50,20 +44,9 @@ lazy val root = project
     javalib,
     kanjidate,
     model,
-    // myclinicutilJS,
-    // myclinicutilJVM,
-    // practiceApp,
     rcpt,
-    // receptionApp,
-    // repl,
     server,
-    // utilJS,
-    // utilJVM,
     util
-    // validatorJS,
-    // validatorJVM,
-    // webclient,
-    // masterDb
   )
   .settings(
     publish := {},
@@ -81,18 +64,6 @@ lazy val formatshohousen = project
     Test / logBuffered := false
   )
 
-
-// lazy val myclinicutil = crossProject(JSPlatform, JVMPlatform)
-//   .crossType(CrossType.Full)
-//   .in(file("myclinic-util"))
-//   .dependsOn(model)
-//   .settings(
-//     name := "myclinicutil"
-//   )
-
-// val myclinicutilJS = myclinicutil.js
-// val myclinicutilJVM = myclinicutil.jvm
-
 lazy val model = project
   .in(file("model"))
   .dependsOn(util, holidayjp, clinicop, drawerscala)
@@ -102,17 +73,9 @@ lazy val model = project
       "io.circe" %% "circe-core" % circeVersion,
       "io.circe" %% "circe-generic" % circeVersion,
       "io.circe" %% "circe-parser" % circeVersion,
-      "org.scalatest" %% "scalatest" % scalaTestVersion % "test",
+      "org.scalatest" %% "scalatest" % scalaTestVersion % "test"
     )
   )
-  // .jvmSettings(
-  //   libraryDependencies ++= Seq(
-  //     "org.scalatest" %% "scalatest" % scalaTestVersion % "test"
-  //   )
-  // )
-
-// val modelJS = model.js
-// val modelJVM = model.jvm
 
 lazy val db = project
   .in(file("db"))
@@ -128,32 +91,6 @@ lazy val db = project
     )
   )
 
-// lazy val masterDb = project
-//   .in(file("master-db"))
-//   .dependsOn(db)
-//   .enablePlugins(PackPlugin)
-//   .settings(
-//     name := "master-db",
-//     libraryDependencies ++= Seq(
-//       "org.apache.commons" % "commons-csv" % "1.9.0",
-//       "co.fs2" %% "fs2-core" % fs2Version,
-//       "co.fs2" %% "fs2-io" % fs2Version
-//     )
-//   )
-
-// lazy val client = project
-//   .in(file("client"))
-//   .dependsOn(modelJVM, utilJVM)
-//   .settings(
-//     name := "client",
-//     libraryDependencies ++= Seq(
-//       "org.http4s" %% "http4s-dsl" % http4sVersion,
-//       "org.http4s" %% "http4s-blaze-client" % http4sVersion,
-//       "org.http4s" %% "http4s-circe" % http4sVersion,
-//       "io.circe" %%% "circe-core" % circeVersion
-//     )
-//   )
-
 lazy val util = project
   .in(file("util"))
   .settings(
@@ -161,9 +98,6 @@ lazy val util = project
       "org.scalatest" %% "scalatest" % scalaTestVersion % "test"
     )
   )
-
-// val utilJS = util.js
-// val utilJVM = util.jvm.dependsOn(timejs)
 
 lazy val server = project
   .in(file("server"))
@@ -197,168 +131,17 @@ lazy val server = project
     )
   )
 
-// lazy val webclient = project
-//   .in(file("webclient"))
-//   .enablePlugins(ScalaJSPlugin)
-//   .dependsOn(modelJS, utilJS, drawerJS, drawerformJS)
-//   .settings(
-//     name := "webclient",
-//     scalaJSUseMainModuleInitializer := false,
-//     libraryDependencies ++= Seq(
-//       "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion,
-//       "io.circe" %%% "circe-core" % circeVersion,
-//       "io.circe" %%% "circe-generic" % circeVersion,
-//       "io.circe" %%% "circe-parser" % circeVersion,
-//       "org.scala-js" %%% "scala-js-macrotask-executor" % macrotaskExecutorVersion
-//     )
-//   )
-
-// lazy val domq = project
-//   .in(file("domq"))
-//   .enablePlugins(ScalaJSPlugin)
-//   .dependsOn(validatorJS)
-//   .settings(
-//     name := "domq",
-//     libraryDependencies ++= Seq(
-//       "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion,
-//       "org.scala-js" %%% "scala-js-macrotask-executor" % macrotaskExecutorVersion,
-//       "org.typelevel" %%% "cats-core" % catsVersion
-//     )
-//   )
-
-// lazy val appbase = project
-//   .in(file("app-base"))
-//   .enablePlugins(ScalaJSPlugin)
-//   .dependsOn(
-//     domq,
-//     modelJS,
-//     utilJS,
-//     webclient,
-//     validatorJS,
-//     drawerJS,
-//     kanjidateJS,
-//     validatorJS,
-//     appUtilJS
-//   )
-//   .settings(
-//     name := "myclinic-appbase",
-//     libraryDependencies ++= Seq(
-//       "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion,
-//       "org.typelevel" %%% "cats-core" % catsVersion,
-//       "org.scala-js" %%% "scala-js-macrotask-executor" % macrotaskExecutorVersion
-//     )
-//   )
-
-// lazy val appointApp = project
-//   .in(file("appoint-app"))
-//   .enablePlugins(ScalaJSPlugin)
-//   .dependsOn(
-//     domq,
-//     modelJS,
-//     utilJS,
-//     webclient,
-//     validatorJS,
-//     appbase,
-//     kanjidateJS
-//   )
-//   .settings(
-//     name := "myclinic-appoint",
-//     Compile / fastLinkJS / scalaJSLinkerOutputDirectory :=
-//       (rootDir.value / "server" / "web" / "appoint" / "scalajs"),
-//     Compile / fullLinkJS / scalaJSLinkerOutputDirectory :=
-//       (rootDir.value / "server" / "web" / "appoint" / "scalajs"),
-//     libraryDependencies ++= Seq(
-//       "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion,
-//       "org.scala-js" %%% "scala-js-macrotask-executor" % macrotaskExecutorVersion
-//     )
-//   )
-
 lazy val appointAdmin = project
   .in(file("appoint-admin"))
   .dependsOn(model, db, util, clinicop)
-
-// lazy val receptionApp = project
-//   .in(file("reception-app"))
-//   .enablePlugins(ScalaJSPlugin)
-//   .dependsOn(
-//     domq,
-//     modelJS,
-//     utilJS,
-//     webclient,
-//     validatorJS,
-//     appbase,
-//     appUtilJS,
-//     drawerJS,
-//     drawerformJS,
-//     kanjidateJS
-//   )
-//   .settings(
-//     name := "myclinic-reception",
-//     Compile / fastLinkJS / scalaJSLinkerOutputDirectory :=
-//       (rootDir.value / "server" / "web" / "reception" / "scalajs"),
-//     Compile / fullLinkJS / scalaJSLinkerOutputDirectory :=
-//       (rootDir.value / "server" / "web" / "reception" / "scalajs"),
-//     libraryDependencies ++= Seq(
-//       "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion,
-//       "org.scala-js" %%% "scala-js-macrotask-executor" % macrotaskExecutorVersion
-//     )
-//   )
-
-// lazy val practiceApp = project
-//   .in(file("practice-app"))
-//   .enablePlugins(ScalaJSPlugin)
-//   .dependsOn(
-//     domq,
-//     modelJS,
-//     utilJS,
-//     webclient,
-//     validatorJS,
-//     appbase,
-//     appUtilJS,
-//     drawerJS,
-//     kanjidateJS,
-//     formatshohousenJS,
-//     myclinicutilJS
-//   )
-//   .settings(
-//     name := "myclinic-practice",
-//     Compile / fastLinkJS / scalaJSLinkerOutputDirectory :=
-//       (rootDir.value / "server" / "web" / "practice" / "scalajs"),
-//     Compile / fullLinkJS / scalaJSLinkerOutputDirectory :=
-//       (rootDir.value / "server" / "web" / "practice" / "scalajs"),
-//     libraryDependencies ++= Seq(
-//       "org.scala-js" %%% "scalajs-dom" % scalaJSDomVersion,
-//       "org.scala-js" %%% "scala-js-macrotask-executor" % macrotaskExecutorVersion,
-//       "org.scalatest" %%% "scalatest-funsuite" % "3.2.13" % "test",
-//     )
-//   )
-
-// lazy val validator = crossProject(JSPlatform, JVMPlatform)
-//   .crossType(CrossType.Pure)
-//   .in(file("validator"))
-//   .dependsOn(util, model)
-//   .settings(
-//     libraryDependencies ++= Seq(
-//       "org.typelevel" %%% "cats-core" % catsVersion
-//     )
-//   )
-
-// val validatorJVM = validator.jvm
-// val validatorJS = validator.js
 
 lazy val holidayjp = project
   .in(file("holidayjp"))
   .dependsOn(util, kanjidate)
 
-// val holidayjpJVM = holidayjp.jvm
-// val holidayjpJS = holidayjp.js
-
 lazy val clinicop = project
   .in(file("clinicop"))
   .dependsOn(util, holidayjp)
-
-// val clinicopJVM = clinicop.jvm
-// val clinicopJS = clinicop.js
 
 lazy val rcpt = project
   .in(file("rcpt"))
@@ -403,7 +186,7 @@ lazy val drawerscala = project
       "io.circe" %% "circe-core" % circeVersion,
       "io.circe" %% "circe-generic" % circeVersion,
       "io.circe" %% "circe-parser" % circeVersion,
-      "dev.fujiwara" % "drawer" % "1.0.0-SNAPSHOT",
+      "dev.fujiwara" % "drawer" % "1.0.0-SNAPSHOT"
     )
   )
 
@@ -420,54 +203,5 @@ lazy val drawerform = project
     )
   )
 
-// val drawerformJVM = drawerform.jvm
-// val drawerformJS = drawerform.js
-
 lazy val kanjidate = project
   .in(file("kanjidate"))
-
-// val kanjidateJVM = kanjidate.jvm
-// val kanjidateJS = kanjidate.js.dependsOn(timejs)
-
-// lazy val repl = project
-//   .in(file("repl"))
-//   .dependsOn(modelJVM)
-//   .settings(
-//     name := "repl",
-//     libraryDependencies ++= Seq(
-//       "org.http4s" %% "http4s-dsl" % http4sVersion,
-//       "org.http4s" %% "http4s-blaze-client" % http4sVersion,
-//       "org.http4s" %% "http4s-circe" % http4sVersion,
-//       "io.circe" %%% "circe-core" % circeVersion
-//     )
-//   )
-
-// lazy val chrome = project
-//   .in(file("chrome"))
-//   .dependsOn(modelJVM, client)
-//   .settings(
-//     name := "chrome",
-//     libraryDependencies ++= Seq(
-//       "org.seleniumhq.selenium" % "selenium-chrome-driver" % "4.3.0",
-//       "org.seleniumhq.selenium" % "selenium-support" % "4.3.0",
-//       "org.http4s" %% "http4s-dsl" % http4sVersion,
-//       "org.http4s" %% "http4s-blaze-client" % http4sVersion,
-//       "org.http4s" %% "http4s-circe" % http4sVersion,
-//       "io.circe" %%% "circe-core" % circeVersion,
-//       "org.scalatest" %% "scalatest" % "3.2.13" % "test",
-//       "org.scalatest" %% "scalatest-funsuite" % "3.2.13" % "test"
-//     )
-//   )
-
-// lazy val timejs = project
-//   .in(file("timejs"))
-//   .enablePlugins(ScalaJSPlugin, TzdbPlugin)
-//   .settings(
-//     dbVersion := TzdbPlugin.Version("2022a"),
-//     zonesFilter := ((z: String) => z == "Asia/Tokyo"),
-//     libraryDependencies ++= Seq(
-//       "org.scalatest" %%% "scalatest" % "3.2.13" % "test",
-//       "org.scalatest" %%% "scalatest-funsuite" % "3.2.13" % "test",
-//       "io.github.cquiroz" %%% "scala-java-time" % scalaJavaTimeVersion
-//     )
-//   )
