@@ -5,6 +5,8 @@ ThisBuild / organizationName := "myclinic"
 ThisBuild / resolvers += Resolver.mavenLocal
 
 val mysqlVersion = "6.0.6"
+val slf4jVersion = "2.0.16"
+val logbackVersion = "1.5.12"
 val catsVersion = "2.12.0"
 val fs2Version = "3.11.0"
 val http4sVersion = "0.23.12"
@@ -15,7 +17,6 @@ val scalaJavaTimeVersion = "2.3.0"
 val scalaJSDomVersion = "2.2.0"
 val macrotaskExecutorVersion = "1.0.0"
 val jacksonVersion = "2.13.3"
-val slf4jVersion = "1.7.25"
 val scalaLoggingVersion = "3.9.4"
 val scalaTestVersion = "3.2.10"
 
@@ -120,7 +121,8 @@ lazy val server = project
     resolvers += Resolver.mavenLocal,
     libraryDependencies ++= Seq(
       "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion,
-      "ch.qos.logback" % "logback-classic" % "1.1.3",
+      "ch.qos.logback" % "logback-classic" % logbackVersion,
+      //"ch.qos.logback" % "logback-classic" % "1.1.3" ,
       //"ch.qos.logback" % "logback-classic" % "1.1.3" % "runtime",
       "org.http4s" %% "http4s-blaze-server" % http4sVersion,
       "org.http4s" %% "http4s-dsl" % http4sVersion,
