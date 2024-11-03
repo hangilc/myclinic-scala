@@ -6,6 +6,7 @@ ThisBuild / resolvers += Resolver.mavenLocal
 
 val mysqlVersion = "6.0.6"
 val catsVersion = "2.12.0"
+val fs2Version = "3.11.0"
 val http4sVersion = "0.23.12"
 val doobieVersion = "1.0.0-RC2"
 val circeVersion = "0.14.2"
@@ -15,7 +16,6 @@ val scalaJSDomVersion = "2.2.0"
 val macrotaskExecutorVersion = "1.0.0"
 val jacksonVersion = "2.13.3"
 val slf4jVersion = "1.7.25"
-val fs2Version = "3.2.8"
 val scalaLoggingVersion = "3.9.4"
 val scalaTestVersion = "3.2.10"
 
