@@ -48,10 +48,10 @@ object Db
     with DbConfigs
     with DbUsageMaster:
 
-  def deleteVisit(visitId: Int): IO[List[AppEvent]] =
+  def deleteVisit(visitId: Int): IO[Either[String, List[AppEvent]]] =
     mysql(DbPrim.deleteVisit(visitId))
 
-  def deleteVisitFromReception(visitId: Int): IO[List[AppEvent]] =
+  def deleteVisitFromReception(visitId: Int): IO[Either[String, List[AppEvent]]] =
     mysql(for
       wqueue <- DbWqueuePrim.getWqueue(visitId).unique
       _ = if wqueue.waitState != WaitState.WaitExam then

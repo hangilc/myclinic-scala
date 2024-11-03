@@ -83,7 +83,8 @@ object DbChargePrim:
     yield event
 
   def tryDeleteCharge(visitId: Int): ConnectionIO[Option[AppEvent]] =
-    val op = for
+    val optT = for
       chargeOpt <- OptionT(getCharge(visitId).option)
-      eventOpt <- OptionT.some(deleteCharge(chargeOpt.visitId))
+      eventOpt <- OptionT.liftF(deleteCharge(chargeOpt.visitId))
     yield eventOpt
+    optT.value

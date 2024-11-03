@@ -26,13 +26,13 @@ object VisitService extends Publisher:
   object intVisitId extends QueryParamDecoderMatcher[Int]("visit-id")
 
   def routes(using topic: Topic[IO, WebSocketFrame]) = HttpRoutes.of[IO] {
-    case GET -> Root / "get-visit" :? intVisitId(visitId) => 
+    case GET -> Root / "get-visit" :? intVisitId(visitId) =>
       Ok(Db.getVisit(visitId))
 
-    case GET -> Root / "find-visit" :? intVisitId(visitId) => 
+    case GET -> Root / "find-visit" :? intVisitId(visitId) =>
       Ok(Db.findVisit(visitId))
 
-    case req @ POST -> Root / "batch-get-visit" => 
+    case req @ POST -> Root / "batch-get-visit" =>
       Ok(for
         visitIds <- req.as[List[Int]]
         map <- Db.batchGetVisit(visitIds)
@@ -41,7 +41,8 @@ object VisitService extends Publisher:
     case GET -> Root / "delete-visit" :? intVisitId(visitId) =>
       val op = {
         for
-          events <- Db.deleteVisit(visitId)
+          eventsEither <- Db.deleteVisit(visitId)
+          events = eventsEither.getOrElse(List())
           _ <- publishAll(events)
         yield true
       }
@@ -50,7 +51,8 @@ object VisitService extends Publisher:
     case GET -> Root / "delete-visit-from-reception" :? intVisitId(visitId) =>
       val op = {
         for
-          events <- Db.deleteVisitFromReception(visitId)
+          eventsEither <- Db.deleteVisitFromReception(visitId)
+          events = eventsEither.getOrElse(List())
           _ <- publishAll(events)
         yield true
       }
@@ -60,7 +62,7 @@ object VisitService extends Publisher:
       Ok(Db.getVisitEx(visitId))
 
     case req @ POST -> Root / "update-hoken-ids" :? intVisitId(visitId) =>
-      val op = 
+      val op =
         for
           hokenIdSet <- req.as[HokenIdSet]
           event <- Db.updateHokenIds(visitId, hokenIdSet)

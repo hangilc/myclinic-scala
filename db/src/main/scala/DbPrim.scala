@@ -17,42 +17,72 @@ import dev.myclinic.scala.db.DbPaymentPrim.countPaymentForVisit
 import cats.data.EitherT
 import java.time.LocalDateTime
 import java.time.LocalDate
+import cats.data.OptionT
 
 object DbPrim:
   type ShinryouId = Int
   type ConductId = Int
 
-  def deleteVisit(visitId: Int): ConnectionIO[List[AppEvent]] =
+  def deleteVisit(visitId: Int): ConnectionIO[Either[String, List[AppEvent]]] =
     def check(
         chk: Int => ConnectionIO[Int],
         err: String
     ): EitherT[ConnectionIO, String, Unit] =
       EitherT(chk(visitId).map(c => if c > 0 then Left(err) else Right(())))
-    def proc(): ConnectionIO[List[AppEvent]] =
-      for
-        wqueueEventOpt <- DbWqueuePrim.tryDeleteWqueue(visitId)
-        onshiEventOpt <- DbOnshiPrim.clearOnshi(visitId)
-        chargeEventOpt <- DbChargePrim.tryDeleteCharge(visitId)
-        visit <- DbVisitPrim.getVisit(visitId).unique
-        _ <- DbVisitPrim.deleteVisit(visitId)
-        visitEvent <- DbEventPrim.logVisitDeleted(visit)
-      yield wqueueEventOpt.toList ++ onshiEventOpt.toList ++ chargeEventOpt.toList :+ visitEvent
-    val op = List(
-      check(countTextForVisit, "テキストがあるため、削除できません。"),
-      check(countDrugForVisit, "処方があるため、削除できません。"),
-      check(countShinryouForVisit, "診療行為があるため、削除できません。"),
-      check(countConductForVisit, "処置があるため、削除できません。"),
-      // check(countChargeForVisit, "請求があるため、削除できません。"),
-      check(countPaymentForVisit, "支払い記録があるため、削除できません。")
-    ).sequence_.value
-    for
-      either <- op
-      _ = either match {
-        case Right(_)  => ()
-        case Left(msg) => throw new RuntimeException(msg)
-      }
-      events <- proc()
+    def checkPayment(): ConnectionIO[Either[String, Unit]] = for
+      payOpt <- DbPaymentPrim.getLastPayment(visitId).option
+    yield payOpt match {
+      case Some(pay) if pay.amount != 0 => Left("支払があるため、削除できません。")
+      case _ => Right(())
+    }
+    def exec(): ConnectionIO[Either[String, List[AppEvent]]] = for
+      wqueueEvent <- DbWqueuePrim.tryDeleteWqueue(visitId).map(_.toList)
+      onshiEvent <- DbOnshiPrim.clearOnshi(visitId).map(_.toList)
+      chargeEvent <- DbChargePrim.tryDeleteCharge(visitId).map(_.toList)
+      visit <- DbVisitPrim.getVisit(visitId).unique
+      _ <- DbVisitPrim.deleteVisit(visitId)
+      visitEvent <- DbEventPrim.logVisitDeleted(visit)
+    yield Right(wqueueEvent ++ onshiEvent ++ chargeEvent ++ List(visitEvent))
+    val eitherT: EitherT[ConnectionIO, String, List[AppEvent]] = for
+      _ <- check(countTextForVisit, "テキストがあるため、削除できません。")
+      _ <- check(countDrugForVisit, "処方があるため、削除できません。")
+      _ <- check(countShinryouForVisit, "診療行為があるため、削除できません。")
+      _ <- check(countConductForVisit, "処置があるため、削除できません。")
+      _ <- EitherT(checkPayment())
+      events <- EitherT(exec())
     yield events
+    eitherT.value
+    // def check(
+    //     chk: Int => ConnectionIO[Int],
+    //     err: String
+    // ): EitherT[ConnectionIO, String, Unit] =
+    //   EitherT(chk(visitId).map(c => if c > 0 then Left(err) else Right(())))
+    // def proc(): ConnectionIO[List[AppEvent]] =
+    //   for
+    //     wqueueEventOpt <- DbWqueuePrim.tryDeleteWqueue(visitId)
+    //     onshiEventOpt <- DbOnshiPrim.clearOnshi(visitId)
+    //     chargeEventOpt <- DbChargePrim.tryDeleteCharge(visitId)
+    //     visit <- DbVisitPrim.getVisit(visitId).unique
+    //     _ <- DbVisitPrim.deleteVisit(visitId)
+    //     visitEvent <- DbEventPrim.logVisitDeleted(visit)
+    //   yield wqueueEventOpt.toList ++ onshiEventOpt.toList ++ chargeEventOpt.toList :+ visitEvent
+    // val op = List(
+    //   check(countTextForVisit, "テキストがあるため、削除できません。"),
+    //   check(countDrugForVisit, "処方があるため、削除できません。"),
+    //   check(countShinryouForVisit, "診療行為があるため、削除できません。"),
+    //   check(countConductForVisit, "処置があるため、削除できません。"),
+    //   // check(countChargeForVisit, "請求があるため、削除できません。"),
+    //   check(countPaymentForVisit, "支払い記録があるため、削除できません。")
+    // ).sequence_.value
+
+    // for
+    //   either <- op
+    //   _ = either match {
+    //     case Right(_)  => ()
+    //     case Left(msg) => throw new RuntimeException(msg)
+    //   }
+    //   events <- proc()
+    // yield events
 
   def batchEnterShinryouConduct(
       req: CreateShinryouConductRequest
