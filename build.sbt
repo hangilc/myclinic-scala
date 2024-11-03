@@ -15,9 +15,9 @@ val fs2Version = "3.11.0"
 val http4sVersion = "0.23.12"
 val doobieVersion = "1.0.0-RC2"
 val scalaJavaTimeVersion = "2.6.0"
-// val scalaLoggingVersion = "3.9.4"
 val scalaLoggingVersion = "3.9.5"
-val scalaTestVersion = "3.2.10"
+// val scalaTestVersion = "3.2.10"
+val scalaTestVersion = "3.2.19"
 
 ThisBuild / scalacOptions ++= Seq(
   "-deprecation",
