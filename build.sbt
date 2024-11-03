@@ -1,4 +1,4 @@
-val ESVersion = org.scalajs.linker.interface.ESVersion
+// val ESVersion = org.scalajs.linker.interface.ESVersion
 
 ThisBuild / scalaVersion := "3.1.3"
 ThisBuild / version := "0.1.0-SNAPSHOT"
