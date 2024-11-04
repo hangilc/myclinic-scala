@@ -8,6 +8,7 @@ import java.time.format.DateTimeFormatter
 
 import dev.myclinic.scala.model.{Sex, WaitState, ValidUpto}
 import java.time.LocalDateTime
+import doobie.implicits.*
 
 private object LocalDateMapping:
   private val sqlDateFormatter: DateTimeFormatter =
@@ -68,15 +69,15 @@ object DoobieMapping:
   implicit val sexGet: Get[Sex] = Get[String].map(SexMapping.fromString _)
   implicit val sexSet: Put[Sex] = Put[String].tcontramap(SexMapping.toString _)
 
-  implicit val optionStringGet: Get[Option[String]] =
-    Get[String].map(str => if str == null then None else Some(str))
-  implicit val optionStringPut: Put[Option[String]] =
-    Put[String].tcontramap(opt =>
-      opt match {
-        case Some(s) => s
-        case None    => null
-      }
-    )
+  // implicit val optionStringGet: Get[Option[String]] =
+  //   Get[String].map(str => if str == null then None else Some(str))
+  // implicit val optionStringPut: Put[Option[String]] =
+  //   Put[String].tcontramap(opt =>
+  //     opt match {
+  //       case Some(s) => s
+  //       case None    => null
+  //     }
+  //   )
 
   implicit val waitStateGet: Get[WaitState] = Get[Int].map(WaitState.fromCode _)
   implicit val waitStatePut: Put[WaitState] = Put[Int].tcontramap(_.code)

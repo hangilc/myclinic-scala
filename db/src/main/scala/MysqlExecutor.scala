@@ -2,7 +2,9 @@ package dev.myclinic.scala.db
 
 import doobie._
 import doobie.implicits._
+import doobie.util.log.LogEvent
 import cats.effect.IO
+import java.util.Properties
 
 object MysqlExecutor:
 
@@ -16,22 +18,32 @@ object MysqlExecutor:
   url += "&noDatetimeStringSync=true"
   url += "&useUnicode=true"
   url += "&characterEncoding=utf8"
-  url += "&serverTimezone=JST"
+  // url += "&serverTimezone=JST"
+  url += "&serverTimezone=Asia/Tokyo"
   url += "&useSSL=false"
 
   println("jdbc-utl: " + url)
 
+  val props = new Properties()
+  props.setProperty("user", user)
+  props.setProperty("password", pass)
+
+  val printSqlLogHandler: LogHandler[IO] = new LogHandler[IO] {
+    def run(logEvent: LogEvent): IO[Unit] =
+      IO {
+        println(logEvent.sql)
+      }
+  }
+
   val xa = Transactor.fromDriverManager[IO](
     "com.mysql.cj.jdbc.Driver",
     url,
-    user,
-    pass
+    props,
+    None // Some(printSqlLogHandler)
   )
 
   def execute[A](sql: ConnectionIO[A]): IO[A] =
     sql.transact(xa)
 
-
 trait Mysql:
   def mysql[A](op: ConnectionIO[A]): IO[A] = MysqlExecutor.execute(op)
-  //def sqlite[A](op: ConnectionIO[A]): IO[A] = MysqlExecutor.execute(op)
