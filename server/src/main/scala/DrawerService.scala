@@ -27,7 +27,8 @@ import dev.fujiwara.drawer.pdf.PdfPrinter
 import dev.fujiwara.scala.drawer.Op
 import java.io.OutputStream
 import java.io.FileOutputStream
-import scala.collection.JavaConverters.*
+// import scala.collection.JavaConverters.*
+import scala.jdk.CollectionConverters.*
 import dev.fujiwara.scala.drawer.ToJavaOp
 import dev.myclinic.scala.config.StampInfo
 import dev.fujiwara.drawer.pdf.Stamper

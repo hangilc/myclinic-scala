@@ -24,9 +24,9 @@ trait Event extends AppEventCodec with Model:
   given Encoder[EventType] with
     def apply(event: EventType): Json =
       event match {
-        case appEvent @ _: AppEvent => serialize("appevent", appEvent)
-        case hotlineBeep @ _: HotlineBeep => serialize("hotline-beep", hotlineBeep)
-        case eventIdNotice @_: EventIdNotice => serialize("event-id-notice", eventIdNotice)
+        case appEvent : AppEvent => serialize("appevent", appEvent)
+        case hotlineBeep: HotlineBeep => serialize("hotline-beep", hotlineBeep)
+        case eventIdNotice: EventIdNotice => serialize("event-id-notice", eventIdNotice)
         case _: HeartBeat => serialize("heart-beat", "")
       }
     
