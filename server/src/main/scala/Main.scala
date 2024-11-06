@@ -75,7 +75,7 @@ object Main extends IOApp:
   val viteStaticService = fileService[IO](
     FileService.Config(System.getenv("MYCLINIC_VITE_DIR"), "/")
   )
-  val staticService = fileService[IO](FileService.Config("./web", "/"))
+  // val staticService = fileService[IO](FileService.Config("./web", "/"))
 
   def buildServer(
       topic: Topic[IO, WebSocketFrame],
@@ -95,7 +95,7 @@ object Main extends IOApp:
           "/ws" -> ws(topic, websocketBuilder),
           "/portal-tmp" -> portalTmpStaticService,
           "/vite" -> viteStaticService,
-          "/" -> staticService
+          // "/" -> staticService
         )).orNotFound
       )
       .resource
