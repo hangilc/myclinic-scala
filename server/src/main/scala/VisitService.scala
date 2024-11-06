@@ -42,6 +42,10 @@ object VisitService extends Publisher:
       val op = {
         for
           eventsEither <- Db.deleteVisit(visitId)
+          _ = eventsEither match {
+            case Left(err) => println(err)
+            case Right(_) => {}
+          }
           events = eventsEither.getOrElse(List())
           _ <- publishAll(events)
         yield true
