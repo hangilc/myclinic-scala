@@ -364,7 +364,9 @@ case class ShinryouMaster(
     oushinkubun: String,
     kensagroup: String,
     validFrom: LocalDate,
-    validUpto: ValidUpto
+    validUpto: ValidUpto,
+    chuukasan: Int,
+    chuukasanOrder: String,
 ):
   def tensuu: Int = tensuuStore.toDouble.toInt
 
