@@ -34,6 +34,13 @@ object DbPatientPrim:
         order by last_name_yomi, first_name_yomi
     """.query[Patient]
 
+  def searchPatientByPhone(text: String): Query0[Patient] =
+    val t: String = s"%${text}%"
+    sql"""
+      select * from patient where phone like ${t}
+      order by last_name_yomi, first_name_yomi
+    """.query[Patient]
+
   def enterPatient(patient: Patient): ConnectionIO[(Patient, AppEvent)] =
     val op = sql"""
       insert into patient (last_name, first_name, last_name_yomi, first_name_yomi,

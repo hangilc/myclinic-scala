@@ -37,6 +37,9 @@ object PatientService:
     case GET -> Root / "search-patient" :? strText(text) =>
       Ok(Db.searchPatient(text))
 
+    case GET -> Root / "search-patient-by-phone" :? strText(text) =>
+      Ok(Db.searchPatientByPhone(text))
+
     case req @ POST -> Root / "batch-get-patient" =>
       Ok(
         for

@@ -36,6 +36,9 @@ trait DbPatient extends Mysql:
         else Prim.searchPatient(parts(0), parts(1)).to[List]
     yield (gen, patients))
 
+  def searchPatientByPhone(text: String): IO[List[Patient]] =
+    mysql(Prim.searchPatientByPhone(text).to[List])
+
   def batchGetPatient(patientIds: List[Int]): IO[Map[Int, Patient]] =
     mysql(DbPatientPrim.batchGetPatient(patientIds))
 
