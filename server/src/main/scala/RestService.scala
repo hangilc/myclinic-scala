@@ -482,8 +482,16 @@ object RestService extends DateTimeQueryParam with Publisher:
         yield true
       Ok(op)
 
-    case GET -> Root / "list-visit-id-in-date-interval" :? dateFrom(fromDate) +& dateUpto(uptoDate) =>
+    case GET -> Root / "list-visit-id-in-date-interval" :? dateFrom(
+          fromDate
+        ) +& dateUpto(uptoDate) =>
       Ok(Db.listVisitIdInDateInterval(fromDate, uptoDate))
+
+    case GET -> Root / "list-visit-id-by-date-interval-and-patient" :? dateFrom(
+          fromDate
+        ) +& dateUpto(uptoDate)
+        +& intPatientId(patientId) =>
+      Ok(Db.listVisitIdByDateIntervalAndPatient(fromDate, uptoDate, patientId))
 
     case GET -> Root / "get-config" :? strName(name) =>
       Ok(Db.getConfig(name))
@@ -507,7 +515,6 @@ object RestService extends DateTimeQueryParam with Publisher:
 
     case GET -> Root / "list-usage-master-timing-name" =>
       Ok(Db.listUsageMasterTimingName())
-
 
   } <+> PatientService.routes <+> VisitService.routes <+> MiscService.routes
     <+> ConfigService.routes <+> FileService.routes

@@ -237,3 +237,14 @@ object DbVisitPrim:
     sql"""select visit_id from visit where date(v_datetime) >= ${fromDate} and date(v_datetime) <= ${uptoDate}"""
       .query[Int]
       .to[List]
+
+  def listVisitIdByDateIntervalAndPatient(
+      fromDate: LocalDate,
+      uptoDate: LocalDate,
+      patientId: Int
+  ): ConnectionIO[List[Int]] =
+    sql"""select visit_id from visit where 
+      patient_id = ${patientId} and 
+    date(v_datetime) >= ${fromDate} and date(v_datetime) <= ${uptoDate}"""
+      .query[Int]
+      .to[List]
