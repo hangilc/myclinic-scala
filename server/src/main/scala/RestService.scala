@@ -463,26 +463,7 @@ object RestService extends DateTimeQueryParam with Publisher:
         ) +& dateAt(at) =>
       Ok(Helper.resolveShuushokugocode(shuushokugocode, at))
 
-    case GET -> Root / "find-patient-summary" :? intPatientId(patientId) =>
-      Ok(Db.findPatientSummary(patientId))
-
-    case req @ POST -> Root / "enter-patient-summary" =>
-      val op =
-        for
-          createReq <- req.as[PatientSummary]
-          _ <- Db.enterPatientSummary(createReq)
-        yield true
-      Ok(op)
-
-    case req @ POST -> Root / "set-patient-summary" =>
-      val op =
-        for
-          createReq <- req.as[PatientSummary]
-          _ <- Db.setPatientSummary(createReq)
-        yield true
-      Ok(op)
-
-    case GET -> Root / "list-visit-id-in-date-interval" :? dateFrom(
+     case GET -> Root / "list-visit-id-in-date-interval" :? dateFrom(
           fromDate
         ) +& dateUpto(uptoDate) =>
       Ok(Db.listVisitIdInDateInterval(fromDate, uptoDate))

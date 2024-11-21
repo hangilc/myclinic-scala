@@ -44,7 +44,6 @@ object Db
     with DbByoumeiMaster
     with DbShuushokugoMaster
     with DbOnshi
-    with DbPatientSummary
     with DbConfigs
     with DbUsageMaster:
 

@@ -665,11 +665,6 @@ case class HokenLists(
   koukikoureiList: List[Koukikourei],
 )
 
-case class PatientSummary(
-  patientId: Int,
-  content: String,
-)
-
 case class UsageMaster(
     usage_code: String,
     kubun_code: String,
