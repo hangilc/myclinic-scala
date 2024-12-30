@@ -31,6 +31,8 @@ object NationalHolidays:
     2021 -> NationalHolidays(2021),
     2022 -> NationalHolidays(2022),
     2023 -> NationalHolidays(2023),
+    2024 -> NationalHolidays(2024),
+    2025 -> NationalHolidays(2025),
   )
 
   def findByDate(date: LocalDate): Option[Holiday] =
@@ -122,10 +124,12 @@ object Adjust:
     val s = sandwiched(holidays).map(d => Holiday(d, "休日"))
     f ++ s ++ holidays
 
+
   def furikae(holidays: Seq[Holiday]): List[LocalDate] =
+    val hdates = holidays.map(_.date)
     def isSunday(d: LocalDate): Boolean = d.getDayOfWeek == SUNDAY
     def pickFurikae(d: LocalDate): LocalDate =
-      if holidays.contains(d) then pickFurikae(d.plus(1, DAYS)) else d
+      if hdates.contains(d) then pickFurikae(d.plus(1, DAYS)) else d
     val buf = ListBuffer[LocalDate]()
     holidays.foreach(h => {
       if isSunday(h.date) then buf.append(pickFurikae(h.date.plus(1, DAYS)))
@@ -133,12 +137,13 @@ object Adjust:
     buf.toList
 
   def sandwiched(holidays: Seq[Holiday]): List[LocalDate] =
+    val hdates = holidays.map(_.date)
     def isSunday(d: LocalDate): Boolean = d.getDayOfWeek == SUNDAY
     val buf = ListBuffer[LocalDate]()
     holidays.foreach(h => {
       val d1 = h.date.plus(1, DAYS)
       val d2 = h.date.plus(2, DAYS)
-      if holidays.contains(d2) && !holidays.contains(d1) && !isSunday(d1) then
+      if hdates.contains(d2) && !hdates.contains(d1) && !isSunday(d1) then
         buf.append(d1)
     })
     buf.toList
