@@ -244,7 +244,7 @@ object FileService extends DateTimeQueryParam with Publisher:
         .eval(textPath)
         .flatMap(path => fs2.io.file.Files[IO].readAll(path))
         .handleErrorWith(t => Stream("".getBytes()*).covary[IO])
-        .through(text.utf8.decode)
+        // .through(text.utf8.decode)
       Ok(op, `Content-Type`(MediaType.text.plain))
 
     case req @ POST -> Root / "save-shujii-master-text" :? intPatientId(
