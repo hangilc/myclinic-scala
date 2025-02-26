@@ -180,7 +180,8 @@ object DbPrim:
         .map(visit => DbPaymentPrim.getLastPayment(visit.visitId).option)
         .sequence
     yield (visits.zip(charges).zip(payments) map {
-      case ((visit, Some(charge)), Some(payment)) if payment.amount == 0 =>
+      case ((visit, Some(charge)), Some(payment)) 
+      if payment.amount == 0 && charge.charge != 0 =>
         Some((visit, charge))
       case _ => None
     }) collect { case Some((visit, charge)) =>
