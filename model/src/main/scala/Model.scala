@@ -345,7 +345,12 @@ case class IyakuhinMaster(
     kouhatsu: String,
     zaikei: String,
     validFrom: LocalDate,
-    validUpto: ValidUpto
+    validUpto: ValidUpto,
+    senteiRyouyouKubun: Int,
+    ippanmei: String,
+    ippanmeicode: String,
+    choukiShuusaihinKanren: Int,
+    ippanmeiShohouKasanKubun: Int,
 ):
   def yakka: Double = yakkaStore.toDouble
 
