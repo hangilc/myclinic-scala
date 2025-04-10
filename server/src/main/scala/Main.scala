@@ -48,25 +48,31 @@ object Main extends IOApp:
     ): IO[Unit] =
       topic.publish1(Text(text)) >> IO.pure(())
 
-  def ws(topic: Topic[IO, WebSocketFrame], websocketBuilder: WebSocketBuilder2[IO]) = HttpRoutes.of[IO] {
-    case GET -> Root / "events" =>
-      for
-        eventId <- Db.currentEventId()
-        toClient = fs2.Stream[IO, WebSocketFrame](
-          Text(EventIdNotice(eventId).asInstanceOf[EventType].asJson.toString)
-        ) ++ topic.subscribe(10)
-        fromClient = (s: fs2.Stream[IO, WebSocketFrame]) =>
-          s.evalMap {
-            case Text("heart-beat", _) =>
-              IO.delay(
-                // println("heart-beat received")
-                ()
-              )
-            case Text(t, _) => IO.delay(println(t))
-            case f          => IO.delay(println(s"Unknown type: $f"))
-          }
-        resp <- websocketBuilder.build(toClient, fromClient)
-      yield resp
+  def ws(
+      topic: Topic[IO, WebSocketFrame],
+      websocketBuilder: WebSocketBuilder2[IO]
+  ) = HttpRoutes.of[IO] { case GET -> Root / "events" =>
+    for
+      eventId <- Db.currentEventId()
+      toClient = fs2.Stream[IO, WebSocketFrame](
+        Text(EventIdNotice(eventId).asInstanceOf[EventType].asJson.toString)
+      ) ++ topic.subscribe(10)
+      fromClient = (s: fs2.Stream[IO, WebSocketFrame]) =>
+        s.evalMap {
+          case Text("heart-beat", _) =>
+            // for
+            //   eventId <- Db.currentEventId()
+            //   _ <- topic.publish1(Text(EventIdNotice(eventId).asInstanceOf[EventType].asJson.toString))
+            // yield ()
+            IO.delay(
+              // println("heart-beat received")
+              ()
+            )
+          case Text(t, _) => IO.delay(println(t))
+          case f          => IO.delay(println(s"Unknown type: $f"))
+        }
+      resp <- websocketBuilder.build(toClient, fromClient)
+    yield resp
   }
 
   val portalTmpStaticService = fileService[IO](
@@ -83,6 +89,7 @@ object Main extends IOApp:
       sslContextOption: Option[SSLContext]
   ) =
     given Topic[IO, WebSocketFrame] = topic
+    var lastEventId = 0
     var builder = BlazeServerBuilder[IO]
       .withSocketReuseAddress(true)
       .bindHttp(port, "0.0.0.0")
@@ -90,22 +97,41 @@ object Main extends IOApp:
       builder = builder.withSslContext(sslContextOption.get)
     builder
       .withHttpWebSocketApp(websocketBuilder =>
-        CORS.policy.withAllowOriginAll(Router(
-          "/api" -> RestService.routes,
-          "/ws" -> ws(topic, websocketBuilder),
-          "/portal-tmp" -> portalTmpStaticService,
-          "/vite" -> viteStaticService,
-          // "/" -> staticService
-        )).orNotFound
+        CORS.policy
+          .withAllowOriginAll(
+            Router(
+              "/api" -> RestService.routes,
+              "/ws" -> ws(topic, websocketBuilder),
+              "/portal-tmp" -> portalTmpStaticService,
+              "/vite" -> viteStaticService
+              // "/" -> staticService
+            )
+          )
+          .orNotFound
       )
       .resource
       .use(_ => {
         val heartBeatFrame =
           Text(HeartBeat().asInstanceOf[EventType].asJson.toString)
         fs2.Stream
-          .awakeEvery[IO](15.seconds)
+          .awakeEvery[IO](3.seconds)
           .evalMap(_ => {
-            topic.publish1(heartBeatFrame)
+            for
+              eventId <- Db.currentEventId()
+              _ <-
+                if eventId > lastEventId then
+                  lastEventId = eventId
+                  topic.publish1(
+                    Text(
+                      EventIdNotice(eventId)
+                        .asInstanceOf[EventType]
+                        .asJson
+                        .toString
+                    )
+                  )
+                else IO {}
+            yield ()
+            // topic.publish1(heartBeatFrame)
           })
           .compile
           .drain
@@ -114,17 +140,13 @@ object Main extends IOApp:
       .as(ExitCode.Success)
 
   def sslServerPort(): Int =
-    try
-      System.getenv("MYCLINIC_SSL_SERVER_PORT").toInt
-    catch
-      case _ => 8443
+    try System.getenv("MYCLINIC_SSL_SERVER_PORT").toInt
+    catch case _ => 8443
 
   def nonSslServerPort(): Int =
-    try
-      System.getenv("MYCLINIC_NON_SSL_SERVER_PORT").toInt
-    catch
-      case _ => 8080
-      
+    try System.getenv("MYCLINIC_NON_SSL_SERVER_PORT").toInt
+    catch case _ => 8080
+
   override def run(args: List[String]): IO[ExitCode] =
     val cmdArgs = CmdArgs(args)
     val port = if cmdArgs.ssl then sslServerPort() else nonSslServerPort()
