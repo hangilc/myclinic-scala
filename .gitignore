@@ -13,4 +13,5 @@ project/target/
 /work/
 node_modules/
 local-bin/
+*.env
 
