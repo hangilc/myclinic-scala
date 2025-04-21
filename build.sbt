@@ -199,7 +199,8 @@ lazy val drawerform = project
       "io.circe" %% "circe-core" % circeVersion,
       "io.circe" %% "circe-generic" % circeVersion,
       "io.circe" %% "circe-parser" % circeVersion,
-      "dev.fujiwara" % "drawer" % "1.0.1-SNAPSHOT"
+      "dev.fujiwara" % "drawer" % "1.0.1-SNAPSHOT",
+	  "com.itextpdf" % "itextpdf" % "5.5.13.3"
     )
   )
 
